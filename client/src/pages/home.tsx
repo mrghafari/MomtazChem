@@ -11,7 +11,7 @@ const Home = () => {
       title: "Fuel Additives",
       description: "High-performance fuel additives designed to enhance combustion efficiency, reduce emissions, and extend engine life across automotive and industrial applications.",
       features: ["Octane Boosters", "Anti-icing Additives", "Fuel Stabilizers"],
-      imageUrl: "https://images.unsplash.com/photo-1545558014-8692077e9b5c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
       href: "/products/fuel-additives",
       icon: <Fuel className="text-white text-xl" />,
       iconBg: "bg-primary-blue",
