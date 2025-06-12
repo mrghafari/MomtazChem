@@ -2,6 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
+/* RTL and Language Support */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+}
+
+/* RTL-specific styles */
+.lang-fa {
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+}
+
+.lang-en {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+
+/* RTL spacing utilities */
+.rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* Language switcher animations */
+@keyframes flagWave {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(1deg); }
+  75% { transform: translateY(2px) rotate(-1deg); }
+}
+
+.flag-wave {
+  animation: flagWave 2s ease-in-out infinite;
+}
+
+.flag-wave:hover {
+  animation-duration: 0.5s;
+}
+
+/* Smooth transitions for language changes */
+* {
+  transition: font-family 0.3s ease;
+}
+
+/* RTL text alignment */
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* RTL margin and padding */
+[dir="rtl"] .ml-auto {
+  margin-left: unset;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: unset;
+  margin-left: auto;
+}
+
+/* Language switcher specific styles */
+.language-dropdown {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.dark .language-dropdown {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+/* Flag container */
+.flag-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.flag-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.flag-container:hover::after {
+  opacity: 1;
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(20, 14.3%, 4.1%);

@@ -79,9 +79,9 @@ export function LanguageSwitcher() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.2 }}
-            className="flex items-center"
+            className="flex items-center flag-container"
           >
-            <currentLanguage.flag className="rounded-sm shadow-sm" />
+            <currentLanguage.flag className="rounded-sm shadow-sm flag-wave" />
           </motion.div>
           
           <span className="hidden sm:inline font-medium text-sm">
@@ -129,9 +129,9 @@ export function LanguageSwitcher() {
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 flag-container"
                   >
-                    <lang.flag className="rounded-sm shadow-sm border border-gray-200 dark:border-gray-700" />
+                    <lang.flag className="rounded-sm shadow-sm border border-gray-200 dark:border-gray-700 flag-wave" />
                   </motion.div>
                   
                   <div className="flex flex-col flex-1">

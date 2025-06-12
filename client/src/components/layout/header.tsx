@@ -1,142 +1,186 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ChevronDown, Menu, Phone } from "lucide-react";
+import { useState } from 'react';
+import { Link, useLocation } from 'wouter';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSwitcher, LanguageSwitcherCompact } from '@/components/ui/language-switcher';
+import { Button } from '@/components/ui/button';
+import { Menu, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-import company_logo from "@assets/company-logo.png";
+// Import company logo
+import companyLogoPath from '@assets/company-logo.png';
 
-const Header = () => {
+export default function Header() {
   const [location] = useLocation();
-  const [isProductsOpen, setIsProductsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, isRTL } = useLanguage();
 
   const navigation = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Services", href: "/services" },
-    { name: "Contact", href: "/contact" },
+    { href: '/', label: t('nav.home') },
+    { href: '/about', label: t('nav.about') },
+    { href: '/services', label: t('nav.services') },
+    { href: '/products/fuel-additives', label: t('nav.products') },
+    { href: '/contact', label: t('nav.contact') },
+    { href: '/shop', label: t('nav.shop') },
   ];
 
-  const productCategories = [
-    { name: "Fuel Additives", href: "/products/fuel-additives" },
-    { name: "Water Treatment", href: "/products/water-treatment" },
-    { name: "Paint & Thinner", href: "/products/paint-thinner" },
-    { name: "Agricultural Fertilizers", href: "/products/agricultural-fertilizers" },
-  ];
+  const isActive = (path: string) => {
+    if (path === '/') return location === '/';
+    return location.startsWith(path);
+  };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50 header-transition">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-900/95 dark:supports-[backdrop-filter]:bg-gray-900/60">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/">
-            <div className="flex items-center space-x-3 cursor-pointer">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center space-x-2 rtl:space-x-reverse"
+            >
               <img 
-                src={company_logo} 
-                alt="Momtazchem Logo" 
-                className="h-12 w-12 rounded-lg"
+                src={companyLogoPath} 
+                alt="Momtazchem" 
+                className="h-8 w-auto"
               />
-              <div className="text-2xl font-bold">
-                <span className="primary-green">Momtaz</span>
-                <span className="primary-blue">chem</span>
-              </div>
-            </div>
+              <span className="hidden sm:block text-xl font-bold text-gray-900 dark:text-white">
+                Momtazchem
+              </span>
+            </motion.div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
             {navigation.map((item) => (
-              <Link key={item.name} href={item.href}>
-                <span className={`text-gray-700 hover:text-primary transition-colors duration-200 font-medium cursor-pointer ${
-                  location === item.href ? 'text-primary' : ''
-                }`}>
-                  {item.name}
-                </span>
+              <Link key={item.href} href={item.href}>
+                <motion.span
+                  className={cn(
+                    "relative px-3 py-2 text-sm font-medium transition-colors",
+                    isActive(item.href)
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  )}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ y: 0 }}
+                >
+                  {item.label}
+                  {isActive(item.href) && (
+                    <motion.div
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
+                      layoutId="activeTab"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
+                </motion.span>
               </Link>
             ))}
-            
-            {/* Products Dropdown */}
-            <div className="relative group">
-              <button
-                className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium flex items-center"
-                onMouseEnter={() => setIsProductsOpen(true)}
-                onMouseLeave={() => setIsProductsOpen(false)}
-              >
-                Products <ChevronDown className="ml-1 h-3 w-3" />
-              </button>
-              <div
-                className={`absolute top-full left-0 mt-2 w-64 bg-white shadow-lg rounded-lg transition-all duration-200 ${
-                  isProductsOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-                }`}
-                onMouseEnter={() => setIsProductsOpen(true)}
-                onMouseLeave={() => setIsProductsOpen(false)}
-              >
-                <div className="py-2">
-                  {productCategories.map((product) => (
-                    <Link key={product.name} href={product.href}>
-                      <span className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary cursor-pointer">
-                        {product.name}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
           </nav>
 
-          {/* Desktop Contact Info & CTA */}
-          <div className="hidden lg:flex items-center space-x-4">
-            <a href="tel:+967709996771" className="text-sm text-gray-600 flex items-center hover:text-primary transition-colors duration-200">
-              <Phone className="h-4 w-4 text-primary mr-2" />
-              <span>+967 709 996 771</span>
-            </a>
-            <Link href="/shop">
-              <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white">
-                Shop
+          {/* Right side actions */}
+          <div className="flex items-center space-x-4 rtl:space-x-reverse">
+            {/* Language Switcher - Desktop */}
+            <div className="hidden sm:block">
+              <LanguageSwitcher />
+            </div>
+
+            {/* Language Switcher - Mobile */}
+            <div className="sm:hidden">
+              <LanguageSwitcherCompact />
+            </div>
+
+            {/* Admin Link */}
+            <Link href="/admin">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
+                {t('nav.admin')}
               </Button>
             </Link>
-          </div>
 
-          {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <div className="flex flex-col space-y-4 mt-6">
-                {navigation.map((item) => (
-                  <Link key={item.name} href={item.href}>
-                    <span className="text-gray-700 hover:text-primary text-lg cursor-pointer">
-                      {item.name}
-                    </span>
-                  </Link>
-                ))}
-                <div className="border-t pt-4">
-                  <h3 className="font-semibold text-gray-900 mb-2">Products</h3>
-                  {productCategories.map((product) => (
-                    <Link key={product.name} href={product.href}>
-                      <span className="block text-gray-700 hover:text-primary py-1 cursor-pointer">
-                        {product.name}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-                <div className="border-t pt-4">
-                  <Link href="/shop">
-                    <span className="block text-gray-700 hover:text-primary text-lg cursor-pointer">
-                      Shop
-                    </span>
-                  </Link>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <motion.div
+                animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </motion.div>
+            </Button>
+          </div>
         </div>
+
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden border-t border-gray-200 dark:border-gray-700"
+            >
+              <nav className="py-4 space-y-1">
+                {navigation.map((item, index) => (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Link href={item.href}>
+                      <motion.span
+                        className={cn(
+                          "block px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                          isActive(item.href)
+                            ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                        )}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {item.label}
+                      </motion.span>
+                    </Link>
+                  </motion.div>
+                ))}
+                
+                {/* Mobile Admin Link */}
+                <motion.div
+                  initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navigation.length * 0.1 }}
+                  className="pt-2 border-t border-gray-200 dark:border-gray-700"
+                >
+                  <Link href="/admin">
+                    <motion.span
+                      className="block px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {t('nav.admin')}
+                    </motion.span>
+                  </Link>
+                </motion.div>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </header>
   );
-};
-
-export default Header;
+}
