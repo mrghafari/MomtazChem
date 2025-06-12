@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 
 const WaterTreatment = () => {

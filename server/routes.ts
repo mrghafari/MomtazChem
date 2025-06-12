@@ -7,6 +7,8 @@ import fs from "fs";
 import { storage } from "./storage";
 import { insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
 import { insertContactSchema, insertShowcaseProductSchema } from "@shared/showcase-schema";
+import { customerStorage } from "./customer-storage";
+import { insertCustomerInquirySchema } from "@shared/customer-schema";
 import { sendContactEmail } from "./email";
 import { z } from "zod";
 
@@ -448,6 +450,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteProduct(id);
       res.json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Product inquiry routes
+  app.post("/api/inquiries", async (req, res) => {
+    try {
+      const inquiryData = insertCustomerInquirySchema.parse(req.body);
+      const inquiry = await customerStorage.createInquiry(inquiryData);
+      res.status(201).json({ 
+        success: true, 
+        message: "Inquiry submitted successfully",
+        inquiry 
+      });
+    } catch (error) {
+      console.error("Error creating inquiry:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid inquiry data", 
+          errors: error.errors 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: "Internal server error" 
+        });
+      }
+    }
+  });
+
+  app.get("/api/inquiries", requireAuth, async (req, res) => {
+    try {
+      const inquiries = await customerStorage.getAllInquiries();
+      res.json(inquiries);
+    } catch (error) {
+      console.error("Error fetching inquiries:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.get("/api/inquiries/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid inquiry ID" 
+        });
+      }
+
+      const inquiry = await customerStorage.getInquiryById(id);
+      if (!inquiry) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Inquiry not found" 
+        });
+      }
+
+      res.json(inquiry);
+    } catch (error) {
+      console.error("Error fetching inquiry:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.patch("/api/inquiries/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid inquiry ID" 
+        });
+      }
+
+      const updates = req.body;
+      const inquiry = await customerStorage.updateInquiry(id, updates);
+      res.json({ 
+        success: true, 
+        message: "Inquiry updated successfully",
+        inquiry 
+      });
+    } catch (error) {
+      console.error("Error updating inquiry:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
