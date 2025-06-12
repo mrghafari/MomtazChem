@@ -327,7 +327,16 @@ export default function AdminPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product: ShowcaseProduct) => (
-                <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                <Card key={product.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+                  {product.imageUrl && (
+                    <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
@@ -357,6 +366,23 @@ export default function AdminPage() {
                         Display Order: {product.displayOrder || 0}
                       </Badge>
                     </div>
+                    
+                    {/* File attachments indicator */}
+                    <div className="flex items-center gap-2 mb-4">
+                      {product.imageUrl && (
+                        <Badge variant="outline" className="text-xs">
+                          <Image className="w-3 h-3 mr-1" />
+                          Image
+                        </Badge>
+                      )}
+                      {product.pdfCatalogUrl && (
+                        <Badge variant="outline" className="text-xs">
+                          <FileText className="w-3 h-3 mr-1" />
+                          Catalog
+                        </Badge>
+                      )}
+                    </div>
+                    
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => openEditDialog(product)}>
                         <Edit className="w-4 h-4" />
