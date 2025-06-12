@@ -70,8 +70,8 @@ const Contact = () => {
       icon: <Phone className="h-6 w-6 text-white" />,
       title: "Phone",
       content: [
-        "+1 (555) 123-4567",
-        "Fax: +1 (555) 123-4568"
+        "+967 709 996 771",
+        "+967 509 996 771"
       ],
       bgColor: "bg-primary-green"
     },
@@ -80,7 +80,8 @@ const Contact = () => {
       title: "Email",
       content: [
         "info@momtazchem.com",
-        "sales@momtazchem.com"
+        "sales@momtazchem.com",
+        "support@momtazchem.com"
       ],
       bgColor: "bg-accent-orange"
     },

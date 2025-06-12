@@ -38,11 +38,11 @@ const Header = () => {
           <nav className="hidden md:flex space-x-8">
             {navigation.map((item) => (
               <Link key={item.name} href={item.href}>
-                <a className={`text-gray-700 hover:text-primary transition-colors duration-200 font-medium ${
+                <span className={`text-gray-700 hover:text-primary transition-colors duration-200 font-medium cursor-pointer ${
                   location === item.href ? 'text-primary' : ''
                 }`}>
                   {item.name}
-                </a>
+                </span>
               </Link>
             ))}
             
@@ -65,9 +65,9 @@ const Header = () => {
                 <div className="py-2">
                   {productCategories.map((product) => (
                     <Link key={product.name} href={product.href}>
-                      <a className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary">
+                      <span className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary cursor-pointer">
                         {product.name}
-                      </a>
+                      </span>
                     </Link>
                   ))}
                 </div>
@@ -79,8 +79,13 @@ const Header = () => {
           <div className="hidden lg:flex items-center space-x-4">
             <div className="text-sm text-gray-600 flex items-center">
               <Phone className="h-4 w-4 text-primary mr-2" />
-              <span>+1 (555) 123-4567</span>
+              <span>+967 709 996 771</span>
             </div>
+            <Link href="/shop">
+              <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white">
+                Shop
+              </Button>
+            </Link>
             <Link href="/contact">
               <Button className="bg-primary-blue hover:bg-primary-blue-dark text-white">
                 Get Quote
@@ -99,20 +104,27 @@ const Header = () => {
               <div className="flex flex-col space-y-4 mt-6">
                 {navigation.map((item) => (
                   <Link key={item.name} href={item.href}>
-                    <a className="text-gray-700 hover:text-primary text-lg">
+                    <span className="text-gray-700 hover:text-primary text-lg cursor-pointer">
                       {item.name}
-                    </a>
+                    </span>
                   </Link>
                 ))}
                 <div className="border-t pt-4">
                   <h3 className="font-semibold text-gray-900 mb-2">Products</h3>
                   {productCategories.map((product) => (
                     <Link key={product.name} href={product.href}>
-                      <a className="block text-gray-700 hover:text-primary py-1">
+                      <span className="block text-gray-700 hover:text-primary py-1 cursor-pointer">
                         {product.name}
-                      </a>
+                      </span>
                     </Link>
                   ))}
+                </div>
+                <div className="border-t pt-4">
+                  <Link href="/shop">
+                    <span className="block text-gray-700 hover:text-primary text-lg cursor-pointer">
+                      Shop
+                    </span>
+                  </Link>
                 </div>
               </div>
             </SheetContent>
