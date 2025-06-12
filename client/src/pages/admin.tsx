@@ -567,10 +567,17 @@ export default function AdminPage() {
                     {/* File attachments indicator */}
                     <div className="flex items-center gap-2 mb-4">
                       {product.imageUrl && (
-                        <Badge variant="outline" className="text-xs">
-                          <Image className="w-3 h-3 mr-1" />
-                          Image
-                        </Badge>
+                        <a 
+                          href={product.imageUrl} 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex"
+                        >
+                          <Badge variant="outline" className="text-xs hover:bg-green-50 hover:text-green-600 cursor-pointer transition-colors">
+                            <Image className="w-3 h-3 mr-1" />
+                            View Image
+                          </Badge>
+                        </a>
                       )}
                       {product.pdfCatalogUrl && (
                         <a 
