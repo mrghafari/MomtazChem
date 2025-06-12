@@ -2,48 +2,67 @@ import HeroSection from "@/components/ui/hero-section";
 import StatsSection from "@/components/ui/stats-section";
 import ProductCard from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat, Download, FileText, Image } from "lucide-react";
+import type { ShowcaseProduct } from "@shared/showcase-schema";
 
 const Home = () => {
-  const products = [
+  // Fetch all products from database
+  const { data: allProducts, isLoading } = useQuery<ShowcaseProduct[]>({
+    queryKey: ["/api/products"],
+    queryFn: () => fetch("/api/products").then(res => res.json()),
+  });
+
+  const categoryInfo = [
     {
       title: "Fuel Additives",
       description: "High-performance fuel additives designed to enhance combustion efficiency, reduce emissions, and extend engine life across automotive and industrial applications.",
-      features: ["Octane Boosters", "Anti-icing Additives", "Fuel Stabilizers"],
-      imageUrl: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
       href: "/products/fuel-additives",
       icon: <Fuel className="text-white text-xl" />,
       iconBg: "bg-primary-blue",
+      category: "fuel-additives",
+      imageUrl: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
       title: "Water Treatment",
       description: "Comprehensive water treatment solutions for municipal, industrial, and residential applications, ensuring clean and safe water for all uses.",
-      features: ["Coagulants & Flocculants", "Disinfectants", "pH Adjusters"],
-      imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
       href: "/products/water-treatment",
       icon: <Droplets className="text-white text-xl" />,
       iconBg: "bg-primary-green",
+      category: "water-treatment",
+      imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
       title: "Paint & Thinner",
       description: "Premium paint formulations and thinners for automotive, architectural, and industrial applications with superior durability and finish quality.",
-      features: ["Industrial Coatings", "Automotive Paints", "Specialty Thinners"],
-      imageUrl: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
       href: "/products/paint-thinner",
       icon: <PaintBucket className="text-white text-xl" />,
       iconBg: "bg-accent-orange",
+      category: "paint-thinner",
+      imageUrl: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
       title: "Agricultural Fertilizers",
       description: "Advanced fertilizer solutions designed to maximize crop yields while promoting sustainable farming practices and soil health enhancement.",
-      features: ["NPK Complex Fertilizers", "Micronutrient Solutions", "Organic Amendments"],
-      imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
       href: "/products/agricultural-fertilizers",
       icon: <Wheat className="text-white text-xl" />,
       iconBg: "bg-primary-green",
+      category: "agricultural-fertilizers",
+      imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
   ];
+
+  // Group products by category
+  const productsByCategory = allProducts?.reduce((acc, product) => {
+    if (!acc[product.category]) {
+      acc[product.category] = [];
+    }
+    acc[product.category].push(product);
+    return acc;
+  }, {} as Record<string, ShowcaseProduct[]>) || {};
 
   const services = [
     {
@@ -87,11 +106,105 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {products.map((product, index) => (
-              <ProductCard key={index} {...product} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid md:grid-cols-2 gap-8">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="bg-white">
+                  <CardContent className="p-8">
+                    <div className="animate-pulse">
+                      <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                      <div className="h-20 bg-gray-200 rounded mb-6"></div>
+                      <div className="space-y-2 mb-6">
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8">
+              {categoryInfo.map((category) => {
+                const categoryProducts = productsByCategory[category.category] || [];
+                const productCount = categoryProducts.length;
+                
+                return (
+                  <Card key={category.category} className="group bg-white hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-200">
+                    <CardContent className="p-0">
+                      <div className="relative overflow-hidden rounded-t-lg">
+                        <img
+                          src={category.imageUrl}
+                          alt={category.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div className={`absolute top-4 left-4 w-12 h-12 ${category.iconBg} rounded-lg flex items-center justify-center`}>
+                          {category.icon}
+                        </div>
+                        <Badge className="absolute top-4 right-4 bg-white/90 text-gray-800 border-0">
+                          {productCount} Products
+                        </Badge>
+                      </div>
+                      
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                          {category.title}
+                        </h3>
+                        <p className="text-gray-600 mb-4 line-clamp-3">
+                          {category.description}
+                        </p>
+                        
+                        {categoryProducts.length > 0 && (
+                          <div className="mb-6">
+                            <h4 className="text-sm font-semibold text-gray-900 mb-3">Available Products:</h4>
+                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                              {categoryProducts.slice(0, 3).map((product) => (
+                                <div key={product.id} className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-700 truncate flex-1">{product.name}</span>
+                                  <div className="flex items-center gap-1 ml-2">
+                                    {product.inventoryStatus === 'in_stock' && (
+                                      <Badge variant="outline" className="text-xs border-green-200 text-green-800 bg-green-50">
+                                        In Stock
+                                      </Badge>
+                                    )}
+                                    {product.pdfCatalogUrl && (
+                                      <a 
+                                        href={product.pdfCatalogUrl} 
+                                        download={`${product.name}_catalog.pdf`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <FileText className="w-3 h-3" />
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                              {categoryProducts.length > 3 && (
+                                <div className="text-xs text-gray-500 pt-1">
+                                  +{categoryProducts.length - 3} more products
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <Link href={category.href}>
+                          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                            View All {category.title}
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
