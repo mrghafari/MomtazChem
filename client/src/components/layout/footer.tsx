@@ -67,6 +67,12 @@ const Footer = () => {
               >
                 <i className="fab fa-instagram"></i>
               </a>
+              <a
+                href="#"
+                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
+              >
+                <i className="fab fa-whatsapp"></i>
+              </a>
             </div>
           </div>
 
