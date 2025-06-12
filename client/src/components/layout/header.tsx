@@ -189,16 +189,7 @@ export default function Header() {
               <LanguageSwitcherCompact />
             </div>
 
-            {/* Admin Link */}
-            <Link href="/admin">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="hidden sm:inline-flex"
-              >
-                {t('nav.admin')}
-              </Button>
-            </Link>
+
 
             {/* Mobile menu button */}
             <Button
@@ -304,24 +295,7 @@ export default function Header() {
                     </div>
                   </div>
                 </motion.div>
-                
-                {/* Mobile Admin Link */}
-                <motion.div
-                  initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: navigation.length * 0.1 }}
-                  className="pt-2 border-t border-gray-200 dark:border-gray-700"
-                >
-                  <Link href="/admin">
-                    <motion.span
-                      className="block px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 rounded-md transition-colors"
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {t('nav.admin')}
-                    </motion.span>
-                  </Link>
-                </motion.div>
+
               </nav>
             </motion.div>
           )}
