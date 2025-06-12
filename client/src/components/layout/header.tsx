@@ -4,8 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher, LanguageSwitcherCompact } from '@/components/ui/language-switcher';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 // Import company logo
 import companyLogoPath from '@assets/company-logo.png';
@@ -19,9 +27,35 @@ export default function Header() {
     { href: '/', label: t('nav.home') },
     { href: '/about', label: t('nav.about') },
     { href: '/services', label: t('nav.services') },
-    { href: '/products/fuel-additives', label: t('nav.products') },
     { href: '/contact', label: t('nav.contact') },
     { href: '/shop', label: t('nav.shop') },
+  ];
+
+  const productCategories = [
+    {
+      title: "Fuel Additives",
+      href: "/products/fuel-additives",
+      description: "High-performance fuel additives for enhanced engine efficiency",
+      icon: <Beaker className="h-6 w-6" />
+    },
+    {
+      title: "Water Treatment",
+      href: "/products/water-treatment", 
+      description: "Comprehensive water treatment solutions for all applications",
+      icon: <Droplet className="h-6 w-6" />
+    },
+    {
+      title: "Paint & Thinner",
+      href: "/products/paint-thinner",
+      description: "Premium paint formulations and specialty thinners",
+      icon: <Package className="h-6 w-6" />
+    },
+    {
+      title: "Agricultural Fertilizers", 
+      href: "/products/agricultural-fertilizers",
+      description: "Advanced fertilizer solutions for sustainable farming",
+      icon: <Wheat className="h-6 w-6" />
+    }
   ];
 
   const isActive = (path: string) => {
@@ -52,7 +86,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+          <nav className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
             {navigation.map((item) => (
               <Link key={item.href} href={item.href}>
                 <motion.span
@@ -78,6 +112,49 @@ export default function Header() {
                 </motion.span>
               </Link>
             ))}
+
+            {/* Products Dropdown */}
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className={cn(
+                    "px-3 py-2 text-sm font-medium transition-colors",
+                    location.startsWith('/products')
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  )}>
+                    {t('nav.products')}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                      {productCategories.map((category) => (
+                        <Link key={category.href} href={category.href}>
+                          <NavigationMenuLink asChild>
+                            <motion.div
+                              className="group block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="text-blue-600 dark:text-blue-400">
+                                  {category.icon}
+                                </div>
+                                <div className="text-sm font-medium leading-none group-hover:text-blue-600">
+                                  {category.title}
+                                </div>
+                              </div>
+                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                {category.description}
+                              </p>
+                            </motion.div>
+                          </NavigationMenuLink>
+                        </Link>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </nav>
 
           {/* Right side actions */}
@@ -158,6 +235,52 @@ export default function Header() {
                     </Link>
                   </motion.div>
                 ))}
+
+                {/* Mobile Products Menu */}
+                <motion.div
+                  initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navigation.length * 0.1 }}
+                >
+                  <div className="px-4 py-2">
+                    <div className={cn(
+                      "text-sm font-medium rounded-md transition-colors mb-2",
+                      location.startsWith('/products')
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-600 dark:text-gray-300"
+                    )}>
+                      {t('nav.products')}
+                    </div>
+                    <div className="ml-4 space-y-1">
+                      {productCategories.map((category, categoryIndex) => (
+                        <motion.div
+                          key={category.href}
+                          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: (navigation.length + categoryIndex + 1) * 0.1 }}
+                        >
+                          <Link href={category.href}>
+                            <motion.div
+                              className={cn(
+                                "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors",
+                                isActive(category.href)
+                                  ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                              )}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <div className="text-blue-600 dark:text-blue-400">
+                                {category.icon}
+                              </div>
+                              <span>{category.title}</span>
+                            </motion.div>
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
                 
                 {/* Mobile Admin Link */}
                 <motion.div
