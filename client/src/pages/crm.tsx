@@ -587,10 +587,10 @@ export default function CRMPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -631,13 +631,14 @@ export default function CRMPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Product Interest</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select product interest" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value="">Select Category</SelectItem>
                           {productCategories.map(category => (
                             <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
                           ))}

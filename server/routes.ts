@@ -290,10 +290,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CRM Lead management routes
   app.post("/api/leads", requireAuth, async (req, res) => {
     try {
+      console.log('Creating lead with data:', req.body);
       const leadData = insertLeadSchema.parse(req.body);
+      console.log('Parsed lead data:', leadData);
       const lead = await storage.createLead(leadData);
       res.status(201).json(lead);
     } catch (error) {
+      console.error('Lead creation error:', error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ 
           success: false, 
@@ -303,7 +306,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ 
           success: false, 
-          message: "Internal server error" 
+          message: "Internal server error",
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     }
