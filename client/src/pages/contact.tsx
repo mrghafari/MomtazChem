@@ -313,7 +313,7 @@ const Contact = () => {
             <div className="relative">
               <div className="h-96 rounded-lg overflow-hidden shadow-lg">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d51436.12345678!2d44.009212!3d36.191147!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40076b2e8c7e7c7b%3A0x7c8b4c8b4c8b4c8b!2sErbil%2C%20Kurdistan%20Region%2C%20Iraq!5e0!3m2!1sen!2s!4v1649123456789"
+                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12885.234567!2d44.009212!3d36.191147!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDExJzI4LjEiTiA0NMKwMDAnMzMuMiJF!5e0!3m2!1sen!2s!4v1649123456789"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -322,14 +322,24 @@ const Contact = () => {
                   referrerPolicy="no-referrer-when-downgrade"
                   title="Momtazchem Location - Erbil"
                 ></iframe>
+                
+                {/* Company Location Marker Overlay */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                  <div className="relative">
+                    <div className="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg animate-pulse"></div>
+                    <div className="absolute -top-2 -right-2 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                  </div>
+                </div>
+                
                 <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg">
                   <div className="flex items-center space-x-3">
-                    <MapPin className="h-6 w-6 text-primary-blue" />
+                    <MapPin className="h-6 w-6 text-red-500" />
                     <div>
-                      <h3 className="font-semibold text-gray-900">Momtazchem</h3>
-                      <p className="text-sm text-gray-600">Erbil, Kurdistan Region</p>
+                      <h3 className="font-semibold text-gray-900">Momtazchem Company</h3>
+                      <p className="text-sm text-gray-600">Manufacturing Facility</p>
+                      <p className="text-xs text-gray-500">Erbil, Kurdistan Region</p>
                       <a
-                        href="https://maps.app.goo.gl/ngapesxcH4XiT4L26"
+                        href="https://maps.app.goo.gl/umCmoKpmaovSkTJ96"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary-blue hover:text-primary-blue-dark text-sm font-medium"
