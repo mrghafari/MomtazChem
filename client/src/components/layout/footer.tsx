@@ -1,5 +1,7 @@
 import { Link } from "wouter";
 
+import company_logo from "@assets/company-logo.png";
+
 const Footer = () => {
   const productLinks = [
     { name: "Fuel Additives", href: "/products/fuel-additives" },
@@ -30,7 +32,7 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-3 mb-4">
               <img 
-                src="/attached_assets/company-logo.png_1749711494880.jpg" 
+                src={company_logo} 
                 alt="Momtazchem Logo" 
                 className="h-10 w-10 rounded-lg"
               />
