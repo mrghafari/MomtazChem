@@ -8,8 +8,8 @@ export const contacts = pgTable("contacts", {
   lastName: text("last_name").notNull(),
   email: text("email").notNull(),
   company: text("company"),
-  productInterest: text("product_interest"),
-  message: text("message").notNull(),
+  productInterest: text("product_interest").notNull(),
+  message: text("message"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

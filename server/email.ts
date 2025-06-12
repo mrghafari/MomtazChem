@@ -17,9 +17,9 @@ export interface ContactFormData {
   firstName: string;
   lastName: string;
   email: string;
-  company: string | null;
+  company: string;
   productInterest: string;
-  message: string | null;
+  message: string;
 }
 
 export async function sendContactEmail(formData: ContactFormData): Promise<void> {
@@ -33,10 +33,10 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
       <h2>New Contact Form Submission</h2>
       <p><strong>Name:</strong> ${formData.firstName} ${formData.lastName}</p>
       <p><strong>Email:</strong> ${formData.email}</p>
-      <p><strong>Company:</strong> ${formData.company}</p>
+      <p><strong>Company:</strong> ${formData.company || 'Not provided'}</p>
       <p><strong>Product Interest:</strong> ${formData.productInterest}</p>
       <p><strong>Message:</strong></p>
-      <p>${formData.message}</p>
+      <p>${formData.message || 'No message provided'}</p>
       
       <hr>
       <p><em>This message was sent from the Momtazchem website contact form.</em></p>

@@ -18,9 +18,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstName: contact.firstName,
           lastName: contact.lastName,
           email: contact.email,
-          company: contact.company,
+          company: contact.company ?? '',
           productInterest: contact.productInterest,
-          message: contact.message
+          message: contact.message ?? ''
         });
         console.log("Email sent successfully for contact:", contact.id);
       } catch (emailError) {
