@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { LanguageSwitcher, LanguageSwitcherCompact } from '@/components/ui/language-switcher';
 import { Button } from '@/components/ui/button';
 import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat } from 'lucide-react';
 import { cn } from '@/lib/utils';
