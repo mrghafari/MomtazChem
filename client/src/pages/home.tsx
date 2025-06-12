@@ -138,14 +138,11 @@ const Home = () => {
                         <img
                           src={(() => {
                             const productWithImage = categoryProducts.find(p => p.imageUrl);
-                            const imageUrl = productWithImage?.imageUrl || category.imageUrl;
-                            console.log(`Category: ${category.category}, Image URL: ${imageUrl}`);
-                            return imageUrl;
+                            return productWithImage?.imageUrl || category.imageUrl;
                           })()}
                           alt={category.title}
                           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
-                            console.error(`Failed to load image: ${e.currentTarget.src}`);
                             e.currentTarget.src = category.imageUrl;
                           }}
                         />

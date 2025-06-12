@@ -53,10 +53,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
-
-  // Serve uploaded files statically
+  // Serve uploaded files statically - must be before routes
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+  const server = await registerRoutes(app);
 
   // Multer error handling middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
