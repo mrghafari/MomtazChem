@@ -179,6 +179,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve uploaded files
+  app.get('/uploads/images/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filepath = path.join(process.cwd(), 'uploads', 'images', filename);
+    
+    if (fs.existsSync(filepath)) {
+      res.sendFile(filepath);
+    } else {
+      res.status(404).json({ message: 'Image not found' });
+    }
+  });
+
+  app.get('/uploads/catalogs/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filepath = path.join(process.cwd(), 'uploads', 'catalogs', filename);
+    
+    if (fs.existsSync(filepath)) {
+      res.sendFile(filepath);
+    } else {
+      res.status(404).json({ message: 'Catalog not found' });
+    }
+  });
+
   // File upload endpoints
   app.post("/api/upload/image", requireAuth, uploadImage.single('image'), (req, res) => {
     try {
