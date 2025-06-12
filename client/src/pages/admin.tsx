@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const categories = [
@@ -24,6 +24,66 @@ const categories = [
   { value: "paint-thinner", label: "Paint & Thinner", icon: <Package className="w-4 h-4" /> },
   { value: "agricultural-fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
 ];
+
+// Inventory status helper functions
+const getInventoryStatusColor = (status: string) => {
+  switch (status) {
+    case 'in_stock':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'low_stock':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'out_of_stock':
+      return 'bg-red-100 text-red-800 border-red-200';
+    case 'discontinued':
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
+const getInventoryStatusIcon = (status: string) => {
+  switch (status) {
+    case 'in_stock':
+      return <CheckCircle className="w-4 h-4" />;
+    case 'low_stock':
+      return <AlertTriangle className="w-4 h-4" />;
+    case 'out_of_stock':
+      return <XCircle className="w-4 h-4" />;
+    case 'discontinued':
+      return <AlertCircle className="w-4 h-4" />;
+    default:
+      return <Package className="w-4 h-4" />;
+  }
+};
+
+const getInventoryStatusLabel = (status: string) => {
+  switch (status) {
+    case 'in_stock':
+      return 'In Stock';
+    case 'low_stock':
+      return 'Low Stock';
+    case 'out_of_stock':
+      return 'Out of Stock';
+    case 'discontinued':
+      return 'Discontinued';
+    default:
+      return 'Unknown';
+  }
+};
+
+const getStockLevelIndicator = (current: number, min: number, max: number) => {
+  const percentage = (current / max) * 100;
+  
+  if (current === 0) {
+    return { color: 'bg-red-500', width: 0, status: 'empty' };
+  } else if (current <= min) {
+    return { color: 'bg-yellow-500', width: Math.max(percentage, 10), status: 'low' };
+  } else if (percentage >= 80) {
+    return { color: 'bg-green-500', width: percentage, status: 'high' };
+  } else {
+    return { color: 'bg-blue-500', width: percentage, status: 'normal' };
+  }
+};
 
 export default function AdminPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -367,6 +427,68 @@ export default function AdminPage() {
                       </Badge>
                     </div>
                     
+                    {/* Inventory Status Section */}
+                    <div className="space-y-3 mb-4">
+                      {/* Inventory Status Badge */}
+                      <div className="flex items-center justify-between">
+                        <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-medium ${getInventoryStatusColor(product.inventoryStatus || 'in_stock')}`}>
+                          {getInventoryStatusIcon(product.inventoryStatus || 'in_stock')}
+                          {getInventoryStatusLabel(product.inventoryStatus || 'in_stock')}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {product.stockQuantity || 0} {product.stockUnit || 'units'}
+                        </div>
+                      </div>
+
+                      {/* Stock Level Progress Bar */}
+                      {(product.stockQuantity !== undefined && product.maxStockLevel) && (
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs text-gray-600">
+                            <span>Stock Level</span>
+                            <span>{Math.round(((product.stockQuantity || 0) / (product.maxStockLevel || 1)) * 100)}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full transition-all duration-300 ${getStockLevelIndicator(
+                                product.stockQuantity || 0, 
+                                product.minStockLevel || 10, 
+                                product.maxStockLevel || 100
+                              ).color}`}
+                              style={{ 
+                                width: `${getStockLevelIndicator(
+                                  product.stockQuantity || 0, 
+                                  product.minStockLevel || 10, 
+                                  product.maxStockLevel || 100
+                                ).width}%` 
+                              }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>Min: {product.minStockLevel || 0}</span>
+                            <span>Max: {product.maxStockLevel || 0}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Additional inventory info */}
+                      {(product.supplier || product.warehouseLocation) && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          {product.supplier && (
+                            <div className="flex items-center gap-1">
+                              <Package className="w-3 h-3" />
+                              <span>Supplier: {product.supplier}</span>
+                            </div>
+                          )}
+                          {product.warehouseLocation && (
+                            <div className="flex items-center gap-1">
+                              <BarChart3 className="w-3 h-3" />
+                              <span>Location: {product.warehouseLocation}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     {/* File attachments indicator */}
                     <div className="flex items-center gap-2 mb-4">
                       {product.imageUrl && (
