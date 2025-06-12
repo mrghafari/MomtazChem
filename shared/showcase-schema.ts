@@ -42,6 +42,17 @@ export const showcaseProducts = pgTable("showcase_products", {
   technicalDataSheet: text("technical_data_sheet_url"),
   safetyDataSheet: text("safety_data_sheet_url"),
   certifications: json("certifications"), // Array of certifications
+  // Inventory management fields
+  stockQuantity: integer("stock_quantity").default(0), // Current stock level
+  minStockLevel: integer("min_stock_level").default(10), // Minimum stock threshold
+  maxStockLevel: integer("max_stock_level").default(1000), // Maximum stock capacity
+  stockUnit: text("stock_unit").default("units"), // Unit of measurement (liters, kg, units, etc.)
+  inventoryStatus: text("inventory_status").default("in_stock"), // in_stock, low_stock, out_of_stock, discontinued
+  lastRestockDate: timestamp("last_restock_date"),
+  supplier: text("supplier"), // Supplier information
+  warehouseLocation: text("warehouse_location"), // Storage location
+  batchNumber: text("batch_number"), // Current batch tracking
+  expiryDate: timestamp("expiry_date"), // For chemicals with expiration
   isActive: boolean("is_active").default(true),
   displayOrder: integer("display_order").default(0), // For ordering on website
   createdAt: timestamp("created_at").notNull().defaultNow(),
