@@ -17,9 +17,9 @@ export function useAuth() {
   });
 
   return {
-    user: data?.user,
+    user: data?.success ? data.user : null,
     isLoading,
-    isAuthenticated: !!data?.user && !error,
+    isAuthenticated: !!(data?.success && data?.user) && !error,
     logout: logout.mutate,
     isLoggingOut: logout.isPending,
   };
