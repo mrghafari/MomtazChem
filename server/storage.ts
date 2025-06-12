@@ -1,17 +1,19 @@
-import { contacts, products, users, leads, leadActivities, type Contact, type InsertContact, type Product, type InsertProduct, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity } from "@shared/schema";
+import { users, leads, leadActivities, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity } from "@shared/schema";
+import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
+import { showcaseDb } from "./showcase-db";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 
 export interface IStorage {
   createContact(contact: InsertContact): Promise<Contact>;
   getContacts(): Promise<Contact[]>;
   
-  // Product management
-  createProduct(product: InsertProduct): Promise<Product>;
-  getProducts(): Promise<Product[]>;
-  getProductById(id: number): Promise<Product | undefined>;
-  getProductsByCategory(category: string): Promise<Product[]>;
-  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
+  // Showcase Product management (for admin panel)
+  createProduct(product: InsertShowcaseProduct): Promise<ShowcaseProduct>;
+  getProducts(): Promise<ShowcaseProduct[]>;
+  getProductById(id: number): Promise<ShowcaseProduct | undefined>;
+  getProductsByCategory(category: string): Promise<ShowcaseProduct[]>;
+  updateProduct(id: number, product: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct>;
   deleteProduct(id: number): Promise<void>;
   
   // User management
