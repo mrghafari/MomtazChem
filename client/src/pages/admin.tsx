@@ -321,7 +321,7 @@ export default function AdminPage() {
                     <FormItem>
                       <FormLabel>Price</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" step="0.01" />
+                        <Input {...field} value={field.value ?? ""} type="number" step="0.01" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -334,7 +334,7 @@ export default function AdminPage() {
                     <FormItem>
                       <FormLabel>Price Unit</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="per liter" />
+                        <Input {...field} value={field.value ?? ""} placeholder="per liter" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -347,7 +347,7 @@ export default function AdminPage() {
                     <FormItem>
                       <FormLabel>SKU</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
