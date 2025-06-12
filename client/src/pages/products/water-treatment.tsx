@@ -229,6 +229,16 @@ const WaterTreatment = () => {
                         </a>
                       )}
                     </div>
+                    
+                    <div className="mt-6">
+                      <ProductInquiryForm 
+                        product={product}
+                        triggerText="Get Quote"
+                        triggerVariant="default"
+                        triggerSize="sm"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
