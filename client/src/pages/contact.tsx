@@ -254,7 +254,7 @@ const Contact = () => {
                               </a>
                             ) : info.title === "Email" ? (
                               <a 
-                                href={`mailto:${line}`}
+                                href="mailto:info@momtazchem.com"
                                 className="hover:text-primary transition-colors duration-200 cursor-pointer"
                               >
                                 {line}
