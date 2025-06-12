@@ -34,13 +34,25 @@ export default function AdminPage() {
   const { toast } = useToast();
 
   // All hooks must be called before any conditional returns
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading, error } = useQuery({
     queryKey: selectedCategory === "all" ? ["/api/products"] : ["/api/products", selectedCategory],
-    queryFn: () => 
-      selectedCategory === "all" 
-        ? fetch("/api/products").then(res => res.json())
-        : fetch(`/api/products?category=${selectedCategory}`).then(res => res.json()),
+    queryFn: async () => {
+      const url = selectedCategory === "all" 
+        ? "/api/products" 
+        : `/api/products?category=${selectedCategory}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      // Handle API error response
+      if (!res.ok || data.success === false) {
+        throw new Error(data.message || 'Failed to fetch products');
+      }
+      
+      // Ensure we return an array
+      return Array.isArray(data) ? data : [];
+    },
     enabled: isAuthenticated, // Only run query if authenticated
+    retry: false,
   });
 
   const form = useForm<InsertShowcaseProduct>({
