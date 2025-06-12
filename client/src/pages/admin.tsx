@@ -115,21 +115,21 @@ export default function AdminPage() {
       name: product.name,
       category: product.category,
       description: product.description,
-      shortDescription: product.shortDescription || "",
-      price: product.price || "0",
-      priceUnit: product.priceUnit || "per liter",
-      inStock: product.inStock || true,
-      stockQuantity: product.stockQuantity || 0,
-      sku: product.sku || "",
-      imageUrl: product.imageUrl || "",
-      pdfCatalogUrl: product.pdfCatalogUrl || "",
-      specifications: product.specifications || {},
-      features: product.features || [],
-      applications: product.applications || [],
-      technicalDataSheet: product.technicalDataSheet || "",
-      safetyDataSheet: product.safetyDataSheet || "",
-      minimumOrderQuantity: product.minimumOrderQuantity || 1,
-      leadTime: product.leadTime || "7-14 days",
+      shortDescription: product.shortDescription ?? "",
+      price: product.price ?? "0",
+      priceUnit: product.priceUnit ?? "per liter",
+      inStock: product.inStock ?? true,
+      stockQuantity: product.stockQuantity ?? 0,
+      sku: product.sku ?? "",
+      imageUrl: product.imageUrl ?? "",
+      pdfCatalogUrl: product.pdfCatalogUrl ?? "",
+      specifications: product.specifications ?? {},
+      features: product.features ?? [],
+      applications: product.applications ?? [],
+      technicalDataSheet: product.technicalDataSheet ?? "",
+      safetyDataSheet: product.safetyDataSheet ?? "",
+      minimumOrderQuantity: product.minimumOrderQuantity ?? 1,
+      leadTime: product.leadTime ?? "7-14 days",
       isActive: product.isActive !== false,
     });
     setDialogOpen(true);
@@ -292,7 +292,7 @@ export default function AdminPage() {
                   <FormItem>
                     <FormLabel>Short Description</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
