@@ -904,7 +904,7 @@ export default function AdminPage() {
                       <FormItem>
                         <FormLabel>Stock Unit</FormLabel>
                         <FormControl>
-                          <Select value={field.value || "units"} onValueChange={field.onChange}>
+                          <Select value={field.value ?? "units"} onValueChange={field.onChange}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select unit" />
                             </SelectTrigger>
@@ -930,7 +930,7 @@ export default function AdminPage() {
                       <FormItem>
                         <FormLabel>Inventory Status</FormLabel>
                         <FormControl>
-                          <Select value={field.value} onValueChange={field.onChange}>
+                          <Select value={field.value ?? "in_stock"} onValueChange={field.onChange}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
