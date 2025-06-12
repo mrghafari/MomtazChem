@@ -1,38 +1,24 @@
 import { contacts, type Contact, type InsertContact } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   createContact(contact: InsertContact): Promise<Contact>;
   getContacts(): Promise<Contact[]>;
 }
 
-export class MemStorage implements IStorage {
-  private contacts: Map<number, Contact>;
-  private currentId: number;
-
-  constructor() {
-    this.contacts = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async createContact(insertContact: InsertContact): Promise<Contact> {
-    const id = this.currentId++;
-    const contact: Contact = {
-      id,
-      firstName: insertContact.firstName,
-      lastName: insertContact.lastName,
-      email: insertContact.email,
-      company: insertContact.company || null,
-      productInterest: insertContact.productInterest || null,
-      message: insertContact.message,
-      createdAt: new Date(),
-    };
-    this.contacts.set(id, contact);
+    const [contact] = await db
+      .insert(contacts)
+      .values(insertContact)
+      .returning();
     return contact;
   }
 
   async getContacts(): Promise<Contact[]> {
-    return Array.from(this.contacts.values());
+    return await db.select().from(contacts);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
