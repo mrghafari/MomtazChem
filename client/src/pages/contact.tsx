@@ -289,7 +289,7 @@ const Contact = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Momtazchem Location</h3>
                   <p className="text-gray-600 mb-4">Yemen</p>
                   <a
-                    href="https://maps.app.goo.gl/mQoBQyZ5Q6i6iFjGA"
+                    href="https://maps.app.goo.gl/NxVHEazam3gEMYKB7"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center bg-primary-blue hover:bg-primary-blue-dark text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
@@ -307,7 +307,7 @@ const Contact = () => {
                   <p className="text-gray-600">Yemen</p>
                 </div>
                 <a
-                  href="https://maps.app.goo.gl/mQoBQyZ5Q6i6iFjGA"
+                  href="https://maps.app.goo.gl/NxVHEazam3gEMYKB7"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-primary-blue hover:bg-primary-blue-dark text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
