@@ -313,7 +313,7 @@ const Contact = () => {
             <div className="relative">
               <div className="h-96 rounded-lg overflow-hidden shadow-lg">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12885.234567!2d44.009212!3d36.191147!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDExJzI4LjEiTiA0NMKwMDAnMzMuMiJF!5e0!3m2!1sen!2s!4v1649123456789"
+                  src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3220.234567890123!2d44.009!3d36.191!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzbCsDExJzI4LjAiTiA0NMKwMDAnMzIuNCJF!5e0!3m2!1sen!2s!4v1649123456789"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -324,10 +324,20 @@ const Contact = () => {
                 ></iframe>
                 
                 {/* Company Location Marker Overlay */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <div className="relative">
-                    <div className="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg animate-pulse"></div>
-                    <div className="absolute -top-2 -right-2 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full pointer-events-none">
+                  <div className="relative flex flex-col items-center">
+                    {/* Location Pin */}
+                    <div className="relative">
+                      <div className="w-6 h-6 bg-red-500 rounded-full border-3 border-white shadow-lg"></div>
+                      <div className="absolute top-0 left-1/2 w-1 h-6 bg-red-500 transform -translate-x-1/2 -translate-y-6"></div>
+                      <div className="absolute -bottom-1 left-1/2 w-3 h-3 bg-red-500 transform -translate-x-1/2 rotate-45"></div>
+                    </div>
+                    {/* Pulsing Effect */}
+                    <div className="absolute top-0 w-8 h-8 bg-red-500 rounded-full opacity-25 animate-ping"></div>
+                    {/* Company Label */}
+                    <div className="mt-2 bg-white px-3 py-1 rounded-full shadow-md border">
+                      <span className="text-xs font-semibold text-gray-800">Momtazchem</span>
+                    </div>
                   </div>
                 </div>
                 
