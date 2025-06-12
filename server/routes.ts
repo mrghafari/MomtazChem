@@ -1,6 +1,9 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
 import { insertContactSchema, insertShowcaseProductSchema } from "@shared/showcase-schema";
@@ -14,6 +17,67 @@ declare module "express-session" {
     isAuthenticated?: boolean;
   }
 }
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(process.cwd(), 'uploads');
+const imagesDir = path.join(uploadsDir, 'images');
+const catalogsDir = path.join(uploadsDir, 'catalogs');
+
+[uploadsDir, imagesDir, catalogsDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+// Multer configuration for image uploads
+const imageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, imagesDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `product-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+// Multer configuration for catalog uploads
+const catalogStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, catalogsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `catalog-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const uploadImage = multer({
+  storage: imageStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
+
+const uploadCatalog = multer({
+  storage: catalogStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
+  }
+});
 
 // Authentication middleware
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
@@ -111,6 +175,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
+      });
+    }
+  });
+
+  // File upload endpoints
+  app.post("/api/upload/image", requireAuth, uploadImage.single('image'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No image file uploaded" 
+        });
+      }
+
+      const imageUrl = `/uploads/images/${req.file.filename}`;
+      res.json({ 
+        success: true, 
+        url: imageUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload image" 
+      });
+    }
+  });
+
+  app.post("/api/upload/catalog", requireAuth, uploadCatalog.single('catalog'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No catalog file uploaded" 
+        });
+      }
+
+      const catalogUrl = `/uploads/catalogs/${req.file.filename}`;
+      res.json({ 
+        success: true, 
+        url: catalogUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload catalog" 
       });
     }
   });
