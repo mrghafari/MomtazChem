@@ -29,8 +29,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.body;
       
-      console.log('Login attempt:', { username, password: password ? '[PROVIDED]' : '[MISSING]' });
-      
       if (!username || !password) {
         return res.status(400).json({ 
           success: false, 
@@ -40,8 +38,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user exists and verify password
       const user = await storage.getUserByUsername(username);
-      console.log('User found:', user ? { id: user.id, username: user.username } : 'Not found');
-      
       if (!user) {
         return res.status(401).json({ 
           success: false, 
@@ -50,8 +46,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-      console.log('Password valid:', isValidPassword);
-      
       if (!isValidPassword) {
         return res.status(401).json({ 
           success: false, 
@@ -63,12 +57,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.adminId = user.id;
       req.session.isAuthenticated = true;
 
-      console.log('Session set:', { adminId: req.session.adminId, isAuthenticated: req.session.isAuthenticated });
-
       // Save session explicitly
       req.session.save((err) => {
         if (err) {
-          console.error('Session save error:', err);
           return res.status(500).json({ 
             success: false, 
             message: "Failed to save session" 
@@ -82,7 +73,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       });
     } catch (error) {
-      console.error('Login error:', error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 

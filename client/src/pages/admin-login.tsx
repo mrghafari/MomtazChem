@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, User } from "lucide-react";
 
@@ -34,6 +34,8 @@ export default function AdminLogin() {
   const loginMutation = useMutation({
     mutationFn: (data: LoginForm) => apiRequest("/api/admin/login", "POST", data),
     onSuccess: () => {
+      // Invalidate auth cache to trigger re-fetch
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
       toast({ title: "Success", description: "Logged in successfully" });
       setLocation("/admin");
     },
@@ -58,7 +60,7 @@ export default function AdminLogin() {
             Admin Login
           </CardTitle>
           <CardDescription>
-            Enter your credentials to access the admin panel
+            Username: info@momtazchem.com | Password: Ghafari110
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,7 +75,7 @@ export default function AdminLogin() {
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input {...field} className="pl-10" placeholder="Enter username" />
+                        <Input {...field} className="pl-10" placeholder="info@momtazchem.com" />
                       </div>
                     </FormControl>
                     <FormMessage />

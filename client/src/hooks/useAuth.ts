@@ -16,10 +16,13 @@ export function useAuth() {
     },
   });
 
+  const user = data?.success ? data.user : null;
+  const isAuthenticated = !!(data?.success && data?.user) && !error;
+
   return {
-    user: data?.success ? data.user : null,
+    user,
     isLoading,
-    isAuthenticated: !!(data?.success && data?.user) && !error,
+    isAuthenticated,
     logout: logout.mutate,
     isLoggingOut: logout.isPending,
   };
