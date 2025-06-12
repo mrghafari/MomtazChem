@@ -279,7 +279,7 @@ const PaintThinnerPage = () => {
               </Button>
             </Link>
             <Link href="/services">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-orange-600">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-orange-600 bg-[#3c445c]">
                 View All Services
               </Button>
             </Link>

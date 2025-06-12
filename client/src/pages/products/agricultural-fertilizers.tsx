@@ -300,7 +300,7 @@ const AgriculturalFertilizersPage = () => {
               </Button>
             </Link>
             <Link href="/services">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 bg-[#836fe5]">
                 View All Services
               </Button>
             </Link>

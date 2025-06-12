@@ -324,7 +324,7 @@ const FuelAdditives = () => {
                 Contact Technical Team
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-gray-900">
+            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-gray-900 bg-[#21894d]">
               Download Product Catalog
             </Button>
           </div>
