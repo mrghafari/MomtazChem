@@ -138,10 +138,16 @@ const Home = () => {
                         <img
                           src={(() => {
                             const productWithImage = categoryProducts.find(p => p.imageUrl);
-                            return productWithImage?.imageUrl || category.imageUrl;
+                            const imageUrl = productWithImage?.imageUrl || category.imageUrl;
+                            console.log(`Category: ${category.category}, Image URL: ${imageUrl}`);
+                            return imageUrl;
                           })()}
                           alt={category.title}
                           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${e.currentTarget.src}`);
+                            e.currentTarget.src = category.imageUrl;
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                         <div className={`absolute top-4 left-4 w-12 h-12 ${category.iconBg} rounded-lg flex items-center justify-center`}>
