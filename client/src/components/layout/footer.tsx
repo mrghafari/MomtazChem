@@ -41,9 +41,14 @@ const Footer = () => {
                 <span className="text-white">chem</span>
               </div>
             </div>
-            <p className="text-gray-400 mb-6 leading-relaxed">
+            <p className="text-gray-400 mb-4 leading-relaxed">
               Leading provider of advanced chemical solutions for fuel, water treatment, paint, and agricultural industries worldwide.
             </p>
+            <div className="text-gray-400 text-sm mb-6">
+              <p className="mb-1">Codal pose: 44001</p>
+              <p className="mb-1">Gwer Road, Qaryataq Village</p>
+              <p>Erbil, Iraq</p>
+            </div>
             <div className="flex space-x-4">
               <a
                 href="#"
