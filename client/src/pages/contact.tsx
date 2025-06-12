@@ -61,7 +61,7 @@ const Contact = () => {
       title: "Headquarters",
       content: [
         "Momtazchem Company",
-        "Yemen",
+        "Erbil",
         "Chemical Manufacturing Facility"
       ],
       bgColor: "bg-primary-blue"
@@ -287,7 +287,7 @@ const Contact = () => {
                 <div className="text-center">
                   <MapPin className="h-12 w-12 text-primary-blue mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Momtazchem Location</h3>
-                  <p className="text-gray-600 mb-4">Yemen</p>
+                  <p className="text-gray-600 mb-4">Erbil</p>
                   <a
                     href="https://maps.app.goo.gl/NxVHEazam3gEMYKB7"
                     target="_blank"
@@ -304,7 +304,7 @@ const Contact = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Momtazchem Headquarters</h3>
-                  <p className="text-gray-600">Yemen</p>
+                  <p className="text-gray-600">Erbil</p>
                 </div>
                 <a
                   href="https://maps.app.goo.gl/NxVHEazam3gEMYKB7"
