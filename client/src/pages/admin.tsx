@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const categories = [
@@ -29,6 +29,10 @@ export default function AdminPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [catalogPreview, setCatalogPreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
@@ -147,8 +151,93 @@ export default function AdminPage() {
     }
   };
 
+  // File upload handlers
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Error", description: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Error", description: "Image file must be less than 5MB", variant: "destructive" });
+      return;
+    }
+    
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Upload failed');
+      }
+      
+      form.setValue('imageUrl', data.url);
+      setImagePreview(data.url);
+      toast({ title: "Success", description: "Image uploaded successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to upload image", variant: "destructive" });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleCatalogUpload = async (file: File) => {
+    if (!file) return;
+    
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+      toast({ title: "Error", description: "Please select a PDF file", variant: "destructive" });
+      return;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "Error", description: "PDF file must be less than 10MB", variant: "destructive" });
+      return;
+    }
+    
+    setUploadingCatalog(true);
+    try {
+      const formData = new FormData();
+      formData.append('catalog', file);
+      
+      const response = await fetch('/api/upload/catalog', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Upload failed');
+      }
+      
+      form.setValue('pdfCatalogUrl', data.url);
+      setCatalogPreview(data.url);
+      toast({ title: "Success", description: "Catalog uploaded successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to upload catalog", variant: "destructive" });
+    } finally {
+      setUploadingCatalog(false);
+    }
+  };
+
   const openEditDialog = (product: ShowcaseProduct) => {
     setEditingProduct(product);
+    setImagePreview(product.imageUrl);
+    setCatalogPreview(product.pdfCatalogUrl);
     form.reset({
       name: product.name,
       category: product.category,
@@ -171,6 +260,8 @@ export default function AdminPage() {
 
   const openCreateDialog = () => {
     setEditingProduct(null);
+    setImagePreview(null);
+    setCatalogPreview(null);
     form.reset();
     setDialogOpen(true);
   };
@@ -390,6 +481,127 @@ export default function AdminPage() {
                     </FormItem>
                   )}
                 />
+              </div>
+
+              {/* Image Upload Section */}
+              <div className="space-y-4">
+                <FormLabel>Product Image</FormLabel>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                  {imagePreview ? (
+                    <div className="relative">
+                      <img 
+                        src={imagePreview} 
+                        alt="Product preview" 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setImagePreview(null);
+                          form.setValue('imageUrl', '');
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <Image className="mx-auto h-12 w-12 text-gray-400" />
+                      <div className="mt-4">
+                        <label className="cursor-pointer">
+                          <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                            {uploadingImage ? "Uploading..." : "Upload product image"}
+                          </span>
+                          <input
+                            type="file"
+                            className="sr-only"
+                            accept="image/*"
+                            disabled={uploadingImage}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file);
+                            }}
+                          />
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                      </div>
+                      {uploadingImage && (
+                        <div className="mt-2">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Catalog Upload Section */}
+              <div className="space-y-4">
+                <FormLabel>Product Catalog (PDF)</FormLabel>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                  {catalogPreview ? (
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-8 w-8 text-red-600" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Catalog uploaded</p>
+                          <p className="text-xs text-gray-500">PDF document</p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(catalogPreview, '_blank')}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            setCatalogPreview(null);
+                            form.setValue('pdfCatalogUrl', '');
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                      <div className="mt-4">
+                        <label className="cursor-pointer">
+                          <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                            {uploadingCatalog ? "Uploading..." : "Upload product catalog"}
+                          </span>
+                          <input
+                            type="file"
+                            className="sr-only"
+                            accept=".pdf"
+                            disabled={uploadingCatalog}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleCatalogUpload(file);
+                            }}
+                          />
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1">PDF files up to 10MB</p>
+                      </div>
+                      {uploadingCatalog && (
+                        <div className="mt-2">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-end gap-2">
