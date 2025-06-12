@@ -134,10 +134,12 @@ const Home = () => {
                   <Card key={category.category} className="group bg-white hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-200">
                     <CardContent className="p-0">
                       <div className="relative overflow-hidden rounded-t-lg">
-                        {/* Use first product image if available, otherwise fallback to category image */}
+                        {/* Use first product with image, otherwise fallback to category image */}
                         <img
-                          src={categoryProducts.length > 0 && categoryProducts[0].imageUrl ? 
-                            categoryProducts[0].imageUrl : category.imageUrl}
+                          src={(() => {
+                            const productWithImage = categoryProducts.find(p => p.imageUrl);
+                            return productWithImage?.imageUrl || category.imageUrl;
+                          })()}
                           alt={category.title}
                           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
