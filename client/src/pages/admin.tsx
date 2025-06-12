@@ -78,7 +78,7 @@ export default function AdminPage() {
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertProduct> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
       apiRequest(`/api/products/${id}`, "PATCH", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -127,7 +127,7 @@ export default function AdminPage() {
     return null;
   }
 
-  const onSubmit = (data: InsertProduct) => {
+  const onSubmit = (data: InsertShowcaseProduct) => {
     if (editingProduct) {
       updateProductMutation.mutate({ id: editingProduct.id, data });
     } else {
@@ -135,18 +135,14 @@ export default function AdminPage() {
     }
   };
 
-  const openEditDialog = (product: Product) => {
+  const openEditDialog = (product: ShowcaseProduct) => {
     setEditingProduct(product);
     form.reset({
       name: product.name,
       category: product.category,
       description: product.description,
       shortDescription: product.shortDescription ?? "",
-      price: product.price ?? "0",
-      priceUnit: product.priceUnit ?? "per liter",
-      inStock: product.inStock ?? true,
-      stockQuantity: product.stockQuantity ?? 0,
-      sku: product.sku ?? "",
+      priceRange: product.priceRange ?? "Contact for pricing",
       imageUrl: product.imageUrl ?? "",
       pdfCatalogUrl: product.pdfCatalogUrl ?? "",
       specifications: product.specifications ?? {},
@@ -154,9 +150,9 @@ export default function AdminPage() {
       applications: product.applications ?? [],
       technicalDataSheet: product.technicalDataSheet ?? "",
       safetyDataSheet: product.safetyDataSheet ?? "",
-      minimumOrderQuantity: product.minimumOrderQuantity ?? 1,
-      leadTime: product.leadTime ?? "7-14 days",
+      certifications: product.certifications ?? [],
       isActive: product.isActive !== false,
+      displayOrder: product.displayOrder ?? 0,
     });
     setDialogOpen(true);
   };
@@ -227,7 +223,7 @@ export default function AdminPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product: Product) => (
+              {products.map((product: ShowcaseProduct) => (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex justify-between items-start">
@@ -356,15 +352,15 @@ export default function AdminPage() {
                 )}
               />
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="priceRange"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price</FormLabel>
+                      <FormLabel>Price Range</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value ?? ""} type="number" step="0.01" />
+                        <Input {...field} value={field.value ?? ""} placeholder="Contact for pricing" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -372,25 +368,12 @@ export default function AdminPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="priceUnit"
+                  name="displayOrder"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price Unit</FormLabel>
+                      <FormLabel>Display Order</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value ?? ""} placeholder="per liter" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="sku"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SKU</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value ?? ""} />
+                        <Input {...field} value={field.value ?? 0} type="number" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
