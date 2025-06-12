@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertProductSchema, type Product, type InsertProduct } from "@shared/schema";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const categories = [
@@ -27,7 +29,33 @@ export default function AdminPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [, setLocation] = useLocation();
+  const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/admin/login");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: selectedCategory === "all" ? ["/api/products"] : ["/api/products", selectedCategory],
@@ -148,10 +176,27 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Product Management</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">Manage products across four categories</p>
         </div>
-        <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Product
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-gray-600">
+            <User className="w-4 h-4" />
+            <span className="text-sm">{user?.username}</span>
+          </div>
+          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Product
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              logout();
+              setLocation("/admin/login");
+            }}
+            className="border-red-300 text-red-600 hover:bg-red-50"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">

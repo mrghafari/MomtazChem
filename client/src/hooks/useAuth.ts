@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["/api/admin/me"],
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -17,9 +17,9 @@ export function useAuth() {
   });
 
   return {
-    user: user?.user,
+    user: data?.user,
     isLoading,
-    isAuthenticated: !!user?.user && !error,
+    isAuthenticated: !!data?.user && !error,
     logout: logout.mutate,
     isLoggingOut: logout.isPending,
   };
