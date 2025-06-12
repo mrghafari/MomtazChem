@@ -301,7 +301,7 @@ const Contact = () => {
                       <h3 className="font-semibold text-gray-900">Momtazchem</h3>
                       <p className="text-sm text-gray-600">Erbil, Kurdistan Region</p>
                       <a
-                        href="https://maps.app.goo.gl/NxVHEazam3gEMYKB7"
+                        href="https://maps.app.goo.gl/ngapesxcH4XiT4L26"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary-blue hover:text-primary-blue-dark text-sm font-medium"
@@ -320,7 +320,7 @@ const Contact = () => {
                   <p className="text-gray-600">Erbil</p>
                 </div>
                 <a
-                  href="https://maps.app.goo.gl/NxVHEazam3gEMYKB7"
+                  href="https://maps.app.goo.gl/ngapesxcH4XiT4L26"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-primary-blue hover:bg-primary-blue-dark text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
