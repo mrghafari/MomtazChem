@@ -64,7 +64,8 @@ const Contact = () => {
         "Erbil",
         "Chemical Manufacturing Facility"
       ],
-      bgColor: "bg-primary-blue"
+      bgColor: "bg-primary-blue",
+      link: "https://maps.app.goo.gl/umCmoKpmaovSkTJ96"
     },
     {
       icon: <Phone className="h-6 w-6 text-white" />,
@@ -255,6 +256,15 @@ const Contact = () => {
                             ) : info.title === "Email" ? (
                               <a 
                                 href={`mailto:${line}`}
+                                className="hover:text-primary transition-colors duration-200 cursor-pointer"
+                              >
+                                {line}
+                              </a>
+                            ) : info.title === "Headquarters" && info.link ? (
+                              <a 
+                                href={info.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="hover:text-primary transition-colors duration-200 cursor-pointer"
                               >
                                 {line}
