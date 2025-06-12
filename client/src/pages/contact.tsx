@@ -60,9 +60,9 @@ const Contact = () => {
       icon: <MapPin className="h-6 w-6 text-white" />,
       title: "Headquarters",
       content: [
-        "123 Chemical Industry Blvd",
-        "Industrial Zone, City 12345",
-        "Country"
+        "Momtazchem Company",
+        "Yemen",
+        "Chemical Manufacturing Facility"
       ],
       bgColor: "bg-primary-blue"
     },
@@ -274,18 +274,47 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Map Section Placeholder */}
+      {/* Map Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Find Us</h2>
             <p className="text-xl text-gray-600">Visit our headquarters and manufacturing facilities</p>
           </div>
-          <div className="bg-gray-200 rounded-xl h-96 flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Interactive map would be integrated here</p>
-              <p className="text-sm text-gray-500 mt-2">123 Chemical Industry Blvd, Industrial Zone</p>
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="relative">
+              <div className="bg-gray-100 h-96 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <MapPin className="h-12 w-12 text-primary-blue mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Momtazchem Location</h3>
+                  <p className="text-gray-600 mb-4">Yemen</p>
+                  <a
+                    href="https://maps.app.goo.gl/mQoBQyZ5Q6i6iFjGA"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center bg-primary-blue hover:bg-primary-blue-dark text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+                  >
+                    <MapPin className="h-5 w-5 mr-2" />
+                    View on Google Maps
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 bg-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Momtazchem Headquarters</h3>
+                  <p className="text-gray-600">Yemen</p>
+                </div>
+                <a
+                  href="https://maps.app.goo.gl/mQoBQyZ5Q6i6iFjGA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-primary-blue hover:bg-primary-blue-dark text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                >
+                  Get Directions
+                </a>
+              </div>
             </div>
           </div>
         </div>

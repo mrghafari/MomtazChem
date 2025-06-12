@@ -28,9 +28,16 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <div className="text-2xl font-bold mb-4">
-              <span className="text-green-400">Momtaz</span>
-              <span className="text-white">chem</span>
+            <div className="flex items-center space-x-3 mb-4">
+              <img 
+                src="/attached_assets/company-logo.png_1749705269136.jpg" 
+                alt="Momtazchem Logo" 
+                className="h-10 w-10 rounded-lg"
+              />
+              <div className="text-2xl font-bold">
+                <span className="text-green-400">Momtaz</span>
+                <span className="text-white">chem</span>
+              </div>
             </div>
             <p className="text-gray-400 mb-6 leading-relaxed">
               Leading provider of advanced chemical solutions for fuel, water treatment, paint, and agricultural industries worldwide.
