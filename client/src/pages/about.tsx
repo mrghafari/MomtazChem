@@ -56,7 +56,7 @@ const About = () => {
             </div>
             <div>
               <img
-                src="https://images.unsplash.com/photo-1582719471769-e3c2bb2e0b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                src="https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                 alt="Modern chemical manufacturing facility"
                 className="rounded-lg shadow-lg"
               />
@@ -150,7 +150,7 @@ const About = () => {
             </div>
             <div>
               <img
-                src="https://images.unsplash.com/photo-1582719471769-e3c2bb2e0b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                 alt="Chemical research team"
                 className="rounded-lg shadow-lg"
               />
