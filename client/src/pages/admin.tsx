@@ -137,6 +137,14 @@ export default function AdminPage() {
       certifications: [],
       isActive: true,
       displayOrder: 0,
+      stockQuantity: 0,
+      minStockLevel: 10,
+      maxStockLevel: 1000,
+      stockUnit: "units",
+      inventoryStatus: "in_stock",
+      supplier: "",
+      warehouseLocation: "",
+      batchNumber: "",
     },
   });
 
@@ -314,6 +322,14 @@ export default function AdminPage() {
       certifications: product.certifications ?? [],
       isActive: product.isActive !== false,
       displayOrder: product.displayOrder ?? 0,
+      stockQuantity: product.stockQuantity ?? 0,
+      minStockLevel: product.minStockLevel ?? 10,
+      maxStockLevel: product.maxStockLevel ?? 1000,
+      stockUnit: product.stockUnit ?? "units",
+      inventoryStatus: product.inventoryStatus ?? "in_stock",
+      supplier: product.supplier ?? "",
+      warehouseLocation: product.warehouseLocation ?? "",
+      batchNumber: product.batchNumber ?? "",
     });
     setDialogOpen(true);
   };
@@ -355,6 +371,65 @@ export default function AdminPage() {
           </Button>
         </div>
       </div>
+
+      {/* Inventory Dashboard Summary */}
+      {products && products.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600">In Stock</p>
+                  <p className="text-2xl font-bold text-green-800">
+                    {products.filter(p => p.inventoryStatus === 'in_stock').length}
+                  </p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-yellow-600">Low Stock</p>
+                  <p className="text-2xl font-bold text-yellow-800">
+                    {products.filter(p => p.inventoryStatus === 'low_stock').length}
+                  </p>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-red-600">Out of Stock</p>
+                  <p className="text-2xl font-bold text-red-800">
+                    {products.filter(p => p.inventoryStatus === 'out_of_stock').length}
+                  </p>
+                </div>
+                <XCircle className="w-8 h-8 text-red-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Total Products</p>
+                  <p className="text-2xl font-bold text-blue-800">{products.length}</p>
+                </div>
+                <Package className="w-8 h-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
         <TabsList className="grid w-full grid-cols-5">
@@ -750,6 +825,172 @@ export default function AdminPage() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Inventory Management Section */}
+              <div className="space-y-4 border-t pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Package className="w-5 h-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold">Inventory Management</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="stockQuantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Stock</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            min="0" 
+                            value={field.value ?? 0}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="minStockLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Minimum Level</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            min="0" 
+                            value={field.value ?? 10}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 10)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="maxStockLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Maximum Level</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            min="1" 
+                            value={field.value ?? 1000}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 1000)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="stockUnit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Stock Unit</FormLabel>
+                        <FormControl>
+                          <Select value={field.value || "units"} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="units">Units</SelectItem>
+                              <SelectItem value="kg">Kilograms</SelectItem>
+                              <SelectItem value="liters">Liters</SelectItem>
+                              <SelectItem value="tons">Tons</SelectItem>
+                              <SelectItem value="boxes">Boxes</SelectItem>
+                              <SelectItem value="pallets">Pallets</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="inventoryStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inventory Status</FormLabel>
+                        <FormControl>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="in_stock">In Stock</SelectItem>
+                              <SelectItem value="low_stock">Low Stock</SelectItem>
+                              <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                              <SelectItem value="discontinued">Discontinued</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="supplier"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Supplier</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ""} placeholder="Supplier name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="warehouseLocation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Warehouse Location</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ""} placeholder="Storage location" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="batchNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Batch Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value ?? ""} placeholder="Batch/Lot number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div className="flex justify-end gap-2">
