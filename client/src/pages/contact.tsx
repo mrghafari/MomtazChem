@@ -313,7 +313,7 @@ const Contact = () => {
             <div className="relative">
               <div className="h-96 rounded-lg overflow-hidden shadow-lg">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3220.2!2d43.882198!3d36.157825!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzbCsDA5JzI4LjEiTiA0M8KwNTInNTUuOSJF!5e0!3m2!1sen!2s!4v1649123456789"
+                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12885.5!2d43.882198296180086!3d36.15782506411755!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDA5JzI4LjEiTiA0M8KwNTInNTUuOSJF!5e0!3m2!1sen!2s!4v1649123456789"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -346,8 +346,9 @@ const Contact = () => {
                     <MapPin className="h-6 w-6 text-red-500" />
                     <div>
                       <h3 className="font-semibold text-gray-900">Momtazchem Company</h3>
-                      <p className="text-sm text-gray-600">Manufacturing Facility</p>
-                      <p className="text-xs text-gray-500">Erbil, Kurdistan Region</p>
+                      <p className="text-sm text-gray-600">Chemical Manufacturing Facility</p>
+                      <p className="text-xs text-gray-500">36.1578°N, 43.8822°E</p>
+                      <p className="text-xs text-gray-400">Erbil, Kurdistan Region, Iraq</p>
                       <a
                         href="https://maps.app.goo.gl/umCmoKpmaovSkTJ96"
                         target="_blank"
