@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactSchema } from "@shared/schema";
+import { sendContactEmail } from "./email";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -11,7 +12,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contactData = insertContactSchema.parse(req.body);
       const contact = await storage.createContact(contactData);
       
-      // In a real application, you would send an email here using nodemailer
+      // Send email notification
+      try {
+        await sendContactEmail({
+          firstName: contact.firstName,
+          lastName: contact.lastName,
+          email: contact.email,
+          company: contact.company,
+          productInterest: contact.productInterest,
+          message: contact.message
+        });
+        console.log("Email sent successfully for contact:", contact.id);
+      } catch (emailError) {
+        console.error("Failed to send email:", emailError);
+        // Continue processing even if email fails
+      }
+      
       console.log("New contact form submission:", contact);
       
       res.json({ success: true, message: "Contact form submitted successfully" });
@@ -23,6 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           errors: error.errors 
         });
       } else {
+        console.error("Contact form error:", error);
         res.status(500).json({ 
           success: false, 
           message: "Internal server error" 
