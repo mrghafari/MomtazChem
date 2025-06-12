@@ -136,13 +136,13 @@ const Home = () => {
                       <div className="relative overflow-hidden rounded-t-lg">
                         {/* Use first product with image, otherwise fallback to category image */}
                         <img
-                          src={(() => {
-                            const productWithImage = categoryProducts.find(p => p.imageUrl);
-                            return productWithImage?.imageUrl || category.imageUrl;
-                          })()}
+                          src={category.category === 'water-treatment' ? 
+                            '/uploads/images/product-1749743089947-629563758.png' : 
+                            category.imageUrl}
                           alt={category.title}
                           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
+                            console.error('Image load error:', e.currentTarget.src);
                             e.currentTarget.src = category.imageUrl;
                           }}
                         />

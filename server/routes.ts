@@ -185,6 +185,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const filepath = path.join(process.cwd(), 'uploads', 'images', filename);
     
     if (fs.existsSync(filepath)) {
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
       res.sendFile(filepath);
     } else {
       res.status(404).json({ message: 'Image not found' });
