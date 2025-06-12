@@ -49,7 +49,7 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async createContact(insertContact: InsertContact): Promise<Contact> {
-    const [contact] = await db
+    const [contact] = await showcaseDb
       .insert(contacts)
       .values(insertContact)
       .returning();
@@ -57,42 +57,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContacts(): Promise<Contact[]> {
-    return await db.select().from(contacts).orderBy(desc(contacts.createdAt));
+    return await showcaseDb.select().from(contacts).orderBy(desc(contacts.createdAt));
   }
 
-  // Product management methods
-  async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const [product] = await db
-      .insert(products)
+  // Showcase Product management methods
+  async createProduct(insertProduct: InsertShowcaseProduct): Promise<ShowcaseProduct> {
+    const [product] = await showcaseDb
+      .insert(showcaseProducts)
       .values(insertProduct)
       .returning();
     return product;
   }
 
-  async getProducts(): Promise<Product[]> {
-    return await db.select().from(products).orderBy(desc(products.createdAt));
+  async getProducts(): Promise<ShowcaseProduct[]> {
+    return await showcaseDb.select().from(showcaseProducts).orderBy(desc(showcaseProducts.createdAt));
   }
 
-  async getProductById(id: number): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.id, id));
+  async getProductById(id: number): Promise<ShowcaseProduct | undefined> {
+    const [product] = await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.id, id));
     return product || undefined;
   }
 
-  async getProductsByCategory(category: string): Promise<Product[]> {
-    return await db.select().from(products).where(eq(products.category, category));
+  async getProductsByCategory(category: string): Promise<ShowcaseProduct[]> {
+    return await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.category, category));
   }
 
-  async updateProduct(id: number, productUpdate: Partial<InsertProduct>): Promise<Product> {
-    const [product] = await db
-      .update(products)
+  async updateProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
+    const [product] = await showcaseDb
+      .update(showcaseProducts)
       .set({ ...productUpdate, updatedAt: new Date() })
-      .where(eq(products.id, id))
+      .where(eq(showcaseProducts.id, id))
       .returning();
     return product;
   }
 
   async deleteProduct(id: number): Promise<void> {
-    await db.delete(products).where(eq(products.id, id));
+    await showcaseDb.delete(showcaseProducts).where(eq(showcaseProducts.id, id));
   }
 
   // User management methods

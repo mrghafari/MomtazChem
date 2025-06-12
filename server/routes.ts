@@ -2,7 +2,8 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
-import { insertContactSchema, insertProductSchema, insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
+import { insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
+import { insertContactSchema, insertShowcaseProductSchema } from "@shared/showcase-schema";
 import { sendContactEmail } from "./email";
 import { z } from "zod";
 
@@ -172,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Protected admin routes for product management
   app.post("/api/products", requireAuth, async (req, res) => {
     try {
-      const productData = insertProductSchema.parse(req.body);
+      const productData = insertShowcaseProductSchema.parse(req.body);
       const product = await storage.createProduct(productData);
       res.status(201).json(product);
     } catch (error) {
@@ -248,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const productData = insertProductSchema.partial().parse(req.body);
+      const productData = insertShowcaseProductSchema.partial().parse(req.body);
       const product = await storage.updateProduct(id, productData);
       res.json(product);
     } catch (error) {

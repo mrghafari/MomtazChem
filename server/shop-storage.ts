@@ -349,7 +349,7 @@ export class ShopStorage implements IShopStorage {
     const product = await this.getShopProductById(productId);
     if (!product) throw new Error("Product not found");
 
-    const difference = newQuantity - product.stockQuantity;
+    const difference = newQuantity - (product.stockQuantity || 0);
 
     // Update product stock
     await this.updateShopProduct(productId, { stockQuantity: newQuantity });
