@@ -573,10 +573,18 @@ export default function AdminPage() {
                         </Badge>
                       )}
                       {product.pdfCatalogUrl && (
-                        <Badge variant="outline" className="text-xs">
-                          <FileText className="w-3 h-3 mr-1" />
-                          Catalog
-                        </Badge>
+                        <a 
+                          href={product.pdfCatalogUrl} 
+                          download={`${product.name}_catalog.pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex"
+                        >
+                          <Badge variant="outline" className="text-xs hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors">
+                            <FileText className="w-3 h-3 mr-1" />
+                            Download Catalog
+                          </Badge>
+                        </a>
                       )}
                     </div>
                     
