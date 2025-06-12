@@ -19,14 +19,13 @@ import companyLogoPath from '@assets/company-logo.png';
 export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { t, isRTL } = useLanguage();
 
   const navigation = [
-    { href: '/', label: t('nav.home') },
-    { href: '/about', label: t('nav.about') },
-    { href: '/services', label: t('nav.services') },
-    { href: '/contact', label: t('nav.contact') },
-    { href: '/shop', label: t('nav.shop') },
+    { href: '/', label: 'Home' },
+    { href: '/about', label: 'About' },
+    { href: '/services', label: 'Services' },
+    { href: '/contact', label: 'Contact' },
+    { href: '/shop', label: 'Shop' },
   ];
 
   const productCategories = [
@@ -137,7 +136,7 @@ export default function Header() {
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   )}>
-                    {t('nav.products')}
+                    Products
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
@@ -176,19 +175,7 @@ export default function Header() {
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            {/* Language Switcher - Desktop */}
-            <div className="hidden sm:block">
-              <LanguageSwitcher />
-            </div>
-
-            {/* Language Switcher - Mobile */}
-            <div className="sm:hidden">
-              <LanguageSwitcherCompact />
-            </div>
-
-
-
+          <div className="flex items-center space-x-4">
             {/* Mobile menu button */}
             <Button
               variant="ghost"
@@ -224,7 +211,7 @@ export default function Header() {
                 {navigation.map((item, index) => (
                   <motion.div
                     key={item.href}
-                    initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
@@ -247,7 +234,7 @@ export default function Header() {
 
                 {/* Mobile Products Menu */}
                 <motion.div
-                  initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                  initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: navigation.length * 0.1 }}
                 >
@@ -258,13 +245,13 @@ export default function Header() {
                         ? "text-blue-600 dark:text-blue-400"
                         : "text-gray-600 dark:text-gray-300"
                     )}>
-                      {t('nav.products')}
+                      Products
                     </div>
                     <div className="ml-4 space-y-1">
                       {productCategories.map((category, categoryIndex) => (
                         <motion.div
                           key={category.href}
-                          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                          initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: (navigation.length + categoryIndex + 1) * 0.1 }}
                         >
