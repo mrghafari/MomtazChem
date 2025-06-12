@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProductSchema, type Product, type InsertProduct } from "@shared/schema";
+import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,7 +27,7 @@ const categories = [
 
 export default function AdminPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
@@ -43,18 +43,14 @@ export default function AdminPage() {
     enabled: isAuthenticated, // Only run query if authenticated
   });
 
-  const form = useForm<InsertProduct>({
-    resolver: zodResolver(insertProductSchema),
+  const form = useForm<InsertShowcaseProduct>({
+    resolver: zodResolver(insertShowcaseProductSchema),
     defaultValues: {
       name: "",
       category: "fuel-additives",
       description: "",
       shortDescription: "",
-      price: "0",
-      priceUnit: "per liter",
-      inStock: true,
-      stockQuantity: 0,
-      sku: "",
+      priceRange: "Contact for pricing",
       imageUrl: "",
       pdfCatalogUrl: "",
       specifications: {},
@@ -62,14 +58,14 @@ export default function AdminPage() {
       applications: [],
       technicalDataSheet: "",
       safetyDataSheet: "",
-      minimumOrderQuantity: 1,
-      leadTime: "7-14 days",
+      certifications: [],
       isActive: true,
+      displayOrder: 0,
     },
   });
 
   const createProductMutation = useMutation({
-    mutationFn: (data: InsertProduct) => apiRequest("/api/products", "POST", data),
+    mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setDialogOpen(false);
