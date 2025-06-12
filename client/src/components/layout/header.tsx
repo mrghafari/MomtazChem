@@ -30,7 +30,7 @@ const Header = () => {
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
               <img 
-                src="/attached_assets/company-logo.png_1749711494880.jpg" 
+                src="attached_assets/company-logo.png.jpg" 
                 alt="Momtazchem Logo" 
                 className="h-12 w-12 rounded-lg"
               />

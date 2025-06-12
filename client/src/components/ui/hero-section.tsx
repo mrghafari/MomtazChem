@@ -2,6 +2,8 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { FlaskRound, Phone, ChevronDown } from "lucide-react";
 
+import company_logo_png from "@assets/company-logo.png.jpg";
+
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center">
@@ -12,7 +14,6 @@ const HeroSection = () => {
           backgroundImage: `linear-gradient(rgba(21, 101, 192, 0.8), rgba(46, 125, 50, 0.6)), url('https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80')`,
         }}
       />
-
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
         <div className="max-w-3xl">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
@@ -36,8 +37,8 @@ const HeroSection = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-white text-white hover:bg-white hover:text-primary text-lg font-semibold"
-              >
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 border-2 border-white text-white hover:bg-white hover:text-primary text-lg font-semibold bg-[#0079f2]"
+                src={company_logo_png}>
                 <Phone className="mr-3 h-5 w-5" />
                 Contact Sales
               </Button>
@@ -45,7 +46,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
         <ChevronDown className="h-8 w-8" />

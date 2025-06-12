@@ -69,7 +69,7 @@ const PaintThinner = () => {
       <section 
         className="relative py-20 bg-cover bg-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(255, 111, 0, 0.8), rgba(255, 111, 0, 0.6)), url('https://images.unsplash.com/photo-1572981779307-38b8cabb2407?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`
+          backgroundImage: `linear-gradient(rgba(255, 111, 0, 0.8), rgba(255, 111, 0, 0.6)), url('https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
@@ -234,8 +234,8 @@ const PaintThinner = () => {
             </div>
             <div>
               <img
-                src="https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                alt="Paint laboratory testing"
+                src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Paint manufacturing facility"
                 className="rounded-lg shadow-lg"
               />
             </div>
@@ -255,8 +255,8 @@ const PaintThinner = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="relative group">
               <img
-                src="https://images.unsplash.com/photo-1580477667995-2b94f01c9516?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                alt="Industrial application"
+                src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Industrial coating application"
                 className="rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -268,8 +268,8 @@ const PaintThinner = () => {
             </div>
             <div className="relative group">
               <img
-                src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                alt="Automotive painting"
+                src="https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Paint formulation laboratory"
                 className="rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
