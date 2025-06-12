@@ -185,8 +185,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const filepath = path.join(process.cwd(), 'uploads', 'images', filename);
     
     if (fs.existsSync(filepath)) {
-      res.setHeader('Content-Type', 'image/png');
+      // Set proper content type based on file extension
+      const ext = path.extname(filename).toLowerCase();
+      let contentType = 'image/png'; // default
+      
+      switch (ext) {
+        case '.jpg':
+        case '.jpeg':
+          contentType = 'image/jpeg';
+          break;
+        case '.png':
+          contentType = 'image/png';
+          break;
+        case '.webp':
+          contentType = 'image/webp';
+          break;
+        case '.gif':
+          contentType = 'image/gif';
+          break;
+      }
+      
+      res.setHeader('Content-Type', contentType);
       res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Access-Control-Allow-Origin', '*');
       res.sendFile(filepath);
     } else {
       res.status(404).json({ message: 'Image not found' });

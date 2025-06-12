@@ -469,6 +469,13 @@ export default function AdminPage() {
                         src={product.imageUrl} 
                         alt={product.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.log('Image failed to load:', product.imageUrl);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                        onLoad={() => {
+                          console.log('Image loaded successfully:', product.imageUrl);
+                        }}
                       />
                     </div>
                   )}
