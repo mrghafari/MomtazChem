@@ -186,7 +186,7 @@ export class DatabaseStorage implements IStorage {
       firstName: contact.firstName,
       lastName: contact.lastName,
       email: contact.email,
-      phone: contact.phone || "",
+      phone: "",
       company: contact.company,
       leadSource: "contact_form",
       status: "new",

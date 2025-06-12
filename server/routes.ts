@@ -277,6 +277,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CRM Lead management routes
+  app.post("/api/leads", requireAuth, async (req, res) => {
+    try {
+      const leadData = insertLeadSchema.parse(req.body);
+      const lead = await storage.createLead(leadData);
+      res.status(201).json(lead);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead data", 
+          errors: error.errors 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: "Internal server error" 
+        });
+      }
+    }
+  });
+
+  app.get("/api/leads", requireAuth, async (req, res) => {
+    try {
+      const { status, priority, assignedTo, search } = req.query;
+      const filters = {
+        status: status as string,
+        priority: priority as string,
+        assignedTo: assignedTo ? parseInt(assignedTo as string) : undefined,
+        search: search as string,
+      };
+      
+      const leads = await storage.getLeads(filters);
+      res.json(leads);
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.get("/api/leads/statistics", requireAuth, async (req, res) => {
+    try {
+      const stats = await storage.getLeadStatistics();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.get("/api/leads/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead ID" 
+        });
+      }
+
+      const lead = await storage.getLeadById(id);
+      if (!lead) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Lead not found" 
+        });
+      }
+
+      res.json(lead);
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.patch("/api/leads/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead ID" 
+        });
+      }
+
+      const leadData = insertLeadSchema.partial().parse(req.body);
+      const lead = await storage.updateLead(id, leadData);
+      res.json(lead);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead data", 
+          errors: error.errors 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: "Internal server error" 
+        });
+      }
+    }
+  });
+
+  app.delete("/api/leads/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead ID" 
+        });
+      }
+
+      await storage.deleteLead(id);
+      res.json({ success: true, message: "Lead deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Convert contact to lead
+  app.post("/api/contacts/:id/convert-to-lead", requireAuth, async (req, res) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      if (isNaN(contactId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid contact ID" 
+        });
+      }
+
+      const additionalData = req.body || {};
+      const lead = await storage.convertContactToLead(contactId, additionalData);
+      res.status(201).json(lead);
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : "Internal server error" 
+      });
+    }
+  });
+
+  // Lead activities routes
+  app.post("/api/leads/:leadId/activities", requireAuth, async (req, res) => {
+    try {
+      const leadId = parseInt(req.params.leadId);
+      if (isNaN(leadId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead ID" 
+        });
+      }
+
+      const activityData = insertLeadActivitySchema.parse({
+        ...req.body,
+        leadId,
+        createdBy: req.session.adminId
+      });
+      
+      const activity = await storage.createLeadActivity(activityData);
+      res.status(201).json(activity);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid activity data", 
+          errors: error.errors 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: "Internal server error" 
+        });
+      }
+    }
+  });
+
+  app.get("/api/leads/:leadId/activities", requireAuth, async (req, res) => {
+    try {
+      const leadId = parseInt(req.params.leadId);
+      if (isNaN(leadId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead ID" 
+        });
+      }
+
+      const activities = await storage.getLeadActivities(leadId);
+      res.json(activities);
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
