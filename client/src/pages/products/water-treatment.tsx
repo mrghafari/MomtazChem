@@ -1,35 +1,17 @@
-import { CheckCircle, Droplets, Filter, Shield, Zap } from "lucide-react";
+import { CheckCircle, Droplets, Filter, Shield, Zap, Download, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import type { ShowcaseProduct } from "@shared/showcase-schema";
 
 const WaterTreatment = () => {
-  const products = [
-    {
-      name: "Coagulants & Flocculants",
-      description: "Advanced chemicals for effective water clarification and solid separation",
-      features: ["Rapid settling of suspended particles", "High efficiency at low dosage", "Wide pH range compatibility"],
-      applications: ["Municipal water treatment", "Industrial wastewater", "Mining operations"]
-    },
-    {
-      name: "Disinfectants",
-      description: "Powerful antimicrobial solutions for water purification and safety",
-      features: ["Broad spectrum pathogen control", "Long-lasting residual protection", "Safe for potable water"],
-      applications: ["Drinking water", "Swimming pools", "Cooling towers"]
-    },
-    {
-      name: "pH Adjusters",
-      description: "Precise pH control chemicals for optimal water treatment processes",
-      features: ["Stable pH control", "Minimal impact on water quality", "Cost-effective formulations"],
-      applications: ["Process water", "Boiler water", "Wastewater treatment"]
-    },
-    {
-      name: "Corrosion Inhibitors",
-      description: "Protective chemicals that prevent metal corrosion in water systems",
-      features: ["Extends equipment life", "Reduces maintenance costs", "Environmentally friendly"],
-      applications: ["Cooling systems", "Boilers", "Distribution networks"]
-    }
-  ];
+  // Fetch water treatment products from database
+  const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
+    queryKey: ["/api/products", "water-treatment"],
+    queryFn: () => fetch("/api/products?category=water-treatment").then(res => res.json()),
+  });
 
   const benefits = [
     {
