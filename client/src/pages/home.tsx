@@ -29,7 +29,7 @@ const Home = () => {
       title: "Paint & Thinner",
       description: "Premium paint formulations and thinners for automotive, architectural, and industrial applications with superior durability and finish quality.",
       features: ["Industrial Coatings", "Automotive Paints", "Specialty Thinners"],
-      imageUrl: "https://images.unsplash.com/photo-1596548438137-d51ea5c83ca4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1572883454114-1cf0031ede2a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
       href: "/products/paint-thinner",
       icon: <PaintBucket className="text-white text-xl" />,
       iconBg: "bg-accent-orange",
