@@ -62,9 +62,18 @@ export class DatabaseStorage implements IStorage {
 
   // Showcase Product management methods
   async createProduct(insertProduct: InsertShowcaseProduct): Promise<ShowcaseProduct> {
+    // Ensure JSON fields are properly handled for PostgreSQL
+    const productData = {
+      ...insertProduct,
+      specifications: insertProduct.specifications && Object.keys(insertProduct.specifications).length > 0 ? insertProduct.specifications : null,
+      features: insertProduct.features && insertProduct.features.length > 0 ? insertProduct.features : null,
+      applications: insertProduct.applications && insertProduct.applications.length > 0 ? insertProduct.applications : null,
+      certifications: insertProduct.certifications && insertProduct.certifications.length > 0 ? insertProduct.certifications : null,
+    };
+
     const [product] = await showcaseDb
       .insert(showcaseProducts)
-      .values(insertProduct)
+      .values(productData)
       .returning();
     return product;
   }
@@ -83,9 +92,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
+    // Ensure JSON fields are properly handled for PostgreSQL
+    const updateData = {
+      ...productUpdate,
+      updatedAt: new Date(),
+    };
+
+    // Handle JSON fields properly - use null for empty arrays/objects
+    if (productUpdate.specifications !== undefined) {
+      updateData.specifications = productUpdate.specifications && Object.keys(productUpdate.specifications).length > 0 ? productUpdate.specifications : null;
+    }
+    if (productUpdate.features !== undefined) {
+      updateData.features = productUpdate.features && productUpdate.features.length > 0 ? productUpdate.features : null;
+    }
+    if (productUpdate.applications !== undefined) {
+      updateData.applications = productUpdate.applications && productUpdate.applications.length > 0 ? productUpdate.applications : null;
+    }
+    if (productUpdate.certifications !== undefined) {
+      updateData.certifications = productUpdate.certifications && productUpdate.certifications.length > 0 ? productUpdate.certifications : null;
+    }
+
     const [product] = await showcaseDb
       .update(showcaseProducts)
-      .set({ ...productUpdate, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(showcaseProducts.id, id))
       .returning();
     return product;
