@@ -11,8 +11,8 @@ const Footer = () => {
   const companyLinks = [
     { name: "About Us", href: "/about" },
     { name: "Services", href: "/services" },
+    { name: "Shop", href: "/shop" },
     { name: "Careers", href: "#careers" },
-    { name: "News & Updates", href: "#news" },
   ];
 
   const supportLinks = [
@@ -64,9 +64,9 @@ const Footer = () => {
               {productLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href}>
-                    <a className="text-gray-400 hover:text-white transition-colors duration-200">
+                    <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
                       {link.name}
-                    </a>
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -80,9 +80,9 @@ const Footer = () => {
               {companyLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href}>
-                    <a className="text-gray-400 hover:text-white transition-colors duration-200">
+                    <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
                       {link.name}
-                    </a>
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -96,9 +96,9 @@ const Footer = () => {
               {supportLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href}>
-                    <a className="text-gray-400 hover:text-white transition-colors duration-200">
+                    <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
                       {link.name}
-                    </a>
+                    </span>
                   </Link>
                 </li>
               ))}

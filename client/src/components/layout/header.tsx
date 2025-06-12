@@ -28,9 +28,16 @@ const Header = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link href="/">
-            <div className="text-2xl font-bold cursor-pointer">
-              <span className="primary-green">Momtaz</span>
-              <span className="primary-blue">chem</span>
+            <div className="flex items-center space-x-3 cursor-pointer">
+              <img 
+                src="/attached_assets/company-logo.png_1749705269136.jpg" 
+                alt="Momtazchem Logo" 
+                className="h-12 w-12 rounded-lg"
+              />
+              <div className="text-2xl font-bold">
+                <span className="primary-green">Momtaz</span>
+                <span className="primary-blue">chem</span>
+              </div>
             </div>
           </Link>
 
