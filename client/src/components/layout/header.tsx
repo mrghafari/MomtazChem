@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChevronDown, Menu, Phone } from "lucide-react";
 
+import company_logo from "@assets/company-logo.png";
+
 const Header = () => {
   const [location] = useLocation();
   const [isProductsOpen, setIsProductsOpen] = useState(false);
@@ -30,7 +32,7 @@ const Header = () => {
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
               <img 
-                src="attached_assets/company-logo.png.jpg" 
+                src={company_logo} 
                 alt="Momtazchem Logo" 
                 className="h-12 w-12 rounded-lg"
               />
