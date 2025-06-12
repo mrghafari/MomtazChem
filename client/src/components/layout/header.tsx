@@ -95,11 +95,6 @@ const Header = () => {
                 Shop
               </Button>
             </Link>
-            <Link href="/contact">
-              <Button className="bg-primary-blue hover:bg-primary-blue-dark text-white">
-                Get Quote
-              </Button>
-            </Link>
           </div>
 
           {/* Mobile Menu */}
