@@ -144,7 +144,19 @@ const PaintThinnerPage = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {products?.map((product) => (
-                <Card key={product.id} className="group bg-white hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-orange-300">
+                <Card key={product.id} className="group bg-white hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-orange-300 overflow-hidden">
+                  {product.imageUrl && (
+                    <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <h3 className="text-xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">

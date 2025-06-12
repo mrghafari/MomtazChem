@@ -139,7 +139,19 @@ const WaterTreatment = () => {
           ) : products && products.length > 0 ? (
             <div className="grid md:grid-cols-2 gap-8">
               {products.map((product) => (
-                <Card key={product.id} className="bg-white hover:shadow-lg transition-shadow duration-300">
+                <Card key={product.id} className="bg-white hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                  {product.imageUrl && (
+                    <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                   <CardContent className="p-8">
                     <div className="flex justify-between items-start mb-4">
                       <h3 className="text-2xl font-bold text-gray-900">{product.name}</h3>
