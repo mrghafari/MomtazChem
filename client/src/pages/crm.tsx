@@ -580,7 +580,7 @@ export default function CRMPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 <FormField
                   control={leadForm.control}
                   name="status"
@@ -619,6 +619,32 @@ export default function CRMPage() {
                           {priorities.map(priority => (
                             <SelectItem key={priority.value} value={priority.value}>{priority.label}</SelectItem>
                           ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={leadForm.control}
+                  name="leadSource"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Lead Source</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select source" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="website">Website</SelectItem>
+                          <SelectItem value="contact_form">Contact Form</SelectItem>
+                          <SelectItem value="email">Email</SelectItem>
+                          <SelectItem value="phone">Phone</SelectItem>
+                          <SelectItem value="referral">Referral</SelectItem>
+                          <SelectItem value="trade_show">Trade Show</SelectItem>
+                          <SelectItem value="social_media">Social Media</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
