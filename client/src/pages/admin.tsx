@@ -33,36 +33,14 @@ export default function AdminPage() {
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setLocation("/admin/login");
-    }
-  }, [authLoading, isAuthenticated, setLocation]);
-
-  // Show loading while checking authentication
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
-
+  // All hooks must be called before any conditional returns
   const { data: products = [], isLoading } = useQuery({
     queryKey: selectedCategory === "all" ? ["/api/products"] : ["/api/products", selectedCategory],
     queryFn: () => 
       selectedCategory === "all" 
         ? fetch("/api/products").then(res => res.json())
-        : fetch(`/api/products?category=${selectedCategory}`).then(res => res.json())
+        : fetch(`/api/products?category=${selectedCategory}`).then(res => res.json()),
+    enabled: isAuthenticated, // Only run query if authenticated
   });
 
   const form = useForm<InsertProduct>({
@@ -128,6 +106,30 @@ export default function AdminPage() {
       toast({ title: "Error", description: "Failed to delete product", variant: "destructive" });
     },
   });
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/admin/login");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const onSubmit = (data: InsertProduct) => {
     if (editingProduct) {
