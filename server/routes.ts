@@ -292,6 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const product = await storage.createProduct(productData);
       res.status(201).json(product);
     } catch (error) {
+      console.error("Error creating product:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ 
           success: false, 
@@ -301,7 +302,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ 
           success: false, 
-          message: "Internal server error" 
+          message: "Internal server error",
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     }
@@ -370,6 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const product = await storage.updateProduct(id, productData);
       res.json(product);
     } catch (error) {
+      console.error("Error updating product:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ 
           success: false, 
@@ -379,7 +382,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ 
           success: false, 
-          message: "Internal server error" 
+          message: "Internal server error",
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     }

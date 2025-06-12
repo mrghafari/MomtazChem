@@ -60,7 +60,7 @@ export default function AdminLogin() {
             Admin Login
           </CardTitle>
           <CardDescription>
-            Username: info@momtazchem.com | Password: Ghafari110
+            Enter your admin credentials to access the management panel
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -75,7 +75,7 @@ export default function AdminLogin() {
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input {...field} className="pl-10" placeholder="info@momtazchem.com" />
+                        <Input {...field} className="pl-10" placeholder="Enter your username" />
                       </div>
                     </FormControl>
                     <FormMessage />
