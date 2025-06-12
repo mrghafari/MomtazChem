@@ -1,0 +1,43 @@
+CREATE TABLE "lead_activities" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"lead_id" integer NOT NULL,
+	"activity_type" text NOT NULL,
+	"subject" text NOT NULL,
+	"description" text,
+	"contact_method" text,
+	"outcome" text,
+	"duration" integer,
+	"scheduled_at" timestamp,
+	"completed_at" timestamp,
+	"created_by" integer,
+	"attachments" json,
+	"created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "leads" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"first_name" text NOT NULL,
+	"last_name" text NOT NULL,
+	"email" text NOT NULL,
+	"phone" text,
+	"company" text,
+	"job_title" text,
+	"industry" text,
+	"country" text,
+	"city" text,
+	"lead_source" text NOT NULL,
+	"status" text DEFAULT 'new' NOT NULL,
+	"priority" text DEFAULT 'medium' NOT NULL,
+	"product_interest" text,
+	"estimated_value" numeric(10, 2),
+	"probability" integer DEFAULT 25,
+	"expected_close_date" timestamp,
+	"last_contact_date" timestamp,
+	"next_follow_up_date" timestamp,
+	"notes" text,
+	"assigned_to" integer,
+	"tags" json,
+	"custom_fields" json,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);

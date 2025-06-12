@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
-import { insertContactSchema, insertProductSchema } from "@shared/schema";
+import { insertContactSchema, insertProductSchema, insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
 import { sendContactEmail } from "./email";
 import { z } from "zod";
 

@@ -8,6 +8,13 @@
       "when": 1749715881038,
       "tag": "0000_wakeful_proudstar",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749716442112,
+      "tag": "0001_fluffy_stardust",
+      "breakpoints": true
     }
   ]
 }
