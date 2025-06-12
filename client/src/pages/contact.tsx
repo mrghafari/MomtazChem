@@ -244,7 +244,25 @@ const Contact = () => {
                       <div>
                         <h3 className="font-semibold text-gray-900 mb-1">{info.title}</h3>
                         {info.content.map((line, lineIndex) => (
-                          <p key={lineIndex} className="text-gray-600">{line}</p>
+                          <p key={lineIndex} className="text-gray-600">
+                            {info.title === "Phone" ? (
+                              <a 
+                                href={`tel:${line.replace(/\s+/g, '')}`}
+                                className="hover:text-primary transition-colors duration-200 cursor-pointer"
+                              >
+                                {line}
+                              </a>
+                            ) : info.title === "Email" ? (
+                              <a 
+                                href={`mailto:${line}`}
+                                className="hover:text-primary transition-colors duration-200 cursor-pointer"
+                              >
+                                {line}
+                              </a>
+                            ) : (
+                              line
+                            )}
+                          </p>
                         ))}
                       </div>
                     </div>

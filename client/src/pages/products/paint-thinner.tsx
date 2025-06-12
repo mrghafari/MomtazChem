@@ -309,7 +309,7 @@ const PaintThinner = () => {
                 Consult Paint Specialists
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-gray-900">
+            <Button variant="outline" size="lg" className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border h-11 rounded-md px-8 border-white text-white hover:bg-white hover:text-gray-900 bg-[#ffa100]">
               Request Color Samples
             </Button>
           </div>

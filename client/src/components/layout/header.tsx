@@ -86,10 +86,10 @@ const Header = () => {
 
           {/* Desktop Contact Info & CTA */}
           <div className="hidden lg:flex items-center space-x-4">
-            <div className="text-sm text-gray-600 flex items-center">
+            <a href="tel:+967709996771" className="text-sm text-gray-600 flex items-center hover:text-primary transition-colors duration-200">
               <Phone className="h-4 w-4 text-primary mr-2" />
               <span>+967 709 996 771</span>
-            </div>
+            </a>
             <Link href="/shop">
               <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white">
                 Shop
