@@ -283,20 +283,33 @@ const Contact = () => {
           </div>
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="relative">
-              <div className="bg-gray-100 h-96 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="h-12 w-12 text-primary-blue mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Momtazchem Location</h3>
-                  <p className="text-gray-600 mb-4">Erbil</p>
-                  <a
-                    href="https://maps.app.goo.gl/NxVHEazam3gEMYKB7"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center bg-primary-blue hover:bg-primary-blue-dark text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-                  >
-                    <MapPin className="h-5 w-5 mr-2" />
-                    View on Google Maps
-                  </a>
+              <div className="h-96 rounded-lg overflow-hidden shadow-lg">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d51436.12345678!2d44.0092162!3d36.1911473!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40076b2e8c7e7c7b%3A0x7c8b4c8b4c8b4c8b!2sErbil%2C%20Iraq!5e0!3m2!1sen!2s!4v1649123456789"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Momtazchem Location - Erbil"
+                ></iframe>
+                <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg">
+                  <div className="flex items-center space-x-3">
+                    <MapPin className="h-6 w-6 text-primary-blue" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Momtazchem</h3>
+                      <p className="text-sm text-gray-600">Erbil, Kurdistan Region</p>
+                      <a
+                        href="https://maps.app.goo.gl/NxVHEazam3gEMYKB7"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-blue hover:text-primary-blue-dark text-sm font-medium"
+                      >
+                        View in Google Maps →
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
