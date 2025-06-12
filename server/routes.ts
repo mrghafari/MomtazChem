@@ -1,11 +1,109 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { insertContactSchema, insertProductSchema } from "@shared/schema";
 import { sendContactEmail } from "./email";
 import { z } from "zod";
 
+// Extend session type to include admin user
+declare module "express-session" {
+  interface SessionData {
+    adminId?: number;
+    isAuthenticated?: boolean;
+  }
+}
+
+// Authentication middleware
+const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (req.session.isAuthenticated && req.session.adminId) {
+    next();
+  } else {
+    res.status(401).json({ success: false, message: "Authentication required" });
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Admin authentication routes
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Check if user exists and verify password
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Set session
+      req.session.adminId = user.id;
+      req.session.isAuthenticated = true;
+
+      res.json({ 
+        success: true, 
+        message: "Login successful",
+        user: { id: user.id, username: user.username, email: user.email, role: user.role }
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "Could not log out" 
+        });
+      }
+      res.json({ success: true, message: "Logged out successfully" });
+    });
+  });
+
+  app.get("/api/admin/me", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUserById(req.session.adminId!);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        user: { id: user.id, username: user.username, email: user.email, role: user.role }
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Contact form submission
   app.post("/api/contact", async (req, res) => {
     try {
@@ -61,8 +159,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Product management routes
-  app.post("/api/products", async (req, res) => {
+  // Protected admin routes for product management
+  app.post("/api/products", requireAuth, async (req, res) => {
     try {
       const productData = insertProductSchema.parse(req.body);
       const product = await storage.createProduct(productData);
@@ -130,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/products/:id", async (req, res) => {
+  app.patch("/api/products/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -159,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/products/:id", async (req, res) => {
+  app.delete("/api/products/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
