@@ -244,15 +244,14 @@ export default function AdminPage() {
                       {product.shortDescription || product.description}
                     </p>
                     <div className="flex items-center justify-between mb-4">
-                      {product.price && (
+                      {product.priceRange && (
                         <div className="flex items-center gap-1">
                           <DollarSign className="w-4 h-4" />
-                          <span className="font-semibold">${product.price}</span>
-                          <span className="text-sm text-gray-500">{product.priceUnit}</span>
+                          <span className="font-semibold">{product.priceRange}</span>
                         </div>
                       )}
-                      <Badge variant={product.inStock ? "default" : "destructive"}>
-                        {product.inStock ? "In Stock" : "Out of Stock"}
+                      <Badge variant="default">
+                        Display Order: {product.displayOrder || 0}
                       </Badge>
                     </div>
                     <div className="flex justify-end gap-2">
