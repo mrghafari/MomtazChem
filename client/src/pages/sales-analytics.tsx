@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,6 +51,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 export default function SalesAnalytics() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { t, isRTL } = useLanguage();
 
   // Authentication check
   useEffect(() => {
@@ -89,14 +91,14 @@ export default function SalesAnalytics() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('analyticsPage.title')}</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Comprehensive sales performance dashboard
+              {t('analyticsPage.subtitle')}
             </p>
           </div>
           <Button variant="outline" onClick={() => setLocation("/admin")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Admin
+            <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+            {t('analyticsPage.backToAdmin')}
           </Button>
         </div>
         <div className="text-center">
@@ -150,38 +152,38 @@ export default function SalesAnalytics() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('analyticsPage.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Comprehensive sales performance dashboard
+            {t('analyticsPage.subtitle')}
           </p>
         </div>
         <Button variant="outline" onClick={() => setLocation("/admin")}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Admin
+          <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+          {t('analyticsPage.backToAdmin')}
         </Button>
       </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
-          title="Total Revenue"
+          title={t('analyticsPage.totalRevenue')}
           value={formatCurrency(salesData.totalRevenue)}
           icon={DollarSign}
           trend="up"
           trendValue={`+${salesData.growthRate.toFixed(1)}%`}
         />
         <StatCard
-          title="Total Orders"
+          title={t('analyticsPage.totalOrders')}
           value={salesData.totalOrders}
           icon={ShoppingCart}
         />
         <StatCard
-          title="Average Order Value"
+          title={t('analyticsPage.averageOrderValue')}
           value={formatCurrency(salesData.averageOrderValue)}
           icon={TrendingUp}
         />
         <StatCard
-          title="Total Customers"
+          title={t('analyticsPage.totalCustomers')}
           value={salesData.totalCustomers}
           icon={Users}
         />
