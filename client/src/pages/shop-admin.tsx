@@ -12,7 +12,10 @@ import {
   Calendar,
   Search,
   Filter,
-  Download
+  Download,
+  Plus,
+  Trash2,
+  Percent
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,14 +25,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
+
+// Form schema for discount settings
+const discountFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  minQuantity: z.number().min(1, "Minimum quantity must be at least 1"),
+  discountPercentage: z.number().min(0.01, "Discount must be at least 0.01%").max(100, "Discount cannot exceed 100%"),
+  description: z.string().optional(),
+  isActive: z.boolean().default(true),
+});
+
+type DiscountFormData = z.infer<typeof discountFormSchema>;
 
 const ShopAdmin = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingDiscount, setEditingDiscount] = useState<any>(null);
+  const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -46,6 +67,11 @@ const ShopAdmin = () => {
   // Fetch products for inventory management
   const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
+  });
+
+  // Fetch discount settings
+  const { data: discounts = [] } = useQuery({
+    queryKey: ["/api/shop/discounts"],
   });
 
   // Update order status mutation
@@ -90,6 +116,93 @@ const ShopAdmin = () => {
       });
     },
   });
+
+  // Discount form
+  const discountForm = useForm<DiscountFormData>({
+    resolver: zodResolver(discountFormSchema),
+    defaultValues: {
+      name: "",
+      minQuantity: 1,
+      discountPercentage: 5,
+      description: "",
+      isActive: true,
+    },
+  });
+
+  // Create discount mutation
+  const createDiscountMutation = useMutation({
+    mutationFn: async (data: DiscountFormData) => {
+      return apiRequest("/api/shop/discounts", "POST", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      setIsDiscountDialogOpen(false);
+      discountForm.reset();
+      toast({
+        title: "Discount Created",
+        description: "New discount rule has been created successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create discount rule.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update discount mutation
+  const updateDiscountMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<DiscountFormData> }) => {
+      return apiRequest(`/api/shop/discounts/${id}`, "PATCH", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      setEditingDiscount(null);
+      toast({
+        title: "Discount Updated",
+        description: "Discount rule has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update discount rule.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete discount mutation
+  const deleteDiscountMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/shop/discounts/${id}`, "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      toast({
+        title: "Discount Deleted",
+        description: "Discount rule has been deleted successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Deletion Failed",
+        description: "Failed to delete discount rule.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle discount form submission
+  const handleDiscountSubmit = (data: DiscountFormData) => {
+    if (editingDiscount) {
+      updateDiscountMutation.mutate({ id: editingDiscount.id, data });
+    } else {
+      createDiscountMutation.mutate(data);
+    }
+  };
 
   // Filter orders
   const filteredOrders = orders ? orders.filter(order => {

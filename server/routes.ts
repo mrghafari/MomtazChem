@@ -1098,6 +1098,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Discount settings management
+  app.get("/api/shop/discounts", async (req, res) => {
+    try {
+      const discounts = await shopStorage.getDiscountSettings();
+      res.json(discounts);
+    } catch (error) {
+      console.error("Error fetching discounts:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch discounts" });
+    }
+  });
+
+  app.get("/api/shop/discounts/active", async (req, res) => {
+    try {
+      const discounts = await shopStorage.getActiveDiscountSettings();
+      res.json(discounts);
+    } catch (error) {
+      console.error("Error fetching active discounts:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch active discounts" });
+    }
+  });
+
+  app.post("/api/shop/discounts", async (req, res) => {
+    try {
+      const discountData = req.body;
+      const discount = await shopStorage.createDiscountSetting(discountData);
+      res.json(discount);
+    } catch (error) {
+      console.error("Error creating discount:", error);
+      res.status(500).json({ success: false, message: "Failed to create discount" });
+    }
+  });
+
+  app.patch("/api/shop/discounts/:id", async (req, res) => {
+    try {
+      const discountId = parseInt(req.params.id);
+      if (isNaN(discountId)) {
+        return res.status(400).json({ success: false, message: "Invalid discount ID" });
+      }
+      
+      const updates = req.body;
+      const discount = await shopStorage.updateDiscountSetting(discountId, updates);
+      res.json(discount);
+    } catch (error) {
+      console.error("Error updating discount:", error);
+      res.status(500).json({ success: false, message: "Failed to update discount" });
+    }
+  });
+
+  app.delete("/api/shop/discounts/:id", async (req, res) => {
+    try {
+      const discountId = parseInt(req.params.id);
+      if (isNaN(discountId)) {
+        return res.status(400).json({ success: false, message: "Invalid discount ID" });
+      }
+      
+      await shopStorage.deleteDiscountSetting(discountId);
+      res.json({ success: true, message: "Discount deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting discount:", error);
+      res.status(500).json({ success: false, message: "Failed to delete discount" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
