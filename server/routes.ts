@@ -2638,6 +2638,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SMTP Configuration Validator
+  app.post("/api/admin/validate-smtp", requireAuth, async (req, res) => {
+    try {
+      const { email, password, customHost, customPort } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Email and password are required"
+        });
+      }
+
+      const { SMTPValidator } = await import('./smtp-validator');
+      const result = await SMTPValidator.validateConfiguration(
+        email, 
+        password, 
+        customHost, 
+        customPort
+      );
+      
+      res.json({
+        success: result.isValid,
+        ...result
+      });
+    } catch (error) {
+      console.error("Error validating SMTP:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to validate SMTP configuration"
+      });
+    }
+  });
+
+  // Detect email provider
+  app.post("/api/admin/detect-provider", requireAuth, async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: "Email is required"
+        });
+      }
+
+      const { SMTPValidator } = await import('./smtp-validator');
+      const provider = SMTPValidator.detectProvider(email);
+      const config = SMTPValidator.generateOptimalConfig(email);
+      
+      res.json({
+        success: true,
+        provider,
+        recommendedConfig: config
+      });
+    } catch (error) {
+      console.error("Error detecting provider:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to detect email provider"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
