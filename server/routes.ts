@@ -1,4 +1,4 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import express, { type Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import multer from "multer";
@@ -97,6 +97,8 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve static files from attached_assets directory
+  app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
   // Admin authentication routes
   app.post("/api/admin/login", async (req, res) => {
     try {
