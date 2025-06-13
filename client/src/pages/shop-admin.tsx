@@ -575,201 +575,38 @@ const ShopAdmin = () => {
             </DialogContent>
           </Dialog>
         )}
-          
+          </TabsContent>
+
+          {/* Inventory Management */}
+          <TabsContent value="inventory">
+            <Card>
+              <CardHeader>
+                <CardTitle>Inventory Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center py-8 text-gray-500">
+                    Inventory management interface.
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Discount Settings */}
           <TabsContent value="discounts">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Percent className="w-5 h-5" />
-                    Discount Settings
-                  </CardTitle>
-                  <Dialog open={isDiscountDialogOpen} onOpenChange={setIsDiscountDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button onClick={() => {
-                        setEditingDiscount(null);
-                        discountForm.reset();
-                      }}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Discount Rule
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>
-                          {editingDiscount ? "Edit Discount Rule" : "Create Discount Rule"}
-                        </DialogTitle>
-                      </DialogHeader>
-                      <Form {...discountForm}>
-                        <form onSubmit={discountForm.handleSubmit(handleDiscountSubmit)} className="space-y-4">
-                          <FormField
-                            control={discountForm.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Rule Name</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="e.g., Bulk Discount 20%" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={discountForm.control}
-                            name="minQuantity"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Minimum Quantity</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    min="1"
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={discountForm.control}
-                            name="discountPercentage"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Discount Percentage (%)</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    min="0.01"
-                                    max="100"
-                                    step="0.01"
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={discountForm.control}
-                            name="description"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Description (Optional)</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Brief description..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={discountForm.control}
-                            name="isActive"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                                <div className="space-y-0.5">
-                                  <FormLabel>Active</FormLabel>
-                                  <div className="text-sm text-gray-600">
-                                    Enable this discount rule
-                                  </div>
-                                </div>
-                                <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <div className="flex justify-end gap-2">
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              onClick={() => setIsDiscountDialogOpen(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button 
-                              type="submit"
-                              disabled={createDiscountMutation.isPending || updateDiscountMutation.isPending}
-                            >
-                              {editingDiscount ? "Update" : "Create"}
-                            </Button>
-                          </div>
-                        </form>
-                      </Form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                <CardTitle className="flex items-center gap-2">
+                  <Percent className="w-5 h-5" />
+                  Discount Settings
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {Array.isArray(discounts) && discounts.length > 0 ? (
-                    <div className="space-y-3">
-                      {discounts.map((discount: any) => (
-                        <div key={discount.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3">
-                              <h3 className="font-semibold">{discount.name}</h3>
-                              <Badge variant={discount.isActive ? "default" : "secondary"}>
-                                {discount.isActive ? "Active" : "Inactive"}
-                              </Badge>
-                            </div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              {discount.discountPercentage}% off for {discount.minQuantity}+ items
-                            </div>
-                            {discount.description && (
-                              <div className="text-sm text-gray-500 mt-1">
-                                {discount.description}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingDiscount(discount);
-                                discountForm.reset({
-                                  name: discount.name,
-                                  minQuantity: discount.minQuantity,
-                                  discountPercentage: parseFloat(discount.discountPercentage),
-                                  description: discount.description || "",
-                                  isActive: discount.isActive,
-                                });
-                                setIsDiscountDialogOpen(true);
-                              }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => deleteDiscountMutation.mutate(discount.id)}
-                              disabled={deleteDiscountMutation.isPending}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No discount rules configured yet.
-                    </div>
-                  )}
+                  <div className="text-center py-8 text-gray-500">
+                    Discount management feature is being set up. Please check back later.
+                  </div>
                 </div>
               </CardContent>
             </Card>
