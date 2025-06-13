@@ -92,13 +92,13 @@ const ShopAdmin = () => {
   });
 
   // Filter orders
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = orders ? orders.filter(order => {
     const matchesStatus = orderStatusFilter === "all" || order.status === orderStatusFilter;
     const matchesSearch = searchTerm === "" || 
                          order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.id.toString().includes(searchTerm);
     return matchesStatus && matchesSearch;
-  });
+  }) : [];
 
   // Get order details
   const getOrderDetails = async (orderId: number) => {

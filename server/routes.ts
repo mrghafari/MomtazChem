@@ -1017,7 +1017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/shop/orders", requireAuth, async (req, res) => {
+  app.get("/api/shop/orders", async (req, res) => {
     try {
       const orders = await shopStorage.getOrders();
       res.json(orders);
@@ -1064,7 +1064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Order statistics for dashboard
-  app.get("/api/shop/statistics", requireAuth, async (req, res) => {
+  app.get("/api/shop/statistics", async (req, res) => {
     try {
       const stats = await shopStorage.getOrderStatistics();
       res.json(stats);
