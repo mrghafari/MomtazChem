@@ -5,7 +5,8 @@ export function useAuth() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/admin/me"],
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fetch fresh data to avoid authentication issues
+    refetchOnWindowFocus: false,
   });
 
   const logout = useMutation({
@@ -16,8 +17,8 @@ export function useAuth() {
     },
   });
 
-  const user = data?.success ? data.user : null;
-  const isAuthenticated = !!(data?.success && data?.user) && !error;
+  const user = (data as any)?.success ? (data as any).user : null;
+  const isAuthenticated = !!((data as any)?.success && (data as any)?.user) && !error;
 
   return {
     user,

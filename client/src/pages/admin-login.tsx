@@ -33,9 +33,19 @@ export default function AdminLogin() {
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginForm) => apiRequest("/api/admin/login", "POST", data),
-    onSuccess: () => {
-      // Invalidate auth cache to trigger re-fetch
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
+    onSuccess: async () => {
+      // Clear existing cache and refetch auth state
+      queryClient.removeQueries({ queryKey: ["/api/admin/me"] });
+      
+      // Wait a moment for session to be established
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Prefetch the auth data to ensure it's available
+      await queryClient.prefetchQuery({
+        queryKey: ["/api/admin/me"],
+        queryFn: () => fetch("/api/admin/me").then(res => res.json()),
+      });
+      
       toast({ title: "Success", description: "Logged in successfully" });
       setLocation("/admin");
     },
