@@ -1055,6 +1055,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updates = req.body;
+      const currentOrder = await shopStorage.getOrderById(orderId);
+      
+      if (!currentOrder) {
+        return res.status(404).json({ success: false, message: "Order not found" });
+      }
+      
+      // If order is being cancelled or refunded, restore inventory
+      if (updates.status && (updates.status === 'cancelled' || updates.status === 'refunded') && 
+          currentOrder.status !== 'cancelled' && currentOrder.status !== 'refunded') {
+        
+        const orderItems = await shopStorage.getOrderItems(orderId);
+        for (const item of orderItems) {
+          const product = await shopStorage.getShopProductById(item.productId);
+          if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
+            const newQuantity = product.stockQuantity + item.quantity;
+            await shopStorage.updateProductStock(
+              item.productId,
+              newQuantity,
+              `Order ${currentOrder.orderNumber} ${updates.status} - Restored ${item.quantity} units`
+            );
+          }
+        }
+      }
+      
       const order = await shopStorage.updateOrder(orderId, updates);
       res.json(order);
     } catch (error) {
