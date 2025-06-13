@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const categories = [
@@ -392,6 +392,14 @@ export default function AdminPage() {
           >
             <BarChart3 className="w-4 h-4 mr-2" />
             Product Inquiries
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => setLocation("/admin/barcode-inventory")}
+            className="border-cyan-300 text-cyan-600 hover:bg-cyan-50"
+          >
+            <QrCode className="w-4 h-4 mr-2" />
+            Barcode Inventory
           </Button>
           <Button 
             variant="outline"

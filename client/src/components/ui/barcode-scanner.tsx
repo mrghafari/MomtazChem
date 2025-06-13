@@ -1,21 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  Camera, 
-  CameraOff, 
-  Package, 
-  CheckCircle, 
-  AlertCircle, 
-  X,
-  Search,
-  Scan
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect, useRef } from "react";
+import { Html5QrcodeScanner, Html5QrcodeScanType, Html5QrcodeSupportedFormats } from "html5-qrcode";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Camera, Square, CheckCircle, AlertTriangle, History } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface BarcodeScannerProps {
   onScanSuccess: (barcode: string, productData?: any) => void;
@@ -24,142 +14,149 @@ interface BarcodeScannerProps {
   className?: string;
 }
 
-export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
+const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   onScanSuccess,
   onScanError,
   scanMode = 'lookup',
-  className = ''
+  className = ""
 }) => {
   const [isScanning, setIsScanning] = useState(false);
-  const [manualBarcode, setManualBarcode] = useState('');
-  const [lastScannedCode, setLastScannedCode] = useState('');
+  const [lastScanResult, setLastScanResult] = useState<string | null>(null);
   const [scanHistory, setScanHistory] = useState<Array<{code: string, timestamp: Date, result: string}>>([]);
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
+  const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
+  const scannerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const startScanner = async () => {
+  useEffect(() => {
+    // Check camera permission on component mount
+    navigator.permissions?.query({ name: 'camera' as PermissionName })
+      .then(permission => {
+        setCameraPermission(permission.state as any);
+        permission.addEventListener('change', () => {
+          setCameraPermission(permission.state as any);
+        });
+      })
+      .catch(() => setCameraPermission('prompt'));
+
+    return () => {
+      if (scanner) {
+        scanner.clear();
+      }
+    };
+  }, []);
+
+  const startScanning = async () => {
+    if (!scannerRef.current) return;
+
     try {
       setIsScanning(true);
       
-      const scanner = new Html5QrcodeScanner(
-        "barcode-scanner-container",
+      const newScanner = new Html5QrcodeScanner(
+        "qr-reader",
         {
           fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
+          qrbox: { width: 300, height: 200 },
+          supportedScanTypes: [
+            Html5QrcodeScanType.SCAN_TYPE_CAMERA,
+          ],
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.CODE_93,
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+          ],
           rememberLastUsedCamera: true,
-          showTorchButtonIfSupported: true
+          showTorchButtonIfSupported: true,
         },
         false
       );
 
-      scanner.render(
-        (decodedText) => {
-          handleScanSuccess(decodedText);
-          scanner.pause(true);
+      newScanner.render(
+        async (decodedText, decodedResult) => {
+          // Handle successful scan
+          setLastScanResult(decodedText);
+          
+          try {
+            // Look up product by barcode
+            const response = await fetch(`/api/products/barcode/${encodeURIComponent(decodedText)}`);
+            
+            let productData = null;
+            let scanResult = 'not_found';
+            
+            if (response.ok) {
+              productData = await response.json();
+              scanResult = 'found';
+              
+              toast({
+                title: "Product Found",
+                description: `Scanned: ${productData.name}`,
+                variant: "default"
+              });
+            } else {
+              toast({
+                title: "Product Not Found",
+                description: `No product found for barcode: ${decodedText}`,
+                variant: "destructive"
+              });
+            }
+
+            // Add to scan history
+            setScanHistory(prev => [{
+              code: decodedText,
+              timestamp: new Date(),
+              result: scanResult
+            }, ...prev.slice(0, 9)]);
+
+            // Log the scan
+            await fetch('/api/barcode/log', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                barcode: decodedText,
+                scanType: scanMode,
+                scanResult,
+                location: 'inventory_scanner'
+              })
+            });
+
+            onScanSuccess(decodedText, productData);
+            
+          } catch (error) {
+            console.error('Error processing scan:', error);
+            onScanError?.('Failed to process barcode scan');
+          }
         },
         (errorMessage) => {
-          // Handle scan errors silently - most are just "no code found"
-          console.debug('Scan error:', errorMessage);
+          // Handle scan error (but don't spam the console)
+          if (!errorMessage.includes('QR code parse error')) {
+            console.warn('Scanner error:', errorMessage);
+          }
         }
       );
 
-      scannerRef.current = scanner;
+      setScanner(newScanner);
     } catch (error) {
+      console.error('Failed to start scanner:', error);
       setIsScanning(false);
-      const errorMsg = 'Failed to start camera scanner';
       toast({
         title: "Scanner Error",
-        description: errorMsg,
+        description: "Failed to start camera. Please check permissions.",
         variant: "destructive"
       });
-      if (onScanError) onScanError(errorMsg);
     }
   };
 
-  const stopScanner = () => {
-    if (scannerRef.current) {
-      scannerRef.current.clear();
-      scannerRef.current = null;
+  const stopScanning = () => {
+    if (scanner) {
+      scanner.clear();
+      setScanner(null);
     }
     setIsScanning(false);
-  };
-
-  const handleScanSuccess = async (scannedCode: string) => {
-    setLastScannedCode(scannedCode);
-    
-    // Add to scan history
-    setScanHistory(prev => [
-      { code: scannedCode, timestamp: new Date(), result: 'success' },
-      ...prev.slice(0, 9) // Keep last 10 scans
-    ]);
-
-    // Log the scan
-    try {
-      await fetch('/api/barcode/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          barcode: scannedCode,
-          scanType: scanMode,
-          scanResult: 'success'
-        })
-      });
-    } catch (error) {
-      console.error('Failed to log barcode scan:', error);
-    }
-
-    // Look up product information
-    try {
-      const response = await fetch(`/api/products/barcode/${encodeURIComponent(scannedCode)}`);
-      if (response.ok) {
-        const productData = await response.json();
-        toast({
-          title: "Product Found",
-          description: `${productData.name} - Stock: ${productData.stockQuantity}`,
-          variant: "default"
-        });
-        onScanSuccess(scannedCode, productData);
-      } else {
-        toast({
-          title: "Product Not Found",
-          description: `Barcode: ${scannedCode}`,
-          variant: "destructive"
-        });
-        onScanSuccess(scannedCode, null);
-      }
-    } catch (error) {
-      toast({
-        title: "Lookup Error",
-        description: "Failed to lookup product information",
-        variant: "destructive"
-      });
-      onScanSuccess(scannedCode, null);
-    }
-
-    stopScanner();
-  };
-
-  const handleManualEntry = () => {
-    if (!manualBarcode.trim()) return;
-    
-    handleScanSuccess(manualBarcode.trim());
-    setManualBarcode('');
-  };
-
-  useEffect(() => {
-    return () => {
-      stopScanner();
-    };
-  }, []);
-
-  const getScanModeLabel = () => {
-    switch (scanMode) {
-      case 'inventory_in': return 'Stock In';
-      case 'inventory_out': return 'Stock Out';
-      case 'audit': return 'Inventory Audit';
-      default: return 'Product Lookup';
-    }
   };
 
   const getScanModeColor = () => {
@@ -171,12 +168,21 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     }
   };
 
+  const getScanModeLabel = () => {
+    switch (scanMode) {
+      case 'inventory_in': return 'Stock In';
+      case 'inventory_out': return 'Stock Out';
+      case 'audit': return 'Audit';
+      default: return 'Lookup';
+    }
+  };
+
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Scan className="h-5 w-5" />
+            <Camera className="h-5 w-5" />
             Barcode Scanner
           </div>
           <Badge className={getScanModeColor()}>
@@ -185,74 +191,103 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Camera Permission Status */}
+        {cameraPermission === 'denied' && (
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Camera access is denied. Please enable camera permissions in your browser settings.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Scanner Controls */}
         <div className="flex gap-2">
           {!isScanning ? (
-            <Button onClick={startScanner} className="flex-1">
+            <Button 
+              onClick={startScanning}
+              disabled={cameraPermission === 'denied'}
+              className="flex-1"
+            >
               <Camera className="h-4 w-4 mr-2" />
-              Start Scanner
+              Start Scanning
             </Button>
           ) : (
-            <Button onClick={stopScanner} variant="destructive" className="flex-1">
-              <CameraOff className="h-4 w-4 mr-2" />
-              Stop Scanner
+            <Button 
+              onClick={stopScanning}
+              variant="outline"
+              className="flex-1"
+            >
+              <Square className="h-4 w-4 mr-2" />
+              Stop Scanning
             </Button>
           )}
         </div>
 
-        {/* Camera Scanner Container */}
-        {isScanning && (
-          <div className="border rounded-lg p-4">
-            <div id="barcode-scanner-container" className="w-full"></div>
-          </div>
-        )}
-
-        {/* Manual Entry */}
-        <div className="space-y-2">
-          <Label htmlFor="manual-barcode">Manual Barcode Entry</Label>
-          <div className="flex gap-2">
-            <Input
-              id="manual-barcode"
-              placeholder="Enter barcode manually..."
-              value={manualBarcode}
-              onChange={(e) => setManualBarcode(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleManualEntry()}
-            />
-            <Button onClick={handleManualEntry} disabled={!manualBarcode.trim()}>
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
+        {/* Scanner Area */}
+        <div className="relative">
+          <div 
+            id="qr-reader" 
+            ref={scannerRef}
+            className={`rounded-lg overflow-hidden ${isScanning ? 'block' : 'hidden'}`}
+          />
+          
+          {!isScanning && (
+            <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>Click "Start Scanning" to begin</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Last Scanned Code */}
-        {lastScannedCode && (
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-2 text-sm">
+        {/* Last Scan Result */}
+        {lastScanResult && (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="font-medium">Last Scanned:</span>
-              <code className="bg-white px-2 py-1 rounded text-xs">
-                {lastScannedCode}
-              </code>
+              <span className="text-sm font-medium text-green-800">Last Scanned:</span>
             </div>
+            <code className="text-sm font-mono text-green-700 block mt-1">
+              {lastScanResult}
+            </code>
           </div>
         )}
 
         {/* Scan History */}
         {scanHistory.length > 0 && (
           <div className="space-y-2">
-            <Label>Recent Scans</Label>
-            <div className="max-h-40 overflow-y-auto space-y-1">
-              {scanHistory.map((scan, index) => (
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <History className="h-4 w-4" />
+              Recent Scans
+            </div>
+            <div className="space-y-1 max-h-40 overflow-y-auto">
+              {scanHistory.slice(0, 5).map((scan, index) => (
                 <div key={index} className="flex items-center justify-between text-xs p-2 bg-gray-50 rounded">
-                  <code className="font-mono">{scan.code}</code>
-                  <span className="text-gray-500">
-                    {scan.timestamp.toLocaleTimeString()}
-                  </span>
+                  <code className="font-mono">{scan.code.substring(0, 20)}...</code>
+                  <div className="flex items-center gap-1">
+                    {scan.result === 'found' ? (
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                    ) : (
+                      <AlertTriangle className="h-3 w-3 text-red-500" />
+                    )}
+                    <span className="text-gray-500">
+                      {scan.timestamp.toLocaleTimeString()}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
+
+        {/* Scanner Instructions */}
+        <div className="text-xs text-gray-500 space-y-1">
+          <p>• Position the barcode within the scanning area</p>
+          <p>• Ensure good lighting for best results</p>
+          <p>• Supports QR codes, Code128, Code39, EAN, and UPC formats</p>
+        </div>
       </CardContent>
     </Card>
   );

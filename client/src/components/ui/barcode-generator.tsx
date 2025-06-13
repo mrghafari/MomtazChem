@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import JsBarcode from 'jsbarcode';
-import QRCode from 'qrcode';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Download, Copy, RefreshCw, Package } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useRef, useEffect } from "react";
+import JsBarcode from "jsbarcode";
+import QRCode from "qrcode";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QrCode, BarChart3, Download, Copy, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface BarcodeGeneratorProps {
   productId?: number;
@@ -20,126 +21,102 @@ interface BarcodeGeneratorProps {
 
 export const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
   productId,
-  productName = '',
-  sku = '',
+  productName,
+  sku,
   onBarcodeGenerated,
-  className = ''
+  className = ""
 }) => {
-  const [barcodeType, setBarcodeType] = useState<'EAN13' | 'CODE128' | 'QR'>('EAN13');
-  const [barcodeValue, setBarcodeValue] = useState('');
-  const [generatedBarcode, setGeneratedBarcode] = useState('');
-  const [qrCodeData, setQrCodeData] = useState('');
+  const [barcodeText, setBarcodeText] = useState(sku || '');
+  const [barcodeFormat, setBarcodeFormat] = useState('CODE128');
+  const [qrText, setQrText] = useState('');
+  const [customBarcode, setCustomBarcode] = useState('');
+  const [generatedBarcodes, setGeneratedBarcodes] = useState<{barcode?: string, qr?: string}>({});
+  
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Auto-generate barcode for new products
-    if (productId && !barcodeValue) {
-      generateProductBarcode();
-    }
-  }, [productId]);
-
-  const generateProductBarcode = () => {
-    const timestamp = Date.now().toString();
-    const productPrefix = productId ? productId.toString().padStart(4, '0') : '0001';
-    
-    if (barcodeType === 'EAN13') {
-      // Generate EAN13: Country(2) + Company(5) + Product(5) + Check(1)
-      const countryCode = '98'; // Iran country code
-      const companyCode = '12345'; // Company identifier
-      const productCode = productPrefix + timestamp.slice(-1);
-      const partial = countryCode + companyCode + productCode;
-      const checkDigit = calculateEAN13CheckDigit(partial);
-      const ean13 = partial + checkDigit;
-      setBarcodeValue(ean13);
-      setGeneratedBarcode(ean13);
-    } else if (barcodeType === 'CODE128') {
-      const code128 = `MCH${productPrefix}${timestamp.slice(-4)}`;
-      setBarcodeValue(code128);
-      setGeneratedBarcode(code128);
-    } else if (barcodeType === 'QR') {
+    if (productId && productName) {
+      // Generate default QR code data
       const qrData = JSON.stringify({
         productId,
-        productName,
-        sku: sku || `SKU${productPrefix}`,
-        timestamp: new Date().toISOString(),
+        name: productName,
+        sku: sku || `SKU${productId.toString().padStart(4, '0')}`,
         type: 'product'
       });
-      setQrCodeData(qrData);
-      setBarcodeValue(qrData);
-      setGeneratedBarcode(qrData);
+      setQrText(qrData);
+      
+      // Set default barcode if SKU exists
+      if (sku) {
+        setBarcodeText(sku);
+      } else {
+        setBarcodeText(`${productId.toString().padStart(10, '0')}`);
+      }
     }
+  }, [productId, productName, sku]);
+
+  const generateRandomBarcode = (format: string) => {
+    let code = '';
+    const digits = format === 'EAN13' ? 12 : format === 'EAN8' ? 7 : 10;
+    
+    for (let i = 0; i < digits; i++) {
+      code += Math.floor(Math.random() * 10);
+    }
+    
+    // Add check digit for EAN codes
+    if (format === 'EAN13' || format === 'EAN8') {
+      const checkDigit = calculateEANCheckDigit(code);
+      code += checkDigit;
+    }
+    
+    return code;
   };
 
-  const calculateEAN13CheckDigit = (partial: string): string => {
+  const calculateEANCheckDigit = (code: string) => {
     let sum = 0;
-    for (let i = 0; i < 12; i++) {
-      const digit = parseInt(partial[i]);
+    for (let i = 0; i < code.length; i++) {
+      const digit = parseInt(code[i]);
       sum += i % 2 === 0 ? digit : digit * 3;
     }
-    const checkDigit = (10 - (sum % 10)) % 10;
-    return checkDigit.toString();
+    return (10 - (sum % 10)) % 10;
   };
 
-  const generateBarcode = () => {
-    if (!barcodeValue) {
-      generateProductBarcode();
-      return;
-    }
+  const generateBarcode = async () => {
+    if (!barcodeCanvasRef.current || !barcodeText.trim()) return;
 
     try {
-      if (barcodeType === 'QR') {
-        generateQRCode();
-      } else {
-        generateLinearBarcode();
-      }
-    } catch (error) {
-      toast({
-        title: "Generation Error",
-        description: "Failed to generate barcode",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const generateLinearBarcode = () => {
-    if (!barcodeCanvasRef.current) return;
-
-    try {
-      JsBarcode(barcodeCanvasRef.current, barcodeValue, {
-        format: barcodeType,
+      JsBarcode(barcodeCanvasRef.current, barcodeText, {
+        format: barcodeFormat,
+        width: 2,
+        height: 80,
         displayValue: true,
         fontSize: 12,
-        textMargin: 8,
-        margin: 10,
-        width: 2,
-        height: 60
+        textMargin: 5,
       });
 
-      if (onBarcodeGenerated) {
-        onBarcodeGenerated(barcodeValue, barcodeType);
-      }
-
+      setGeneratedBarcodes(prev => ({ ...prev, barcode: barcodeText }));
+      
       toast({
         title: "Barcode Generated",
-        description: `${barcodeType} barcode created successfully`,
+        description: `${barcodeFormat} barcode created successfully`,
         variant: "default"
       });
     } catch (error) {
+      console.error('Barcode generation error:', error);
       toast({
         title: "Generation Error",
-        description: "Invalid barcode format or value",
+        description: "Failed to generate barcode. Check the format and input.",
         variant: "destructive"
       });
     }
   };
 
   const generateQRCode = async () => {
-    if (!qrCanvasRef.current) return;
+    if (!qrCanvasRef.current || !qrText.trim()) return;
 
     try {
-      await QRCode.toCanvas(qrCanvasRef.current, qrCodeData || barcodeValue, {
+      await QRCode.toCanvas(qrCanvasRef.current, qrText, {
         width: 200,
         margin: 2,
         color: {
@@ -148,16 +125,15 @@ export const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
         }
       });
 
-      if (onBarcodeGenerated) {
-        onBarcodeGenerated(qrCodeData || barcodeValue, 'QR');
-      }
-
+      setGeneratedBarcodes(prev => ({ ...prev, qr: qrText }));
+      
       toast({
         title: "QR Code Generated",
         description: "QR code created successfully",
         variant: "default"
       });
     } catch (error) {
+      console.error('QR code generation error:', error);
       toast({
         title: "Generation Error",
         description: "Failed to generate QR code",
@@ -166,124 +142,276 @@ export const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
     }
   };
 
-  const downloadBarcode = () => {
-    const canvas = barcodeType === 'QR' ? qrCanvasRef.current : barcodeCanvasRef.current;
+  const downloadBarcode = (type: 'barcode' | 'qr') => {
+    const canvas = type === 'barcode' ? barcodeCanvasRef.current : qrCanvasRef.current;
     if (!canvas) return;
 
     const link = document.createElement('a');
-    link.download = `${barcodeType}_${productName || 'product'}_${Date.now()}.png`;
+    link.download = `${productName || 'product'}-${type}.png`;
     link.href = canvas.toDataURL();
     link.click();
   };
 
-  const copyBarcodeValue = () => {
-    navigator.clipboard.writeText(generatedBarcode);
-    toast({
-      title: "Copied",
-      description: "Barcode value copied to clipboard",
-      variant: "default"
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: "Copied",
+        description: "Code copied to clipboard",
+        variant: "default"
+      });
     });
   };
 
-  useEffect(() => {
-    if (generatedBarcode) {
-      generateBarcode();
+  const assignToProduct = (type: 'barcode' | 'qr') => {
+    const code = type === 'barcode' ? generatedBarcodes.barcode : generatedBarcodes.qr;
+    if (code && onBarcodeGenerated) {
+      onBarcodeGenerated(code, type === 'barcode' ? barcodeFormat : 'QR');
     }
-  }, [generatedBarcode, barcodeType]);
+  };
 
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
+          <QrCode className="h-5 w-5" />
           Barcode Generator
           {productName && <Badge variant="outline">{productName}</Badge>}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Barcode Type Selection */}
-        <div className="space-y-2">
-          <Label>Barcode Type</Label>
-          <Select value={barcodeType} onValueChange={(value: any) => setBarcodeType(value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="EAN13">EAN-13 (Standard Product)</SelectItem>
-              <SelectItem value="CODE128">Code 128 (Alphanumeric)</SelectItem>
-              <SelectItem value="QR">QR Code (Product Info)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <CardContent>
+        <Tabs defaultValue="barcode" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="barcode">Barcode</TabsTrigger>
+            <TabsTrigger value="qrcode">QR Code</TabsTrigger>
+          </TabsList>
 
-        {/* Manual Value Input */}
-        <div className="space-y-2">
-          <Label>Barcode Value</Label>
-          <div className="flex gap-2">
-            <Input
-              placeholder={barcodeType === 'QR' ? 'Product information JSON' : 'Barcode number'}
-              value={barcodeType === 'QR' ? qrCodeData : barcodeValue}
-              onChange={(e) => {
-                if (barcodeType === 'QR') {
-                  setQrCodeData(e.target.value);
-                } else {
-                  setBarcodeValue(e.target.value);
-                }
-              }}
-            />
-            <Button onClick={generateProductBarcode} variant="outline">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+          {/* Barcode Tab */}
+          <TabsContent value="barcode" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="barcode-format">Barcode Format</Label>
+                  <Select value={barcodeFormat} onValueChange={setBarcodeFormat}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CODE128">Code 128</SelectItem>
+                      <SelectItem value="CODE39">Code 39</SelectItem>
+                      <SelectItem value="EAN13">EAN-13</SelectItem>
+                      <SelectItem value="EAN8">EAN-8</SelectItem>
+                      <SelectItem value="UPC">UPC-A</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-        {/* Generate Button */}
-        <Button onClick={generateBarcode} className="w-full">
-          Generate {barcodeType} {barcodeType === 'QR' ? 'Code' : 'Barcode'}
-        </Button>
+                <div className="space-y-2">
+                  <Label htmlFor="barcode-text">Barcode Data</Label>
+                  <Input
+                    id="barcode-text"
+                    value={barcodeText}
+                    onChange={(e) => setBarcodeText(e.target.value)}
+                    placeholder="Enter barcode data"
+                  />
+                </div>
 
-        {/* Generated Barcode Display */}
-        <div className="space-y-4">
-          {/* Linear Barcode Canvas */}
-          {barcodeType !== 'QR' && (
-            <div className="flex justify-center p-4 border rounded-lg bg-white">
-              <canvas ref={barcodeCanvasRef}></canvas>
-            </div>
-          )}
+                <div className="flex gap-2">
+                  <Button onClick={generateBarcode} className="flex-1">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Generate
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setBarcodeText(generateRandomBarcode(barcodeFormat))}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
 
-          {/* QR Code Canvas */}
-          {barcodeType === 'QR' && (
-            <div className="flex justify-center p-4 border rounded-lg bg-white">
-              <canvas ref={qrCanvasRef}></canvas>
-            </div>
-          )}
+                {customBarcode && (
+                  <div className="space-y-2">
+                    <Label>Custom Barcode</Label>
+                    <Input
+                      value={customBarcode}
+                      onChange={(e) => setCustomBarcode(e.target.value)}
+                      placeholder="Enter custom barcode"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setBarcodeText(customBarcode)}
+                      className="w-full"
+                    >
+                      Use Custom Code
+                    </Button>
+                  </div>
+                )}
+              </div>
 
-          {/* Generated Value Display */}
-          {generatedBarcode && (
-            <div className="space-y-2">
-              <Label>Generated Value</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={generatedBarcode}
-                  readOnly
-                  className="font-mono text-sm"
-                />
-                <Button onClick={copyBarcodeValue} variant="outline" size="sm">
-                  <Copy className="h-4 w-4" />
-                </Button>
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4 bg-white">
+                  <canvas
+                    ref={barcodeCanvasRef}
+                    className="w-full h-auto"
+                  />
+                </div>
+
+                {generatedBarcodes.barcode && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 p-2 bg-gray-100 rounded text-sm font-mono">
+                        {generatedBarcodes.barcode}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard(generatedBarcodes.barcode!)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => downloadBarcode('barcode')}
+                        className="flex-1"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                      {onBarcodeGenerated && (
+                        <Button
+                          size="sm"
+                          onClick={() => assignToProduct('barcode')}
+                          className="flex-1"
+                        >
+                          Assign to Product
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </TabsContent>
 
-          {/* Action Buttons */}
-          {generatedBarcode && (
-            <div className="flex gap-2">
-              <Button onClick={downloadBarcode} variant="outline" className="flex-1">
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
+          {/* QR Code Tab */}
+          <TabsContent value="qrcode" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="qr-text">QR Code Data</Label>
+                  <textarea
+                    id="qr-text"
+                    value={qrText}
+                    onChange={(e) => setQrText(e.target.value)}
+                    placeholder="Enter QR code data (URL, text, JSON, etc.)"
+                    className="w-full p-2 border rounded-md resize-none"
+                    rows={4}
+                  />
+                </div>
+
+                <Button onClick={generateQRCode} className="w-full">
+                  <QrCode className="h-4 w-4 mr-2" />
+                  Generate QR Code
+                </Button>
+
+                <div className="space-y-2">
+                  <Label>Quick Templates</Label>
+                  <div className="grid grid-cols-1 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setQrText(`https://example.com/product/${productId}`)}
+                    >
+                      Product URL
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setQrText(JSON.stringify({
+                        productId,
+                        name: productName,
+                        sku: sku || `SKU${productId?.toString().padStart(4, '0')}`,
+                        type: 'product'
+                      }, null, 2))}
+                    >
+                      Product Info JSON
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setQrText(sku || `SKU${productId?.toString().padStart(4, '0')}`)}
+                    >
+                      Simple SKU
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4 bg-white flex items-center justify-center">
+                  <canvas
+                    ref={qrCanvasRef}
+                    className="max-w-full h-auto"
+                  />
+                </div>
+
+                {generatedBarcodes.qr && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 p-2 bg-gray-100 rounded text-xs font-mono max-h-20 overflow-y-auto">
+                        {generatedBarcodes.qr.length > 100 
+                          ? `${generatedBarcodes.qr.substring(0, 100)}...` 
+                          : generatedBarcodes.qr
+                        }
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard(generatedBarcodes.qr!)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => downloadBarcode('qr')}
+                        className="flex-1"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                      {onBarcodeGenerated && (
+                        <Button
+                          size="sm"
+                          onClick={() => assignToProduct('qr')}
+                          className="flex-1"
+                        >
+                          Assign to Product
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Usage Instructions */}
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="font-medium text-blue-900 mb-2">Usage Tips</h4>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>• Code 128: Best for alphanumeric data, variable length</li>
+            <li>• EAN-13/EAN-8: Standard retail barcodes with check digits</li>
+            <li>• QR Codes: Can store URLs, JSON data, or plain text</li>
+            <li>• Use "Assign to Product" to link codes to inventory items</li>
+          </ul>
         </div>
       </CardContent>
     </Card>
