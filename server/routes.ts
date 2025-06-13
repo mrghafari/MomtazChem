@@ -12,6 +12,7 @@ import { shopStorage } from "./shop-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema } from "@shared/customer-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
+import TemplateProcessor from "./template-processor";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -1869,6 +1870,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating sales report:", error);
       res.status(500).json({ success: false, message: "Failed to generate sales report" });
+    }
+  });
+
+  // Email template management routes
+  app.get("/api/email-templates", requireAuth, async (req, res) => {
+    try {
+      const templates = await customerStorage.getEmailTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching email templates:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.get("/api/email-templates/category/:category", requireAuth, async (req, res) => {
+    try {
+      const { category } = req.params;
+      const templates = await customerStorage.getEmailTemplatesByCategory(category);
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching templates by category:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.get("/api/email-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid template ID" 
+        });
+      }
+
+      const template = await customerStorage.getEmailTemplateById(id);
+      if (!template) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Template not found" 
+        });
+      }
+
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching email template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.post("/api/email-templates", requireAuth, async (req, res) => {
+    try {
+      const sessionData = req.session as SessionData;
+      const templateData = insertEmailTemplateSchema.parse({
+        ...req.body,
+        createdBy: sessionData.adminId
+      });
+      
+      const template = await customerStorage.createEmailTemplate(templateData);
+      res.status(201).json({ 
+        success: true, 
+        message: "Email template created successfully",
+        template 
+      });
+    } catch (error) {
+      console.error("Error creating email template:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid template data", 
+          errors: error.errors 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: "Internal server error" 
+        });
+      }
+    }
+  });
+
+  app.patch("/api/email-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid template ID" 
+        });
+      }
+
+      const updates = req.body;
+      const template = await customerStorage.updateEmailTemplate(id, updates);
+      res.json({ 
+        success: true, 
+        message: "Email template updated successfully",
+        template 
+      });
+    } catch (error) {
+      console.error("Error updating email template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.delete("/api/email-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid template ID" 
+        });
+      }
+
+      await customerStorage.deleteEmailTemplate(id);
+      res.json({ 
+        success: true, 
+        message: "Email template deleted successfully" 
+      });
+    } catch (error) {
+      console.error("Error deleting email template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.post("/api/email-templates/:id/set-default", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid template ID" 
+        });
+      }
+
+      const { category } = req.body;
+      if (!category) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Category is required" 
+        });
+      }
+
+      await customerStorage.setDefaultTemplate(id, category);
+      res.json({ 
+        success: true, 
+        message: "Default template set successfully" 
+      });
+    } catch (error) {
+      console.error("Error setting default template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
     }
   });
 
