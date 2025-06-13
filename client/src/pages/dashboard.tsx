@@ -21,6 +21,7 @@ import {
   Eye
 } from "lucide-react";
 import { format } from "date-fns";
+import { Link } from "wouter";
 
 interface Inquiry {
   id: number;
@@ -56,7 +57,7 @@ const Dashboard = () => {
   });
 
   // Filter inquiries based on search and filters
-  const filteredInquiries = inquiries?.filter(inquiry => {
+  const filteredInquiries = Array.isArray(inquiries) ? inquiries.filter(inquiry => {
     const matchesSearch = 
       inquiry.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inquiry.contactEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,7 +68,7 @@ const Dashboard = () => {
     const matchesCategory = categoryFilter === "all" || inquiry.category === categoryFilter;
     
     return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
-  }) || [];
+  }) : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -259,7 +260,7 @@ const Dashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredInquiries.map((inquiry) => (
+                {filteredInquiries.map((inquiry: Inquiry) => (
                   <div key={inquiry.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
@@ -275,10 +276,12 @@ const Dashboard = () => {
                         </div>
                         <p className="text-sm text-gray-600 mb-2">{inquiry.inquiryNumber}</p>
                       </div>
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Details
-                      </Button>
+                      <Link href={`/inquiry/${inquiry.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                      </Link>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">

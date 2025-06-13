@@ -855,46 +855,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/inquiries", requireAuth, async (req, res) => {
-    try {
-      const inquiries = await customerStorage.getAllInquiries();
-      res.json(inquiries);
-    } catch (error) {
-      console.error("Error fetching inquiries:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Internal server error" 
-      });
-    }
-  });
 
-  app.get("/api/inquiries/:id", requireAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Invalid inquiry ID" 
-        });
-      }
-
-      const inquiry = await customerStorage.getInquiryById(id);
-      if (!inquiry) {
-        return res.status(404).json({ 
-          success: false, 
-          message: "Inquiry not found" 
-        });
-      }
-
-      res.json(inquiry);
-    } catch (error) {
-      console.error("Error fetching inquiry:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Internal server error" 
-      });
-    }
-  });
 
   app.patch("/api/inquiries/:id", requireAuth, async (req, res) => {
     try {
@@ -2173,6 +2134,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Failed to fetch inquiry"
+      });
+    }
+  });
+
+  app.get("/api/inquiries/:id/responses", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid inquiry ID"
+        });
+      }
+
+      const responses = await customerStorage.getInquiryResponses(id);
+      res.json(responses);
+    } catch (error) {
+      console.error("Error fetching inquiry responses:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch inquiry responses"
       });
     }
   });
