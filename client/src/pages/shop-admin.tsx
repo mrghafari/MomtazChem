@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Package, 
   Users, 
@@ -199,10 +201,34 @@ const ShopAdmin = () => {
   const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  // Authentication check
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/admin/login");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Fetch shop statistics
   const { data: stats = {} } = useQuery({
     queryKey: ["/api/shop/statistics"],
+    enabled: isAuthenticated,
   });
 
   // Fetch orders

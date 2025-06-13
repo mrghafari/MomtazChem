@@ -378,6 +378,14 @@ export default function AdminPage() {
             {syncProductsMutation.isPending ? 'Syncing...' : 'Sync to Shop'}
           </Button>
           <Button 
+            variant="outline"
+            onClick={() => setLocation("/shop-admin")}
+            className="border-purple-300 text-purple-600 hover:bg-purple-50"
+          >
+            <DollarSign className="w-4 h-4 mr-2" />
+            Shop Management
+          </Button>
+          <Button 
             variant="outline" 
             onClick={() => {
               logout();
