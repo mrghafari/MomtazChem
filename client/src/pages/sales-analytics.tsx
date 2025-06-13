@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/i18n/LanguageContext";
 import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -51,7 +50,6 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 export default function SalesAnalytics() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { t, isRTL } = useLanguage();
 
   // Authentication check
   useEffect(() => {
@@ -91,14 +89,14 @@ export default function SalesAnalytics() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('analyticsPage.title')}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              {t('analyticsPage.subtitle')}
+              Comprehensive sales performance dashboard
             </p>
           </div>
           <Button variant="outline" onClick={() => setLocation("/admin")}>
-            <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {t('analyticsPage.backToAdmin')}
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Admin
           </Button>
         </div>
         <div className="text-center">
@@ -152,38 +150,38 @@ export default function SalesAnalytics() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('analyticsPage.title')}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            {t('analyticsPage.subtitle')}
+            Comprehensive sales performance dashboard
           </p>
         </div>
         <Button variant="outline" onClick={() => setLocation("/admin")}>
-          <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-          {t('analyticsPage.backToAdmin')}
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Admin
         </Button>
       </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
-          title={t('analyticsPage.totalRevenue')}
+          title="Total Revenue"
           value={formatCurrency(salesData.totalRevenue)}
           icon={DollarSign}
           trend="up"
           trendValue={`+${salesData.growthRate.toFixed(1)}%`}
         />
         <StatCard
-          title={t('analyticsPage.totalOrders')}
+          title="Total Orders"
           value={salesData.totalOrders}
           icon={ShoppingCart}
         />
         <StatCard
-          title={t('analyticsPage.averageOrderValue')}
+          title="Average Order Value"
           value={formatCurrency(salesData.averageOrderValue)}
           icon={TrendingUp}
         />
         <StatCard
-          title={t('analyticsPage.totalCustomers')}
+          title="Total Customers"
           value={salesData.totalCustomers}
           icon={Users}
         />
@@ -191,10 +189,10 @@ export default function SalesAnalytics() {
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">{t('analyticsPage.overview')}</TabsTrigger>
-          <TabsTrigger value="products">{t('analyticsPage.products')}</TabsTrigger>
-          <TabsTrigger value="orders">{t('analyticsPage.orders')}</TabsTrigger>
-          <TabsTrigger value="trends">{t('analyticsPage.trends')}</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
+          <TabsTrigger value="trends">Trends</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -202,8 +200,8 @@ export default function SalesAnalytics() {
             {/* Revenue Trend */}
             <Card>
               <CardHeader>
-                <CardTitle>{t('analyticsPage.revenueTrend')}</CardTitle>
-                <CardDescription>{t('analyticsPage.dailyRevenuePerformance')}</CardDescription>
+                <CardTitle>Revenue Trend (Last 30 Days)</CardTitle>
+                <CardDescription>Daily revenue performance</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -234,8 +232,8 @@ export default function SalesAnalytics() {
             {/* Order Status Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle>{t('analyticsPage.orderStatusDistribution')}</CardTitle>
-                <CardDescription>{t('analyticsPage.orderStatusBreakdown')}</CardDescription>
+                <CardTitle>Order Status Distribution</CardTitle>
+                <CardDescription>Current order status breakdown</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -264,8 +262,8 @@ export default function SalesAnalytics() {
           {/* Revenue by Category */}
           <Card>
             <CardHeader>
-              <CardTitle>{t('analyticsPage.revenueByCategory')}</CardTitle>
-              <CardDescription>{t('analyticsPage.categoryPerformance')}</CardDescription>
+              <CardTitle>Revenue by Category</CardTitle>
+              <CardDescription>Sales performance across product categories</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -284,8 +282,8 @@ export default function SalesAnalytics() {
         <TabsContent value="products" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>{t('analyticsPage.topPerformingProducts')}</CardTitle>
-              <CardDescription>{t('analyticsPage.bestSellingProducts')}</CardDescription>
+              <CardTitle>Top Performing Products</CardTitle>
+              <CardDescription>Best selling products by revenue and quantity</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">

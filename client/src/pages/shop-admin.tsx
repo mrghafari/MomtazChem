@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/i18n/LanguageContext";
 import { 
   Package, 
   Users, 
@@ -205,7 +204,6 @@ const ShopAdmin = () => {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { t, isRTL } = useLanguage();
 
   // Authentication check
   useEffect(() => {
@@ -479,10 +477,8 @@ ${data.data.map((item: any) =>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t('adminPanel.shopManagement')}</h1>
-            <p className="text-gray-600 mt-2">
-              {isRTL ? 'إدارة الطلبات والمخزون وإعدادات الخصومات' : 'Manage orders, inventory, and discount settings'}
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">Shop Management</h1>
+            <p className="text-gray-600 mt-2">Manage orders, inventory, and discount settings</p>
           </div>
         </div>
 
@@ -492,7 +488,7 @@ ${data.data.map((item: any) =>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{t('adminPanel.totalOrders')}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Orders</p>
                   <p className="text-2xl font-bold text-gray-900">{(stats as any)?.totalOrders || 0}</p>
                 </div>
                 <ShoppingCart className="w-8 h-8 text-blue-600" />
@@ -504,7 +500,7 @@ ${data.data.map((item: any) =>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{t('adminPanel.totalRevenue')}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                   <p className="text-2xl font-bold text-gray-900">${(stats as any)?.totalRevenue || 0}</p>
                 </div>
                 <DollarSign className="w-8 h-8 text-green-600" />
@@ -516,7 +512,7 @@ ${data.data.map((item: any) =>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{t('adminPanel.pendingOrders')}</p>
+                  <p className="text-sm font-medium text-gray-600">Pending Orders</p>
                   <p className="text-2xl font-bold text-gray-900">{(stats as any)?.pendingOrders || 0}</p>
                 </div>
                 <Package className="w-8 h-8 text-orange-600" />
@@ -528,7 +524,7 @@ ${data.data.map((item: any) =>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{t('adminPanel.shippedOrders')}</p>
+                  <p className="text-sm font-medium text-gray-600">Shipped Orders</p>
                   <p className="text-2xl font-bold text-gray-900">{(stats as any)?.shippedOrders || 0}</p>
                 </div>
                 <Truck className="w-8 h-8 text-purple-600" />
@@ -540,10 +536,10 @@ ${data.data.map((item: any) =>
         {/* Main Content */}
         <Tabs defaultValue="orders" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="orders">{t('adminPanel.ordersManagement')}</TabsTrigger>
-            <TabsTrigger value="inventory">{t('adminPanel.inventoryManagement')}</TabsTrigger>
-            <TabsTrigger value="discounts">{t('adminPanel.discountSettings')}</TabsTrigger>
-            <TabsTrigger value="accounting">{t('adminPanel.accounting')}</TabsTrigger>
+            <TabsTrigger value="orders">Orders Management</TabsTrigger>
+            <TabsTrigger value="inventory">Inventory Management</TabsTrigger>
+            <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
+            <TabsTrigger value="accounting">Accounting</TabsTrigger>
           </TabsList>
 
           {/* Orders Management */}
@@ -551,12 +547,12 @@ ${data.data.map((item: any) =>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>{t('adminPanel.orders')}</CardTitle>
+                  <CardTitle>Orders</CardTitle>
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
                       <Input
-                        placeholder={t('adminPanel.searchOrders')}
+                        placeholder="Search orders..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 w-64"

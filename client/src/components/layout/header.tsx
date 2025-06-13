@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { LanguageToggle } from '@/components/ui/language-toggle';
-import { useLanguage } from '@/i18n/LanguageContext';
 import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -21,14 +19,13 @@ import companyLogoPath from '@assets/company-logo.png';
 export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { t, isRTL } = useLanguage();
 
   const navigation = [
-    { href: '/', label: t('home') },
-    { href: '/about', label: t('about') },
-    { href: '/services', label: 'خدماتنا' },
-    { href: '/contact', label: t('contact') },
-    { href: '/shop', label: t('shop') },
+    { href: '/', label: 'Home' },
+    { href: '/about', label: 'About' },
+    { href: '/services', label: 'Services' },
+    { href: '/contact', label: 'Contact' },
+    { href: '/shop', label: 'Shop' },
   ];
 
   const productCategories = [
@@ -96,7 +93,7 @@ export default function Header() {
                 className="h-8 w-auto"
               />
               <span className="hidden sm:block text-xl font-bold text-gray-900 dark:text-white">
-                {isRTL ? t('companyShortName') : 'Momtazchem'}
+                Momtazchem
               </span>
             </motion.div>
           </Link>
@@ -178,10 +175,7 @@ export default function Header() {
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            {/* Language Toggle */}
-            <LanguageToggle />
-            
+          <div className="flex items-center space-x-4">
             {/* Mobile menu button */}
             <Button
               variant="ghost"
