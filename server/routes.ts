@@ -8,7 +8,9 @@ import { storage } from "./storage";
 import { insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
 import { insertContactSchema, insertShowcaseProductSchema } from "@shared/showcase-schema";
 import { customerStorage } from "./customer-storage";
+import { shopStorage } from "./shop-storage";
 import { insertCustomerInquirySchema } from "@shared/customer-schema";
+import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail } from "./email";
 import { z } from "zod";
 

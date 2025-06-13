@@ -1,234 +1,365 @@
-import { ShoppingCart, Package, Filter, Search, Star } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 
 const Shop = () => {
-  const categories = [
-    { name: "Fuel Additives", count: 24, href: "/products/fuel-additives" },
-    { name: "Water Treatment", count: 18, href: "/products/water-treatment" },
-    { name: "Paint & Thinner", count: 32, href: "/products/paint-thinner" },
-    { name: "Agricultural Fertilizers", count: 16, href: "/products/agricultural-fertilizers" }
-  ];
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [cart, setCart] = useState<{[key: number]: number}>({});
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Premium Octane Booster",
-      category: "Fuel Additives",
-      price: "Contact for pricing",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.8,
-      inStock: true
-    },
-    {
-      id: 2,
-      name: "Industrial Water Coagulant",
-      category: "Water Treatment",
-      price: "Contact for pricing",
-      image: "https://images.unsplash.com/photo-1581093804475-577d72e38aa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.9,
-      inStock: true
-    },
-    {
-      id: 3,
-      name: "Automotive Paint System",
-      category: "Paint & Thinner",
-      price: "Contact for pricing",
-      image: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.7,
-      inStock: true
-    },
-    {
-      id: 4,
-      name: "NPK Complex Fertilizer",
-      category: "Agricultural Fertilizers",
-      price: "Contact for pricing",
-      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.8,
-      inStock: true
-    }
-  ];
+  // Fetch shop products
+  const { data: products = [], isLoading: productsLoading } = useQuery<ShopProduct[]>({
+    queryKey: ["/api/shop/products"],
+  });
+
+  // Fetch shop categories
+  const { data: categories = [] } = useQuery<ShopCategory[]>({
+    queryKey: ["/api/shop/categories"],
+  });
+
+  // Filter and sort products
+  const filteredProducts = products
+    .filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+      return matchesSearch && matchesCategory && product.isActive;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "price-low":
+          return parseFloat(a.price) - parseFloat(b.price);
+        case "price-high":
+          return parseFloat(b.price) - parseFloat(a.price);
+        case "name":
+          return a.name.localeCompare(b.name);
+        default:
+          return 0;
+      }
+    });
+
+  // Cart functions
+  const addToCart = (productId: number) => {
+    setCart(prev => ({
+      ...prev,
+      [productId]: (prev[productId] || 0) + 1
+    }));
+  };
+
+  const removeFromCart = (productId: number) => {
+    setCart(prev => {
+      const newCart = { ...prev };
+      if (newCart[productId] > 1) {
+        newCart[productId]--;
+      } else {
+        delete newCart[productId];
+      }
+      return newCart;
+    });
+  };
+
+  const getTotalItems = () => {
+    return Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+  };
+
+  const getTotalPrice = () => {
+    return Object.entries(cart).reduce((total, [productId, qty]) => {
+      const product = products.find(p => p.id === parseInt(productId));
+      return total + (product ? parseFloat(product.price) * qty : 0);
+    }, 0);
+  };
+
+  if (productsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading products...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="pt-20">
-      {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-primary to-secondary text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Momtazchem Shop</h1>
-            <p className="text-xl max-w-3xl mx-auto mb-8">
-              Browse our comprehensive catalog of premium chemical solutions for industrial and commercial applications.
-            </p>
-            <div className="max-w-md mx-auto relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <Input 
-                placeholder="Search products..." 
-                className="pl-10 bg-white text-gray-900 border-0"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Coming Soon Notice */}
-      <section className="py-16 bg-yellow-50 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <Package className="h-16 w-16 text-accent-orange mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">E-Commerce Platform Coming Soon</h2>
-            <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-              We're currently developing our online shopping platform to make ordering our chemical products even easier. 
-              In the meantime, please contact our sales team for product availability and pricing.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact">
-                <Button size="lg" className="bg-primary-blue hover:bg-primary-blue-dark">
-                  Contact Sales Team
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900">Chemical Products Shop</h1>
+            
+            {/* Cart Summary */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Button variant="outline" className="flex items-center gap-2">
+                  <ShoppingCart className="w-5 h-5" />
+                  Cart ({getTotalItems()})
+                  {getTotalItems() > 0 && (
+                    <Badge variant="secondary">
+                      ${getTotalPrice().toFixed(2)}
+                    </Badge>
+                  )}
                 </Button>
-              </Link>
-              <Button variant="outline" size="lg" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white">
-                Request Product Catalog
-              </Button>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Product Categories */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Product Categories</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Explore our four main product categories with detailed specifications and applications.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((category, index) => (
-              <Link key={index} href={category.href}>
-                <Card className="hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-                  <CardContent className="p-6 text-center">
-                    <div className={`w-16 h-16 ${
-                      index === 0 ? 'bg-primary-blue' : 
-                      index === 1 ? 'bg-primary-green' :
-                      index === 2 ? 'bg-accent-orange' : 'bg-primary-green'
-                    } rounded-lg flex items-center justify-center mx-auto mb-4`}>
-                      <Package className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{category.name}</h3>
-                    <Badge variant="secondary" className="text-sm">
-                      {category.count} Products
-                    </Badge>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          {/* Sidebar Filters */}
+          <div className="w-64 flex-shrink-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Filters</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Search */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Search</label>
+                  <Input
+                    placeholder="Search products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
 
-      {/* Featured Products */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Products</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our most popular and innovative chemical solutions trusted by industries worldwide.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <Card key={product.id} className="bg-white hover:shadow-lg transition-shadow duration-300">
-                <div 
-                  className="h-48 bg-cover bg-center rounded-t-lg"
-                  style={{ backgroundImage: `url(${product.image})` }}
-                />
-                <CardContent className="p-6">
-                  <Badge variant="outline" className="mb-2 text-xs">
-                    {product.category}
-                  </Badge>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{product.name}</h3>
-                  <div className="flex items-center mb-3">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                        />
+                <Separator />
+
+                {/* Categories */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Category</label>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {categories.map(category => (
+                        <SelectItem key={category.id} value={category.slug}>
+                          {category.name}
+                        </SelectItem>
                       ))}
-                    </div>
-                    <span className="text-sm text-gray-600 ml-2">({product.rating})</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-primary">{product.price}</span>
-                    <Badge variant={product.inStock ? "default" : "secondary"}>
-                      {product.inStock ? "In Stock" : "Out of Stock"}
-                    </Badge>
-                  </div>
-                  <Button className="w-full mt-4 bg-primary-blue hover:bg-primary-blue-dark">
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Request Quote
-                  </Button>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator />
+
+                {/* Sort */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Sort By</label>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="name">Name A-Z</SelectItem>
+                      <SelectItem value="price-low">Price: Low to High</SelectItem>
+                      <SelectItem value="price-high">Price: High to Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Products Grid */}
+          <div className="flex-1">
+            {/* View Toggle */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-gray-600">
+                Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Products */}
+            {filteredProducts.length > 0 ? (
+              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+                {filteredProducts.map(product => (
+                  <Card key={product.id} className={viewMode === "list" ? "flex" : ""}>
+                    {viewMode === "grid" ? (
+                      <>
+                        <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+                          {product.thumbnailUrl ? (
+                            <img 
+                              src={product.thumbnailUrl} 
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {product.shortDescription || product.description}
+                          </p>
+                          
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <span className="text-2xl font-bold text-green-600">
+                                ${product.price}
+                              </span>
+                              <span className="text-sm text-gray-500 ml-1">
+                                / {product.priceUnit}
+                              </span>
+                            </div>
+                            <Badge variant={product.inStock ? "secondary" : "destructive"}>
+                              {product.inStock ? "In Stock" : "Out of Stock"}
+                            </Badge>
+                          </div>
+
+                          {product.inStock && (
+                            <div className="flex items-center gap-2">
+                              {cart[product.id] ? (
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => removeFromCart(product.id)}
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </Button>
+                                  <span className="w-8 text-center">{cart[product.id]}</span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => addToCart(product.id)}
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  className="w-full"
+                                  onClick={() => addToCart(product.id)}
+                                >
+                                  Add to Cart
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </>
+                    ) : (
+                      <div className="flex">
+                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0">
+                          {product.thumbnailUrl ? (
+                            <img 
+                              src={product.thumbnailUrl} 
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+                        <CardContent className="p-6 flex-1">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
+                              <p className="text-gray-600 mb-4">
+                                {product.description}
+                              </p>
+                              
+                              <div className="flex items-center gap-4 mb-4">
+                                <div>
+                                  <span className="text-2xl font-bold text-green-600">
+                                    ${product.price}
+                                  </span>
+                                  <span className="text-sm text-gray-500 ml-1">
+                                    / {product.priceUnit}
+                                  </span>
+                                </div>
+                                <Badge variant={product.inStock ? "secondary" : "destructive"}>
+                                  {product.inStock ? "In Stock" : "Out of Stock"}
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            <div className="ml-6">
+                              {product.inStock && (
+                                <div className="flex items-center gap-2">
+                                  {cart[product.id] ? (
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => removeFromCart(product.id)}
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </Button>
+                                      <span className="w-8 text-center">{cart[product.id]}</span>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => addToCart(product.id)}
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <Button onClick={() => addToCart(product.id)}>
+                                      Add to Cart
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">No products found</h3>
+                  <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </div>
-      </section>
-
-      {/* Services Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Shop with Momtazchem?</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary-blue rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Package className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Quality Assured</h3>
-              <p className="text-gray-600">All products meet international quality standards with full documentation.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary-green rounded-lg flex items-center justify-center mx-auto mb-4">
-                <ShoppingCart className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Global Shipping</h3>
-              <p className="text-gray-600">Reliable delivery to over 40 countries with express shipping options.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-accent-orange rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Filter className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Technical Support</h3>
-              <p className="text-gray-600">Expert guidance on product selection and application methods.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="py-20 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            Be the first to know when our online store launches and get exclusive product updates.
-          </p>
-          <div className="max-w-md mx-auto flex gap-4">
-            <Input 
-              placeholder="Enter your email" 
-              className="bg-white text-gray-900 border-0"
-            />
-            <Button className="bg-primary-blue hover:bg-primary-blue-dark">
-              Subscribe
-            </Button>
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
   );
 };
