@@ -1005,6 +1005,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastOrderDate: new Date(),
       });
 
+      // Create financial transaction for the sale
+      await shopStorage.createFinancialTransaction({
+        type: 'sale',
+        orderId: order.id,
+        amount: order.totalAmount,
+        description: `Sale from order #${order.orderNumber}`,
+        referenceNumber: order.orderNumber,
+        status: 'completed',
+        processingDate: new Date(),
+        metadata: { 
+          orderNumber: order.orderNumber,
+          customerId: order.customerId,
+          paymentStatus: order.paymentStatus
+        }
+      });
+
       res.json({ 
         success: true, 
         orderId: order.id,

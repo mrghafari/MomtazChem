@@ -363,6 +363,143 @@ const ShopAdmin = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Accounting Dashboard */}
+          <TabsContent value="accounting">
+            <div className="space-y-6">
+              {/* Accounting Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Today's Sales</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          ${(accountingStats as any)?.todaySales || 0}
+                        </p>
+                      </div>
+                      <TrendingUp className="w-8 h-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Today's Returns</p>
+                        <p className="text-2xl font-bold text-red-600">
+                          ${(accountingStats as any)?.todayReturns || 0}
+                        </p>
+                      </div>
+                      <TrendingDown className="w-8 h-8 text-red-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                        <p className="text-2xl font-bold text-blue-600">
+                          ${(accountingStats as any)?.monthlyRevenue || 0}
+                        </p>
+                      </div>
+                      <BarChart3 className="w-8 h-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Net Profit</p>
+                        <p className="text-2xl font-bold text-purple-600">
+                          ${(accountingStats as any)?.netProfit || 0}
+                        </p>
+                      </div>
+                      <Calculator className="w-8 h-8 text-purple-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Financial Transactions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Financial Transactions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Array.isArray(transactions) && transactions.length > 0 ? (
+                      <div className="space-y-3">
+                        {transactions.slice(0, 10).map((transaction: any) => (
+                          <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-3 h-3 rounded-full ${
+                                transaction.type === 'sale' ? 'bg-green-500' :
+                                transaction.type === 'refund' ? 'bg-red-500' :
+                                transaction.type === 'return' ? 'bg-orange-500' :
+                                'bg-gray-500'
+                              }`} />
+                              <div>
+                                <h4 className="font-semibold">{transaction.description}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {new Date(transaction.processingDate).toLocaleDateString('fa-IR')}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className={`font-semibold ${
+                                transaction.type === 'sale' ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {transaction.type === 'sale' ? '+' : '-'}${transaction.amount}
+                              </p>
+                              <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
+                                {transaction.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No financial transactions found. Transactions will appear here after orders are processed.
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Button className="flex items-center gap-2" variant="outline">
+                      <Download className="w-4 h-4" />
+                      Export Sales Report
+                    </Button>
+                    <Button className="flex items-center gap-2" variant="outline">
+                      <RefreshCw className="w-4 h-4" />
+                      Generate Monthly Report
+                    </Button>
+                    <Button className="flex items-center gap-2" variant="outline">
+                      <BarChart3 className="w-4 h-4" />
+                      View Analytics
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
