@@ -53,6 +53,10 @@ export const showcaseProducts = pgTable("showcase_products", {
   warehouseLocation: text("warehouse_location"), // Storage location
   batchNumber: text("batch_number"), // Current batch tracking
   expiryDate: timestamp("expiry_date"), // For chemicals with expiration
+  // Barcode system fields
+  barcode: text("barcode").unique(), // Main product barcode (EAN-13, UPC, etc.)
+  qrCode: text("qr_code"), // QR code data for additional product information
+  sku: text("sku").unique(), // Stock Keeping Unit
   isActive: boolean("is_active").default(true),
   displayOrder: integer("display_order").default(0), // For ordering on website
   createdAt: timestamp("created_at").notNull().defaultNow(),

@@ -48,6 +48,70 @@ export type User = typeof users.$inferSelect;
 export type InsertPasswordReset = z.infer<typeof insertPasswordResetSchema>;
 export type PasswordReset = typeof passwordResets.$inferSelect;
 
+// =============================================================================
+// BARCODE & INVENTORY TRACKING SYSTEM
+// =============================================================================
+
+// Inventory transactions for tracking stock movements
+export const inventoryTransactions = pgTable("inventory_transactions", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  transactionType: text("transaction_type").notNull(), // "in", "out", "adjustment", "transfer"
+  quantity: integer("quantity").notNull(),
+  previousStock: integer("previous_stock").notNull(),
+  newStock: integer("new_stock").notNull(),
+  reason: text("reason"), // "purchase", "sale", "return", "damage", "audit", etc.
+  reference: text("reference"), // Order ID, PO number, etc.
+  notes: text("notes"),
+  scannedBarcode: text("scanned_barcode"), // Barcode used for this transaction
+  userId: integer("user_id"), // Who performed the transaction
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Barcode scan log for tracking all scanning activities
+export const barcodeScanLog = pgTable("barcode_scan_log", {
+  id: serial("id").primaryKey(),
+  barcode: text("barcode").notNull(),
+  scanType: text("scan_type").notNull(), // "product_lookup", "inventory_in", "inventory_out", "audit"
+  productId: integer("product_id"),
+  scanResult: text("scan_result").notNull(), // "success", "not_found", "error"
+  userId: integer("user_id"),
+  location: text("location"), // Warehouse location or device location
+  additionalData: json("additional_data"), // Extra scan data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Barcode generation settings and templates
+export const barcodeSettings = pgTable("barcode_settings", {
+  id: serial("id").primaryKey(),
+  settingKey: text("setting_key").notNull().unique(),
+  settingValue: text("setting_value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertInventoryTransactionSchema = createInsertSchema(inventoryTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertBarcodeScanLogSchema = createInsertSchema(barcodeScanLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertBarcodeSettingsSchema = createInsertSchema(barcodeSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertInventoryTransaction = z.infer<typeof insertInventoryTransactionSchema>;
+export type InventoryTransaction = typeof inventoryTransactions.$inferSelect;
+export type InsertBarcodeScanLog = z.infer<typeof insertBarcodeScanLogSchema>;
+export type BarcodeScanLog = typeof barcodeScanLog.$inferSelect;
+export type InsertBarcodeSettings = z.infer<typeof insertBarcodeSettingsSchema>;
+export type BarcodeSettings = typeof barcodeSettings.$inferSelect;
+
 // Online Specialists table for live chat management
 export const specialists = pgTable("specialists", {
   id: text("id").primaryKey(),
