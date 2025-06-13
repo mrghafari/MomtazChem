@@ -74,7 +74,7 @@ const getCategoryEmail = (category: string): string => {
   const categoryEmails = {
     'fuel-additives': 'fuel@momtazchem.com',
     'water-treatment': 'water@momtazchem.com', 
-    'paint-thinner': 'thinner@momtaz.com',
+    'paint-thinner': 'thinner@momtazchem.com',
     'agricultural-fertilizers': 'fertilizer@momtazchem.com'
   };
   
