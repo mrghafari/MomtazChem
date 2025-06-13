@@ -831,6 +831,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // BARCODE & INVENTORY MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get product by barcode
+  app.get("/api/products/barcode/:barcode", async (req, res) => {
+    try {
+      const { barcode } = req.params;
+      const decodedBarcode = decodeURIComponent(barcode);
+      
+      // Search for product by barcode, SKU, or QR code
+      const products = await storage.getProducts();
+      const product = products.find(p => 
+        p.barcode === decodedBarcode || 
+        p.sku === decodedBarcode || 
+        p.qrCode === decodedBarcode
+      );
+      
+      if (!product) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Product not found" 
+        });
+      }
+      
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching product by barcode:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Update product barcode information
+  app.put("/api/products/:id/barcode", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { barcode, qrCode, sku } = req.body;
+      
+      const updateData: any = {};
+      if (barcode) updateData.barcode = barcode;
+      if (qrCode) updateData.qrCode = qrCode;
+      if (sku) updateData.sku = sku;
+      
+      const updatedProduct = await storage.updateProduct(parseInt(id), updateData);
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error updating product barcode:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Log barcode scan
+  app.post("/api/barcode/log", async (req, res) => {
+    try {
+      const { barcode, scanType, scanResult, location, additionalData } = req.body;
+      
+      // Simple logging to console for now - could be extended to database
+      console.log('Barcode scan logged:', {
+        barcode,
+        scanType,
+        scanResult,
+        userId: req.session?.adminId,
+        timestamp: new Date().toISOString()
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error logging barcode scan:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Create inventory transaction and update stock
+  app.post("/api/inventory/transaction", requireAuth, async (req, res) => {
+    try {
+      const { productId, transactionType, quantity, reason, reference, scannedBarcode } = req.body;
+      
+      // Get current product
+      const product = await storage.getProductById(productId);
+      if (!product) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Product not found" 
+        });
+      }
+      
+      const previousStock = product.stockQuantity || 0;
+      let newStock;
+      
+      if (transactionType === 'in') {
+        newStock = previousStock + Math.abs(quantity);
+      } else if (transactionType === 'out') {
+        newStock = Math.max(0, previousStock - Math.abs(quantity));
+      } else if (transactionType === 'audit') {
+        newStock = Math.abs(quantity);
+      } else {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid transaction type" 
+        });
+      }
+      
+      // Update product stock
+      await storage.updateProduct(productId, { stockQuantity: newStock });
+      
+      // Log transaction
+      console.log('Inventory transaction:', {
+        productId,
+        transactionType,
+        quantity,
+        previousStock,
+        newStock,
+        reason,
+        reference,
+        scannedBarcode,
+        userId: req.session.adminId,
+        timestamp: new Date().toISOString()
+      });
+      
+      res.json({
+        success: true,
+        previousStock,
+        newStock,
+        quantity: transactionType === 'out' ? -Math.abs(quantity) : Math.abs(quantity)
+      });
+    } catch (error) {
+      console.error("Error creating inventory transaction:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Get mock inventory transactions for now
+  app.get("/api/inventory/transactions", requireAuth, async (req, res) => {
+    try {
+      // Return empty array for now - can be extended with actual transaction storage
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching inventory transactions:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Product inquiry routes
   app.post("/api/inquiries", async (req, res) => {
     try {
