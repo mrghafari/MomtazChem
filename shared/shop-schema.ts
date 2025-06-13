@@ -35,6 +35,7 @@ export const shopProducts = pgTable("shop_products", {
   leadTime: text("lead_time"), // Delivery time
   shippingClass: text("shipping_class"), // standard, hazardous, etc.
   taxClass: text("tax_class").default("standard"),
+  quantityDiscounts: json("quantity_discounts"), // [{minQty: 10, discount: 0.05}, {minQty: 50, discount: 0.10}]
   isActive: boolean("is_active").default(true),
   isFeatured: boolean("is_featured").default(false),
   metaTitle: text("meta_title"),

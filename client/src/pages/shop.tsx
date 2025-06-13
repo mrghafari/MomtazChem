@@ -77,7 +77,41 @@ const Shop = () => {
   const getTotalPrice = () => {
     return Object.entries(cart).reduce((total, [productId, qty]) => {
       const product = products.find(p => p.id === parseInt(productId));
-      return total + (product ? parseFloat(product.price) * qty : 0);
+      if (!product) return total;
+      
+      const price = getDiscountedPrice(product, qty);
+      return total + (price * qty);
+    }, 0);
+  };
+
+  // Calculate discounted price based on quantity
+  const getDiscountedPrice = (product: any, quantity: number) => {
+    const basePrice = parseFloat(product.price);
+    
+    if (product.quantityDiscounts && Array.isArray(product.quantityDiscounts)) {
+      // Sort discounts by minimum quantity (descending)
+      const sortedDiscounts = product.quantityDiscounts
+        .filter((d: any) => quantity >= d.minQty)
+        .sort((a: any, b: any) => b.minQty - a.minQty);
+      
+      if (sortedDiscounts.length > 0) {
+        const discount = sortedDiscounts[0].discount;
+        return basePrice * (1 - discount);
+      }
+    }
+    
+    return basePrice;
+  };
+
+  // Calculate total savings
+  const getTotalSavings = () => {
+    return Object.entries(cart).reduce((savings, [productId, qty]) => {
+      const product = products.find(p => p.id === parseInt(productId));
+      if (!product) return savings;
+      
+      const basePrice = parseFloat(product.price);
+      const discountedPrice = getDiscountedPrice(product, qty);
+      return savings + ((basePrice - discountedPrice) * qty);
     }, 0);
   };
 
@@ -238,9 +272,22 @@ const Shop = () => {
                           
                           <div className="flex items-center justify-between mb-3">
                             <div>
-                              <span className="text-2xl font-bold text-green-600">
-                                ${product.price}
-                              </span>
+                              {cart[product.id] ? (
+                                <div>
+                                  <span className="text-2xl font-bold text-green-600">
+                                    ${getDiscountedPrice(product, cart[product.id]).toFixed(2)}
+                                  </span>
+                                  {getDiscountedPrice(product, cart[product.id]) < parseFloat(product.price) && (
+                                    <span className="text-sm line-through text-gray-400 ml-2">
+                                      ${product.price}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-2xl font-bold text-green-600">
+                                  ${product.price}
+                                </span>
+                              )}
                               <span className="text-sm text-gray-500 ml-1">
                                 / {product.priceUnit}
                               </span>
@@ -249,6 +296,20 @@ const Shop = () => {
                               {product.inStock ? "In Stock" : "Out of Stock"}
                             </Badge>
                           </div>
+
+                          {/* Quantity Discounts */}
+                          {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-xs font-medium text-gray-700 mb-1">Quantity Discounts:</p>
+                              <div className="space-y-1">
+                                {product.quantityDiscounts.map((discount: any, index: number) => (
+                                  <div key={index} className="text-xs text-gray-600">
+                                    {discount.minQty}+ units: {(discount.discount * 100).toFixed(0)}% off
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
                           {product.inStock && (
                             <div className="flex items-center gap-2">
