@@ -234,26 +234,31 @@ const ShopAdmin = () => {
   // Fetch orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/shop/orders"],
+    enabled: isAuthenticated,
   });
 
   // Fetch products for inventory management
   const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
+    enabled: isAuthenticated,
   });
 
   // Fetch discount settings
   const { data: discounts = [] } = useQuery({
     queryKey: ["/api/shop/discounts"],
+    enabled: isAuthenticated,
   });
 
   // Fetch accounting statistics
   const { data: accountingStats = {} } = useQuery({
     queryKey: ["/api/shop/accounting-stats"],
+    enabled: isAuthenticated,
   });
 
   // Fetch financial transactions
   const { data: transactions = [] } = useQuery({
     queryKey: ["/api/shop/financial-transactions"],
+    enabled: isAuthenticated,
   });
 
   // Update order status mutation
