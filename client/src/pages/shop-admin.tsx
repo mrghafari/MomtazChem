@@ -194,6 +194,7 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
 };
 
 const ShopAdmin = () => {
+  // All hooks must be declared at the top before any conditional logic
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -204,49 +205,131 @@ const ShopAdmin = () => {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // All hooks must be called before any conditional returns
-  // Fetch shop statistics
-  const { data: stats = {} } = useQuery({
-    queryKey: ["/api/shop/statistics"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch orders
-  const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
-    queryKey: ["/api/shop/orders"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch products for inventory management
-  const { data: products = [] } = useQuery<ShopProduct[]>({
-    queryKey: ["/api/shop/products"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch discount settings
-  const { data: discounts = [] } = useQuery({
-    queryKey: ["/api/shop/discounts"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch accounting statistics
-  const { data: accountingStats = {} } = useQuery({
-    queryKey: ["/api/shop/accounting-stats"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch financial transactions
-  const { data: transactions = [] } = useQuery({
-    queryKey: ["/api/shop/financial-transactions"],
-    enabled: isAuthenticated,
-  });
-
   // Authentication check
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       setLocation("/admin/login");
     }
   }, [authLoading, isAuthenticated, setLocation]);
+
+  // All queries and mutations
+  const { data: stats = {} } = useQuery({
+    queryKey: ["/api/shop/statistics"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
+    queryKey: ["/api/shop/orders"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: products = [] } = useQuery<ShopProduct[]>({
+    queryKey: ["/api/shop/products"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: discounts = [] } = useQuery({
+    queryKey: ["/api/shop/discounts"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: accountingStats = {} } = useQuery({
+    queryKey: ["/api/shop/accounting-stats"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: transactions = [] } = useQuery({
+    queryKey: ["/api/shop/financial-transactions"],
+    enabled: isAuthenticated,
+  });
+
+  // Update order status mutation
+  const updateOrderMutation = useMutation({
+    mutationFn: async ({ orderId, updates }: { orderId: number; updates: any }) => {
+      return apiRequest(`/api/shop/orders/${orderId}`, "PATCH", updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/statistics"] });
+      toast({
+        title: "Order Updated",
+        description: "Order status has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update order status.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update discount mutation
+  const updateDiscountMutation = useMutation({
+    mutationFn: async ({ discountId, updates }: { discountId: number; updates: any }) => {
+      return apiRequest(`/api/shop/discounts/${discountId}`, "PATCH", updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      setIsDiscountDialogOpen(false);
+      setEditingDiscount(null);
+      toast({
+        title: "Discount Updated",
+        description: "Discount settings have been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update discount settings.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create discount mutation
+  const createDiscountMutation = useMutation({
+    mutationFn: async (discountData: any) => {
+      return apiRequest("/api/shop/discounts", "POST", discountData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      setIsDiscountDialogOpen(false);
+      toast({
+        title: "Discount Created",
+        description: "New discount has been created successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create new discount.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete discount mutation
+  const deleteDiscountMutation = useMutation({
+    mutationFn: async (discountId: number) => {
+      return apiRequest(`/api/shop/discounts/${discountId}`, "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      toast({
+        title: "Discount Deleted",
+        description: "Discount has been deleted successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Deletion Failed",
+        description: "Failed to delete discount.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Export sales report handler
   const handleExportSalesReport = async () => {
@@ -354,73 +437,7 @@ ${data.data.map((item: any) =>
     return null;
   }
 
-  // Update order status mutation
-  const updateOrderMutation = useMutation({
-    mutationFn: async ({ orderId, updates }: { orderId: number; updates: any }) => {
-      return apiRequest(`/api/shop/orders/${orderId}`, "PATCH", updates);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/statistics"] });
-      toast({
-        title: "Order Updated",
-        description: "Order status has been updated successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Update Failed",
-        description: "Failed to update order status.",
-        variant: "destructive",
-      });
-    },
-  });
 
-  // Update discount mutation
-  const updateDiscountMutation = useMutation({
-    mutationFn: async ({ discountId, updates }: { discountId: number; updates: any }) => {
-      return apiRequest(`/api/shop/discounts/${discountId}`, "PATCH", updates);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
-      setIsDiscountDialogOpen(false);
-      setEditingDiscount(null);
-      toast({
-        title: "Discount Updated",
-        description: "Discount settings have been updated successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Update Failed",
-        description: "Failed to update discount settings.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Create discount mutation
-  const createDiscountMutation = useMutation({
-    mutationFn: async (discountData: any) => {
-      return apiRequest("/api/shop/discounts", "POST", discountData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
-      setIsDiscountDialogOpen(false);
-      setEditingDiscount(null);
-      toast({
-        title: "Discount Created",
-        description: "New discount has been created successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Creation Failed",
-        description: "Failed to create discount.",
-        variant: "destructive",
-      });
-    },
-  });
 
   // Filter orders
   const filteredOrders = orders ? orders.filter(order => {
