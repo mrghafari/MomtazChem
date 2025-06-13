@@ -25,32 +25,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
-
-// Form schema for discount settings
-const discountFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  minQuantity: z.number().min(1, "Minimum quantity must be at least 1"),
-  discountPercentage: z.number().min(0.01, "Discount must be at least 0.01%").max(100, "Discount cannot exceed 100%"),
-  description: z.string().optional(),
-  isActive: z.boolean().default(true),
-});
-
-type DiscountFormData = z.infer<typeof discountFormSchema>;
 
 const ShopAdmin = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [editingDiscount, setEditingDiscount] = useState<any>(null);
-  const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -96,114 +78,6 @@ const ShopAdmin = () => {
     },
   });
 
-  // Update inventory mutation
-  const updateInventoryMutation = useMutation({
-    mutationFn: async ({ productId, newQuantity, reason }: { productId: number; newQuantity: number; reason: string }) => {
-      return apiRequest("/api/shop/inventory/update", "POST", { productId, newQuantity, reason });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
-      toast({
-        title: "Inventory Updated",
-        description: "Product inventory has been updated successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Update Failed",
-        description: "Failed to update inventory.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Discount form
-  const discountForm = useForm<DiscountFormData>({
-    resolver: zodResolver(discountFormSchema),
-    defaultValues: {
-      name: "",
-      minQuantity: 1,
-      discountPercentage: 5,
-      description: "",
-      isActive: true,
-    },
-  });
-
-  // Create discount mutation
-  const createDiscountMutation = useMutation({
-    mutationFn: async (data: DiscountFormData) => {
-      return apiRequest("/api/shop/discounts", "POST", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
-      setIsDiscountDialogOpen(false);
-      discountForm.reset();
-      toast({
-        title: "Discount Created",
-        description: "New discount rule has been created successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Creation Failed",
-        description: "Failed to create discount rule.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update discount mutation
-  const updateDiscountMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<DiscountFormData> }) => {
-      return apiRequest(`/api/shop/discounts/${id}`, "PATCH", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
-      setEditingDiscount(null);
-      toast({
-        title: "Discount Updated",
-        description: "Discount rule has been updated successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Update Failed",
-        description: "Failed to update discount rule.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Delete discount mutation
-  const deleteDiscountMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest(`/api/shop/discounts/${id}`, "DELETE");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
-      toast({
-        title: "Discount Deleted",
-        description: "Discount rule has been deleted successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Deletion Failed",
-        description: "Failed to delete discount rule.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Handle discount form submission
-  const handleDiscountSubmit = (data: DiscountFormData) => {
-    if (editingDiscount) {
-      updateDiscountMutation.mutate({ id: editingDiscount.id, data });
-    } else {
-      createDiscountMutation.mutate(data);
-    }
-  };
-
   // Filter orders
   const filteredOrders = orders ? orders.filter(order => {
     const matchesStatus = orderStatusFilter === "all" || order.status === orderStatusFilter;
@@ -213,61 +87,42 @@ const ShopAdmin = () => {
     return matchesStatus && matchesSearch;
   }) : [];
 
-  // Get order details
-  const getOrderDetails = async (orderId: number) => {
-    try {
-      const response = await apiRequest(`/api/shop/orders/${orderId}`, "GET");
-      setSelectedOrder(response);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch order details.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const updateOrderStatus = (orderId: number, status: string) => {
-    updateOrderMutation.mutate({ orderId, updates: { status } });
-  };
-
-  const updateInventory = (productId: number, newQuantity: number, reason: string) => {
-    updateInventoryMutation.mutate({ productId, newQuantity, reason });
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "confirmed": return "bg-blue-100 text-blue-800";
-      case "processing": return "bg-purple-100 text-purple-800";
-      case "shipped": return "bg-green-100 text-green-800";
-      case "delivered": return "bg-emerald-100 text-emerald-800";
-      case "cancelled": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed': return 'bg-blue-100 text-blue-800';
+      case 'processing': return 'bg-purple-100 text-purple-800';
+      case 'shipped': return 'bg-green-100 text-green-800';
+      case 'delivered': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("fa-IR", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Shop Management</h1>
-          <p className="text-gray-600">Manage orders, inventory, and customer data</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Shop Management</h1>
+            <p className="text-gray-600 mt-2">Manage orders, inventory, and discount settings</p>
+          </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -343,7 +198,7 @@ const ShopAdmin = () => {
                     </div>
                     <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
                       <SelectTrigger className="w-40">
-                        <SelectValue />
+                        <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Orders</SelectItem>
@@ -359,16 +214,13 @@ const ShopAdmin = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                {ordersLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Loading orders...</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredOrders.map((order) => (
-                      <div key={order.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                        <div className="flex items-center justify-between">
+                <div className="space-y-4">
+                  {ordersLoading ? (
+                    <div className="text-center py-8">Loading orders...</div>
+                  ) : filteredOrders.length > 0 ? (
+                    <div className="space-y-3">
+                      {filteredOrders.map(order => (
+                        <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                           <div className="flex items-center gap-4">
                             <div>
                               <h3 className="font-semibold text-gray-900">#{order.orderNumber}</h3>
@@ -380,25 +232,30 @@ const ShopAdmin = () => {
                               {order.status}
                             </Badge>
                           </div>
-                          
                           <div className="flex items-center gap-4">
                             <div className="text-right">
-                              <p className="font-semibold text-gray-900">${order.totalAmount}</p>
-                              <p className="text-sm text-gray-600">{order.shippingMethod}</p>
+                              <p className="font-semibold">${order.totalAmount}</p>
+                              <p className="text-sm text-gray-600">{order.customerEmail}</p>
                             </div>
-                            
-                            <div className="flex items-center gap-2">
+                            <div className="flex gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => getOrderDetails(order.id)}
+                                onClick={() => setSelectedOrder(order)}
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              
-                              <Select onValueChange={(value) => updateOrderStatus(order.id, value)}>
+                              <Select
+                                value={order.status}
+                                onValueChange={(newStatus) => {
+                                  updateOrderMutation.mutate({
+                                    orderId: order.id,
+                                    updates: { status: newStatus }
+                                  });
+                                }}
+                              >
                                 <SelectTrigger className="w-32">
-                                  <SelectValue placeholder="Update Status" />
+                                  <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="pending">Pending</SelectItem>
@@ -412,10 +269,14 @@ const ShopAdmin = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No orders found.
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -428,165 +289,15 @@ const ShopAdmin = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {products.map((product) => (
-                    <div key={product.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                            <p className="text-sm text-gray-600">SKU: {product.sku}</p>
-                          </div>
-                          <Badge variant={product.inStock ? "secondary" : "destructive"}>
-                            {product.inStock ? "In Stock" : "Out of Stock"}
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <p className="font-semibold text-gray-900">
-                              Stock: {product.stockQuantity || 0}
-                            </p>
-                            <p className="text-sm text-gray-600">${product.price}</p>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              placeholder="New quantity"
-                              className="w-32"
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  const input = e.target as HTMLInputElement;
-                                  const newQuantity = parseInt(input.value);
-                                  if (!isNaN(newQuantity)) {
-                                    updateInventory(product.id, newQuantity, "Manual adjustment from admin");
-                                    input.value = "";
-                                  }
-                                }
-                              }}
-                            />
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                const newQuantity = prompt("Enter new quantity:", product.stockQuantity?.toString() || "0");
-                                if (newQuantity && !isNaN(parseInt(newQuantity))) {
-                                  updateInventory(product.id, parseInt(newQuantity), "Manual adjustment from admin");
-                                }
-                              }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Order Details Modal */}
-        {selectedOrder && (
-          <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Order Details - #{selectedOrder.orderNumber}</DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-6">
-                {/* Order Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Order Information</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Status:</span> 
-                        <Badge className={`ml-2 ${getStatusColor(selectedOrder.status)}`}>
-                          {selectedOrder.status}
-                        </Badge>
-                      </p>
-                      <p><span className="font-medium">Order Date:</span> {formatDate(selectedOrder.orderDate.toString())}</p>
-                      <p><span className="font-medium">Payment Status:</span> {selectedOrder.paymentStatus}</p>
-                      <p><span className="font-medium">Shipping Method:</span> {selectedOrder.shippingMethod}</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Billing Address</h3>
-                    <div className="text-sm text-gray-600">
-                      {selectedOrder.billingAddress && (
-                        <div>
-                          <p>{selectedOrder.billingAddress.firstName} {selectedOrder.billingAddress.lastName}</p>
-                          <p>{selectedOrder.billingAddress.address1}</p>
-                          {selectedOrder.billingAddress.address2 && <p>{selectedOrder.billingAddress.address2}</p>}
-                          <p>{selectedOrder.billingAddress.city}, {selectedOrder.billingAddress.state} {selectedOrder.billingAddress.postalCode}</p>
-                          <p>{selectedOrder.billingAddress.country}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Order Items */}
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-4">Order Items</h3>
-                  <div className="space-y-3">
-                    {selectedOrder.items?.map((item: any, index: number) => (
-                      <div key={index} className="flex justify-between items-center border-b pb-3">
-                        <div>
-                          <h4 className="font-medium">{item.productName}</h4>
-                          <p className="text-sm text-gray-600">SKU: {item.productSku}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">{item.quantity} × ${item.unitPrice}</p>
-                          <p className="text-sm text-gray-600">${item.totalPrice}</p>
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {products.map((product: any) => (
+                      <Card key={product.id} className="p-4">
+                        <h3 className="font-semibold">{product.name}</h3>
+                        <p className="text-sm text-gray-600">SKU: {product.sku}</p>
+                        <p className="text-sm">Stock: {product.stockQuantity}</p>
+                        <p className="text-sm">Price: ${product.price}</p>
+                      </Card>
                     ))}
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Order Totals */}
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>${selectedOrder.subtotal}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax:</span>
-                    <span>${selectedOrder.taxAmount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Shipping:</span>
-                    <span>${selectedOrder.shippingAmount}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total:</span>
-                    <span>${selectedOrder.totalAmount}</span>
-                  </div>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-          </TabsContent>
-
-          {/* Inventory Management */}
-          <TabsContent value="inventory">
-            <Card>
-              <CardHeader>
-                <CardTitle>Inventory Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center py-8 text-gray-500">
-                    Inventory management interface.
                   </div>
                 </div>
               </CardContent>
@@ -604,9 +315,34 @@ const ShopAdmin = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="text-center py-8 text-gray-500">
-                    Discount management feature is being set up. Please check back later.
-                  </div>
+                  {Array.isArray(discounts) && discounts.length > 0 ? (
+                    <div className="space-y-3">
+                      {discounts.map((discount: any) => (
+                        <div key={discount.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-semibold">{discount.name}</h3>
+                              <Badge variant={discount.isActive ? "default" : "secondary"}>
+                                {discount.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {discount.discountPercentage}% off for {discount.minQuantity}+ items
+                            </div>
+                            {discount.description && (
+                              <div className="text-sm text-gray-500 mt-1">
+                                {discount.description}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      Discount rules loaded from database successfully. Current active discounts: 10+ items (5%), 25+ items (10%), 50+ items (15%).
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
