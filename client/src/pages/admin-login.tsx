@@ -122,6 +122,17 @@ export default function AdminLogin() {
               </Button>
             </form>
           </Form>
+          
+          <div className="text-center mt-4">
+            <Button
+              type="button"
+              variant="link"
+              className="text-sm text-blue-600 hover:text-blue-800"
+              onClick={() => setLocation("/forgot-password")}
+            >
+              فراموشی رمز عبور؟
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
