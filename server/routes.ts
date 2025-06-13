@@ -2122,6 +2122,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quote request routes (public)
+  app.post("/api/quote-requests", async (req, res) => {
+    try {
+      const { firstName, lastName, email, phone, company, productName, category, quantity, urgency, message } = req.body;
+      
+      if (!firstName || !lastName || !email || !productName || !company) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields"
+        });
+      }
+
+      // Generate quote number
+      const quoteNumber = `QR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const quoteRequest = await customerStorage.createQuoteRequest({
+        quoteNumber,
+        contactEmail: email,
+        contactPhone: phone,
+        company,
+        deliveryLocation: "To be determined",
+        requestedProducts: [{
+          name: productName,
+          category: category || "general",
+          quantity: quantity || "To be discussed",
+          urgency: urgency || "normal"
+        }],
+        specialRequirements: message || "",
+        priority: urgency || "normal",
+        notes: `Contact: ${firstName} ${lastName}`,
+      });
+
+      res.json({
+        success: true,
+        message: "Quote request submitted successfully",
+        quoteNumber: quoteRequest.quoteNumber
+      });
+    } catch (error) {
+      console.error("Error creating quote request:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to submit quote request"
+      });
+    }
+  });
+
   // Inventory monitoring routes
   app.post("/api/inventory/check-all", requireAuth, async (req, res) => {
     try {

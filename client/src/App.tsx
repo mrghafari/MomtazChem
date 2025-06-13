@@ -23,6 +23,7 @@ import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
 import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
+import QuotePage from "@/pages/quote";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -48,6 +49,7 @@ function Router() {
           <Route path="/products/water-treatment" component={WaterTreatment} />
           <Route path="/products/paint-thinner" component={PaintThinner} />
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
+          <Route path="/quote" component={QuotePage} />
           <Route component={NotFound} />
         </Switch>
       </main>
