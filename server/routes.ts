@@ -2285,9 +2285,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
+      // Remove timestamp fields and let the database handle them
+      const { createdAt, updatedAt, id, ...cleanSpecialistData } = specialistData;
+
       const [newSpecialist] = await db.insert(schema.specialists)
         .values({
-          ...specialistData,
+          ...cleanSpecialistData,
+          createdAt: new Date(),
           updatedAt: new Date()
         })
         .returning();
@@ -2309,11 +2313,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updateData = req.body;
 
+      // Validate required fields
+      if (!id) {
+        return res.status(400).json({ message: "Specialist ID is required" });
+      }
+
+      // Create a safe update object with only allowed fields
+      const safeUpdateData: any = {};
+      
+      if (updateData.name) safeUpdateData.name = updateData.name;
+      if (updateData.email) safeUpdateData.email = updateData.email;
+      if (updateData.phone !== undefined) safeUpdateData.phone = updateData.phone;
+      if (updateData.department) safeUpdateData.department = updateData.department;
+      if (updateData.status) safeUpdateData.status = updateData.status;
+      if (updateData.expertise) safeUpdateData.expertise = updateData.expertise;
+      if (updateData.isActive !== undefined) safeUpdateData.isActive = updateData.isActive;
+      if (updateData.workingHours) safeUpdateData.workingHours = updateData.workingHours;
+
+      // Always set updatedAt to current time
+      safeUpdateData.updatedAt = new Date();
+
       const [updatedSpecialist] = await db.update(schema.specialists)
-        .set({
-          ...updateData,
-          updatedAt: new Date()
-        })
+        .set(safeUpdateData)
         .where(eq(schema.specialists.id, id))
         .returning();
 
