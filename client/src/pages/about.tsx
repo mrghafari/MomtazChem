@@ -1,199 +1,225 @@
-import { Award, Leaf, Users, Globe, Target, Eye } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Building2,
+  Target,
+  Eye,
+  Heart,
+  Users,
+  Award,
+  Shield,
+  Globe
+} from "lucide-react";
 
-const About = () => {
+export default function AboutPage() {
+  const { t, isRTL } = useLanguage();
+
   const values = [
     {
-      icon: <Award className="h-8 w-8 text-white" />,
-      title: "Quality Excellence",
-      description: "We maintain the highest standards in all our products and processes, with ISO certifications ensuring consistent quality.",
+      icon: Shield,
+      title: isRTL ? "الجودة والسلامة" : "Quality & Safety",
+      description: isRTL ? "نلتزم بأعلى معايير الجودة والسلامة في جميع منتجاتنا وعملياتنا" : "We commit to the highest standards of quality and safety in all our products and operations"
     },
     {
-      icon: <Leaf className="h-8 w-8 text-white" />,
-      title: "Environmental Responsibility",
-      description: "Committed to sustainable manufacturing practices and developing eco-friendly chemical solutions.",
+      icon: Globe,
+      title: isRTL ? "الابتكار والتطوير" : "Innovation & Development", 
+      description: isRTL ? "نستثمر في البحث والتطوير لتقديم حلول كيميائية متقدمة ومبتكرة" : "We invest in research and development to provide advanced and innovative chemical solutions"
     },
     {
-      icon: <Users className="h-8 w-8 text-white" />,
-      title: "Customer Focus",
-      description: "Our customers' success is our priority. We provide tailored solutions and exceptional service.",
+      icon: Users,
+      title: isRTL ? "خدمة العملاء" : "Customer Service",
+      description: isRTL ? "نضع عملاءنا في المقدمة ونسعى لتقديم أفضل خدمة ودعم تقني" : "We put our customers first and strive to provide the best service and technical support"
     },
     {
-      icon: <Globe className="h-8 w-8 text-white" />,
-      title: "Global Reach",
-      description: "Serving customers in over 40 countries with reliable supply chains and local support.",
-    },
+      icon: Heart,
+      title: isRTL ? "المسؤولية البيئية" : "Environmental Responsibility",
+      description: isRTL ? "نحرص على حماية البيئة والالتزام بالممارسات المستدامة" : "We are committed to environmental protection and sustainable practices"
+    }
+  ];
+
+  const certifications = [
+    { name: "ISO 9001:2015", type: isRTL ? "إدارة الجودة" : "Quality Management" },
+    { name: "ISO 14001:2015", type: isRTL ? "الإدارة البيئية" : "Environmental Management" },
+    { name: "ISO 45001:2018", type: isRTL ? "الصحة والسلامة المهنية" : "Occupational Health & Safety" },
+    { name: "REACH", type: isRTL ? "تنظيم المواد الكيميائية الأوروبي" : "European Chemical Regulation" }
+  ];
+
+  const stats = [
+    { number: "15+", label: isRTL ? "سنوات من الخبرة" : "Years of Experience" },
+    { number: "500+", label: isRTL ? "منتج كيميائي" : "Chemical Products" },
+    { number: "1000+", label: isRTL ? "عميل راضي" : "Satisfied Clients" },
+    { number: "50+", label: isRTL ? "دولة نخدمها" : "Countries Served" }
   ];
 
   return (
-    <div className="pt-20">
+    <div className={`min-h-screen ${isRTL ? 'font-arabic' : ''}`}>
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-primary to-secondary text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">About Momtazchem</h1>
-            <p className="text-xl max-w-3xl mx-auto">
-              Leading the chemical industry with innovation, quality, and sustainability for over 25 years.
+      <section className="bg-gradient-to-br from-blue-900 to-purple-900 text-white py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              {t('aboutPage.title')}
+            </h1>
+            <p className="text-xl text-blue-100">
+              {t('aboutPage.subtitle')}
             </p>
           </div>
         </div>
       </section>
 
-      {/* Company Story */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      {/* Company Overview */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
-              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                Founded in 1999, Momtazchem began as a small chemical manufacturing company with a vision to provide high-quality chemical solutions to industries worldwide. Over the past 25 years, we have grown into a leading manufacturer serving four key market segments.
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                {t('companyName')}
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                {isRTL ? 
+                  "تأسست شركة الإنتاج الممتاز للتجارة العامة والصناعة الكيميائية المحدودة كشركة رائدة في مجال توفير الحلول الكيميائية المتخصصة للصناعات المختلفة. نحن نفخر بتقديم منتجات عالية الجودة تلبي أعلى المعايير الدولية." :
+                  "Al-Intaj Al-Mumtaz for General Trade and Chemical Industry, Limited was established as a leading company in providing specialized chemical solutions for various industries. We pride ourselves on delivering high-quality products that meet the highest international standards."
+                }
               </p>
-              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                Our journey has been marked by continuous innovation, strategic expansion, and an unwavering commitment to quality. Today, we operate state-of-the-art manufacturing facilities and serve customers in over 40 countries across the globe.
-              </p>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                As we look to the future, we remain dedicated to advancing chemical science, supporting our customers' success, and contributing to a more sustainable world.
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                {isRTL ?
+                  "مع أكثر من 15 عاماً من الخبرة في السوق، نواصل التطوير والابتكار لنكون الخيار الأول للعملاء الذين يبحثون عن الجودة والموثوقية في المنتجات الكيميائية." :
+                  "With over 15 years of experience in the market, we continue to develop and innovate to be the first choice for customers seeking quality and reliability in chemical products."
+                }
               </p>
             </div>
-            <div>
-              <img
-                src="https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-                alt="Modern chemical manufacturing facility"
-                className="rounded-lg shadow-lg"
-              />
+            <div className="grid grid-cols-2 gap-6">
+              {stats.map((stat, index) => (
+                <Card key={index} className="text-center">
+                  <CardContent className="p-6">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">{stat.number}</div>
+                    <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Mission & Vision */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12">
-            <div className="bg-white p-8 rounded-xl shadow-lg">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-primary-blue rounded-lg flex items-center justify-center mr-4">
-                  <Target className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">Our Mission</h3>
-              </div>
-              <p className="text-gray-600 leading-relaxed">
-                To develop and manufacture innovative chemical solutions that enhance industrial processes, improve product performance, and contribute to sustainable development while maintaining the highest standards of quality and safety.
-              </p>
-            </div>
-            <div className="bg-white p-8 rounded-xl shadow-lg">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-primary-green rounded-lg flex items-center justify-center mr-4">
-                  <Eye className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">Our Vision</h3>
-              </div>
-              <p className="text-gray-600 leading-relaxed">
-                To be the world's most trusted partner in chemical solutions, recognized for our innovation, sustainability, and commitment to advancing industries while protecting the environment for future generations.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Mission, Vision, Values */}
+      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Target className="w-6 h-6 text-blue-600" />
+                  {t('aboutPage.mission')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {isRTL ?
+                    "توفير حلول كيميائية مبتكرة وموثوقة تساهم في نجاح عملائنا وتطوير الصناعات المحلية والإقليمية مع الالتزام بأعلى معايير الجودة والسلامة البيئية." :
+                    "To provide innovative and reliable chemical solutions that contribute to our customers' success and the development of local and regional industries while maintaining the highest standards of quality and environmental safety."
+                  }
+                </p>
+              </CardContent>
+            </Card>
 
-      {/* Values */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Core Values</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              The principles that guide our decisions and shape our culture every day.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <div key={index} className="text-center">
-                <div className={`w-16 h-16 ${
-                  index % 2 === 0 ? 'bg-primary-blue' : 'bg-primary-green'
-                } rounded-lg flex items-center justify-center mx-auto mb-4`}>
-                  {value.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{value.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{value.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Eye className="w-6 h-6 text-purple-600" />
+                  {t('aboutPage.vision')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {isRTL ?
+                    "أن نكون الشركة الرائدة في منطقة الشرق الأوسط في مجال توفير المواد الكيميائية والحلول الصناعية المتطورة، مع التركيز على الابتكار والاستدامة." :
+                    "To be the leading company in the Middle East in providing advanced chemical materials and industrial solutions, focusing on innovation and sustainability."
+                  }
+                </p>
+              </CardContent>
+            </Card>
 
-      {/* Team & Facilities */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Team & Expertise</h2>
-              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                Our success is built on the expertise and dedication of our team. We employ over 500 professionals, including chemical engineers, research scientists, quality specialists, and industry experts.
-              </p>
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold primary-blue mb-2">500+</div>
-                  <div className="text-gray-600">Employees</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold primary-green mb-2">50+</div>
-                  <div className="text-gray-600">R&D Scientists</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold accent-orange mb-2">15+</div>
-                  <div className="text-gray-600">Manufacturing Sites</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold primary-blue mb-2">99.8%</div>
-                  <div className="text-gray-600">Quality Rate</div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <img
-                src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-                alt="Chemical research laboratory"
-                className="rounded-lg shadow-lg"
-              />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Building2 className="w-6 h-6 text-green-600" />
+                  {t('aboutPage.values')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {isRTL ?
+                    "نؤمن بأهمية النزاهة والشفافية في جميع تعاملاتنا، والالتزام بالجودة والتميز، واحترام البيئة والمجتمع، والتطوير المستمر لفريق العمل." :
+                    "We believe in the importance of integrity and transparency in all our dealings, commitment to quality and excellence, respect for the environment and community, and continuous development of our team."
+                  }
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Core Values Grid */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+              {isRTL ? "قيمنا الأساسية" : "Our Core Values"}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {values.map((value, index) => {
+                const IconComponent = value.icon;
+                return (
+                  <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
+                        <IconComponent className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                        {value.title}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        {value.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </div>
       </section>
 
       {/* Certifications */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Certifications & Compliance</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We maintain the highest industry standards and certifications to ensure quality, safety, and environmental responsibility.
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              {t('aboutPage.certifications')}
+            </h3>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              {isRTL ?
+                "نحن معتمدون من أهم المنظمات الدولية للجودة والسلامة" :
+                "We are certified by the most important international quality and safety organizations"
+              }
             </p>
           </div>
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center p-6 bg-gray-50 rounded-lg">
-              <i className="fas fa-certificate text-primary text-4xl mb-4"></i>
-              <h3 className="font-semibold text-gray-900 mb-2">ISO 9001:2015</h3>
-              <p className="text-gray-600 text-sm">Quality Management Systems</p>
-            </div>
-            <div className="text-center p-6 bg-gray-50 rounded-lg">
-              <i className="fas fa-shield-alt text-primary text-4xl mb-4"></i>
-              <h3 className="font-semibold text-gray-900 mb-2">ISO 14001</h3>
-              <p className="text-gray-600 text-sm">Environmental Management</p>
-            </div>
-            <div className="text-center p-6 bg-gray-50 rounded-lg">
-              <i className="fas fa-hard-hat text-primary text-4xl mb-4"></i>
-              <h3 className="font-semibold text-gray-900 mb-2">OHSAS 18001</h3>
-              <p className="text-gray-600 text-sm">Occupational Health & Safety</p>
-            </div>
-            <div className="text-center p-6 bg-gray-50 rounded-lg">
-              <i className="fas fa-check-circle text-primary text-4xl mb-4"></i>
-              <h3 className="font-semibold text-gray-900 mb-2">REACH Compliance</h3>
-              <p className="text-gray-600 text-sm">European Chemicals Regulation</p>
-            </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {certifications.map((cert, index) => (
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <Award className="w-12 h-12 mx-auto text-yellow-500 mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {cert.name}
+                  </h4>
+                  <Badge variant="secondary" className="text-xs">
+                    {cert.type}
+                  </Badge>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
     </div>
   );
-};
-
-export default About;
+}

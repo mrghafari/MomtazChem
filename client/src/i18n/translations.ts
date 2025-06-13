@@ -120,6 +120,65 @@ export const translations = {
       errorOccurred: "An error occurred",
       noDataAvailable: "No data available",
       loadingData: "Loading data..."
+    },
+
+    // Homepage Content
+    homepage: {
+      heroTitle: "Advanced Chemical Solutions",
+      heroSubtitle: "Professional grade chemicals and industrial solutions for modern industries",
+      heroDescription: "Discover our comprehensive range of high-quality chemical products designed for industrial applications, water treatment, and specialized manufacturing processes.",
+      learnMore: "Learn More",
+      getQuote: "Get Quote",
+      
+      // Features Section
+      featuresTitle: "Why Choose Our Chemical Solutions",
+      feature1Title: "Premium Quality",
+      feature1Description: "Laboratory-tested chemicals meeting international standards",
+      feature2Title: "Expert Support", 
+      feature2Description: "Technical consultation and application guidance",
+      feature3Title: "Reliable Supply",
+      feature3Description: "Consistent availability and timely delivery",
+      feature4Title: "Safety Certified",
+      feature4Description: "Full compliance with safety and environmental regulations",
+
+      // Products Preview
+      productsPreviewTitle: "Featured Product Categories",
+      viewAllProducts: "View All Products"
+    },
+
+    // About Page
+    aboutPage: {
+      title: "About Our Company",
+      subtitle: "Excellence in Chemical Industry Solutions",
+      history: "Company History",
+      mission: "Our Mission",
+      vision: "Our Vision", 
+      values: "Our Values",
+      team: "Our Team",
+      certifications: "Certifications & Standards"
+    },
+
+    // Contact Page
+    contactPage: {
+      title: "Contact Us",
+      subtitle: "Get in touch with our chemical experts",
+      address: "Address",
+      phone: "Phone",
+      email: "Email",
+      hours: "Business Hours",
+      form: {
+        title: "Send us a Message",
+        firstName: "First Name",
+        lastName: "Last Name",
+        email: "Email Address",
+        company: "Company",
+        productInterest: "Product Interest",
+        message: "Message",
+        send: "Send Message",
+        sending: "Sending...",
+        success: "Message sent successfully!",
+        error: "Failed to send message. Please try again."
+      }
     }
   },
 
@@ -249,6 +308,65 @@ export const translations = {
       errorOccurred: "حدث خطأ",
       noDataAvailable: "لا توجد بيانات متاحة",
       loadingData: "جاري تحميل البيانات..."
+    },
+
+    // محتوى الصفحة الرئيسية
+    homepage: {
+      heroTitle: "حلول كيميائية متقدمة",
+      heroSubtitle: "مواد كيميائية احترافية وحلول صناعية للصناعات الحديثة",
+      heroDescription: "اكتشف مجموعتنا الشاملة من المنتجات الكيميائية عالية الجودة المصممة للتطبيقات الصناعية ومعالجة المياه وعمليات التصنيع المتخصصة.",
+      learnMore: "اعرف المزيد",
+      getQuote: "احصل على عرض أسعار",
+      
+      // قسم الميزات
+      featuresTitle: "لماذا تختار حلولنا الكيميائية",
+      feature1Title: "جودة ممتازة",
+      feature1Description: "مواد كيميائية مختبرة معملياً تلبي المعايير الدولية",
+      feature2Title: "دعم الخبراء",
+      feature2Description: "استشارات تقنية وتوجيه للتطبيقات",
+      feature3Title: "إمداد موثوق",
+      feature3Description: "توفر ثابت وتسليم في الوقت المحدد",
+      feature4Title: "معتمد للسلامة",
+      feature4Description: "امتثال كامل لمعايير السلامة والبيئة",
+
+      // معاينة المنتجات
+      productsPreviewTitle: "فئات المنتجات المميزة",
+      viewAllProducts: "عرض جميع المنتجات"
+    },
+
+    // صفحة حولنا
+    aboutPage: {
+      title: "حول شركتنا",
+      subtitle: "التميز في حلول الصناعة الكيميائية",
+      history: "تاريخ الشركة",
+      mission: "مهمتنا",
+      vision: "رؤيتنا",
+      values: "قيمنا",
+      team: "فريقنا",
+      certifications: "الشهادات والمعايير"
+    },
+
+    // صفحة الاتصال
+    contactPage: {
+      title: "اتصل بنا",
+      subtitle: "تواصل مع خبرائنا في الكيماويات",
+      address: "العنوان",
+      phone: "الهاتف",
+      email: "البريد الإلكتروني",
+      hours: "ساعات العمل",
+      form: {
+        title: "أرسل لنا رسالة",
+        firstName: "الاسم الأول",
+        lastName: "اسم العائلة",
+        email: "عنوان البريد الإلكتروني",
+        company: "الشركة",
+        productInterest: "اهتمام المنتج",
+        message: "الرسالة",
+        send: "إرسال الرسالة",
+        sending: "جاري الإرسال...",
+        success: "تم إرسال الرسالة بنجاح!",
+        error: "فشل في إرسال الرسالة. يرجى المحاولة مرة أخرى."
+      }
     }
   }
 };
