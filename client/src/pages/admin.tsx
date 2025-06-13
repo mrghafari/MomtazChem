@@ -364,14 +364,25 @@ export default function AdminPage() {
             <User className="w-4 h-4" />
             <span className="text-sm">{user?.username}</span>
           </div>
-          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Product
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => window.open('/admin/specialists', '_blank')}
+              variant="outline"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Manage Specialists
+            </Button>
+            <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Product
+            </Button>
+          </div>
           <Button 
             onClick={() => syncProductsMutation.mutate()}
             disabled={syncProductsMutation.isPending}
             variant="outline"
+            className="ml-2"
             className="border-green-300 text-green-600 hover:bg-green-50"
           >
             <Package className="w-4 h-4 mr-2" />
