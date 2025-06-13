@@ -17,9 +17,12 @@ import {
   type InsertInquiryResponse,
   type QuoteRequest,
   type InsertQuoteRequest,
+  emailTemplates,
+  type EmailTemplate,
+  type InsertEmailTemplate,
 } from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
-import { eq, desc, and, or, ilike, count } from "drizzle-orm";
+import { eq, desc, and, or, ilike, count, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 export interface ICustomerStorage {
@@ -72,6 +75,17 @@ export interface ICustomerStorage {
     openInquiries: number;
     pendingQuotes: number;
   }>;
+
+  // Email template management
+  createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate>;
+  getEmailTemplates(): Promise<EmailTemplate[]>;
+  getEmailTemplateById(id: number): Promise<EmailTemplate | undefined>;
+  getEmailTemplatesByCategory(category: string): Promise<EmailTemplate[]>;
+  getDefaultTemplateForCategory(category: string, language?: string): Promise<EmailTemplate | undefined>;
+  updateEmailTemplate(id: number, template: Partial<InsertEmailTemplate>): Promise<EmailTemplate>;
+  deleteEmailTemplate(id: number): Promise<void>;
+  setDefaultTemplate(id: number, category: string): Promise<void>;
+  incrementTemplateUsage(id: number): Promise<void>;
 }
 
 export class CustomerStorage implements ICustomerStorage {
@@ -389,6 +403,102 @@ export class CustomerStorage implements ICustomerStorage {
       openInquiries: openInquiriesResult.count,
       pendingQuotes: pendingQuotesResult.count,
     };
+  }
+
+  // Email template management
+  async createEmailTemplate(templateData: InsertEmailTemplate): Promise<EmailTemplate> {
+    const [template] = await customerDb
+      .insert(emailTemplates)
+      .values({
+        ...templateData,
+        usageCount: 0,
+      })
+      .returning();
+    return template;
+  }
+
+  async getEmailTemplates(): Promise<EmailTemplate[]> {
+    return await customerDb
+      .select()
+      .from(emailTemplates)
+      .orderBy(desc(emailTemplates.createdAt));
+  }
+
+  async getEmailTemplateById(id: number): Promise<EmailTemplate | undefined> {
+    const [template] = await customerDb
+      .select()
+      .from(emailTemplates)
+      .where(eq(emailTemplates.id, id));
+    return template;
+  }
+
+  async getEmailTemplatesByCategory(category: string): Promise<EmailTemplate[]> {
+    return await customerDb
+      .select()
+      .from(emailTemplates)
+      .where(and(
+        eq(emailTemplates.category, category),
+        eq(emailTemplates.isActive, true)
+      ))
+      .orderBy(desc(emailTemplates.isDefault), desc(emailTemplates.usageCount));
+  }
+
+  async getDefaultTemplateForCategory(category: string, language: string = 'en'): Promise<EmailTemplate | undefined> {
+    const [template] = await customerDb
+      .select()
+      .from(emailTemplates)
+      .where(and(
+        eq(emailTemplates.category, category),
+        eq(emailTemplates.language, language),
+        eq(emailTemplates.isDefault, true),
+        eq(emailTemplates.isActive, true)
+      ));
+    return template;
+  }
+
+  async updateEmailTemplate(id: number, templateUpdate: Partial<InsertEmailTemplate>): Promise<EmailTemplate> {
+    const [template] = await customerDb
+      .update(emailTemplates)
+      .set({
+        ...templateUpdate,
+        updatedAt: new Date(),
+      })
+      .where(eq(emailTemplates.id, id))
+      .returning();
+    return template;
+  }
+
+  async deleteEmailTemplate(id: number): Promise<void> {
+    await customerDb
+      .delete(emailTemplates)
+      .where(eq(emailTemplates.id, id));
+  }
+
+  async setDefaultTemplate(id: number, category: string): Promise<void> {
+    // First remove default status from all templates in this category
+    await customerDb
+      .update(emailTemplates)
+      .set({ isDefault: false })
+      .where(eq(emailTemplates.category, category));
+
+    // Then set the specified template as default
+    await customerDb
+      .update(emailTemplates)
+      .set({ isDefault: true })
+      .where(eq(emailTemplates.id, id));
+  }
+
+  async incrementTemplateUsage(id: number): Promise<void> {
+    await customerDb
+      .update(emailTemplates)
+      .set({ 
+        lastUsed: new Date() 
+      })
+      .where(eq(emailTemplates.id, id));
+    
+    // Increment usage count separately
+    await customerDb
+      .execute(sql`UPDATE email_templates SET usage_count = usage_count + 1 WHERE id = ${id}`);
   }
 }
 
