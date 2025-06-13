@@ -174,12 +174,6 @@ const WaterTreatment = () => {
                     
                     <p className="text-gray-600 mb-6">{product.description}</p>
                     
-                    {product.priceRange && (
-                      <div className="mb-6">
-                        <span className="text-lg font-semibold text-blue-600">{product.priceRange}</span>
-                      </div>
-                    )}
-                    
                     {product.features && Array.isArray(product.features) && product.features.length > 0 && (
                       <div className="mb-6">
                         <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
