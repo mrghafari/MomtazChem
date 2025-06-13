@@ -248,6 +248,43 @@ const ShopAdmin = () => {
     }
   }, [authLoading, isAuthenticated, setLocation]);
 
+  // Export sales report handler
+  const handleExportSalesReport = async () => {
+    try {
+      const response = await fetch('/api/analytics/sales/export?format=csv', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate sales report');
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sales-report-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Sales report exported successfully",
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to export sales report",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Show loading while checking authentication
   if (authLoading) {
     return (
@@ -778,15 +815,27 @@ const ShopAdmin = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Button className="flex items-center gap-2" variant="outline">
+                    <Button 
+                      className="flex items-center gap-2" 
+                      variant="outline"
+                      onClick={handleExportSalesReport}
+                    >
                       <Download className="w-4 h-4" />
                       Export Sales Report
                     </Button>
-                    <Button className="flex items-center gap-2" variant="outline">
+                    <Button 
+                      className="flex items-center gap-2" 
+                      variant="outline"
+                      onClick={handleGenerateMonthlyReport}
+                    >
                       <RefreshCw className="w-4 h-4" />
                       Generate Monthly Report
                     </Button>
-                    <Button className="flex items-center gap-2" variant="outline">
+                    <Button 
+                      className="flex items-center gap-2" 
+                      variant="outline"
+                      onClick={() => setLocation("/analytics/sales")}
+                    >
                       <BarChart3 className="w-4 h-4" />
                       View Analytics
                     </Button>

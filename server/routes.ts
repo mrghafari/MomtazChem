@@ -1467,6 +1467,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export sales report endpoint
+  app.get("/api/analytics/sales/export", requireAuth, async (req, res) => {
+    try {
+      const format = req.query.format as string || 'csv';
+      
+      // Get all orders with items
+      const orders = await shopStorage.getOrders();
+      
+      // Build detailed report data
+      const reportData = [];
+      for (const order of orders) {
+        const orderItems = await shopStorage.getOrderItems(order.id);
+        const customer = await shopStorage.getCustomerById(order.customerId);
+        
+        for (const item of orderItems) {
+          reportData.push({
+            orderNumber: order.orderNumber,
+            orderDate: order.createdAt.toISOString().split('T')[0],
+            customerName: customer ? `${customer.firstName} ${customer.lastName}` : 'N/A',
+            customerEmail: customer?.email || 'N/A',
+            productName: item.productName,
+            quantity: item.quantity,
+            unitPrice: parseFloat(item.unitPrice),
+            itemTotal: parseFloat(item.unitPrice) * item.quantity,
+            orderStatus: order.status,
+            paymentStatus: order.paymentStatus,
+            subtotal: parseFloat(order.subtotal || '0'),
+            taxAmount: parseFloat(order.taxAmount || '0'),
+            shippingAmount: parseFloat(order.shippingAmount || '0'),
+            totalAmount: parseFloat(order.totalAmount || '0'),
+            currency: order.currency || 'USD'
+          });
+        }
+      }
+
+      if (format === 'csv') {
+        // Generate CSV
+        const csvHeaders = [
+          'Order Number', 'Order Date', 'Customer Name', 'Customer Email',
+          'Product Name', 'Quantity', 'Unit Price', 'Item Total',
+          'Order Status', 'Payment Status', 'Subtotal', 'Tax Amount',
+          'Shipping Amount', 'Total Amount', 'Currency'
+        ].join(',');
+        
+        const csvRows = reportData.map(row => [
+          row.orderNumber,
+          row.orderDate,
+          `"${row.customerName}"`,
+          row.customerEmail,
+          `"${row.productName}"`,
+          row.quantity,
+          row.unitPrice.toFixed(2),
+          row.itemTotal.toFixed(2),
+          row.orderStatus,
+          row.paymentStatus,
+          row.subtotal.toFixed(2),
+          row.taxAmount.toFixed(2),
+          row.shippingAmount.toFixed(2),
+          row.totalAmount.toFixed(2),
+          row.currency
+        ].join(','));
+        
+        const csvContent = [csvHeaders, ...csvRows].join('\n');
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="sales-report-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(csvContent);
+      } else {
+        // Return JSON for other formats or direct download
+        res.json({
+          success: true,
+          data: reportData,
+          summary: {
+            totalOrders: orders.length,
+            totalRevenue: reportData.reduce((sum, item) => sum + item.itemTotal, 0),
+            reportDate: new Date().toISOString().split('T')[0]
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error generating sales report:", error);
+      res.status(500).json({ success: false, message: "Failed to generate sales report" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
