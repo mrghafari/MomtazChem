@@ -84,8 +84,9 @@ const SpecialistsAdmin = () => {
   ];
 
   // Fetch specialists
-  const { data: specialists = [], isLoading } = useQuery<Specialist[]>({
-    queryKey: ["/api/admin/specialists"]
+  const { data: specialists = [], isLoading, error } = useQuery<Specialist[]>({
+    queryKey: ["/api/admin/specialists"],
+    retry: false
   });
 
   // Create specialist mutation
@@ -282,6 +283,21 @@ const SpecialistsAdmin = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-6xl">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900">خطا در بارگذاری</h2>
+          <p className="text-gray-600">امکان دریافت اطلاعات کارشناسان وجود ندارد.</p>
+          <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
+            تلاش مجدد
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -307,7 +323,7 @@ const SpecialistsAdmin = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">کل کارشناسان</p>
-                  <p className="text-2xl font-bold text-gray-900">{specialists.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{specialists?.length || 0}</p>
                 </div>
                 <Users className="w-8 h-8 text-blue-600" />
               </div>
@@ -320,7 +336,7 @@ const SpecialistsAdmin = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">آنلاین</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {specialists.filter(s => s.status === "online").length}
+                    {specialists?.filter(s => s.status === "online").length || 0}
                   </p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-600" />
@@ -334,7 +350,7 @@ const SpecialistsAdmin = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">مشغول</p>
                   <p className="text-2xl font-bold text-yellow-600">
-                    {specialists.filter(s => s.status === "busy").length}
+                    {specialists?.filter(s => s.status === "busy").length || 0}
                   </p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-yellow-600" />
@@ -348,7 +364,7 @@ const SpecialistsAdmin = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">آفلاین</p>
                   <p className="text-2xl font-bold text-red-600">
-                    {specialists.filter(s => s.status === "offline").length}
+                    {specialists?.filter(s => s.status === "offline").length || 0}
                   </p>
                 </div>
                 <X className="w-8 h-8 text-red-600" />
@@ -359,7 +375,7 @@ const SpecialistsAdmin = () => {
 
         {/* Specialists Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {specialists.map((specialist) => (
+          {specialists?.map((specialist) => (
             <Card key={specialist.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
