@@ -591,6 +591,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test email endpoint
+  app.post("/api/test-email", async (req, res) => {
+    try {
+      const testData = {
+        firstName: "Test",
+        lastName: "User",
+        email: "test@example.com",
+        company: "Test Company",
+        productInterest: "Test Product",
+        message: "This is a test email message"
+      };
+      
+      await sendContactEmail(testData);
+      res.json({ success: true, message: "Test email sent successfully" });
+    } catch (error) {
+      console.error("Test email failed:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Test email failed",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Contact form submission
   app.post("/api/contact", async (req, res) => {
     try {
