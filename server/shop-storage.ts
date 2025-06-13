@@ -6,6 +6,7 @@ import {
   orders,
   orderItems,
   inventoryTransactions,
+  discountSettings,
   type ShopProduct, 
   type InsertShopProduct,
   type ShopCategory,
@@ -19,7 +20,9 @@ import {
   type OrderItem,
   type InsertOrderItem,
   type InventoryTransaction,
-  type InsertInventoryTransaction
+  type InsertInventoryTransaction,
+  type DiscountSetting,
+  type InsertDiscountSetting
 } from "@shared/shop-schema";
 import { shopDb } from "./shop-db";
 import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
@@ -33,6 +36,14 @@ export interface IShopStorage {
   createShopProduct(product: InsertShopProduct): Promise<ShopProduct>;
   updateShopProduct(id: number, product: Partial<InsertShopProduct>): Promise<ShopProduct>;
   deleteShopProduct(id: number): Promise<void>;
+  
+  // Discount settings management
+  getDiscountSettings(): Promise<DiscountSetting[]>;
+  getActiveDiscountSettings(): Promise<DiscountSetting[]>;
+  getDiscountSettingById(id: number): Promise<DiscountSetting | undefined>;
+  createDiscountSetting(discount: InsertDiscountSetting): Promise<DiscountSetting>;
+  updateDiscountSetting(id: number, discount: Partial<InsertDiscountSetting>): Promise<DiscountSetting>;
+  deleteDiscountSetting(id: number): Promise<void>;
   
   // Categories
   getShopCategories(): Promise<ShopCategory[]>;
@@ -391,6 +402,48 @@ export class ShopStorage implements IShopStorage {
       pendingOrders: Number(stats.pendingOrders),
       shippedOrders: Number(stats.shippedOrders),
     };
+  }
+
+  // Discount settings management
+  async getDiscountSettings(): Promise<DiscountSetting[]> {
+    return await shopDb.select().from(discountSettings).orderBy(desc(discountSettings.minQuantity));
+  }
+
+  async getActiveDiscountSettings(): Promise<DiscountSetting[]> {
+    return await shopDb
+      .select()
+      .from(discountSettings)
+      .where(eq(discountSettings.isActive, true))
+      .orderBy(desc(discountSettings.minQuantity));
+  }
+
+  async getDiscountSettingById(id: number): Promise<DiscountSetting | undefined> {
+    const [discount] = await shopDb
+      .select()
+      .from(discountSettings)
+      .where(eq(discountSettings.id, id));
+    return discount || undefined;
+  }
+
+  async createDiscountSetting(discountData: InsertDiscountSetting): Promise<DiscountSetting> {
+    const [discount] = await shopDb
+      .insert(discountSettings)
+      .values(discountData)
+      .returning();
+    return discount;
+  }
+
+  async updateDiscountSetting(id: number, discountUpdate: Partial<InsertDiscountSetting>): Promise<DiscountSetting> {
+    const [discount] = await shopDb
+      .update(discountSettings)
+      .set(discountUpdate)
+      .where(eq(discountSettings.id, id))
+      .returning();
+    return discount;
+  }
+
+  async deleteDiscountSetting(id: number): Promise<void> {
+    await shopDb.delete(discountSettings).where(eq(discountSettings.id, id));
   }
 }
 
