@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,23 @@ interface InquiryResponse {
 
 const InquiryDetail = () => {
   const [location] = useLocation();
-  const inquiryId = location.split('/')[2]; // Get ID from /inquiry/123
+  const inquiryId = location.split('/')[3]; // Get ID from /admin/inquiry/123
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/admin/check-auth');
+        if (!response.ok) {
+          window.location.href = '/admin/login';
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        window.location.href = '/admin/login';
+      }
+    };
+    checkAuth();
+  }, []);
 
   const { data: inquiry, isLoading } = useQuery<Inquiry>({
     queryKey: ["/api/inquiries", inquiryId],

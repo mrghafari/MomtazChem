@@ -45,6 +45,8 @@ function Router() {
           <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin/users" component={AdminUsers} />
           <Route path="/admin/specialists" component={SpecialistsAdmin} />
+          <Route path="/admin/inquiries" component={Dashboard} />
+          <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />
           <Route path="/reset-password" component={ResetPassword} />
           <Route path="/crm" component={CRMPage} />
@@ -54,8 +56,6 @@ function Router() {
           <Route path="/products/paint-thinner" component={PaintThinner} />
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/quote" component={QuotePage} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/inquiry/:id" component={InquiryDetail} />
           <Route component={NotFound} />
         </Switch>
       </main>

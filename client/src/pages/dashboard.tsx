@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +45,22 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/admin/check-auth');
+        if (!response.ok) {
+          window.location.href = '/admin/login';
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        window.location.href = '/admin/login';
+      }
+    };
+    checkAuth();
+  }, []);
 
   const { data: inquiries, isLoading } = useQuery<Inquiry[]>({
     queryKey: ["/api/inquiries"],
@@ -276,7 +292,7 @@ const Dashboard = () => {
                         </div>
                         <p className="text-sm text-gray-600 mb-2">{inquiry.inquiryNumber}</p>
                       </div>
-                      <Link href={`/inquiry/${inquiry.id}`}>
+                      <Link href={`/admin/inquiry/${inquiry.id}`}>
                         <Button variant="outline" size="sm">
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
