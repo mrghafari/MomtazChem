@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
+import LiveChat from "@/components/ui/live-chat";
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 
 const FuelAdditives = () => {
@@ -324,6 +325,9 @@ const FuelAdditives = () => {
           </div>
         </div>
       </section>
+
+      {/* Live Chat Support */}
+      <LiveChat />
     </div>
   );
 };

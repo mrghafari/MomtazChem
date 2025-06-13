@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
+import LiveChat from "@/components/ui/live-chat";
 
 const Shop = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -450,6 +451,9 @@ const Shop = () => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Live Chat Support */}
+      <LiveChat />
     </div>
   );
 };
