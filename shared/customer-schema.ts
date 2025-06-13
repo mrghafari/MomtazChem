@@ -122,6 +122,7 @@ export const customerInquiries = pgTable("customer_inquiries", {
 
 export const insertCustomerInquirySchema = createInsertSchema(customerInquiries).omit({
   id: true,
+  inquiryNumber: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -149,6 +150,36 @@ export const insertInquiryResponseSchema = createInsertSchema(inquiryResponses).
 
 export type InsertInquiryResponse = z.infer<typeof insertInquiryResponseSchema>;
 export type InquiryResponse = typeof inquiryResponses.$inferSelect;
+
+// Email templates table for customizable support responses
+export const emailTemplates = pgTable("email_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // quote_response, product_info, technical_support, general, welcome, followup
+  subject: text("subject").notNull(),
+  htmlContent: text("html_content").notNull(),
+  textContent: text("text_content"),
+  variables: json("variables"), // Available template variables like {{customer_name}}, {{product_name}}
+  isActive: boolean("is_active").default(true),
+  isDefault: boolean("is_default").default(false), // Default template for category
+  language: text("language").notNull().default("en"), // en, fa
+  createdBy: integer("created_by").notNull(), // Admin user ID
+  usageCount: integer("usage_count").default(0),
+  lastUsed: timestamp("last_used"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({
+  id: true,
+  usageCount: true,
+  lastUsed: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
 
 // Quote requests table
 export const quoteRequests = pgTable("quote_requests", {
