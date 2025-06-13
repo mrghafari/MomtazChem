@@ -1,4 +1,4 @@
-import { CheckCircle, ArrowRight, Wheat, Sprout, TreePine, Leaf, Download, Image } from "lucide-react";
+import { CheckCircle, ArrowRight, Wheat, Sprout, TreePine, Leaf, Download, Image, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -240,26 +240,35 @@ const AgriculturalFertilizersPage = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-3 mt-6">
-                      {product.imageUrl && (
-                        <Badge variant="outline" className="text-xs">
-                          <Image className="w-3 h-3 mr-1" />
-                          Image Available
-                        </Badge>
-                      )}
-                      {product.pdfCatalogUrl && (
-                        <a 
-                          href={product.pdfCatalogUrl} 
-                          download={`${product.name}_catalog.pdf`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Badge variant="outline" className="text-xs hover:bg-green-50 cursor-pointer">
-                            <Download className="w-3 h-3 mr-1" />
-                            Download PDF
+                    <div className="flex items-center justify-between gap-3 mt-6">
+                      <div className="flex items-center gap-3">
+                        {product.imageUrl && (
+                          <Badge variant="outline" className="text-xs">
+                            <Image className="w-3 h-3 mr-1" />
+                            Image Available
                           </Badge>
-                        </a>
-                      )}
+                        )}
+                        {product.pdfCatalogUrl && (
+                          <a 
+                            href={product.pdfCatalogUrl} 
+                            download={`${product.name}_catalog.pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Badge variant="outline" className="text-xs hover:bg-green-50 cursor-pointer">
+                              <Download className="w-3 h-3 mr-1" />
+                              Download PDF
+                            </Badge>
+                          </a>
+                        )}
+                      </div>
+                      
+                      <Link href={`/quote?product=${encodeURIComponent(product.name)}&category=agricultural-fertilizers`}>
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4" />
+                          Get Quote
+                        </Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
