@@ -148,9 +148,16 @@ const Shop = () => {
                   <ShoppingCart className="w-5 h-5" />
                   Cart ({getTotalItems()})
                   {getTotalItems() > 0 && (
-                    <Badge variant="secondary">
-                      ${getTotalPrice().toFixed(2)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">
+                        ${getTotalPrice().toFixed(2)}
+                      </Badge>
+                      {getTotalSavings() > 0 && (
+                        <Badge variant="default" className="bg-green-600">
+                          Save ${getTotalSavings().toFixed(2)}
+                        </Badge>
+                      )}
+                    </div>
                   )}
                 </Button>
               </div>
