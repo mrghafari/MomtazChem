@@ -223,7 +223,7 @@ const AgriculturalFertilizersPage = () => {
                       <div className="mb-6">
                         <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
                         <ul className="space-y-2">
-                          {product.features.map((feature, featureIndex) => (
+                          {(product.features as any[]).map((feature, featureIndex) => (
                             <li key={featureIndex} className="flex items-center text-gray-700">
                               <CheckCircle className="h-4 w-4 text-secondary mr-3 flex-shrink-0" />
                               {String(feature)}
@@ -237,9 +237,9 @@ const AgriculturalFertilizersPage = () => {
                       <div className="mb-6">
                         <h4 className="font-semibold text-gray-900 mb-3">Applications:</h4>
                         <div className="flex flex-wrap gap-2">
-                          {(product.applications as string[]).map((app, appIndex) => (
+                          {(product.applications as any[]).map((app, appIndex) => (
                             <span key={appIndex} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                              {app}
+                              {String(app)}
                             </span>
                           ))}
                         </div>
