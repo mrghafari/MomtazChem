@@ -161,6 +161,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  app.post("/api/admin/register", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(409).json({ 
+          success: false, 
+          message: "User already exists" 
+        });
+      }
+
+      // Hash password
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      // Create user
+      const newUser = await storage.createUser({
+        username,
+        email: username,
+        passwordHash,
+        role: 'admin',
+        isActive: true,
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Admin account created successfully",
+        user: { id: newUser.id, username: newUser.username, email: newUser.email, role: newUser.role }
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   app.get("/api/admin/me", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUserById(req.session.adminId!);
