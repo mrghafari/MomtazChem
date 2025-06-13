@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { 
   Package, 
   Users, 
@@ -204,6 +205,7 @@ const ShopAdmin = () => {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { t, isRTL } = useLanguage();
 
   // Authentication check
   useEffect(() => {
@@ -477,8 +479,10 @@ ${data.data.map((item: any) =>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Shop Management</h1>
-            <p className="text-gray-600 mt-2">Manage orders, inventory, and discount settings</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t('adminPanel.shopManagement')}</h1>
+            <p className="text-gray-600 mt-2">
+              {isRTL ? 'إدارة الطلبات والمخزون وإعدادات الخصومات' : 'Manage orders, inventory, and discount settings'}
+            </p>
           </div>
         </div>
 
@@ -488,7 +492,7 @@ ${data.data.map((item: any) =>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                  <p className="text-sm font-medium text-gray-600">{t('adminPanel.totalOrders')}</p>
                   <p className="text-2xl font-bold text-gray-900">{(stats as any)?.totalOrders || 0}</p>
                 </div>
                 <ShoppingCart className="w-8 h-8 text-blue-600" />
@@ -500,7 +504,7 @@ ${data.data.map((item: any) =>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                  <p className="text-sm font-medium text-gray-600">{t('adminPanel.totalRevenue')}</p>
                   <p className="text-2xl font-bold text-gray-900">${(stats as any)?.totalRevenue || 0}</p>
                 </div>
                 <DollarSign className="w-8 h-8 text-green-600" />

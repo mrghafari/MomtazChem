@@ -96,7 +96,7 @@ export default function Header() {
                 className="h-8 w-auto"
               />
               <span className="hidden sm:block text-xl font-bold text-gray-900 dark:text-white">
-                Momtazchem
+                {isRTL ? t('companyShortName') : 'Momtazchem'}
               </span>
             </motion.div>
           </Link>
@@ -178,7 +178,10 @@ export default function Header() {
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 rtl:space-x-reverse">
+            {/* Language Toggle */}
+            <LanguageToggle />
+            
             {/* Mobile menu button */}
             <Button
               variant="ghost"
