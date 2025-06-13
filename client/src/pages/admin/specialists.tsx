@@ -56,6 +56,7 @@ interface Specialist {
 export default function SpecialistsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingSpecialist, setEditingSpecialist] = useState<Specialist | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const { data: specialists = [], isLoading, refetch } = useQuery({
@@ -115,6 +116,32 @@ export default function SpecialistsPage() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async (data: { id: string; updates: Partial<SpecialistForm> }) => {
+      const expertiseArray = data.updates.expertise ? 
+        data.updates.expertise.split("،").map(item => item.trim()) : 
+        undefined;
+      return apiRequest(`/api/admin/specialists/${data.id}`, 'PUT', {
+        ...data.updates,
+        expertise: expertiseArray,
+      });
+    },
+    onSuccess: () => {
+      toast({ description: "کارشناس به‌روزرسانی شد" });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/specialists'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/specialists/online'] });
+      setIsEditDialogOpen(false);
+      setEditingSpecialist(null);
+      form.reset();
+    },
+    onError: () => {
+      toast({ 
+        variant: "destructive",
+        description: "خطا در به‌روزرسانی کارشناس" 
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       return apiRequest(`/api/admin/specialists/${id}`, 'DELETE');
@@ -133,7 +160,31 @@ export default function SpecialistsPage() {
   });
 
   const onSubmit = (data: SpecialistForm) => {
-    createMutation.mutate(data);
+    if (editingSpecialist) {
+      updateMutation.mutate({ id: editingSpecialist.id, updates: data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  const handleEditSpecialist = (specialist: Specialist) => {
+    setEditingSpecialist(specialist);
+    form.reset({
+      name: specialist.name,
+      email: specialist.email,
+      phone: specialist.phone || "",
+      department: specialist.department,
+      status: specialist.status as "online" | "busy" | "away" | "offline",
+      expertise: specialist.expertise.join("، "),
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsAddDialogOpen(false);
+    setIsEditDialogOpen(false);
+    setEditingSpecialist(null);
+    form.reset();
   };
 
   const getStatusColor = (status: string) => {
@@ -174,7 +225,7 @@ export default function SpecialistsPage() {
           </p>
         </div>
         
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={isAddDialogOpen || isEditDialogOpen} onOpenChange={handleCloseDialog}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -183,7 +234,9 @@ export default function SpecialistsPage() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-md" dir="rtl">
             <DialogHeader>
-              <DialogTitle>افزودن کارشناس جدید</DialogTitle>
+              <DialogTitle>
+                {editingSpecialist ? "ویرایش کارشناس" : "افزودن کارشناس جدید"}
+              </DialogTitle>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -284,15 +337,16 @@ export default function SpecialistsPage() {
                 <div className="flex gap-3 pt-4">
                   <Button 
                     type="submit" 
-                    disabled={createMutation.isPending}
+                    disabled={createMutation.isPending || updateMutation.isPending}
                     className="flex-1"
                   >
-                    {createMutation.isPending ? "در حال ذخیره..." : "ذخیره"}
+                    {(createMutation.isPending || updateMutation.isPending) ? "در حال ذخیره..." : 
+                     editingSpecialist ? "به‌روزرسانی" : "ذخیره"}
                   </Button>
                   <Button 
                     type="button" 
                     variant="outline" 
-                    onClick={() => setIsAddDialogOpen(false)}
+                    onClick={handleCloseDialog}
                     className="flex-1"
                   >
                     لغو
@@ -364,6 +418,14 @@ export default function SpecialistsPage() {
                       <SelectItem value="offline">آفلاین</SelectItem>
                     </SelectContent>
                   </Select>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditSpecialist(specialist)}
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </Button>
                   
                   <Button
                     variant="outline"
