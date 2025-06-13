@@ -43,7 +43,7 @@ const UserForm = ({ user, onSave, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="username">نام کاربری</Label>
+        <Label htmlFor="username">Username</Label>
         <Input
           id="username"
           value={formData.username}
@@ -52,7 +52,7 @@ const UserForm = ({ user, onSave, onCancel }: {
         />
       </div>
       <div>
-        <Label htmlFor="email">ایمیل</Label>
+        <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
@@ -62,14 +62,14 @@ const UserForm = ({ user, onSave, onCancel }: {
         />
       </div>
       <div>
-        <Label htmlFor="role">نقش</Label>
+        <Label htmlFor="role">Role</Label>
         <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="admin">مدیر</SelectItem>
-            <SelectItem value="manager">مدیر بخش</SelectItem>
+            <SelectItem value="admin">Administrator</SelectItem>
+            <SelectItem value="manager">Manager</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -81,14 +81,14 @@ const UserForm = ({ user, onSave, onCancel }: {
           onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
           className="rounded"
         />
-        <Label htmlFor="isActive">فعال</Label>
+        <Label htmlFor="isActive">Active</Label>
       </div>
       <div className="flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={onCancel}>
-          لغو
+          Cancel
         </Button>
         <Button type="submit">
-          {user ? "به‌روزرسانی" : "ایجاد"}
+          {user ? "Update" : "Create"}
         </Button>
       </div>
     </form>
@@ -112,8 +112,8 @@ const PasswordChangeForm = ({ userId, onSave, onCancel }: {
     
     if (formData.newPassword !== formData.confirmPassword) {
       toast({
-        title: "خطا",
-        description: "رمز عبور جدید و تایید آن یکسان نیستند",
+        title: "Error",
+        description: "New password and confirmation do not match",
         variant: "destructive",
       });
       return;
@@ -126,15 +126,15 @@ const PasswordChangeForm = ({ userId, onSave, onCancel }: {
       });
       
       toast({
-        title: "موفق",
-        description: "رمز عبور با موفقیت تغییر کرد",
+        title: "Success",
+        description: "Password changed successfully",
       });
       
       onSave();
     } catch (error) {
       toast({
-        title: "خطا",
-        description: "تغییر رمز عبور انجام نشد",
+        title: "Error",
+        description: "Failed to change password",
         variant: "destructive",
       });
     }
@@ -143,7 +143,7 @@ const PasswordChangeForm = ({ userId, onSave, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="currentPassword">رمز عبور فعلی</Label>
+        <Label htmlFor="currentPassword">Current Password</Label>
         <Input
           id="currentPassword"
           type="password"
@@ -153,7 +153,7 @@ const PasswordChangeForm = ({ userId, onSave, onCancel }: {
         />
       </div>
       <div>
-        <Label htmlFor="newPassword">رمز عبور جدید</Label>
+        <Label htmlFor="newPassword">New Password</Label>
         <Input
           id="newPassword"
           type="password"
@@ -163,7 +163,7 @@ const PasswordChangeForm = ({ userId, onSave, onCancel }: {
         />
       </div>
       <div>
-        <Label htmlFor="confirmPassword">تایید رمز عبور جدید</Label>
+        <Label htmlFor="confirmPassword">Confirm New Password</Label>
         <Input
           id="confirmPassword"
           type="password"
@@ -174,10 +174,10 @@ const PasswordChangeForm = ({ userId, onSave, onCancel }: {
       </div>
       <div className="flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={onCancel}>
-          لغو
+          Cancel
         </Button>
         <Button type="submit">
-          تغییر رمز عبور
+          Change Password
         </Button>
       </div>
     </form>
@@ -214,14 +214,14 @@ export default function AdminUsers() {
       setIsUserDialogOpen(false);
       setEditingUser(null);
       toast({
-        title: "موفق",
-        description: "کاربر با موفقیت به‌روزرسانی شد",
+        title: "Success",
+        description: "User updated successfully",
       });
     },
     onError: () => {
       toast({
-        title: "خطا",
-        description: "به‌روزرسانی کاربر انجام نشد",
+        title: "Error",
+        description: "Failed to update user",
         variant: "destructive",
       });
     },
@@ -234,14 +234,14 @@ export default function AdminUsers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
-        title: "موفق",
-        description: "کاربر با موفقیت حذف شد",
+        title: "Success",
+        description: "User deleted successfully",
       });
     },
     onError: () => {
       toast({
-        title: "خطا",
-        description: "حذف کاربر انجام نشد",
+        title: "Error",
+        description: "Failed to delete user",
         variant: "destructive",
       });
     },
@@ -254,13 +254,13 @@ export default function AdminUsers() {
   };
 
   const handleDeleteUser = (user: User) => {
-    if (confirm(`آیا از حذف کاربر ${user.username} اطمینان دارید؟`)) {
+    if (confirm(`Are you sure you want to delete user ${user.username}?`)) {
       deleteUserMutation.mutate(user.id);
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fa-IR', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -280,12 +280,12 @@ export default function AdminUsers() {
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">مدیریت کاربران</h1>
-            <p className="text-gray-600 mt-2">مدیریت حساب‌های کاربری و دسترسی‌ها</p>
+            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+            <p className="text-gray-600 mt-2">Manage user accounts and access permissions</p>
           </div>
           <Button variant="outline" onClick={() => setLocation("/admin")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            بازگشت به پنل مدیریت
+            Back to Admin Panel
           </Button>
         </div>
 
@@ -293,7 +293,7 @@ export default function AdminUsers() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              لیست کاربران ({users.length})
+              User List ({users.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -304,13 +304,13 @@ export default function AdminUsers() {
                     <div className="flex items-center gap-3">
                       <h3 className="font-medium">{user.username}</h3>
                       <Badge variant={user.isActive ? "default" : "secondary"}>
-                        {user.isActive ? "فعال" : "غیرفعال"}
+                        {user.isActive ? "Active" : "Inactive"}
                       </Badge>
                       <Badge variant="outline">{user.role}</Badge>
                     </div>
                     <p className="text-sm text-gray-600 mt-1">{user.email}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      ایجاد شده: {formatDate(user.createdAt)}
+                      Created: {formatDate(user.createdAt)}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -353,7 +353,7 @@ export default function AdminUsers() {
         <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>ویرایش کاربر</DialogTitle>
+              <DialogTitle>Edit User</DialogTitle>
             </DialogHeader>
             {editingUser && (
               <UserForm
@@ -372,7 +372,7 @@ export default function AdminUsers() {
         <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>تغییر رمز عبور</DialogTitle>
+              <DialogTitle>Change Password</DialogTitle>
             </DialogHeader>
             {currentUser && (
               <PasswordChangeForm

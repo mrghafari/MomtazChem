@@ -29,13 +29,13 @@ export default function ForgotPassword() {
       
       setIsSubmitted(true);
       toast({
-        title: "درخواست ارسال شد",
-        description: "اگر حساب کاربری با این ایمیل وجود داشته باشد، لینک بازیابی رمز عبور ارسال خواهد شد",
+        title: "Request Sent",
+        description: "If an account with this email exists, a password reset link has been sent",
       });
     } catch (error) {
       toast({
-        title: "خطا",
-        description: "مشکلی در ارسال درخواست پیش آمد",
+        title: "Error",
+        description: "Failed to send reset request",
         variant: "destructive",
       });
     } finally {
@@ -108,9 +108,9 @@ export default function ForgotPassword() {
           <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
             <Mail className="w-6 h-6 text-blue-600" />
           </div>
-          <CardTitle>بازیابی رمز عبور</CardTitle>
+          <CardTitle>Forgot Password</CardTitle>
           <p className="text-sm text-gray-600">
-            ایمیل خود را وارد کنید تا لینک بازیابی رمز عبور ارسال شود
+            Enter your email address to receive a password reset link
           </p>
         </CardHeader>
         <CardContent>
