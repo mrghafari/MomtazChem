@@ -364,20 +364,10 @@ export default function AdminPage() {
             <User className="w-4 h-4" />
             <span className="text-sm">{user?.username}</span>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              onClick={() => window.open('/admin/specialists', '_blank')}
-              variant="outline"
-              className="border-blue-600 text-blue-600 hover:bg-blue-50"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Manage Specialists
-            </Button>
-            <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Product
-            </Button>
-          </div>
+          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Product
+          </Button>
           <Button 
             onClick={() => syncProductsMutation.mutate()}
             disabled={syncProductsMutation.isPending}
@@ -393,7 +383,7 @@ export default function AdminPage() {
             className="border-blue-300 text-blue-600 hover:bg-blue-50"
           >
             <User className="w-4 h-4 mr-2" />
-            مدیریت متخصصان
+            Manage Specialists
           </Button>
           <Button 
             variant="outline"
