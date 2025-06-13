@@ -2,6 +2,7 @@ import { users, leads, leadActivities, type User, type InsertUser, type Lead, ty
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
+import { shopStorage } from "./shop-storage";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 
 export interface IStorage {
@@ -15,6 +16,10 @@ export interface IStorage {
   getProductsByCategory(category: string): Promise<ShowcaseProduct[]>;
   updateProduct(id: number, product: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct>;
   deleteProduct(id: number): Promise<void>;
+  
+  // Product synchronization with shop
+  syncProductToShop(showcaseProduct: ShowcaseProduct): Promise<void>;
+  syncAllProductsToShop(): Promise<void>;
   
   // User management
   createUser(user: InsertUser): Promise<User>;
@@ -75,6 +80,10 @@ export class DatabaseStorage implements IStorage {
       .insert(showcaseProducts)
       .values(productData)
       .returning();
+    
+    // Auto-sync to shop after creating showcase product
+    await this.syncProductToShop(product);
+    
     return product;
   }
 
@@ -117,11 +126,76 @@ export class DatabaseStorage implements IStorage {
       .set(updateData)
       .where(eq(showcaseProducts.id, id))
       .returning();
+    
+    // Auto-sync to shop after updating showcase product
+    await this.syncProductToShop(product);
+    
     return product;
   }
 
   async deleteProduct(id: number): Promise<void> {
     await showcaseDb.delete(showcaseProducts).where(eq(showcaseProducts.id, id));
+  }
+
+  // Product synchronization methods
+  async syncProductToShop(showcaseProduct: ShowcaseProduct): Promise<void> {
+    try {
+      // Generate SKU from name if not available
+      const productSku = `SP-${showcaseProduct.id}-${showcaseProduct.name.replace(/\s+/g, '-').toUpperCase().substring(0, 10)}`;
+      
+      // Check if product already exists in shop by name (since showcase doesn't have SKU)
+      const allShopProducts = await shopStorage.getShopProducts();
+      const existingShopProduct = allShopProducts.find(p => p.name === showcaseProduct.name);
+      
+      // Extract price from priceRange (e.g., "$50 - $100" -> "75")
+      let productPrice = "50"; // Default price
+      if (showcaseProduct.priceRange) {
+        const priceMatch = showcaseProduct.priceRange.match(/\$?(\d+(?:\.\d+)?)/);
+        if (priceMatch) {
+          productPrice = priceMatch[1];
+        }
+      }
+      
+      if (existingShopProduct) {
+        // Update existing shop product
+        await shopStorage.updateShopProduct(existingShopProduct.id, {
+          name: showcaseProduct.name,
+          description: showcaseProduct.description,
+          price: productPrice,
+          category: showcaseProduct.category,
+          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
+          isActive: showcaseProduct.isActive,
+        });
+      } else {
+        // Create new shop product
+        await shopStorage.createShopProduct({
+          name: showcaseProduct.name,
+          sku: productSku,
+          description: showcaseProduct.description || '',
+          price: productPrice,
+          priceUnit: 'unit',
+          category: showcaseProduct.category,
+          stockQuantity: 100, // Default stock for new products
+          lowStockThreshold: 10,
+          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
+          isActive: showcaseProduct.isActive,
+          isFeatured: false,
+        });
+      }
+    } catch (error) {
+      console.error('Error syncing product to shop:', error);
+    }
+  }
+
+  async syncAllProductsToShop(): Promise<void> {
+    try {
+      const showcaseProducts = await this.getProducts();
+      for (const product of showcaseProducts) {
+        await this.syncProductToShop(product);
+      }
+    } catch (error) {
+      console.error('Error syncing all products to shop:', error);
+    }
   }
 
   // User management methods

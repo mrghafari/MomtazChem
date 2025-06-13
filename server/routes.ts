@@ -1259,6 +1259,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Product synchronization endpoint
+  app.post("/api/sync-products", requireAuth, async (req, res) => {
+    try {
+      await storage.syncAllProductsToShop();
+      res.json({ success: true, message: "All products synchronized successfully" });
+    } catch (error) {
+      console.error("Error syncing products:", error);
+      res.status(500).json({ success: false, message: "Failed to sync products" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
