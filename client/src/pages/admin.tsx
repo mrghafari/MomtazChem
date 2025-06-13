@@ -386,6 +386,14 @@ export default function AdminPage() {
             Shop Management
           </Button>
           <Button 
+            variant="outline"
+            onClick={() => setLocation("/analytics/sales")}
+            className="border-green-300 text-green-600 hover:bg-green-50"
+          >
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Sales Analytics
+          </Button>
+          <Button 
             variant="outline" 
             onClick={() => {
               logout();
