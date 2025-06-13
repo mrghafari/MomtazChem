@@ -322,24 +322,7 @@ const Contact = () => {
                   referrerPolicy="no-referrer-when-downgrade"
                   title="Momtazchem Location - Erbil"
                 ></iframe>
-                
-                {/* Company Location Marker Overlay */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full pointer-events-none">
-                  <div className="relative flex flex-col items-center">
-                    {/* Location Pin */}
-                    <div className="relative">
-                      <div className="w-6 h-6 bg-red-500 rounded-full border-3 border-white shadow-lg"></div>
-                      <div className="absolute top-0 left-1/2 w-1 h-6 bg-red-500 transform -translate-x-1/2 -translate-y-6"></div>
-                      <div className="absolute -bottom-1 left-1/2 w-3 h-3 bg-red-500 transform -translate-x-1/2 rotate-45"></div>
-                    </div>
-                    {/* Pulsing Effect */}
-                    <div className="absolute top-0 w-8 h-8 bg-red-500 rounded-full opacity-25 animate-ping"></div>
-                    {/* Company Label */}
-                    <div className="mt-2 bg-white px-3 py-1 rounded-full shadow-md border">
-                      <span className="text-xs font-semibold text-gray-800">Momtazchem</span>
-                    </div>
-                  </div>
-                </div>
+
                 
                 <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg">
                   <div className="flex items-center space-x-3">
