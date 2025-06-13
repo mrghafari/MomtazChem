@@ -204,27 +204,7 @@ const ShopAdmin = () => {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // Authentication check
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setLocation("/admin/login");
-    }
-  }, [authLoading, isAuthenticated, setLocation]);
-
-  // Show loading while checking authentication
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
-
+  // All hooks must be called before any conditional returns
   // Fetch shop statistics
   const { data: stats = {} } = useQuery({
     queryKey: ["/api/shop/statistics"],
@@ -260,6 +240,27 @@ const ShopAdmin = () => {
     queryKey: ["/api/shop/financial-transactions"],
     enabled: isAuthenticated,
   });
+
+  // Authentication check
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/admin/login");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Update order status mutation
   const updateOrderMutation = useMutation({
