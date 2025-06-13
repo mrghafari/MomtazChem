@@ -354,79 +354,82 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Product Management</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Manage products across four categories</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-gray-600">
-            <User className="w-4 h-4" />
-            <span className="text-sm">{user?.username}</span>
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Product Management</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Manage products across four categories</p>
           </div>
-          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-gray-600">
+              <User className="w-4 h-4" />
+              <span className="text-sm">{user?.username}</span>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                logout();
+                setLocation("/admin/login");
+              }}
+              className="border-red-300 text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+
+        {/* Management Actions Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 h-12 text-sm">
             <Plus className="w-4 h-4 mr-2" />
             Add Product
           </Button>
+          
           <Button 
             onClick={() => syncProductsMutation.mutate()}
             disabled={syncProductsMutation.isPending}
             variant="outline"
-            className="ml-2 border-green-300 text-green-600 hover:bg-green-50"
+            className="border-green-300 text-green-600 hover:bg-green-50 h-12 text-sm"
           >
             <Package className="w-4 h-4 mr-2" />
-            {syncProductsMutation.isPending ? 'Syncing...' : 'Sync to Shop'}
+            {syncProductsMutation.isPending ? 'Syncing...' : 'Sync Shop'}
           </Button>
+          
           <Button 
             variant="outline"
             onClick={() => setLocation("/admin/specialists")}
-            className="border-blue-300 text-blue-600 hover:bg-blue-50"
+            className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
           >
             <User className="w-4 h-4 mr-2" />
-            Manage Specialists
+            Specialists
           </Button>
+          
           <Button 
             variant="outline"
             onClick={() => setLocation("/admin/inquiries")}
-            className="border-orange-300 text-orange-600 hover:bg-orange-50"
+            className="border-orange-300 text-orange-600 hover:bg-orange-50 h-12 text-sm"
           >
             <BarChart3 className="w-4 h-4 mr-2" />
-            Product Inquiries
+            Inquiries
           </Button>
+          
           <Button 
             variant="outline"
             onClick={() => setLocation("/admin/barcode-inventory")}
-            className="border-cyan-300 text-cyan-600 hover:bg-cyan-50"
+            className="border-cyan-300 text-cyan-600 hover:bg-cyan-50 h-12 text-sm"
           >
             <QrCode className="w-4 h-4 mr-2" />
-            Barcode Inventory
+            Barcode
           </Button>
+          
           <Button 
             variant="outline"
             onClick={() => setLocation("/shop-admin")}
-            className="border-purple-300 text-purple-600 hover:bg-purple-50"
+            className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
           >
             <DollarSign className="w-4 h-4 mr-2" />
-            Shop Management
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/analytics/sales")}
-            className="border-green-300 text-green-600 hover:bg-green-50"
-          >
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Sales Analytics
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              logout();
-              setLocation("/admin/login");
-            }}
-            className="border-red-300 text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
+            Shop
           </Button>
         </div>
       </div>
