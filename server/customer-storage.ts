@@ -360,10 +360,6 @@ export class CustomerStorage implements ICustomerStorage {
       .select({ count: count() })
       .from(customers);
 
-    const [totalOrdersResult] = await customerDb
-      .select({ count: count() })
-      .from(customerOrders);
-
     const [totalInquiriesResult] = await customerDb
       .select({ count: count() })
       .from(customerInquiries);
@@ -371,15 +367,6 @@ export class CustomerStorage implements ICustomerStorage {
     const [totalQuoteRequestsResult] = await customerDb
       .select({ count: count() })
       .from(quoteRequests);
-
-    const [pendingOrdersResult] = await customerDb
-      .select({ count: count() })
-      .from(customerOrders)
-      .where(or(
-        eq(customerOrders.status, 'pending'),
-        eq(customerOrders.status, 'confirmed'),
-        eq(customerOrders.status, 'processing')
-      ));
 
     const [openInquiriesResult] = await customerDb
       .select({ count: count() })
@@ -396,10 +383,10 @@ export class CustomerStorage implements ICustomerStorage {
 
     return {
       totalCustomers: totalCustomersResult.count,
-      totalOrders: totalOrdersResult.count,
+      totalOrders: 0, // Orders table not implemented yet
       totalInquiries: totalInquiriesResult.count,
       totalQuoteRequests: totalQuoteRequestsResult.count,
-      pendingOrders: pendingOrdersResult.count,
+      pendingOrders: 0, // Orders table not implemented yet
       openInquiries: openInquiriesResult.count,
       pendingQuotes: pendingQuotesResult.count,
     };
