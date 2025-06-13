@@ -179,6 +179,60 @@ export const translations = {
         success: "Message sent successfully!",
         error: "Failed to send message. Please try again."
       }
+    },
+
+    // Services Page
+    servicesPage: {
+      title: "Our Services",
+      subtitle: "Comprehensive chemical industry solutions",
+      service1: {
+        title: "Research & Development",
+        description: "Custom formulation development and product optimization to meet your specific requirements.",
+        features: [
+          "Custom Chemical Formulations",
+          "Product Performance Testing", 
+          "Regulatory Compliance Support",
+          "Scale-up from Lab to Production",
+          "Quality Optimization",
+          "Application Development"
+        ]
+      },
+      service2: {
+        title: "Global Distribution",
+        description: "Reliable supply chain and logistics network ensuring timely delivery worldwide.",
+        features: [
+          "40+ Countries Coverage",
+          "Express Shipping Options",
+          "Bulk Order Handling",
+          "Cold Chain Management",
+          "Real-time Tracking",
+          "Local Warehousing"
+        ]
+      },
+      service3: {
+        title: "Technical Support",
+        description: "Expert technical assistance and consultation for optimal product application.",
+        features: [
+          "24/7 Technical Helpline",
+          "Application Training",
+          "Troubleshooting Support",
+          "Performance Optimization",
+          "Safety Guidelines",
+          "Documentation Support"
+        ]
+      },
+      service4: {
+        title: "Consulting Services",
+        description: "Strategic consulting to help optimize your chemical processes and operations.",
+        features: [
+          "Process Optimization",
+          "Cost Reduction Analysis",
+          "Regulatory Guidance",
+          "Environmental Solutions",
+          "Training Programs",
+          "Quality Assurance"
+        ]
+      }
     }
   },
 
@@ -366,6 +420,60 @@ export const translations = {
         sending: "جاري الإرسال...",
         success: "تم إرسال الرسالة بنجاح!",
         error: "فشل في إرسال الرسالة. يرجى المحاولة مرة أخرى."
+      }
+    },
+
+    // صفحة الخدمات
+    servicesPage: {
+      title: "خدماتنا",
+      subtitle: "حلول شاملة لصناعة الكيماويات",
+      service1: {
+        title: "البحث والتطوير",
+        description: "تطوير تركيبات مخصصة وتحسين المنتجات لتلبية متطلباتك المحددة.",
+        features: [
+          "تركيبات كيميائية مخصصة",
+          "اختبار أداء المنتجات",
+          "دعم الامتثال التنظيمي",
+          "التوسع من المختبر إلى الإنتاج",
+          "تحسين الجودة",
+          "تطوير التطبيقات"
+        ]
+      },
+      service2: {
+        title: "التوزيع العالمي",
+        description: "شبكة موثوقة لسلسلة التوريد واللوجستيات تضمن التسليم في الوقت المحدد في جميع أنحاء العالم.",
+        features: [
+          "تغطية أكثر من 40 دولة",
+          "خيارات الشحن السريع",
+          "التعامل مع الطلبات الكبيرة",
+          "إدارة السلسلة الباردة",
+          "التتبع في الوقت الفعلي",
+          "التخزين المحلي"
+        ]
+      },
+      service3: {
+        title: "الدعم التقني",
+        description: "مساعدة تقنية خبيرة واستشارات لتطبيق المنتج الأمثل.",
+        features: [
+          "خط المساعدة التقنية 24/7",
+          "تدريب التطبيقات",
+          "دعم استكشاف الأخطاء وإصلاحها",
+          "تحسين الأداء",
+          "إرشادات السلامة",
+          "دعم التوثيق"
+        ]
+      },
+      service4: {
+        title: "خدمات الاستشارات",
+        description: "استشارات استراتيجية للمساعدة في تحسين عملياتك ومعالجاتك الكيميائية.",
+        features: [
+          "تحسين العمليات",
+          "تحليل تقليل التكاليف",
+          "التوجيه التنظيمي",
+          "الحلول البيئية",
+          "برامج التدريب",
+          "ضمان الجودة"
+        ]
       }
     }
   }
