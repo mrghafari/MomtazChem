@@ -74,8 +74,8 @@ const getCategoryEmail = (category: string): string => {
   const categoryEmails = {
     'fuel-additives': 'fuel@momtazchem.com',
     'water-treatment': 'water@momtazchem.com', 
-    'paint-thinner': 'paint@momtazchem.com',
-    'agricultural-fertilizers': 'agriculture@momtazchem.com'
+    'paint-thinner': 'thinner@momtaz.com',
+    'agricultural-fertilizers': 'fertilizer@momtazchem.com'
   };
   
   return categoryEmails[category as keyof typeof categoryEmails] || 'info@momtazchem.com';
