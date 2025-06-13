@@ -11,7 +11,7 @@ import { customerStorage } from "./customer-storage";
 import { shopStorage } from "./shop-storage";
 import { insertCustomerInquirySchema } from "@shared/customer-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
-import { sendContactEmail } from "./email";
+import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -799,6 +799,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const inquiryData = insertCustomerInquirySchema.parse(req.body);
       const inquiry = await customerStorage.createInquiry(inquiryData);
+      
+      // Send email notification for the inquiry
+      try {
+        // Get product name for email
+        let productName = 'Product';
+        if (inquiryData.productIds && Array.isArray(inquiryData.productIds) && inquiryData.productIds.length > 0) {
+          const product = await storage.getProductById(inquiryData.productIds[0]);
+          if (product) {
+            productName = product.name;
+          }
+        }
+
+        const emailData = {
+          contactEmail: inquiryData.contactEmail,
+          contactPhone: inquiryData.contactPhone || undefined,
+          company: inquiryData.company || undefined,
+          subject: inquiryData.subject,
+          message: inquiryData.message,
+          type: inquiryData.type,
+          priority: inquiryData.priority || 'normal',
+          category: inquiryData.category || 'general',
+          productName: productName,
+          inquiryNumber: inquiry.inquiryNumber,
+        };
+
+        await sendProductInquiryEmail(emailData);
+        console.log(`Product inquiry email sent for category: ${inquiryData.category}`);
+      } catch (emailError) {
+        console.error("Failed to send inquiry email:", emailError);
+        // Don't fail the inquiry creation if email fails
+      }
+      
       res.status(201).json({ 
         success: true, 
         message: "Inquiry submitted successfully",

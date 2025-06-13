@@ -65,7 +65,7 @@ const FuelAdditives = () => {
                   Request Quote
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-primary">
+              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-primary bg-[#bbd45f]">
                 Download Datasheet
               </Button>
             </div>
@@ -170,10 +170,10 @@ const FuelAdditives = () => {
                       <div className="mb-6">
                         <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
                         <ul className="space-y-2">
-                          {(product.features as string[]).map((feature, featureIndex) => (
+                          {product.features.filter(Boolean).map((feature, featureIndex) => (
                             <li key={featureIndex} className="flex items-center text-gray-700">
                               <CheckCircle className="h-4 w-4 text-secondary mr-3 flex-shrink-0" />
-                              {feature}
+                              {String(feature)}
                             </li>
                           ))}
                         </ul>
@@ -184,9 +184,9 @@ const FuelAdditives = () => {
                       <div className="mb-6">
                         <h4 className="font-semibold text-gray-900 mb-3">Applications:</h4>
                         <div className="flex flex-wrap gap-2">
-                          {(product.applications as string[]).map((app, appIndex) => (
+                          {product.applications.filter(Boolean).map((app, appIndex) => (
                             <span key={appIndex} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                              {app}
+                              {String(app)}
                             </span>
                           ))}
                         </div>
@@ -324,7 +324,7 @@ const FuelAdditives = () => {
                 Contact Technical Team
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-gray-900 bg-[#21894d]">
+            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-gray-900 bg-[#bbd45f]">
               Download Product Catalog
             </Button>
           </div>
