@@ -764,6 +764,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shop/E-commerce API endpoints - Inventory-based product management
+  app.get("/api/shop/products", async (req, res) => {
+    try {
+      const products = await shopStorage.getShopProducts();
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching shop products:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch products" });
+    }
+  });
+
+  app.get("/api/shop/categories", async (req, res) => {
+    try {
+      const categories = await shopStorage.getShopCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching shop categories:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch categories" });
+    }
+  });
+
+  app.get("/api/shop/products/:id", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+      
+      const product = await shopStorage.getShopProductById(productId);
+      if (!product) {
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching shop product:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch product" });
+    }
+  });
+
+  app.post("/api/shop/products", requireAuth, async (req, res) => {
+    try {
+      const productData = insertShopProductSchema.parse(req.body);
+      const product = await shopStorage.createShopProduct(productData);
+      res.json({ success: true, product });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid product data", 
+          errors: error.errors 
+        });
+      } else {
+        console.error("Error creating shop product:", error);
+        res.status(500).json({ success: false, message: "Failed to create product" });
+      }
+    }
+  });
+
+  app.patch("/api/shop/products/:id", requireAuth, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+      
+      const updates = req.body;
+      const product = await shopStorage.updateShopProduct(productId, updates);
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating shop product:", error);
+      res.status(500).json({ success: false, message: "Failed to update product" });
+    }
+  });
+
+  app.delete("/api/shop/products/:id", requireAuth, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+      
+      await shopStorage.deleteShopProduct(productId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting shop product:", error);
+      res.status(500).json({ success: false, message: "Failed to delete product" });
+    }
+  });
+
+  // Shop categories management
+  app.post("/api/shop/categories", requireAuth, async (req, res) => {
+    try {
+      const categoryData = insertShopCategorySchema.parse(req.body);
+      const category = await shopStorage.createShopCategory(categoryData);
+      res.json({ success: true, category });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid category data", 
+          errors: error.errors 
+        });
+      } else {
+        console.error("Error creating shop category:", error);
+        res.status(500).json({ success: false, message: "Failed to create category" });
+      }
+    }
+  });
+
+  app.patch("/api/shop/categories/:id", requireAuth, async (req, res) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      if (isNaN(categoryId)) {
+        return res.status(400).json({ success: false, message: "Invalid category ID" });
+      }
+      
+      const updates = req.body;
+      const category = await shopStorage.updateShopCategory(categoryId, updates);
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating shop category:", error);
+      res.status(500).json({ success: false, message: "Failed to update category" });
+    }
+  });
+
+  // Inventory management endpoints
+  app.get("/api/shop/inventory/:productId", requireAuth, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+      
+      const transactions = await shopStorage.getInventoryTransactions(productId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching inventory transactions:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch inventory data" });
+    }
+  });
+
+  app.post("/api/shop/inventory/update", requireAuth, async (req, res) => {
+    try {
+      const { productId, newQuantity, reason } = req.body;
+      
+      if (!productId || newQuantity === undefined || !reason) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: productId, newQuantity, reason" 
+        });
+      }
+      
+      await shopStorage.updateProductStock(productId, newQuantity, reason);
+      res.json({ success: true, message: "Inventory updated successfully" });
+    } catch (error) {
+      console.error("Error updating inventory:", error);
+      res.status(500).json({ success: false, message: "Failed to update inventory" });
+    }
+  });
+
+  // Order statistics for dashboard
+  app.get("/api/shop/statistics", requireAuth, async (req, res) => {
+    try {
+      const stats = await shopStorage.getOrderStatistics();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching shop statistics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch statistics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
