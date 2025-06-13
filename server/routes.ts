@@ -13,6 +13,7 @@ import { insertCustomerInquirySchema, insertEmailTemplateSchema } from "@shared/
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
+import InventoryAlertService from "./inventory-alerts";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -2117,6 +2118,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Failed to get template suggestions"
+      });
+    }
+  });
+
+  // Inventory monitoring routes
+  app.post("/api/inventory/check-all", requireAuth, async (req, res) => {
+    try {
+      await InventoryAlertService.checkInventoryLevels();
+      res.json({
+        success: true,
+        message: "Inventory check completed and alerts sent if needed"
+      });
+    } catch (error) {
+      console.error("Error checking inventory:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to check inventory levels"
+      });
+    }
+  });
+
+  app.post("/api/inventory/check-product/:id", requireAuth, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const alertSent = await InventoryAlertService.checkProductInventory(productId);
+      
+      res.json({
+        success: true,
+        alertSent,
+        message: alertSent ? "Alert sent for low stock" : "Stock levels are adequate"
+      });
+    } catch (error) {
+      console.error("Error checking product inventory:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to check product inventory"
       });
     }
   });
