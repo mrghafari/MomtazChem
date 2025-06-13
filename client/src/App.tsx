@@ -17,6 +17,7 @@ import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
 import SpecialistsAdmin from "@/pages/admin/specialists";
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
+import SMTPTestPage from "@/pages/admin/smtp-test";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import CRMPage from "@/pages/crm";
@@ -47,6 +48,7 @@ function Router() {
           <Route path="/admin/users" component={AdminUsers} />
           <Route path="/admin/specialists" component={SpecialistsAdmin} />
           <Route path="/admin/barcode-inventory" component={BarcodeInventory} />
+          <Route path="/admin/smtp-test" component={SMTPTestPage} />
           <Route path="/admin/inquiries" component={Dashboard} />
           <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />
