@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
 import { 
   MessageSquare, 
   Send, 
@@ -37,29 +38,13 @@ export default function LiveChat() {
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
-  const [onlineSpecialists, setOnlineSpecialists] = useState<OnlineSpecialist[]>([
-    {
-      id: "1",
-      name: "احمد محمدی",
-      department: "فروش محصولات شیمیایی",
-      status: "online",
-      expertise: ["افزودنی‌های سوخت", "تصفیه آب"]
-    },
-    {
-      id: "2", 
-      name: "فاطمه احمدی",
-      department: "پشتیبانی فنی",
-      status: "online",
-      expertise: ["کودهای کشاورزی", "مشاوره فنی"]
-    },
-    {
-      id: "3",
-      name: "علی رضایی", 
-      department: "فروش رنگ و تینر",
-      status: "busy",
-      expertise: ["محصولات رنگ", "حلال‌ها"]
-    }
-  ]);
+  
+  // Fetch online specialists from API
+  const { data: onlineSpecialists = [], isLoading, refetch } = useQuery({
+    queryKey: ['/api/specialists/online'],
+    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchOnWindowFocus: true,
+  });
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
     email: "",
@@ -135,7 +120,7 @@ export default function LiveChat() {
     if (!customerInfo.name || !customerInfo.email || !customerInfo.inquiry) return;
     
     // Find an available specialist
-    const availableSpecialist = onlineSpecialists.find(s => s.status === "online");
+    const availableSpecialist = onlineSpecialists.find((s: any) => s.status === "online");
     if (availableSpecialist) {
       startChat(availableSpecialist);
       
@@ -228,40 +213,59 @@ export default function LiveChat() {
                   <User className="w-4 h-4 mr-2" />
                   کارشناسان آنلاین
                 </h3>
-                <div className="space-y-3">
-                  {onlineSpecialists.map((specialist) => (
-                    <div key={specialist.id} className="border rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <Avatar className="w-8 h-8 mr-2">
-                            <AvatarFallback>{specialist.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium text-sm">{specialist.name}</div>
-                            <div className="text-xs text-gray-600">{specialist.department}</div>
+                {isLoading ? (
+                  <div className="text-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-sm text-gray-600 mt-2">در حال بارگذاری...</p>
+                  </div>
+                ) : onlineSpecialists.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-600">در حال حاضر کارشناسی آنلاین نیست</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => refetch()}
+                      className="mt-2"
+                    >
+                      تلاش مجدد
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {onlineSpecialists.map((specialist: any) => (
+                      <div key={specialist.id} className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center">
+                            <Avatar className="w-8 h-8 mr-2">
+                              <AvatarFallback>{specialist.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium text-sm">{specialist.name}</div>
+                              <div className="text-xs text-gray-600">{specialist.department}</div>
+                            </div>
                           </div>
+                          <Badge 
+                            variant={specialist.status === "online" ? "default" : "secondary"}
+                            className={`text-xs ${specialist.status === "online" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}
+                          >
+                            {getStatusText(specialist.status)}
+                          </Badge>
                         </div>
-                        <Badge 
-                          variant={specialist.status === "online" ? "default" : "secondary"}
-                          className={`text-xs ${specialist.status === "online" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}
+                        <div className="text-xs text-gray-600 mb-2">
+                          تخصص: {Array.isArray(specialist.expertise) ? specialist.expertise.join("، ") : specialist.expertise}
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => specialist.status === "online" ? startChat(specialist) : setShowContactForm(true)}
+                          disabled={specialist.status === "away"}
+                          className="w-full"
                         >
-                          {getStatusText(specialist.status)}
-                        </Badge>
+                          {specialist.status === "online" ? "شروع گفتگو" : "درخواست تماس"}
+                        </Button>
                       </div>
-                      <div className="text-xs text-gray-600 mb-2">
-                        تخصص: {specialist.expertise.join("، ")}
-                      </div>
-                      <Button
-                        size="sm"
-                        onClick={() => specialist.status === "online" ? startChat(specialist) : setShowContactForm(true)}
-                        disabled={specialist.status === "away"}
-                        className="w-full"
-                      >
-                        {specialist.status === "online" ? "شروع گفتگو" : "درخواست تماس"}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="border-t pt-4">
