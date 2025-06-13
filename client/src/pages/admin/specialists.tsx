@@ -77,13 +77,10 @@ export default function SpecialistsPage() {
   const createMutation = useMutation({
     mutationFn: async (data: SpecialistForm) => {
       const expertiseArray = data.expertise.split("،").map(item => item.trim());
-      return apiRequest('/api/admin/specialists', {
-        method: 'POST',
-        body: {
-          ...data,
-          expertise: expertiseArray,
-          id: `specialist-${Date.now()}`,
-        },
+      return apiRequest('/api/admin/specialists', 'POST', {
+        ...data,
+        expertise: expertiseArray,
+        id: `specialist-${Date.now()}`,
       });
     },
     onSuccess: () => {
@@ -103,10 +100,7 @@ export default function SpecialistsPage() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      return apiRequest(`/api/admin/specialists/${id}/status`, {
-        method: 'PATCH',
-        body: { status },
-      });
+      return apiRequest(`/api/admin/specialists/${id}/status`, 'PATCH', { status });
     },
     onSuccess: () => {
       toast({ description: "وضعیت کارشناس به‌روزرسانی شد" });
@@ -123,9 +117,7 @@ export default function SpecialistsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest(`/api/admin/specialists/${id}`, {
-        method: 'DELETE',
-      });
+      return apiRequest(`/api/admin/specialists/${id}`, 'DELETE');
     },
     onSuccess: () => {
       toast({ description: "کارشناس حذف شد" });
