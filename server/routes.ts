@@ -924,6 +924,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Order management endpoints
+  app.post("/api/shop/orders", async (req, res) => {
+    try {
+      const orderData = req.body;
+      
+      // Generate unique order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      
+      // Create or find customer
+      let customer = await shopStorage.getCustomerByEmail(orderData.customer.email);
+      if (!customer) {
+        customer = await shopStorage.createCustomer({
+          email: orderData.customer.email,
+          firstName: orderData.customer.firstName,
+          lastName: orderData.customer.lastName,
+          phone: orderData.customer.phone,
+          company: orderData.customer.company || null,
+          taxId: null,
+          isVerified: false,
+          isActive: true,
+          totalOrders: 0,
+          totalSpent: "0",
+          lastOrderDate: null,
+          notes: null,
+        });
+      }
+
+      // Create order
+      const order = await shopStorage.createOrder({
+        orderNumber,
+        customerId: customer.id,
+        status: "pending",
+        paymentStatus: "pending",
+        subtotal: orderData.subtotal.toString(),
+        taxAmount: orderData.taxAmount.toString(),
+        shippingAmount: orderData.shippingAmount.toString(),
+        discountAmount: "0",
+        totalAmount: orderData.totalAmount.toString(),
+        currency: "USD",
+        notes: orderData.notes,
+        billingAddress: orderData.billingAddress,
+        shippingAddress: orderData.shippingAddress,
+        shippingMethod: orderData.shippingMethod,
+        trackingNumber: null,
+        orderDate: new Date(),
+        shippedDate: null,
+        deliveredDate: null,
+      });
+
+      // Create order items and update inventory
+      for (const item of orderData.items) {
+        await shopStorage.createOrderItem({
+          orderId: order.id,
+          productId: item.productId,
+          productName: item.productName,
+          productSku: item.productSku,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice.toString(),
+          totalPrice: item.totalPrice.toString(),
+          productSnapshot: null,
+        });
+
+        // Update product stock
+        const product = await shopStorage.getShopProductById(item.productId);
+        if (product) {
+          const newQuantity = product.stockQuantity - item.quantity;
+          await shopStorage.updateProductStock(
+            item.productId,
+            newQuantity,
+            `Order ${orderNumber} - Sold ${item.quantity} units`
+          );
+        }
+      }
+
+      // Update customer statistics
+      await shopStorage.updateCustomer(customer.id, {
+        totalOrders: customer.totalOrders + 1,
+        totalSpent: (parseFloat(customer.totalSpent) + orderData.totalAmount).toString(),
+        lastOrderDate: new Date(),
+      });
+
+      res.json({ 
+        success: true, 
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        message: "Order created successfully" 
+      });
+    } catch (error) {
+      console.error("Error creating order:", error);
+      res.status(500).json({ success: false, message: "Failed to create order" });
+    }
+  });
+
+  app.get("/api/shop/orders", requireAuth, async (req, res) => {
+    try {
+      const orders = await shopStorage.getOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/shop/orders/:id", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: "Invalid order ID" });
+      }
+      
+      const order = await shopStorage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: "Order not found" });
+      }
+
+      const orderItems = await shopStorage.getOrderItems(orderId);
+      res.json({ ...order, items: orderItems });
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch order" });
+    }
+  });
+
+  app.patch("/api/shop/orders/:id", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: "Invalid order ID" });
+      }
+      
+      const updates = req.body;
+      const order = await shopStorage.updateOrder(orderId, updates);
+      res.json(order);
+    } catch (error) {
+      console.error("Error updating order:", error);
+      res.status(500).json({ success: false, message: "Failed to update order" });
+    }
+  });
+
   // Order statistics for dashboard
   app.get("/api/shop/statistics", requireAuth, async (req, res) => {
     try {

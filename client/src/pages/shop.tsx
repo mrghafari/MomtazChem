@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
+import Checkout from "./checkout";
 
 const Shop = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,6 +17,7 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [cart, setCart] = useState<{[key: number]: number}>({});
+  const [showCheckout, setShowCheckout] = useState(false);
 
   // Fetch shop products
   const { data: products = [], isLoading: productsLoading } = useQuery<ShopProduct[]>({
@@ -102,7 +105,12 @@ const Shop = () => {
             {/* Cart Summary */}
             <div className="flex items-center gap-4">
               <div className="relative">
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => setShowCheckout(true)}
+                  disabled={getTotalItems() === 0}
+                >
                   <ShoppingCart className="w-5 h-5" />
                   Cart ({getTotalItems()})
                   {getTotalItems() > 0 && (
@@ -360,6 +368,20 @@ const Shop = () => {
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
+          <Checkout 
+            cart={cart} 
+            products={products}
+            onOrderComplete={() => {
+              setCart({});
+              setShowCheckout(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
