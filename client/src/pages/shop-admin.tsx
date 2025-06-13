@@ -540,10 +540,10 @@ ${data.data.map((item: any) =>
         {/* Main Content */}
         <Tabs defaultValue="orders" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="orders">Orders Management</TabsTrigger>
-            <TabsTrigger value="inventory">Inventory Management</TabsTrigger>
-            <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
-            <TabsTrigger value="accounting">Accounting</TabsTrigger>
+            <TabsTrigger value="orders">{t('adminPanel.ordersManagement')}</TabsTrigger>
+            <TabsTrigger value="inventory">{t('adminPanel.inventoryManagement')}</TabsTrigger>
+            <TabsTrigger value="discounts">{t('adminPanel.discountSettings')}</TabsTrigger>
+            <TabsTrigger value="accounting">{t('adminPanel.accounting')}</TabsTrigger>
           </TabsList>
 
           {/* Orders Management */}
@@ -551,12 +551,12 @@ ${data.data.map((item: any) =>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Orders</CardTitle>
+                  <CardTitle>{t('adminPanel.orders')}</CardTitle>
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
                       <Input
-                        placeholder="Search orders..."
+                        placeholder={t('adminPanel.searchOrders')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 w-64"
