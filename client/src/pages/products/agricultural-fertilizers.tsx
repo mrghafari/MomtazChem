@@ -212,12 +212,6 @@ const AgriculturalFertilizersPage = () => {
                     {product.description && (
                       <p className="text-gray-600 mb-4 line-clamp-3">{product.description}</p>
                     )}
-
-                    {product.priceRange && (
-                      <div className="mb-6">
-                        <span className="text-lg font-semibold text-green-600">{product.priceRange}</span>
-                      </div>
-                    )}
                     
                     {product.features && Array.isArray(product.features) && product.features.length > 0 && (
                       <div className="mb-6">
