@@ -83,8 +83,8 @@ const getCategoryEmail = (category: string): string => {
 
 export interface ProductInquiryData {
   contactEmail: string;
-  contactPhone?: string;
-  company?: string;
+  contactPhone?: string | null;
+  company?: string | null;
   subject: string;
   message: string;
   type: string;

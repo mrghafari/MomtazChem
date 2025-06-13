@@ -813,8 +813,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const emailData = {
           contactEmail: inquiryData.contactEmail,
-          contactPhone: inquiryData.contactPhone || undefined,
-          company: inquiryData.company || undefined,
+          contactPhone: inquiryData.contactPhone,
+          company: inquiryData.company,
           subject: inquiryData.subject,
           message: inquiryData.message,
           type: inquiryData.type,
