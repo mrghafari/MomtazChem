@@ -11,13 +11,13 @@ import { Key, Check, ArrowLeft } from "lucide-react";
 export default function ResetPassword() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [token, setToken] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [token, setToken] = useState("");
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -26,8 +26,8 @@ export default function ResetPassword() {
       setToken(tokenParam);
     } else {
       toast({
-        title: "خطا",
-        description: "توکن بازیابی معتبر نیست",
+        title: "Error",
+        description: "Invalid reset token",
         variant: "destructive",
       });
       setLocation("/admin/login");
@@ -39,8 +39,8 @@ export default function ResetPassword() {
     
     if (formData.newPassword !== formData.confirmPassword) {
       toast({
-        title: "خطا",
-        description: "رمز عبور جدید و تایید آن یکسان نیستند",
+        title: "Error",
+        description: "New password and confirmation do not match",
         variant: "destructive",
       });
       return;
@@ -48,8 +48,8 @@ export default function ResetPassword() {
 
     if (formData.newPassword.length < 6) {
       toast({
-        title: "خطا",
-        description: "رمز عبور باید حداقل 6 کاراکتر باشد",
+        title: "Error",
+        description: "Password must be at least 6 characters long",
         variant: "destructive",
       });
       return;
@@ -65,13 +65,13 @@ export default function ResetPassword() {
       
       setIsSuccess(true);
       toast({
-        title: "موفق",
-        description: "رمز عبور با موفقیت تغییر کرد",
+        title: "Success",
+        description: "Password changed successfully",
       });
     } catch (error) {
       toast({
-        title: "خطا",
-        description: "بازیابی رمز عبور انجام نشد. ممکن است توکن منقضی شده باشد",
+        title: "Error",
+        description: "Password reset failed. Token may have expired",
         variant: "destructive",
       });
     } finally {
@@ -87,11 +87,11 @@ export default function ResetPassword() {
             <div className="w-12 h-12 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
               <Check className="w-6 h-6 text-green-600" />
             </div>
-            <CardTitle>رمز عبور تغییر کرد</CardTitle>
+            <CardTitle>Password Changed</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-gray-600">
-              رمز عبور شما با موفقیت تغییر کرد. اکنون می‌توانید با رمز عبور جدید وارد شوید.
+              Your password has been successfully changed. You can now log in with your new password.
             </p>
             
             <Button
@@ -99,7 +99,7 @@ export default function ResetPassword() {
               onClick={() => setLocation("/admin/login")}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              رفتن به صفحه ورود
+              Go to Login Page
             </Button>
           </CardContent>
         </Card>
@@ -114,41 +114,39 @@ export default function ResetPassword() {
           <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
             <Key className="w-6 h-6 text-blue-600" />
           </div>
-          <CardTitle>تنظیم رمز عبور جدید</CardTitle>
+          <CardTitle>Set New Password</CardTitle>
           <p className="text-sm text-gray-600">
-            رمز عبور جدید خود را وارد کنید
+            Enter your new password
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="newPassword">رمز عبور جدید</Label>
+              <Label htmlFor="newPassword">New Password</Label>
               <Input
                 id="newPassword"
                 type="password"
                 value={formData.newPassword}
                 onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                placeholder="رمز عبور جدید را وارد کنید"
+                placeholder="Enter new password"
                 required
-                minLength={6}
               />
             </div>
             
             <div>
-              <Label htmlFor="confirmPassword">تایید رمز عبور جدید</Label>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                placeholder="رمز عبور جدید را مجدداً وارد کنید"
+                placeholder="Confirm new password"
                 required
-                minLength={6}
               />
             </div>
             
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "در حال تنظیم..." : "تنظیم رمز عبور"}
+              {isLoading ? "Changing..." : "Change Password"}
             </Button>
             
             <Button
@@ -158,7 +156,7 @@ export default function ResetPassword() {
               onClick={() => setLocation("/admin/login")}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              بازگشت به ورود
+              Back to Login
             </Button>
           </form>
         </CardContent>

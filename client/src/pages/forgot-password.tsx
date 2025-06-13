@@ -51,17 +51,17 @@ export default function ForgotPassword() {
             <div className="w-12 h-12 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
               <Check className="w-6 h-6 text-green-600" />
             </div>
-            <CardTitle>درخواست ارسال شد</CardTitle>
+            <CardTitle>Request Sent</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-gray-600">
-              اگر حساب کاربری با این ایمیل وجود داشته باشد، لینک بازیابی رمز عبور ارسال خواهد شد.
+              If an account with this email exists, a password reset link has been sent.
             </p>
             
             {resetToken && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-sm text-yellow-800 mb-2">
-                  <strong>توکن بازیابی (فقط برای تست):</strong>
+                  <strong>Reset Token (for testing only):</strong>
                 </p>
                 <code className="text-xs bg-yellow-100 p-2 rounded block break-all">
                   {resetToken}
@@ -70,7 +70,7 @@ export default function ForgotPassword() {
                   className="w-full mt-3"
                   onClick={() => setLocation(`/reset-password?token=${resetToken}`)}
                 >
-                  بازیابی رمز عبور
+                  Reset Password
                 </Button>
               </div>
             )}
@@ -82,7 +82,7 @@ export default function ForgotPassword() {
                 onClick={() => setLocation("/admin/login")}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                بازگشت به ورود
+                Back to Login
               </Button>
               <Button
                 variant="outline"
@@ -92,7 +92,7 @@ export default function ForgotPassword() {
                   setResetToken("");
                 }}
               >
-                ارسال مجدد
+                Send Again
               </Button>
             </div>
           </CardContent>
@@ -116,20 +116,20 @@ export default function ForgotPassword() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="email">ایمیل</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ایمیل خود را وارد کنید"
+                placeholder="Enter your email address"
                 required
                 dir="ltr"
               />
             </div>
             
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "در حال ارسال..." : "ارسال لینک بازیابی"}
+              {isLoading ? "Sending..." : "Send Reset Link"}
             </Button>
             
             <Button
@@ -139,7 +139,7 @@ export default function ForgotPassword() {
               onClick={() => setLocation("/admin/login")}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              بازگشت به ورود
+              Back to Login
             </Button>
           </form>
         </CardContent>
