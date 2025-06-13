@@ -2603,6 +2603,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // SMTP TEST ROUTES (Admin only)
+  // =============================================================================
+  
+  // Test SMTP connection
+  app.post("/api/admin/test-smtp", requireAuth, async (req, res) => {
+    try {
+      const { testZohoSMTP } = await import('./test-smtp');
+      const result = await testZohoSMTP();
+      res.json(result);
+    } catch (error) {
+      console.error("Error testing SMTP:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to test SMTP connection"
+      });
+    }
+  });
+
+  // Send test email
+  app.post("/api/admin/test-email", requireAuth, async (req, res) => {
+    try {
+      const { email } = req.body;
+      const { sendTestEmail } = await import('./test-smtp');
+      const result = await sendTestEmail(email);
+      res.json(result);
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send test email"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

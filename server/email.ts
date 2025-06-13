@@ -1,19 +1,34 @@
 import nodemailer from 'nodemailer';
 
-// Create transporter using environment variables
+// Create transporter optimized for Zoho Mail
 const createTransporter = () => {
   const port = parseInt(process.env.SMTP_PORT || '587');
+  const host = process.env.SMTP_HOST?.trim() || 'smtp.zoho.com';
+  
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST?.trim(),
+    host: host,
     port: port,
     secure: port === 465, // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER?.trim(),
       pass: process.env.SMTP_PASS?.trim(),
     },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 5000, // 5 seconds
-    socketTimeout: 10000, // 10 seconds
+    // Zoho Mail specific optimizations
+    pool: true, // Use connection pooling
+    maxConnections: 5,
+    maxMessages: 100,
+    rateLimit: 50, // 50 emails per second max
+    connectionTimeout: 20000, // 20 seconds for Zoho
+    greetingTimeout: 10000, // 10 seconds
+    socketTimeout: 20000, // 20 seconds
+    // Enable debugging for troubleshooting
+    debug: process.env.NODE_ENV === 'development',
+    logger: process.env.NODE_ENV === 'development',
+    // TLS options for better security with Zoho
+    tls: {
+      rejectUnauthorized: true,
+      minVersion: 'TLSv1.2'
+    }
   });
 };
 
