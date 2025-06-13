@@ -285,6 +285,61 @@ const ShopAdmin = () => {
     }
   };
 
+  // Generate monthly report handler
+  const handleGenerateMonthlyReport = async () => {
+    try {
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+      
+      const response = await fetch(`/api/analytics/sales/export?format=json&month=${currentMonth}&year=${currentYear}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate monthly report');
+      }
+
+      const data = await response.json();
+      
+      // Create a formatted report
+      const reportContent = `Monthly Sales Report - ${currentMonth}/${currentYear}
+      
+Total Orders: ${data.summary.totalOrders}
+Total Revenue: $${data.summary.totalRevenue.toFixed(2)}
+Report Date: ${data.summary.reportDate}
+
+Detailed Sales Data:
+${data.data.map((item: any) => 
+  `${item.orderDate} - ${item.productName} (Qty: ${item.quantity}) - $${item.itemTotal.toFixed(2)}`
+).join('\n')}`;
+
+      // Download as text file
+      const blob = new Blob([reportContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `monthly-report-${currentMonth}-${currentYear}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Monthly report generated successfully",
+      });
+    } catch (error) {
+      console.error('Monthly report error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate monthly report",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Show loading while checking authentication
   if (authLoading) {
     return (
