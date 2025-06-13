@@ -2042,6 +2042,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Template processing routes
+  app.post("/api/templates/send-response", requireAuth, async (req, res) => {
+    try {
+      const { inquiryId, templateId, customVariables, customContent } = req.body;
+      
+      if (!inquiryId || !templateId) {
+        return res.status(400).json({
+          success: false,
+          message: "Inquiry ID and Template ID are required"
+        });
+      }
+
+      await TemplateProcessor.sendTemplatedResponse(
+        inquiryId,
+        templateId,
+        customVariables,
+        customContent
+      );
+
+      res.json({
+        success: true,
+        message: "Email response sent successfully"
+      });
+    } catch (error) {
+      console.error("Error sending templated response:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send email response"
+      });
+    }
+  });
+
+  app.post("/api/templates/preview", requireAuth, async (req, res) => {
+    try {
+      const { templateId, variables } = req.body;
+      
+      const template = await customerStorage.getEmailTemplateById(templateId);
+      if (!template) {
+        return res.status(404).json({
+          success: false,
+          message: "Template not found"
+        });
+      }
+
+      const preview = TemplateProcessor.previewTemplate(template, variables || {});
+      
+      res.json({
+        success: true,
+        preview
+      });
+    } catch (error) {
+      console.error("Error previewing template:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to preview template"
+      });
+    }
+  });
+
+  app.get("/api/templates/suggestions/:category", requireAuth, async (req, res) => {
+    try {
+      const { category } = req.params;
+      const { language = 'en' } = req.query;
+      
+      const suggestions = await TemplateProcessor.getTemplateSuggestions(
+        category, 
+        language as string
+      );
+      
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Error getting template suggestions:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get template suggestions"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
