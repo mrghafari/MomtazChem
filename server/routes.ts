@@ -1047,7 +1047,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/shop/orders/:id", requireAuth, async (req, res) => {
+  app.patch("/api/shop/orders/:id", async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
       if (isNaN(orderId)) {
