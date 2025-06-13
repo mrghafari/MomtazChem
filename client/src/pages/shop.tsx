@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLanguage } from "@/i18n/LanguageContext";
 import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,6 @@ import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
 
 const Shop = () => {
-  const { t, isRTL } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
@@ -123,7 +121,7 @@ const Shop = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">{t('messages.loadingData')}</p>
+            <p className="mt-4 text-gray-600">Loading products...</p>
           </div>
         </div>
       </div>
@@ -136,7 +134,7 @@ const Shop = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">{t('shopInterface.title')}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Chemical Products Shop</h1>
             
             {/* Cart Summary */}
             <div className="flex items-center gap-4">
@@ -148,7 +146,7 @@ const Shop = () => {
                   disabled={getTotalItems() === 0}
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  {t('shopInterface.cart')} ({getTotalItems()})
+                  Cart ({getTotalItems()})
                   {getTotalItems() > 0 && (
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">
@@ -156,7 +154,7 @@ const Shop = () => {
                       </Badge>
                       {getTotalSavings() > 0 && (
                         <Badge variant="default" className="bg-green-600">
-  {isRTL ? 'وفر' : 'Save'} ${getTotalSavings().toFixed(2)}
+                          Save ${getTotalSavings().toFixed(2)}
                         </Badge>
                       )}
                     </div>
