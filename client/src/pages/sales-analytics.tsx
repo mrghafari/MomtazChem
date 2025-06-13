@@ -191,10 +191,10 @@ export default function SalesAnalytics() {
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="orders">Orders</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
+          <TabsTrigger value="overview">{t('analyticsPage.overview')}</TabsTrigger>
+          <TabsTrigger value="products">{t('analyticsPage.products')}</TabsTrigger>
+          <TabsTrigger value="orders">{t('analyticsPage.orders')}</TabsTrigger>
+          <TabsTrigger value="trends">{t('analyticsPage.trends')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -202,8 +202,8 @@ export default function SalesAnalytics() {
             {/* Revenue Trend */}
             <Card>
               <CardHeader>
-                <CardTitle>Revenue Trend (Last 30 Days)</CardTitle>
-                <CardDescription>Daily revenue performance</CardDescription>
+                <CardTitle>{t('analyticsPage.revenueTrend')}</CardTitle>
+                <CardDescription>{t('analyticsPage.dailyRevenuePerformance')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -234,8 +234,8 @@ export default function SalesAnalytics() {
             {/* Order Status Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle>Order Status Distribution</CardTitle>
-                <CardDescription>Current order status breakdown</CardDescription>
+                <CardTitle>{t('analyticsPage.orderStatusDistribution')}</CardTitle>
+                <CardDescription>{t('analyticsPage.orderStatusBreakdown')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -264,8 +264,8 @@ export default function SalesAnalytics() {
           {/* Revenue by Category */}
           <Card>
             <CardHeader>
-              <CardTitle>Revenue by Category</CardTitle>
-              <CardDescription>Sales performance across product categories</CardDescription>
+              <CardTitle>{t('analyticsPage.revenueByCategory')}</CardTitle>
+              <CardDescription>{t('analyticsPage.categoryPerformance')}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -284,8 +284,8 @@ export default function SalesAnalytics() {
         <TabsContent value="products" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Top Performing Products</CardTitle>
-              <CardDescription>Best selling products by revenue and quantity</CardDescription>
+              <CardTitle>{t('analyticsPage.topPerformingProducts')}</CardTitle>
+              <CardDescription>{t('analyticsPage.bestSellingProducts')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">

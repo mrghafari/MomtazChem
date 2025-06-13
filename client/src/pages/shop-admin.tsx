@@ -516,7 +516,7 @@ ${data.data.map((item: any) =>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Orders</p>
+                  <p className="text-sm font-medium text-gray-600">{t('adminPanel.pendingOrders')}</p>
                   <p className="text-2xl font-bold text-gray-900">{(stats as any)?.pendingOrders || 0}</p>
                 </div>
                 <Package className="w-8 h-8 text-orange-600" />
@@ -528,7 +528,7 @@ ${data.data.map((item: any) =>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Shipped Orders</p>
+                  <p className="text-sm font-medium text-gray-600">{t('adminPanel.shippedOrders')}</p>
                   <p className="text-2xl font-bold text-gray-900">{(stats as any)?.shippedOrders || 0}</p>
                 </div>
                 <Truck className="w-8 h-8 text-purple-600" />
