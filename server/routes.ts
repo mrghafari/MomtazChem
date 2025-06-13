@@ -2243,6 +2243,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // SPECIALISTS MANAGEMENT API ROUTES (Admin)
+  // =============================================================================
+
+  // Get all specialists
+  app.get("/api/admin/specialists", requireAuth, async (req, res) => {
+    try {
+      const specialists = await db.select().from(schema.specialists);
+      res.json(specialists);
+    } catch (error) {
+      console.error("Error fetching specialists:", error);
+      res.status(500).json({ message: "Failed to fetch specialists" });
+    }
+  });
+
+  // Get specialist by ID
+  app.get("/api/admin/specialists/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const [specialist] = await db.select().from(schema.specialists).where(eq(schema.specialists.id, id));
+      
+      if (!specialist) {
+        return res.status(404).json({ message: "Specialist not found" });
+      }
+      
+      res.json(specialist);
+    } catch (error) {
+      console.error("Error fetching specialist:", error);
+      res.status(500).json({ message: "Failed to fetch specialist" });
+    }
+  });
+
+  // Create new specialist
+  app.post("/api/admin/specialists", requireAuth, async (req, res) => {
+    try {
+      const specialistData = req.body;
+      
+      if (!specialistData.name || !specialistData.email || !specialistData.department) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const [newSpecialist] = await db.insert(schema.specialists)
+        .values({
+          ...specialistData,
+          updatedAt: new Date()
+        })
+        .returning();
+
+      res.status(201).json(newSpecialist);
+    } catch (error) {
+      console.error("Error creating specialist:", error);
+      if (error.code === '23505') { // Unique violation
+        res.status(409).json({ message: "Email already exists" });
+      } else {
+        res.status(500).json({ message: "Failed to create specialist" });
+      }
+    }
+  });
+
+  // Update specialist
+  app.put("/api/admin/specialists/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      const [updatedSpecialist] = await db.update(schema.specialists)
+        .set({
+          ...updateData,
+          updatedAt: new Date()
+        })
+        .where(eq(schema.specialists.id, id))
+        .returning();
+
+      if (!updatedSpecialist) {
+        return res.status(404).json({ message: "Specialist not found" });
+      }
+
+      res.json(updatedSpecialist);
+    } catch (error) {
+      console.error("Error updating specialist:", error);
+      res.status(500).json({ message: "Failed to update specialist" });
+    }
+  });
+
+  // Delete specialist
+  app.delete("/api/admin/specialists/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const [deletedSpecialist] = await db.delete(schema.specialists)
+        .where(eq(schema.specialists.id, id))
+        .returning();
+
+      if (!deletedSpecialist) {
+        return res.status(404).json({ message: "Specialist not found" });
+      }
+
+      res.json({ message: "Specialist deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting specialist:", error);
+      res.status(500).json({ message: "Failed to delete specialist" });
+    }
+  });
+
+  // Update specialist status (for real-time status changes)
+  app.patch("/api/admin/specialists/:id/status", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!['online', 'busy', 'away', 'offline'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const [updatedSpecialist] = await db.update(schema.specialists)
+        .set({ 
+          status,
+          updatedAt: new Date()
+        })
+        .where(eq(schema.specialists.id, id))
+        .returning();
+
+      if (!updatedSpecialist) {
+        return res.status(404).json({ message: "Specialist not found" });
+      }
+
+      res.json(updatedSpecialist);
+    } catch (error) {
+      console.error("Error updating specialist status:", error);
+      res.status(500).json({ message: "Failed to update specialist status" });
+    }
+  });
+
+  // Get online specialists (public route for live chat)
+  app.get("/api/specialists/online", async (req, res) => {
+    try {
+      const onlineSpecialists = await db.select().from(schema.specialists)
+        .where(and(
+          eq(schema.specialists.isActive, true),
+          eq(schema.specialists.status, 'online')
+        ));
+      
+      res.json(onlineSpecialists);
+    } catch (error) {
+      console.error("Error fetching online specialists:", error);
+      res.status(500).json({ message: "Failed to fetch online specialists" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

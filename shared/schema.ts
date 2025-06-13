@@ -48,6 +48,37 @@ export type User = typeof users.$inferSelect;
 export type InsertPasswordReset = z.infer<typeof insertPasswordResetSchema>;
 export type PasswordReset = typeof passwordResets.$inferSelect;
 
+// Online Specialists table for live chat management
+export const specialists = pgTable("specialists", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  phone: text("phone"),
+  department: text("department").notNull(),
+  status: text("status").notNull().default("offline"), // online, busy, away, offline
+  expertise: json("expertise").$type<string[]>().default([]),
+  isActive: boolean("is_active").default(true),
+  workingHours: json("working_hours").$type<{
+    start: string;
+    end: string;
+    days: string[];
+  }>().default({
+    start: "08:00",
+    end: "17:00",
+    days: ["saturday", "sunday", "monday", "tuesday", "wednesday"]
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSpecialistSchema = createInsertSchema(specialists).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSpecialist = z.infer<typeof insertSpecialistSchema>;
+export type Specialist = typeof specialists.$inferSelect;
+
 // Leads table for CRM system
 export const leads = pgTable("leads", {
   id: serial("id").primaryKey(),
