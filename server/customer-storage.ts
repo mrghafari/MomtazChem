@@ -4,7 +4,6 @@ import {
   orderItems,
   customerInquiries,
   inquiryResponses,
-  quoteRequests,
   type Customer,
   type InsertCustomer,
   type CustomerOrder,
@@ -15,8 +14,6 @@ import {
   type InsertCustomerInquiry,
   type InquiryResponse,
   type InsertInquiryResponse,
-  type QuoteRequest,
-  type InsertQuoteRequest,
   emailTemplates,
   type EmailTemplate,
   type InsertEmailTemplate,
@@ -58,12 +55,7 @@ export interface ICustomerStorage {
   createInquiryResponse(response: InsertInquiryResponse): Promise<InquiryResponse>;
   getInquiryResponses(inquiryId: number): Promise<InquiryResponse[]>;
   
-  // Quote requests
-  createQuoteRequest(quote: InsertQuoteRequest): Promise<QuoteRequest>;
-  getQuoteRequestById(id: number): Promise<QuoteRequest | undefined>;
-  getQuoteRequestsByCustomer(customerId: number): Promise<QuoteRequest[]>;
-  getAllQuoteRequests(): Promise<QuoteRequest[]>;
-  updateQuoteRequest(id: number, quote: Partial<InsertQuoteRequest>): Promise<QuoteRequest>;
+
   
   // Analytics and stats
   getCustomerStats(): Promise<{
@@ -364,10 +356,6 @@ export class CustomerStorage implements ICustomerStorage {
       .select({ count: count() })
       .from(customerInquiries);
 
-    const [totalQuoteRequestsResult] = await customerDb
-      .select({ count: count() })
-      .from(quoteRequests);
-
     const [openInquiriesResult] = await customerDb
       .select({ count: count() })
       .from(customerInquiries)
@@ -376,19 +364,14 @@ export class CustomerStorage implements ICustomerStorage {
         eq(customerInquiries.status, 'in_progress')
       ));
 
-    const [pendingQuotesResult] = await customerDb
-      .select({ count: count() })
-      .from(quoteRequests)
-      .where(eq(quoteRequests.status, 'pending'));
-
     return {
       totalCustomers: totalCustomersResult.count,
       totalOrders: 0, // Orders table not implemented yet
       totalInquiries: totalInquiriesResult.count,
-      totalQuoteRequests: totalQuoteRequestsResult.count,
+      totalQuoteRequests: 0, // Quote requests table not implemented yet
       pendingOrders: 0, // Orders table not implemented yet
       openInquiries: openInquiriesResult.count,
-      pendingQuotes: pendingQuotesResult.count,
+      pendingQuotes: 0, // Quote requests table not implemented yet
     };
   }
 
