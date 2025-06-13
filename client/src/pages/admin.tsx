@@ -187,6 +187,16 @@ export default function AdminPage() {
     },
   });
 
+  const syncProductsMutation = useMutation({
+    mutationFn: () => apiRequest("/api/sync-products", "POST"),
+    onSuccess: () => {
+      toast({ title: "Success", description: "All products synchronized with shop successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to sync products", variant: "destructive" });
+    },
+  });
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -357,6 +367,15 @@ export default function AdminPage() {
           <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" />
             Add Product
+          </Button>
+          <Button 
+            onClick={() => syncProductsMutation.mutate()}
+            disabled={syncProductsMutation.isPending}
+            variant="outline"
+            className="border-green-300 text-green-600 hover:bg-green-50"
+          >
+            <Package className="w-4 h-4 mr-2" />
+            {syncProductsMutation.isPending ? 'Syncing...' : 'Sync to Shop'}
           </Button>
           <Button 
             variant="outline" 
