@@ -7,7 +7,7 @@ import fs from "fs";
 import { storage } from "./storage";
 import { insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
 import { insertContactSchema, insertShowcaseProductSchema } from "@shared/showcase-schema";
-import { customerStorage } from "./customer-storage";
+import { simpleCustomerStorage } from "./simple-customer-storage";
 import { shopStorage } from "./shop-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema } from "@shared/customer-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
@@ -800,7 +800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/inquiries", async (req, res) => {
     try {
       const inquiryData = insertCustomerInquirySchema.parse(req.body);
-      const inquiry = await customerStorage.createInquiry(inquiryData);
+      const inquiry = await simpleCustomerStorage.createInquiry(inquiryData);
       
       // Send email notification for the inquiry
       try {
@@ -868,7 +868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updates = req.body;
-      const inquiry = await customerStorage.updateInquiry(id, updates);
+      const inquiry = await simpleCustomerStorage.updateInquiry(id, updates);
       res.json({ 
         success: true, 
         message: "Inquiry updated successfully",
@@ -2086,7 +2086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard and inquiry tracking routes (public)
   app.get("/api/inquiries", async (req, res) => {
     try {
-      const inquiries = await customerStorage.getAllInquiries();
+      const inquiries = await simpleCustomerStorage.getAllInquiries();
       res.json(inquiries);
     } catch (error) {
       console.error("Error fetching inquiries:", error);
@@ -2099,7 +2099,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/inquiries/stats", async (req, res) => {
     try {
-      const stats = await customerStorage.getCustomerStats();
+      const stats = await simpleCustomerStorage.getCustomerStats();
       res.json(stats);
     } catch (error) {
       console.error("Error fetching inquiry stats:", error);
@@ -2120,7 +2120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const inquiry = await customerStorage.getInquiryById(id);
+      const inquiry = await simpleCustomerStorage.getInquiryById(id);
       if (!inquiry) {
         return res.status(404).json({
           success: false,
@@ -2148,7 +2148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const responses = await customerStorage.getInquiryResponses(id);
+      const responses = await simpleCustomerStorage.getInquiryResponses(id);
       res.json(responses);
     } catch (error) {
       console.error("Error fetching inquiry responses:", error);
