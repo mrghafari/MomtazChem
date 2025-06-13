@@ -988,7 +988,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Update product stock
         const product = await shopStorage.getShopProductById(item.productId);
-        if (product) {
+        if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
           const newQuantity = product.stockQuantity - item.quantity;
           await shopStorage.updateProductStock(
             item.productId,
@@ -1000,8 +1000,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update customer statistics
       await shopStorage.updateCustomer(customer.id, {
-        totalOrders: customer.totalOrders + 1,
-        totalSpent: (parseFloat(customer.totalSpent) + orderData.totalAmount).toString(),
+        totalOrders: (customer.totalOrders || 0) + 1,
+        totalSpent: (parseFloat(customer.totalSpent || "0") + orderData.totalAmount).toString(),
         lastOrderDate: new Date(),
       });
 

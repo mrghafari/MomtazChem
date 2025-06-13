@@ -10,6 +10,7 @@ import About from "@/pages/about";
 import Services from "@/pages/services";
 import Contact from "@/pages/contact";
 import Shop from "@/pages/shop";
+import Checkout from "@/pages/checkout";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import CRMPage from "@/pages/crm";
