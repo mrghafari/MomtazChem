@@ -235,6 +235,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Authentication check endpoint
+  app.get("/api/admin/check-auth", async (req, res) => {
+    try {
+      if (!req.session.adminId || !req.session.isAuthenticated) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Not authenticated" 
+        });
+      }
+      
+      // Verify user still exists and is active
+      const user = await storage.getUserById(req.session.adminId);
+      if (!user || !user.isActive) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "User not found or inactive" 
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        authenticated: true,
+        user: { id: user.id, username: user.username, email: user.email, role: user.role }
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Password reset functionality
   app.post("/api/admin/forgot-password", async (req, res) => {
     try {

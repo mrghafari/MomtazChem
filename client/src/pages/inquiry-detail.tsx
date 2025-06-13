@@ -123,7 +123,7 @@ const InquiryDetail = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Inquiry Not Found</h1>
-            <Link href="/dashboard">
+            <Link href="/admin/inquiries">
               <Button>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
@@ -140,7 +140,7 @@ const InquiryDetail = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
-          <Link href="/dashboard">
+          <Link href="/admin/inquiries">
             <Button variant="outline" className="mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
