@@ -34,7 +34,7 @@ const ShopAdmin = () => {
   const queryClient = useQueryClient();
 
   // Fetch shop statistics
-  const { data: stats } = useQuery({
+  const { data: stats = {} } = useQuery({
     queryKey: ["/api/shop/statistics"],
   });
 
@@ -160,7 +160,7 @@ const ShopAdmin = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.totalOrders || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{(stats as any)?.totalOrders || 0}</p>
                 </div>
                 <ShoppingCart className="w-8 h-8 text-blue-600" />
               </div>
@@ -172,7 +172,7 @@ const ShopAdmin = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">${stats?.totalRevenue || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">${(stats as any)?.totalRevenue || 0}</p>
                 </div>
                 <DollarSign className="w-8 h-8 text-green-600" />
               </div>
@@ -184,7 +184,7 @@ const ShopAdmin = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.pendingOrders || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{(stats as any)?.pendingOrders || 0}</p>
                 </div>
                 <Package className="w-8 h-8 text-orange-600" />
               </div>
@@ -196,7 +196,7 @@ const ShopAdmin = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Shipped Orders</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.shippedOrders || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{(stats as any)?.shippedOrders || 0}</p>
                 </div>
                 <Truck className="w-8 h-8 text-purple-600" />
               </div>
@@ -259,7 +259,7 @@ const ShopAdmin = () => {
                             <div>
                               <h3 className="font-semibold text-gray-900">#{order.orderNumber}</h3>
                               <p className="text-sm text-gray-600">
-                                Order Date: {formatDate(order.orderDate)}
+                                Order Date: {formatDate(order.orderDate.toString())}
                               </p>
                             </div>
                             <Badge className={getStatusColor(order.status)}>
@@ -393,7 +393,7 @@ const ShopAdmin = () => {
                           {selectedOrder.status}
                         </Badge>
                       </p>
-                      <p><span className="font-medium">Order Date:</span> {formatDate(selectedOrder.orderDate)}</p>
+                      <p><span className="font-medium">Order Date:</span> {formatDate(selectedOrder.orderDate.toString())}</p>
                       <p><span className="font-medium">Payment Status:</span> {selectedOrder.paymentStatus}</p>
                       <p><span className="font-medium">Shipping Method:</span> {selectedOrder.shippingMethod}</p>
                     </div>
