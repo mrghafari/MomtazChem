@@ -130,7 +130,7 @@ export default function AdminLogin() {
               className="text-sm text-blue-600 hover:text-blue-800"
               onClick={() => setLocation("/forgot-password")}
             >
-              فراموشی رمز عبور؟
+              Forgot Password?
             </Button>
           </div>
         </CardContent>
