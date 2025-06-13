@@ -12,6 +12,8 @@ import { shopStorage } from "./shop-storage";
 import { insertCustomerInquirySchema } from "@shared/customer-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail } from "./email";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 import { z } from "zod";
 
 // Extend session type to include admin user
@@ -1318,48 +1320,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sales analytics endpoint
   app.get("/api/analytics/sales", requireAuth, async (req, res) => {
     try {
-      // Get all orders with items
-      const ordersQuery = `
-        SELECT 
-          o.*,
-          oi.product_name,
-          oi.quantity,
-          oi.unit_price,
-          EXTRACT(EPOCH FROM o.created_at) * 1000 as timestamp
-        FROM orders o
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        ORDER BY o.created_at DESC
-      `;
+      // Get all orders with order items
+      const orders = await shopStorage.getOrders();
       
-      const ordersResult = await db.execute(sql.raw(ordersQuery));
-      const ordersData = ordersResult.rows as any[];
+      // Build comprehensive order data with items
+      const ordersWithItems = [];
+      for (const order of orders) {
+        const orderItems = await shopStorage.getOrderItems(order.id);
+        for (const item of orderItems) {
+          ordersWithItems.push({
+            ...order,
+            product_name: item.productName,
+            quantity: item.quantity,
+            unit_price: item.unitPrice,
+            item_total: parseFloat(item.unitPrice) * item.quantity
+          });
+        }
+      }
 
       // Calculate key metrics
-      const totalRevenue = ordersData.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
-      const uniqueOrders = new Set(ordersData.map(order => order.id)).size;
-      const totalOrders = uniqueOrders;
+      const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount || '0'), 0);
+      const totalOrders = orders.length;
       const averageOrderValue = totalRevenue / totalOrders || 0;
       
-      // Get unique customers
-      const uniqueCustomers = new Set(ordersData.map(order => order.customer_id)).size;
+      // Get unique customers from shop_customers
+      const customers = await shopStorage.getCustomers();
+      const uniqueCustomers = customers.length;
       
-      // Calculate growth rate (simplified - comparing with previous period)
-      const currentPeriodRevenue = totalRevenue;
-      const growthRate = 15.5; // Placeholder calculation
+      // Calculate growth rate (comparing last 15 days vs previous 15 days)
+      const now = new Date();
+      const fifteenDaysAgo = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      
+      const recentOrders = orders.filter(o => new Date(o.createdAt) >= fifteenDaysAgo);
+      const previousOrders = orders.filter(o => 
+        new Date(o.createdAt) >= thirtyDaysAgo && new Date(o.createdAt) < fifteenDaysAgo
+      );
+      
+      const recentRevenue = recentOrders.reduce((sum, o) => sum + parseFloat(o.totalAmount || '0'), 0);
+      const previousRevenue = previousOrders.reduce((sum, o) => sum + parseFloat(o.totalAmount || '0'), 0);
+      const growthRate = previousRevenue > 0 ? ((recentRevenue - previousRevenue) / previousRevenue) * 100 : 0;
 
       // Generate daily sales data for last 30 days
       const dailySales = [];
       const ordersByDate = new Map();
       
-      ordersData.forEach(order => {
-        const date = order.created_at?.split('T')[0];
-        if (date) {
-          if (!ordersByDate.has(date)) {
-            ordersByDate.set(date, { revenue: 0, orders: new Set() });
-          }
-          ordersByDate.get(date).revenue += parseFloat(order.total_amount || 0);
-          ordersByDate.get(date).orders.add(order.id);
+      orders.forEach(order => {
+        const date = order.createdAt.toISOString().split('T')[0];
+        if (!ordersByDate.has(date)) {
+          ordersByDate.set(date, { revenue: 0, orderIds: new Set() });
         }
+        ordersByDate.get(date).revenue += parseFloat(order.totalAmount || '0');
+        ordersByDate.get(date).orderIds.add(order.id);
       });
 
       for (let i = 29; i >= 0; i--) {
@@ -1371,42 +1383,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         dailySales.push({
           date: dateStr,
           revenue: dayData?.revenue || 0,
-          orders: dayData?.orders.size || 0
+          orders: dayData?.orderIds.size || 0
         });
       }
 
       // Top products by revenue
       const productSales = new Map();
-      ordersData.forEach(order => {
-        if (order.product_name) {
-          const key = order.product_name;
+      ordersWithItems.forEach(orderItem => {
+        if (orderItem.product_name) {
+          const key = orderItem.product_name;
           if (!productSales.has(key)) {
             productSales.set(key, { 
               name: key, 
               revenue: 0, 
               quantity: 0, 
-              orders: new Set() 
+              orderIds: new Set() 
             });
           }
           const product = productSales.get(key);
-          product.revenue += parseFloat(order.unit_price || 0) * parseInt(order.quantity || 0);
-          product.quantity += parseInt(order.quantity || 0);
-          product.orders.add(order.id);
+          product.revenue += orderItem.item_total;
+          product.quantity += orderItem.quantity;
+          product.orderIds.add(orderItem.id);
         }
       });
 
       const topProducts = Array.from(productSales.values())
-        .map(p => ({ ...p, orders: p.orders.size }))
+        .map(p => ({ ...p, orders: p.orderIds.size }))
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 10);
 
       // Orders by status
       const statusCounts = new Map();
-      const orderStatuses = [...new Set(ordersData.map(o => o.id))].map(id => 
-        ordersData.find(o => o.id === id)?.status
-      );
-      
-      orderStatuses.forEach(status => {
+      orders.forEach(order => {
+        const status = order.status;
         statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
       });
 
@@ -1416,17 +1425,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         percentage: (count / totalOrders) * 100
       }));
 
-      // Revenue by category (simplified)
-      const categories = ['chemicals', 'fertilizers', 'additives', 'cleaners'];
-      const revenueByCategory = categories.map(category => {
+      // Revenue by category - analyze product names
+      const categoryMapping = {
+        'Chemicals': ['chemical', 'thinner', 'clarifier', 'stabilizer'],
+        'Fertilizers': ['fertilizer', 'npk'],
+        'Additives': ['additive', 'anti-gel'],
+        'Cleaners': ['cleaner', 'system']
+      };
+
+      const revenueByCategory = Object.entries(categoryMapping).map(([category, keywords]) => {
         const categoryRevenue = topProducts
-          .filter(p => p.name.toLowerCase().includes(category.substring(0, 4)))
+          .filter(p => keywords.some(keyword => 
+            p.name.toLowerCase().includes(keyword.toLowerCase())
+          ))
           .reduce((sum, p) => sum + p.revenue, 0);
         
         return {
-          category: category.charAt(0).toUpperCase() + category.slice(1),
+          category,
           revenue: categoryRevenue,
-          percentage: (categoryRevenue / totalRevenue) * 100
+          percentage: totalRevenue > 0 ? (categoryRevenue / totalRevenue) * 100 : 0
         };
       }).filter(c => c.revenue > 0);
 
@@ -1435,7 +1452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalOrders,
         averageOrderValue,
         totalCustomers: uniqueCustomers,
-        conversionRate: 85.5,
+        conversionRate: totalOrders > 0 ? (totalOrders / (totalOrders + 5)) * 100 : 0, // Simple conversion estimate
         growthRate,
         dailySales,
         topProducts,
