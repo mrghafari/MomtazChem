@@ -2122,6 +2122,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dashboard and inquiry tracking routes (public)
+  app.get("/api/inquiries", async (req, res) => {
+    try {
+      const inquiries = await customerStorage.getAllInquiries();
+      res.json(inquiries);
+    } catch (error) {
+      console.error("Error fetching inquiries:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch inquiries"
+      });
+    }
+  });
+
+  app.get("/api/inquiries/stats", async (req, res) => {
+    try {
+      const stats = await customerStorage.getCustomerStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching inquiry stats:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch inquiry statistics"
+      });
+    }
+  });
+
+  app.get("/api/inquiries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid inquiry ID"
+        });
+      }
+
+      const inquiry = await customerStorage.getInquiryById(id);
+      if (!inquiry) {
+        return res.status(404).json({
+          success: false,
+          message: "Inquiry not found"
+        });
+      }
+
+      res.json(inquiry);
+    } catch (error) {
+      console.error("Error fetching inquiry:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch inquiry"
+      });
+    }
+  });
+
   // Quote request routes (public)
   app.post("/api/quote-requests", async (req, res) => {
     try {

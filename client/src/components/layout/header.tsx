@@ -26,6 +26,7 @@ export default function Header() {
     { href: '/services', label: 'Services' },
     { href: '/contact', label: 'Contact' },
     { href: '/shop', label: 'Shop' },
+    { href: '/dashboard', label: 'Dashboard' },
   ];
 
   const productCategories = [
