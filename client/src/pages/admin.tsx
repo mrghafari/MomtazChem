@@ -382,11 +382,18 @@ export default function AdminPage() {
             onClick={() => syncProductsMutation.mutate()}
             disabled={syncProductsMutation.isPending}
             variant="outline"
-            className="ml-2"
-            className="border-green-300 text-green-600 hover:bg-green-50"
+            className="ml-2 border-green-300 text-green-600 hover:bg-green-50"
           >
             <Package className="w-4 h-4 mr-2" />
             {syncProductsMutation.isPending ? 'Syncing...' : 'Sync to Shop'}
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => setLocation("/admin/specialists")}
+            className="border-blue-300 text-blue-600 hover:bg-blue-50"
+          >
+            <User className="w-4 h-4 mr-2" />
+            مدیریت متخصصان
           </Button>
           <Button 
             variant="outline"
