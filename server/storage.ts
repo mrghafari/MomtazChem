@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -25,6 +25,16 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserById(id: number): Promise<User | undefined>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
+  updateUserPassword(id: number, newPasswordHash: string): Promise<void>;
+  getAllUsers(): Promise<User[]>;
+  deleteUser(id: number): Promise<void>;
+  
+  // Password reset functionality
+  createPasswordReset(reset: InsertPasswordReset): Promise<PasswordReset>;
+  getPasswordResetByToken(token: string): Promise<PasswordReset | undefined>;
+  markPasswordResetAsUsed(token: string): Promise<void>;
+  cleanupExpiredResets(): Promise<void>;
   
   // CRM Lead management
   createLead(lead: InsertLead): Promise<Lead>;
@@ -217,6 +227,63 @@ export class DatabaseStorage implements IStorage {
   async getUserById(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
+  }
+
+  async updateUser(id: number, userUpdate: Partial<InsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...userUpdate, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserPassword(id: number, newPasswordHash: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ passwordHash: newPasswordHash, updatedAt: new Date() })
+      .where(eq(users.id, id));
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
+  // Password reset methods
+  async createPasswordReset(resetData: InsertPasswordReset): Promise<PasswordReset> {
+    const [reset] = await db
+      .insert(passwordResets)
+      .values(resetData)
+      .returning();
+    return reset;
+  }
+
+  async getPasswordResetByToken(token: string): Promise<PasswordReset | undefined> {
+    const [reset] = await db
+      .select()
+      .from(passwordResets)
+      .where(and(
+        eq(passwordResets.token, token),
+        eq(passwordResets.used, false)
+      ));
+    return reset || undefined;
+  }
+
+  async markPasswordResetAsUsed(token: string): Promise<void> {
+    await db
+      .update(passwordResets)
+      .set({ used: true })
+      .where(eq(passwordResets.token, token));
+  }
+
+  async cleanupExpiredResets(): Promise<void> {
+    await db
+      .delete(passwordResets)
+      .where(sql`expires_at < NOW()`);
   }
 
   // CRM Lead management methods

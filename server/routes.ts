@@ -230,6 +230,270 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Password reset functionality
+  app.post("/api/admin/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Email is required" 
+        });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByUsername(email);
+      if (!user) {
+        // Don't reveal if user exists or not for security
+        return res.json({ 
+          success: true, 
+          message: "If an account with this email exists, a password reset link has been sent" 
+        });
+      }
+
+      // Generate reset token
+      const resetToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+
+      // Save reset token
+      await storage.createPasswordReset({
+        email: user.email,
+        token: resetToken,
+        expiresAt,
+        used: false,
+      });
+
+      // TODO: Send email with reset link
+      // For now, log the token (in production, this would be sent via email)
+      console.log(`Password reset token for ${email}: ${resetToken}`);
+
+      res.json({ 
+        success: true, 
+        message: "If an account with this email exists, a password reset link has been sent",
+        resetToken // In production, remove this and send via email
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.post("/api/admin/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Token and new password are required" 
+        });
+      }
+
+      // Verify reset token
+      const resetRecord = await storage.getPasswordResetByToken(token);
+      if (!resetRecord) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid or expired reset token" 
+        });
+      }
+
+      // Check if token is expired
+      if (new Date() > resetRecord.expiresAt) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Reset token has expired" 
+        });
+      }
+
+      // Find user by email
+      const user = await storage.getUserByUsername(resetRecord.email);
+      if (!user) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+
+      // Hash new password
+      const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update user password
+      await storage.updateUserPassword(user.id, newPasswordHash);
+
+      // Mark reset token as used
+      await storage.markPasswordResetAsUsed(token);
+
+      // Clean up expired tokens
+      await storage.cleanupExpiredResets();
+
+      res.json({ 
+        success: true, 
+        message: "Password reset successfully" 
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Admin management endpoints
+  app.get("/api/admin/users", requireAuth, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const safeUsers = users.map(user => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }));
+      
+      res.json({ 
+        success: true, 
+        users: safeUsers 
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.put("/api/admin/users/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { username, email, role, isActive } = req.body;
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid user ID" 
+        });
+      }
+
+      // Prevent self-deactivation
+      if (req.session.adminId === userId && isActive === false) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Cannot deactivate your own account" 
+        });
+      }
+
+      const updatedUser = await storage.updateUser(userId, {
+        username,
+        email,
+        role,
+        isActive,
+      });
+
+      res.json({ 
+        success: true, 
+        message: "User updated successfully",
+        user: {
+          id: updatedUser.id,
+          username: updatedUser.username,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          isActive: updatedUser.isActive,
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.put("/api/admin/change-password", requireAuth, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Current and new passwords are required" 
+        });
+      }
+
+      // Get current user
+      const user = await storage.getUserById(req.session.adminId!);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Current password is incorrect" 
+        });
+      }
+
+      // Hash new password
+      const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await storage.updateUserPassword(user.id, newPasswordHash);
+
+      res.json({ 
+        success: true, 
+        message: "Password changed successfully" 
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid user ID" 
+        });
+      }
+
+      // Prevent self-deletion
+      if (req.session.adminId === userId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Cannot delete your own account" 
+        });
+      }
+
+      await storage.deleteUser(userId);
+
+      res.json({ 
+        success: true, 
+        message: "User deleted successfully" 
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Serve uploaded files
   app.get('/uploads/images/:filename', (req, res) => {
     const filename = req.params.filename;
