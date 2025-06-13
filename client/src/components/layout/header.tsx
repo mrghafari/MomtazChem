@@ -138,7 +138,7 @@ export default function Header() {
                   )}>
                     Products
                   </NavigationMenuTrigger>
-                  <NavigationMenuContent className="left-auto right-0">
+                  <NavigationMenuContent className="!left-auto !right-0 !origin-top-right">
                     <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                       {productCategories.map((category) => (
                         <Link key={category.href} href={category.href}>
