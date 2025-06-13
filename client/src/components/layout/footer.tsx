@@ -132,6 +132,35 @@ const Footer = () => {
               ))}
             </ul>
           </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
+            <div className="space-y-3 text-gray-400 text-sm">
+              <div className="flex items-center space-x-2">
+                <i className="fas fa-envelope w-4"></i>
+                <a 
+                  href="mailto:info@momtazchem.com"
+                  className="hover:text-white transition-colors duration-200"
+                >
+                  info@momtazchem.com
+                </a>
+              </div>
+              <div className="flex items-center space-x-2">
+                <i className="fas fa-phone w-4"></i>
+                <a 
+                  href="tel:+9647099996771"
+                  className="hover:text-white transition-colors duration-200"
+                >
+                  +967 709 996 771
+                </a>
+              </div>
+              <div className="flex items-center space-x-2">
+                <i className="fas fa-map-marker-alt w-4"></i>
+                <span>Erbil, Iraq</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8">
