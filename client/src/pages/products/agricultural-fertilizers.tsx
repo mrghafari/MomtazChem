@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { ShowcaseProduct } from "@shared/showcase-schema";
+import MolecularHoverEffect from "@/components/ui/molecular-hover-effect";
+import ProductInquiryForm from "@/components/product-inquiry-form";
 
 const AgriculturalFertilizersPage = () => {
   const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
@@ -176,7 +178,8 @@ const AgriculturalFertilizersPage = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {products?.map((product) => (
-                <Card key={product.id} className="group bg-white hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-green-300 overflow-hidden">
+                <MolecularHoverEffect key={product.id} moleculeType="ammonia" className="h-full">
+                  <Card className="group bg-white hover:shadow-xl hover:shadow-glow-green transition-all duration-500 border border-gray-200 hover:border-green-300 overflow-hidden h-full">
                   {product.imageUrl && (
                     <div className="aspect-video w-full overflow-hidden bg-gray-100">
                       <img 
