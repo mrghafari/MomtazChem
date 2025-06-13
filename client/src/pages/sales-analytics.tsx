@@ -1,13 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, Area, AreaChart
 } from "recharts";
 import { 
   DollarSign, ShoppingCart, TrendingUp, Package, Users, 
-  Calendar, ArrowUp, ArrowDown, Target, Activity
+  Calendar, ArrowUp, ArrowDown, Target, Activity, ArrowLeft
 } from "lucide-react";
 import { format, subDays, parseISO } from "date-fns";
 
@@ -44,9 +48,33 @@ interface SalesData {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function SalesAnalytics() {
-  const { data: salesData, isLoading } = useQuery<SalesData>({
+  const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  // Authentication check
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/admin/login");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
+  const { data: salesData, isLoading, error } = useQuery<SalesData>({
     queryKey: ["/api/analytics/sales"],
+    enabled: isAuthenticated,
+    retry: false,
   });
+
+  if (authLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -56,15 +84,27 @@ export default function SalesAnalytics() {
     );
   }
 
-  if (!salesData) {
+  if (error || !salesData) {
     return (
       <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Comprehensive sales performance dashboard
+            </p>
+          </div>
+          <Button variant="outline" onClick={() => setLocation("/admin")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Admin
+          </Button>
+        </div>
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            No Sales Data Available
+            {error ? "Error Loading Analytics" : "No Sales Data Available"}
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Start making sales to see analytics data here.
+            {error ? "Failed to load sales analytics. Please try again." : "Start making sales to see analytics data here."}
           </p>
         </div>
       </div>
@@ -108,11 +148,17 @@ export default function SalesAnalytics() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Comprehensive sales performance dashboard
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Comprehensive sales performance dashboard
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => setLocation("/admin")}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Admin
+        </Button>
       </div>
 
       {/* Key Metrics */}
