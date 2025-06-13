@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 import MolecularHoverEffect from "@/components/ui/molecular-hover-effect";
-import ProductInquiryForm from "@/components/product-inquiry-form";
+// import ProductInquiryForm from "@/components/product-inquiry-form";
 
 const AgriculturalFertilizersPage = () => {
   const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
@@ -180,7 +180,7 @@ const AgriculturalFertilizersPage = () => {
               {products?.map((product) => (
                 <MolecularHoverEffect key={product.id} moleculeType="ammonia" className="h-full">
                   <Card className="group bg-white hover:shadow-xl hover:shadow-glow-green transition-all duration-500 border border-gray-200 hover:border-green-300 overflow-hidden h-full">
-                  {product.imageUrl && (
+                    {product.imageUrl && (
                     <div className="aspect-video w-full overflow-hidden bg-gray-100">
                       <img 
                         src={product.imageUrl} 
@@ -223,10 +223,10 @@ const AgriculturalFertilizersPage = () => {
                       <div className="mb-6">
                         <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
                         <ul className="space-y-2">
-                          {(product.features as string[]).map((feature, featureIndex) => (
+                          {product.features.map((feature, featureIndex) => (
                             <li key={featureIndex} className="flex items-center text-gray-700">
                               <CheckCircle className="h-4 w-4 text-secondary mr-3 flex-shrink-0" />
-                              {feature}
+                              {String(feature)}
                             </li>
                           ))}
                         </ul>
@@ -269,6 +269,7 @@ const AgriculturalFertilizersPage = () => {
                     </div>
                   </CardContent>
                 </Card>
+                </MolecularHoverEffect>
               ))}
             </div>
           )}
