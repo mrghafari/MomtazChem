@@ -157,17 +157,19 @@ export class DatabaseStorage implements IStorage {
       }
       
       if (existingShopProduct) {
-        // Update existing shop product
+        // Update existing shop product with real inventory data
         await shopStorage.updateShopProduct(existingShopProduct.id, {
           name: showcaseProduct.name,
           description: showcaseProduct.description,
           price: productPrice,
           category: showcaseProduct.category,
+          stockQuantity: showcaseProduct.stockQuantity || 0,
+          lowStockThreshold: showcaseProduct.minStockLevel || 10,
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
           isActive: showcaseProduct.isActive,
         });
       } else {
-        // Create new shop product
+        // Create new shop product with real inventory data
         await shopStorage.createShopProduct({
           name: showcaseProduct.name,
           sku: productSku,
@@ -175,8 +177,8 @@ export class DatabaseStorage implements IStorage {
           price: productPrice,
           priceUnit: 'unit',
           category: showcaseProduct.category,
-          stockQuantity: 100, // Default stock for new products
-          lowStockThreshold: 10,
+          stockQuantity: showcaseProduct.stockQuantity || 0,
+          lowStockThreshold: showcaseProduct.minStockLevel || 10,
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
           isActive: showcaseProduct.isActive,
           isFeatured: false,
