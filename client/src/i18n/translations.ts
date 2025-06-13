@@ -40,7 +40,7 @@ export const translations = {
     },
 
     // Admin Panel
-    admin: {
+    adminPanel: {
       dashboard: "Admin Dashboard",
       products: "Products",
       orders: "Orders", 
@@ -60,7 +60,7 @@ export const translations = {
     },
 
     // Analytics
-    analytics: {
+    analyticsPage: {
       title: "Sales Analytics",
       subtitle: "Comprehensive sales performance dashboard",
       totalRevenue: "Total Revenue",
@@ -75,7 +75,7 @@ export const translations = {
     },
 
     // Order Management
-    orders: {
+    orderManagement: {
       orderNumber: "Order Number",
       customer: "Customer",
       date: "Date",
@@ -124,6 +124,11 @@ export const translations = {
   },
 
   ar: {
+    // معلومات الشركة
+    companyName: "الإنتاج الممتاز، للتجاره عامه والصناعه كيمياويه، المحدوده",
+    companyShortName: "الإنتاج الممتاز",
+    companyDescription: "شركة رائدة في مجال الكيماويات الصناعية والتجارة العامة",
+    
     // التنقل والعنوان
     home: "الرئيسية",
     products: "المنتجات", 
@@ -164,7 +169,7 @@ export const translations = {
     },
 
     // لوحة الإدارة
-    admin: {
+    adminPanel: {
       dashboard: "لوحة الإدارة",
       products: "المنتجات",
       orders: "الطلبات",
@@ -184,7 +189,7 @@ export const translations = {
     },
 
     // التحليلات
-    analytics: {
+    analyticsPage: {
       title: "تحليلات المبيعات",
       subtitle: "لوحة معلومات شاملة لأداء المبيعات",
       totalRevenue: "إجمالي الإيرادات",
@@ -199,7 +204,7 @@ export const translations = {
     },
 
     // إدارة الطلبات
-    orders: {
+    orderManagement: {
       orderNumber: "رقم الطلب",
       customer: "العميل",
       date: "التاريخ",

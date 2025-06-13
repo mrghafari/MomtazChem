@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { LanguageToggle } from '@/components/ui/language-toggle';
+import { useLanguage } from '@/i18n/LanguageContext';
 import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -19,13 +21,14 @@ import companyLogoPath from '@assets/company-logo.png';
 export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, isRTL } = useLanguage();
 
   const navigation = [
-    { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
-    { href: '/services', label: 'Services' },
-    { href: '/contact', label: 'Contact' },
-    { href: '/shop', label: 'Shop' },
+    { href: '/', label: t('home') },
+    { href: '/about', label: t('about') },
+    { href: '/services', label: 'خدماتنا' },
+    { href: '/contact', label: t('contact') },
+    { href: '/shop', label: t('shop') },
   ];
 
   const productCategories = [
