@@ -1161,6 +1161,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Financial transactions endpoints for accounting
+  app.get("/api/shop/financial-transactions", async (req, res) => {
+    try {
+      const { type, startDate, endDate, orderId } = req.query;
+      const filters: any = {};
+      
+      if (type) filters.type = type as string;
+      if (orderId) filters.orderId = parseInt(orderId as string);
+      if (startDate) filters.startDate = new Date(startDate as string);
+      if (endDate) filters.endDate = new Date(endDate as string);
+
+      const transactions = await shopStorage.getFinancialTransactions(filters);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching financial transactions:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch financial transactions" });
+    }
+  });
+
+  app.post("/api/shop/financial-transactions", async (req, res) => {
+    try {
+      const transaction = await shopStorage.createFinancialTransaction(req.body);
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error creating financial transaction:", error);
+      res.status(500).json({ success: false, message: "Failed to create financial transaction" });
+    }
+  });
+
+  // Sales reports endpoints
+  app.get("/api/shop/sales-reports", async (req, res) => {
+    try {
+      const { reportType, startDate, endDate } = req.query;
+      const filters: any = {};
+      
+      if (reportType) filters.reportType = reportType as string;
+      if (startDate) filters.startDate = new Date(startDate as string);
+      if (endDate) filters.endDate = new Date(endDate as string);
+
+      const reports = await shopStorage.getSalesReports(filters);
+      res.json(reports);
+    } catch (error) {
+      console.error("Error fetching sales reports:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch sales reports" });
+    }
+  });
+
+  app.post("/api/shop/sales-reports", async (req, res) => {
+    try {
+      const report = await shopStorage.createSalesReport(req.body);
+      res.json(report);
+    } catch (error) {
+      console.error("Error creating sales report:", error);
+      res.status(500).json({ success: false, message: "Failed to create sales report" });
+    }
+  });
+
+  // Real-time accounting statistics
+  app.get("/api/shop/accounting-stats", async (req, res) => {
+    try {
+      const stats = await shopStorage.getAccountingStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching accounting stats:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch accounting stats" });
+    }
+  });
+
+  // Process refund/return
+  app.post("/api/shop/orders/:id/refund", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { amount, reason, type } = req.body;
+      
+      await shopStorage.processOrderRefund(orderId, amount, reason, type);
+      res.json({ success: true, message: `${type === 'refund' ? 'Refund' : 'Return'} processed successfully` });
+    } catch (error) {
+      console.error("Error processing refund/return:", error);
+      res.status(500).json({ success: false, message: "Failed to process refund/return" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

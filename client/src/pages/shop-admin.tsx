@@ -15,7 +15,12 @@ import {
   Download,
   Plus,
   Trash2,
-  Percent
+  Percent,
+  Calculator,
+  TrendingDown,
+  RefreshCw,
+  BarChart3,
+  CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +59,16 @@ const ShopAdmin = () => {
   // Fetch discount settings
   const { data: discounts = [] } = useQuery({
     queryKey: ["/api/shop/discounts"],
+  });
+
+  // Fetch accounting statistics
+  const { data: accountingStats = {} } = useQuery({
+    queryKey: ["/api/shop/accounting-stats"],
+  });
+
+  // Fetch financial transactions
+  const { data: transactions = [] } = useQuery({
+    queryKey: ["/api/shop/financial-transactions"],
   });
 
   // Update order status mutation
@@ -178,6 +193,7 @@ const ShopAdmin = () => {
             <TabsTrigger value="orders">Orders Management</TabsTrigger>
             <TabsTrigger value="inventory">Inventory Management</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
+            <TabsTrigger value="accounting">Accounting</TabsTrigger>
           </TabsList>
 
           {/* Orders Management */}

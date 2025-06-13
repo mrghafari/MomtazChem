@@ -66,6 +66,55 @@ export const insertDiscountSettingsSchema = createInsertSchema(discountSettings)
 export type InsertDiscountSetting = z.infer<typeof insertDiscountSettingsSchema>;
 export type DiscountSetting = typeof discountSettings.$inferSelect;
 
+// Financial transactions table for accounting
+export const financialTransactions = pgTable("financial_transactions", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(), // 'sale', 'refund', 'adjustment', 'return'
+  orderId: integer("order_id").references(() => orders.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  referenceNumber: text("reference_number"),
+  status: text("status").notNull().default("completed"), // completed, pending, cancelled
+  processingDate: timestamp("processing_date").notNull().defaultNow(),
+  metadata: json("metadata"), // Additional transaction details
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertFinancialTransactionSchema = createInsertSchema(financialTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertFinancialTransaction = z.infer<typeof insertFinancialTransactionSchema>;
+export type FinancialTransaction = typeof financialTransactions.$inferSelect;
+
+// Sales reports table for daily/monthly summaries
+export const salesReports = pgTable("sales_reports", {
+  id: serial("id").primaryKey(),
+  reportDate: timestamp("report_date").notNull(),
+  reportType: text("report_type").notNull(), // 'daily', 'monthly', 'yearly'
+  totalSales: decimal("total_sales", { precision: 12, scale: 2 }).notNull().default("0"),
+  totalRefunds: decimal("total_refunds", { precision: 12, scale: 2 }).notNull().default("0"),
+  totalReturns: decimal("total_returns", { precision: 12, scale: 2 }).notNull().default("0"),
+  netRevenue: decimal("net_revenue", { precision: 12, scale: 2 }).notNull().default("0"),
+  orderCount: integer("order_count").notNull().default(0),
+  refundCount: integer("refund_count").notNull().default(0),
+  returnCount: integer("return_count").notNull().default(0),
+  averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).notNull().default("0"),
+  topSellingProducts: json("top_selling_products"), // Array of product sales data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSalesReportSchema = createInsertSchema(salesReports).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSalesReport = z.infer<typeof insertSalesReportSchema>;
+export type SalesReport = typeof salesReports.$inferSelect;
+
 export const insertShopProductSchema = createInsertSchema(shopProducts).omit({
   id: true,
   createdAt: true,

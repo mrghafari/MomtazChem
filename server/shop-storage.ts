@@ -7,6 +7,8 @@ import {
   orderItems,
   inventoryTransactions,
   discountSettings,
+  financialTransactions,
+  salesReports,
   type ShopProduct, 
   type InsertShopProduct,
   type ShopCategory,
@@ -22,7 +24,11 @@ import {
   type InventoryTransaction,
   type InsertInventoryTransaction,
   type DiscountSetting,
-  type InsertDiscountSetting
+  type InsertDiscountSetting,
+  type FinancialTransaction,
+  type InsertFinancialTransaction,
+  type SalesReport,
+  type InsertSalesReport
 } from "@shared/shop-schema";
 import { shopDb } from "./shop-db";
 import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
@@ -90,6 +96,39 @@ export interface IShopStorage {
     pendingOrders: number;
     shippedOrders: number;
   }>;
+
+  // Financial transactions for accounting
+  createFinancialTransaction(transaction: InsertFinancialTransaction): Promise<FinancialTransaction>;
+  getFinancialTransactions(filters?: {
+    type?: string;
+    startDate?: Date;
+    endDate?: Date;
+    orderId?: number;
+  }): Promise<FinancialTransaction[]>;
+  updateFinancialTransaction(id: number, transaction: Partial<InsertFinancialTransaction>): Promise<FinancialTransaction>;
+  
+  // Sales reports for accounting dashboard
+  createSalesReport(report: InsertSalesReport): Promise<SalesReport>;
+  getSalesReports(filters?: {
+    reportType?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<SalesReport[]>;
+  updateSalesReport(id: number, report: Partial<InsertSalesReport>): Promise<SalesReport>;
+  
+  // Real-time accounting statistics
+  getAccountingStats(): Promise<{
+    todaySales: number;
+    todayReturns: number;
+    todayRefunds: number;
+    monthlyRevenue: number;
+    totalTransactions: number;
+    pendingRefunds: number;
+    netProfit: number;
+  }>;
+  
+  // Process order refund/return
+  processOrderRefund(orderId: number, amount: number, reason: string, type: 'refund' | 'return'): Promise<void>;
 }
 
 export class ShopStorage implements IShopStorage {
@@ -444,6 +483,245 @@ export class ShopStorage implements IShopStorage {
 
   async deleteDiscountSetting(id: number): Promise<void> {
     await shopDb.delete(discountSettings).where(eq(discountSettings.id, id));
+  }
+
+  // Financial transactions for accounting
+  async createFinancialTransaction(transactionData: InsertFinancialTransaction): Promise<FinancialTransaction> {
+    const [transaction] = await shopDb
+      .insert(financialTransactions)
+      .values(transactionData)
+      .returning();
+    return transaction;
+  }
+
+  async getFinancialTransactions(filters?: {
+    type?: string;
+    startDate?: Date;
+    endDate?: Date;
+    orderId?: number;
+  }): Promise<FinancialTransaction[]> {
+    let query = shopDb.select().from(financialTransactions);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.type) {
+        conditions.push(eq(financialTransactions.type, filters.type));
+      }
+      if (filters.orderId) {
+        conditions.push(eq(financialTransactions.orderId, filters.orderId));
+      }
+      if (filters.startDate) {
+        conditions.push(gte(financialTransactions.processingDate, filters.startDate));
+      }
+      if (filters.endDate) {
+        conditions.push(lte(financialTransactions.processingDate, filters.endDate));
+      }
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(financialTransactions.processingDate));
+  }
+
+  async updateFinancialTransaction(id: number, transactionUpdate: Partial<InsertFinancialTransaction>): Promise<FinancialTransaction> {
+    const [transaction] = await shopDb
+      .update(financialTransactions)
+      .set(transactionUpdate)
+      .where(eq(financialTransactions.id, id))
+      .returning();
+    return transaction;
+  }
+
+  // Sales reports for accounting dashboard
+  async createSalesReport(reportData: InsertSalesReport): Promise<SalesReport> {
+    const [report] = await shopDb
+      .insert(salesReports)
+      .values(reportData)
+      .returning();
+    return report;
+  }
+
+  async getSalesReports(filters?: {
+    reportType?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<SalesReport[]> {
+    let query = shopDb.select().from(salesReports);
+    
+    if (filters) {
+      const conditions = [];
+      if (filters.reportType) {
+        conditions.push(eq(salesReports.reportType, filters.reportType));
+      }
+      if (filters.startDate) {
+        conditions.push(gte(salesReports.reportDate, filters.startDate));
+      }
+      if (filters.endDate) {
+        conditions.push(lte(salesReports.reportDate, filters.endDate));
+      }
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query.orderBy(desc(salesReports.reportDate));
+  }
+
+  async updateSalesReport(id: number, reportUpdate: Partial<InsertSalesReport>): Promise<SalesReport> {
+    const [report] = await shopDb
+      .update(salesReports)
+      .set({
+        ...reportUpdate,
+        updatedAt: new Date()
+      })
+      .where(eq(salesReports.id, id))
+      .returning();
+    return report;
+  }
+
+  // Real-time accounting statistics
+  async getAccountingStats(): Promise<{
+    todaySales: number;
+    todayReturns: number;
+    todayRefunds: number;
+    monthlyRevenue: number;
+    totalTransactions: number;
+    pendingRefunds: number;
+    netProfit: number;
+  }> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    // Today's sales
+    const todaySalesResult = await shopDb
+      .select({ 
+        total: sql<number>`COALESCE(SUM(CAST(${financialTransactions.amount} AS DECIMAL)), 0)` 
+      })
+      .from(financialTransactions)
+      .where(
+        and(
+          eq(financialTransactions.type, 'sale'),
+          gte(financialTransactions.processingDate, today),
+          lte(financialTransactions.processingDate, tomorrow)
+        )
+      );
+
+    // Today's returns
+    const todayReturnsResult = await shopDb
+      .select({ 
+        total: sql<number>`COALESCE(SUM(CAST(${financialTransactions.amount} AS DECIMAL)), 0)` 
+      })
+      .from(financialTransactions)
+      .where(
+        and(
+          eq(financialTransactions.type, 'return'),
+          gte(financialTransactions.processingDate, today),
+          lte(financialTransactions.processingDate, tomorrow)
+        )
+      );
+
+    // Today's refunds
+    const todayRefundsResult = await shopDb
+      .select({ 
+        total: sql<number>`COALESCE(SUM(CAST(${financialTransactions.amount} AS DECIMAL)), 0)` 
+      })
+      .from(financialTransactions)
+      .where(
+        and(
+          eq(financialTransactions.type, 'refund'),
+          gte(financialTransactions.processingDate, today),
+          lte(financialTransactions.processingDate, tomorrow)
+        )
+      );
+
+    // Monthly revenue
+    const monthlyRevenueResult = await shopDb
+      .select({ 
+        total: sql<number>`COALESCE(SUM(CAST(${financialTransactions.amount} AS DECIMAL)), 0)` 
+      })
+      .from(financialTransactions)
+      .where(
+        and(
+          eq(financialTransactions.type, 'sale'),
+          gte(financialTransactions.processingDate, thisMonth)
+        )
+      );
+
+    // Total transactions count
+    const totalTransactionsResult = await shopDb
+      .select({ count: count() })
+      .from(financialTransactions);
+
+    // Pending refunds
+    const pendingRefundsResult = await shopDb
+      .select({ 
+        total: sql<number>`COALESCE(SUM(CAST(${financialTransactions.amount} AS DECIMAL)), 0)` 
+      })
+      .from(financialTransactions)
+      .where(
+        and(
+          eq(financialTransactions.type, 'refund'),
+          eq(financialTransactions.status, 'pending')
+        )
+      );
+
+    const todaySales = todaySalesResult[0]?.total || 0;
+    const todayReturns = todayReturnsResult[0]?.total || 0;
+    const todayRefunds = todayRefundsResult[0]?.total || 0;
+    const monthlyRevenue = monthlyRevenueResult[0]?.total || 0;
+    const totalTransactions = totalTransactionsResult[0]?.count || 0;
+    const pendingRefunds = pendingRefundsResult[0]?.total || 0;
+
+    return {
+      todaySales,
+      todayReturns,
+      todayRefunds,
+      monthlyRevenue,
+      totalTransactions,
+      pendingRefunds,
+      netProfit: todaySales - todayReturns - todayRefunds
+    };
+  }
+
+  // Process order refund/return
+  async processOrderRefund(orderId: number, amount: number, reason: string, type: 'refund' | 'return'): Promise<void> {
+    // Update order status
+    await shopDb
+      .update(orders)
+      .set({ status: type === 'refund' ? 'refunded' : 'returned' })
+      .where(eq(orders.id, orderId));
+
+    // Create financial transaction
+    await this.createFinancialTransaction({
+      type,
+      orderId,
+      amount: amount.toString(),
+      description: `${type === 'refund' ? 'Refund' : 'Return'} processed: ${reason}`,
+      referenceNumber: `${type.toUpperCase()}-${Date.now()}`,
+      status: 'completed',
+      processingDate: new Date(),
+      metadata: { reason, originalOrderId: orderId }
+    });
+
+    // If it's a return, restore inventory
+    if (type === 'return') {
+      const orderItemsToRestore = await this.getOrderItems(orderId);
+      for (const item of orderItemsToRestore) {
+        const product = await this.getShopProductById(item.productId);
+        if (product) {
+          await this.updateProductStock(
+            item.productId, 
+            product.stockQuantity + item.quantity, 
+            `Return from order #${orderId}`
+          );
+        }
+      }
+    }
   }
 }
 
