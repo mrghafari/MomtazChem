@@ -53,6 +53,9 @@ export const discountSettings = pgTable("discount_settings", {
   discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }).notNull(),
   isActive: boolean("is_active").default(true),
   description: text("description"),
+  applicableProducts: json("applicable_products"), // Array of selected product IDs
+  applyToAllProducts: boolean("apply_to_all_products").default(true), // If false, apply only to selected products
+  applicableCategories: json("applicable_categories"), // Array of category IDs for category-based discounts
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

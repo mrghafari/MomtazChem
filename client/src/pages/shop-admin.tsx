@@ -30,14 +30,173 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
+
+// Discount Form Component
+const DiscountForm = ({ discount, products, onSave, onCancel }: {
+  discount?: any;
+  products: ShopProduct[];
+  onSave: (data: any) => void;
+  onCancel: () => void;
+}) => {
+  const [formData, setFormData] = useState({
+    name: discount?.name || "",
+    discountPercentage: discount?.discountPercentage || "",
+    minQuantity: discount?.minQuantity || 1,
+    description: discount?.description || "",
+    isActive: discount?.isActive ?? true,
+    applyToAllProducts: discount?.applyToAllProducts ?? true,
+    applicableProducts: discount?.applicableProducts || [],
+  });
+
+  const handleProductSelection = (productId: number, checked: boolean) => {
+    if (checked) {
+      setFormData(prev => ({
+        ...prev,
+        applicableProducts: [...prev.applicableProducts, productId]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        applicableProducts: prev.applicableProducts.filter((id: number) => id !== productId)
+      }));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="name">Discount Name</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            placeholder="e.g., Bulk Discount 10+"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="discountPercentage">Discount Percentage (%)</Label>
+          <Input
+            id="discountPercentage"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            value={formData.discountPercentage}
+            onChange={(e) => setFormData(prev => ({ ...prev, discountPercentage: e.target.value }))}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="minQuantity">Minimum Quantity</Label>
+          <Input
+            id="minQuantity"
+            type="number"
+            min="1"
+            value={formData.minQuantity}
+            onChange={(e) => setFormData(prev => ({ ...prev, minQuantity: parseInt(e.target.value) }))}
+            required
+          />
+        </div>
+        <div className="flex items-center space-x-2 mt-6">
+          <Checkbox
+            id="isActive"
+            checked={formData.isActive}
+            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: !!checked }))}
+          />
+          <Label htmlFor="isActive">Active</Label>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="description">Description (Optional)</Label>
+        <Input
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Brief description of this discount"
+        />
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="applyToAllProducts"
+            checked={formData.applyToAllProducts}
+            onCheckedChange={(checked) => {
+              setFormData(prev => ({ 
+                ...prev, 
+                applyToAllProducts: !!checked,
+                applicableProducts: !!checked ? [] : prev.applicableProducts
+              }));
+            }}
+          />
+          <Label htmlFor="applyToAllProducts">Apply to all products</Label>
+        </div>
+
+        {!formData.applyToAllProducts && (
+          <div>
+            <Label>Select Products for Discount</Label>
+            <div className="mt-2 max-h-60 overflow-y-auto border rounded-lg p-4">
+              <div className="space-y-3">
+                {products.map((product) => (
+                  <div key={product.id} className="flex items-center space-x-3">
+                    <Checkbox
+                      id={`product-${product.id}`}
+                      checked={formData.applicableProducts.includes(product.id)}
+                      onCheckedChange={(checked) => handleProductSelection(product.id, !!checked)}
+                    />
+                    <Label htmlFor={`product-${product.id}`} className="flex-1 cursor-pointer">
+                      <div>
+                        <div className="font-medium">{product.name}</div>
+                        <div className="text-sm text-gray-500">SKU: {product.sku} - ${product.price}</div>
+                      </div>
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {formData.applicableProducts.length > 0 && (
+              <div className="mt-2 text-sm text-blue-600">
+                {formData.applicableProducts.length} product(s) selected
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-end gap-3">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit">
+          {discount ? "Update Discount" : "Create Discount"}
+        </Button>
+      </div>
+    </form>
+  );
+};
 
 const ShopAdmin = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingDiscount, setEditingDiscount] = useState<any>(null);
+  const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -88,6 +247,52 @@ const ShopAdmin = () => {
       toast({
         title: "Update Failed",
         description: "Failed to update order status.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update discount mutation
+  const updateDiscountMutation = useMutation({
+    mutationFn: async ({ discountId, updates }: { discountId: number; updates: any }) => {
+      return apiRequest(`/api/shop/discounts/${discountId}`, "PATCH", updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      setIsDiscountDialogOpen(false);
+      setEditingDiscount(null);
+      toast({
+        title: "Discount Updated",
+        description: "Discount settings have been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update discount settings.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create discount mutation
+  const createDiscountMutation = useMutation({
+    mutationFn: async (discountData: any) => {
+      return apiRequest("/api/shop/discounts", "POST", discountData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      setIsDiscountDialogOpen(false);
+      setEditingDiscount(null);
+      toast({
+        title: "Discount Created",
+        description: "New discount has been created successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create discount.",
         variant: "destructive",
       });
     },
@@ -324,10 +529,22 @@ const ShopAdmin = () => {
           <TabsContent value="discounts">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Percent className="w-5 h-5" />
-                  Discount Settings
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Percent className="w-5 h-5" />
+                    Discount Settings
+                  </CardTitle>
+                  <Button 
+                    onClick={() => {
+                      setEditingDiscount(null);
+                      setIsDiscountDialogOpen(true);
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Discount
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -350,18 +567,64 @@ const ShopAdmin = () => {
                                 {discount.description}
                               </div>
                             )}
+                            {discount.applicableProducts && discount.applicableProducts.length > 0 && (
+                              <div className="text-sm text-blue-600 mt-1">
+                                Applied to {discount.applicableProducts.length} selected products
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingDiscount(discount);
+                                setIsDiscountDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
-                      Discount rules loaded from database successfully. Current active discounts: 10+ items (5%), 25+ items (10%), 50+ items (15%).
+                      No discount rules found. Click "Add Discount" to create your first discount.
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
+
+            {/* Discount Edit/Create Dialog */}
+            <Dialog open={isDiscountDialogOpen} onOpenChange={setIsDiscountDialogOpen}>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingDiscount ? "Edit Discount" : "Create New Discount"}
+                  </DialogTitle>
+                </DialogHeader>
+                <DiscountForm
+                  discount={editingDiscount}
+                  products={products}
+                  onSave={(discountData: any) => {
+                    if (editingDiscount) {
+                      updateDiscountMutation.mutate({
+                        discountId: editingDiscount.id,
+                        updates: discountData
+                      });
+                    } else {
+                      createDiscountMutation.mutate(discountData);
+                    }
+                  }}
+                  onCancel={() => {
+                    setIsDiscountDialogOpen(false);
+                    setEditingDiscount(null);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           {/* Accounting Dashboard */}
