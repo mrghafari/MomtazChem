@@ -15,6 +15,7 @@ import ShopAdmin from "@/pages/shop-admin";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
+import SpecialistsAdmin from "@/pages/admin/specialists";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import CRMPage from "@/pages/crm";
@@ -43,6 +44,7 @@ function Router() {
           <Route path="/admin" component={AdminPage} />
           <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin/users" component={AdminUsers} />
+          <Route path="/admin/specialists" component={SpecialistsAdmin} />
           <Route path="/forgot-password" component={ForgotPassword} />
           <Route path="/reset-password" component={ResetPassword} />
           <Route path="/crm" component={CRMPage} />

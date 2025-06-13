@@ -15,8 +15,9 @@ import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
 import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { sql, eq, and } from "drizzle-orm";
 import { z } from "zod";
+import * as schema from "@shared/schema";
 
 // Extend session type to include admin user
 declare module "express-session" {

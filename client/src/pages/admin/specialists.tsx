@@ -90,10 +90,19 @@ const SpecialistsAdmin = () => {
 
   // Create specialist mutation
   const createSpecialistMutation = useMutation({
-    mutationFn: (data: Partial<Specialist>) => apiRequest("/api/admin/specialists", {
-      method: "POST",
-      body: JSON.stringify(data)
-    }),
+    mutationFn: async (data: Partial<Specialist>) => {
+      const response = await fetch("/api/admin/specialists", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/specialists"] });
       setIsCreateDialogOpen(false);
@@ -114,11 +123,19 @@ const SpecialistsAdmin = () => {
 
   // Update specialist mutation
   const updateSpecialistMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Specialist> }) => 
-      apiRequest(`/api/admin/specialists/${id}`, {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Specialist> }) => {
+      const response = await fetch(`/api/admin/specialists/${id}`, {
         method: "PUT",
-        body: JSON.stringify(data)
-      }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/specialists"] });
       setIsEditDialogOpen(false);
@@ -140,9 +157,15 @@ const SpecialistsAdmin = () => {
 
   // Delete specialist mutation
   const deleteSpecialistMutation = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/admin/specialists/${id}`, {
-      method: "DELETE"
-    }),
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/specialists/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/specialists"] });
       toast({
