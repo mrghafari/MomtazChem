@@ -235,8 +235,13 @@ export default function ProceduresManagement() {
     queryKey: ["/api/procedures/safety-protocols"],
   });
 
+  // Documents query - handles both procedures and safety protocols
   const { data: documents = [], isLoading: documentsLoading } = useQuery<ProcedureDocument[]>({
-    queryKey: [`/api/procedures/${selectedProcedureId}/documents`],
+    queryKey: [
+      selectedTab === 'safety' 
+        ? `/api/procedures/safety-protocols/${selectedProcedureId}/documents`
+        : `/api/procedures/${selectedProcedureId}/documents`
+    ],
     enabled: !!selectedProcedureId,
   });
 
@@ -383,7 +388,11 @@ export default function ProceduresManagement() {
     }
 
     try {
-      const response = await fetch(`/api/procedures/documents/${documentId}`, {
+      const deleteEndpoint = selectedTab === 'safety' 
+        ? `/api/procedures/safety-protocols/documents/${documentId}`
+        : `/api/procedures/documents/${documentId}`;
+      
+      const response = await fetch(deleteEndpoint, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -406,15 +415,21 @@ export default function ProceduresManagement() {
         }
         
         // Refresh the list anyway in case the document was already deleted
+        const documentApiEndpoint = selectedTab === 'safety' 
+          ? `/api/procedures/safety-protocols/${selectedProcedureId}/documents`
+          : `/api/procedures/${selectedProcedureId}/documents`;
         queryClient.invalidateQueries({ 
-          queryKey: [`/api/procedures/${selectedProcedureId}/documents`] 
+          queryKey: [documentApiEndpoint] 
         });
         return;
       }
 
       // Refresh documents list
+      const documentApiEndpoint = selectedTab === 'safety' 
+        ? `/api/procedures/safety-protocols/${selectedProcedureId}/documents`
+        : `/api/procedures/${selectedProcedureId}/documents`;
       queryClient.invalidateQueries({ 
-        queryKey: [`/api/procedures/${selectedProcedureId}/documents`] 
+        queryKey: [documentApiEndpoint] 
       });
 
       toast({
@@ -1091,6 +1106,31 @@ export default function ProceduresManagement() {
                               </div>
                             </div>
                           )}
+                        </div>
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProcedureId(protocol.id);
+                                setShowDocuments(true);
+                              }}
+                            >
+                              <FileText className="h-4 w-4 mr-1" />
+                              Documents
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => openEditDialog('safety', protocol)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>

@@ -1923,6 +1923,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get safety protocol documents
+  app.get("/api/procedures/safety-protocols/:protocolId/documents", requireAuth, async (req, res) => {
+    try {
+      const { protocolId } = req.params;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT d.id, d.procedure_id, d.outline_id, d.title, d.description, d.file_name, 
+               d.file_path, d.file_size, d.file_type, d.upload_date, d.uploaded_by, 
+               d.version, d.is_active, d.download_count, d.last_downloaded_at, d.tags,
+               u.username as uploaded_by_name
+        FROM procedure_documents d
+        LEFT JOIN users u ON d.uploaded_by = u.id
+        WHERE d.procedure_id = $1 AND d.is_active = true AND d.document_type = 'safety_protocol'
+        ORDER BY d.upload_date DESC
+      `, [protocolId]);
+      
+      const documents = result.rows.map((row: any) => ({
+        id: row.id,
+        procedureId: row.procedure_id,
+        outlineId: row.outline_id,
+        title: row.title || 'بدون عنوان',
+        description: row.description,
+        fileName: row.file_name || 'فایل نامشخص',
+        filePath: row.file_path,
+        fileSize: row.file_size || 0,
+        fileType: row.file_type || 'نامشخص',
+        uploadDate: row.upload_date,
+        uploadedBy: row.uploaded_by,
+        uploadedByName: row.uploaded_by_name || 'نامشخص',
+        version: row.version || '1.0',
+        isActive: row.is_active,
+        downloadCount: row.download_count || 0,
+        lastDownloadedAt: row.last_downloaded_at,
+        tags: row.tags || []
+      }));
+
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching safety protocol documents:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Upload safety protocol document
+  app.post("/api/procedures/safety-protocols/:protocolId/documents", requireAuth, upload.single('document'), async (req, res) => {
+    try {
+      const { protocolId } = req.params;
+      const { title, description, version, tags } = req.body;
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ success: false, message: "No file uploaded" });
+      }
+
+      const userId = req.session.adminId;
+      const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO procedure_documents (
+          procedure_id, title, description, file_name, file_path, 
+          file_size, file_type, uploaded_by, version, tags, document_type
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'safety_protocol')
+        RETURNING *
+      `, [
+        protocolId, 
+        title || file.originalname, 
+        description || null, 
+        file.originalname, 
+        file.path, 
+        file.size, 
+        file.mimetype, 
+        userId, 
+        version || '1.0', 
+        tagsArray
+      ]);
+
+      res.json({
+        success: true,
+        document: result.rows[0],
+        message: "Document uploaded successfully"
+      });
+    } catch (error) {
+      console.error("Error uploading safety protocol document:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Download safety protocol document
+  app.get("/api/procedures/safety-protocols/documents/:documentId/download", requireAuth, async (req, res) => {
+    try {
+      const { documentId } = req.params;
+      
+      const { pool } = await import('./db');
+      
+      // Get document info
+      const docResult = await pool.query(`
+        SELECT file_path, file_name, file_type
+        FROM procedure_documents
+        WHERE id = $1 AND is_active = true AND document_type = 'safety_protocol'
+      `, [documentId]);
+
+      if (docResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Document not found" });
+      }
+
+      const document = docResult.rows[0];
+
+      // Update download count
+      await pool.query(`
+        UPDATE procedure_documents 
+        SET download_count = download_count + 1, 
+            last_downloaded_at = NOW()
+        WHERE id = $1
+      `, [documentId]);
+
+      // Handle both absolute and relative paths
+      let filePath = document.file_path;
+      if (!path.isAbsolute(filePath)) {
+        filePath = path.resolve(process.cwd(), filePath);
+      }
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ success: false, message: "File not found on server" });
+      }
+
+      res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
+      res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
+      
+      res.sendFile(filePath);
+
+    } catch (error) {
+      console.error("Error downloading safety protocol document:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Delete safety protocol document
+  app.delete("/api/procedures/safety-protocols/documents/:documentId", requireAuth, async (req, res) => {
+    try {
+      const { documentId } = req.params;
+      
+      const { pool } = await import('./db');
+      
+      // Get document info before deletion
+      const docResult = await pool.query(`
+        SELECT file_path, file_name
+        FROM procedure_documents
+        WHERE id = $1 AND is_active = true AND document_type = 'safety_protocol'
+      `, [documentId]);
+
+      if (docResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Document not found" });
+      }
+
+      const document = docResult.rows[0];
+
+      // Mark document as inactive (soft delete)
+      await pool.query(`
+        UPDATE procedure_documents 
+        SET is_active = false, updated_at = NOW()
+        WHERE id = $1
+      `, [documentId]);
+
+      // Optionally delete the physical file
+      try {
+        let filePath = document.file_path;
+        if (!path.isAbsolute(filePath)) {
+          filePath = path.resolve(process.cwd(), filePath);
+        }
+        
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileError) {
+        console.log('Could not delete physical file:', fileError);
+        // Continue even if file deletion fails
+      }
+
+      res.json({
+        success: true,
+        message: "Document deleted successfully"
+      });
+
+    } catch (error) {
+      console.error("Error deleting safety protocol document:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Update procedure category
   app.put("/api/procedures/categories/:id", requireAuth, async (req, res) => {
     try {
