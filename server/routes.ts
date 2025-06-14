@@ -3716,7 +3716,7 @@ ${procedure.content}
     }
   });
 
-  app.patch("/api/shop/orders/:id", async (req, res) => {
+  app.patch("/api/shop/orders/:id", requireAuth, async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
       if (isNaN(orderId)) {
@@ -3724,35 +3724,23 @@ ${procedure.content}
       }
       
       const updates = req.body;
-      const currentOrder = await shopStorage.getOrderById(orderId);
+      const currentOrder = await customerStorage.getOrderById(orderId);
       
       if (!currentOrder) {
         return res.status(404).json({ success: false, message: "Order not found" });
       }
       
-      // If order is being cancelled or refunded, restore inventory
-      if (updates.status && (updates.status === 'cancelled' || updates.status === 'refunded') && 
-          currentOrder.status !== 'cancelled' && currentOrder.status !== 'refunded') {
-        
-        const orderItems = await shopStorage.getOrderItems(orderId);
-        for (const item of orderItems) {
-          const product = await shopStorage.getShopProductById(item.productId);
-          if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
-            const newQuantity = product.stockQuantity + item.quantity;
-            await shopStorage.updateProductStock(
-              item.productId,
-              newQuantity,
-              `Order ${currentOrder.orderNumber} ${updates.status} - Restored ${item.quantity} units`
-            );
-          }
-        }
-      }
+      // Update the customer order status
+      const updatedOrder = await customerStorage.updateOrder(orderId, updates);
       
-      const order = await shopStorage.updateOrder(orderId, updates);
-      res.json(order);
+      res.json({
+        success: true,
+        message: "Order status updated successfully",
+        order: updatedOrder
+      });
     } catch (error) {
-      console.error("Error updating order:", error);
-      res.status(500).json({ success: false, message: "Failed to update order" });
+      console.error("Error updating customer order:", error);
+      res.status(500).json({ success: false, message: "Failed to update customer order" });
     }
   });
 
