@@ -528,15 +528,15 @@ export default function FactoryManagement() {
   };
 
   // Filter products based on search query
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = (products || []).filter((product) => {
     if (!searchQuery.trim()) return true;
     
     const query = searchQuery.toLowerCase();
     return (
-      product.name.toLowerCase().includes(query) ||
+      product.name?.toLowerCase().includes(query) ||
       product.barcode?.toLowerCase().includes(query) ||
       product.sku?.toLowerCase().includes(query) ||
-      product.category.toLowerCase().includes(query)
+      product.category?.toLowerCase().includes(query)
     );
   });
 
