@@ -16,9 +16,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "momtazchem-admin-secret-key",
   resave: false,
   saveUninitialized: false,
+  rolling: true, // Reset maxAge on each request
   cookie: {
     secure: false, // Set to true in production with HTTPS
-    httpOnly: true,
+    httpOnly: false, // Allow frontend access to session
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
   },

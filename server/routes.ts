@@ -132,9 +132,16 @@ const upload = multer({
 
 // Authentication middleware
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+  console.log('Auth check:', {
+    isAuthenticated: req.session.isAuthenticated,
+    adminId: req.session.adminId,
+    sessionId: req.sessionID
+  });
+  
   if (req.session.isAuthenticated && req.session.adminId) {
     next();
   } else {
+    console.log('Authentication failed for:', req.path);
     res.status(401).json({ success: false, message: "Authentication required" });
   }
 };
@@ -2495,18 +2502,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: row.id,
         procedureId: row.procedure_id,
         outlineId: row.outline_id,
-        title: row.title,
+        title: row.title || 'بدون عنوان',
         description: row.description,
-        fileName: row.file_name,
+        fileName: row.file_name || 'فایل نامشخص',
         filePath: row.file_path,
-        fileSize: row.file_size,
-        fileType: row.file_type,
+        fileSize: row.file_size || 0,
+        fileType: row.file_type || 'نامشخص',
         uploadDate: row.upload_date,
         uploadedBy: row.uploaded_by,
-        uploadedByName: row.uploaded_by_name,
-        version: row.version,
+        uploadedByName: row.uploaded_by_name || 'نامشخص',
+        version: row.version || '1.0',
         isActive: row.is_active,
-        downloadCount: row.download_count,
+        downloadCount: row.download_count || 0,
         lastDownloadedAt: row.last_downloaded_at,
         tags: row.tags || [],
         outlineTitle: row.outline_title
@@ -2547,7 +2554,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           file_path, file_size, file_type, uploaded_by, version, tags,
           upload_date, is_active, download_count
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), true, 0)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, '1.0'), $11, NOW(), true, 0)
         RETURNING id, title, file_name, upload_date, version
       `, [
         procedureId, 
