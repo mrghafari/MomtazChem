@@ -2608,10 +2608,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE id = $1
       `, [documentId]);
 
-      // Send file
-      const path = require('path');
-      const fs = require('fs');
-      
       // Handle both absolute and relative paths
       let filePath = document.file_path;
       if (!path.isAbsolute(filePath)) {
