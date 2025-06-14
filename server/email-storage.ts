@@ -31,7 +31,7 @@ export interface IEmailStorage {
   createSmtpSetting(setting: InsertSmtpSetting): Promise<SmtpSetting>;
   getSmtpSettings(): Promise<SmtpSetting[]>;
   getSmtpSettingById(id: number): Promise<SmtpSetting | undefined>;
-  getSmtpSettingByCategory(categoryId: number): Promise<SmtpSetting | undefined>;
+  getSmtpSettingByCategory(categoryId: number): Promise<SmtpSetting | null>;
   updateSmtpSetting(id: number, setting: Partial<InsertSmtpSetting>): Promise<SmtpSetting>;
   deleteSmtpSetting(id: number): Promise<void>;
   testSmtpConnection(id: number): Promise<boolean>;

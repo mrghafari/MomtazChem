@@ -179,7 +179,7 @@ export default function AdvancedEmailSettingsPage() {
         username: "",
         password: "",
         fromName: "Momtaz Chemical",
-        fromEmail: ""
+        fromEmail: "info@momtazchem.com"
       });
     }
     
@@ -387,7 +387,14 @@ export default function AdvancedEmailSettingsPage() {
                         <Input
                           id="username"
                           value={smtpForm.username}
-                          onChange={(e) => setSmtpForm({ ...smtpForm, username: e.target.value })}
+                          onChange={(e) => {
+                            const username = e.target.value;
+                            setSmtpForm({ 
+                              ...smtpForm, 
+                              username,
+                              fromEmail: username || smtpForm.fromEmail
+                            });
+                          }}
                           placeholder="your-email@domain.com"
                         />
                       </div>

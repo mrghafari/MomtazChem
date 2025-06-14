@@ -155,7 +155,7 @@ export class TemplateProcessor {
    * Preview template with variables
    */
   static previewTemplate(
-    template: { subject: string; htmlContent: string; textContent?: string },
+    template: { subject: string; htmlContent: string; textContent?: string | null },
     variables: TemplateVariables
   ): { subject: string; htmlContent: string; textContent?: string } {
     
