@@ -1303,6 +1303,226 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // FACTORY MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Production Lines
+  app.get("/api/factory/production-lines", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, name, description, capacity_per_hour, status, location, supervisor_name, created_at, updated_at
+        FROM production_lines
+        ORDER BY created_at DESC
+      `);
+      
+      const productionLines = result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        capacityPerHour: row.capacity_per_hour,
+        status: row.status,
+        location: row.location,
+        supervisorName: row.supervisor_name,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(productionLines);
+    } catch (error) {
+      console.error("Error fetching production lines:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Raw Materials
+  app.get("/api/factory/raw-materials", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, name, code, unit, current_stock, minimum_stock, maximum_stock, 
+               unit_price, supplier, storage_location, expiry_date, quality_grade, created_at, updated_at
+        FROM raw_materials
+        ORDER BY name
+      `);
+      
+      const rawMaterials = result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        code: row.code,
+        unit: row.unit,
+        currentStock: row.current_stock,
+        minimumStock: row.minimum_stock,
+        maximumStock: row.maximum_stock,
+        unitPrice: row.unit_price,
+        supplier: row.supplier,
+        storageLocation: row.storage_location,
+        expiryDate: row.expiry_date,
+        qualityGrade: row.quality_grade,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(rawMaterials);
+    } catch (error) {
+      console.error("Error fetching raw materials:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Production Orders
+  app.get("/api/factory/production-orders", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, order_number, product_name, quantity_planned, quantity_produced, unit,
+               production_line_id, status, priority, planned_start_date, actual_start_date,
+               planned_end_date, actual_end_date, supervisor_notes, quality_check_status, created_at, updated_at
+        FROM production_orders
+        ORDER BY created_at DESC
+      `);
+      
+      const productionOrders = result.rows.map((row: any) => ({
+        id: row.id,
+        orderNumber: row.order_number,
+        productName: row.product_name,
+        quantityPlanned: row.quantity_planned,
+        quantityProduced: row.quantity_produced,
+        unit: row.unit,
+        productionLineId: row.production_line_id,
+        status: row.status,
+        priority: row.priority,
+        plannedStartDate: row.planned_start_date,
+        actualStartDate: row.actual_start_date,
+        plannedEndDate: row.planned_end_date,
+        actualEndDate: row.actual_end_date,
+        supervisorNotes: row.supervisor_notes,
+        qualityCheckStatus: row.quality_check_status,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(productionOrders);
+    } catch (error) {
+      console.error("Error fetching production orders:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Equipment Maintenance
+  app.get("/api/factory/equipment-maintenance", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, equipment_name, equipment_code, production_line_id, maintenance_type,
+               scheduled_date, completed_date, status, technician_name, description,
+               cost, downtime_hours, created_at, updated_at
+        FROM equipment_maintenance
+        ORDER BY scheduled_date DESC
+      `);
+      
+      const equipmentMaintenance = result.rows.map((row: any) => ({
+        id: row.id,
+        equipmentName: row.equipment_name,
+        equipmentCode: row.equipment_code,
+        productionLineId: row.production_line_id,
+        maintenanceType: row.maintenance_type,
+        scheduledDate: row.scheduled_date,
+        completedDate: row.completed_date,
+        status: row.status,
+        technicianName: row.technician_name,
+        description: row.description,
+        cost: row.cost,
+        downtimeHours: row.downtime_hours,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(equipmentMaintenance);
+    } catch (error) {
+      console.error("Error fetching equipment maintenance:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Create Production Line
+  app.post("/api/factory/production-lines", requireAuth, async (req, res) => {
+    try {
+      const { name, description, capacityPerHour, location, supervisorName } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO production_lines (name, description, capacity_per_hour, location, supervisor_name)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id, name, description, capacity_per_hour, status, location, supervisor_name, created_at
+      `, [name, description, capacityPerHour, location, supervisorName]);
+
+      res.json({
+        success: true,
+        productionLine: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error creating production line:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "Production line name already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // Create Raw Material
+  app.post("/api/factory/raw-materials", requireAuth, async (req, res) => {
+    try {
+      const { name, code, unit, currentStock, minimumStock, maximumStock, unitPrice, supplier, storageLocation, qualityGrade } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO raw_materials (name, code, unit, current_stock, minimum_stock, maximum_stock, unit_price, supplier, storage_location, quality_grade)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id, name, code, unit, current_stock, minimum_stock, maximum_stock, unit_price, supplier, storage_location, quality_grade, created_at
+      `, [name, code, unit, currentStock, minimumStock, maximumStock, unitPrice, supplier, storageLocation, qualityGrade]);
+
+      res.json({
+        success: true,
+        rawMaterial: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error creating raw material:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "Raw material code already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // Create Production Order
+  app.post("/api/factory/production-orders", requireAuth, async (req, res) => {
+    try {
+      const { productName, quantityPlanned, unit, productionLineId, priority, plannedStartDate, plannedEndDate } = req.body;
+      
+      // Generate order number
+      const orderNumber = `PO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO production_orders (order_number, product_name, quantity_planned, unit, production_line_id, priority, planned_start_date, planned_end_date)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, order_number, product_name, quantity_planned, quantity_produced, unit, production_line_id, status, priority, planned_start_date, planned_end_date, created_at
+      `, [orderNumber, productName, quantityPlanned, unit, productionLineId, priority, plannedStartDate, plannedEndDate]);
+
+      res.json({
+        success: true,
+        productionOrder: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating production order:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Get database statistics
   app.get("/api/admin/database/stats", requireAuth, async (req, res) => {
     try {
