@@ -585,9 +585,35 @@ export default function AdminPage() {
                 </Card>
               ))}
             </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <QrCode className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchQuery ? 'No products found' : 'No products available'}
+              </h3>
+              <p className="text-gray-500 mb-4">
+                {searchQuery 
+                  ? `No products match "${searchQuery}". Try searching by name, barcode, or SKU.`
+                  : 'Add your first product to get started.'
+                }
+              </p>
+              {searchQuery && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSearchQuery("")}
+                  className="mr-2"
+                >
+                  Clear Search
+                </Button>
+              )}
+              <Button onClick={openCreateDialog}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Product
+              </Button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product: ShowcaseProduct) => (
+              {filteredProducts.map((product: ShowcaseProduct) => (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                   {product.imageUrl && (
                     <div className="aspect-video w-full overflow-hidden bg-gray-100">
