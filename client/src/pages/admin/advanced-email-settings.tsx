@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Mail, Settings, TestTube, Save, Plus, Trash2, Edit, Check, X, AlertCircle, CheckCircle, Clock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import EmailSetupProgress from "@/components/ui/email-setup-progress";
 
 interface EmailCategory {
   id: number;
@@ -303,17 +304,35 @@ export default function AdvancedEmailSettingsPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Categories List */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="w-5 h-5" />
-                Email Categories
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+      {/* Progress Tracker Tab */}
+      <Tabs defaultValue="categories" className="mb-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="categories">Email Configuration</TabsTrigger>
+          <TabsTrigger value="progress">Progress Tracker</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="progress" className="mt-6">
+          <EmailSetupProgress 
+            categories={categories}
+            onSelectCategory={(category) => {
+              setSelectedCategory(category);
+            }}
+            selectedCategory={selectedCategory}
+          />
+        </TabsContent>
+        
+        <TabsContent value="categories" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Categories List */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="w-5 h-5" />
+                    Email Categories
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
               {categories.map((category) => (
                 <div
                   key={category.id}
@@ -603,8 +622,9 @@ export default function AdvancedEmailSettingsPage() {
               </CardContent>
             </Card>
           )}
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
