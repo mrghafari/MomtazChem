@@ -206,9 +206,15 @@ const Shop = () => {
                 <div className="flex items-center gap-2">
                   {customer ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">
-                        سلام، {customer.firstName}
-                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.location.href = "/customer/profile"}
+                        className="flex items-center gap-1"
+                      >
+                        <User className="w-4 h-4" />
+                        {customer.firstName}
+                      </Button>
                       <Button 
                         variant="ghost" 
                         size="sm"
@@ -216,7 +222,7 @@ const Shop = () => {
                         className="flex items-center gap-1"
                       >
                         <LogOut className="w-4 h-4" />
-                        خروج
+                        Logout
                       </Button>
                     </div>
                   ) : (
