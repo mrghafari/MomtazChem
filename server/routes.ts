@@ -2613,8 +2613,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test SMTP connection
   app.post("/api/admin/test-smtp", requireAuth, async (req, res) => {
     try {
+      const { host, port, secure, user, pass, fromName, fromEmail } = req.body;
+      
+      if (!host || !port || !user || !pass || !fromEmail) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required SMTP parameters"
+        });
+      }
+
       const { testZohoSMTP } = await import('./test-smtp');
-      const result = await testZohoSMTP();
+      const result = await testZohoSMTP(user, pass, fromEmail);
       res.json(result);
     } catch (error) {
       console.error("Error testing SMTP:", error);

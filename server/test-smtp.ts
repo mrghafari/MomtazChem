@@ -16,7 +16,7 @@ export async function testSMTPConnection(config: {
       port: config.port,
       secure: config.secure,
       username: config.username,
-      password: config.password.substring(0, 3) + '*'.repeat(config.password.length - 3)
+      password: config.password ? config.password.substring(0, 3) + '*'.repeat(config.password.length - 3) : 'undefined'
     });
 
     const transporter = nodemailer.createTransport({

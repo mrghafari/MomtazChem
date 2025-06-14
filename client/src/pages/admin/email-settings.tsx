@@ -140,13 +140,26 @@ export default function EmailSettingsPage() {
     setConnectionStatus('idle');
 
     try {
-      const response = await apiRequest("/api/admin/test-smtp", "POST", smtpSettings);
+      // Map frontend fields to backend expected fields
+      const testData = {
+        host: smtpSettings.host,
+        port: smtpSettings.port,
+        secure: smtpSettings.secure,
+        user: smtpSettings.user,
+        pass: smtpSettings.pass,
+        fromName: smtpSettings.fromName,
+        fromEmail: smtpSettings.fromEmail
+      };
+
+      console.log('Testing SMTP with data:', { ...testData, pass: '***' });
+
+      const response = await apiRequest("/api/admin/test-smtp", "POST", testData);
       if (response.success) {
         setConnectionStatus('success');
         toast({ title: "Success", description: "SMTP connection test successful" });
       } else {
         setConnectionStatus('error');
-        toast({ title: "Error", description: "SMTP connection test failed", variant: "destructive" });
+        toast({ title: "Error", description: response.message || "SMTP connection test failed", variant: "destructive" });
       }
     } catch (error) {
       setConnectionStatus('error');
