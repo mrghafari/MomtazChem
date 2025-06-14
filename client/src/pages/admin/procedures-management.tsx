@@ -236,7 +236,7 @@ export default function ProceduresManagement() {
   });
 
   const { data: documents = [], isLoading: documentsLoading } = useQuery<ProcedureDocument[]>({
-    queryKey: ["/api/procedures", selectedProcedureId, "documents"],
+    queryKey: [`/api/procedures/${selectedProcedureId}/documents`],
     enabled: !!selectedProcedureId,
   });
 
@@ -407,14 +407,14 @@ export default function ProceduresManagement() {
         
         // Refresh the list anyway in case the document was already deleted
         queryClient.invalidateQueries({ 
-          queryKey: ["/api/procedures", selectedProcedureId, "documents"] 
+          queryKey: [`/api/procedures/${selectedProcedureId}/documents`] 
         });
         return;
       }
 
       // Refresh documents list
       queryClient.invalidateQueries({ 
-        queryKey: ["/api/procedures", selectedProcedureId, "documents"] 
+        queryKey: [`/api/procedures/${selectedProcedureId}/documents`] 
       });
 
       toast({
@@ -582,6 +582,11 @@ export default function ProceduresManagement() {
         console.error('Error uploading document:', error);
       }
     }
+    
+    // Refresh documents list after all uploads
+    queryClient.invalidateQueries({ 
+      queryKey: [`/api/procedures/${procedureId}/documents`] 
+    });
   };
 
   const onSubmitCategory = async (data: ProcedureCategoryForm) => {
