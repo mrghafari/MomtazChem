@@ -43,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
 // Types for procedures management
@@ -150,6 +151,7 @@ type SafetyProtocolForm = z.infer<typeof safetyProtocolSchema>;
 export default function ProceduresManagement() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState("overview");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'category' | 'procedure' | 'safety' | null>(null);
@@ -377,6 +379,82 @@ export default function ProceduresManagement() {
 
   const removeDocument = (index: number) => {
     setDocumentFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Form submission handlers
+  const onSubmitProcedure = async (data: ProcedureForm) => {
+    try {
+      const formData = new FormData();
+      
+      // Add form data
+      Object.entries(data).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
+
+      let response;
+      if (editingItem) {
+        // Update existing procedure
+        response = await fetch(`/api/procedures/${editingItem.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+      } else {
+        // Create new procedure
+        response = await fetch('/api/procedures', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Upload documents if any
+        if (documentFiles.length > 0 && result.procedure?.id) {
+          await uploadDocuments(result.procedure.id);
+        }
+
+        toast({
+          title: "موفقیت",
+          description: editingItem ? "دستورالعمل با موفقیت به‌روزرسانی شد" : "دستورالعمل جدید ایجاد شد",
+        });
+        
+        closeDialog();
+        queryClient.invalidateQueries({ queryKey: ["/api/procedures"] });
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('Error submitting procedure:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "مشکلی در ذخیره دستورالعمل رخ داده است",
+      });
+    }
+  };
+
+  const uploadDocuments = async (procedureId: number) => {
+    for (const file of documentFiles) {
+      const formData = new FormData();
+      formData.append('document', file);
+      formData.append('title', file.name);
+      formData.append('description', `فایل ضمیمه: ${file.name}`);
+
+      try {
+        await fetch(`/api/procedures/${procedureId}/documents`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+      } catch (error) {
+        console.error('Error uploading document:', error);
+      }
+    }
   };
 
   return (
@@ -920,7 +998,7 @@ export default function ProceduresManagement() {
 
           {dialogType === 'procedure' && (
             <Form {...procedureForm}>
-              <form className="space-y-4">
+              <form onSubmit={procedureForm.handleSubmit(onSubmitProcedure)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={procedureForm.control}
@@ -1075,12 +1153,59 @@ export default function ProceduresManagement() {
                     )}
                   />
                 </div>
+                
+                {/* Document Upload Section */}
+                <div className="space-y-4 p-4 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    <h3 className="font-medium">آپلود مدارک ضمیمه</h3>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                      onChange={handleDocumentUpload}
+                      className="w-full p-2 border rounded"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      فرمت‌های مجاز: PDF, DOC, DOCX, TXT, JPG, PNG
+                    </p>
+                  </div>
+
+                  {documentFiles.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">فایل‌های انتخاب شده:</h4>
+                      {documentFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span className="text-sm">{file.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              ({(file.size / 1024).toFixed(1)} KB)
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeDocument(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={closeDialog}>
                     انصراف
                   </Button>
                   <Button type="submit">
-                    ایجاد دستورالعمل
+                    {editingItem ? 'به‌روزرسانی دستورالعمل' : 'ایجاد دستورالعمل'}
                   </Button>
                 </div>
               </form>

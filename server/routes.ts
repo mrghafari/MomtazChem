@@ -1977,6 +1977,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload procedure document
+  app.post("/api/procedures/:procedureId/documents", requireAuth, upload.single('document'), async (req, res) => {
+    try {
+      const { procedureId } = req.params;
+      const { title, description } = req.body;
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ success: false, message: "No file uploaded" });
+      }
+
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        INSERT INTO procedure_documents (
+          procedure_id, title, description, file_name, file_path, 
+          file_size, file_type, upload_date, uploaded_by
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8)
+        RETURNING *
+      `, [
+        procedureId,
+        title || file.originalname,
+        description || null,
+        file.originalname,
+        file.path,
+        file.size,
+        file.mimetype,
+        req.session.adminId
+      ]);
+
+      res.json({ 
+        success: true, 
+        message: "Document uploaded successfully",
+        document: result.rows[0] 
+      });
+
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Generate procedure text document
   app.get("/api/procedures/:procedureId/export", requireAuth, async (req, res) => {
     try {
