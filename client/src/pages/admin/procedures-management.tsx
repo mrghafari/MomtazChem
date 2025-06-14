@@ -37,7 +37,8 @@ import {
   Settings,
   Award,
   TrendingUp,
-  FilePlus
+  FilePlus,
+  X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -345,7 +346,11 @@ export default function ProceduresManagement() {
 
   const downloadDocument = async (documentId: number, fileName: string) => {
     try {
-      const response = await fetch(`/api/procedures/documents/${documentId}/download`, {
+      const downloadEndpoint = selectedTab === 'safety' 
+        ? `/api/procedures/safety-protocols/documents/${documentId}/download`
+        : `/api/procedures/documents/${documentId}/download`;
+        
+      const response = await fetch(downloadEndpoint, {
         credentials: 'include'
       });
 
@@ -364,15 +369,15 @@ export default function ProceduresManagement() {
       document.body.removeChild(a);
 
       toast({
-        title: "موفقیت",
-        description: "سند با موفقیت دانلود شد",
+        title: "Success",
+        description: "Document downloaded successfully",
       });
     } catch (error) {
       console.error('Error downloading document:', error);
       toast({
         variant: "destructive",
-        title: "خطا",
-        description: "مشکلی در دانلود سند رخ داده است",
+        title: "Error",
+        description: "Failed to download document",
       });
     }
   };
@@ -581,6 +586,10 @@ export default function ProceduresManagement() {
   };
 
   const uploadDocuments = async (procedureId: number) => {
+    const uploadEndpoint = selectedTab === 'safety' 
+      ? `/api/procedures/safety-protocols/${procedureId}/documents`
+      : `/api/procedures/${procedureId}/documents`;
+
     for (const file of documentFiles) {
       const formData = new FormData();
       formData.append('document', file);
@@ -588,7 +597,7 @@ export default function ProceduresManagement() {
       formData.append('description', `فایل ضمیمه: ${file.name}`);
 
       try {
-        await fetch(`/api/procedures/${procedureId}/documents`, {
+        await fetch(uploadEndpoint, {
           method: 'POST',
           credentials: 'include',
           body: formData
@@ -599,8 +608,11 @@ export default function ProceduresManagement() {
     }
     
     // Refresh documents list after all uploads
+    const documentApiEndpoint = selectedTab === 'safety' 
+      ? `/api/procedures/safety-protocols/${procedureId}/documents`
+      : `/api/procedures/${procedureId}/documents`;
     queryClient.invalidateQueries({ 
-      queryKey: [`/api/procedures/${procedureId}/documents`] 
+      queryKey: [documentApiEndpoint] 
     });
   };
 
@@ -680,9 +692,14 @@ export default function ProceduresManagement() {
       const result = await response.json();
       
       if (result.success) {
+        // Upload documents if any
+        if (documentFiles.length > 0 && result.safetyProtocol?.id) {
+          await uploadDocuments(result.safetyProtocol.id);
+        }
+
         toast({
-          title: "موفقیت",
-          description: editingItem ? "پروتکل ایمنی با موفقیت به‌روزرسانی شد" : "پروتکل ایمنی جدید ایجاد شد",
+          title: "Success",
+          description: editingItem ? "Safety protocol updated successfully" : "Safety protocol created successfully",
         });
         
         closeDialog();
@@ -1726,12 +1743,47 @@ export default function ProceduresManagement() {
                     </FormItem>
                   )}
                 />
+                
+                {/* Document Upload Section */}
+                <div className="space-y-4 pt-4 border-t">
+                  <h4 className="font-medium">Document Attachments</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="safety-documents">Upload Safety Documents</Label>
+                    <Input
+                      id="safety-documents"
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                      onChange={handleDocumentUpload}
+                      className="cursor-pointer"
+                    />
+                    {documentFiles.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">Selected files:</p>
+                        {documentFiles.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                            <span className="text-sm">{file.name}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeDocument(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={closeDialog}>
-                    انصراف
+                    Cancel
                   </Button>
                   <Button type="submit">
-                    ایجاد پروتکل ایمنی
+                    {editingItem ? "Update Safety Protocol" : "Create Safety Protocol"}
                   </Button>
                 </div>
               </form>
