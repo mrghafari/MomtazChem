@@ -377,6 +377,40 @@ export default function ProceduresManagement() {
     setShowDocuments(true);
   };
 
+  const deleteDocument = async (documentId: number, documentTitle: string) => {
+    if (!confirm(`آیا مطمئن هستید که می‌خواهید سند "${documentTitle}" را حذف کنید؟`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/procedures/documents/${documentId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      // Refresh documents list
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/procedures/${selectedProcedureId}/documents`] 
+      });
+
+      toast({
+        title: "موفقیت",
+        description: "سند با موفقیت حذف شد",
+      });
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "مشکلی در حذف سند رخ داده است",
+      });
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -1182,6 +1216,16 @@ export default function ProceduresManagement() {
                           >
                             <Download className="h-4 w-4 mr-1" />
                             دانلود
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deleteDocument(document.id, document.title)}
+                            title="حذف سند"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            حذف
                           </Button>
                         </div>
                       </div>

@@ -2671,6 +2671,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete procedure document
+  app.delete("/api/procedures/documents/:documentId", requireAuth, async (req, res) => {
+    try {
+      const { documentId } = req.params;
+      
+      const { pool } = await import('./db');
+      
+      // Get document info before deletion
+      const docResult = await pool.query(`
+        SELECT file_path, file_name
+        FROM procedure_documents
+        WHERE id = $1 AND is_active = true
+      `, [documentId]);
+
+      if (docResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Document not found" });
+      }
+
+      const document = docResult.rows[0];
+
+      // Mark document as inactive (soft delete)
+      await pool.query(`
+        UPDATE procedure_documents 
+        SET is_active = false, updated_at = NOW()
+        WHERE id = $1
+      `, [documentId]);
+
+      // Optionally delete the physical file
+      try {
+        let filePath = document.file_path;
+        if (!path.isAbsolute(filePath)) {
+          filePath = path.resolve(process.cwd(), filePath);
+        }
+        
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileError) {
+        console.log('Could not delete physical file:', fileError);
+        // Continue even if file deletion fails
+      }
+
+      res.json({
+        success: true,
+        message: "Document deleted successfully"
+      });
+
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Generate procedure text document
   app.get("/api/procedures/:procedureId/export", requireAuth, async (req, res) => {
     try {
