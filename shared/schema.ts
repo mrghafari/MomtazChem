@@ -10,14 +10,45 @@ import { z } from "zod";
 export * from "./showcase-schema";
 export * from "./shop-schema";
 
+// Admin roles table
+export const adminRoles = pgTable("admin_roles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // super_admin, products_admin, crm_admin, etc.
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Admin permissions table
+export const adminPermissions = pgTable("admin_permissions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // manage_products, view_analytics, etc.
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  module: text("module").notNull(), // products, crm, shop, analytics, users, etc.
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Role permissions junction table
+export const rolePermissions = pgTable("role_permissions", {
+  id: serial("id").primaryKey(),
+  roleId: integer("role_id").notNull().references(() => adminRoles.id),
+  permissionId: integer("permission_id").notNull().references(() => adminPermissions.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Users table for admin authentication
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  role: text("role").notNull().default("admin"), // admin, manager, etc.
+  roleId: integer("role_id").references(() => adminRoles.id),
   isActive: boolean("is_active").default(true),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -32,10 +63,28 @@ export const passwordResets = pgTable("password_resets", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Create insert schemas for new tables
+export const insertAdminRoleSchema = createInsertSchema(adminRoles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminPermissionSchema = createInsertSchema(adminPermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  lastLoginAt: true,
 });
 
 export const insertPasswordResetSchema = createInsertSchema(passwordResets).omit({
@@ -43,6 +92,13 @@ export const insertPasswordResetSchema = createInsertSchema(passwordResets).omit
   createdAt: true,
 });
 
+// Export types
+export type InsertAdminRole = z.infer<typeof insertAdminRoleSchema>;
+export type AdminRole = typeof adminRoles.$inferSelect;
+export type InsertAdminPermission = z.infer<typeof insertAdminPermissionSchema>;
+export type AdminPermission = typeof adminPermissions.$inferSelect;
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+export type RolePermission = typeof rolePermissions.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertPasswordReset = z.infer<typeof insertPasswordResetSchema>;

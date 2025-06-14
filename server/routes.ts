@@ -948,9 +948,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create database backup
   app.post("/api/admin/backup/create", requireAuth, async (req, res) => {
     try {
-      const { spawn } = require('child_process');
-      const fs = require('fs');
-      const path = require('path');
+      const { spawn } = await import('child_process');
+      const fsModule = await import('fs');
+      const pathModule = await import('path');
       
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
       const backupDir = './backups';
@@ -1046,8 +1046,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // List available backups
   app.get("/api/admin/backup/list", requireAuth, async (req, res) => {
     try {
-      const fs = require('fs');
-      const path = require('path');
       
       const backupDir = './backups';
       
