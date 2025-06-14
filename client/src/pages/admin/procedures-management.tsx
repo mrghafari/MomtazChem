@@ -113,6 +113,25 @@ interface SafetyProtocol {
   updatedAt: string;
 }
 
+interface ProcedureDocument {
+  id: number;
+  procedureId: number;
+  title: string;
+  description?: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  fileType: string;
+  uploadDate: string;
+  uploadedBy: number;
+  uploadedByName?: string;
+  version: string;
+  isActive: boolean;
+  downloadCount: number;
+  lastDownloadedAt?: string;
+  tags: string[];
+}
+
 // Form schemas
 const procedureCategorySchema = z.object({
   name: z.string().min(3, "نام دسته‌بندی باید حداقل 3 کاراکتر باشد"),
@@ -160,6 +179,8 @@ export default function ProceduresManagement() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
+  const [selectedProcedureId, setSelectedProcedureId] = useState<number | null>(null);
+  const [showDocuments, setShowDocuments] = useState(false);
 
   // Form hooks
   const categoryForm = useForm<ProcedureCategoryForm>({
@@ -212,6 +233,11 @@ export default function ProceduresManagement() {
 
   const { data: safetyProtocols = [], isLoading: safetyLoading } = useQuery<SafetyProtocol[]>({
     queryKey: ["/api/procedures/safety-protocols"],
+  });
+
+  const { data: documents = [], isLoading: documentsLoading } = useQuery<ProcedureDocument[]>({
+    queryKey: ["/api/procedures", selectedProcedureId, "documents"],
+    enabled: !!selectedProcedureId,
   });
 
   // Helper functions
