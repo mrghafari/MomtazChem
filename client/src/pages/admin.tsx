@@ -425,11 +425,11 @@ export default function AdminPage() {
           
           <Button 
             variant="outline"
-            onClick={() => setLocation("/admin/email-settings")}
+            onClick={() => setLocation("/admin/advanced-email-settings")}
             className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 h-12 text-sm"
           >
             <Mail className="w-4 h-4 mr-2" />
-            Email Settings
+            Advanced Email Settings
           </Button>
 
           <Button 
