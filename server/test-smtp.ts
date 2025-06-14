@@ -1,91 +1,116 @@
 import nodemailer from 'nodemailer';
 
-// Test SMTP connection for Zoho Mail
-export async function testZohoSMTP(): Promise<{ success: boolean; message: string }> {
+// Simple SMTP test function for debugging
+export async function testSMTPConnection(config: {
+  host: string;
+  port: number;
+  secure: boolean;
+  username: string;
+  password: string;
+  fromEmail: string;
+  toEmail: string;
+}) {
   try {
+    console.log('Testing SMTP with config:', {
+      host: config.host,
+      port: config.port,
+      secure: config.secure,
+      username: config.username,
+      password: config.password.substring(0, 3) + '*'.repeat(config.password.length - 3)
+    });
+
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.zoho.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false, // Use STARTTLS
+      host: config.host,
+      port: config.port,
+      secure: config.secure,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: config.username,
+        pass: config.password,
       },
+      debug: true,
+      logger: true,
+      connectionTimeout: 30000,
+      greetingTimeout: 15000,
+      socketTimeout: 30000,
       tls: {
-        rejectUnauthorized: true,
-        minVersion: 'TLSv1.2'
+        rejectUnauthorized: false
       }
     });
 
-    // Verify connection
+    // Test connection
+    console.log('Verifying SMTP connection...');
     await transporter.verify();
-    
-    return {
-      success: true,
-      message: 'SMTP connection to Zoho Mail successful!'
-    };
-  } catch (error: any) {
-    console.error('SMTP Test Error:', error);
-    
-    let errorMessage = 'SMTP connection failed';
-    if (error.code === 'EAUTH') {
-      errorMessage = 'Authentication failed - check username/password';
-    } else if (error.code === 'ECONNECTION') {
-      errorMessage = 'Connection failed - check host/port settings';
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    
-    return {
-      success: false,
-      message: errorMessage
+    console.log('SMTP connection verified successfully');
+
+    // Send test email
+    console.log('Sending test email...');
+    const result = await transporter.sendMail({
+      from: config.fromEmail,
+      to: config.toEmail,
+      subject: 'SMTP Test - ' + new Date().toISOString(),
+      text: 'This is a test email to verify SMTP configuration.',
+      html: '<p>This is a test email to verify SMTP configuration.</p>'
+    });
+
+    console.log('Test email sent successfully:', result.messageId);
+    return { success: true, messageId: result.messageId };
+
+  } catch (error) {
+    console.error('SMTP test failed:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      code: (error as any)?.code || 'UNKNOWN'
     };
   }
 }
 
-// Send test email
-export async function sendTestEmail(to: string = 'info@momtazchem.com'): Promise<{ success: boolean; message: string }> {
-  try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.zoho.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
+// Test with different authentication methods for Zoho
+export async function testZohoSMTP(email: string, password: string, testEmail: string) {
+  const configurations = [
+    {
+      name: 'Zoho EU with STARTTLS',
+      host: 'smtppro.zoho.eu',
+      port: 587,
       secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      tls: {
-        rejectUnauthorized: true,
-        minVersion: 'TLSv1.2'
-      }
-    });
+      username: email,
+      password: password,
+      fromEmail: email,
+      toEmail: testEmail
+    },
+    {
+      name: 'Zoho EU with SSL',
+      host: 'smtppro.zoho.eu',
+      port: 465,
+      secure: true,
+      username: email,
+      password: password,
+      fromEmail: email,
+      toEmail: testEmail
+    },
+    {
+      name: 'Zoho Global with STARTTLS',
+      host: 'smtp.zoho.com',
+      port: 587,
+      secure: false,
+      username: email,
+      password: password,
+      fromEmail: email,
+      toEmail: testEmail
+    }
+  ];
 
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: to,
-      subject: 'SMTP Test - Momtazchem Website',
-      html: `
-        <h2>SMTP Test Email</h2>
-        <p>This is a test email to verify SMTP configuration for Momtazchem website.</p>
-        <p><strong>Sent at:</strong> ${new Date().toISOString()}</p>
-        <p><strong>From:</strong> ${process.env.SMTP_USER}</p>
-        <hr>
-        <p><em>If you received this email, your SMTP configuration is working correctly!</em></p>
-      `,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
+  for (const config of configurations) {
+    console.log(`\n--- Testing ${config.name} ---`);
+    const result = await testSMTPConnection(config);
     
-    return {
-      success: true,
-      message: `Test email sent successfully! Message ID: ${info.messageId}`
-    };
-  } catch (error: any) {
-    console.error('Test Email Error:', error);
-    
-    return {
-      success: false,
-      message: `Failed to send test email: ${error.message}`
-    };
+    if (result.success) {
+      console.log(`✅ ${config.name} worked!`);
+      return { success: true, config, result };
+    } else {
+      console.log(`❌ ${config.name} failed: ${result.error}`);
+    }
   }
+
+  return { success: false, message: 'All configurations failed' };
 }
