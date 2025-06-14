@@ -65,7 +65,7 @@ const WaterTreatment = () => {
       <section 
         className="relative py-20 bg-cover bg-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(46, 125, 50, 0.8), rgba(46, 125, 50, 0.6)), url('https://images.unsplash.com/photo-1581093804475-577d72e38aa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`
+          backgroundImage: `linear-gradient(rgba(46, 125, 50, 0.8), rgba(46, 125, 50, 0.6)), url('/attached_assets/download_1749877891276.jpeg')`
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
