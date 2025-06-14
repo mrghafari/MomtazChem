@@ -161,9 +161,9 @@ export default function UserManagement() {
     };
 
     if (editingUser) {
-      updateUserMutation.mutate({ id: editingUser.id, data: formData });
+      updateUserMutation.mutate({ id: editingUser.id, data: formData as any });
     } else {
-      createUserMutation.mutate(formData);
+      createUserMutation.mutate(formData as any);
     }
   };
 

@@ -480,6 +480,15 @@ export default function AdminPage() {
 
           <Button 
             variant="outline"
+            onClick={() => setLocation("/admin/user-management")}
+            className="border-red-300 text-red-600 hover:bg-red-50 h-12 text-sm"
+          >
+            <User className="w-4 h-4 mr-2" />
+            User Management
+          </Button>
+
+          <Button 
+            variant="outline"
             onClick={() => setLocation("/admin/smtp-test")}
             className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
           >

@@ -1084,7 +1084,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check if user has specific permission
   const hasPermission = async (userId: number, permissionName: string): Promise<boolean> => {
     try {
-      const result = await storage.db.query(`
+      const { pool } = await import('./db');
+      const result = await pool.query(`
         SELECT 1 FROM users u
         JOIN admin_roles r ON u.role_id = r.id
         JOIN role_permissions rp ON r.id = rp.role_id
@@ -1100,7 +1101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Middleware to check super admin permission
   const requireSuperAdmin = async (req: Request, res: Response, next: NextFunction) => {
-    const session = req.session as SessionData;
+    const session = req.session as any;
     if (!session?.adminId) {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
@@ -1116,7 +1117,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all admin users
   app.get("/api/admin/users", requireSuperAdmin, async (req, res) => {
     try {
-      const result = await storage.db.query(`
+      const { pool } = await import('./db');
+      const result = await pool.query(`
         SELECT u.id, u.username, u.email, u.role_id, u.is_active, u.last_login_at, u.created_at,
                r.name as role_name, r.display_name as role_display_name
         FROM users u
@@ -1124,7 +1126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ORDER BY u.created_at DESC
       `);
       
-      const users = result.rows.map(row => ({
+      const users = result.rows.map((row: any) => ({
         id: row.id,
         username: row.username,
         email: row.email,
@@ -1146,7 +1148,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all admin roles
   app.get("/api/admin/roles", requireSuperAdmin, async (req, res) => {
     try {
-      const result = await storage.db.query(`
+      const { pool } = await import('./db');
+      const result = await pool.query(`
         SELECT r.id, r.name, r.display_name, r.description, r.is_active,
                COUNT(rp.permission_id) as permission_count
         FROM admin_roles r
@@ -1155,7 +1158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ORDER BY r.id
       `);
       
-      const roles = result.rows.map(row => ({
+      const roles = result.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         displayName: row.display_name,
@@ -1174,13 +1177,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all admin permissions
   app.get("/api/admin/permissions", requireSuperAdmin, async (req, res) => {
     try {
-      const result = await storage.db.query(`
+      const { pool } = await import('./db');
+      const result = await pool.query(`
         SELECT id, name, display_name, description, module, is_active
         FROM admin_permissions
         ORDER BY module, display_name
       `);
       
-      const permissions = result.rows.map(row => ({
+      const permissions = result.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         displayName: row.display_name,
@@ -1204,7 +1208,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash password
       const passwordHash = await bcrypt.hash(password, 12);
       
-      const result = await storage.db.query(`
+      const { pool } = await import('./db');
+      const result = await pool.query(`
         INSERT INTO users (username, email, password_hash, role_id, is_active)
         VALUES ($1, $2, $3, $4, true)
         RETURNING id, username, email, role_id, is_active, created_at
@@ -1249,7 +1254,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       query += ` RETURNING id, username, email, role_id, is_active`;
 
-      const result = await storage.db.query(query, params);
+      const { pool } = await import('./db');
+      const result = await pool.query(query, params);
       
       if (result.rows.length === 0) {
         return res.status(404).json({ success: false, message: "User not found" });
@@ -1275,7 +1281,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { isActive } = req.body;
       
-      const result = await storage.db.query(`
+      const { pool } = await import('./db');
+      const result = await pool.query(`
         UPDATE users 
         SET is_active = $1, updated_at = NOW()
         WHERE id = $2
