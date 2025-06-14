@@ -1952,10 +1952,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get procedure details
       const procedureResult = await pool.query(`
-        SELECT p.id, p.title, p.category_id, p.description, p.content, p.version, p.status, p.priority, 
-               p.language, p.author_id, p.approver_id, p.approved_at, p.effective_date, p.review_date, 
-               p.tags, p.access_level, p.view_count, p.last_viewed_at, p.created_at, p.updated_at,
-               c.name as category_name
+        SELECT p.id, p.title, p.description, p.content, p.version, p.status, p.priority, 
+               p.created_at, c.name as category_name
         FROM procedures p
         LEFT JOIN procedure_categories c ON p.category_id = c.id
         WHERE p.id = $1
@@ -1967,132 +1965,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const procedure = procedureResult.rows[0];
 
-      // Get outlines
-      const outlinesResult = await pool.query(`
-        SELECT id, procedure_id, parent_id, level, order_number, title, content, 
-               is_collapsible, is_expanded, created_at, updated_at
-        FROM procedure_outlines
-        WHERE procedure_id = $1
-        ORDER BY level, order_number
-      `, [procedureId]);
+      // Generate simple text content
+      const textContent = `دستورالعمل: ${procedure.title}
+نسخه: ${procedure.version}
+وضعیت: ${procedure.status}
+دسته‌بندی: ${procedure.category_name || 'نامشخص'}
 
-      // Get documents
-      const documentsResult = await pool.query(`
-        SELECT d.id, d.procedure_id, d.outline_id, d.title, d.description, d.file_name, 
-               d.file_path, d.file_size, d.file_type, d.upload_date, d.uploaded_by, 
-               d.version, d.is_active, d.download_count, d.last_downloaded_at, d.tags,
-               u.username as uploaded_by_name,
-               o.title as outline_title
-        FROM procedure_documents d
-        LEFT JOIN users u ON d.uploaded_by = u.id
-        LEFT JOIN procedure_outlines o ON d.outline_id = o.id
-        WHERE d.procedure_id = $1 AND d.is_active = true
-        ORDER BY d.upload_date DESC
-      `, [procedureId]);
+توضیحات:
+${procedure.description || 'ندارد'}
 
-      // Generate text content
-      let textContent = `
-========================================
-${procedure.title}
-========================================
-
-معلومات کلی:
-- نسخه: ${procedure.version}
-- وضعیت: ${procedure.status === 'approved' ? 'تأیید شده' : 
-              procedure.status === 'review' ? 'در بررسی' :
-              procedure.status === 'draft' ? 'پیش‌نویس' : 'بایگانی'}
-- اولویت: ${procedure.priority === 'critical' ? 'بحرانی' :
-             procedure.priority === 'high' ? 'بالا' :
-             procedure.priority === 'normal' ? 'عادی' : 'پایین'}
-- دسته‌بندی: ${procedure.category_name || 'نامشخص'}
-- تاریخ ایجاد: ${new Date(procedure.created_at).toLocaleDateString('fa-IR')}
-${procedure.effective_date ? `- تاریخ اجرا: ${new Date(procedure.effective_date).toLocaleDateString('fa-IR')}` : ''}
-${procedure.review_date ? `- تاریخ بازنگری: ${new Date(procedure.review_date).toLocaleDateString('fa-IR')}` : ''}
-- سطح دسترسی: ${procedure.access_level === 'public' ? 'عمومی' :
-                  procedure.access_level === 'internal' ? 'داخلی' :
-                  procedure.access_level === 'restricted' ? 'محدود' : 'محرمانه'}
-${procedure.tags && procedure.tags.length > 0 ? `- برچسب‌ها: ${procedure.tags.join(', ')}` : ''}
-
-`;
-
-      if (procedure.description) {
-        textContent += `
-خلاصه توضیحات:
-${procedure.description}
-
-`;
-      }
-
-      if (outlinesResult.rows.length > 0) {
-        textContent += `
-========================================
-فهرست مطالب
-========================================
-
-`;
-        outlinesResult.rows.forEach((outline: any) => {
-          const indent = '  '.repeat(outline.level - 1);
-          textContent += `${indent}${outline.order_number}. ${outline.title}\n`;
-          if (outline.content) {
-            textContent += `${indent}   ${outline.content}\n`;
-          }
-          textContent += '\n';
-        });
-      }
-
-      textContent += `
-========================================
-محتوای دستورالعمل
-========================================
-
+محتوا:
 ${procedure.content}
 
+تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')}
 `;
 
-      if (documentsResult.rows.length > 0) {
-        textContent += `
-========================================
-مستندات و پیوست‌ها
-========================================
-
-`;
-        documentsResult.rows.forEach((doc: any) => {
-          const formatFileSize = (bytes: number): string => {
-            if (bytes === 0) return '0 بایت';
-            const k = 1024;
-            const sizes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-          };
-
-          textContent += `
-- ${doc.title}
-  نوع فایل: ${doc.file_type}
-  اندازه: ${formatFileSize(doc.file_size)}
-  تاریخ آپلود: ${new Date(doc.upload_date).toLocaleDateString('fa-IR')}
-  آپلودکننده: ${doc.uploaded_by_name}
-  ${doc.outline_title ? `مربوط به: ${doc.outline_title}` : ''}
-  ${doc.description ? `توضیحات: ${doc.description}` : ''}
-  ${doc.tags && doc.tags.length > 0 ? `برچسب‌ها: ${doc.tags.join(', ')}` : ''}
-
-`;
-        });
-      }
-
-      textContent += `
-========================================
-اطلاعات تولید مستند
-========================================
-
-این مستند در تاریخ ${new Date().toLocaleDateString('fa-IR')} ساعت ${new Date().toLocaleTimeString('fa-IR')} تولید شده است.
-تعداد بازدید: ${procedure.view_count}
-
-`;
-
-      // Return text content directly
-      const filename = `procedure-${procedure.id}-${Date.now()}.txt`;
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Disposition', 'attachment; filename=procedure-export.txt');
       res.send(textContent);
 
     } catch (error) {
