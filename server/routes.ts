@@ -1944,6 +1944,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate procedure PDF
+  app.get("/api/procedures/:procedureId/generate-pdf", requireAuth, async (req, res) => {
+    try {
+      const { procedureId } = req.params;
+      const { pool } = await import('./db');
+      
+      // Get procedure details
+      const procedureResult = await pool.query(`
+        SELECT id, title, category_id, description, content, version, status, priority, 
+               language, author_id, approver_id, approved_at, effective_date, review_date, 
+               tags, access_level, view_count, last_viewed_at, created_at, updated_at
+        FROM procedures
+        WHERE id = $1
+      `, [procedureId]);
+
+      if (procedureResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Procedure not found" });
+      }
+
+      const procedure = procedureResult.rows[0];
+
+      // Get outlines
+      const outlinesResult = await pool.query(`
+        SELECT id, procedure_id, parent_id, level, order_number, title, content, 
+               is_collapsible, is_expanded, created_at, updated_at
+        FROM procedure_outlines
+        WHERE procedure_id = $1
+        ORDER BY level, order_number
+      `, [procedureId]);
+
+      // Get documents
+      const documentsResult = await pool.query(`
+        SELECT d.id, d.procedure_id, d.outline_id, d.title, d.description, d.file_name, 
+               d.file_path, d.file_size, d.file_type, d.upload_date, d.uploaded_by, 
+               d.version, d.is_active, d.download_count, d.last_downloaded_at, d.tags,
+               u.username as uploaded_by_name,
+               o.title as outline_title
+        FROM procedure_documents d
+        LEFT JOIN users u ON d.uploaded_by = u.id
+        LEFT JOIN procedure_outlines o ON d.outline_id = o.id
+        WHERE d.procedure_id = $1 AND d.is_active = true
+        ORDER BY d.upload_date DESC
+      `, [procedureId]);
+
+      // Transform data
+      const procedureData = {
+        id: procedure.id,
+        title: procedure.title,
+        categoryId: procedure.category_id,
+        description: procedure.description,
+        content: procedure.content,
+        version: procedure.version,
+        status: procedure.status,
+        priority: procedure.priority,
+        language: procedure.language,
+        authorId: procedure.author_id,
+        approverId: procedure.approver_id,
+        approvedAt: procedure.approved_at,
+        effectiveDate: procedure.effective_date,
+        reviewDate: procedure.review_date,
+        tags: procedure.tags || [],
+        accessLevel: procedure.access_level,
+        viewCount: procedure.view_count,
+        lastViewedAt: procedure.last_viewed_at,
+        createdAt: procedure.created_at,
+        updatedAt: procedure.updated_at
+      };
+
+      const outlinesData = outlinesResult.rows.map((row: any) => ({
+        id: row.id,
+        procedureId: row.procedure_id,
+        parentId: row.parent_id,
+        level: row.level,
+        orderNumber: row.order_number,
+        title: row.title,
+        content: row.content,
+        isCollapsible: row.is_collapsible,
+        isExpanded: row.is_expanded,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      const documentsData = documentsResult.rows.map((row: any) => ({
+        id: row.id,
+        procedureId: row.procedure_id,
+        outlineId: row.outline_id,
+        title: row.title,
+        description: row.description,
+        fileName: row.file_name,
+        filePath: row.file_path,
+        fileSize: row.file_size,
+        fileType: row.file_type,
+        uploadDate: row.upload_date,
+        uploadedBy: row.uploaded_by,
+        uploadedByName: row.uploaded_by_name,
+        version: row.version,
+        isActive: row.is_active,
+        downloadCount: row.download_count,
+        lastDownloadedAt: row.last_downloaded_at,
+        tags: row.tags || [],
+        outlineTitle: row.outline_title
+      }));
+
+      // Generate PDF
+      const { PDFGenerator } = await import('./pdf-generator');
+      const pdfFileName = await PDFGenerator.generateProcedurePDF(procedureData, outlinesData, documentsData);
+      
+      // Return PDF file path
+      const pdfPath = path.join(process.cwd(), 'uploads', 'documents', pdfFileName);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="procedure-${procedure.title}-${new Date().toISOString().split('T')[0]}.pdf"`);
+      res.sendFile(pdfPath);
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Get database statistics
   app.get("/api/admin/database/stats", requireAuth, async (req, res) => {
     try {

@@ -36,7 +36,8 @@ import {
   Layers,
   Settings,
   Award,
-  TrendingUp
+  TrendingUp,
+  FilePlus
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -511,6 +512,14 @@ export default function ProceduresManagement() {
                             <div className="flex items-center gap-2">
                               <Button variant="outline" size="sm">
                                 <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => downloadPDF(procedure.id)}
+                                title="دانلود PDF"
+                              >
+                                <Download className="h-4 w-4" />
                               </Button>
                               <Button variant="outline" size="sm">
                                 <Edit className="h-4 w-4" />
