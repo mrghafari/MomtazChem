@@ -2773,22 +2773,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/email/smtp/:categoryId", requireAuth, async (req, res) => {
     try {
       const { categoryId } = req.params;
-      const smtpData = smtpConfigSchema.parse(req.body);
+      console.log("Received SMTP data:", req.body);
+      
+      // Manual validation instead of strict schema
+      const {
+        host,
+        port,
+        secure,
+        username,
+        password,
+        fromName,
+        fromEmail
+      } = req.body;
+
+      if (!host || !username || !password || !fromName || !fromEmail) {
+        return res.status(400).json({
+          success: false,
+          message: "All SMTP fields are required"
+        });
+      }
+
+      const smtpData = {
+        host: host.toString(),
+        port: parseInt(port) || 587,
+        secure: Boolean(secure),
+        username: username.toString(),
+        password: password.toString(),
+        fromName: fromName.toString(),
+        fromEmail: fromEmail.toString(),
+        categoryId: parseInt(categoryId)
+      };
+
+      console.log("Processed SMTP data:", smtpData);
       
       // Check if SMTP settings already exist for this category
       const existing = await emailStorage.getSmtpSettingByCategory(parseInt(categoryId));
       
       let smtp;
       if (existing) {
-        smtp = await emailStorage.updateSmtpSetting(existing.id, {
-          ...smtpData,
-          categoryId: parseInt(categoryId)
-        });
+        console.log("Updating existing SMTP settings");
+        smtp = await emailStorage.updateSmtpSetting(existing.id, smtpData);
       } else {
-        smtp = await emailStorage.createSmtpSetting({
-          ...smtpData,
-          categoryId: parseInt(categoryId)
-        });
+        console.log("Creating new SMTP settings");
+        smtp = await emailStorage.createSmtpSetting(smtpData);
       }
 
       res.json({
@@ -2800,7 +2827,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error saving SMTP settings:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to save SMTP settings"
+        message: "Failed to save SMTP settings",
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
