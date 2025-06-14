@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,14 +11,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
 import LiveChat from "@/components/ui/live-chat";
+import CustomerAuth from "@/components/auth/customer-auth";
+import { useToast } from "@/hooks/use-toast";
 
 const Shop = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [cart, setCart] = useState<{[key: number]: number}>({});
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [customer, setCustomer] = useState<any>(null);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
 
   // Fetch shop products
   const { data: products = [], isLoading: productsLoading } = useQuery<ShopProduct[]>({

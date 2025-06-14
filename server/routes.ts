@@ -1944,6 +1944,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer authentication routes
+  app.post("/api/customers/register", async (req, res) => {
+    try {
+      const { firstName, lastName, email, password, phone, company, country, city, address } = req.body;
+      
+      // Check if customer already exists
+      const existingCustomer = await customerStorage.getCustomerByEmail(email);
+      if (existingCustomer) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "ایمیل قبلاً ثبت شده است" 
+        });
+      }
+
+      // Create customer
+      const customerData = {
+        firstName,
+        lastName,
+        email,
+        passwordHash: password, // Will be hashed in storage
+        phone: phone || null,
+        company: company || null,
+        country: country || null,
+        city: city || null,
+        address: address || null,
+      };
+
+      const customer = await customerStorage.createCustomer(customerData);
+      
+      res.json({
+        success: true,
+        message: "ثبت نام با موفقیت انجام شد",
+        customer: {
+          id: customer.id,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+        }
+      });
+    } catch (error) {
+      console.error("Error registering customer:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ثبت نام" 
+      });
+    }
+  });
+
+  app.post("/api/customers/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Verify customer credentials
+      const customer = await customerStorage.verifyCustomerPassword(email, password);
+      if (!customer) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "ایمیل یا رمز عبور اشتباه است" 
+        });
+      }
+
+      // Store customer session
+      (req.session as any).customerId = customer.id;
+      (req.session as any).customerEmail = customer.email;
+
+      res.json({
+        success: true,
+        message: "ورود موفق",
+        customer: {
+          id: customer.id,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+          company: customer.company,
+        }
+      });
+    } catch (error) {
+      console.error("Error logging in customer:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ورود" 
+      });
+    }
+  });
+
+  app.post("/api/customers/logout", async (req, res) => {
+    try {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+          return res.status(500).json({ 
+            success: false, 
+            message: "خطا در خروج" 
+          });
+        }
+        res.json({
+          success: true,
+          message: "خروج موفق"
+        });
+      });
+    } catch (error) {
+      console.error("Error logging out customer:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در خروج" 
+      });
+    }
+  });
+
+  app.get("/api/customers/me", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت نشده" 
+        });
+      }
+
+      const customer = await customerStorage.getCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "مشتری یافت نشد" 
+        });
+      }
+
+      res.json({
+        success: true,
+        customer: {
+          id: customer.id,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+          company: customer.company,
+          phone: customer.phone,
+          country: customer.country,
+          city: customer.city,
+          address: customer.address,
+        }
+      });
+    } catch (error) {
+      console.error("Error getting customer info:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت اطلاعات" 
+      });
+    }
+  });
+
   // Get procedure documents
   app.get("/api/procedures/:procedureId/documents", requireAuth, async (req, res) => {
     try {
