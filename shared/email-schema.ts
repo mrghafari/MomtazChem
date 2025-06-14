@@ -127,7 +127,7 @@ export const smtpConfigSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
   fromName: z.string().min(1, "From name is required"),
-  fromEmail: z.string().email("Valid email address required"),
+  fromEmail: z.string().min(1, "From email is required"),
 });
 
 export const emailRecipientConfigSchema = z.object({

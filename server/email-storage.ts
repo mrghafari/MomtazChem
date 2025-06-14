@@ -108,15 +108,10 @@ export class EmailStorage implements IEmailStorage {
   
   // SMTP Settings
   async createSmtpSetting(settingData: InsertSmtpSetting): Promise<SmtpSetting> {
-    // Encrypt password before storing
-    const encryptedPassword = await bcrypt.hash(settingData.password, 10);
-    
+    // Store password as is for now - in production, use proper encryption
     const [setting] = await emailDb
       .insert(smtpSettings)
-      .values({
-        ...settingData,
-        password: encryptedPassword
-      })
+      .values(settingData)
       .returning();
     return setting;
   }
