@@ -11,7 +11,7 @@ const createTransporter = async (categoryKey: string) => {
 
   const smtp = categorySettings.smtp;
   
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: smtp.host,
     port: smtp.port,
     secure: smtp.port === 465 ? true : false,
@@ -60,9 +60,10 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
       throw new Error('No active recipients found for contact form');
     }
 
+    const recipientEmails = recipients.map(r => r.email).join(', ');
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
-      to: recipients.map(r => r.email).join(', '),
+      to: recipientEmails,
       subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName}`,
       html: `
         <h2>New Contact Form Submission</h2>
@@ -88,10 +89,11 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
 
     await transporter.sendMail(mailOptions);
     
-    // Log the email
+    // Log the email with correct schema
     await emailStorage.logEmail({
       categoryId: categorySettings.category.id,
-      recipientEmail: recipients.map(r => r.email).join(', '),
+      toEmail: recipientEmails,
+      fromEmail: smtp.fromEmail,
       subject: mailOptions.subject,
       status: 'sent',
       sentAt: new Date(),
@@ -99,6 +101,25 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
     
   } catch (error) {
     console.error('Contact email error:', error);
+    
+    // Log the failed email attempt
+    try {
+      const categorySettings = await emailStorage.getCategoryWithSettings('general');
+      if (categorySettings) {
+        await emailStorage.logEmail({
+          categoryId: categorySettings.category.id,
+          toEmail: formData.email,
+          fromEmail: categorySettings.smtp?.fromEmail || '',
+          subject: `Failed: New Contact Form Submission from ${formData.firstName} ${formData.lastName}`,
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          sentAt: new Date(),
+        });
+      }
+    } catch (logError) {
+      console.error('Failed to log email error:', logError);
+    }
+    
     throw error;
   }
 }
@@ -132,9 +153,10 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
       throw new Error('No active recipients found for product inquiries');
     }
 
+    const recipientEmails = recipients.map(r => r.email).join(', ');
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
-      to: recipients.map(r => r.email).join(', '),
+      to: recipientEmails,
       subject: inquiryData.subject,
       html: `
         <h2>New Product Inquiry</h2>
@@ -168,10 +190,11 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
 
     await transporter.sendMail(mailOptions);
     
-    // Log the email
+    // Log the email with correct schema
     await emailStorage.logEmail({
       categoryId: categorySettings.category.id,
-      recipientEmail: recipients.map(r => r.email).join(', '),
+      toEmail: recipientEmails,
+      fromEmail: smtp.fromEmail,
       subject: mailOptions.subject,
       status: 'sent',
       sentAt: new Date(),
@@ -179,6 +202,25 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
     
   } catch (error) {
     console.error('Product inquiry email error:', error);
+    
+    // Log the failed email attempt
+    try {
+      const categorySettings = await emailStorage.getCategoryWithSettings('product_inquiries');
+      if (categorySettings) {
+        await emailStorage.logEmail({
+          categoryId: categorySettings.category.id,
+          toEmail: inquiryData.contactEmail,
+          fromEmail: categorySettings.smtp?.fromEmail || '',
+          subject: `Failed: ${inquiryData.subject}`,
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          sentAt: new Date(),
+        });
+      }
+    } catch (logError) {
+      console.error('Failed to log email error:', logError);
+    }
+    
     throw error;
   }
 }

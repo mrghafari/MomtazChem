@@ -1,4 +1,5 @@
 import { shopStorage } from "./shop-storage";
+import { emailStorage } from "./email-storage";
 import nodemailer from "nodemailer";
 
 interface InventoryAlert {
