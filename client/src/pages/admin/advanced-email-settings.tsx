@@ -155,6 +155,10 @@ export default function AdvancedEmailSettingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
       toast({ title: "Recipients updated successfully" });
+    },
+    onError: (error: any) => {
+      console.error("Failed to save recipients:", error);
+      toast({ title: "Failed to save recipients", variant: "destructive" });
     }
   });
 
@@ -184,11 +188,21 @@ export default function AdvancedEmailSettingsPage() {
       });
     }
     
-    if (selectedCategory?.recipients) {
-      setRecipients(selectedCategory.recipients);
+    // Always reload recipients from fresh data
+    if (selectedCategory?.recipients && Array.isArray(selectedCategory.recipients)) {
+      setRecipients([...selectedCategory.recipients]);
     } else {
       setRecipients([]);
     }
+    
+    // Reset new recipient form
+    setNewRecipient({
+      email: "",
+      name: "",
+      isPrimary: false,
+      isActive: true,
+      receiveTypes: []
+    });
   }, [selectedCategory]);
 
   const handleSaveSmtp = () => {
