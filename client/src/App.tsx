@@ -56,6 +56,7 @@ function Router() {
           <Route path="/admin/barcode-inventory" component={BarcodeInventory} />
           <Route path="/admin/database-management" component={DatabaseManagement} />
           <Route path="/admin/user-management" component={UserManagement} />
+          <Route path="/admin/factory-management" component={FactoryManagement} />
           <Route path="/admin/smtp-test" component={SMTPTestPage} />
           <Route path="/admin/email-settings" component={EmailSettingsPage} />
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />

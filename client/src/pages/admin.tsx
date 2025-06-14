@@ -489,6 +489,15 @@ export default function AdminPage() {
 
           <Button 
             variant="outline"
+            onClick={() => setLocation("/admin/factory-management")}
+            className="border-amber-300 text-amber-600 hover:bg-amber-50 h-12 text-sm"
+          >
+            <Package className="w-4 h-4 mr-2" />
+            Factory Management
+          </Button>
+
+          <Button 
+            variant="outline"
             onClick={() => setLocation("/admin/smtp-test")}
             className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
           >

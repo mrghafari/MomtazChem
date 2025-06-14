@@ -159,7 +159,7 @@ export default function FactoryManagement() {
   });
 
   // Fetch products for dropdown
-  const { data: products = [] } = useQuery({
+  const { data: products = [] } = useQuery<any[]>({
     queryKey: ["/api/products"],
   });
 
@@ -231,7 +231,7 @@ export default function FactoryManagement() {
     setDialogOpen(true);
   };
 
-  const getCurrentForm = () => {
+  const getCurrentForm = (): any => {
     switch (dialogType) {
       case 'batch':
         return batchForm;
@@ -244,14 +244,79 @@ export default function FactoryManagement() {
     }
   };
 
+  // Mutations for creating new items
+  const createBatchMutation = useMutation({
+    mutationFn: (data: ProductionBatchForm) => apiRequest("/api/admin/factory/batches", "POST", data),
+    onSuccess: () => {
+      toast({
+        title: "موفق",
+        description: "دسته تولید با موفقیت ایجاد شد",
+      });
+      setDialogOpen(false);
+      refetchBatches();
+      batchForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در ایجاد دسته تولید",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createLineMutation = useMutation({
+    mutationFn: (data: ProductionLineForm) => apiRequest("/api/admin/factory/lines", "POST", data),
+    onSuccess: () => {
+      toast({
+        title: "موفق",
+        description: "خط تولید با موفقیت ایجاد شد",
+      });
+      setDialogOpen(false);
+      refetchLines();
+      lineForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در ایجاد خط تولید",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createQualityMutation = useMutation({
+    mutationFn: (data: QualityCheckForm) => apiRequest("/api/admin/factory/quality", "POST", data),
+    onSuccess: () => {
+      toast({
+        title: "موفق",
+        description: "بازرسی کیفیت با موفقیت ایجاد شد",
+      });
+      setDialogOpen(false);
+      refetchQuality();
+      qualityForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در ایجاد بازرسی کیفیت",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: any) => {
-    // Handle form submission based on dialog type
-    console.log('Form submitted:', { type: dialogType, data });
-    toast({
-      title: "موفق",
-      description: "عملیات با موفقیت انجام شد",
-    });
-    setDialogOpen(false);
+    switch (dialogType) {
+      case 'batch':
+        createBatchMutation.mutate(data);
+        break;
+      case 'line':
+        createLineMutation.mutate(data);
+        break;
+      case 'quality':
+        createQualityMutation.mutate(data);
+        break;
+    }
   };
 
   return (
@@ -519,99 +584,266 @@ export default function FactoryManagement() {
               {dialogType === 'quality' && 'افزودن بازرسی کیفیت'}
             </DialogTitle>
           </DialogHeader>
-          <Form {...getCurrentForm()}>
-            <form onSubmit={getCurrentForm().handleSubmit(onSubmit)} className="space-y-4">
-              {dialogType === 'batch' && (
-                <>
-                  <FormField
-                    control={batchForm.control}
-                    name="batchNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>شماره دسته</FormLabel>
+          {dialogType === 'batch' && (
+            <Form {...batchForm}>
+              <form onSubmit={batchForm.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={batchForm.control}
+                  name="batchNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>شماره دسته</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={batchForm.control}
+                  name="productId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>محصول</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <Input {...field} />
+                          <SelectTrigger>
+                            <SelectValue placeholder="محصول را انتخاب کنید" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={batchForm.control}
-                    name="productId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>محصول</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="محصول را انتخاب کنید" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {products.map((product: any) => (
-                              <SelectItem key={product.id} value={product.id.toString()}>
-                                {product.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={batchForm.control}
-                    name="plannedQuantity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>مقدار برنامه‌ریزی شده</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={batchForm.control}
-                    name="startDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاریخ شروع</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={batchForm.control}
-                    name="operatorName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>نام اپراتور</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
+                        <SelectContent>
+                          {products.map((product: any) => (
+                            <SelectItem key={product.id} value={product.id.toString()}>
+                              {product.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={batchForm.control}
+                  name="plannedQuantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>مقدار برنامه‌ریزی شده</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={batchForm.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>تاریخ شروع</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={batchForm.control}
+                  name="operatorName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>نام اپراتور</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={batchForm.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>یادداشت</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  انصراف
-                </Button>
-                <Button type="submit">
-                  ذخیره
-                </Button>
-              </div>
-            </form>
-          </Form>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                    انصراف
+                  </Button>
+                  <Button type="submit">
+                    ذخیره
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
+
+          {dialogType === 'line' && (
+            <Form {...lineForm}>
+              <form onSubmit={lineForm.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={lineForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>نام خط تولید</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={lineForm.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>توضیحات</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={lineForm.control}
+                  name="capacity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ظرفیت</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={lineForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>وضعیت</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="وضعیت را انتخاب کنید" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">فعال</SelectItem>
+                          <SelectItem value="maintenance">تعمیرات</SelectItem>
+                          <SelectItem value="inactive">غیرفعال</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                    انصراف
+                  </Button>
+                  <Button type="submit">
+                    ذخیره
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
+
+          {dialogType === 'quality' && (
+            <Form {...qualityForm}>
+              <form onSubmit={qualityForm.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={qualityForm.control}
+                  name="batchId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>دسته تولید</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="دسته تولید را انتخاب کنید" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {batches.map((batch) => (
+                            <SelectItem key={batch.id} value={batch.id.toString()}>
+                              {batch.batchNumber} - {batch.productName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={qualityForm.control}
+                  name="inspector"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>نام بازرس</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={qualityForm.control}
+                  name="score"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>امتیاز کیفیت (0-100)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="100" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={qualityForm.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>یادداشت</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                    انصراف
+                  </Button>
+                  <Button type="submit">
+                    ذخیره
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
