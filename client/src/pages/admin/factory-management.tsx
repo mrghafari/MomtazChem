@@ -668,7 +668,7 @@ export default function FactoryManagement() {
               <div>
                 <p className="text-sm text-muted-foreground">Active Lines</p>
                 <p className="text-2xl font-bold">
-                  {lines.filter(l => l.status === 'active').length}
+                  {(lines || []).filter(l => l.status === 'active').length}
                 </p>
               </div>
               <Settings className="h-8 w-8 text-green-600" />
@@ -682,7 +682,7 @@ export default function FactoryManagement() {
               <div>
                 <p className="text-sm text-muted-foreground">Total Products</p>
                 <p className="text-2xl font-bold">
-                  {products.length}
+                  {(products || []).length}
                 </p>
               </div>
               <Package className="h-8 w-8 text-purple-600" />
@@ -696,8 +696,8 @@ export default function FactoryManagement() {
               <div>
                 <p className="text-sm text-muted-foreground">Quality Average</p>
                 <p className="text-2xl font-bold">
-                  {qualityChecks.length > 0 
-                    ? Math.round(qualityChecks.reduce((acc, q) => acc + q.score, 0) / qualityChecks.length)
+                  {(qualityChecks || []).length > 0 
+                    ? Math.round((qualityChecks || []).reduce((acc, q) => acc + q.score, 0) / (qualityChecks || []).length)
                     : 0
                   }%
                 </p>
@@ -749,7 +749,7 @@ export default function FactoryManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {batches.map((batch) => (
+                    {(batches || []).map((batch) => (
                       <TableRow key={batch.id}>
                         <TableCell className="font-medium">{batch.batchNumber}</TableCell>
                         <TableCell>{batch.productName}</TableCell>
@@ -794,7 +794,7 @@ export default function FactoryManagement() {
                 <div className="text-center py-8">Loading...</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {lines.map((line) => (
+                  {(lines || []).map((line) => (
                     <Card key={line.id} className="border-2">
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
@@ -863,7 +863,7 @@ export default function FactoryManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {qualityChecks.map((check) => (
+                    {(qualityChecks || []).map((check) => (
                       <TableRow key={check.id}>
                         <TableCell className="font-medium">{check.batchNumber}</TableCell>
                         <TableCell>{check.productName}</TableCell>
