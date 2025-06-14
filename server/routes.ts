@@ -1919,12 +1919,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { pool } = await import('./db');
       const result = await pool.query(`
-        INSERT INTO procedure_documents (procedure_id, outline_id, title, description, file_name, 
-                                       file_path, file_size, file_type, uploaded_by, version, tags)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING id, title, file_name, upload_date
-      `, [procedureId, outlineId, title, description, req.file.filename, req.file.path, 
-          req.file.size, req.file.mimetype, userId, version, tagsArray]);
+        INSERT INTO procedure_documents (
+          procedure_id, outline_id, title, description, file_name, 
+          file_path, file_size, file_type, uploaded_by, version, tags,
+          upload_date, is_active, download_count
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), true, 0)
+        RETURNING id, title, file_name, upload_date, version
+      `, [
+        procedureId, 
+        outlineId || null, 
+        title || req.file.originalname, 
+        description || null, 
+        req.file.originalname, 
+        req.file.path, 
+        req.file.size, 
+        req.file.mimetype, 
+        userId, 
+        version || '1.0', 
+        tagsArray
+      ]);
 
       res.json({
         success: true,
@@ -1965,9 +1979,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `, [documentId]);
 
       // Send file
-      const path = await import('path');
-      const fs = await import('fs');
-      const filePath = path.resolve(document.file_path);
+      const path = require('path');
+      const fs = require('fs');
+      
+      // Handle both absolute and relative paths
+      let filePath = document.file_path;
+      if (!path.isAbsolute(filePath)) {
+        filePath = path.resolve(process.cwd(), filePath);
+      }
 
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({ success: false, message: "File not found on server" });
@@ -1975,6 +1994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
       res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
+      
       res.sendFile(filePath);
 
     } catch (error) {
