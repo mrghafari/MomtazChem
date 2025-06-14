@@ -46,8 +46,8 @@ export interface ContactFormData {
 
 export async function sendContactEmail(formData: ContactFormData): Promise<void> {
   try {
-    const transporter = await createTransporter('general');
-    const categorySettings = await emailStorage.getCategoryWithSettings('general');
+    const transporter = await createTransporter('admin');
+    const categorySettings = await emailStorage.getCategoryWithSettings('admin');
     
     if (!categorySettings?.smtp || !categorySettings.recipients?.length) {
       throw new Error('No email configuration found for contact form');
@@ -104,7 +104,7 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
     
     // Log the failed email attempt
     try {
-      const categorySettings = await emailStorage.getCategoryWithSettings('general');
+      const categorySettings = await emailStorage.getCategoryWithSettings('admin');
       if (categorySettings) {
         await emailStorage.logEmail({
           categoryId: categorySettings.category.id,
