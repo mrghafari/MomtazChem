@@ -234,6 +234,36 @@ export default function FactoryManagement() {
     },
   });
 
+  // Product form
+  const productForm = useForm<InsertShowcaseProduct>({
+    resolver: zodResolver(insertShowcaseProductSchema),
+    defaultValues: {
+      name: "",
+      category: "fuel-additives",
+      description: "",
+      shortDescription: "",
+      priceRange: "Contact for pricing",
+      imageUrl: "",
+      pdfCatalogUrl: "",
+      specifications: {},
+      features: [],
+      applications: [],
+      technicalDataSheet: "",
+      safetyDataSheet: "",
+      certifications: [],
+      isActive: true,
+      displayOrder: 0,
+      stockQuantity: 0,
+      minStockLevel: 10,
+      maxStockLevel: 1000,
+      stockUnit: "units",
+      inventoryStatus: "in_stock",
+      supplier: "",
+      warehouseLocation: "",
+      batchNumber: "",
+    },
+  });
+
   // Fetch production batches
   const { data: batches = [], isLoading: batchesLoading, refetch: refetchBatches } = useQuery<ProductionBatch[]>({
     queryKey: ["/api/admin/factory/batches"],
@@ -257,6 +287,56 @@ export default function FactoryManagement() {
   // Fetch inquiries
   const { data: inquiries = [], isLoading: inquiriesLoading, refetch: refetchInquiries } = useQuery<any[]>({
     queryKey: ["/api/inquiries"],
+  });
+
+  // Product mutations
+  const createProductMutation = useMutation({
+    mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setProductDialogOpen(false);
+      productForm.reset();
+      toast({ title: "Success", description: "Product created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create product", variant: "destructive" });
+    },
+  });
+
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
+      apiRequest(`/api/products/${id}`, "PATCH", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setProductDialogOpen(false);
+      setEditingProduct(null);
+      productForm.reset();
+      toast({ title: "Success", description: "Product updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update product", variant: "destructive" });
+    },
+  });
+
+  const deleteProductMutation = useMutation({
+    mutationFn: (id: number) => apiRequest(`/api/products/${id}`, "DELETE"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      toast({ title: "Success", description: "Product deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete product", variant: "destructive" });
+    },
+  });
+
+  const syncProductsMutation = useMutation({
+    mutationFn: () => apiRequest("/api/sync-products", "POST"),
+    onSuccess: () => {
+      toast({ title: "Success", description: "All products synchronized with shop successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to sync products", variant: "destructive" });
+    },
   });
 
   const getStatusColor = (status: string) => {
@@ -326,6 +406,139 @@ export default function FactoryManagement() {
     qualityForm.reset();
     setDialogOpen(true);
   };
+
+  // Product handler functions
+  const openCreateProductDialog = () => {
+    setEditingProduct(null);
+    setImagePreview(null);
+    setCatalogPreview(null);
+    productForm.reset();
+    setProductDialogOpen(true);
+  };
+
+  const openEditProductDialog = (product: ShowcaseProduct) => {
+    setEditingProduct(product);
+    setImagePreview(product.imageUrl);
+    setCatalogPreview(product.pdfCatalogUrl);
+    productForm.reset({
+      name: product.name,
+      category: product.category,
+      description: product.description,
+      shortDescription: product.shortDescription ?? "",
+      priceRange: product.priceRange ?? "Contact for pricing",
+      imageUrl: product.imageUrl ?? "",
+      pdfCatalogUrl: product.pdfCatalogUrl ?? "",
+      specifications: product.specifications ?? {},
+      features: product.features ?? [],
+      applications: product.applications ?? [],
+      technicalDataSheet: product.technicalDataSheet ?? "",
+      safetyDataSheet: product.safetyDataSheet ?? "",
+      certifications: product.certifications ?? [],
+      isActive: product.isActive !== false,
+      displayOrder: product.displayOrder ?? 0,
+      stockQuantity: product.stockQuantity ?? 0,
+      minStockLevel: product.minStockLevel ?? 10,
+      maxStockLevel: product.maxStockLevel ?? 1000,
+      stockUnit: product.stockUnit ?? "units",
+      inventoryStatus: product.inventoryStatus ?? "in_stock",
+      supplier: product.supplier ?? "",
+      warehouseLocation: product.warehouseLocation ?? "",
+      batchNumber: product.batchNumber ?? "",
+    });
+    setProductDialogOpen(true);
+  };
+
+  // File upload handlers
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Error", description: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Error", description: "Image file must be less than 5MB", variant: "destructive" });
+      return;
+    }
+    
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Upload failed');
+      }
+      
+      productForm.setValue('imageUrl', data.url);
+      setImagePreview(data.url);
+      toast({ title: "Success", description: "Image uploaded successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to upload image", variant: "destructive" });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleCatalogUpload = async (file: File) => {
+    if (!file) return;
+    
+    if (file.type !== 'application/pdf') {
+      toast({ title: "Error", description: "Please select a PDF file", variant: "destructive" });
+      return;
+    }
+    
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "Error", description: "PDF file must be less than 10MB", variant: "destructive" });
+      return;
+    }
+    
+    setUploadingCatalog(true);
+    try {
+      const formData = new FormData();
+      formData.append('catalog', file);
+      
+      const response = await fetch('/api/upload/catalog', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Upload failed');
+      }
+      
+      productForm.setValue('pdfCatalogUrl', data.url);
+      setCatalogPreview(data.url);
+      toast({ title: "Success", description: "Catalog uploaded successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to upload catalog", variant: "destructive" });
+    } finally {
+      setUploadingCatalog(false);
+    }
+  };
+
+  // Filter products based on search query
+  const filteredProducts = products.filter((product) => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      product.name.toLowerCase().includes(query) ||
+      product.barcode?.toLowerCase().includes(query) ||
+      product.sku?.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query)
+    );
+  });
 
   const getCurrentForm = (): any => {
     switch (dialogType) {
@@ -671,6 +884,7 @@ export default function FactoryManagement() {
 
         {/* Product Management Tab */}
         <TabsContent value="products" className="space-y-4">
+          {/* Product Management Header */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -678,53 +892,323 @@ export default function FactoryManagement() {
                   <ShoppingCart className="h-5 w-5" />
                   Product Management
                 </CardTitle>
-                <Button onClick={() => setLocation('/admin')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Product
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={openCreateProductDialog}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Product
+                  </Button>
+                  <Button 
+                    onClick={() => syncProductsMutation.mutate()}
+                    disabled={syncProductsMutation.isPending}
+                    variant="outline"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    {syncProductsMutation.isPending ? 'Syncing...' : 'Sync Shop'}
+                  </Button>
+                </div>
               </div>
             </CardHeader>
-            <CardContent>
+          </Card>
+
+          {/* Search Section */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search by name, barcode, or SKU..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inventory Summary */}
+          {products && products.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-600">In Stock</p>
+                      <p className="text-2xl font-bold text-green-800">
+                        {products.filter(p => p.inventoryStatus === 'in_stock').length}
+                      </p>
+                    </div>
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-yellow-600">Low Stock</p>
+                      <p className="text-2xl font-bold text-yellow-800">
+                        {products.filter(p => p.inventoryStatus === 'low_stock').length}
+                      </p>
+                    </div>
+                    <AlertTriangle className="w-8 h-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-red-600">Out of Stock</p>
+                      <p className="text-2xl font-bold text-red-800">
+                        {products.filter(p => p.inventoryStatus === 'out_of_stock').length}
+                      </p>
+                    </div>
+                    <XCircle className="w-8 h-8 text-red-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600">Total Products</p>
+                      <p className="text-2xl font-bold text-blue-800">{products.length}</p>
+                    </div>
+                    <Package className="w-8 w-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Products Grid */}
+          <Card>
+            <CardContent className="p-6">
               {productsLoading ? (
-                <div className="text-center py-8">Loading...</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardHeader>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-20 bg-gray-200 rounded"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <QrCode className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {searchQuery ? 'No products found' : 'No products available'}
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    {searchQuery 
+                      ? `No products match "${searchQuery}". Try searching by name, barcode, or SKU.`
+                      : 'Add your first product to get started.'
+                    }
+                  </p>
+                  {searchQuery && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSearchQuery("")}
+                      className="mr-2"
+                    >
+                      Clear Search
+                    </Button>
+                  )}
+                  <Button onClick={openCreateProductDialog}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Product
+                  </Button>
+                </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products.map((product: any) => (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>${product.price}</TableCell>
-                        <TableCell>{product.stock || 'N/A'}</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-100 text-green-800">
-                            Active
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" className="text-red-600">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProducts.map((product: ShowcaseProduct) => (
+                    <Card key={product.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+                      {product.imageUrl && (
+                        <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                          <img 
+                            src={product.imageUrl} 
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg">{product.name}</CardTitle>
+                            <CardDescription className="flex items-center gap-2 mt-2">
+                              {categories.find(c => c.value === product.category)?.icon}
+                              {categories.find(c => c.value === product.category)?.label}
+                            </CardDescription>
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                          <Badge variant={product.isActive ? "default" : "secondary"}>
+                            {product.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                          {product.shortDescription || product.description}
+                        </p>
+                        <div className="flex items-center justify-between mb-4">
+                          {product.priceRange && (
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="w-4 h-4" />
+                              <span className="font-semibold">{product.priceRange}</span>
+                            </div>
+                          )}
+                          <Badge variant="default">
+                            Display Order: {product.displayOrder || 0}
+                          </Badge>
+                        </div>
+                        
+                        {/* Inventory Status Section */}
+                        <div className="space-y-3 mb-4">
+                          <div className="flex items-center justify-between">
+                            <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-medium ${getInventoryStatusColor(product.inventoryStatus || 'in_stock')}`}>
+                              {getInventoryStatusIcon(product.inventoryStatus || 'in_stock')}
+                              {getInventoryStatusLabel(product.inventoryStatus || 'in_stock')}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {product.stockQuantity || 0} {product.stockUnit || 'units'}
+                            </div>
+                          </div>
+
+                          {/* Stock Level Progress Bar */}
+                          {(product.stockQuantity !== undefined && product.maxStockLevel) && (
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs text-gray-600">
+                                <span>Stock Level</span>
+                                <span>{Math.round(((product.stockQuantity || 0) / (product.maxStockLevel || 1)) * 100)}%</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className={`h-2 rounded-full transition-all duration-300 ${getStockLevelIndicator(
+                                    product.stockQuantity || 0, 
+                                    product.minStockLevel || 10, 
+                                    product.maxStockLevel || 100
+                                  ).color}`}
+                                  style={{ 
+                                    width: `${getStockLevelIndicator(
+                                      product.stockQuantity || 0, 
+                                      product.minStockLevel || 10, 
+                                      product.maxStockLevel || 100
+                                    ).width}%` 
+                                  }}
+                                />
+                              </div>
+                              <div className="flex justify-between text-xs text-gray-500">
+                                <span>Min: {product.minStockLevel || 0}</span>
+                                <span>Max: {product.maxStockLevel || 0}</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Product Identification */}
+                          {(product.barcode || product.sku) && (
+                            <div className="text-xs text-gray-500 space-y-1 mb-2">
+                              {product.barcode && (
+                                <div className="flex items-center gap-1">
+                                  <QrCode className="w-3 h-3" />
+                                  <span>Barcode: {product.barcode}</span>
+                                </div>
+                              )}
+                              {product.sku && (
+                                <div className="flex items-center gap-1">
+                                  <Package className="w-3 h-3" />
+                                  <span>SKU: {product.sku}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Additional inventory info */}
+                          {(product.supplier || product.warehouseLocation) && (
+                            <div className="text-xs text-gray-500 space-y-1">
+                              {product.supplier && (
+                                <div className="flex items-center gap-1">
+                                  <Package className="w-3 h-3" />
+                                  <span>Supplier: {product.supplier}</span>
+                                </div>
+                              )}
+                              {product.warehouseLocation && (
+                                <div className="flex items-center gap-1">
+                                  <BarChart3 className="w-3 h-3" />
+                                  <span>Location: {product.warehouseLocation}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* File attachments indicator */}
+                        <div className="flex items-center gap-2 mb-4">
+                          {product.imageUrl && (
+                            <a 
+                              href={product.imageUrl} 
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex"
+                            >
+                              <Badge variant="outline" className="text-xs hover:bg-green-50 hover:text-green-600 cursor-pointer transition-colors">
+                                <Image className="w-3 h-3 mr-1" />
+                                View Image
+                              </Badge>
+                            </a>
+                          )}
+                          {product.pdfCatalogUrl && (
+                            <a 
+                              href={product.pdfCatalogUrl} 
+                              download={`${product.name}_catalog.pdf`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex"
+                            >
+                              <Badge variant="outline" className="text-xs hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors">
+                                <FileText className="w-3 h-3 mr-1" />
+                                Download Catalog
+                              </Badge>
+                            </a>
+                          )}
+                        </div>
+                        
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm" onClick={() => openEditProductDialog(product)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            onClick={() => deleteProductMutation.mutate(product.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -1069,6 +1553,340 @@ export default function FactoryManagement() {
               </form>
             </Form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Product Add/Edit Dialog */}
+      <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? "Edit Product" : "Add New Product"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...productForm}>
+            <form onSubmit={productForm.handleSubmit((data) => {
+              if (editingProduct) {
+                updateProductMutation.mutate({ id: editingProduct.id, data });
+              } else {
+                createProductMutation.mutate(data);
+              }
+            })} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={productForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Product Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={productForm.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.value} value={category.value}>
+                              {category.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={productForm.control}
+                name="shortDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Short Description</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={productForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={productForm.control}
+                  name="priceRange"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price Range</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value ?? ""} placeholder="Contact for pricing" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={productForm.control}
+                  name="displayOrder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Display Order</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value ?? 0} type="number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Inventory Management Section */}
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="text-lg font-semibold">Inventory Management</h3>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={productForm.control}
+                    name="stockQuantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Stock</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? 0} type="number" min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={productForm.control}
+                    name="minStockLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Min Stock Level</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? 10} type="number" min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={productForm.control}
+                    name="maxStockLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Max Stock Level</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? 1000} type="number" min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={productForm.control}
+                    name="stockUnit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Stock Unit</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select unit" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="units">Units</SelectItem>
+                            <SelectItem value="kg">Kilograms</SelectItem>
+                            <SelectItem value="liters">Liters</SelectItem>
+                            <SelectItem value="boxes">Boxes</SelectItem>
+                            <SelectItem value="pallets">Pallets</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={productForm.control}
+                    name="inventoryStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inventory Status</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="in_stock">In Stock</SelectItem>
+                            <SelectItem value="low_stock">Low Stock</SelectItem>
+                            <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                            <SelectItem value="discontinued">Discontinued</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={productForm.control}
+                    name="supplier"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Supplier</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ""} placeholder="Supplier name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={productForm.control}
+                    name="warehouseLocation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Warehouse Location</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ""} placeholder="e.g., A1-B2" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* File Upload Section */}
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="text-lg font-semibold">Media & Documents</h3>
+                
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label>Product Image</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file);
+                        }}
+                        disabled={uploadingImage}
+                      />
+                    </div>
+                    {uploadingImage && (
+                      <div className="text-sm text-gray-500">Uploading...</div>
+                    )}
+                  </div>
+                  {imagePreview && (
+                    <div className="relative w-32 h-32 border rounded overflow-hidden">
+                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-1 right-1 p-1 h-6 w-6"
+                        onClick={() => {
+                          setImagePreview(null);
+                          productForm.setValue('imageUrl', '');
+                        }}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Catalog Upload */}
+                <div className="space-y-2">
+                  <Label>Product Catalog (PDF)</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <Input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleCatalogUpload(file);
+                        }}
+                        disabled={uploadingCatalog}
+                      />
+                    </div>
+                    {uploadingCatalog && (
+                      <div className="text-sm text-gray-500">Uploading...</div>
+                    )}
+                  </div>
+                  {catalogPreview && (
+                    <div className="flex items-center gap-2 p-2 border rounded">
+                      <FileText className="w-4 h-4" />
+                      <span className="text-sm">Catalog uploaded</span>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="ml-auto p-1 h-6 w-6"
+                        onClick={() => {
+                          setCatalogPreview(null);
+                          productForm.setValue('pdfCatalogUrl', '');
+                        }}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button type="button" variant="outline" onClick={() => setProductDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createProductMutation.isPending || updateProductMutation.isPending}>
+                  {createProductMutation.isPending || updateProductMutation.isPending ? "Saving..." : "Save Product"}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>
