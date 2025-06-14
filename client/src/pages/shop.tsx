@@ -36,6 +36,62 @@ const Shop = () => {
     queryKey: ["/api/shop/categories"],
   });
 
+  // Load customer info on component mount
+  useEffect(() => {
+    checkCustomerAuth();
+  }, []);
+
+  const checkCustomerAuth = async () => {
+    try {
+      const response = await fetch('/api/customers/me', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setCustomer(result.customer);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking customer auth:', error);
+    } finally {
+      setIsLoadingCustomer(false);
+    }
+  };
+
+  const handleLoginSuccess = (customerData: any) => {
+    setCustomer(customerData);
+    toast({
+      title: "خوش آمدید",
+      description: `${customerData.firstName} ${customerData.lastName}`,
+    });
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/customers/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        setCustomer(null);
+        toast({
+          title: "خروج موفق",
+          description: "از حساب کاربری خود خارج شدید",
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "مشکلی در خروج رخ داده است",
+      });
+    }
+  };
+
   // Filter and sort products
   const filteredProducts = products
     .filter(product => {
@@ -143,8 +199,41 @@ const Shop = () => {
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">Chemical Products Shop</h1>
             
-            {/* Cart Summary */}
+            {/* User Account & Cart */}
             <div className="flex items-center gap-4">
+              {/* User Account */}
+              {!isLoadingCustomer && (
+                <div className="flex items-center gap-2">
+                  {customer ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">
+                        سلام، {customer.firstName}
+                      </span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={handleLogout}
+                        className="flex items-center gap-1"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        خروج
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowAuth(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <User className="w-4 h-4" />
+                      ورود / ثبت نام
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {/* Cart Summary */}
               <div className="relative">
                 <Button 
                   variant="outline" 
@@ -286,12 +375,12 @@ const Shop = () => {
                           
                           <div className="flex items-center justify-between mb-3">
                             <div>
-                              {cart[product.id] ? (
+                              {cart[product.id] && cart[product.id] > 0 ? (
                                 <div>
                                   <span className="text-2xl font-bold text-green-600">
-                                    ${getDiscountedPrice(product, cart[product.id]).toFixed(2)}
+                                    ${getDiscountedPrice(product, cart[product.id] || 1).toFixed(2)}
                                   </span>
-                                  {getDiscountedPrice(product, cart[product.id]) < parseFloat(product.price) && (
+                                  {getDiscountedPrice(product, cart[product.id] || 1) < parseFloat(product.price) && (
                                     <span className="text-sm line-through text-gray-400 ml-2">
                                       ${product.price}
                                     </span>
@@ -312,7 +401,7 @@ const Shop = () => {
                           </div>
 
                           {/* Quantity Discounts */}
-                          {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
+                          {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
                             <div className="mb-3">
                               <p className="text-xs font-medium text-gray-700 mb-1">Quantity Discounts:</p>
                               <div className="space-y-1">
@@ -323,7 +412,7 @@ const Shop = () => {
                                 ))}
                               </div>
                             </div>
-                          )}
+                          ) : null}
 
                           {product.inStock && (
                             <div className="flex items-center gap-2">
@@ -457,6 +546,13 @@ const Shop = () => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Customer Authentication Modal */}
+      <CustomerAuth 
+        open={showAuth}
+        onOpenChange={setShowAuth}
+        onLoginSuccess={handleLoginSuccess}
+      />
 
       {/* Live Chat Support */}
       <LiveChat />
