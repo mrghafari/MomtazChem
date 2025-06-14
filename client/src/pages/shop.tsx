@@ -416,7 +416,7 @@ const Shop = () => {
 
                           {product.inStock && (
                             <div className="flex items-center gap-2">
-                              {cart[product.id] ? (
+                              {cart[product.id] && cart[product.id] > 0 ? (
                                 <div className="flex items-center gap-2">
                                   <Button
                                     size="sm"
@@ -487,7 +487,7 @@ const Shop = () => {
                             <div className="ml-6">
                               {product.inStock && (
                                 <div className="flex items-center gap-2">
-                                  {cart[product.id] ? (
+                                  {cart[product.id] && cart[product.id] > 0 ? (
                                     <div className="flex items-center gap-2">
                                       <Button
                                         size="sm"
