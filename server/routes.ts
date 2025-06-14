@@ -2088,7 +2088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/email-templates", requireAuth, async (req, res) => {
     try {
-      const sessionData = req.session as SessionData;
+      const sessionData = req.session;
       const templateData = insertEmailTemplateSchema.parse({
         ...req.body,
         createdBy: sessionData.adminId

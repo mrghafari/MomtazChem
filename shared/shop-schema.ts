@@ -73,7 +73,7 @@ export type DiscountSetting = typeof discountSettings.$inferSelect;
 export const financialTransactions = pgTable("financial_transactions", {
   id: serial("id").primaryKey(),
   type: text("type").notNull(), // 'sale', 'refund', 'adjustment', 'return'
-  orderId: integer("order_id").references(() => orders.id),
+  orderId: integer("order_id"), // Reference to orders table (foreign key will be added separately)
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   description: text("description").notNull(),
   referenceNumber: text("reference_number"),

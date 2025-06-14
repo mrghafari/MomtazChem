@@ -131,7 +131,7 @@ export class EmailStorage implements IEmailStorage {
     return setting || undefined;
   }
   
-  async getSmtpSettingByCategory(categoryId: number): Promise<SmtpSetting | undefined> {
+  async getSmtpSettingByCategory(categoryId: number): Promise<SmtpSetting | null> {
     const [setting] = await emailDb
       .select()
       .from(smtpSettings)
@@ -139,7 +139,7 @@ export class EmailStorage implements IEmailStorage {
         eq(smtpSettings.categoryId, categoryId),
         eq(smtpSettings.isActive, true)
       ));
-    return setting || undefined;
+    return setting || null;
   }
   
   async updateSmtpSetting(id: number, settingUpdate: Partial<InsertSmtpSetting>): Promise<SmtpSetting> {
