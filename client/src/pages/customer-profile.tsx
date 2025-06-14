@@ -34,8 +34,8 @@ const CustomerProfile = () => {
 
       if (response.ok) {
         toast({
-          title: "خروج موفق",
-          description: "از حساب کاربری خود خارج شدید",
+          title: "Logout Successful",
+          description: "You have been logged out successfully",
         });
         setLocation("/shop");
       }
@@ -43,8 +43,8 @@ const CustomerProfile = () => {
       console.error('Logout error:', error);
       toast({
         variant: "destructive",
-        title: "خطا",
-        description: "مشکلی در خروج رخ داده است",
+        title: "Error",
+        description: "An error occurred during logout",
       });
     }
   };
@@ -54,7 +54,7 @@ const CustomerProfile = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">در حال بارگذاری پروفایل...</p>
+          <p className="text-gray-600">Loading profile...</p>
         </div>
       </div>
     );
@@ -66,10 +66,10 @@ const CustomerProfile = () => {
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">دسترسی محدود</h2>
-            <p className="text-gray-500 mb-6">برای مشاهده پروفایل باید وارد حساب کاربری شوید.</p>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Access Restricted</h2>
+            <p className="text-gray-500 mb-6">Please log in to view your profile.</p>
             <Button onClick={() => setLocation("/shop")} className="w-full">
-              رفتن به فروشگاه
+              Go to Shop
             </Button>
           </CardContent>
         </Card>
@@ -81,7 +81,7 @@ const CustomerProfile = () => {
   const orders = orderData?.success ? orderData.orders : [];
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fa-IR', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -102,12 +102,12 @@ const CustomerProfile = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending': return 'در انتظار';
-      case 'confirmed': return 'تایید شده';
-      case 'processing': return 'در حال پردازش';
-      case 'shipped': return 'ارسال شده';
-      case 'delivered': return 'تحویل داده شده';
-      case 'cancelled': return 'لغو شده';
+      case 'pending': return 'Pending';
+      case 'confirmed': return 'Confirmed';
+      case 'processing': return 'Processing';
+      case 'shipped': return 'Shipped';
+      case 'delivered': return 'Delivered';
+      case 'cancelled': return 'Cancelled';
       default: return status;
     }
   };
@@ -120,19 +120,19 @@ const CustomerProfile = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8" dir="rtl">
+        <div className="flex justify-between items-center mb-8">
           <div>
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-gray-900">
-                خوش آمدید، {customer.firstName} {customer.lastName}!
+                Welcome, {customer.firstName} {customer.lastName}!
               </h1>
               <p className="text-lg text-blue-600 mt-1">
-                داشبورد شخصی شما آماده است
+                {getPersonalizedWelcome(customer.firstName)}
               </p>
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-700">پروفایل مشتری</h2>
-              <p className="text-gray-600">مدیریت حساب کاربری و مشاهده تاریخچه سفارشات</p>
+              <h2 className="text-xl font-semibold text-gray-700">Customer Profile</h2>
+              <p className="text-gray-600">Manage your account and view order history</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -140,15 +140,15 @@ const CustomerProfile = () => {
               variant="outline"
               onClick={() => setLocation("/shop")}
             >
-              <ShoppingBag className="w-4 h-4 ml-2" />
-              ادامه خرید
+              <ShoppingBag className="w-4 h-4 mr-2" />
+              Continue Shopping
             </Button>
             <Button
               variant="outline"
               onClick={handleLogout}
             >
-              <LogOut className="w-4 h-4 ml-2" />
-              خروج
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
           </div>
         </div>
