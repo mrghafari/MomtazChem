@@ -127,7 +127,7 @@ const CustomerProfile = () => {
                 Welcome, {customer.firstName} {customer.lastName}!
               </h1>
               <p className="text-lg text-blue-600 mt-1">
-                {getPersonalizedWelcome(customer.firstName)}
+                {getPersonalizedWelcome(customer.firstName, 'customer', 'en')}
               </p>
             </div>
             <div>
