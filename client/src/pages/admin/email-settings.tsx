@@ -205,10 +205,18 @@ export default function EmailSettingsPage() {
             <p className="text-gray-600 mt-1">Configure email addresses and SMTP settings</p>
           </div>
         </div>
-        <Button onClick={() => setLocation("/admin")} variant="outline">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Admin
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            onClick={() => setLocation("/admin/email-progress")}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+          >
+            🎯 Progress Tracker
+          </Button>
+          <Button onClick={() => setLocation("/admin")} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Admin
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="email-addresses" className="space-y-6">
