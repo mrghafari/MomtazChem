@@ -1713,13 +1713,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process tags
       const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
       
+      // Handle empty date strings - convert to null
+      const processedEffectiveDate = effectiveDate && effectiveDate.trim() !== '' ? effectiveDate : null;
+      const processedReviewDate = reviewDate && reviewDate.trim() !== '' ? reviewDate : null;
+      
       const { pool } = await import('./db');
       const result = await pool.query(`
         INSERT INTO procedures (title, category_id, description, content, priority, author_id, 
                                effective_date, review_date, tags, access_level)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING id, title, category_id, description, version, status, priority, created_at
-      `, [title, categoryId, description, content, priority, userId, effectiveDate, reviewDate, tagsArray, accessLevel]);
+      `, [title, categoryId, description, content, priority, userId, processedEffectiveDate, processedReviewDate, tagsArray, accessLevel]);
 
       res.json({
         success: true,
