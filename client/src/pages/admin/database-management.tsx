@@ -1,0 +1,287 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { 
+  Database, 
+  Download, 
+  RefreshCw, 
+  HardDrive,
+  Table,
+  FileDown,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  ArrowLeft
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
+
+interface BackupFile {
+  filename: string;
+  size: number;
+  created: string;
+  modified: string;
+}
+
+interface DatabaseStats {
+  database_size: string;
+  table_count: number;
+  table_stats: Array<{
+    tablename: string;
+    live_rows: number;
+    total_inserts: number;
+    total_updates: number;
+    total_deletes: number;
+  }>;
+}
+
+export default function DatabaseManagement() {
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const [isCreatingBackup, setIsCreatingBackup] = useState(false);
+
+  // Fetch database statistics
+  const { data: dbStats, isLoading: statsLoading } = useQuery<DatabaseStats>({
+    queryKey: ["/api/admin/database/stats"],
+  });
+
+  // Fetch backup list
+  const { data: backupsData, isLoading: backupsLoading, refetch: refetchBackups } = useQuery<{ backups: BackupFile[] }>({
+    queryKey: ["/api/admin/backup/list"],
+  });
+
+  // Create backup mutation
+  const createBackupMutation = useMutation({
+    mutationFn: () => apiRequest("/api/admin/backup/create", "POST"),
+    onSuccess: () => {
+      toast({
+        title: "بک‌آپ ایجاد شد",
+        description: "بک‌آپ جدید با موفقیت ایجاد شد",
+      });
+      refetchBackups();
+      setIsCreatingBackup(false);
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "خطا در ایجاد بک‌آپ",
+        description: "مشکلی در ایجاد بک‌آپ رخ داده است",
+      });
+      setIsCreatingBackup(false);
+    },
+  });
+
+  const handleCreateBackup = () => {
+    setIsCreatingBackup(true);
+    createBackupMutation.mutate();
+  };
+
+  const handleDownloadBackup = (filename: string) => {
+    const link = document.createElement('a');
+    link.href = `/api/admin/backup/download/${filename}`;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "دانلود شروع شد",
+      description: `فایل ${filename} در حال دانلود است`,
+    });
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('fa-IR');
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setLocation('/admin')}
+        >
+          <ArrowLeft className="h-4 w-4 ml-2" />
+          بازگشت به داشبورد
+        </Button>
+        <h1 className="text-2xl font-bold">مدیریت دیتابیس</h1>
+      </div>
+
+      {/* Database Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">حجم دیتابیس</CardTitle>
+            <HardDrive className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {statsLoading ? "..." : dbStats?.database_size || "نامشخص"}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">تعداد جداول</CardTitle>
+            <Table className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {statsLoading ? "..." : dbStats?.table_count || 0}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">تعداد بک‌آپ‌ها</CardTitle>
+            <FileDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {backupsLoading ? "..." : backupsData?.backups.length || 0}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Backup Management */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              مدیریت بک‌آپ
+            </CardTitle>
+            <Button
+              onClick={handleCreateBackup}
+              disabled={isCreatingBackup || createBackupMutation.isPending}
+              className="flex items-center gap-2"
+            >
+              {isCreatingBackup || createBackupMutation.isPending ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              ایجاد بک‌آپ جدید
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {backupsLoading ? (
+            <div className="text-center py-8">در حال بارگذاری...</div>
+          ) : backupsData?.backups.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              هیچ بک‌آپی موجود نیست
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {backupsData?.backups.map((backup) => (
+                <div
+                  key={backup.filename}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{backup.filename}</h3>
+                      <Badge variant="secondary">
+                        {formatFileSize(backup.size)}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {formatDate(backup.created)}
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownloadBackup(backup.filename)}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    دانلود
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Table Statistics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Table className="h-5 w-5" />
+            آمار جداول دیتابیس
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {statsLoading ? (
+            <div className="text-center py-8">در حال بارگذاری...</div>
+          ) : (
+            <div className="space-y-4">
+              {dbStats?.table_stats.map((table) => (
+                <div key={table.tablename} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{table.tablename}</span>
+                    <Badge variant="outline">{table.live_rows} رکورد</Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
+                    <span>درج: {table.total_inserts}</span>
+                    <span>بروزرسانی: {table.total_updates}</span>
+                    <span>حذف: {table.total_deletes}</span>
+                  </div>
+                  <Progress value={(table.live_rows / Math.max(...dbStats.table_stats.map(t => t.live_rows))) * 100} className="h-2" />
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Setup Instructions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5" />
+            راهنمای نصب در سیستم شخصی
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 bg-muted rounded-lg">
+            <h4 className="font-medium mb-2">مراحل نصب:</h4>
+            <ol className="list-decimal list-inside space-y-2 text-sm">
+              <li>PostgreSQL را نصب کنید</li>
+              <li>یک دیتابیس جدید ایجاد کنید</li>
+              <li>فایل بک‌آپ را دانلود و بازیابی کنید</li>
+              <li>متغیر DATABASE_URL را تنظیم کنید</li>
+              <li>npm install و npm run dev را اجرا کنید</li>
+            </ol>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-green-600">
+            <CheckCircle className="h-4 w-4" />
+            فایل راهنمای کامل در پوشه پروژه موجود است: PORTABLE_DATABASE_SETUP.md
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

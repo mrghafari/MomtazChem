@@ -941,6 +941,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // DATABASE BACKUP ENDPOINTS
+  // =============================================================================
+
+  // Create database backup
+  app.post("/api/admin/backup/create", requireAuth, async (req, res) => {
+    try {
+      const { spawn } = require('child_process');
+      const fs = require('fs');
+      const path = require('path');
+      
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+      const backupDir = './backups';
+      const backupFile = `database_backup_${timestamp}.sql`;
+      const backupPath = path.join(backupDir, backupFile);
+      
+      // Create backup directory if it doesn't exist
+      if (!fs.existsSync(backupDir)) {
+        fs.mkdirSync(backupDir, { recursive: true });
+      }
+      
+      // Create backup using pg_dump
+      const pgDump = spawn('pg_dump', [process.env.DATABASE_URL, '--no-owner', '--no-privileges'], {
+        stdio: ['ignore', 'pipe', 'pipe']
+      });
+      
+      const writeStream = fs.createWriteStream(backupPath);
+      pgDump.stdout.pipe(writeStream);
+      
+      let errorOutput = '';
+      pgDump.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+      
+      pgDump.on('close', (code) => {
+        if (code === 0) {
+          const stats = fs.statSync(backupPath);
+          res.json({
+            success: true,
+            message: 'Backup created successfully',
+            filename: backupFile,
+            size: stats.size,
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          console.error('pg_dump error:', errorOutput);
+          res.status(500).json({
+            success: false,
+            message: 'Failed to create backup',
+            error: errorOutput
+          });
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error creating backup:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Download database backup
+  app.get("/api/admin/backup/download/:filename", requireAuth, async (req, res) => {
+    try {
+      const { filename } = req.params;
+      const path = require('path');
+      const fs = require('fs');
+      
+      // Security check - only allow .sql files and prevent directory traversal
+      if (!filename.endsWith('.sql') || filename.includes('..') || filename.includes('/')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid filename'
+        });
+      }
+      
+      const backupPath = path.join('./backups', filename);
+      
+      if (!fs.existsSync(backupPath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Backup file not found'
+        });
+      }
+      
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Type', 'application/sql');
+      
+      const fileStream = fs.createReadStream(backupPath);
+      fileStream.pipe(res);
+      
+    } catch (error) {
+      console.error("Error downloading backup:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // List available backups
+  app.get("/api/admin/backup/list", requireAuth, async (req, res) => {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      const backupDir = './backups';
+      
+      if (!fs.existsSync(backupDir)) {
+        return res.json({ backups: [] });
+      }
+      
+      const files = fs.readdirSync(backupDir)
+        .filter(file => file.endsWith('.sql') || file.endsWith('.sql.gz'))
+        .map(file => {
+          const filePath = path.join(backupDir, file);
+          const stats = fs.statSync(filePath);
+          return {
+            filename: file,
+            size: stats.size,
+            created: stats.birthtime,
+            modified: stats.mtime
+          };
+        })
+        .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+      
+      res.json({ backups: files });
+    } catch (error) {
+      console.error("Error listing backups:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Get database statistics
+  app.get("/api/admin/database/stats", requireAuth, async (req, res) => {
+    try {
+      const { pool } = require('./db');
+      
+      const tableStats = await pool.query(`
+        SELECT 
+          schemaname,
+          tablename,
+          n_tup_ins as total_inserts,
+          n_tup_upd as total_updates,
+          n_tup_del as total_deletes,
+          n_live_tup as live_rows,
+          n_dead_tup as dead_rows
+        FROM pg_stat_user_tables
+        ORDER BY n_live_tup DESC;
+      `);
+      
+      const dbSize = await pool.query(`
+        SELECT pg_size_pretty(pg_database_size(current_database())) as database_size;
+      `);
+      
+      const tableCount = await pool.query(`
+        SELECT COUNT(*) as table_count 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public';
+      `);
+      
+      res.json({
+        database_size: dbSize.rows[0].database_size,
+        table_count: parseInt(tableCount.rows[0].table_count),
+        table_stats: tableStats.rows
+      });
+    } catch (error) {
+      console.error("Error getting database stats:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Create inventory transaction and update stock
   app.post("/api/inventory/transaction", requireAuth, async (req, res) => {
     try {

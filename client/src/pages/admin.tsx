@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const categories = [
@@ -467,6 +467,15 @@ export default function AdminPage() {
           >
             <Mail className="w-4 h-4 mr-2" />
             Advanced Email Settings
+          </Button>
+          
+          <Button 
+            variant="outline"
+            onClick={() => setLocation("/admin/database-management")}
+            className="border-slate-300 text-slate-600 hover:bg-slate-50 h-12 text-sm"
+          >
+            <Database className="w-4 h-4 mr-2" />
+            Database Backup
           </Button>
 
           <Button 
