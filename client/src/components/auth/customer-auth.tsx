@@ -13,15 +13,15 @@ import { User, Mail, Lock, Phone, MapPin, Building } from "lucide-react";
 
 // Form schemas
 const loginSchema = z.object({
-  email: z.string().email("ایمیل معتبر وارد کنید"),
-  password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = z.object({
-  firstName: z.string().min(2, "نام باید حداقل 2 کاراکتر باشد"),
-  lastName: z.string().min(2, "نام خانوادگی باید حداقل 2 کاراکتر باشد"),
-  email: z.string().email("ایمیل معتبر وارد کنید"),
-  password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
   phone: z.string().optional(),
   company: z.string().optional(),
@@ -29,7 +29,7 @@ const registerSchema = z.object({
   city: z.string().optional(),
   address: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "رمز عبور و تکرار آن باید یکسان باشند",
+  message: "Password and confirm password must match",
   path: ["confirmPassword"],
 });
 
@@ -84,8 +84,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
 
       if (result.success) {
         toast({
-          title: "خوش آمدید",
-          description: "با موفقیت وارد شدید",
+          title: "Welcome",
+          description: "Successfully logged in",
         });
         onLoginSuccess(result.customer);
         onOpenChange(false);
@@ -93,16 +93,16 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
       } else {
         toast({
           variant: "destructive",
-          title: "خطا در ورود",
-          description: result.message || "ایمیل یا رمز عبور اشتباه است",
+          title: "Login Error",
+          description: result.message || "Invalid email or password",
         });
       }
     } catch (error) {
       console.error('Login error:', error);
       toast({
         variant: "destructive",
-        title: "خطا",
-        description: "مشکلی در ورود رخ داده است",
+        title: "Error",
+        description: "An error occurred while logging in",
       });
     } finally {
       setIsLoading(false);
@@ -125,23 +125,23 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
 
       if (result.success) {
         toast({
-          title: "ثبت نام موفق",
-          description: "حساب کاربری شما ایجاد شد. اکنون می‌توانید وارد شوید",
+          title: "Registration Successful",
+          description: "Your account has been created. You can now log in",
         });
         registerForm.reset();
       } else {
         toast({
           variant: "destructive",
-          title: "خطا در ثبت نام",
-          description: result.message || "مشکلی در ثبت نام رخ داده است",
+          title: "Registration Error",
+          description: result.message || "An error occurred during registration",
         });
       }
     } catch (error) {
       console.error('Register error:', error);
       toast({
         variant: "destructive",
-        title: "خطا",
-        description: "مشکلی در ثبت نام رخ داده است",
+        title: "Error",
+        description: "An error occurred during registration",
       });
     } finally {
       setIsLoading(false);
@@ -152,16 +152,16 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>ورود به حساب کاربری</DialogTitle>
+          <DialogTitle>Customer Login</DialogTitle>
           <DialogDescription>
-            وارد حساب کاربری خود شوید یا حساب جدید ایجاد کنید
+            Sign in to your account or create a new one
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">ورود</TabsTrigger>
-            <TabsTrigger value="register">ثبت نام</TabsTrigger>
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="register">Register</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login" className="space-y-4">
@@ -174,10 +174,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
-                        ایمیل
+                        Email
                       </FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="ایمیل خود را وارد کنید" {...field} />
+                        <Input type="email" placeholder="Enter your email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -190,17 +190,17 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <Lock className="h-4 w-4" />
-                        رمز عبور
+                        Password
                       </FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="رمز عبور خود را وارد کنید" {...field} />
+                        <Input type="password" placeholder="Enter your password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "در حال ورود..." : "ورود"}
+                  {isLoading ? "Logging in..." : "Login"}
                 </Button>
                 
                 <div className="text-center mt-4">
@@ -212,7 +212,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800 underline"
                   >
-                    رمز عبور خود را فراموش کرده‌اید؟
+                    Forgot your password?
                   </button>
                 </div>
               </form>
@@ -230,10 +230,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <User className="h-4 w-4" />
-                          نام
+                          First Name
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="نام" {...field} />
+                          <Input placeholder="First Name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -244,9 +244,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>نام خانوادگی</FormLabel>
+                        <FormLabel>Last Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="نام خانوادگی" {...field} />
+                          <Input placeholder="Last Name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -261,10 +261,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
-                        ایمیل
+                        Email
                       </FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="ایمیل" {...field} />
+                        <Input type="email" placeholder="Email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -279,10 +279,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Lock className="h-4 w-4" />
-                          رمز عبور
+                          Password
                         </FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="رمز عبور" {...field} />
+                          <Input type="password" placeholder="Password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -293,9 +293,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>تکرار رمز عبور</FormLabel>
+                        <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="تکرار رمز عبور" {...field} />
+                          <Input type="password" placeholder="Confirm Password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -311,10 +311,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
-                          تلفن
+                          Phone
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="تلفن (اختیاری)" {...field} />
+                          <Input placeholder="Phone (optional)" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -327,10 +327,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Building className="h-4 w-4" />
-                          شرکت
+                          Company
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="شرکت (اختیاری)" {...field} />
+                          <Input placeholder="Company (optional)" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -344,9 +344,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>کشور</FormLabel>
+                        <FormLabel>Country</FormLabel>
                         <FormControl>
-                          <Input placeholder="کشور (اختیاری)" {...field} />
+                          <Input placeholder="Country (optional)" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -357,9 +357,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>شهر</FormLabel>
+                        <FormLabel>City</FormLabel>
                         <FormControl>
-                          <Input placeholder="شهر (اختیاری)" {...field} />
+                          <Input placeholder="City (optional)" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -385,7 +385,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                 />
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "در حال ثبت نام..." : "ثبت نام"}
+                  {isLoading ? "Registering..." : "Register"}
                 </Button>
               </form>
             </Form>
