@@ -418,10 +418,6 @@ export default function AdminPage() {
 
         {/* Management Actions Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 h-12 text-sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Product
-          </Button>
           
           <Button 
             onClick={() => syncProductsMutation.mutate()}
@@ -633,10 +629,6 @@ export default function AdminPage() {
                   Clear Search
                 </Button>
               )}
-              <Button onClick={openCreateDialog}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Product
-              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
