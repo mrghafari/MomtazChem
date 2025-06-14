@@ -120,8 +120,18 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Product Inquiry Dashboard</h1>
-          <p className="text-gray-600">Track and manage all your product inquiries in one place</p>
+          <div className="mb-4">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Good day, Administrator!
+            </h1>
+            <p className="text-lg text-blue-600 mt-1">
+              Your inquiry management center is ready
+            </p>
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-700">Product Inquiry Dashboard</h2>
+            <p className="text-gray-600">Track and manage all your product inquiries in one place</p>
+          </div>
         </div>
 
         {/* Stats Cards */}

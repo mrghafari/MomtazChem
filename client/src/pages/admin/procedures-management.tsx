@@ -628,19 +628,32 @@ export default function ProceduresManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setLocation('/admin')}
-        >
-          <ArrowLeft className="h-4 w-4 ml-2" />
-          بازگشت به داشبورد
-        </Button>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <BookOpen className="h-6 w-6" />
-          مدیریت دستورالعمل‌ها و روش‌ها
-        </h1>
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLocation('/admin')}
+          >
+            <ArrowLeft className="h-4 w-4 ml-2" />
+            بازگشت به داشبورد
+          </Button>
+        </div>
+        
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Hello, Administrator!
+          </h1>
+          <p className="text-lg text-blue-600 mb-4">
+            Your procedures management center is ready for action
+          </p>
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-6 w-6 text-gray-600" />
+            <h2 className="text-xl font-semibold text-gray-700">
+              مدیریت دستورالعمل‌ها و روش‌ها
+            </h2>
+          </div>
+        </div>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>

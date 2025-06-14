@@ -371,8 +371,18 @@ export default function AdminPage() {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Product Management</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Manage products across four categories</p>
+            <div className="mb-4">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Welcome back, {user?.username || 'Admin'}!
+              </h1>
+              <p className="text-lg text-blue-600 dark:text-blue-400 mt-1">
+                Ready to manage your chemical products today
+              </p>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">Product Management</h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Manage products across four categories</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-gray-600">

@@ -121,8 +121,18 @@ const CustomerProfile = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-8" dir="rtl">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">پروفایل مشتری</h1>
-            <p className="text-gray-600">مدیریت حساب کاربری و مشاهده تاریخچه سفارشات</p>
+            <div className="mb-4">
+              <h1 className="text-3xl font-bold text-gray-900">
+                خوش آمدید، {customer.firstName} {customer.lastName}!
+              </h1>
+              <p className="text-lg text-blue-600 mt-1">
+                داشبورد شخصی شما آماده است
+              </p>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700">پروفایل مشتری</h2>
+              <p className="text-gray-600">مدیریت حساب کاربری و مشاهده تاریخچه سفارشات</p>
+            </div>
           </div>
           <div className="flex gap-3">
             <Button

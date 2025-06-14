@@ -213,8 +213,18 @@ export default function CRM() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">سیستم CRM</h1>
-          <p className="text-muted-foreground">مدیریت حرفه‌ای مشتریان فروشگاه</p>
+          <div className="mb-4">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Welcome to CRM Dashboard!
+            </h1>
+            <p className="text-lg text-blue-600 mt-1">
+              Your customer management center is ready
+            </p>
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-700">سیستم CRM</h2>
+            <p className="text-muted-foreground">مدیریت حرفه‌ای مشتریان فروشگاه</p>
+          </div>
         </div>
         <Button onClick={() => setIsNewCustomerDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
