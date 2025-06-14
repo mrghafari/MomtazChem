@@ -59,7 +59,7 @@ export default function SpecialistsPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: specialists = [], isLoading, refetch } = useQuery({
+  const { data: specialists = [], isLoading, refetch } = useQuery<Specialist[]>({
     queryKey: ['/api/admin/specialists'],
   });
 
@@ -175,7 +175,7 @@ export default function SpecialistsPage() {
       phone: specialist.phone || "",
       department: specialist.department,
       status: specialist.status as "online" | "busy" | "away" | "offline",
-      expertise: specialist.expertise.join("، "),
+      expertise: (specialist.expertise || []).join("، "),
     });
     setIsEditDialogOpen(true);
   };
@@ -359,7 +359,7 @@ export default function SpecialistsPage() {
       </div>
 
       <div className="grid gap-6">
-        {specialists.map((specialist: Specialist) => (
+        {(specialists as Specialist[]).map((specialist: Specialist) => (
           <Card key={specialist.id}>
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
@@ -393,7 +393,7 @@ export default function SpecialistsPage() {
                   </div>
                   
                   <div className="flex flex-wrap gap-1">
-                    {specialist.expertise.map((skill, index) => (
+                    {(specialist.expertise || []).map((skill, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {skill}
                       </Badge>
@@ -441,7 +441,7 @@ export default function SpecialistsPage() {
           </Card>
         ))}
         
-        {specialists.length === 0 && (
+        {(specialists as Specialist[]).length === 0 && (
           <Card>
             <CardContent className="p-8 text-center">
               <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />

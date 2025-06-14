@@ -187,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ 
           success: true, 
           message: "Login successful",
-          user: { id: user.id, username: user.username, email: user.email, role: user.role }
+          user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
         });
       });
     } catch (error) {
@@ -238,14 +238,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username,
         email: username,
         passwordHash,
-        role: 'admin',
+        roleId: 1, // Default admin role ID
         isActive: true,
       });
 
       res.json({ 
         success: true, 
         message: "Admin account created successfully",
-        user: { id: newUser.id, username: newUser.username, email: newUser.email, role: newUser.role }
+        user: { id: newUser.id, username: newUser.username, email: newUser.email, roleId: newUser.roleId }
       });
     } catch (error) {
       res.status(500).json({ 
