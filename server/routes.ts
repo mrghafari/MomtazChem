@@ -2304,6 +2304,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset admin password (development only)
+  app.post("/api/admin/reset-password-dev", async (req, res) => {
+    try {
+      const { username, newPassword } = req.body;
+      
+      if (!username || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Username and new password required"
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(
+        'UPDATE users SET password_hash = $1 WHERE username = $2 RETURNING id, username',
+        [hashedPassword, username]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Password updated successfully"
+      });
+
+    } catch (error) {
+      console.error("Error resetting admin password:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
   // Customer password reset - Request reset
   app.post("/api/customers/forgot-password", async (req, res) => {
     try {
