@@ -151,6 +151,127 @@ export const insertInquiryResponseSchema = createInsertSchema(inquiryResponses).
 export type InsertInquiryResponse = z.infer<typeof insertInquiryResponseSchema>;
 export type InquiryResponse = typeof inquiryResponses.$inferSelect;
 
+// =============================================================================
+// CRM CUSTOMERS - Enhanced customer management for shop purchases
+// =============================================================================
+
+// CRM Customers table - for shop customers with advanced tracking
+export const crmCustomers = pgTable("crm_customers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  company: text("company"),
+  phone: text("phone"),
+  alternatePhone: text("alternate_phone"),
+  country: text("country"),
+  state: text("state"),
+  city: text("city"),
+  address: text("address"),
+  postalCode: text("postal_code"),
+  
+  // Business information
+  industry: text("industry"),
+  businessType: text("business_type"), // manufacturer, distributor, retailer, end_user
+  companySize: text("company_size"), // small, medium, large, enterprise
+  annualRevenue: text("annual_revenue"), // <1M, 1M-10M, 10M-100M, 100M+
+  
+  // Customer classification
+  customerType: text("customer_type").notNull().default("retail"), // retail, wholesale, b2b, distributor
+  customerStatus: text("customer_status").notNull().default("active"), // active, inactive, vip, blacklisted
+  customerSource: text("customer_source").notNull().default("website"), // website, referral, marketing, cold_call, trade_show
+  assignedSalesRep: text("assigned_sales_rep"),
+  
+  // Purchase behavior analytics
+  totalOrdersCount: integer("total_orders_count").default(0),
+  totalSpent: decimal("total_spent", { precision: 12, scale: 2 }).default("0"),
+  averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).default("0"),
+  lastOrderDate: timestamp("last_order_date"),
+  firstOrderDate: timestamp("first_order_date"),
+  
+  // Engagement metrics
+  lastContactDate: timestamp("last_contact_date"),
+  nextFollowUpDate: timestamp("next_follow_up_date"),
+  communicationPreference: text("communication_preference").default("email"), // email, phone, sms, whatsapp
+  preferredLanguage: text("preferred_language").default("en"),
+  
+  // Marketing and preferences
+  marketingConsent: boolean("marketing_consent").default(false),
+  productInterests: json("product_interests"), // Array of product categories
+  priceRange: text("price_range"), // budget, standard, premium
+  orderFrequency: text("order_frequency"), // weekly, monthly, quarterly, yearly
+  
+  // Credit and payment
+  creditLimit: decimal("credit_limit", { precision: 10, scale: 2 }),
+  paymentTerms: text("payment_terms").default("immediate"), // immediate, net_30, net_60, net_90
+  preferredPaymentMethod: text("preferred_payment_method"),
+  creditStatus: text("credit_status").default("good"), // good, fair, poor, blocked
+  
+  // Internal notes and tags
+  tags: json("tags"), // Array of custom tags
+  internalNotes: text("internal_notes"),
+  publicNotes: text("public_notes"), // Notes visible to customer
+  
+  // System fields
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdBy: text("created_by").default("system"), // auto, admin_user_id, import
+});
+
+export const insertCrmCustomerSchema = createInsertSchema(crmCustomers).omit({
+  id: true,
+  totalOrdersCount: true,
+  totalSpent: true,
+  averageOrderValue: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCrmCustomer = z.infer<typeof insertCrmCustomerSchema>;
+export type CrmCustomer = typeof crmCustomers.$inferSelect;
+
+// Customer activities log
+export const customerActivities = pgTable("customer_activities", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull(),
+  activityType: text("activity_type").notNull(), // order_placed, payment_received, inquiry_submitted, email_sent, call_made, meeting_held
+  activityData: json("activity_data"), // Flexible data storage for activity details
+  description: text("description").notNull(),
+  performedBy: text("performed_by"), // system, admin_user_id
+  relatedOrderId: integer("related_order_id"),
+  relatedInquiryId: integer("related_inquiry_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCustomerActivitySchema = createInsertSchema(customerActivities).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCustomerActivity = z.infer<typeof insertCustomerActivitySchema>;
+export type CustomerActivity = typeof customerActivities.$inferSelect;
+
+// Customer segments for marketing
+export const customerSegments = pgTable("customer_segments", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  criteria: json("criteria"), // Segmentation rules
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCustomerSegmentSchema = createInsertSchema(customerSegments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCustomerSegment = z.infer<typeof insertCustomerSegmentSchema>;
+export type CustomerSegment = typeof customerSegments.$inferSelect;
+
 // Email templates table for customizable support responses
 export const emailTemplates = pgTable("email_templates", {
   id: serial("id").primaryKey(),
