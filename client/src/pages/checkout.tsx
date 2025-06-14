@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -60,8 +60,15 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [currentStep, setCurrentStep] = useState(1);
   const [isOrderComplete, setIsOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  // Get customer information if logged in
+  const { data: customerData } = useQuery<any>({
+    queryKey: ["/api/customers/me"],
+    retry: false,
+  });
 
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutFormSchema),
@@ -83,6 +90,33 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       notes: "",
     },
   });
+
+  // Auto-fill form with customer data when available
+  useEffect(() => {
+    if (customerData?.success && customerData.customer) {
+      const customer = customerData.customer;
+      setIsLoggedIn(true);
+      
+      // Fill form with customer data from CRM
+      form.setValue("email", customer.email || "");
+      form.setValue("firstName", customer.firstName || "");
+      form.setValue("lastName", customer.lastName || "");
+      form.setValue("phone", customer.phone || "");
+      form.setValue("company", customer.company || "");
+      
+      if (customer.address) {
+        form.setValue("billingAddress1", customer.address || "");
+      }
+      if (customer.city) {
+        form.setValue("billingCity", customer.city || "");
+      }
+      if (customer.country) {
+        form.setValue("billingCountry", customer.country || "");
+      }
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [customerData, form]);
 
   // Calculate order totals
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {
@@ -221,6 +255,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5" />
                       Customer Information
+                      {isLoggedIn && (
+                        <Badge variant="secondary" className="ml-2">
+                          Auto-filled from account
+                        </Badge>
+                      )}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
