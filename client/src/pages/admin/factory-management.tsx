@@ -27,7 +27,9 @@ import {
   Settings,
   TrendingUp,
   Users,
-  Target
+  Target,
+  MessageSquare,
+  ShoppingCart
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -158,9 +160,14 @@ export default function FactoryManagement() {
     queryKey: ["/api/admin/factory/quality"],
   });
 
-  // Fetch products for dropdown
-  const { data: products = [] } = useQuery<any[]>({
+  // Fetch products for dropdown and product management
+  const { data: products = [], isLoading: productsLoading, refetch: refetchProducts } = useQuery<any[]>({
     queryKey: ["/api/products"],
+  });
+
+  // Fetch inquiries
+  const { data: inquiries = [], isLoading: inquiriesLoading, refetch: refetchInquiries } = useQuery<any[]>({
+    queryKey: ["/api/inquiries"],
   });
 
   const getStatusColor = (status: string) => {
@@ -204,19 +211,19 @@ export default function FactoryManagement() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'planned':
-        return 'برنامه‌ریزی شده';
+        return 'Planned';
       case 'in_progress':
-        return 'در حال تولید';
+        return 'In Progress';
       case 'completed':
-        return 'تکمیل شده';
+        return 'Completed';
       case 'cancelled':
-        return 'لغو شده';
+        return 'Cancelled';
       case 'active':
-        return 'فعال';
+        return 'Active';
       case 'maintenance':
-        return 'تعمیرات';
+        return 'Maintenance';
       case 'inactive':
-        return 'غیرفعال';
+        return 'Inactive';
       default:
         return status;
     }
@@ -339,7 +346,7 @@ export default function FactoryManagement() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">دسته‌های در حال تولید</p>
+                <p className="text-sm text-muted-foreground">Production Batches</p>
                 <p className="text-2xl font-bold">
                   {batches.filter(b => b.status === 'in_progress').length}
                 </p>
@@ -353,7 +360,7 @@ export default function FactoryManagement() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">خطوط تولید فعال</p>
+                <p className="text-sm text-muted-foreground">Active Lines</p>
                 <p className="text-2xl font-bold">
                   {lines.filter(l => l.status === 'active').length}
                 </p>
@@ -367,11 +374,9 @@ export default function FactoryManagement() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">تولید امروز</p>
+                <p className="text-sm text-muted-foreground">Total Products</p>
                 <p className="text-2xl font-bold">
-                  {batches.filter(b => 
-                    new Date(b.startDate).toDateString() === new Date().toDateString()
-                  ).length}
+                  {products.length}
                 </p>
               </div>
               <Package className="h-8 w-8 text-purple-600" />
@@ -383,7 +388,7 @@ export default function FactoryManagement() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">میانگین کیفیت</p>
+                <p className="text-sm text-muted-foreground">Quality Average</p>
                 <p className="text-2xl font-bold">
                   {qualityChecks.length > 0 
                     ? Math.round(qualityChecks.reduce((acc, q) => acc + q.score, 0) / qualityChecks.length)
@@ -398,10 +403,12 @@ export default function FactoryManagement() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="production">تولیدات</TabsTrigger>
-          <TabsTrigger value="lines">خطوط تولید</TabsTrigger>
-          <TabsTrigger value="quality">کنترل کیفیت</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="production">Production Batches</TabsTrigger>
+          <TabsTrigger value="lines">Production Lines</TabsTrigger>
+          <TabsTrigger value="quality">Quality Control</TabsTrigger>
+          <TabsTrigger value="products">Product Management</TabsTrigger>
+          <TabsTrigger value="inquiries">Inquiry Management</TabsTrigger>
         </TabsList>
 
         {/* Production Batches Tab */}
@@ -411,28 +418,28 @@ export default function FactoryManagement() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  دسته‌های تولید
+                  Production Batches
                 </CardTitle>
                 <Button onClick={() => openCreateDialog('batch')}>
                   <Plus className="h-4 w-4 mr-2" />
-                  دسته جدید
+                  New Batch
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {batchesLoading ? (
-                <div className="text-center py-8">در حال بارگذاری...</div>
+                <div className="text-center py-8">Loading...</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>شماره دسته</TableHead>
-                      <TableHead>محصول</TableHead>
-                      <TableHead>مقدار برنامه‌ریزی</TableHead>
-                      <TableHead>مقدار تولید</TableHead>
-                      <TableHead>وضعیت</TableHead>
-                      <TableHead>تاریخ شروع</TableHead>
-                      <TableHead>اپراتور</TableHead>
+                      <TableHead>Batch Number</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Planned Quantity</TableHead>
+                      <TableHead>Actual Quantity</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Start Date</TableHead>
+                      <TableHead>Operator</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -449,7 +456,7 @@ export default function FactoryManagement() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {new Date(batch.startDate).toLocaleDateString('fa-IR')}
+                          {new Date(batch.startDate).toLocaleDateString('en-US')}
                         </TableCell>
                         <TableCell>{batch.operatorName || '-'}</TableCell>
                       </TableRow>
@@ -468,17 +475,17 @@ export default function FactoryManagement() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Factory className="h-5 w-5" />
-                  خطوط تولید
+                  Production Lines
                 </CardTitle>
                 <Button onClick={() => openCreateDialog('line')}>
                   <Plus className="h-4 w-4 mr-2" />
-                  خط جدید
+                  New Line
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {linesLoading ? (
-                <div className="text-center py-8">در حال بارگذاری...</div>
+                <div className="text-center py-8">Loading...</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {lines.map((line) => (
@@ -496,16 +503,16 @@ export default function FactoryManagement() {
                         <div className="space-y-2">
                           <p className="text-sm text-muted-foreground">{line.description}</p>
                           <div className="flex justify-between text-sm">
-                            <span>ظرفیت:</span>
+                            <span>Capacity:</span>
                             <span>{line.capacity}</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span>بازدهی:</span>
+                            <span>Efficiency:</span>
                             <span>{line.efficiency}%</span>
                           </div>
                           {line.currentBatch && (
                             <div className="flex justify-between text-sm">
-                              <span>دسته فعلی:</span>
+                              <span>Current Batch:</span>
                               <span>{line.currentBatch}</span>
                             </div>
                           )}
@@ -526,27 +533,27 @@ export default function FactoryManagement() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
-                  کنترل کیفیت
+                  Quality Control
                 </CardTitle>
                 <Button onClick={() => openCreateDialog('quality')}>
                   <Plus className="h-4 w-4 mr-2" />
-                  بازرسی جدید
+                  New Inspection
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {qualityLoading ? (
-                <div className="text-center py-8">در حال بارگذاری...</div>
+                <div className="text-center py-8">Loading...</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>شماره دسته</TableHead>
-                      <TableHead>محصول</TableHead>
-                      <TableHead>بازرس</TableHead>
-                      <TableHead>امتیاز</TableHead>
-                      <TableHead>نتیجه</TableHead>
-                      <TableHead>تاریخ بازرسی</TableHead>
+                      <TableHead>Batch Number</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Inspector</TableHead>
+                      <TableHead>Score</TableHead>
+                      <TableHead>Result</TableHead>
+                      <TableHead>Inspection Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -558,11 +565,140 @@ export default function FactoryManagement() {
                         <TableCell>{check.score}%</TableCell>
                         <TableCell>
                           <Badge className={check.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                            {check.passed ? 'قبول' : 'رد'}
+                            {check.passed ? 'Pass' : 'Fail'}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {new Date(check.checkDate).toLocaleDateString('fa-IR')}
+                          {new Date(check.checkDate).toLocaleDateString('en-US')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Product Management Tab */}
+        <TabsContent value="products" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Product Management
+                </CardTitle>
+                <Button onClick={() => setLocation('/admin')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Product
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {productsLoading ? (
+                <div className="text-center py-8">Loading...</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {products.map((product: any) => (
+                      <TableRow key={product.id}>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>{product.category}</TableCell>
+                        <TableCell>${product.price}</TableCell>
+                        <TableCell>{product.stock || 'N/A'}</TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-100 text-green-800">
+                            Active
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm" className="text-red-600">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Inquiry Management Tab */}
+        <TabsContent value="inquiries" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Inquiry Management
+                </CardTitle>
+                <Button onClick={() => setLocation('/admin/inquiries')}>
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  View All Inquiries
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {inquiriesLoading ? (
+                <div className="text-center py-8">Loading...</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Inquiry #</TableHead>
+                      <TableHead>Company</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {inquiries.slice(0, 10).map((inquiry: any) => (
+                      <TableRow key={inquiry.id}>
+                        <TableCell className="font-medium">{inquiry.inquiryNumber}</TableCell>
+                        <TableCell>{inquiry.companyName}</TableCell>
+                        <TableCell>{inquiry.contactName}</TableCell>
+                        <TableCell className="max-w-xs truncate">{inquiry.subject}</TableCell>
+                        <TableCell>
+                          <Badge className={
+                            inquiry.status === 'open' ? 'bg-blue-100 text-blue-800' :
+                            inquiry.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                          }>
+                            {inquiry.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(inquiry.createdAt).toLocaleDateString('en-US')}
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setLocation(`/admin/inquiries/${inquiry.id}`)}
+                          >
+                            View
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -579,9 +715,9 @@ export default function FactoryManagement() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {dialogType === 'batch' && 'افزودن دسته تولید'}
-              {dialogType === 'line' && 'افزودن خط تولید'}
-              {dialogType === 'quality' && 'افزودن بازرسی کیفیت'}
+              {dialogType === 'batch' && 'Add Production Batch'}
+              {dialogType === 'line' && 'Add Production Line'}
+              {dialogType === 'quality' && 'Add Quality Inspection'}
             </DialogTitle>
           </DialogHeader>
           {dialogType === 'batch' && (
