@@ -2304,6 +2304,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer password reset - Request reset
+  app.post("/api/customers/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: "ایمیل الزامی است"
+        });
+      }
+
+      // Check if customer exists
+      const customer = await customerStorage.getCustomerByEmail(email);
+      if (!customer) {
+        // Don't reveal if email exists or not for security
+        return res.json({
+          success: true,
+          message: "اگر ایمیل معتبر باشد، لینک بازیابی رمز عبور ارسال شد"
+        });
+      }
+
+      // Generate reset token
+      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const expiresAt = new Date(Date.now() + 3600000); // 1 hour
+
+      const { pool } = await import('./db');
+      
+      // Clear any existing tokens for this email
+      await pool.query('DELETE FROM password_resets WHERE email = $1', [email]);
+      
+      // Insert new reset token
+      await pool.query(
+        'INSERT INTO password_resets (email, token, expires_at, used, created_at) VALUES ($1, $2, $3, false, NOW())',
+        [email, token, expiresAt]
+      );
+
+      // In a real app, you would send an email here
+      // For now, we'll log it for development
+      console.log(`Password reset token for ${email}: ${token}`);
+      console.log(`Reset link: ${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${token}`);
+
+      res.json({
+        success: true,
+        message: "لینک بازیابی رمز عبور به ایمیل شما ارسال شد",
+        // Remove this in production:
+        resetLink: `/reset-password?token=${token}`
+      });
+
+    } catch (error) {
+      console.error("Error in forgot password:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در درخواست بازیابی رمز عبور"
+      });
+    }
+  });
+
+  // Customer password reset - Reset with token
+  app.post("/api/customers/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "توکن و رمز عبور جدید الزامی است"
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "رمز عبور باید حداقل 6 کاراکتر باشد"
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Check if token is valid and not expired
+      const tokenResult = await pool.query(
+        'SELECT email FROM password_resets WHERE token = $1 AND expires_at > NOW() AND used = false',
+        [token]
+      );
+
+      if (tokenResult.rows.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "توکن نامعتبر یا منقضی شده"
+        });
+      }
+
+      const email = tokenResult.rows[0].email;
+      
+      // Get customer
+      const customer = await customerStorage.getCustomerByEmail(email);
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          message: "مشتری یافت نشد"
+        });
+      }
+
+      // Update password
+      await customerStorage.updateCustomerPassword(customer.id, newPassword);
+      
+      // Mark token as used
+      await pool.query('UPDATE password_resets SET used = true WHERE token = $1', [token]);
+
+      res.json({
+        success: true,
+        message: "رمز عبور با موفقیت تغییر کرد"
+      });
+
+    } catch (error) {
+      console.error("Error in reset password:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تغییر رمز عبور"
+      });
+    }
+  });
+
   // Get procedure documents
   app.get("/api/procedures/:procedureId/documents", requireAuth, async (req, res) => {
     try {

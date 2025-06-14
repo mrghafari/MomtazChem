@@ -27,6 +27,8 @@ import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
 import EmailProgressPage from "@/pages/admin/email-progress";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
+import CustomerForgotPassword from "@/pages/customer-forgot-password";
+import CustomerResetPassword from "@/pages/customer-reset-password";
 import CRMPage from "@/pages/crm";
 import CustomerProfile from "@/pages/customer-profile";
 import SalesAnalytics from "@/pages/sales-analytics";
@@ -68,6 +70,8 @@ function Router() {
           <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />
           <Route path="/reset-password" component={ResetPassword} />
+          <Route path="/customer/forgot-password" component={CustomerForgotPassword} />
+          <Route path="/customer/reset-password" component={CustomerResetPassword} />
           <Route path="/crm" component={CRMPage} />
           <Route path="/customer/profile" component={CustomerProfile} />
           <Route path="/analytics/sales" component={SalesAnalytics} />

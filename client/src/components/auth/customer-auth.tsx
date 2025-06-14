@@ -160,8 +160,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
 
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="login">ورود</TabsTrigger>
+            <TabsTrigger value="register">ثبت نام</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login" className="space-y-4">
@@ -200,8 +200,21 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? "در حال ورود..." : "ورود"}
                 </Button>
+                
+                <div className="text-center mt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenChange(false);
+                      window.location.href = "/customer/forgot-password";
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  >
+                    رمز عبور خود را فراموش کرده‌اید؟
+                  </button>
+                </div>
               </form>
             </Form>
           </TabsContent>
@@ -372,7 +385,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                 />
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Registering..." : "Register"}
+                  {isLoading ? "در حال ثبت نام..." : "ثبت نام"}
                 </Button>
               </form>
             </Form>
