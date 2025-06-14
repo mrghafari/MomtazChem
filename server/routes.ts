@@ -1849,6 +1849,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create safety protocol
+  app.post("/api/procedures/safety-protocols", requireAuth, async (req, res) => {
+    try {
+      const { title, category, description, severityLevel, procedures, firstAidSteps, evacuationPlan, requiredPpe } = req.body;
+      const userId = (req.session as any)?.adminId;
+      
+      // Process PPE array
+      const ppeArray = Array.isArray(requiredPpe) ? requiredPpe : 
+                      (requiredPpe ? requiredPpe.split(',').map((ppe: string) => ppe.trim()).filter((ppe: string) => ppe.length > 0) : []);
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO safety_protocols (title, category, description, severity_level, procedures, 
+                                     first_aid_steps, evacuation_plan, required_ppe, last_updated_by)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id, title, category, severity_level, is_mandatory, created_at
+      `, [title, category, description, severityLevel, procedures, firstAidSteps, evacuationPlan, ppeArray, userId]);
+
+      res.json({
+        success: true,
+        safetyProtocol: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating safety protocol:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Update safety protocol
+  app.put("/api/procedures/safety-protocols/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { title, category, description, severityLevel, procedures, firstAidSteps, evacuationPlan, requiredPpe } = req.body;
+      const userId = (req.session as any)?.adminId;
+      
+      // Process PPE array
+      const ppeArray = Array.isArray(requiredPpe) ? requiredPpe : 
+                      (requiredPpe ? requiredPpe.split(',').map((ppe: string) => ppe.trim()).filter((ppe: string) => ppe.length > 0) : []);
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE safety_protocols SET
+          title = $1, category = $2, description = $3, severity_level = $4,
+          procedures = $5, first_aid_steps = $6, evacuation_plan = $7, 
+          required_ppe = $8, last_updated_by = $9, updated_at = NOW()
+        WHERE id = $10
+        RETURNING id, title, category, severity_level, updated_at
+      `, [title, category, description, severityLevel, procedures, firstAidSteps, evacuationPlan, ppeArray, userId, id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Safety protocol not found" });
+      }
+
+      res.json({
+        success: true,
+        safetyProtocol: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating safety protocol:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Update procedure category
+  app.put("/api/procedures/categories/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, description, colorCode, displayOrder } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE procedure_categories SET
+          name = $1, description = $2, color_code = $3, display_order = $4, updated_at = NOW()
+        WHERE id = $5
+        RETURNING id, name, description, color_code, display_order, is_active, updated_at
+      `, [name, description, colorCode, displayOrder, id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Category not found" });
+      }
+
+      res.json({
+        success: true,
+        category: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error updating procedure category:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "Category name already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
   // Get procedure documents
   app.get("/api/procedures/:procedureId/documents", requireAuth, async (req, res) => {
     try {

@@ -574,6 +574,58 @@ export default function ProceduresManagement() {
     }
   };
 
+  const onSubmitSafety = async (data: SafetyProtocolForm) => {
+    try {
+      // Process required PPE
+      const ppeArray = data.requiredPpe ? data.requiredPpe.split(',').map(item => item.trim()).filter(item => item.length > 0) : [];
+      
+      const requestData = {
+        ...data,
+        requiredPpe: ppeArray
+      };
+
+      let response;
+      if (editingItem) {
+        // Update existing safety protocol
+        response = await fetch(`/api/procedures/safety-protocols/${editingItem.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(requestData)
+        });
+      } else {
+        // Create new safety protocol
+        response = await fetch('/api/procedures/safety-protocols', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(requestData)
+        });
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "موفقیت",
+          description: editingItem ? "پروتکل ایمنی با موفقیت به‌روزرسانی شد" : "پروتکل ایمنی جدید ایجاد شد",
+        });
+        
+        closeDialog();
+        queryClient.invalidateQueries({ queryKey: ["/api/procedures/safety-protocols"] });
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('Error submitting safety protocol:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "مشکلی در ذخیره پروتکل ایمنی رخ داده است",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -1433,7 +1485,7 @@ export default function ProceduresManagement() {
 
           {dialogType === 'safety' && (
             <Form {...safetyForm}>
-              <form className="space-y-4">
+              <form onSubmit={safetyForm.handleSubmit(onSubmitSafety)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={safetyForm.control}
