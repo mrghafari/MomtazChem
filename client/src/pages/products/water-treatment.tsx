@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
 import LiveChat from "@/components/ui/live-chat";
 import type { ShowcaseProduct } from "@shared/showcase-schema";
+import waterTreatmentBg from "@assets/download_1749877891276.jpeg";
 
 const WaterTreatment = () => {
   // Fetch water treatment products from database
@@ -65,7 +66,7 @@ const WaterTreatment = () => {
       <section 
         className="relative py-20 bg-cover bg-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(46, 125, 50, 0.8), rgba(46, 125, 50, 0.6)), url('/attached_assets/download_1749877891276.jpeg')`
+          backgroundImage: `linear-gradient(rgba(46, 125, 50, 0.8), rgba(46, 125, 50, 0.6)), url(${waterTreatmentBg})`
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
