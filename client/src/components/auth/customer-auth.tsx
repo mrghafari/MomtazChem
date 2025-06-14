@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { User, Mail, Lock, Phone, MapPin, Building } from "lucide-react";
@@ -153,6 +153,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>ورود به حساب کاربری</DialogTitle>
+          <DialogDescription>
+            وارد حساب کاربری خود شوید یا حساب جدید ایجاد کنید
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="login" className="w-full">
