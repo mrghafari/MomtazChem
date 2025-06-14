@@ -79,25 +79,25 @@ interface QualityCheck {
 }
 
 const productionBatchSchema = z.object({
-  batchNumber: z.string().min(3, "شماره دسته باید حداقل 3 کاراکتر باشد"),
-  productId: z.string().min(1, "محصول را انتخاب کنید"),
-  plannedQuantity: z.string().min(1, "مقدار برنامه‌ریزی شده را وارد کنید"),
-  startDate: z.string().min(1, "تاریخ شروع را وارد کنید"),
+  batchNumber: z.string().min(3, "Batch number must be at least 3 characters"),
+  productId: z.string().min(1, "Please select a product"),
+  plannedQuantity: z.string().min(1, "Please enter planned quantity"),
+  startDate: z.string().min(1, "Please enter start date"),
   operatorName: z.string().optional(),
   notes: z.string().optional(),
 });
 
 const productionLineSchema = z.object({
-  name: z.string().min(3, "نام خط تولید باید حداقل 3 کاراکتر باشد"),
+  name: z.string().min(3, "Production line name must be at least 3 characters"),
   description: z.string().optional(),
-  capacity: z.string().min(1, "ظرفیت را وارد کنید"),
-  status: z.string().min(1, "وضعیت را انتخاب کنید"),
+  capacity: z.string().min(1, "Please enter capacity"),
+  status: z.string().min(1, "Please select status"),
 });
 
 const qualityCheckSchema = z.object({
-  batchId: z.string().min(1, "دسته تولید را انتخاب کنید"),
-  inspector: z.string().min(2, "نام بازرس را وارد کنید"),
-  score: z.string().min(1, "امتیاز کیفیت را وارد کنید"),
+  batchId: z.string().min(1, "Please select production batch"),
+  inspector: z.string().min(2, "Please enter inspector name"),
+  score: z.string().min(1, "Please enter quality score"),
   notes: z.string().optional(),
 });
 
@@ -728,7 +728,7 @@ export default function FactoryManagement() {
                   name="batchNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>شماره دسته</FormLabel>
+                      <FormLabel>Batch Number</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -741,11 +741,11 @@ export default function FactoryManagement() {
                   name="productId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>محصول</FormLabel>
+                      <FormLabel>Product</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="محصول را انتخاب کنید" />
+                            <SelectValue placeholder="Select a product" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -765,7 +765,7 @@ export default function FactoryManagement() {
                   name="plannedQuantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>مقدار برنامه‌ریزی شده</FormLabel>
+                      <FormLabel>Planned Quantity</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -778,7 +778,7 @@ export default function FactoryManagement() {
                   name="startDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>تاریخ شروع</FormLabel>
+                      <FormLabel>Start Date</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -791,7 +791,7 @@ export default function FactoryManagement() {
                   name="operatorName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>نام اپراتور</FormLabel>
+                      <FormLabel>Operator Name</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -804,7 +804,7 @@ export default function FactoryManagement() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>یادداشت</FormLabel>
+                      <FormLabel>Notes</FormLabel>
                       <FormControl>
                         <Textarea {...field} />
                       </FormControl>
@@ -815,10 +815,10 @@ export default function FactoryManagement() {
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    انصراف
+                    Cancel
                   </Button>
                   <Button type="submit">
-                    ذخیره
+                    Save
                   </Button>
                 </div>
               </form>
@@ -833,7 +833,7 @@ export default function FactoryManagement() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>نام خط تولید</FormLabel>
+                      <FormLabel>Production Line Name</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -846,7 +846,7 @@ export default function FactoryManagement() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>توضیحات</FormLabel>
+                      <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Textarea {...field} />
                       </FormControl>
@@ -859,7 +859,7 @@ export default function FactoryManagement() {
                   name="capacity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ظرفیت</FormLabel>
+                      <FormLabel>Capacity</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -872,17 +872,17 @@ export default function FactoryManagement() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>وضعیت</FormLabel>
+                      <FormLabel>Status</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="وضعیت را انتخاب کنید" />
+                            <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="active">فعال</SelectItem>
-                          <SelectItem value="maintenance">تعمیرات</SelectItem>
-                          <SelectItem value="inactive">غیرفعال</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="maintenance">Maintenance</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -892,10 +892,10 @@ export default function FactoryManagement() {
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    انصراف
+                    Cancel
                   </Button>
                   <Button type="submit">
-                    ذخیره
+                    Save
                   </Button>
                 </div>
               </form>
@@ -910,11 +910,11 @@ export default function FactoryManagement() {
                   name="batchId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>دسته تولید</FormLabel>
+                      <FormLabel>Production Batch</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="دسته تولید را انتخاب کنید" />
+                            <SelectValue placeholder="Select production batch" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -934,7 +934,7 @@ export default function FactoryManagement() {
                   name="inspector"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>نام بازرس</FormLabel>
+                      <FormLabel>Inspector Name</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -947,7 +947,7 @@ export default function FactoryManagement() {
                   name="score"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>امتیاز کیفیت (0-100)</FormLabel>
+                      <FormLabel>Quality Score (0-100)</FormLabel>
                       <FormControl>
                         <Input type="number" min="0" max="100" {...field} />
                       </FormControl>
@@ -960,7 +960,7 @@ export default function FactoryManagement() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>یادداشت</FormLabel>
+                      <FormLabel>Notes</FormLabel>
                       <FormControl>
                         <Textarea {...field} />
                       </FormControl>
@@ -971,10 +971,10 @@ export default function FactoryManagement() {
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    انصراف
+                    Cancel
                   </Button>
                   <Button type="submit">
-                    ذخیره
+                    Save
                   </Button>
                 </div>
               </form>
