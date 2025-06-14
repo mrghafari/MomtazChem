@@ -338,6 +338,53 @@ export default function ProceduresManagement() {
     }
   };
 
+  const downloadDocument = async (documentId: number, fileName: string) => {
+    try {
+      const response = await fetch(`/api/procedures/documents/${documentId}/download`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download document');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "موفقیت",
+        description: "سند با موفقیت دانلود شد",
+      });
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "مشکلی در دانلود سند رخ داده است",
+      });
+    }
+  };
+
+  const viewProcedureDocuments = (procedureId: number) => {
+    setSelectedProcedureId(procedureId);
+    setShowDocuments(true);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   // Dialog handlers
   const openCreateDialog = (type: 'category' | 'procedure' | 'safety') => {
     setDialogType(type);
@@ -668,6 +715,7 @@ export default function ProceduresManagement() {
                       <TableHead>نسخه</TableHead>
                       <TableHead>اولویت</TableHead>
                       <TableHead>وضعیت</TableHead>
+                      <TableHead>اسناد آپلودی</TableHead>
                       <TableHead>بازدید</TableHead>
                       <TableHead>تاریخ ایجاد</TableHead>
                       <TableHead>عملیات</TableHead>
@@ -701,6 +749,17 @@ export default function ProceduresManagement() {
                                procedure.status === 'review' ? 'در بررسی' :
                                procedure.status === 'draft' ? 'پیش‌نویس' : 'بایگانی'}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => viewProcedureDocuments(procedure.id)}
+                              title="مشاهده اسناد آپلودی"
+                            >
+                              <FileText className="h-4 w-4 mr-1" />
+                              اسناد
+                            </Button>
                           </TableCell>
                           <TableCell>{procedure.viewCount}</TableCell>
                           <TableCell>
@@ -941,6 +1000,96 @@ export default function ProceduresManagement() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Documents Dialog */}
+      <Dialog open={showDocuments} onOpenChange={setShowDocuments}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>اسناد آپلود شده</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {documentsLoading ? (
+              <div className="text-center py-8">در حال بارگذاری اسناد...</div>
+            ) : documents.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                هیچ سندی برای این دستورالعمل آپلود نشده است
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {documents.map((document) => (
+                  <Card key={document.id} className="border">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="h-5 w-5 text-blue-600" />
+                            <h3 className="font-semibold text-lg">{document.title}</h3>
+                            <Badge variant="outline">نسخه {document.version}</Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
+                            <div>
+                              <span className="font-medium">نام فایل:</span>
+                              <p className="truncate">{document.fileName}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">حجم:</span>
+                              <p>{formatFileSize(document.fileSize)}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">آپلود کننده:</span>
+                              <p>{document.uploadedByName || 'نامشخص'}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">تاریخ آپلود:</span>
+                              <p>{new Date(document.uploadDate).toLocaleDateString('fa-IR')}</p>
+                            </div>
+                          </div>
+                          
+                          {document.description && (
+                            <div className="mb-3">
+                              <span className="font-medium text-sm">توضیحات:</span>
+                              <p className="text-sm text-gray-600 mt-1">{document.description}</p>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <span>تعداد دانلود: {document.downloadCount}</span>
+                            {document.lastDownloadedAt && (
+                              <span>
+                                آخرین دانلود: {new Date(document.lastDownloadedAt).toLocaleDateString('fa-IR')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 ml-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadDocument(document.id, document.fileName)}
+                            title="دانلود سند"
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            دانلود
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex justify-end mt-4">
+            <Button variant="outline" onClick={() => setShowDocuments(false)}>
+              بستن
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Create Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
