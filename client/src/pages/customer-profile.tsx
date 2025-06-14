@@ -156,25 +156,25 @@ const CustomerProfile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Customer Information */}
           <div className="lg:col-span-1">
-            <Card dir="rtl">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />
-                  اطلاعات حساب
+                  Account Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
                     <User className="w-4 h-4" />
-                    نام کامل
+                    Full Name
                   </label>
                   <p className="text-gray-900 font-semibold">{customer.firstName} {customer.lastName}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
                     <Mail className="w-4 h-4" />
-                    ایمیل
+                    Email
                   </label>
                   <p className="text-gray-900">{customer.email}</p>
                 </div>
@@ -182,7 +182,7 @@ const CustomerProfile = () => {
                   <div>
                     <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
                       <Building className="w-4 h-4" />
-                      شرکت
+                      Company
                     </label>
                     <p className="text-gray-900">{customer.company}</p>
                   </div>
@@ -191,7 +191,7 @@ const CustomerProfile = () => {
                   <div>
                     <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
                       <Phone className="w-4 h-4" />
-                      تلفن
+                      Phone
                     </label>
                     <p className="text-gray-900">{customer.phone}</p>
                   </div>
@@ -200,14 +200,14 @@ const CustomerProfile = () => {
                   <div>
                     <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
-                      آدرس
+                      Address
                     </label>
                     <p className="text-gray-900">{customer.address}</p>
                   </div>
                 )}
                 {customer.city && customer.country && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">موقعیت</label>
+                    <label className="text-sm font-medium text-gray-500">Location</label>
                     <p className="text-gray-900">{customer.city}, {customer.country}</p>
                   </div>
                 )}
@@ -215,25 +215,25 @@ const CustomerProfile = () => {
             </Card>
 
             {/* Order Statistics */}
-            <Card className="mt-6" dir="rtl">
+            <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
-                  آمار سفارشات
+                  Order Statistics
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">تعداد سفارشات:</span>
+                  <span className="text-gray-600">Total Orders:</span>
                   <span className="font-semibold">{orders.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">مجموع خرید:</span>
+                  <span className="text-gray-600">Total Spent:</span>
                   <span className="font-semibold">${totalSpent.toFixed(2)}</span>
                 </div>
                 {orders.length > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">میانگین هر سفارش:</span>
+                    <span className="text-gray-600">Average Order:</span>
                     <span className="font-semibold">${(totalSpent / orders.length).toFixed(2)}</span>
                   </div>
                 )}
@@ -243,26 +243,26 @@ const CustomerProfile = () => {
 
           {/* Order History */}
           <div className="lg:col-span-2">
-            <Card dir="rtl">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5" />
-                  تاریخچه سفارشات
+                  Order History
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {ordersLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">در حال بارگذاری سفارشات...</p>
+                    <p className="text-gray-600">Loading orders...</p>
                   </div>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-8">
                     <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">هنوز سفارشی ثبت نشده</h3>
-                    <p className="text-gray-500 mb-6">شروع به خرید کنید تا تاریخچه سفارشات شما اینجا نمایش داده شود.</p>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">No Orders Yet</h3>
+                    <p className="text-gray-500 mb-6">Start shopping to see your order history here.</p>
                     <Button onClick={() => setLocation("/shop")}>
-                      شروع خرید
+                      Start Shopping
                     </Button>
                   </div>
                 ) : (
@@ -272,14 +272,14 @@ const CustomerProfile = () => {
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <h4 className="font-semibold text-gray-900">
-                              سفارش #{order.orderNumber || order.id}
+                              Order #{order.orderNumber || order.id}
                             </h4>
                             <p className="text-sm text-gray-500 flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
                               {formatDate(order.createdAt)}
                             </p>
                           </div>
-                          <div className="text-left">
+                          <div className="text-right">
                             <p className="font-semibold text-lg">${parseFloat(order.totalAmount).toFixed(2)}</p>
                             <Badge className={getStatusColor(order.status)}>
                               {getStatusLabel(order.status)}
@@ -291,7 +291,7 @@ const CustomerProfile = () => {
                           <div>
                             <Separator className="mb-3" />
                             <div className="space-y-2">
-                              <h5 className="font-medium text-gray-700">اقلام سفارش:</h5>
+                              <h5 className="font-medium text-gray-700">Order Items:</h5>
                               {order.items.map((item: any) => (
                                 <div key={item.id} className="flex justify-between text-sm">
                                   <span>{item.productName} × {parseFloat(item.quantity)} {item.unit}</span>
@@ -305,7 +305,7 @@ const CustomerProfile = () => {
                         {order.notes && (
                           <div className="mt-3 pt-3 border-t">
                             <p className="text-sm text-gray-600">
-                              <strong>یادداشت:</strong> {order.notes}
+                              <strong>Notes:</strong> {order.notes}
                             </p>
                           </div>
                         )}
