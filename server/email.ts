@@ -61,10 +61,19 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
     }
 
     const recipientEmails = recipients.map(r => r.email).join(', ');
+    
+    // Filter out sender email from recipients to avoid "Invalid Recipients" error
+    const filteredRecipients = recipients
+      .filter(r => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
+      .map(r => r.email);
+    
+    // If no recipients remain after filtering, use the original list but change the from email
+    const finalRecipients = filteredRecipients.length > 0 ? filteredRecipients.join(', ') : recipientEmails;
+    const fromEmail = filteredRecipients.length > 0 ? smtp.fromEmail : `noreply@momtazchem.com`;
+    
     const mailOptions = {
-      from: `${smtp.fromName} <${smtp.fromEmail}>`,
-      to: recipientEmails,
-      cc: formData.email,
+      from: `${smtp.fromName} <${fromEmail}>`,
+      to: finalRecipients,
       subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName}`,
       html: `
         <h2>New Contact Form Submission</h2>
