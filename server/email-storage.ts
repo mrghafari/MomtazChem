@@ -164,9 +164,9 @@ export class EmailStorage implements IEmailStorage {
       const setting = await this.getSmtpSettingById(id);
       if (!setting) return false;
       
-      const nodemailer = require('nodemailer');
+      const nodemailer = await import('nodemailer');
       
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.default.createTransporter({
         host: setting.host,
         port: setting.port,
         secure: setting.secure,
