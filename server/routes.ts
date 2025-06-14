@@ -11,7 +11,8 @@ import { simpleCustomerStorage } from "./simple-customer-storage";
 import { shopStorage } from "./shop-storage";
 import { customerStorage } from "./customer-storage";
 import { emailStorage } from "./email-storage";
-import { insertCustomerInquirySchema, insertEmailTemplateSchema } from "@shared/customer-schema";
+import { crmStorage } from "./crm-storage";
+import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCrmCustomerSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
@@ -1529,6 +1530,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalSpent: (parseFloat(customer.totalSpent || "0") + orderData.totalAmount).toString(),
         lastOrderDate: new Date(),
       });
+
+      // Auto-capture customer data in CRM system
+      try {
+        await crmStorage.createOrUpdateCustomerFromOrder({
+          email: orderData.customer.email,
+          firstName: orderData.customer.firstName,
+          lastName: orderData.customer.lastName,
+          company: orderData.customer.company,
+          phone: orderData.customer.phone,
+          country: orderData.billingAddress?.country,
+          city: orderData.billingAddress?.city,
+          address: orderData.billingAddress?.address,
+          postalCode: orderData.billingAddress?.postalCode,
+          orderValue: orderData.totalAmount,
+        });
+        console.log(`Customer ${orderData.customer.email} auto-captured in CRM for order ${orderNumber}`);
+      } catch (crmError) {
+        console.error("Error auto-capturing customer in CRM:", crmError);
+        // Don't fail the order if CRM capture fails
+      }
 
       // Create financial transaction for the sale
       await shopStorage.createFinancialTransaction({
@@ -3052,6 +3073,241 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Failed to detect email provider"
+      });
+    }
+  });
+
+  // =============================================================================
+  // CRM ROUTES - Professional Customer Relationship Management
+  // =============================================================================
+
+  // Get CRM dashboard statistics
+  app.get("/api/crm/dashboard", requireAuth, async (req, res) => {
+    try {
+      const stats = await crmStorage.getCrmDashboardStats();
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error("Error fetching CRM dashboard stats:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch dashboard statistics"
+      });
+    }
+  });
+
+  // Get all CRM customers with pagination
+  app.get("/api/crm/customers", requireAuth, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const customers = await crmStorage.getCrmCustomers(limit, offset);
+      res.json({
+        success: true,
+        data: customers,
+        pagination: {
+          limit,
+          offset,
+          count: customers.length
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching CRM customers:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch customers"
+      });
+    }
+  });
+
+  // Search CRM customers
+  app.get("/api/crm/customers/search", requireAuth, async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: "Search query must be at least 2 characters"
+        });
+      }
+
+      const customers = await crmStorage.searchCrmCustomers(query);
+      res.json({
+        success: true,
+        data: customers
+      });
+    } catch (error) {
+      console.error("Error searching CRM customers:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to search customers"
+      });
+    }
+  });
+
+  // Get specific CRM customer by ID
+  app.get("/api/crm/customers/:id", requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          message: "Customer not found"
+        });
+      }
+
+      // Get customer analytics
+      const analytics = await crmStorage.getCustomerAnalytics(customerId);
+      
+      // Get customer activities
+      const activities = await crmStorage.getCustomerActivities(customerId, 20);
+
+      res.json({
+        success: true,
+        data: {
+          customer,
+          analytics,
+          activities
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching CRM customer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch customer"
+      });
+    }
+  });
+
+  // Create new CRM customer
+  app.post("/api/crm/customers", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertCrmCustomerSchema.parse(req.body);
+      validatedData.createdBy = "admin";
+      
+      const customer = await crmStorage.createCrmCustomer(validatedData);
+      res.status(201).json({
+        success: true,
+        data: customer
+      });
+    } catch (error) {
+      console.error("Error creating CRM customer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create customer"
+      });
+    }
+  });
+
+  // Update CRM customer
+  app.put("/api/crm/customers/:id", requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const updateData = req.body;
+      
+      const customer = await crmStorage.updateCrmCustomer(customerId, updateData);
+      res.json({
+        success: true,
+        data: customer
+      });
+    } catch (error) {
+      console.error("Error updating CRM customer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update customer"
+      });
+    }
+  });
+
+  // Log customer activity
+  app.post("/api/crm/customers/:id/activities", requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const { activityType, description, activityData } = req.body;
+      
+      const activity = await crmStorage.logCustomerActivity({
+        customerId,
+        activityType,
+        description,
+        activityData,
+        performedBy: "admin"
+      });
+
+      res.status(201).json({
+        success: true,
+        data: activity
+      });
+    } catch (error) {
+      console.error("Error logging customer activity:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to log activity"
+      });
+    }
+  });
+
+  // Get customer activities
+  app.get("/api/crm/customers/:id/activities", requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const activities = await crmStorage.getCustomerActivities(customerId, limit);
+      res.json({
+        success: true,
+        data: activities
+      });
+    } catch (error) {
+      console.error("Error fetching customer activities:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch activities"
+      });
+    }
+  });
+
+  // Create customer segment
+  app.post("/api/crm/segments", requireAuth, async (req, res) => {
+    try {
+      const { name, description, criteria } = req.body;
+      
+      const segment = await crmStorage.createCustomerSegment({
+        name,
+        description,
+        criteria
+      });
+
+      res.status(201).json({
+        success: true,
+        data: segment
+      });
+    } catch (error) {
+      console.error("Error creating customer segment:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create segment"
+      });
+    }
+  });
+
+  // Get all customer segments
+  app.get("/api/crm/segments", requireAuth, async (req, res) => {
+    try {
+      const segments = await crmStorage.getCustomerSegments();
+      res.json({
+        success: true,
+        data: segments
+      });
+    } catch (error) {
+      console.error("Error fetching customer segments:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch segments"
       });
     }
   });

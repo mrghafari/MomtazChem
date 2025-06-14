@@ -1,795 +1,577 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertLeadSchema, insertLeadActivitySchema, type Lead, type InsertLead, type LeadActivity, type Contact } from "@shared/schema";
-import { 
-  Plus, Edit, Trash2, User, Phone, Mail, Building, 
-  TrendingUp, TrendingDown, Calendar, Search, Filter,
-  MessageSquare, Clock, Target, DollarSign, Users,
-  Activity, CheckCircle, XCircle, AlertCircle
-} from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
+import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
-const leadStatuses = [
-  { value: "new", label: "New", color: "bg-blue-100 text-blue-800" },
-  { value: "contacted", label: "Contacted", color: "bg-yellow-100 text-yellow-800" },
-  { value: "qualified", label: "Qualified", color: "bg-green-100 text-green-800" },
-  { value: "proposal", label: "Proposal", color: "bg-purple-100 text-purple-800" },
-  { value: "negotiation", label: "Negotiation", color: "bg-orange-100 text-orange-800" },
-  { value: "closed_won", label: "Closed Won", color: "bg-green-100 text-green-800" },
-  { value: "closed_lost", label: "Closed Lost", color: "bg-red-100 text-red-800" },
-];
+interface CrmCustomer {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  company?: string;
+  phone?: string;
+  country?: string;
+  city?: string;
+  customerType: string;
+  customerStatus: string;
+  customerSource: string;
+  totalOrdersCount: number;
+  totalSpent: string;
+  averageOrderValue: string;
+  lastOrderDate?: string;
+  createdAt: string;
+}
 
-const priorities = [
-  { value: "low", label: "Low", color: "bg-gray-100 text-gray-800" },
-  { value: "medium", label: "Medium", color: "bg-blue-100 text-blue-800" },
-  { value: "high", label: "High", color: "bg-orange-100 text-orange-800" },
-  { value: "urgent", label: "Urgent", color: "bg-red-100 text-red-800" },
-];
+interface CustomerActivity {
+  id: number;
+  activityType: string;
+  description: string;
+  performedBy: string;
+  createdAt: string;
+  activityData?: any;
+}
 
-const productCategories = [
-  { value: "fuel-additives", label: "Fuel Additives" },
-  { value: "water-treatment", label: "Water Treatment" },
-  { value: "paint-thinner", label: "Paint & Thinner" },
-  { value: "agricultural-fertilizers", label: "Agricultural Fertilizers" },
-];
+interface DashboardStats {
+  totalCustomers: number;
+  activeCustomers: number;
+  newCustomersThisMonth: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  topCustomers: Array<{
+    id: number;
+    name: string;
+    email: string;
+    totalSpent: number;
+    totalOrders: number;
+  }>;
+  customersByType: Array<{
+    type: string;
+    count: number;
+  }>;
+  recentActivities: CustomerActivity[];
+}
 
-export default function CRMPage() {
-  const [selectedTab, setSelectedTab] = useState<string>("dashboard");
-  const [editingLead, setEditingLead] = useState<Lead | null>(null);
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [activityDialogOpen, setActivityDialogOpen] = useState(false);
-  const [filters, setFilters] = useState({ status: "", priority: "", search: "" });
-  const [, setLocation] = useLocation();
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+export default function CRM() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState<CrmCustomer | null>(null);
+  const [isNewCustomerDialogOpen, setIsNewCustomerDialogOpen] = useState(false);
+  const [isCustomerDetailDialogOpen, setIsCustomerDetailDialogOpen] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    company: "",
+    phone: "",
+    country: "",
+    city: "",
+    customerType: "retail",
+    customerSource: "website",
+    internalNotes: ""
+  });
+
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
-  // Authentication check
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       setLocation("/admin/login");
     }
   }, [authLoading, isAuthenticated, setLocation]);
 
-  // Queries
-  const { data: leads = [], isLoading: leadsLoading } = useQuery({
-    queryKey: ["/api/leads", filters],
-    queryFn: () => {
-      const params = new URLSearchParams();
-      if (filters.status) params.append("status", filters.status);
-      if (filters.priority) params.append("priority", filters.priority);
-      if (filters.search) params.append("search", filters.search);
-      return fetch(`/api/leads?${params}`).then(res => res.json());
+  // Fetch dashboard statistics
+  const { data: dashboardStats, isLoading: statsLoading } = useQuery<DashboardStats>({
+    queryKey: ["/api/crm/dashboard"],
+    enabled: isAuthenticated,
+  });
+
+  // Fetch customers with search
+  const { data: customers = [], isLoading: customersLoading } = useQuery<CrmCustomer[]>({
+    queryKey: ["/api/crm/customers", { search: searchTerm }],
+    queryFn: async () => {
+      if (searchTerm.length >= 2) {
+        const response = await fetch(`/api/crm/customers/search?q=${encodeURIComponent(searchTerm)}`);
+        const result = await response.json();
+        return result.data || [];
+      } else {
+        const response = await fetch("/api/crm/customers?limit=50");
+        const result = await response.json();
+        return result.data || [];
+      }
     },
     enabled: isAuthenticated,
   });
 
-  const { data: statistics } = useQuery({
-    queryKey: ["/api/leads/statistics"],
-    enabled: isAuthenticated,
-  });
-
-  const { data: contacts = [] } = useQuery({
-    queryKey: ["/api/contacts"],
-    enabled: isAuthenticated,
-  });
-
-  const { data: activities = [] } = useQuery({
-    queryKey: ["/api/leads", selectedLead?.id, "activities"],
-    queryFn: () => fetch(`/api/leads/${selectedLead?.id}/activities`).then(res => res.json()),
-    enabled: !!selectedLead,
-  });
-
-  // Forms
-  const leadForm = useForm<InsertLead>({
-    resolver: zodResolver(insertLeadSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      company: "",
-      jobTitle: "",
-      industry: "",
-      country: "",
-      city: "",
-      leadSource: "website",
-      status: "new",
-      priority: "medium",
-      productInterest: "",
-      estimatedValue: "",
-      probability: 25,
-      notes: "",
+  // Create customer mutation
+  const createCustomerMutation = useMutation({
+    mutationFn: async (customerData: any) => {
+      const response = await fetch("/api/crm/customers", {
+        method: "POST",
+        body: JSON.stringify(customerData),
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create customer");
+      }
+      return response.json();
     },
-  });
-
-  const activityForm = useForm({
-    resolver: zodResolver(insertLeadActivitySchema),
-    defaultValues: {
-      activityType: "note",
-      subject: "",
-      description: "",
-      contactMethod: "",
-      outcome: "",
-    },
-  });
-
-  // Mutations
-  const createLeadMutation = useMutation({
-    mutationFn: (data: InsertLead) => apiRequest("/api/leads", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/leads/statistics"] });
-      setDialogOpen(false);
-      leadForm.reset();
-      toast({ title: "Success", description: "Lead created successfully" });
+      toast({ title: "موفقیت", description: "مشتری جدید با موفقیت ایجاد شد" });
+      queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
+      setIsNewCustomerDialogOpen(false);
+      setNewCustomer({
+        email: "",
+        firstName: "",
+        lastName: "",
+        company: "",
+        phone: "",
+        country: "",
+        city: "",
+        customerType: "retail",
+        customerSource: "website",
+        internalNotes: ""
+      });
     },
+    onError: (error) => {
+      toast({ 
+        title: "خطا", 
+        description: "خطا در ایجاد مشتری جدید",
+        variant: "destructive" 
+      });
+    }
   });
 
-  const updateLeadMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertLead> }) =>
-      apiRequest(`/api/leads/${id}`, "PATCH", data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/leads/statistics"] });
-      setDialogOpen(false);
-      setEditingLead(null);
-      leadForm.reset();
-      toast({ title: "Success", description: "Lead updated successfully" });
-    },
-  });
-
-  const deleteLeadMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/leads/${id}`, "DELETE"),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/leads/statistics"] });
-      toast({ title: "Success", description: "Lead deleted successfully" });
-    },
-  });
-
-  const convertContactMutation = useMutation({
-    mutationFn: (contactId: number) => apiRequest(`/api/contacts/${contactId}/convert-to-lead`, "POST"),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/leads/statistics"] });
-      toast({ title: "Success", description: "Contact converted to lead successfully" });
-    },
-  });
-
-  const createActivityMutation = useMutation({
-    mutationFn: (data: any) => apiRequest(`/api/leads/${selectedLead?.id}/activities`, "POST", data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads", selectedLead?.id, "activities"] });
-      setActivityDialogOpen(false);
-      activityForm.reset();
-      toast({ title: "Success", description: "Activity added successfully" });
-    },
-  });
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) return null;
-
-  const openCreateDialog = () => {
-    setEditingLead(null);
-    leadForm.reset();
-    setDialogOpen(true);
+  const handleCreateCustomer = () => {
+    if (!newCustomer.email || !newCustomer.firstName || !newCustomer.lastName) {
+      toast({
+        title: "خطا",
+        description: "لطفاً فیلدهای ضروری را پر کنید",
+        variant: "destructive"
+      });
+      return;
+    }
+    createCustomerMutation.mutate(newCustomer);
   };
 
-  const openEditDialog = (lead: Lead) => {
-    setEditingLead(lead);
-    leadForm.reset({
-      firstName: lead.firstName,
-      lastName: lead.lastName,
-      email: lead.email,
-      phone: lead.phone ?? "",
-      company: lead.company ?? "",
-      jobTitle: lead.jobTitle ?? "",
-      industry: lead.industry ?? "",
-      country: lead.country ?? "",
-      city: lead.city ?? "",
-      leadSource: lead.leadSource,
-      status: lead.status,
-      priority: lead.priority,
-      productInterest: lead.productInterest ?? "",
-      estimatedValue: lead.estimatedValue ?? "",
-      probability: lead.probability ?? 25,
-      notes: lead.notes ?? "",
-    });
-    setDialogOpen(true);
+  const formatCurrency = (amount: string | number) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('fa-IR', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    }).format(num);
   };
 
-  const onSubmitLead = (data: InsertLead) => {
-    if (editingLead) {
-      updateLeadMutation.mutate({ id: editingLead.id, data });
-    } else {
-      createLeadMutation.mutate(data);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fa-IR');
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'inactive': return 'bg-gray-100 text-gray-800';
+      case 'vip': return 'bg-purple-100 text-purple-800';
+      case 'blacklisted': return 'bg-red-100 text-red-800';
+      default: return 'bg-blue-100 text-blue-800';
     }
   };
 
-  const onSubmitActivity = (data: any) => {
-    createActivityMutation.mutate(data);
+  const getTypeBadgeColor = (type: string) => {
+    switch (type) {
+      case 'retail': return 'bg-blue-100 text-blue-800';
+      case 'wholesale': return 'bg-orange-100 text-orange-800';
+      case 'b2b': return 'bg-green-100 text-green-800';
+      case 'distributor': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = leadStatuses.find(s => s.value === status);
-    return statusConfig ? (
-      <Badge className={statusConfig.color}>{statusConfig.label}</Badge>
-    ) : (
-      <Badge>{status}</Badge>
-    );
-  };
+  if (authLoading) {
+    return <div className="flex items-center justify-center min-h-screen">در حال بارگذاری...</div>;
+  }
 
-  const getPriorityBadge = (priority: string) => {
-    const priorityConfig = priorities.find(p => p.value === priority);
-    return priorityConfig ? (
-      <Badge className={priorityConfig.color}>{priorityConfig.label}</Badge>
-    ) : (
-      <Badge>{priority}</Badge>
-    );
-  };
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">CRM System</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Manage leads and track sales pipeline</p>
+          <h1 className="text-3xl font-bold">سیستم CRM</h1>
+          <p className="text-muted-foreground">مدیریت حرفه‌ای مشتریان فروشگاه</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-gray-600">
-            <User className="w-4 h-4" />
-            <span className="text-sm">{user?.username}</span>
-          </div>
-          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Lead
-          </Button>
-        </div>
+        <Button onClick={() => setIsNewCustomerDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          مشتری جدید
+        </Button>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-8">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="leads">Leads</TabsTrigger>
-          <TabsTrigger value="activities">Activities</TabsTrigger>
-          <TabsTrigger value="contacts">Contacts</TabsTrigger>
+      <Tabs defaultValue="dashboard" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="dashboard">داشبورد</TabsTrigger>
+          <TabsTrigger value="customers">مشتریان</TabsTrigger>
+          <TabsTrigger value="activities">فعالیت‌ها</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard">
-          {statistics && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <TabsContent value="dashboard" className="space-y-4">
+          {statsLoading ? (
+            <div className="text-center py-8">در حال بارگذاری آمار...</div>
+          ) : (
+            <>
+              {/* Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">کل مشتریان</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{dashboardStats?.totalCustomers || 0}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">مشتریان فعال</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{dashboardStats?.activeCustomers || 0}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">مشتریان جدید این ماه</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{dashboardStats?.newCustomersThisMonth || 0}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">کل درآمد</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(dashboardStats?.totalRevenue || 0)}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Top Customers */}
               <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Leads</CardTitle>
+                <CardHeader>
+                  <CardTitle>برترین مشتریان</CardTitle>
+                  <CardDescription>مشتریان با بیشترین خرید</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">{statistics.totalLeads}</span>
-                    <Users className="w-5 h-5 text-blue-600" />
-                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>نام</TableHead>
+                        <TableHead>ایمیل</TableHead>
+                        <TableHead>کل خرید</TableHead>
+                        <TableHead>تعداد سفارش</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dashboardStats?.topCustomers?.map((customer) => (
+                        <TableRow key={customer.id}>
+                          <TableCell className="font-medium">{customer.name}</TableCell>
+                          <TableCell>{customer.email}</TableCell>
+                          <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
+                          <TableCell>{customer.totalOrders}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Conversion Rate</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">{statistics.conversionRate}%</span>
-                    <Target className="w-5 h-5 text-green-600" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Avg Deal Size</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">${statistics.averageDealSize}</span>
-                    <DollarSign className="w-5 h-5 text-purple-600" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Closed Won</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">{statistics.closedWon}</span>
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            </>
           )}
         </TabsContent>
 
-        <TabsContent value="leads">
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1">
+        <TabsContent value="customers" className="space-y-4">
+          {/* Search */}
+          <div className="flex items-center space-x-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search leads..."
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="max-w-sm"
+                placeholder="جستجو در مشتریان..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
               />
             </div>
-            <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
-                {leadStatuses.map(status => (
-                  <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filters.priority} onValueChange={(value) => setFilters(prev => ({ ...prev, priority: value }))}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Priorities</SelectItem>
-                {priorities.map(priority => (
-                  <SelectItem key={priority.value} value={priority.value}>{priority.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            {leads.map((lead: Lead) => (
-              <Card key={lead.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {lead.firstName} {lead.lastName}
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-4 mt-2">
-                        <span className="flex items-center gap-1">
-                          <Mail className="w-4 h-4" />
-                          {lead.email}
-                        </span>
-                        {lead.phone && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-4 h-4" />
-                            {lead.phone}
-                          </span>
-                        )}
-                        {lead.company && (
-                          <span className="flex items-center gap-1">
-                            <Building className="w-4 h-4" />
-                            {lead.company}
-                          </span>
-                        )}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      {getStatusBadge(lead.status)}
-                      {getPriorityBadge(lead.priority)}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-4 text-sm text-gray-600">
-                      {lead.estimatedValue && (
-                        <span>${lead.estimatedValue}</span>
-                      )}
-                      {lead.probability && (
-                        <span>{lead.probability}% probability</span>
-                      )}
-                      {lead.productInterest && (
-                        <span>Interested in: {productCategories.find(c => c.value === lead.productInterest)?.label}</span>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setSelectedLead(lead)}
-                      >
-                        <Activity className="w-4 h-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(lead)}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
-                        onClick={() => deleteLeadMutation.mutate(lead.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {/* Customers Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>لیست مشتریان</CardTitle>
+              <CardDescription>مدیریت اطلاعات مشتریان فروشگاه</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {customersLoading ? (
+                <div className="text-center py-8">در حال بارگذاری...</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>نام</TableHead>
+                      <TableHead>ایمیل</TableHead>
+                      <TableHead>شرکت</TableHead>
+                      <TableHead>نوع</TableHead>
+                      <TableHead>وضعیت</TableHead>
+                      <TableHead>کل خرید</TableHead>
+                      <TableHead>آخرین سفارش</TableHead>
+                      <TableHead>عملیات</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {customers.map((customer) => (
+                      <TableRow key={customer.id}>
+                        <TableCell className="font-medium">
+                          {customer.firstName} {customer.lastName}
+                        </TableCell>
+                        <TableCell>{customer.email}</TableCell>
+                        <TableCell>{customer.company || '-'}</TableCell>
+                        <TableCell>
+                          <Badge className={getTypeBadgeColor(customer.customerType)}>
+                            {customer.customerType}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusBadgeColor(customer.customerStatus)}>
+                            {customer.customerStatus}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
+                        <TableCell>
+                          {customer.lastOrderDate ? formatDate(customer.lastOrderDate) : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedCustomer(customer);
+                              setIsCustomerDetailDialogOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="contacts">
-          <div className="grid grid-cols-1 gap-4">
-            {contacts.map((contact: Contact) => (
-              <Card key={contact.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {contact.firstName} {contact.lastName}
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-4 mt-2">
-                        <span className="flex items-center gap-1">
-                          <Mail className="w-4 h-4" />
-                          {contact.email}
-                        </span>
-                        {contact.company && (
-                          <span className="flex items-center gap-1">
-                            <Building className="w-4 h-4" />
-                            {contact.company}
-                          </span>
-                        )}
-                      </CardDescription>
+        <TabsContent value="activities" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>فعالیت‌های اخیر</CardTitle>
+              <CardDescription>آخرین فعالیت‌های سیستم CRM</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {dashboardStats?.recentActivities?.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3 p-3 border rounded-lg">
+                    <Activity className="h-5 w-5 text-blue-500 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-medium">{activity.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        توسط {activity.performedBy} در {formatDate(activity.createdAt)}
+                      </p>
                     </div>
-                    <Button 
-                      onClick={() => convertContactMutation.mutate(contact.id)}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      Convert to Lead
-                    </Button>
                   </div>
-                </CardHeader>
-                {contact.message && (
-                  <CardContent>
-                    <p className="text-sm text-gray-600">{contact.message}</p>
-                  </CardContent>
-                )}
-              </Card>
-            ))}
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Lead Form Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      {/* New Customer Dialog */}
+      <Dialog open={isNewCustomerDialogOpen} onOpenChange={setIsNewCustomerDialogOpen}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              {editingLead ? "Edit Lead" : "Add New Lead"}
-            </DialogTitle>
+            <DialogTitle>مشتری جدید</DialogTitle>
+            <DialogDescription>اطلاعات مشتری جدید را وارد کنید</DialogDescription>
           </DialogHeader>
-          <Form {...leadForm}>
-            <form onSubmit={leadForm.handleSubmit(onSubmitLead)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={leadForm.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={leadForm.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">نام</Label>
+                <Input
+                  id="firstName"
+                  value={newCustomer.firstName}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, firstName: e.target.value })}
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={leadForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="email" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={leadForm.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div>
+                <Label htmlFor="lastName">نام خانوادگی</Label>
+                <Input
+                  id="lastName"
+                  value={newCustomer.lastName}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, lastName: e.target.value })}
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={leadForm.control}
-                  name="company"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={leadForm.control}
-                  name="jobTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Job Title</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-4 gap-4">
-                <FormField
-                  control={leadForm.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {leadStatuses.map(status => (
-                            <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={leadForm.control}
-                  name="priority"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Priority</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select priority" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {priorities.map(priority => (
-                            <SelectItem key={priority.value} value={priority.value}>{priority.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={leadForm.control}
-                  name="leadSource"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Lead Source</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select source" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="website">Website</SelectItem>
-                          <SelectItem value="contact_form">Contact Form</SelectItem>
-                          <SelectItem value="email">Email</SelectItem>
-                          <SelectItem value="phone">Phone</SelectItem>
-                          <SelectItem value="referral">Referral</SelectItem>
-                          <SelectItem value="trade_show">Trade Show</SelectItem>
-                          <SelectItem value="social_media">Social Media</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={leadForm.control}
-                  name="productInterest"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Product Interest</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select product interest" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="">Select Category</SelectItem>
-                          {productCategories.map(category => (
-                            <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={leadForm.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} value={field.value || ""} rows={3} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            </div>
+            
+            <div>
+              <Label htmlFor="email">ایمیل</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newCustomer.email}
+                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
               />
+            </div>
 
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createLeadMutation.isPending || updateLeadMutation.isPending}>
-                  {editingLead ? "Update" : "Create"} Lead
-                </Button>
+            <div>
+              <Label htmlFor="company">شرکت</Label>
+              <Input
+                id="company"
+                value={newCustomer.company}
+                onChange={(e) => setNewCustomer({ ...newCustomer, company: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="phone">تلفن</Label>
+              <Input
+                id="phone"
+                value={newCustomer.phone}
+                onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="customerType">نوع مشتری</Label>
+                <Select value={newCustomer.customerType} onValueChange={(value) => setNewCustomer({ ...newCustomer, customerType: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="retail">خرده‌فروشی</SelectItem>
+                    <SelectItem value="wholesale">عمده‌فروشی</SelectItem>
+                    <SelectItem value="b2b">B2B</SelectItem>
+                    <SelectItem value="distributor">توزیع‌کننده</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </form>
-          </Form>
+              
+              <div>
+                <Label htmlFor="customerSource">منبع مشتری</Label>
+                <Select value={newCustomer.customerSource} onValueChange={(value) => setNewCustomer({ ...newCustomer, customerSource: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="website">وبسایت</SelectItem>
+                    <SelectItem value="referral">معرفی</SelectItem>
+                    <SelectItem value="marketing">بازاریابی</SelectItem>
+                    <SelectItem value="cold_call">تماس سرد</SelectItem>
+                    <SelectItem value="trade_show">نمایشگاه</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="internalNotes">یادداشت داخلی</Label>
+              <Textarea
+                id="internalNotes"
+                value={newCustomer.internalNotes}
+                onChange={(e) => setNewCustomer({ ...newCustomer, internalNotes: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsNewCustomerDialogOpen(false)}>
+                لغو
+              </Button>
+              <Button onClick={handleCreateCustomer} disabled={createCustomerMutation.isPending}>
+                {createCustomerMutation.isPending ? "در حال ایجاد..." : "ایجاد مشتری"}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* Lead Activities Dialog */}
-      {selectedLead && (
-        <Dialog open={!!selectedLead} onOpenChange={() => setSelectedLead(null)}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                Lead Activities - {selectedLead.firstName} {selectedLead.lastName}
-              </DialogTitle>
-            </DialogHeader>
+      {/* Customer Detail Dialog */}
+      <Dialog open={isCustomerDetailDialogOpen} onOpenChange={setIsCustomerDetailDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>جزئیات مشتری</DialogTitle>
+            <DialogDescription>اطلاعات کامل مشتری</DialogDescription>
+          </DialogHeader>
+          {selectedCustomer && (
             <div className="space-y-4">
-              <Button onClick={() => setActivityDialogOpen(true)} className="w-full">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Activity
-              </Button>
-              
-              <div className="space-y-3">
-                {activities.map((activity: LeadActivity) => (
-                  <Card key={activity.id}>
-                    <CardContent className="pt-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium">{activity.subject}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
-                          <div className="flex gap-2 mt-2">
-                            <Badge variant="outline">{activity.activityType}</Badge>
-                            {activity.outcome && <Badge variant="outline">{activity.outcome}</Badge>}
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {new Date(activity.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>نام کامل</Label>
+                  <p className="font-medium">{selectedCustomer.firstName} {selectedCustomer.lastName}</p>
+                </div>
+                <div>
+                  <Label>ایمیل</Label>
+                  <p className="font-medium">{selectedCustomer.email}</p>
+                </div>
+                <div>
+                  <Label>شرکت</Label>
+                  <p className="font-medium">{selectedCustomer.company || '-'}</p>
+                </div>
+                <div>
+                  <Label>تلفن</Label>
+                  <p className="font-medium">{selectedCustomer.phone || '-'}</p>
+                </div>
+                <div>
+                  <Label>کل خرید</Label>
+                  <p className="font-medium">{formatCurrency(selectedCustomer.totalSpent)}</p>
+                </div>
+                <div>
+                  <Label>تعداد سفارشات</Label>
+                  <p className="font-medium">{selectedCustomer.totalOrdersCount}</p>
+                </div>
+                <div>
+                  <Label>میانگین خرید</Label>
+                  <p className="font-medium">{formatCurrency(selectedCustomer.averageOrderValue)}</p>
+                </div>
+                <div>
+                  <Label>تاریخ عضویت</Label>
+                  <p className="font-medium">{formatDate(selectedCustomer.createdAt)}</p>
+                </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Activity Form Dialog */}
-      <Dialog open={activityDialogOpen} onOpenChange={setActivityDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Activity</DialogTitle>
-          </DialogHeader>
-          <Form {...activityForm}>
-            <form onSubmit={activityForm.handleSubmit(onSubmitActivity)} className="space-y-4">
-              <FormField
-                control={activityForm.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Subject</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={activityForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} rows={3} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setActivityDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createActivityMutation.isPending}>
-                  Add Activity
-                </Button>
-              </div>
-            </form>
-          </Form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
