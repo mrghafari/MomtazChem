@@ -10,7 +10,9 @@ import { insertContactSchema, insertShowcaseProductSchema } from "@shared/showca
 import { simpleCustomerStorage } from "./simple-customer-storage";
 import { shopStorage } from "./shop-storage";
 import { customerStorage } from "./customer-storage";
+import { emailStorage } from "./email-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema } from "@shared/customer-schema";
+import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
@@ -2672,82 +2674,224 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Email Settings Management
-  app.get("/api/admin/email-settings", requireAuth, async (req, res) => {
+  // Initialize default email categories if they don't exist
+  app.post("/api/admin/email/init-categories", requireAuth, async (req, res) => {
     try {
-      const emailSettings = [
+      const defaultCategories = [
         {
-          id: 1,
-          category: "admin",
-          name: "Admin & General Contact",
+          categoryKey: "admin",
+          categoryName: "Admin & General Contact",
           description: "Main administrative and general contact email",
-          emailAddress: process.env.ADMIN_EMAIL || "info@momtazchem.com",
-          isActive: true,
-          isPrimary: true,
-          usage: ["Contact Form", "General Inquiries", "Admin Notifications"]
         },
         {
-          id: 2,
-          category: "fuel-additives",
-          name: "Fuel Additives Department",
+          categoryKey: "fuel-additives",
+          categoryName: "Fuel Additives Department",
           description: "Dedicated email for fuel additives inquiries and orders",
-          emailAddress: process.env.FUEL_EMAIL || "fuel@momtazchem.com",
-          isActive: true,
-          isPrimary: false,
-          usage: ["Fuel Additives Inquiries", "Fuel Product Orders", "Technical Support"]
         },
         {
-          id: 3,
-          category: "water-treatment",
-          name: "Water Treatment Department",
+          categoryKey: "water-treatment",
+          categoryName: "Water Treatment Department",
           description: "Dedicated email for water treatment solutions",
-          emailAddress: process.env.WATER_EMAIL || "water@momtazchem.com",
-          isActive: true,
-          isPrimary: false,
-          usage: ["Water Treatment Inquiries", "Water Product Orders", "Technical Consulting"]
         },
         {
-          id: 4,
-          category: "agricultural-fertilizers",
-          name: "Agricultural Fertilizers Department",
+          categoryKey: "agricultural-fertilizers",
+          categoryName: "Agricultural Fertilizers Department",
           description: "Dedicated email for fertilizer products and agricultural solutions",
-          emailAddress: process.env.FERTILIZER_EMAIL || "fertilizer@momtazchem.com",
-          isActive: true,
-          isPrimary: false,
-          usage: ["Fertilizer Inquiries", "Agricultural Orders", "Crop Consulting"]
         },
         {
-          id: 5,
-          category: "paint-thinner",
-          name: "Paint & Thinner Department",
+          categoryKey: "paint-thinner",
+          categoryName: "Paint & Thinner Department",
           description: "Dedicated email for paint and thinner products",
-          emailAddress: process.env.THINNER_EMAIL || "thinner@momtazchem.com",
-          isActive: true,
-          isPrimary: false,
-          usage: ["Paint Product Inquiries", "Thinner Orders", "Application Support"]
         },
         {
-          id: 6,
-          category: "orders",
-          name: "Order Processing",
+          categoryKey: "orders",
+          categoryName: "Order Processing",
           description: "Handles order confirmations and processing",
-          emailAddress: process.env.ORDER_EMAIL || "info@momtazchem.com",
-          isActive: true,
-          isPrimary: false,
-          usage: ["Order Confirmations", "Order Status Updates", "Shipping Notifications"]
         },
         {
-          id: 7,
-          category: "notifications",
-          name: "System Notifications",
+          categoryKey: "notifications",
+          categoryName: "System Notifications",
           description: "Receives system alerts and notifications",
-          emailAddress: process.env.NOTIFICATION_EMAIL || "info@momtazchem.com",
-          isActive: true,
-          isPrimary: false,
-          usage: ["Inventory Alerts", "System Notifications", "Error Reports"]
         }
       ];
 
+      const createdCategories = [];
+      
+      for (const categoryData of defaultCategories) {
+        const existing = await emailStorage.getCategoryByKey(categoryData.categoryKey);
+        if (!existing) {
+          const category = await emailStorage.createCategory(categoryData);
+          createdCategories.push(category);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Initialized ${createdCategories.length} categories`,
+        categories: createdCategories
+      });
+    } catch (error) {
+      console.error("Error initializing categories:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to initialize categories"
+      });
+    }
+  });
+
+  // Get all email categories with their settings
+  app.get("/api/admin/email/categories", requireAuth, async (req, res) => {
+    try {
+      const categories = await emailStorage.getCategories();
+      const categoriesWithSettings = [];
+
+      for (const category of categories) {
+        const smtp = await emailStorage.getSmtpSettingByCategory(category.id);
+        const recipients = await emailStorage.getRecipientsByCategory(category.id);
+        
+        categoriesWithSettings.push({
+          ...category,
+          smtp: smtp || null,
+          recipients
+        });
+      }
+
+      res.json({
+        success: true,
+        categories: categoriesWithSettings
+      });
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch categories"
+      });
+    }
+  });
+
+  // Create/Update SMTP settings for a category
+  app.post("/api/admin/email/smtp/:categoryId", requireAuth, async (req, res) => {
+    try {
+      const { categoryId } = req.params;
+      const smtpData = smtpConfigSchema.parse(req.body);
+      
+      // Check if SMTP settings already exist for this category
+      const existing = await emailStorage.getSmtpSettingByCategory(parseInt(categoryId));
+      
+      let smtp;
+      if (existing) {
+        smtp = await emailStorage.updateSmtpSetting(existing.id, {
+          ...smtpData,
+          categoryId: parseInt(categoryId)
+        });
+      } else {
+        smtp = await emailStorage.createSmtpSetting({
+          ...smtpData,
+          categoryId: parseInt(categoryId)
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "SMTP settings saved successfully",
+        smtp
+      });
+    } catch (error) {
+      console.error("Error saving SMTP settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to save SMTP settings"
+      });
+    }
+  });
+
+  // Test SMTP connection for a category
+  app.post("/api/admin/email/test-smtp/:categoryId", requireAuth, async (req, res) => {
+    try {
+      const { categoryId } = req.params;
+      const smtp = await emailStorage.getSmtpSettingByCategory(parseInt(categoryId));
+      
+      if (!smtp) {
+        return res.status(404).json({
+          success: false,
+          message: "SMTP settings not found for this category"
+        });
+      }
+
+      const success = await emailStorage.testSmtpConnection(smtp.id);
+      
+      res.json({
+        success,
+        message: success ? "SMTP connection test successful" : "SMTP connection test failed"
+      });
+    } catch (error) {
+      console.error("SMTP test failed:", error);
+      res.status(500).json({
+        success: false,
+        message: `SMTP test failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
+    }
+  });
+
+  // Add/Update email recipients for a category
+  app.post("/api/admin/email/recipients/:categoryId", requireAuth, async (req, res) => {
+    try {
+      const { categoryId } = req.params;
+      const { recipients } = req.body;
+      
+      // Delete existing recipients for this category
+      const existingRecipients = await emailStorage.getRecipientsByCategory(parseInt(categoryId));
+      for (const recipient of existingRecipients) {
+        await emailStorage.deleteRecipient(recipient.id);
+      }
+      
+      // Add new recipients
+      const createdRecipients = [];
+      for (const recipientData of recipients) {
+        const recipient = await emailStorage.createRecipient({
+          ...recipientData,
+          categoryId: parseInt(categoryId)
+        });
+        createdRecipients.push(recipient);
+      }
+
+      res.json({
+        success: true,
+        message: "Recipients updated successfully",
+        recipients: createdRecipients
+      });
+    } catch (error) {
+      console.error("Error updating recipients:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update recipients"
+      });
+    }
+  });
+
+  // Legacy endpoint for compatibility
+  app.get("/api/admin/email-settings", requireAuth, async (req, res) => {
+    try {
+      const categories = await emailStorage.getCategories();
+      const emailSettings = [];
+
+      for (const category of categories) {
+        const recipients = await emailStorage.getRecipientsByCategory(category.id);
+        const primaryRecipient = recipients.find(r => r.isPrimary);
+        
+        emailSettings.push({
+          id: category.id,
+          category: category.categoryKey,
+          name: category.categoryName,
+          description: category.description,
+          emailAddress: primaryRecipient?.email || "info@momtazchem.com",
+          isActive: category.isActive,
+          isPrimary: category.categoryKey === "admin",
+          usage: recipients.flatMap(r => r.receiveTypes || [])
+        });
+      }
+
+      // Return default SMTP for backward compatibility
       const smtpSettings = {
         host: process.env.SMTP_HOST || "smtp.zoho.com",
         port: parseInt(process.env.SMTP_PORT || "587"),
