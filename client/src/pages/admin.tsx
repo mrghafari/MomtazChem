@@ -32,7 +32,7 @@ export default function Admin() {
 
   // Product sync mutation
   const syncProductsMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/sync-products", "POST"),
+    mutationFn: () => apiRequest("/api/sync-products", "POST"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({
