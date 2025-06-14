@@ -542,6 +542,10 @@ const Shop = () => {
       {/* Checkout Modal */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Checkout</DialogTitle>
+            <DialogDescription>Complete your order and provide shipping information</DialogDescription>
+          </DialogHeader>
           <Checkout 
             cart={cart} 
             products={products}

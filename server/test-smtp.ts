@@ -114,3 +114,33 @@ export async function testZohoSMTP(email: string, password: string, testEmail: s
 
   return { success: false, message: 'All configurations failed' };
 }
+
+// Simple test email function for admin interface
+export async function sendTestEmail(email: string) {
+  try {
+    // Default configuration - can be made configurable later
+    const config = {
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      username: process.env.SMTP_USERNAME || '',
+      password: process.env.SMTP_PASSWORD || '',
+      fromEmail: process.env.SMTP_FROM || process.env.SMTP_USERNAME || '',
+      toEmail: email
+    };
+
+    if (!config.username || !config.password) {
+      return {
+        success: false,
+        error: 'SMTP credentials not configured. Please set SMTP_USERNAME and SMTP_PASSWORD environment variables.'
+      };
+    }
+
+    return await testSMTPConnection(config);
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
