@@ -28,6 +28,7 @@ import EmailProgressPage from "@/pages/admin/email-progress";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import CRMPage from "@/pages/crm";
+import CustomerProfile from "@/pages/customer-profile";
 import SalesAnalytics from "@/pages/sales-analytics";
 import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
@@ -68,6 +69,7 @@ function Router() {
           <Route path="/forgot-password" component={ForgotPassword} />
           <Route path="/reset-password" component={ResetPassword} />
           <Route path="/crm" component={CRMPage} />
+          <Route path="/customer/profile" component={CustomerProfile} />
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />
           <Route path="/products/water-treatment" component={WaterTreatment} />
