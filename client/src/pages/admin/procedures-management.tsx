@@ -378,7 +378,7 @@ export default function ProceduresManagement() {
   };
 
   const deleteDocument = async (documentId: number, documentTitle: string) => {
-    if (!confirm(`آیا مطمئن هستید که می‌خواهید سند "${documentTitle}" را حذف کنید؟`)) {
+    if (!confirm(`Are you sure you want to delete the document "${documentTitle}"?`)) {
       return;
     }
 
@@ -398,15 +398,15 @@ export default function ProceduresManagement() {
       });
 
       toast({
-        title: "موفقیت",
-        description: "سند با موفقیت حذف شد",
+        title: "Success",
+        description: "Document deleted successfully",
       });
     } catch (error) {
       console.error('Error deleting document:', error);
       toast({
         variant: "destructive",
-        title: "خطا",
-        description: "مشکلی در حذف سند رخ داده است",
+        title: "Error",
+        description: "Failed to delete document",
       });
     }
   };
@@ -1148,15 +1148,15 @@ export default function ProceduresManagement() {
       <Dialog open={showDocuments} onOpenChange={setShowDocuments}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>اسناد آپلود شده</DialogTitle>
+            <DialogTitle>Uploaded Documents</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             {documentsLoading ? (
-              <div className="text-center py-8">در حال بارگذاری اسناد...</div>
+              <div className="text-center py-8">Loading documents...</div>
             ) : documents.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                هیچ سندی برای این دستورالعمل آپلود نشده است
+                No documents have been uploaded for this procedure
               </div>
             ) : (
               <div className="space-y-3">
@@ -1168,40 +1168,40 @@ export default function ProceduresManagement() {
                           <div className="flex items-center gap-2 mb-2">
                             <FileText className="h-5 w-5 text-blue-600" />
                             <h3 className="font-semibold text-lg">{document.title}</h3>
-                            <Badge variant="outline">نسخه {document.version || '1.0'}</Badge>
+                            <Badge variant="outline">Version {document.version || '1.0'}</Badge>
                           </div>
                           
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
                             <div>
-                              <span className="font-medium">نام فایل:</span>
+                              <span className="font-medium">File Name:</span>
                               <p className="truncate">{document.fileName}</p>
                             </div>
                             <div>
-                              <span className="font-medium">حجم:</span>
+                              <span className="font-medium">Size:</span>
                               <p>{formatFileSize(document.fileSize || 0)}</p>
                             </div>
                             <div>
-                              <span className="font-medium">آپلود کننده:</span>
-                              <p>{document.uploadedByName || 'نامشخص'}</p>
+                              <span className="font-medium">Uploaded By:</span>
+                              <p>{document.uploadedByName || 'Unknown'}</p>
                             </div>
                             <div>
-                              <span className="font-medium">تاریخ آپلود:</span>
-                              <p>{document.uploadDate ? new Date(document.uploadDate).toLocaleDateString('fa-IR') : 'نامشخص'}</p>
+                              <span className="font-medium">Upload Date:</span>
+                              <p>{document.uploadDate ? new Date(document.uploadDate).toLocaleDateString('en-US') : 'Unknown'}</p>
                             </div>
                           </div>
                           
                           {document.description && (
                             <div className="mb-3">
-                              <span className="font-medium text-sm">توضیحات:</span>
+                              <span className="font-medium text-sm">Description:</span>
                               <p className="text-sm text-gray-600 mt-1">{document.description}</p>
                             </div>
                           )}
                           
                           <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>تعداد دانلود: {document.downloadCount || 0}</span>
+                            <span>Downloads: {document.downloadCount || 0}</span>
                             {document.lastDownloadedAt && (
                               <span>
-                                آخرین دانلود: {new Date(document.lastDownloadedAt).toLocaleDateString('fa-IR')}
+                                Last Downloaded: {new Date(document.lastDownloadedAt).toLocaleDateString('en-US')}
                               </span>
                             )}
                           </div>
@@ -1212,20 +1212,20 @@ export default function ProceduresManagement() {
                             variant="outline"
                             size="sm"
                             onClick={() => downloadDocument(document.id, document.fileName)}
-                            title="دانلود سند"
+                            title="Download Document"
                           >
                             <Download className="h-4 w-4 mr-1" />
-                            دانلود
+                            Download
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => deleteDocument(document.id, document.title)}
-                            title="حذف سند"
+                            title="Delete Document"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4 mr-1" />
-                            حذف
+                            Delete
                           </Button>
                         </div>
                       </div>
@@ -1238,7 +1238,7 @@ export default function ProceduresManagement() {
           
           <div className="flex justify-end mt-4">
             <Button variant="outline" onClick={() => setShowDocuments(false)}>
-              بستن
+              Close
             </Button>
           </div>
         </DialogContent>
