@@ -839,13 +839,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // BARCODE & INVENTORY MANAGEMENT ENDPOINTS
   // =============================================================================
 
-  // Get product by barcode
+  // Get product by barcode - search in both regular products and shop products
   app.get("/api/products/barcode/:barcode", async (req, res) => {
     try {
       const { barcode } = req.params;
       const decodedBarcode = decodeURIComponent(barcode);
       
-      // Search for product by barcode, SKU, or QR code
+      // First search in shop products (inventory management)
+      try {
+        const shopProduct = await shopStorage.getShopProductBySku(decodedBarcode);
+        if (shopProduct) {
+          return res.json(shopProduct);
+        }
+      } catch (error) {
+        console.log("Shop product not found by SKU, trying barcode field");
+      }
+
+      // Search shop products by barcode field directly
+      try {
+        const shopProducts = await shopStorage.getShopProducts();
+        const foundShopProduct = shopProducts.find(p => 
+          p.barcode === decodedBarcode || 
+          p.sku === decodedBarcode
+        );
+        
+        if (foundShopProduct) {
+          return res.json(foundShopProduct);
+        }
+      } catch (error) {
+        console.log("Error searching shop products:", error);
+      }
+      
+      // Then search in regular products
       const products = await storage.getProducts();
       const product = products.find(p => 
         p.barcode === decodedBarcode || 
