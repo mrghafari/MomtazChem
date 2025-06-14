@@ -2919,16 +2919,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Return default SMTP for backward compatibility
-      const smtpSettings = {
-        host: process.env.SMTP_HOST || "smtp.zoho.com",
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: process.env.SMTP_SECURE === "true",
-        user: process.env.SMTP_USER || "",
-        pass: process.env.SMTP_PASS ? "***hidden***" : "",
-        fromName: process.env.FROM_NAME || "Momtaz Chemical",
-        fromEmail: process.env.FROM_EMAIL || "info@momtazchem.com"
-      };
+      // Get SMTP settings from database only
+      const smtpSettings = null; // No fallback - only use database settings
 
       res.json({
         success: true,

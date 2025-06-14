@@ -179,8 +179,8 @@ export default function AdvancedEmailSettingsPage() {
         secure: false,
         username: "",
         password: "",
-        fromName: "Momtaz Chemical",
-        fromEmail: "info@momtazchem.com"
+        fromName: "",
+        fromEmail: ""
       });
     }
     

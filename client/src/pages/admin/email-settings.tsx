@@ -49,53 +49,7 @@ interface SMTPSettings {
   fromEmail: string;
 }
 
-const defaultEmailSettings: EmailSettings[] = [
-  {
-    category: "contact",
-    name: "Contact Form Recipient",
-    description: "Receives all contact form submissions",
-    emailAddress: "info@momtazchem.com",
-    isActive: true,
-    isPrimary: true,
-    usage: ["Contact Form", "General Inquiries"]
-  },
-  {
-    category: "inquiries",
-    name: "Product Inquiries",
-    description: "Receives product-related questions and quotes",
-    emailAddress: "info@momtazchem.com",
-    isActive: true,
-    isPrimary: false,
-    usage: ["Product Inquiries", "Quote Requests"]
-  },
-  {
-    category: "orders",
-    name: "Order Notifications",
-    description: "Receives order confirmations and updates",
-    emailAddress: "info@momtazchem.com",
-    isActive: true,
-    isPrimary: false,
-    usage: ["Order Confirmations", "Order Status Updates"]
-  },
-  {
-    category: "support",
-    name: "Technical Support",
-    description: "Receives technical support requests",
-    emailAddress: "info@momtazchem.com",
-    isActive: true,
-    isPrimary: false,
-    usage: ["Technical Support", "Live Chat Requests"]
-  },
-  {
-    category: "notifications",
-    name: "System Notifications",
-    description: "Receives system alerts and notifications",
-    emailAddress: "info@momtazchem.com",
-    isActive: true,
-    isPrimary: false,
-    usage: ["Inventory Alerts", "System Notifications"]
-  }
-];
+// No default email settings - use only database configurations
 
 export default function EmailSettingsPage() {
   const [, setLocation] = useLocation();
@@ -103,18 +57,18 @@ export default function EmailSettingsPage() {
   const queryClient = useQueryClient();
   
   // Email settings state
-  const [emailSettings, setEmailSettings] = useState<EmailSettings[]>(defaultEmailSettings);
+  const [emailSettings, setEmailSettings] = useState<EmailSettings[]>([]);
   const [editingEmail, setEditingEmail] = useState<EmailSettings | null>(null);
   
   // SMTP settings state
   const [smtpSettings, setSmtpSettings] = useState<SMTPSettings>({
-    host: "smtp.zoho.com",
+    host: "",
     port: 587,
     secure: false,
     user: "",
     pass: "",
-    fromName: "Momtaz Chemical",
-    fromEmail: "info@momtazchem.com"
+    fromName: "",
+    fromEmail: ""
   });
   
   // UI state
