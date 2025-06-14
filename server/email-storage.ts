@@ -168,18 +168,22 @@ export class EmailStorage implements IEmailStorage {
       const transporter = nodemailer.createTransport({
         host: setting.host,
         port: setting.port,
-        secure: setting.port === 465 ? true : false, // Use SSL only for port 465
-        requireTLS: setting.port === 587 ? true : false, // Use STARTTLS for port 587
+        secure: setting.port === 465 ? true : false,
         auth: {
           user: setting.username,
           pass: setting.password,
         },
         pool: false,
-        socketTimeout: 10000,
-        greetingTimeout: 5000,
+        socketTimeout: 20000,
+        greetingTimeout: 10000,
+        connectionTimeout: 20000,
         tls: {
-          rejectUnauthorized: false // Allow self-signed certificates
-        }
+          rejectUnauthorized: false,
+          ciphers: 'SSLv3'
+        },
+        requireTLS: true,
+        debug: true,
+        logger: true
       } as any);
 
       await transporter.verify();

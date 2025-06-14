@@ -401,13 +401,16 @@ export default function AdvancedEmailSettingsPage() {
                       </div>
                       <div>
                         <Label htmlFor="password">Password</Label>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          For Zoho Mail: Use App Password (not regular password)
+                        </p>
                         <div className="relative">
                           <Input
                             id="password"
                             type={showPassword ? "text" : "password"}
                             value={smtpForm.password}
                             onChange={(e) => setSmtpForm({ ...smtpForm, password: e.target.value })}
-                            placeholder="Enter password"
+                            placeholder="Enter App Password for Zoho"
                             className="pr-10"
                           />
                           <Button
