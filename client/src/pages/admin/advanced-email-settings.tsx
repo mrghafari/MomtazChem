@@ -168,7 +168,7 @@ export default function AdvancedEmailSettingsPage() {
         port: selectedCategory.smtp.port,
         secure: selectedCategory.smtp.secure,
         username: selectedCategory.smtp.username,
-        password: "", // Don't show password
+        password: selectedCategory.smtp.password || "", // Show actual password
         fromName: selectedCategory.smtp.fromName,
         fromEmail: selectedCategory.smtp.fromEmail
       });
