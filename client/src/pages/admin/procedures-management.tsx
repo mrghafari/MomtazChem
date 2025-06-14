@@ -407,14 +407,14 @@ export default function ProceduresManagement() {
         
         // Refresh the list anyway in case the document was already deleted
         queryClient.invalidateQueries({ 
-          queryKey: [`/api/procedures/${selectedProcedureId}/documents`] 
+          queryKey: ["/api/procedures", selectedProcedureId, "documents"] 
         });
         return;
       }
 
       // Refresh documents list
       queryClient.invalidateQueries({ 
-        queryKey: [`/api/procedures/${selectedProcedureId}/documents`] 
+        queryKey: ["/api/procedures", selectedProcedureId, "documents"] 
       });
 
       toast({
