@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat, Download, FileText, Image } from "lucide-react";
 import type { ShowcaseProduct } from "@shared/showcase-schema";
+import waterTreatmentImg from "@assets/download_1749877891276.jpeg";
 
 const Home = () => {
   // Fetch all products from database
@@ -137,7 +138,7 @@ const Home = () => {
                         {/* Use first product with image, otherwise fallback to category image */}
                         <img
                           src={category.category === 'water-treatment' ? 
-                            '/uploads/images/product-1749743089947-629563758.png' : 
+                            waterTreatmentImg : 
                             category.imageUrl}
                           alt={category.title}
                           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
