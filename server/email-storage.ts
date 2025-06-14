@@ -145,11 +145,6 @@ export class EmailStorage implements IEmailStorage {
   async updateSmtpSetting(id: number, settingUpdate: Partial<InsertSmtpSetting>): Promise<SmtpSetting> {
     let updateData = { ...settingUpdate, updatedAt: new Date() };
     
-    // Encrypt password if it's being updated
-    if (settingUpdate.password) {
-      updateData.password = await bcrypt.hash(settingUpdate.password, 10);
-    }
-    
     const [setting] = await emailDb
       .update(smtpSettings)
       .set(updateData)
@@ -177,7 +172,7 @@ export class EmailStorage implements IEmailStorage {
         secure: setting.secure,
         auth: {
           user: setting.username,
-          pass: setting.password, // This is encrypted, would need to decrypt in production
+          pass: setting.password,
         },
         connectionTimeout: 10000,
         greetingTimeout: 5000,
@@ -197,6 +192,7 @@ export class EmailStorage implements IEmailStorage {
       
       return true;
     } catch (error) {
+      console.error("SMTP test error:", error);
       // Update test status
       await emailDb
         .update(smtpSettings)
