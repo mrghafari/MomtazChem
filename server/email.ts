@@ -64,6 +64,7 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: recipientEmails,
+      cc: formData.email,
       subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName}`,
       html: `
         <h2>New Contact Form Submission</h2>
@@ -87,14 +88,67 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    // Send main email to admin
+    console.log('Sending email to admin:', recipientEmails);
+    const emailResult = await transporter.sendMail(mailOptions);
+    console.log('Admin email sent successfully');
+
+    // Send confirmation email to sender
+    const confirmationOptions = {
+      from: `${smtp.fromName} <${smtp.fromEmail}>`,
+      to: formData.email,
+      subject: `Thank you for contacting Momtaz Chemical - ${formData.firstName} ${formData.lastName}`,
+      html: `
+        <h2>Thank you for your inquiry!</h2>
+        <p>Dear ${formData.firstName} ${formData.lastName},</p>
+        <p>We have received your message and will get back to you within 24 hours.</p>
+        
+        <h3>Your Message Details:</h3>
+        <p><strong>Company:</strong> ${formData.company}</p>
+        <p><strong>Product Interest:</strong> ${formData.productInterest}</p>
+        <p><strong>Message:</strong></p>
+        <p>${formData.message}</p>
+        
+        <p>Best regards,<br>Momtaz Chemical Team</p>
+      `,
+      text: `
+        Thank you for your inquiry!
+        
+        Dear ${formData.firstName} ${formData.lastName},
+        
+        We have received your message and will get back to you within 24 hours.
+        
+        Your Message Details:
+        Company: ${formData.company}
+        Product Interest: ${formData.productInterest}
+        
+        Message:
+        ${formData.message}
+        
+        Best regards,
+        Momtaz Chemical Team
+      `
+    };
+
+    console.log('Sending confirmation email to:', formData.email);
+    await transporter.sendMail(confirmationOptions);
+    console.log('Confirmation email sent successfully');
     
-    // Log the email with correct schema
+    // Log both emails
     await emailStorage.logEmail({
       categoryId: categorySettings.category.id,
       toEmail: recipientEmails,
       fromEmail: smtp.fromEmail,
       subject: mailOptions.subject,
+      status: 'sent',
+      sentAt: new Date(),
+    });
+
+    await emailStorage.logEmail({
+      categoryId: categorySettings.category.id,
+      toEmail: formData.email,
+      fromEmail: smtp.fromEmail,
+      subject: confirmationOptions.subject,
       status: 'sent',
       sentAt: new Date(),
     });
