@@ -165,9 +165,7 @@ export class EmailStorage implements IEmailStorage {
       const setting = await this.getSmtpSettingById(id);
       if (!setting) return false;
       
-      const nodemailer = await import('nodemailer');
-      
-      const transporter = nodemailer.default.createTransport({
+      const transporter = nodemailer.createTransport({
         host: setting.host,
         port: setting.port,
         secure: setting.secure,
@@ -175,9 +173,10 @@ export class EmailStorage implements IEmailStorage {
           user: setting.username,
           pass: setting.password,
         },
-        connectionTimeout: 10000,
+        pool: false,
+        socketTimeout: 10000,
         greetingTimeout: 5000,
-      });
+      } as any);
 
       await transporter.verify();
       
