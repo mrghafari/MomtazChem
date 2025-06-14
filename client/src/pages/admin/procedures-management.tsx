@@ -530,6 +530,50 @@ export default function ProceduresManagement() {
     }
   };
 
+  const onSubmitCategory = async (data: ProcedureCategoryForm) => {
+    try {
+      let response;
+      if (editingItem) {
+        // Update existing category
+        response = await fetch(`/api/procedures/categories/${editingItem.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+      } else {
+        // Create new category
+        response = await fetch('/api/procedures/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "موفقیت",
+          description: editingItem ? "دسته‌بندی با موفقیت به‌روزرسانی شد" : "دسته‌بندی جدید ایجاد شد",
+        });
+        
+        closeDialog();
+        queryClient.invalidateQueries({ queryKey: ["/api/procedures/categories"] });
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('Error submitting category:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "مشکلی در ذخیره دسته‌بندی رخ داده است",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -1104,7 +1148,7 @@ export default function ProceduresManagement() {
 
           {dialogType === 'category' && (
             <Form {...categoryForm}>
-              <form className="space-y-4">
+              <form onSubmit={categoryForm.handleSubmit(onSubmitCategory)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={categoryForm.control}
