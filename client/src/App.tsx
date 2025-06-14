@@ -20,6 +20,7 @@ import BarcodeInventory from "@/pages/admin/barcode-inventory";
 import SMTPTestPage from "@/pages/admin/smtp-test";
 import EmailSettingsPage from "@/pages/admin/email-settings";
 import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
+import EmailProgressPage from "@/pages/admin/email-progress";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import CRMPage from "@/pages/crm";
@@ -53,6 +54,7 @@ function Router() {
           <Route path="/admin/smtp-test" component={SMTPTestPage} />
           <Route path="/admin/email-settings" component={EmailSettingsPage} />
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />
+          <Route path="/admin/email-progress" component={EmailProgressPage} />
           <Route path="/admin/inquiries" component={Dashboard} />
           <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />

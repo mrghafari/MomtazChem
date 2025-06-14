@@ -304,27 +304,22 @@ export default function AdvancedEmailSettingsPage() {
         </Card>
       )}
 
-      {/* Progress Tracker Tab */}
-      <Tabs defaultValue="categories" className="mb-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="categories">Email Configuration</TabsTrigger>
-          <TabsTrigger value="progress">Progress Tracker</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="progress" className="mt-6">
-          <EmailSetupProgress 
-            categories={categories}
-            onSelectCategory={(category) => {
-              setSelectedCategory(category);
-            }}
-            selectedCategory={selectedCategory}
-          />
-        </TabsContent>
-        
-        <TabsContent value="categories" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Categories List */}
-            <div className="lg:col-span-1">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-semibold">Email Categories</h2>
+          <p className="text-gray-600">Configure SMTP settings and recipients for each category</p>
+        </div>
+        <Button
+          onClick={() => setLocation("/admin/email-progress")}
+          className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+        >
+          🎯 Progress Tracker
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Categories List */}
+        <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -622,9 +617,8 @@ export default function AdvancedEmailSettingsPage() {
               </CardContent>
             </Card>
           )}
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
