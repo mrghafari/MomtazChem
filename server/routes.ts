@@ -1944,19 +1944,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate procedure PDF
-  app.get("/api/procedures/:procedureId/generate-pdf", requireAuth, async (req, res) => {
+  // Generate procedure text document
+  app.get("/api/procedures/:procedureId/export", requireAuth, async (req, res) => {
     try {
       const { procedureId } = req.params;
       const { pool } = await import('./db');
       
       // Get procedure details
       const procedureResult = await pool.query(`
-        SELECT id, title, category_id, description, content, version, status, priority, 
-               language, author_id, approver_id, approved_at, effective_date, review_date, 
-               tags, access_level, view_count, last_viewed_at, created_at, updated_at
-        FROM procedures
-        WHERE id = $1
+        SELECT p.id, p.title, p.category_id, p.description, p.content, p.version, p.status, p.priority, 
+               p.language, p.author_id, p.approver_id, p.approved_at, p.effective_date, p.review_date, 
+               p.tags, p.access_level, p.view_count, p.last_viewed_at, p.created_at, p.updated_at,
+               c.name as category_name
+        FROM procedures p
+        LEFT JOIN procedure_categories c ON p.category_id = c.id
+        WHERE p.id = $1
       `, [procedureId]);
 
       if (procedureResult.rows.length === 0) {
@@ -1988,78 +1990,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ORDER BY d.upload_date DESC
       `, [procedureId]);
 
-      // Transform data
-      const procedureData = {
-        id: procedure.id,
-        title: procedure.title,
-        categoryId: procedure.category_id,
-        description: procedure.description,
-        content: procedure.content,
-        version: procedure.version,
-        status: procedure.status,
-        priority: procedure.priority,
-        language: procedure.language,
-        authorId: procedure.author_id,
-        approverId: procedure.approver_id,
-        approvedAt: procedure.approved_at,
-        effectiveDate: procedure.effective_date,
-        reviewDate: procedure.review_date,
-        tags: procedure.tags || [],
-        accessLevel: procedure.access_level,
-        viewCount: procedure.view_count,
-        lastViewedAt: procedure.last_viewed_at,
-        createdAt: procedure.created_at,
-        updatedAt: procedure.updated_at
-      };
+      // Generate text content
+      let textContent = `
+========================================
+${procedure.title}
+========================================
 
-      const outlinesData = outlinesResult.rows.map((row: any) => ({
-        id: row.id,
-        procedureId: row.procedure_id,
-        parentId: row.parent_id,
-        level: row.level,
-        orderNumber: row.order_number,
-        title: row.title,
-        content: row.content,
-        isCollapsible: row.is_collapsible,
-        isExpanded: row.is_expanded,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at
-      }));
+معلومات کلی:
+- نسخه: ${procedure.version}
+- وضعیت: ${procedure.status === 'approved' ? 'تأیید شده' : 
+              procedure.status === 'review' ? 'در بررسی' :
+              procedure.status === 'draft' ? 'پیش‌نویس' : 'بایگانی'}
+- اولویت: ${procedure.priority === 'critical' ? 'بحرانی' :
+             procedure.priority === 'high' ? 'بالا' :
+             procedure.priority === 'normal' ? 'عادی' : 'پایین'}
+- دسته‌بندی: ${procedure.category_name || 'نامشخص'}
+- تاریخ ایجاد: ${new Date(procedure.created_at).toLocaleDateString('fa-IR')}
+${procedure.effective_date ? `- تاریخ اجرا: ${new Date(procedure.effective_date).toLocaleDateString('fa-IR')}` : ''}
+${procedure.review_date ? `- تاریخ بازنگری: ${new Date(procedure.review_date).toLocaleDateString('fa-IR')}` : ''}
+- سطح دسترسی: ${procedure.access_level === 'public' ? 'عمومی' :
+                  procedure.access_level === 'internal' ? 'داخلی' :
+                  procedure.access_level === 'restricted' ? 'محدود' : 'محرمانه'}
+${procedure.tags && procedure.tags.length > 0 ? `- برچسب‌ها: ${procedure.tags.join(', ')}` : ''}
 
-      const documentsData = documentsResult.rows.map((row: any) => ({
-        id: row.id,
-        procedureId: row.procedure_id,
-        outlineId: row.outline_id,
-        title: row.title,
-        description: row.description,
-        fileName: row.file_name,
-        filePath: row.file_path,
-        fileSize: row.file_size,
-        fileType: row.file_type,
-        uploadDate: row.upload_date,
-        uploadedBy: row.uploaded_by,
-        uploadedByName: row.uploaded_by_name,
-        version: row.version,
-        isActive: row.is_active,
-        downloadCount: row.download_count,
-        lastDownloadedAt: row.last_downloaded_at,
-        tags: row.tags || [],
-        outlineTitle: row.outline_title
-      }));
+`;
 
-      // Generate PDF
-      const { PDFGenerator } = await import('./pdf-generator');
-      const pdfFileName = await PDFGenerator.generateProcedurePDF(procedureData, outlinesData, documentsData);
-      
-      // Return PDF file path
-      const pdfPath = path.join(process.cwd(), 'uploads', 'documents', pdfFileName);
-      
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="procedure-${procedure.title}-${new Date().toISOString().split('T')[0]}.pdf"`);
-      res.sendFile(pdfPath);
+      if (procedure.description) {
+        textContent += `
+خلاصه توضیحات:
+${procedure.description}
+
+`;
+      }
+
+      if (outlinesResult.rows.length > 0) {
+        textContent += `
+========================================
+فهرست مطالب
+========================================
+
+`;
+        outlinesResult.rows.forEach((outline: any) => {
+          const indent = '  '.repeat(outline.level - 1);
+          textContent += `${indent}${outline.order_number}. ${outline.title}\n`;
+          if (outline.content) {
+            textContent += `${indent}   ${outline.content}\n`;
+          }
+          textContent += '\n';
+        });
+      }
+
+      textContent += `
+========================================
+محتوای دستورالعمل
+========================================
+
+${procedure.content}
+
+`;
+
+      if (documentsResult.rows.length > 0) {
+        textContent += `
+========================================
+مستندات و پیوست‌ها
+========================================
+
+`;
+        documentsResult.rows.forEach((doc: any) => {
+          const formatFileSize = (bytes: number): string => {
+            if (bytes === 0) return '0 بایت';
+            const k = 1024;
+            const sizes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+          };
+
+          textContent += `
+- ${doc.title}
+  نوع فایل: ${doc.file_type}
+  اندازه: ${formatFileSize(doc.file_size)}
+  تاریخ آپلود: ${new Date(doc.upload_date).toLocaleDateString('fa-IR')}
+  آپلودکننده: ${doc.uploaded_by_name}
+  ${doc.outline_title ? `مربوط به: ${doc.outline_title}` : ''}
+  ${doc.description ? `توضیحات: ${doc.description}` : ''}
+  ${doc.tags && doc.tags.length > 0 ? `برچسب‌ها: ${doc.tags.join(', ')}` : ''}
+
+`;
+        });
+      }
+
+      textContent += `
+========================================
+اطلاعات تولید مستند
+========================================
+
+این مستند در تاریخ ${new Date().toLocaleDateString('fa-IR')} ساعت ${new Date().toLocaleTimeString('fa-IR')} تولید شده است.
+تعداد بازدید: ${procedure.view_count}
+
+`;
+
+      // Return text content directly
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="procedure-${procedure.title}-${new Date().toISOString().split('T')[0]}.txt"`);
+      res.send(textContent);
 
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error exporting procedure:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });

@@ -271,6 +271,43 @@ export default function ProceduresManagement() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  // Export procedure handler
+  const exportProcedure = async (procedureId: number) => {
+    try {
+      const response = await fetch(`/api/procedures/${procedureId}/export`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export procedure');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `procedure-${procedureId}-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "موفقیت",
+        description: "فایل دستورالعمل با موفقیت دانلود شد",
+      });
+    } catch (error) {
+      console.error('Error exporting procedure:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "مشکلی در دانلود فایل رخ داده است",
+      });
+    }
+  };
+
   // Dialog handlers
   const openCreateDialog = (type: 'category' | 'procedure' | 'safety') => {
     setDialogType(type);
@@ -516,8 +553,8 @@ export default function ProceduresManagement() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => downloadPDF(procedure.id)}
-                                title="دانلود PDF"
+                                onClick={() => exportProcedure(procedure.id)}
+                                title="دانلود فایل دستورالعمل"
                               >
                                 <Download className="h-4 w-4" />
                               </Button>
