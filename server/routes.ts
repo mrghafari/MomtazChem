@@ -2090,8 +2090,9 @@ ${procedure.content}
 `;
 
       // Return text content directly
+      const filename = `procedure-${procedure.id}-${Date.now()}.txt`;
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="procedure-${procedure.title}-${new Date().toISOString().split('T')[0]}.txt"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.send(textContent);
 
     } catch (error) {
