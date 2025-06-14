@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { 
   Factory, 
   Package, 
@@ -29,13 +30,91 @@ import {
   Users,
   Target,
   MessageSquare,
-  ShoppingCart
+  ShoppingCart,
+  DollarSign,
+  Beaker,
+  Droplet,
+  Upload,
+  Image,
+  FileText,
+  X,
+  Search,
+  QrCode,
+  BarChart3,
+  AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
+const categories = [
+  { value: "fuel-additives", label: "Fuel Additives", icon: <Beaker className="w-4 h-4" /> },
+  { value: "water-treatment", label: "Water Treatment", icon: <Droplet className="w-4 h-4" /> },
+  { value: "paint-thinner", label: "Paint & Thinner", icon: <Package className="w-4 h-4" /> },
+  { value: "agricultural-fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
+];
+
+// Inventory status helper functions
+const getInventoryStatusColor = (status: string) => {
+  switch (status) {
+    case 'in_stock':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'low_stock':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'out_of_stock':
+      return 'bg-red-100 text-red-800 border-red-200';
+    case 'discontinued':
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
+const getInventoryStatusIcon = (status: string) => {
+  switch (status) {
+    case 'in_stock':
+      return <CheckCircle className="w-4 h-4" />;
+    case 'low_stock':
+      return <AlertTriangle className="w-4 h-4" />;
+    case 'out_of_stock':
+      return <XCircle className="w-4 h-4" />;
+    case 'discontinued':
+      return <AlertCircle className="w-4 h-4" />;
+    default:
+      return <Package className="w-4 h-4" />;
+  }
+};
+
+const getInventoryStatusLabel = (status: string) => {
+  switch (status) {
+    case 'in_stock':
+      return 'In Stock';
+    case 'low_stock':
+      return 'Low Stock';
+    case 'out_of_stock':
+      return 'Out of Stock';
+    case 'discontinued':
+      return 'Discontinued';
+    default:
+      return 'Unknown';
+  }
+};
+
+const getStockLevelIndicator = (current: number, min: number, max: number) => {
+  const percentage = (current / max) * 100;
+  
+  if (current === 0) {
+    return { color: 'bg-red-500', width: 0, status: 'empty' };
+  } else if (current <= min) {
+    return { color: 'bg-yellow-500', width: Math.max(percentage, 10), status: 'low' };
+  } else if (percentage >= 80) {
+    return { color: 'bg-green-500', width: percentage, status: 'high' };
+  } else {
+    return { color: 'bg-blue-500', width: percentage, status: 'normal' };
+  }
+};
 
 interface ProductionBatch {
   id: number;
@@ -110,8 +189,18 @@ export default function FactoryManagement() {
   const [, setLocation] = useLocation();
   const [selectedTab, setSelectedTab] = useState("production");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'batch' | 'line' | 'quality'>('batch');
+  const [dialogType, setDialogType] = useState<'batch' | 'line' | 'quality' | 'product'>('batch');
   const [editingItem, setEditingItem] = useState<any>(null);
+  
+  // Product management state
+  const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [catalogPreview, setCatalogPreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingCatalog, setUploadingCatalog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const batchForm = useForm<ProductionBatchForm>({
     resolver: zodResolver(productionBatchSchema),
