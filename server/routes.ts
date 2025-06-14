@@ -35,8 +35,9 @@ declare module "express-session" {
 const uploadsDir = path.join(process.cwd(), 'uploads');
 const imagesDir = path.join(uploadsDir, 'images');
 const catalogsDir = path.join(uploadsDir, 'catalogs');
+const documentsDir = path.join(uploadsDir, 'documents');
 
-[uploadsDir, imagesDir, catalogsDir].forEach(dir => {
+[uploadsDir, imagesDir, catalogsDir, documentsDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -88,6 +89,43 @@ const uploadCatalog = multer({
       cb(null, true);
     } else {
       cb(new Error('Only PDF files are allowed'));
+    }
+  }
+});
+
+// Multer configuration for document uploads
+const documentStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, documentsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: documentStorage,
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 20MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow common document types
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+      'text/plain',
+      'image/png',
+      'image/jpeg',
+      'image/jpg'
+    ];
+    
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('File type not allowed'));
     }
   }
 });
@@ -1519,6 +1557,382 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error creating production order:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // =============================================================================
+  // PROCEDURES MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get procedure categories
+  app.get("/api/procedures/categories", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, name, description, color_code, display_order, is_active, created_at, updated_at
+        FROM procedure_categories
+        WHERE is_active = true
+        ORDER BY display_order, name
+      `);
+      
+      const categories = result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        colorCode: row.color_code,
+        displayOrder: row.display_order,
+        isActive: row.is_active,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching procedure categories:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get procedures
+  app.get("/api/procedures", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, title, category_id, description, content, version, status, priority, 
+               language, author_id, approver_id, approved_at, effective_date, review_date, 
+               tags, access_level, view_count, last_viewed_at, created_at, updated_at
+        FROM procedures
+        ORDER BY created_at DESC
+      `);
+      
+      const procedures = result.rows.map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        categoryId: row.category_id,
+        description: row.description,
+        content: row.content,
+        version: row.version,
+        status: row.status,
+        priority: row.priority,
+        language: row.language,
+        authorId: row.author_id,
+        approverId: row.approver_id,
+        approvedAt: row.approved_at,
+        effectiveDate: row.effective_date,
+        reviewDate: row.review_date,
+        tags: row.tags || [],
+        accessLevel: row.access_level,
+        viewCount: row.view_count,
+        lastViewedAt: row.last_viewed_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(procedures);
+    } catch (error) {
+      console.error("Error fetching procedures:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get safety protocols
+  app.get("/api/procedures/safety-protocols", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, title, category, description, severity_level, required_ppe, 
+               procedures, first_aid_steps, evacuation_plan, is_mandatory, 
+               compliance_notes, last_updated_by, created_at, updated_at
+        FROM safety_protocols
+        ORDER BY severity_level DESC, created_at DESC
+      `);
+      
+      const safetyProtocols = result.rows.map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        category: row.category,
+        description: row.description,
+        severityLevel: row.severity_level,
+        requiredPpe: row.required_ppe || [],
+        procedures: row.procedures,
+        firstAidSteps: row.first_aid_steps,
+        evacuationPlan: row.evacuation_plan,
+        isMandatory: row.is_mandatory,
+        complianceNotes: row.compliance_notes,
+        lastUpdatedBy: row.last_updated_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(safetyProtocols);
+    } catch (error) {
+      console.error("Error fetching safety protocols:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Create procedure category
+  app.post("/api/procedures/categories", requireAuth, async (req, res) => {
+    try {
+      const { name, description, colorCode, displayOrder } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO procedure_categories (name, description, color_code, display_order)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, name, description, color_code, display_order, is_active, created_at
+      `, [name, description, colorCode, displayOrder]);
+
+      res.json({
+        success: true,
+        category: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error creating procedure category:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "Category name already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // Create procedure
+  app.post("/api/procedures", requireAuth, async (req, res) => {
+    try {
+      const { title, categoryId, description, content, priority, effectiveDate, reviewDate, tags, accessLevel } = req.body;
+      const userId = (req.session as any)?.adminId;
+      
+      // Process tags
+      const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO procedures (title, category_id, description, content, priority, author_id, 
+                               effective_date, review_date, tags, access_level)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id, title, category_id, description, version, status, priority, created_at
+      `, [title, categoryId, description, content, priority, userId, effectiveDate, reviewDate, tagsArray, accessLevel]);
+
+      res.json({
+        success: true,
+        procedure: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating procedure:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Create safety protocol
+  app.post("/api/procedures/safety-protocols", requireAuth, async (req, res) => {
+    try {
+      const { title, category, description, severityLevel, procedures, firstAidSteps, evacuationPlan, requiredPpe } = req.body;
+      const userId = (req.session as any)?.adminId;
+      
+      // Process PPE
+      const ppeArray = requiredPpe ? requiredPpe.split(',').map((ppe: string) => ppe.trim()).filter((ppe: string) => ppe.length > 0) : [];
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO safety_protocols (title, category, description, severity_level, procedures, 
+                                     first_aid_steps, evacuation_plan, required_ppe, last_updated_by)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id, title, category, severity_level, is_mandatory, created_at
+      `, [title, category, description, severityLevel, procedures, firstAidSteps, evacuationPlan, ppeArray, userId]);
+
+      res.json({
+        success: true,
+        safetyProtocol: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating safety protocol:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get procedure outlines
+  app.get("/api/procedures/:procedureId/outlines", requireAuth, async (req, res) => {
+    try {
+      const { procedureId } = req.params;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, procedure_id, parent_id, level, order_number, title, content, 
+               is_collapsible, is_expanded, created_at, updated_at
+        FROM procedure_outlines
+        WHERE procedure_id = $1
+        ORDER BY level, order_number
+      `, [procedureId]);
+      
+      const outlines = result.rows.map((row: any) => ({
+        id: row.id,
+        procedureId: row.procedure_id,
+        parentId: row.parent_id,
+        level: row.level,
+        orderNumber: row.order_number,
+        title: row.title,
+        content: row.content,
+        isCollapsible: row.is_collapsible,
+        isExpanded: row.is_expanded,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(outlines);
+    } catch (error) {
+      console.error("Error fetching procedure outlines:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Create procedure outline
+  app.post("/api/procedures/:procedureId/outlines", requireAuth, async (req, res) => {
+    try {
+      const { procedureId } = req.params;
+      const { parentId, level, orderNumber, title, content, isCollapsible } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO procedure_outlines (procedure_id, parent_id, level, order_number, title, content, is_collapsible)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id, procedure_id, level, order_number, title, created_at
+      `, [procedureId, parentId, level, orderNumber, title, content, isCollapsible]);
+
+      res.json({
+        success: true,
+        outline: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating procedure outline:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get procedure documents
+  app.get("/api/procedures/:procedureId/documents", requireAuth, async (req, res) => {
+    try {
+      const { procedureId } = req.params;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT d.id, d.procedure_id, d.outline_id, d.title, d.description, d.file_name, 
+               d.file_path, d.file_size, d.file_type, d.upload_date, d.uploaded_by, 
+               d.version, d.is_active, d.download_count, d.last_downloaded_at, d.tags,
+               u.username as uploaded_by_name,
+               o.title as outline_title
+        FROM procedure_documents d
+        LEFT JOIN users u ON d.uploaded_by = u.id
+        LEFT JOIN procedure_outlines o ON d.outline_id = o.id
+        WHERE d.procedure_id = $1 AND d.is_active = true
+        ORDER BY d.upload_date DESC
+      `, [procedureId]);
+      
+      const documents = result.rows.map((row: any) => ({
+        id: row.id,
+        procedureId: row.procedure_id,
+        outlineId: row.outline_id,
+        title: row.title,
+        description: row.description,
+        fileName: row.file_name,
+        filePath: row.file_path,
+        fileSize: row.file_size,
+        fileType: row.file_type,
+        uploadDate: row.upload_date,
+        uploadedBy: row.uploaded_by,
+        uploadedByName: row.uploaded_by_name,
+        version: row.version,
+        isActive: row.is_active,
+        downloadCount: row.download_count,
+        lastDownloadedAt: row.last_downloaded_at,
+        tags: row.tags || [],
+        outlineTitle: row.outline_title
+      }));
+
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching procedure documents:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Upload procedure document
+  app.post("/api/procedures/:procedureId/documents", requireAuth, upload.single('document'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: "No file uploaded" });
+      }
+
+      const { procedureId } = req.params;
+      const { title, description, outlineId, version, tags } = req.body;
+      const userId = (req.session as any)?.adminId;
+      
+      // Process tags
+      const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO procedure_documents (procedure_id, outline_id, title, description, file_name, 
+                                       file_path, file_size, file_type, uploaded_by, version, tags)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING id, title, file_name, upload_date
+      `, [procedureId, outlineId, title, description, req.file.filename, req.file.path, 
+          req.file.size, req.file.mimetype, userId, version, tagsArray]);
+
+      res.json({
+        success: true,
+        document: result.rows[0],
+        message: "Document uploaded successfully"
+      });
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Download procedure document
+  app.get("/api/procedures/documents/:documentId/download", requireAuth, async (req, res) => {
+    try {
+      const { documentId } = req.params;
+      
+      const { pool } = await import('./db');
+      
+      // Get document info
+      const docResult = await pool.query(`
+        SELECT file_path, file_name, file_type
+        FROM procedure_documents
+        WHERE id = $1 AND is_active = true
+      `, [documentId]);
+
+      if (docResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Document not found" });
+      }
+
+      const document = docResult.rows[0];
+
+      // Update download count
+      await pool.query(`
+        UPDATE procedure_documents 
+        SET download_count = download_count + 1, last_downloaded_at = NOW()
+        WHERE id = $1
+      `, [documentId]);
+
+      // Send file
+      const path = require('path');
+      const fs = require('fs');
+      const filePath = path.resolve(document.file_path);
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ success: false, message: "File not found on server" });
+      }
+
+      res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
+      res.setHeader('Content-Type', document.file_type);
+      res.sendFile(filePath);
+
+    } catch (error) {
+      console.error("Error downloading document:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });

@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const categories = [
@@ -485,6 +485,15 @@ export default function AdminPage() {
           >
             <Factory className="w-4 h-4 mr-2" />
             Factory Management
+          </Button>
+
+          <Button 
+            variant="outline"
+            onClick={() => setLocation("/admin/procedures-management")}
+            className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            Procedures & Methods
           </Button>
 
           <Button 
