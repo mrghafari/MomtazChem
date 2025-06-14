@@ -11,7 +11,7 @@ import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email("ایمیل معتبر وارد کنید"),
+  email: z.string().email("Please enter a valid email"),
 });
 
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
@@ -47,22 +47,22 @@ export default function CustomerForgotPassword() {
           setResetLink(result.resetLink);
         }
         toast({
-          title: "درخواست بازیابی ارسال شد",
-          description: result.message,
+          title: "Reset Request Sent",
+          description: "Password reset link has been sent to your email",
         });
       } else {
         toast({
           variant: "destructive",
-          title: "خطا",
-          description: result.message || "مشکلی در ارسال درخواست رخ داده است",
+          title: "Error",
+          description: result.message || "An error occurred while sending the request",
         });
       }
     } catch (error) {
       console.error('Forgot password error:', error);
       toast({
         variant: "destructive",
-        title: "خطا",
-        description: "مشکلی در ارسال درخواست رخ داده است",
+        title: "Error",
+        description: "An error occurred while sending the request",
       });
     } finally {
       setIsLoading(false);
@@ -72,18 +72,18 @@ export default function CustomerForgotPassword() {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-        <Card className="w-full max-w-md" dir="rtl">
+        <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">درخواست ارسال شد</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Sent</h2>
             <p className="text-gray-600 mb-6">
-              لینک بازیابی رمز عبور به ایمیل شما ارسال شد. لطفاً صندوق پست خود را بررسی کنید.
+              A password reset link has been sent to your email. Please check your inbox.
             </p>
             
             {resetLink && (
               <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800 mb-2">
-                  <strong>برای تست:</strong> روی لینک زیر کلیک کنید
+                  <strong>For testing:</strong> Click the link below
                 </p>
                 <Button
                   variant="outline"
@@ -91,7 +91,7 @@ export default function CustomerForgotPassword() {
                   onClick={() => setLocation(resetLink)}
                   className="w-full"
                 >
-                  بازیابی رمز عبور
+                  Reset Password
                 </Button>
               </div>
             )}
@@ -102,8 +102,8 @@ export default function CustomerForgotPassword() {
                 onClick={() => setLocation("/shop")}
                 className="flex-1"
               >
-                <ArrowLeft className="w-4 h-4 ml-2" />
-                بازگشت به فروشگاه
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Shop
               </Button>
             </div>
           </CardContent>
@@ -114,11 +114,11 @@ export default function CustomerForgotPassword() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-      <Card className="w-full max-w-md" dir="rtl">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">فراموشی رمز عبور</CardTitle>
+          <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
           <p className="text-gray-600">
-            ایمیل خود را وارد کنید تا لینک بازیابی رمز عبور برای شما ارسال شود
+            Enter your email address and we'll send you a password reset link
           </p>
         </CardHeader>
         <CardContent>
@@ -131,12 +131,12 @@ export default function CustomerForgotPassword() {
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      ایمیل
+                      Email
                     </FormLabel>
                     <FormControl>
                       <Input 
                         type="email" 
-                        placeholder="ایمیل خود را وارد کنید" 
+                        placeholder="Enter your email address" 
                         {...field} 
                       />
                     </FormControl>
@@ -146,7 +146,7 @@ export default function CustomerForgotPassword() {
               />
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "در حال ارسال..." : "ارسال لینک بازیابی"}
+                {isLoading ? "Sending..." : "Send Reset Link"}
               </Button>
             </form>
           </Form>
@@ -157,8 +157,8 @@ export default function CustomerForgotPassword() {
               onClick={() => setLocation("/shop")}
               className="flex items-center gap-2"
             >
-              <ArrowLeft className="w-4 h-4" />
-              بازگشت به ورود
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Login
             </Button>
           </div>
         </CardContent>

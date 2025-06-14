@@ -11,10 +11,10 @@ import { Lock, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
 const resetPasswordSchema = z.object({
-  newPassword: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "رمز عبور و تکرار آن باید یکسان باشند",
+  message: "Password and confirm password must match",
   path: ["confirmPassword"],
 });
 
@@ -53,8 +53,8 @@ export default function CustomerResetPassword() {
     if (!token) {
       toast({
         variant: "destructive",
-        title: "خطا",
-        description: "توکن بازیابی معتبر نیست",
+        title: "Error",
+        description: "Invalid reset token",
       });
       return;
     }
@@ -75,22 +75,22 @@ export default function CustomerResetPassword() {
       if (result.success) {
         setIsSuccess(true);
         toast({
-          title: "رمز عبور تغییر کرد",
-          description: result.message,
+          title: "Password Changed",
+          description: "Your password has been successfully updated",
         });
       } else {
         toast({
           variant: "destructive",
-          title: "خطا",
-          description: result.message || "مشکلی در تغییر رمز عبور رخ داده است",
+          title: "Error",
+          description: result.message || "An error occurred while resetting password",
         });
       }
     } catch (error) {
       console.error('Reset password error:', error);
       toast({
         variant: "destructive",
-        title: "خطا",
-        description: "مشکلی در تغییر رمز عبور رخ داده است",
+        title: "Error",
+        description: "An error occurred while resetting password",
       });
     } finally {
       setIsLoading(false);
@@ -100,27 +100,27 @@ export default function CustomerResetPassword() {
   if (isValidToken === false) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-        <Card className="w-full max-w-md" dir="rtl">
+        <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">لینک نامعتبر</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Link</h2>
             <p className="text-gray-600 mb-6">
-              لینک بازیابی رمز عبور نامعتبر یا منقضی شده است.
+              The password reset link is invalid or has expired.
             </p>
             <div className="flex gap-3">
               <Button
                 onClick={() => setLocation("/customer/forgot-password")}
                 className="flex-1"
               >
-                درخواست مجدد
+                Request New Link
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setLocation("/shop")}
                 className="flex-1"
               >
-                <ArrowLeft className="w-4 h-4 ml-2" />
-                بازگشت
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
               </Button>
             </div>
           </CardContent>
@@ -132,18 +132,18 @@ export default function CustomerResetPassword() {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-        <Card className="w-full max-w-md" dir="rtl">
+        <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">رمز عبور تغییر کرد</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Password Changed</h2>
             <p className="text-gray-600 mb-6">
-              رمز عبور شما با موفقیت تغییر کرد. اکنون می‌توانید با رمز عبور جدید وارد شوید.
+              Your password has been successfully changed. You can now log in with your new password.
             </p>
             <Button
               onClick={() => setLocation("/shop")}
               className="w-full"
             >
-              رفتن به فروشگاه و ورود
+              Go to Shop & Login
             </Button>
           </CardContent>
         </Card>
@@ -156,7 +156,7 @@ export default function CustomerResetPassword() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">در حال بررسی...</p>
+          <p className="text-gray-600">Validating...</p>
         </div>
       </div>
     );
@@ -164,11 +164,11 @@ export default function CustomerResetPassword() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-      <Card className="w-full max-w-md" dir="rtl">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">تعیین رمز عبور جدید</CardTitle>
+          <CardTitle className="text-2xl font-bold">Set New Password</CardTitle>
           <p className="text-gray-600">
-            رمز عبور جدید خود را وارد کنید
+            Enter your new password below
           </p>
         </CardHeader>
         <CardContent>
@@ -181,12 +181,12 @@ export default function CustomerResetPassword() {
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       <Lock className="h-4 w-4" />
-                      رمز عبور جدید
+                      New Password
                     </FormLabel>
                     <FormControl>
                       <Input 
                         type="password" 
-                        placeholder="رمز عبور جدید را وارد کنید" 
+                        placeholder="Enter your new password" 
                         {...field} 
                       />
                     </FormControl>
@@ -202,12 +202,12 @@ export default function CustomerResetPassword() {
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       <Lock className="h-4 w-4" />
-                      تکرار رمز عبور
+                      Confirm Password
                     </FormLabel>
                     <FormControl>
                       <Input 
                         type="password" 
-                        placeholder="رمز عبور جدید را مجدداً وارد کنید" 
+                        placeholder="Confirm your new password" 
                         {...field} 
                       />
                     </FormControl>
@@ -217,7 +217,7 @@ export default function CustomerResetPassword() {
               />
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "در حال تغییر..." : "تغییر رمز عبور"}
+                {isLoading ? "Changing..." : "Change Password"}
               </Button>
             </form>
           </Form>
@@ -228,8 +228,8 @@ export default function CustomerResetPassword() {
               onClick={() => setLocation("/shop")}
               className="flex items-center gap-2"
             >
-              <ArrowLeft className="w-4 h-4" />
-              بازگشت به فروشگاه
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Shop
             </Button>
           </div>
         </CardContent>
