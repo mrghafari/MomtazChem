@@ -3666,13 +3666,33 @@ ${procedure.content}
     }
   });
 
-  app.get("/api/shop/orders", async (req, res) => {
+  app.get("/api/shop/orders", requireAuth, async (req, res) => {
     try {
-      const orders = await shopStorage.getOrders();
-      res.json(orders);
+      // Get customer orders from the customer_orders table
+      const orders = await customerStorage.getAllOrders();
+      
+      // Get detailed order information with items and customer details
+      const detailedOrders = await Promise.all(
+        orders.map(async (order) => {
+          const items = await customerStorage.getOrderItems(order.id);
+          let customer = null;
+          if (order.customerId) {
+            customer = await customerStorage.getCustomerById(order.customerId);
+          }
+          return {
+            ...order,
+            items,
+            customer,
+            orderDate: order.createdAt, // Map for compatibility
+            orderNumber: order.orderNumber,
+          };
+        })
+      );
+
+      res.json(detailedOrders);
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      res.status(500).json({ success: false, message: "Failed to fetch orders" });
+      console.error("Error fetching customer orders:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch customer orders" });
     }
   });
 
@@ -3737,13 +3757,39 @@ ${procedure.content}
   });
 
   // Order statistics for dashboard
-  app.get("/api/shop/statistics", async (req, res) => {
+  app.get("/api/shop/statistics", requireAuth, async (req, res) => {
     try {
-      const stats = await shopStorage.getOrderStatistics();
+      // Get customer order statistics from the correct table
+      const customerStats = await customerStorage.getCustomerStats();
+      
+      // Get all customer orders for additional calculations
+      const allOrders = await customerStorage.getAllOrders();
+      
+      // Calculate statistics based on customer orders
+      const totalOrders = allOrders.length;
+      const pendingOrders = allOrders.filter(order => order.status === 'pending').length;
+      const shippedOrders = allOrders.filter(order => order.status === 'shipped').length;
+      const deliveredOrders = allOrders.filter(order => order.status === 'delivered').length;
+      
+      // Calculate total revenue from customer orders
+      const totalRevenue = allOrders.reduce((sum, order) => {
+        return sum + parseFloat(order.totalAmount || '0');
+      }, 0);
+
+      const stats = {
+        totalOrders,
+        pendingOrders,
+        shippedOrders,
+        deliveredOrders,
+        totalRevenue: totalRevenue.toFixed(2),
+        totalCustomers: customerStats.totalCustomers,
+        openInquiries: customerStats.openInquiries
+      };
+      
       res.json(stats);
     } catch (error) {
-      console.error("Error fetching shop statistics:", error);
-      res.status(500).json({ success: false, message: "Failed to fetch statistics" });
+      console.error("Error fetching customer order statistics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch customer order statistics" });
     }
   });
 
