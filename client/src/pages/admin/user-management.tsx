@@ -89,17 +89,19 @@ export default function UserManagement() {
   });
 
   // Fetch admin users
-  const { data: users, isLoading: usersLoading, refetch: refetchUsers } = useQuery<AdminUser[]>({
+  const { data: usersData, isLoading: usersLoading, refetch: refetchUsers } = useQuery({
     queryKey: ["/api/admin/users"],
   });
+  
+  const users = Array.isArray(usersData) ? usersData : [];
 
   // Fetch admin roles
-  const { data: roles, isLoading: rolesLoading } = useQuery<AdminRole[]>({
+  const { data: roles = [], isLoading: rolesLoading } = useQuery<AdminRole[]>({
     queryKey: ["/api/admin/roles"],
   });
 
   // Fetch admin permissions
-  const { data: permissions, isLoading: permissionsLoading } = useQuery<AdminPermission[]>({
+  const { data: permissions = [], isLoading: permissionsLoading } = useQuery<AdminPermission[]>({
     queryKey: ["/api/admin/permissions"],
   });
 
@@ -370,7 +372,7 @@ export default function UserManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users?.map((user) => (
+                    {Array.isArray(users) && users.map((user: AdminUser) => (
                       <TableRow key={user.id}>
                         <TableCell>
                           <div>
