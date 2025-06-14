@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -527,18 +527,22 @@ export default function FactoryManagement() {
     }
   };
 
-  // Filter products based on search query
-  const filteredProducts = (products || []).filter((product) => {
-    if (!searchQuery.trim()) return true;
+  // Filter products based on search query - handle null/undefined safely
+  const filteredProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) return [];
     
-    const query = searchQuery.toLowerCase();
-    return (
-      product.name?.toLowerCase().includes(query) ||
-      product.barcode?.toLowerCase().includes(query) ||
-      product.sku?.toLowerCase().includes(query) ||
-      product.category?.toLowerCase().includes(query)
-    );
-  });
+    return products.filter((product) => {
+      if (!searchQuery?.trim()) return true;
+      
+      const query = searchQuery.toLowerCase();
+      return (
+        product?.name?.toLowerCase()?.includes(query) ||
+        product?.barcode?.toLowerCase()?.includes(query) ||
+        product?.sku?.toLowerCase()?.includes(query) ||
+        product?.category?.toLowerCase()?.includes(query)
+      );
+    });
+  }, [products, searchQuery]);
 
   const getCurrentForm = (): any => {
     switch (dialogType) {
@@ -650,7 +654,7 @@ export default function FactoryManagement() {
               <div>
                 <p className="text-sm text-muted-foreground">Production Batches</p>
                 <p className="text-2xl font-bold">
-                  {batches.filter(b => b.status === 'in_progress').length}
+                  {(batches || []).filter(b => b.status === 'in_progress').length}
                 </p>
               </div>
               <Factory className="h-8 w-8 text-blue-600" />
