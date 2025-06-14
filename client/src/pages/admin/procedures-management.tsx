@@ -388,8 +388,28 @@ export default function ProceduresManagement() {
         credentials: 'include'
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to delete document');
+        if (response.status === 404) {
+          toast({
+            variant: "destructive",
+            title: "Document Not Found",
+            description: "This document has already been deleted or does not exist",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: result.message || "Failed to delete document",
+          });
+        }
+        
+        // Refresh the list anyway in case the document was already deleted
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/procedures/${selectedProcedureId}/documents`] 
+        });
+        return;
       }
 
       // Refresh documents list
@@ -406,7 +426,7 @@ export default function ProceduresManagement() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to delete document",
+        description: "Network error occurred while deleting document",
       });
     }
   };
