@@ -936,7 +936,7 @@ export default function FactoryManagement() {
           </Card>
 
           {/* Inventory Summary */}
-          {products && products.length > 0 && (
+          {(products && products.length > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
                 <CardContent className="p-4">
@@ -1058,8 +1058,8 @@ export default function FactoryManagement() {
                           <div>
                             <CardTitle className="text-lg">{product.name}</CardTitle>
                             <CardDescription className="flex items-center gap-2 mt-2">
-                              {categories.find(c => c.value === product.category)?.icon}
-                              {categories.find(c => c.value === product.category)?.label}
+                              {categories?.find(c => c.value === product.category)?.icon}
+                              {categories?.find(c => c.value === product.category)?.label}
                             </CardDescription>
                           </div>
                           <Badge variant={product.isActive ? "default" : "secondary"}>
@@ -1599,7 +1599,7 @@ export default function FactoryManagement() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories.map((category) => (
+                          {(categories || []).map((category) => (
                             <SelectItem key={category.value} value={category.value}>
                               {category.label}
                             </SelectItem>
