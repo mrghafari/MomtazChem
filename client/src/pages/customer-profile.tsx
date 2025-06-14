@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut } from "lucide-react";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -33,8 +33,8 @@ const CustomerProfile = () => {
 
       if (response.ok) {
         toast({
-          title: "Logged out successfully",
-          description: "You have been logged out of your account",
+          title: "خروج موفق",
+          description: "از حساب کاربری خود خارج شدید",
         });
         setLocation("/shop");
       }
@@ -42,8 +42,8 @@ const CustomerProfile = () => {
       console.error('Logout error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "An error occurred while logging out",
+        title: "خطا",
+        description: "مشکلی در خروج رخ داده است",
       });
     }
   };
@@ -53,7 +53,7 @@ const CustomerProfile = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
+          <p className="text-gray-600">در حال بارگذاری پروفایل...</p>
         </div>
       </div>
     );
@@ -65,10 +65,10 @@ const CustomerProfile = () => {
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Access Denied</h2>
-            <p className="text-gray-500 mb-6">Please log in to view your profile.</p>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">دسترسی محدود</h2>
+            <p className="text-gray-500 mb-6">برای مشاهده پروفایل باید وارد حساب کاربری شوید.</p>
             <Button onClick={() => setLocation("/shop")} className="w-full">
-              Go to Shop
+              رفتن به فروشگاه
             </Button>
           </CardContent>
         </Card>
@@ -80,9 +80,9 @@ const CustomerProfile = () => {
   const orders = orderData?.success ? orderData.orders : [];
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('fa-IR', {
       year: 'numeric',
-      month: 'short',
+      month: 'long',
       day: 'numeric'
     });
   };
@@ -99,6 +99,18 @@ const CustomerProfile = () => {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending': return 'در انتظار';
+      case 'confirmed': return 'تایید شده';
+      case 'processing': return 'در حال پردازش';
+      case 'shipped': return 'ارسال شده';
+      case 'delivered': return 'تحویل داده شده';
+      case 'cancelled': return 'لغو شده';
+      default: return status;
+    }
+  };
+
   const totalSpent = orders.reduce((sum: number, order: any) => 
     sum + parseFloat(order.totalAmount || 0), 0
   );
@@ -107,25 +119,25 @@ const CustomerProfile = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8" dir="rtl">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Customer Profile</h1>
-            <p className="text-gray-600">Manage your account and view order history</p>
+            <h1 className="text-3xl font-bold text-gray-900">پروفایل مشتری</h1>
+            <p className="text-gray-600">مدیریت حساب کاربری و مشاهده تاریخچه سفارشات</p>
           </div>
           <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => setLocation("/shop")}
             >
-              <ShoppingBag className="w-4 h-4 mr-2" />
-              Continue Shopping
+              <ShoppingBag className="w-4 h-4 ml-2" />
+              ادامه خرید
             </Button>
             <Button
               variant="outline"
               onClick={handleLogout}
             >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              <LogOut className="w-4 h-4 ml-2" />
+              خروج
             </Button>
           </div>
         </div>
@@ -133,43 +145,58 @@ const CustomerProfile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Customer Information */}
           <div className="lg:col-span-1">
-            <Card>
+            <Card dir="rtl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />
-                  Account Information
+                  اطلاعات حساب
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Full Name</label>
-                  <p className="text-gray-900">{customer.firstName} {customer.lastName}</p>
+                  <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    نام کامل
+                  </label>
+                  <p className="text-gray-900 font-semibold">{customer.firstName} {customer.lastName}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Email</label>
+                  <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    ایمیل
+                  </label>
                   <p className="text-gray-900">{customer.email}</p>
                 </div>
                 {customer.company && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Company</label>
+                    <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                      <Building className="w-4 h-4" />
+                      شرکت
+                    </label>
                     <p className="text-gray-900">{customer.company}</p>
                   </div>
                 )}
                 {customer.phone && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Phone</label>
+                    <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      تلفن
+                    </label>
                     <p className="text-gray-900">{customer.phone}</p>
                   </div>
                 )}
                 {customer.address && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Address</label>
+                    <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      آدرس
+                    </label>
                     <p className="text-gray-900">{customer.address}</p>
                   </div>
                 )}
                 {customer.city && customer.country && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Location</label>
+                    <label className="text-sm font-medium text-gray-500">موقعیت</label>
                     <p className="text-gray-900">{customer.city}, {customer.country}</p>
                   </div>
                 )}
@@ -177,25 +204,25 @@ const CustomerProfile = () => {
             </Card>
 
             {/* Order Statistics */}
-            <Card className="mt-6">
+            <Card className="mt-6" dir="rtl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
-                  Order Statistics
+                  آمار سفارشات
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Orders:</span>
+                  <span className="text-gray-600">تعداد سفارشات:</span>
                   <span className="font-semibold">{orders.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Spent:</span>
+                  <span className="text-gray-600">مجموع خرید:</span>
                   <span className="font-semibold">${totalSpent.toFixed(2)}</span>
                 </div>
                 {orders.length > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Avg. Order Value:</span>
+                    <span className="text-gray-600">میانگین هر سفارش:</span>
                     <span className="font-semibold">${(totalSpent / orders.length).toFixed(2)}</span>
                   </div>
                 )}
@@ -205,26 +232,26 @@ const CustomerProfile = () => {
 
           {/* Order History */}
           <div className="lg:col-span-2">
-            <Card>
+            <Card dir="rtl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5" />
-                  Order History
+                  تاریخچه سفارشات
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {ordersLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading orders...</p>
+                    <p className="text-gray-600">در حال بارگذاری سفارشات...</p>
                   </div>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-8">
                     <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">No orders yet</h3>
-                    <p className="text-gray-500 mb-6">Start shopping to see your order history here.</p>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">هنوز سفارشی ثبت نشده</h3>
+                    <p className="text-gray-500 mb-6">شروع به خرید کنید تا تاریخچه سفارشات شما اینجا نمایش داده شود.</p>
                     <Button onClick={() => setLocation("/shop")}>
-                      Start Shopping
+                      شروع خرید
                     </Button>
                   </div>
                 ) : (
@@ -234,17 +261,17 @@ const CustomerProfile = () => {
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <h4 className="font-semibold text-gray-900">
-                              Order #{order.orderNumber || order.id}
+                              سفارش #{order.orderNumber || order.id}
                             </h4>
                             <p className="text-sm text-gray-500 flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
                               {formatDate(order.createdAt)}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-left">
                             <p className="font-semibold text-lg">${parseFloat(order.totalAmount).toFixed(2)}</p>
                             <Badge className={getStatusColor(order.status)}>
-                              {order.status}
+                              {getStatusLabel(order.status)}
                             </Badge>
                           </div>
                         </div>
@@ -253,10 +280,10 @@ const CustomerProfile = () => {
                           <div>
                             <Separator className="mb-3" />
                             <div className="space-y-2">
-                              <h5 className="font-medium text-gray-700">Items:</h5>
+                              <h5 className="font-medium text-gray-700">اقلام سفارش:</h5>
                               {order.items.map((item: any) => (
                                 <div key={item.id} className="flex justify-between text-sm">
-                                  <span>{item.productName} × {item.quantity}</span>
+                                  <span>{item.productName} × {parseFloat(item.quantity)} {item.unit}</span>
                                   <span>${parseFloat(item.totalPrice).toFixed(2)}</span>
                                 </div>
                               ))}
@@ -267,7 +294,7 @@ const CustomerProfile = () => {
                         {order.notes && (
                           <div className="mt-3 pt-3 border-t">
                             <p className="text-sm text-gray-600">
-                              <strong>Notes:</strong> {order.notes}
+                              <strong>یادداشت:</strong> {order.notes}
                             </p>
                           </div>
                         )}
