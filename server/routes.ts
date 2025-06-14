@@ -267,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ 
         success: true, 
-        user: { id: user.id, username: user.username, email: user.email, role: user.role }
+        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
       });
     } catch (error) {
       res.status(500).json({ 
@@ -299,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         success: true, 
         authenticated: true,
-        user: { id: user.id, username: user.username, email: user.email, role: user.role }
+        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
       });
     } catch (error) {
       res.status(500).json({ 
@@ -429,7 +429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: user.id,
         username: user.username,
         email: user.email,
-        role: user.role,
+        roleId: user.roleId,
         isActive: user.isActive,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -470,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedUser = await storage.updateUser(userId, {
         username,
         email,
-        role,
+        roleId: role ? parseInt(role) : undefined,
         isActive,
       });
 
@@ -481,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: updatedUser.id,
           username: updatedUser.username,
           email: updatedUser.email,
-          role: updatedUser.role,
+          roleId: updatedUser.roleId,
           isActive: updatedUser.isActive,
         }
       });
@@ -1001,19 +1001,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create backup using pg_dump
-      const pgDump = spawn('pg_dump', [process.env.DATABASE_URL, '--no-owner', '--no-privileges'], {
-        stdio: ['ignore', 'pipe', 'pipe']
-      });
+      const databaseUrl = process.env.DATABASE_URL;
+      if (!databaseUrl) {
+        return res.status(500).json({
+          success: false,
+          message: "Database URL not configured"
+        });
+      }
+
+      const pgDump = spawn('pg_dump', [databaseUrl, '--no-owner', '--no-privileges']);
       
       const writeStream = fs.createWriteStream(backupPath);
-      pgDump.stdout.pipe(writeStream);
+      pgDump.stdout?.pipe(writeStream);
       
       let errorOutput = '';
-      pgDump.stderr.on('data', (data) => {
+      pgDump.stderr?.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
       
-      pgDump.on('close', (code) => {
+      pgDump.on('close', (code: number | null) => {
         if (code === 0) {
           const stats = fs.statSync(backupPath);
           res.json({
@@ -3701,7 +3707,7 @@ ${procedure.content}
         .returning();
 
       res.status(201).json(newSpecialist);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating specialist:", error);
       if (error.code === '23505') { // Unique violation
         res.status(409).json({ message: "Email already exists" });
