@@ -1965,8 +1965,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `, [documentId]);
 
       // Send file
-      const path = require('path');
-      const fs = require('fs');
+      const path = await import('path');
+      const fs = await import('fs');
       const filePath = path.resolve(document.file_path);
 
       if (!fs.existsSync(filePath)) {
@@ -1974,7 +1974,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
-      res.setHeader('Content-Type', document.file_type);
+      res.setHeader('Content-Type', document.file_type || 'application/octet-stream');
       res.sendFile(filePath);
 
     } catch (error) {
