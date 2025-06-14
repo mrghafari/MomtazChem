@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, ArrowLeft } from "lucide-react";
+import { Plus, Edit, Trash2, Package, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, QrCode, Search, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 
 const categories = [
   { value: "fuel-additives", label: "افزودنی‌های سوخت", icon: <Beaker className="w-4 h-4" /> },
@@ -26,7 +27,35 @@ const categories = [
   { value: "agricultural-fertilizers", label: "کودهای کشاورزی", icon: <Package className="w-4 h-4" /> },
 ];
 
-// Inventory status helper functions
+// Create a simplified form schema
+const productFormSchema = z.object({
+  name: z.string().min(1, "نام محصول اجباری است"),
+  category: z.string().min(1, "انتخاب دسته‌بندی اجباری است"),
+  description: z.string().min(1, "توضیحات اجباری است"),
+  shortDescription: z.string().default(""),
+  priceRange: z.string().default("تماس برای قیمت"),
+  imageUrl: z.string().default(""),
+  pdfCatalogUrl: z.string().default(""),
+  specifications: z.record(z.any()).default({}),
+  features: z.array(z.string()).default([]),
+  applications: z.array(z.string()).default([]),
+  technicalDataSheet: z.string().default(""),
+  safetyDataSheet: z.string().default(""),
+  certifications: z.array(z.string()).default([]),
+  isActive: z.boolean().default(true),
+  displayOrder: z.number().default(0),
+  stockQuantity: z.number().default(0),
+  minStockLevel: z.number().default(10),
+  maxStockLevel: z.number().default(1000),
+  stockUnit: z.string().default("عدد"),
+  inventoryStatus: z.enum(["in_stock", "low_stock", "out_of_stock", "discontinued"]).default("in_stock"),
+  supplier: z.string().default(""),
+  warehouseLocation: z.string().default(""),
+  batchNumber: z.string().default(""),
+});
+
+type ProductFormData = z.infer<typeof productFormSchema>;
+
 const getInventoryStatusColor = (status: string) => {
   switch (status) {
     case 'in_stock':
@@ -87,7 +116,6 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 };
 
 export default function ProductManager() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -99,8 +127,8 @@ export default function ProductManager() {
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
 
-  const form = useForm<InsertShowcaseProduct>({
-    resolver: zodResolver(insertShowcaseProductSchema),
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: "",
       category: "",
@@ -128,7 +156,6 @@ export default function ProductManager() {
     },
   });
 
-  // Check authentication and redirect if needed
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       setLocation("/admin/login");
@@ -221,11 +248,12 @@ export default function ProductManager() {
     },
   });
 
-  const onSubmit = (data: InsertShowcaseProduct) => {
+  const onSubmit = (data: ProductFormData) => {
+    const productData = data as InsertShowcaseProduct;
     if (editingProduct) {
-      updateMutation.mutate({ id: editingProduct.id, data });
+      updateMutation.mutate({ id: editingProduct.id, data: productData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(productData);
     }
   };
 
@@ -291,8 +319,8 @@ export default function ProductManager() {
 
   const openEditDialog = (product: ShowcaseProduct) => {
     setEditingProduct(product);
-    setImagePreview(product.imageUrl);
-    setCatalogPreview(product.pdfCatalogUrl);
+    setImagePreview(product.imageUrl || "");
+    setCatalogPreview(product.pdfCatalogUrl || "");
     form.reset({
       name: product.name,
       category: product.category,
@@ -301,22 +329,22 @@ export default function ProductManager() {
       priceRange: product.priceRange || "تماس برای قیمت",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
-      specifications: product.specifications ?? {},
-      features: product.features ?? [],
-      applications: product.applications ?? [],
-      technicalDataSheet: product.technicalDataSheet ?? "",
-      safetyDataSheet: product.safetyDataSheet ?? "",
-      certifications: product.certifications ?? [],
+      specifications: product.specifications || {},
+      features: product.features || [],
+      applications: product.applications || [],
+      technicalDataSheet: product.technicalDataSheet || "",
+      safetyDataSheet: product.safetyDataSheet || "",
+      certifications: product.certifications || [],
       isActive: product.isActive !== false,
-      displayOrder: product.displayOrder ?? 0,
-      stockQuantity: product.stockQuantity ?? 0,
-      minStockLevel: product.minStockLevel ?? 10,
-      maxStockLevel: product.maxStockLevel ?? 1000,
-      stockUnit: product.stockUnit ?? "عدد",
-      inventoryStatus: product.inventoryStatus ?? "in_stock",
-      supplier: product.supplier ?? "",
-      warehouseLocation: product.warehouseLocation ?? "",
-      batchNumber: product.batchNumber ?? "",
+      displayOrder: product.displayOrder || 0,
+      stockQuantity: product.stockQuantity || 0,
+      minStockLevel: product.minStockLevel || 10,
+      maxStockLevel: product.maxStockLevel || 1000,
+      stockUnit: product.stockUnit || "عدد",
+      inventoryStatus: product.inventoryStatus || "in_stock",
+      supplier: product.supplier || "",
+      warehouseLocation: product.warehouseLocation || "",
+      batchNumber: product.batchNumber || "",
     });
     setDialogOpen(true);
   };
@@ -329,15 +357,12 @@ export default function ProductManager() {
     setDialogOpen(true);
   };
 
-  // Filter products based on search query
   const filteredProducts = products.filter((product) => {
     if (!searchQuery.trim()) return true;
     
     const query = searchQuery.toLowerCase();
     return (
       product.name.toLowerCase().includes(query) ||
-      product.barcode?.toLowerCase().includes(query) ||
-      product.sku?.toLowerCase().includes(query) ||
       product.category.toLowerCase().includes(query)
     );
   });
@@ -391,12 +416,11 @@ export default function ProductManager() {
           </div>
         </div>
 
-        {/* Search Section */}
         <div className="mb-6">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="جستجو بر اساس نام، بارکد یا SKU..."
+              placeholder="جستجو بر اساس نام یا دسته‌بندی..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2"
@@ -414,7 +438,6 @@ export default function ProductManager() {
           </div>
         </div>
 
-        {/* Management Actions Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 h-12 text-sm">
             <Plus className="w-4 h-4 mr-2" />
@@ -442,7 +465,6 @@ export default function ProductManager() {
         </div>
       </div>
 
-      {/* Category Tabs */}
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="all">همه محصولات</TabsTrigger>
@@ -456,7 +478,6 @@ export default function ProductManager() {
           ))}
         </TabsList>
 
-        {/* Products Content */}
         <TabsContent value="all" className="space-y-4">
           {isLoading ? (
             <div className="text-center py-8">در حال بارگذاری محصولات...</div>
@@ -464,9 +485,9 @@ export default function ProductManager() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts.map((product) => {
                 const stockLevel = getStockLevelIndicator(
-                  product.stockQuantity ?? 0,
-                  product.minStockLevel ?? 10,
-                  product.maxStockLevel ?? 1000
+                  product.stockQuantity || 0,
+                  product.minStockLevel || 10,
+                  product.maxStockLevel || 1000
                 );
 
                 return (
@@ -480,9 +501,9 @@ export default function ProductManager() {
                         />
                       )}
                       <div className="absolute top-2 right-2">
-                        <Badge className={getInventoryStatusColor(product.inventoryStatus ?? 'in_stock')}>
-                          {getInventoryStatusIcon(product.inventoryStatus ?? 'in_stock')}
-                          <span className="mr-1">{getInventoryStatusLabel(product.inventoryStatus ?? 'in_stock')}</span>
+                        <Badge className={getInventoryStatusColor(product.inventoryStatus || 'in_stock')}>
+                          {getInventoryStatusIcon(product.inventoryStatus || 'in_stock')}
+                          <span className="mr-1">{getInventoryStatusLabel(product.inventoryStatus || 'in_stock')}</span>
                         </Badge>
                       </div>
                     </div>
@@ -500,11 +521,10 @@ export default function ProductManager() {
                     </CardHeader>
 
                     <CardContent className="space-y-4">
-                      {/* Stock Level Indicator */}
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>موجودی فعلی</span>
-                          <span>{product.stockQuantity ?? 0} {product.stockUnit}</span>
+                          <span>{product.stockQuantity || 0} {product.stockUnit}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
@@ -512,32 +532,6 @@ export default function ProductManager() {
                             style={{ width: `${stockLevel.width}%` }}
                           />
                         </div>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>حداقل: {product.minStockLevel}</span>
-                          <span>حداکثر: {product.maxStockLevel}</span>
-                        </div>
-                      </div>
-
-                      {/* Product Details */}
-                      <div className="space-y-2 text-sm">
-                        {product.supplier && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">تامین‌کننده:</span>
-                            <span>{product.supplier}</span>
-                          </div>
-                        )}
-                        {product.warehouseLocation && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">محل انبار:</span>
-                            <span>{product.warehouseLocation}</span>
-                          </div>
-                        )}
-                        {product.batchNumber && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">شماره دسته:</span>
-                            <span>{product.batchNumber}</span>
-                          </div>
-                        )}
                       </div>
 
                       <div className="flex justify-between items-center pt-4">
@@ -574,95 +568,71 @@ export default function ProductManager() {
           )}
         </TabsContent>
 
-        {/* Category-specific tabs */}
         {categories.map((category) => (
           <TabsContent key={category.value} value={category.value} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts
                 .filter((product) => product.category === category.value)
-                .map((product) => {
-                  const stockLevel = getStockLevelIndicator(
-                    product.stockQuantity ?? 0,
-                    product.minStockLevel ?? 10,
-                    product.maxStockLevel ?? 1000
-                  );
-
-                  return (
-                    <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                      <div className="relative">
-                        {product.imageUrl && (
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="w-full h-48 object-cover"
-                          />
-                        )}
-                        <div className="absolute top-2 right-2">
-                          <Badge className={getInventoryStatusColor(product.inventoryStatus ?? 'in_stock')}>
-                            {getInventoryStatusIcon(product.inventoryStatus ?? 'in_stock')}
-                            <span className="mr-1">{getInventoryStatusLabel(product.inventoryStatus ?? 'in_stock')}</span>
-                          </Badge>
-                        </div>
+                .map((product) => (
+                  <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="relative">
+                      {product.imageUrl && (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-48 object-cover"
+                        />
+                      )}
+                      <div className="absolute top-2 right-2">
+                        <Badge className={getInventoryStatusColor(product.inventoryStatus || 'in_stock')}>
+                          {getInventoryStatusIcon(product.inventoryStatus || 'in_stock')}
+                          <span className="mr-1">{getInventoryStatusLabel(product.inventoryStatus || 'in_stock')}</span>
+                        </Badge>
                       </div>
-                      
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">{product.name}</CardTitle>
-                        {product.shortDescription && (
-                          <CardDescription>{product.shortDescription}</CardDescription>
-                        )}
-                      </CardHeader>
+                    </div>
+                    
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">{product.name}</CardTitle>
+                      {product.shortDescription && (
+                        <CardDescription>{product.shortDescription}</CardDescription>
+                      )}
+                    </CardHeader>
 
-                      <CardContent className="space-y-4">
-                        {/* Stock Level Indicator */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>موجودی فعلی</span>
-                            <span>{product.stockQuantity ?? 0} {product.stockUnit}</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className={`h-2 rounded-full ${stockLevel.color}`}
-                              style={{ width: `${stockLevel.width}%` }}
-                            />
-                          </div>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center pt-4">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditDialog(product)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm('آیا از حذف این محصول مطمئن هستید؟')) {
+                                deleteMutation.mutate(product.id);
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-
-                        <div className="flex justify-between items-center pt-4">
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openEditDialog(product)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                if (confirm('آیا از حذف این محصول مطمئن هستید؟')) {
-                                  deleteMutation.mutate(product.id);
-                                }
-                              }}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                          <span className="text-sm font-medium text-blue-600">
-                            {product.priceRange || 'تماس برای قیمت'}
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                        <span className="text-sm font-medium text-blue-600">
+                          {product.priceRange || 'تماس برای قیمت'}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </TabsContent>
         ))}
       </Tabs>
 
-      {/* Create/Edit Product Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -673,7 +643,6 @@ export default function ProductManager() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Basic Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">اطلاعات پایه</h3>
                   
@@ -718,24 +687,10 @@ export default function ProductManager() {
 
                   <FormField
                     control={form.control}
-                    name="shortDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>توضیح کوتاه</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>توضیحات کامل</FormLabel>
+                        <FormLabel>توضیحات</FormLabel>
                         <FormControl>
                           <Textarea {...field} rows={4} />
                         </FormControl>
@@ -759,7 +714,6 @@ export default function ProductManager() {
                   />
                 </div>
 
-                {/* Inventory Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">اطلاعات موجودی</h3>
                   
@@ -790,44 +744,6 @@ export default function ProductManager() {
                           <FormLabel>واحد شمارش</FormLabel>
                           <FormControl>
                             <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="minStockLevel"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>حداقل موجودی</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="maxStockLevel"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>حداکثر موجودی</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -872,43 +788,13 @@ export default function ProductManager() {
                       </FormItem>
                     )}
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="warehouseLocation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>محل انبار</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="batchNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>شماره دسته</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               </div>
 
-              {/* Media Upload Section */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">رسانه‌ها</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Image Upload */}
                   <div className="space-y-2">
                     <Label>تصویر محصول</Label>
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
@@ -957,7 +843,6 @@ export default function ProductManager() {
                     </div>
                   </div>
 
-                  {/* Catalog Upload */}
                   <div className="space-y-2">
                     <Label>کاتالوگ PDF</Label>
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
