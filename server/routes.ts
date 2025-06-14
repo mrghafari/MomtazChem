@@ -1858,7 +1858,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload procedure document
-  app.post("/api/procedures/:procedureId/documents", requireAuth, upload.single('document'), async (req, res) => {
+  app.post("/api/procedures/:procedureId/documents", requireAuth, (req, res, next) => {
+    upload.single('document')(req, res, (err) => {
+      if (err) {
+        return res.status(400).json({ success: false, message: err.message });
+      }
+      next();
+    });
+  }, async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ success: false, message: "No file uploaded" });
