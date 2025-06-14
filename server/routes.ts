@@ -1725,6 +1725,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update procedure
+  app.put("/api/procedures/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { title, categoryId, description, content, priority, effectiveDate, reviewDate, tags, accessLevel } = req.body;
+      
+      // Process tags
+      const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : [];
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE procedures SET
+          title = $1, category_id = $2, description = $3, content = $4,
+          priority = $5, effective_date = $6, review_date = $7, tags = $8,
+          access_level = $9, updated_at = NOW()
+        WHERE id = $10
+        RETURNING id, title, category_id, description, version, status, priority, updated_at
+      `, [title, categoryId, description, content, priority, effectiveDate, reviewDate, tagsArray, accessLevel, id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Procedure not found" });
+      }
+
+      res.json({
+        success: true,
+        procedure: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating procedure:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Create safety protocol
   app.post("/api/procedures/safety-protocols", requireAuth, async (req, res) => {
     try {

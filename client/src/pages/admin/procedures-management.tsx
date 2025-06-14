@@ -153,9 +153,11 @@ export default function ProceduresManagement() {
   const [selectedTab, setSelectedTab] = useState("overview");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'category' | 'procedure' | 'safety' | null>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
 
   // Form hooks
   const categoryForm = useForm<ProcedureCategoryForm>({
@@ -311,15 +313,70 @@ export default function ProceduresManagement() {
   // Dialog handlers
   const openCreateDialog = (type: 'category' | 'procedure' | 'safety') => {
     setDialogType(type);
+    setEditingItem(null);
+    setDocumentFiles([]);
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (type: 'category' | 'procedure' | 'safety', item: any) => {
+    setDialogType(type);
+    setEditingItem(item);
+    
+    if (type === 'procedure') {
+      procedureForm.reset({
+        title: item.title,
+        categoryId: item.categoryId?.toString() || "",
+        description: item.description || "",
+        content: item.content || "",
+        priority: item.priority || "normal",
+        effectiveDate: item.effectiveDate ? new Date(item.effectiveDate).toISOString().split('T')[0] : "",
+        reviewDate: item.reviewDate ? new Date(item.reviewDate).toISOString().split('T')[0] : "",
+        tags: Array.isArray(item.tags) ? item.tags.join(', ') : "",
+        accessLevel: item.accessLevel || "public",
+      });
+    } else if (type === 'category') {
+      categoryForm.reset({
+        name: item.name,
+        description: item.description || "",
+        colorCode: item.colorCode || "#3b82f6",
+        displayOrder: item.displayOrder || 0,
+      });
+    } else if (type === 'safety') {
+      safetyForm.reset({
+        title: item.title,
+        category: item.category,
+        description: item.description || "",
+        severityLevel: item.severityLevel,
+        procedures: item.procedures,
+        firstAidSteps: item.firstAidSteps || "",
+        evacuationPlan: item.evacuationPlan || "",
+        requiredPpe: Array.isArray(item.requiredPpe) ? item.requiredPpe.join(', ') : item.requiredPpe || "",
+      });
+    }
+    
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
     setDialogType(null);
+    setEditingItem(null);
+    setDocumentFiles([]);
     categoryForm.reset();
     procedureForm.reset();
     safetyForm.reset();
+  };
+
+  // Document upload handlers
+  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      setDocumentFiles(Array.from(files));
+    }
+  };
+
+  const removeDocument = (index: number) => {
+    setDocumentFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -558,7 +615,12 @@ export default function ProceduresManagement() {
                               >
                                 <Download className="h-4 w-4" />
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => openEditDialog('procedure', procedure)}
+                                title="ویرایش دستورالعمل"
+                              >
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button variant="outline" size="sm">
@@ -781,9 +843,9 @@ export default function ProceduresManagement() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {dialogType === 'category' ? 'افزودن دسته‌بندی جدید' :
-               dialogType === 'procedure' ? 'ایجاد دستورالعمل جدید' :
-               dialogType === 'safety' ? 'ایجاد پروتکل ایمنی جدید' : ''}
+              {dialogType === 'category' ? (editingItem ? 'ویرایش دسته‌بندی' : 'افزودن دسته‌بندی جدید') :
+               dialogType === 'procedure' ? (editingItem ? 'ویرایش دستورالعمل' : 'ایجاد دستورالعمل جدید') :
+               dialogType === 'safety' ? (editingItem ? 'ویرایش پروتکل ایمنی' : 'ایجاد پروتکل ایمنی جدید') : ''}
             </DialogTitle>
           </DialogHeader>
 
