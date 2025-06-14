@@ -18,6 +18,7 @@ import {
 import { emailDb } from "./email-db";
 import { eq, and, desc } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
 
 export interface IEmailStorage {
   // Email Categories
@@ -166,7 +167,7 @@ export class EmailStorage implements IEmailStorage {
       
       const nodemailer = await import('nodemailer');
       
-      const transporter = nodemailer.default.createTransporter({
+      const transporter = nodemailer.default.createTransport({
         host: setting.host,
         port: setting.port,
         secure: setting.secure,
