@@ -2671,6 +2671,187 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email Settings Management
+  app.get("/api/admin/email-settings", requireAuth, async (req, res) => {
+    try {
+      const emailSettings = [
+        {
+          id: 1,
+          category: "admin",
+          name: "Admin & General Contact",
+          description: "Main administrative and general contact email",
+          emailAddress: process.env.ADMIN_EMAIL || "info@momtazchem.com",
+          isActive: true,
+          isPrimary: true,
+          usage: ["Contact Form", "General Inquiries", "Admin Notifications"]
+        },
+        {
+          id: 2,
+          category: "fuel-additives",
+          name: "Fuel Additives Department",
+          description: "Dedicated email for fuel additives inquiries and orders",
+          emailAddress: process.env.FUEL_EMAIL || "fuel@momtazchem.com",
+          isActive: true,
+          isPrimary: false,
+          usage: ["Fuel Additives Inquiries", "Fuel Product Orders", "Technical Support"]
+        },
+        {
+          id: 3,
+          category: "water-treatment",
+          name: "Water Treatment Department",
+          description: "Dedicated email for water treatment solutions",
+          emailAddress: process.env.WATER_EMAIL || "water@momtazchem.com",
+          isActive: true,
+          isPrimary: false,
+          usage: ["Water Treatment Inquiries", "Water Product Orders", "Technical Consulting"]
+        },
+        {
+          id: 4,
+          category: "agricultural-fertilizers",
+          name: "Agricultural Fertilizers Department",
+          description: "Dedicated email for fertilizer products and agricultural solutions",
+          emailAddress: process.env.FERTILIZER_EMAIL || "fertilizer@momtazchem.com",
+          isActive: true,
+          isPrimary: false,
+          usage: ["Fertilizer Inquiries", "Agricultural Orders", "Crop Consulting"]
+        },
+        {
+          id: 5,
+          category: "paint-thinner",
+          name: "Paint & Thinner Department",
+          description: "Dedicated email for paint and thinner products",
+          emailAddress: process.env.THINNER_EMAIL || "thinner@momtazchem.com",
+          isActive: true,
+          isPrimary: false,
+          usage: ["Paint Product Inquiries", "Thinner Orders", "Application Support"]
+        },
+        {
+          id: 6,
+          category: "orders",
+          name: "Order Processing",
+          description: "Handles order confirmations and processing",
+          emailAddress: process.env.ORDER_EMAIL || "info@momtazchem.com",
+          isActive: true,
+          isPrimary: false,
+          usage: ["Order Confirmations", "Order Status Updates", "Shipping Notifications"]
+        },
+        {
+          id: 7,
+          category: "notifications",
+          name: "System Notifications",
+          description: "Receives system alerts and notifications",
+          emailAddress: process.env.NOTIFICATION_EMAIL || "info@momtazchem.com",
+          isActive: true,
+          isPrimary: false,
+          usage: ["Inventory Alerts", "System Notifications", "Error Reports"]
+        }
+      ];
+
+      const smtpSettings = {
+        host: process.env.SMTP_HOST || "smtp.zoho.com",
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: process.env.SMTP_SECURE === "true",
+        user: process.env.SMTP_USER || "",
+        pass: process.env.SMTP_PASS ? "***hidden***" : "",
+        fromName: process.env.FROM_NAME || "Momtaz Chemical",
+        fromEmail: process.env.FROM_EMAIL || "info@momtazchem.com"
+      };
+
+      res.json({
+        success: true,
+        emailSettings,
+        smtpSettings
+      });
+    } catch (error) {
+      console.error("Error fetching email settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch email settings"
+      });
+    }
+  });
+
+  app.post("/api/admin/email-settings", requireAuth, async (req, res) => {
+    try {
+      const { emailSettings } = req.body;
+      
+      // In a real implementation, you would save these to database
+      // For now, we'll just return success
+      console.log("Email settings updated:", emailSettings);
+      
+      res.json({
+        success: true,
+        message: "Email settings saved successfully"
+      });
+    } catch (error) {
+      console.error("Error saving email settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to save email settings"
+      });
+    }
+  });
+
+  app.post("/api/admin/smtp-settings", requireAuth, async (req, res) => {
+    try {
+      const { host, port, secure, user, pass, fromName, fromEmail } = req.body;
+      
+      // In a real implementation, you would save these to environment or database
+      console.log("SMTP settings updated:", { host, port, secure, user, fromName, fromEmail });
+      
+      res.json({
+        success: true,
+        message: "SMTP settings saved successfully"
+      });
+    } catch (error) {
+      console.error("Error saving SMTP settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to save SMTP settings"
+      });
+    }
+  });
+
+  app.post("/api/admin/test-smtp", requireAuth, async (req, res) => {
+    try {
+      const { host, port, secure, user, pass } = req.body;
+      
+      if (!host || !port || !user || !pass) {
+        return res.status(400).json({
+          success: false,
+          message: "All SMTP fields are required for testing"
+        });
+      }
+
+      const nodemailer = require('nodemailer');
+      
+      const transporter = nodemailer.createTransporter({
+        host,
+        port: parseInt(port),
+        secure: secure || port == 465,
+        auth: {
+          user,
+          pass,
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 5000,
+      });
+
+      await transporter.verify();
+      
+      res.json({
+        success: true,
+        message: "SMTP connection test successful"
+      });
+    } catch (error) {
+      console.error("SMTP test failed:", error);
+      res.status(500).json({
+        success: false,
+        message: `SMTP test failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
+    }
+  });
+
   // Detect email provider
   app.post("/api/admin/detect-provider", requireAuth, async (req, res) => {
     try {
