@@ -1303,6 +1303,201 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // FACTORY MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get production batches
+  app.get("/api/admin/factory/batches", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          pb.*,
+          p.name as product_name
+        FROM production_batches pb
+        LEFT JOIN products p ON pb.product_id = p.id
+        ORDER BY pb.created_at DESC
+      `);
+      
+      const batches = result.rows.map((row: any) => ({
+        id: row.id,
+        batchNumber: row.batch_number,
+        productId: row.product_id,
+        productName: row.product_name,
+        plannedQuantity: row.planned_quantity,
+        actualQuantity: row.actual_quantity,
+        status: row.status,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        completionDate: row.completion_date,
+        qualityScore: row.quality_score,
+        operatorName: row.operator_name,
+        notes: row.notes,
+        createdAt: row.created_at
+      }));
+
+      res.json(batches);
+    } catch (error) {
+      console.error("Error fetching production batches:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get production lines
+  app.get("/api/admin/factory/lines", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          pl.*,
+          pb.batch_number as current_batch
+        FROM production_lines pl
+        LEFT JOIN production_batches pb ON pl.current_batch_id = pb.id
+        ORDER BY pl.created_at ASC
+      `);
+      
+      const lines = result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        capacity: row.capacity,
+        status: row.status,
+        currentBatch: row.current_batch,
+        efficiency: row.efficiency,
+        createdAt: row.created_at
+      }));
+
+      res.json(lines);
+    } catch (error) {
+      console.error("Error fetching production lines:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get quality checks
+  app.get("/api/admin/factory/quality", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT *
+        FROM quality_checks
+        ORDER BY created_at DESC
+      `);
+      
+      const qualityChecks = result.rows.map((row: any) => ({
+        id: row.id,
+        batchId: row.batch_id,
+        batchNumber: row.batch_number,
+        productName: row.product_name,
+        checkDate: row.check_date,
+        inspector: row.inspector,
+        score: row.score,
+        passed: row.passed,
+        notes: row.notes,
+        createdAt: row.created_at
+      }));
+
+      res.json(qualityChecks);
+    } catch (error) {
+      console.error("Error fetching quality checks:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Create production batch
+  app.post("/api/admin/factory/batches", requireAuth, async (req, res) => {
+    try {
+      const { batchNumber, productId, plannedQuantity, startDate, operatorName, notes } = req.body;
+      
+      const { pool } = await import('./db');
+      
+      // Get product name
+      const productResult = await pool.query('SELECT name FROM products WHERE id = $1', [productId]);
+      if (productResult.rows.length === 0) {
+        return res.status(400).json({ success: false, message: "Product not found" });
+      }
+      
+      const productName = productResult.rows[0].name;
+      
+      const result = await pool.query(`
+        INSERT INTO production_batches (batch_number, product_id, product_name, planned_quantity, start_date, operator_name, notes)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+      `, [batchNumber, productId, productName, plannedQuantity, startDate, operatorName, notes]);
+
+      res.json({
+        success: true,
+        batch: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error creating production batch:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "Batch number already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // Create production line
+  app.post("/api/admin/factory/lines", requireAuth, async (req, res) => {
+    try {
+      const { name, description, capacity, status } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO production_lines (name, description, capacity, status)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+      `, [name, description, capacity, status]);
+
+      res.json({
+        success: true,
+        line: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating production line:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Create quality check
+  app.post("/api/admin/factory/quality", requireAuth, async (req, res) => {
+    try {
+      const { batchId, inspector, score, notes } = req.body;
+      
+      const { pool } = await import('./db');
+      
+      // Get batch info
+      const batchResult = await pool.query(
+        'SELECT batch_number, product_name FROM production_batches WHERE id = $1', 
+        [batchId]
+      );
+      
+      if (batchResult.rows.length === 0) {
+        return res.status(400).json({ success: false, message: "Batch not found" });
+      }
+      
+      const { batch_number, product_name } = batchResult.rows[0];
+      const passed = parseInt(score) >= 70; // Quality threshold
+      
+      const result = await pool.query(`
+        INSERT INTO quality_checks (batch_id, batch_number, product_name, inspector, score, passed, notes)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+      `, [batchId, batch_number, product_name, inspector, score, passed, notes]);
+
+      res.json({
+        success: true,
+        qualityCheck: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating quality check:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Get database statistics
   app.get("/api/admin/database/stats", requireAuth, async (req, res) => {
     try {
