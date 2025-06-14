@@ -643,7 +643,7 @@ export default function FactoryManagement() {
           <ArrowLeft className="h-4 w-4 ml-2" />
           بازگشت به داشبورد
         </Button>
-        <h1 className="text-2xl font-bold">Factory Management - مدیریت کارخانه</h1>
+        <h1 className="text-2xl font-bold">Site Management</h1>
       </div>
 
       {/* Overview Cards */}
@@ -709,11 +709,10 @@ export default function FactoryManagement() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="production">Production Batches</TabsTrigger>
           <TabsTrigger value="lines">Production Lines</TabsTrigger>
           <TabsTrigger value="quality">Quality Control</TabsTrigger>
-          <TabsTrigger value="products">Product Management</TabsTrigger>
           <TabsTrigger value="inquiries">Inquiry Management</TabsTrigger>
         </TabsList>
 
