@@ -2151,8 +2151,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           city: customer.city,
           address: customer.address,
           crmId: crmCustomer?.id,
-          totalOrders: crmCustomer?.totalOrders || 0,
-          totalSpent: crmCustomer?.totalSpent || 0,
         }
       });
     } catch (error) {
@@ -2193,21 +2191,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalCustomerInfo = crmCustomer;
       }
 
+      // Generate order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
       // Create order in customer orders table
-      const orderData = customerId ? {
-        customerId,
-        totalAmount,
+      const orderData = {
+        orderNumber,
+        customerId: customerId || null,
+        totalAmount: totalAmount.toString(),
         status: 'pending' as const,
-        shippingAddress: finalCustomerInfo.address,
+        shippingAddress: {
+          address: finalCustomerInfo.address,
+          city: finalCustomerInfo.city,
+          country: finalCustomerInfo.country,
+        },
         notes: notes || '',
-      } : {
-        customerId: null,
-        totalAmount,
-        status: 'pending' as const,
-        shippingAddress: finalCustomerInfo.address,
-        notes: notes || '',
-        guestEmail: finalCustomerInfo.email,
-        guestName: `${finalCustomerInfo.firstName} ${finalCustomerInfo.lastName}`,
+        ...(customerId ? {} : {
+          guestEmail: finalCustomerInfo.email,
+          guestName: `${finalCustomerInfo.firstName} ${finalCustomerInfo.lastName}`,
+        }),
       };
 
       const order = await customerStorage.createOrder(orderData);
@@ -2217,9 +2219,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await customerStorage.createOrderItem({
           orderId: order.id,
           productId: item.productId,
-          quantity: item.quantity,
+          productName: item.productName || 'Unknown Product',
+          quantity: item.quantity.toString(),
           unitPrice: item.unitPrice.toString(),
           totalPrice: (item.quantity * item.unitPrice).toString(),
+          productSku: item.productSku || '',
         });
       }
 

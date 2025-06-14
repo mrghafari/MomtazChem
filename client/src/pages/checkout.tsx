@@ -105,12 +105,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       return apiRequest("/api/shop/orders", "POST", orderData);
     },
     onSuccess: (data: any) => {
-      setOrderNumber(data.orderNumber);
+      setOrderNumber(data.order.id);
       setIsOrderComplete(true);
       onOrderComplete();
       toast({
         title: "Order Placed Successfully!",
-        description: `Your order #${data.orderNumber} has been received.`,
+        description: `Your order #${data.order.id} has been received and saved to CRM.`,
       });
     },
     onError: () => {
@@ -123,64 +123,30 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   });
 
   const onSubmit = (data: CheckoutFormData) => {
+    const shippingAddress = data.sameAsShipping ? 
+      `${data.billingAddress1}, ${data.billingAddress2 || ''}, ${data.billingCity}, ${data.billingState}, ${data.billingPostalCode}, ${data.billingCountry}`.trim() :
+      `${data.shippingAddress1}, ${data.shippingAddress2 || ''}, ${data.shippingCity}, ${data.shippingState}, ${data.shippingPostalCode}, ${data.shippingCountry}`.trim();
+
     const orderData = {
-      customer: {
+      customerInfo: {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
-        company: data.company,
-      },
-      billingAddress: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        company: data.company,
-        address1: data.billingAddress1,
-        address2: data.billingAddress2,
-        city: data.billingCity,
-        state: data.billingState,
-        postalCode: data.billingPostalCode,
+        company: data.company || '',
         country: data.billingCountry,
-        phone: data.phone,
-      },
-      shippingAddress: data.sameAsShipping ? {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        company: data.company,
-        address1: data.billingAddress1,
-        address2: data.billingAddress2,
         city: data.billingCity,
-        state: data.billingState,
-        postalCode: data.billingPostalCode,
-        country: data.billingCountry,
-        phone: data.phone,
-      } : {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        company: data.company,
-        address1: data.shippingAddress1,
-        address2: data.shippingAddress2,
-        city: data.shippingCity,
-        state: data.shippingState,
-        postalCode: data.shippingPostalCode,
-        country: data.shippingCountry,
-        phone: data.phone,
+        address: shippingAddress,
       },
       items: cartItems.map(item => ({
         productId: item.id,
         productName: item.name,
-        productSku: item.sku,
+        productSku: item.sku || '',
         quantity: item.quantity,
         unitPrice: parseFloat(item.price),
-        totalPrice: item.totalPrice,
       })),
-      subtotal,
-      taxAmount,
-      shippingAmount: shippingCost,
       totalAmount,
-      shippingMethod: data.shippingMethod,
-      paymentMethod: data.paymentMethod,
-      notes: data.notes,
+      notes: data.notes || '',
     };
 
     createOrderMutation.mutate(orderData);
