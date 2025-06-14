@@ -477,8 +477,18 @@ ${data.data.map((item: any) =>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Shop Management</h1>
-            <p className="text-gray-600 mt-2">Manage orders, inventory, and discount settings</p>
+            <div className="mb-4">
+              <h1 className="text-3xl font-bold text-gray-900">
+                Welcome, Shop Manager!
+              </h1>
+              <p className="text-lg text-blue-600 mt-1">
+                Your e-commerce control center is active
+              </p>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700">Shop Management</h2>
+              <p className="text-gray-600">Manage orders, inventory, and discount settings</p>
+            </div>
           </div>
         </div>
 
@@ -597,7 +607,7 @@ ${data.data.map((item: any) =>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
                               <p className="font-semibold">${order.totalAmount}</p>
-                              <p className="text-sm text-gray-600">{order.customerEmail}</p>
+                              <p className="text-sm text-gray-600">Customer ID: {order.customerId}</p>
                             </div>
                             <div className="flex gap-2">
                               <Button

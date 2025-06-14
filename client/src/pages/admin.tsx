@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 
 const categories = [
   { value: "fuel-additives", label: "Fuel Additives", icon: <Beaker className="w-4 h-4" /> },
@@ -373,10 +374,10 @@ export default function AdminPage() {
           <div>
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Welcome back, {user?.username || 'Admin'}!
+                {getPersonalizedWelcome(user?.username || 'Admin', 'admin', 'en')}
               </h1>
               <p className="text-lg text-blue-600 dark:text-blue-400 mt-1">
-                Ready to manage your chemical products today
+                {getDashboardMotivation('admin', 'en')}
               </p>
             </div>
             <div>

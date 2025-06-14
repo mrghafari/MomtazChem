@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 
 const CustomerProfile = () => {
   const [, setLocation] = useLocation();

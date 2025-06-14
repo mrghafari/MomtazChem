@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "wouter";
+import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 
 interface Inquiry {
   id: number;
