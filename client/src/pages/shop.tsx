@@ -227,7 +227,7 @@ const Shop = () => {
                       className="flex items-center gap-2"
                     >
                       <User className="w-4 h-4" />
-                      ورود / ثبت نام
+                      Login / Register
                     </Button>
                   )}
                 </div>

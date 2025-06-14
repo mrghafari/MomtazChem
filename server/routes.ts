@@ -1949,7 +1949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { firstName, lastName, email, password, phone, company, country, city, address } = req.body;
       
-      // Check if customer already exists
+      // Check if customer already exists in regular customer table
       const existingCustomer = await customerStorage.getCustomerByEmail(email);
       if (existingCustomer) {
         return res.status(400).json({ 
@@ -1958,7 +1958,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create customer
+      // Check if customer already exists in CRM
+      const existingCrmCustomer = await crmStorage.getCrmCustomerByEmail(email);
+      if (existingCrmCustomer) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "ایمیل قبلاً در CRM ثبت شده است" 
+        });
+      }
+
+      // Create customer in regular customer table for authentication
       const customerData = {
         firstName,
         lastName,
@@ -1972,6 +1981,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const customer = await customerStorage.createCustomer(customerData);
+
+      // Also create customer in CRM for comprehensive tracking
+      const crmCustomerData = {
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        company: company || null,
+        country: country || null,
+        city: city || null,
+        address: address || null,
+        customerType: 'retail' as const,
+        source: 'website_registration' as const,
+        notes: 'مشتری از طریق فروشگاه آنلاین ثبت نام کرده است',
+      };
+
+      const crmCustomer = await crmStorage.createCrmCustomer(crmCustomerData);
+
+      // Log registration activity in CRM
+      await crmStorage.logCustomerActivity({
+        customerId: crmCustomer.id,
+        activityType: 'registration',
+        description: 'مشتری در فروشگاه آنلاین ثبت نام کرد',
+        activityData: {
+          source: 'website',
+          registrationDate: new Date().toISOString(),
+        }
+      });
       
       res.json({
         success: true,
@@ -1981,6 +2018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstName: customer.firstName,
           lastName: customer.lastName,
           email: customer.email,
+          crmId: crmCustomer.id,
         }
       });
     } catch (error) {
@@ -2005,9 +2043,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Store customer session
+      // Get CRM customer data
+      const crmCustomer = await crmStorage.getCrmCustomerByEmail(email);
+
+      // Store customer session with both IDs
       (req.session as any).customerId = customer.id;
       (req.session as any).customerEmail = customer.email;
+      if (crmCustomer) {
+        (req.session as any).crmCustomerId = crmCustomer.id;
+      }
+
+      // Log login activity in CRM if customer exists there
+      if (crmCustomer) {
+        await crmStorage.logCustomerActivity({
+          customerId: crmCustomer.id,
+          activityType: 'login',
+          description: 'مشتری وارد فروشگاه آنلاین شد',
+          activityData: {
+            source: 'website',
+            loginDate: new Date().toISOString(),
+            userAgent: req.headers['user-agent'] || 'unknown',
+          }
+        });
+      }
 
       res.json({
         success: true,
@@ -2018,6 +2076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: customer.lastName,
           email: customer.email,
           company: customer.company,
+          crmId: crmCustomer?.id,
         }
       });
     } catch (error) {
@@ -2056,6 +2115,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/customers/me", async (req, res) => {
     try {
       const customerId = (req.session as any)?.customerId;
+      const crmCustomerId = (req.session as any)?.crmCustomerId;
+      
       if (!customerId) {
         return res.status(401).json({ 
           success: false, 
@@ -2071,6 +2132,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get CRM customer data if available
+      let crmCustomer = null;
+      if (crmCustomerId) {
+        crmCustomer = await crmStorage.getCrmCustomerById(crmCustomerId);
+      }
+
       res.json({
         success: true,
         customer: {
@@ -2083,6 +2150,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           country: customer.country,
           city: customer.city,
           address: customer.address,
+          crmId: crmCustomer?.id,
+          totalOrders: crmCustomer?.totalOrders || 0,
+          totalSpent: crmCustomer?.totalSpent || 0,
         }
       });
     } catch (error) {
@@ -2090,6 +2160,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "خطا در دریافت اطلاعات" 
+      });
+    }
+  });
+
+  // Create shop order and integrate with CRM
+  app.post("/api/shop/orders", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      const crmCustomerId = (req.session as any)?.crmCustomerId;
+      const { items, customerInfo, totalAmount, notes } = req.body;
+
+      let finalCustomerInfo = customerInfo;
+      let finalCrmCustomerId = crmCustomerId;
+
+      // If user is not logged in, create or update CRM customer from order info
+      if (!customerId && customerInfo) {
+        const orderData = {
+          email: customerInfo.email,
+          firstName: customerInfo.firstName,
+          lastName: customerInfo.lastName,
+          company: customerInfo.company,
+          phone: customerInfo.phone,
+          country: customerInfo.country,
+          city: customerInfo.city,
+          address: customerInfo.address,
+          orderValue: totalAmount,
+        };
+
+        const crmCustomer = await crmStorage.createOrUpdateCustomerFromOrder(orderData);
+        finalCrmCustomerId = crmCustomer.id;
+        finalCustomerInfo = crmCustomer;
+      }
+
+      // Create order in customer orders table
+      const orderData = customerId ? {
+        customerId,
+        totalAmount,
+        status: 'pending' as const,
+        shippingAddress: finalCustomerInfo.address,
+        notes: notes || '',
+      } : {
+        customerId: null,
+        totalAmount,
+        status: 'pending' as const,
+        shippingAddress: finalCustomerInfo.address,
+        notes: notes || '',
+        guestEmail: finalCustomerInfo.email,
+        guestName: `${finalCustomerInfo.firstName} ${finalCustomerInfo.lastName}`,
+      };
+
+      const order = await customerStorage.createOrder(orderData);
+
+      // Create order items
+      for (const item of items) {
+        await customerStorage.createOrderItem({
+          orderId: order.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice.toString(),
+          totalPrice: (item.quantity * item.unitPrice).toString(),
+        });
+      }
+
+      // Log order activity in CRM
+      if (finalCrmCustomerId) {
+        await crmStorage.logCustomerActivity({
+          customerId: finalCrmCustomerId,
+          activityType: 'order_placed',
+          description: `سفارش جدید به مبلغ $${totalAmount} ثبت شد`,
+          activityData: {
+            orderId: order.id,
+            totalAmount,
+            itemCount: items.length,
+            source: 'website',
+            orderDate: new Date().toISOString(),
+          },
+          relatedOrderId: order.id,
+        });
+
+        // Update customer metrics in CRM
+        await crmStorage.updateCustomerMetrics(finalCrmCustomerId);
+      }
+
+      res.json({
+        success: true,
+        message: "سفارش با موفقیت ثبت شد",
+        order: {
+          id: order.id,
+          totalAmount: order.totalAmount,
+          status: order.status,
+          crmCustomerId: finalCrmCustomerId,
+        }
+      });
+
+    } catch (error) {
+      console.error("Error creating shop order:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ثبت سفارش"
+      });
+    }
+  });
+
+  // Get customer order history
+  app.get("/api/customers/orders", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت نشده" 
+        });
+      }
+
+      const orders = await customerStorage.getOrdersByCustomer(customerId);
+      
+      // Get detailed order information with items
+      const detailedOrders = await Promise.all(
+        orders.map(async (order) => {
+          const items = await customerStorage.getOrderItems(order.id);
+          return {
+            ...order,
+            items,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        orders: detailedOrders,
+      });
+    } catch (error) {
+      console.error("Error getting customer orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت سفارشات"
       });
     }
   });
