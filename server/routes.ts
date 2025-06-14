@@ -1077,10 +1077,229 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // ADMIN USER MANAGEMENT ENDPOINTS (SUPER ADMIN ONLY)
+  // =============================================================================
+
+  // Check if user has specific permission
+  const hasPermission = async (userId: number, permissionName: string): Promise<boolean> => {
+    try {
+      const result = await storage.db.query(`
+        SELECT 1 FROM users u
+        JOIN admin_roles r ON u.role_id = r.id
+        JOIN role_permissions rp ON r.id = rp.role_id
+        JOIN admin_permissions p ON rp.permission_id = p.id
+        WHERE u.id = $1 AND p.name = $2 AND u.is_active = true AND r.is_active = true
+      `, [userId, permissionName]);
+      return result.rows.length > 0;
+    } catch (error) {
+      console.error('Error checking permission:', error);
+      return false;
+    }
+  };
+
+  // Middleware to check super admin permission
+  const requireSuperAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    const session = req.session as SessionData;
+    if (!session?.adminId) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+
+    const canManageUsers = await hasPermission(session.adminId, 'manage_users');
+    if (!canManageUsers) {
+      return res.status(403).json({ success: false, message: "Super admin access required" });
+    }
+
+    next();
+  };
+
+  // Get all admin users
+  app.get("/api/admin/users", requireSuperAdmin, async (req, res) => {
+    try {
+      const result = await storage.db.query(`
+        SELECT u.id, u.username, u.email, u.role_id, u.is_active, u.last_login_at, u.created_at,
+               r.name as role_name, r.display_name as role_display_name
+        FROM users u
+        LEFT JOIN admin_roles r ON u.role_id = r.id
+        ORDER BY u.created_at DESC
+      `);
+      
+      const users = result.rows.map(row => ({
+        id: row.id,
+        username: row.username,
+        email: row.email,
+        roleId: row.role_id,
+        roleName: row.role_name,
+        roleDisplayName: row.role_display_name,
+        isActive: row.is_active,
+        lastLoginAt: row.last_login_at,
+        createdAt: row.created_at
+      }));
+
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get all admin roles
+  app.get("/api/admin/roles", requireSuperAdmin, async (req, res) => {
+    try {
+      const result = await storage.db.query(`
+        SELECT r.id, r.name, r.display_name, r.description, r.is_active,
+               COUNT(rp.permission_id) as permission_count
+        FROM admin_roles r
+        LEFT JOIN role_permissions rp ON r.id = rp.role_id
+        GROUP BY r.id, r.name, r.display_name, r.description, r.is_active
+        ORDER BY r.id
+      `);
+      
+      const roles = result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        displayName: row.display_name,
+        description: row.description,
+        isActive: row.is_active,
+        permissionCount: parseInt(row.permission_count)
+      }));
+
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get all admin permissions
+  app.get("/api/admin/permissions", requireSuperAdmin, async (req, res) => {
+    try {
+      const result = await storage.db.query(`
+        SELECT id, name, display_name, description, module, is_active
+        FROM admin_permissions
+        ORDER BY module, display_name
+      `);
+      
+      const permissions = result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        displayName: row.display_name,
+        description: row.description,
+        module: row.module,
+        isActive: row.is_active
+      }));
+
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching permissions:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Create new admin user
+  app.post("/api/admin/users", requireSuperAdmin, async (req, res) => {
+    try {
+      const { username, email, password, roleId } = req.body;
+      
+      // Hash password
+      const passwordHash = await bcrypt.hash(password, 12);
+      
+      const result = await storage.db.query(`
+        INSERT INTO users (username, email, password_hash, role_id, is_active)
+        VALUES ($1, $2, $3, $4, true)
+        RETURNING id, username, email, role_id, is_active, created_at
+      `, [username, email, passwordHash, roleId]);
+
+      res.json({
+        success: true,
+        user: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      if (error.code === '23505') { // Unique constraint violation
+        res.status(400).json({ success: false, message: "Username or email already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // Update admin user
+  app.put("/api/admin/users/:id", requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { username, email, password, roleId } = req.body;
+      
+      let query = `
+        UPDATE users 
+        SET username = $1, email = $2, role_id = $3, updated_at = NOW()
+      `;
+      let params = [username, email, roleId];
+      
+      if (password && password.trim() !== '') {
+        const passwordHash = await bcrypt.hash(password, 12);
+        query += `, password_hash = $4`;
+        params.push(passwordHash);
+        query += ` WHERE id = $5`;
+        params.push(id);
+      } else {
+        query += ` WHERE id = $4`;
+        params.push(id);
+      }
+      
+      query += ` RETURNING id, username, email, role_id, is_active`;
+
+      const result = await storage.db.query(query, params);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      res.json({
+        success: true,
+        user: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "Username or email already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // Toggle user active status
+  app.put("/api/admin/users/:id/status", requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      
+      const result = await storage.db.query(`
+        UPDATE users 
+        SET is_active = $1, updated_at = NOW()
+        WHERE id = $2
+        RETURNING id, username, email, is_active
+      `, [isActive, id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      res.json({
+        success: true,
+        user: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Get database statistics
   app.get("/api/admin/database/stats", requireAuth, async (req, res) => {
     try {
-      const { pool } = require('./db');
+      const { pool } = await import('./db');
       
       const tableStats = await pool.query(`
         SELECT 

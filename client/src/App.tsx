@@ -18,6 +18,7 @@ import AdminUsers from "@/pages/admin-users";
 import SpecialistsAdmin from "@/pages/admin/specialists";
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
 import DatabaseManagement from "@/pages/admin/database-management";
+import UserManagement from "@/pages/admin/user-management";
 import SMTPTestPage from "@/pages/admin/smtp-test";
 import EmailSettingsPage from "@/pages/admin/email-settings";
 import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
