@@ -944,7 +944,7 @@ export default function FactoryManagement() {
                     <div>
                       <p className="text-sm font-medium text-green-600">In Stock</p>
                       <p className="text-2xl font-bold text-green-800">
-                        {products.filter(p => p.inventoryStatus === 'in_stock').length}
+                        {(products || []).filter(p => p.inventoryStatus === 'in_stock').length}
                       </p>
                     </div>
                     <CheckCircle className="w-8 h-8 text-green-600" />
@@ -958,7 +958,7 @@ export default function FactoryManagement() {
                     <div>
                       <p className="text-sm font-medium text-yellow-600">Low Stock</p>
                       <p className="text-2xl font-bold text-yellow-800">
-                        {products.filter(p => p.inventoryStatus === 'low_stock').length}
+                        {(products || []).filter(p => p.inventoryStatus === 'low_stock').length}
                       </p>
                     </div>
                     <AlertTriangle className="w-8 h-8 text-yellow-600" />
@@ -972,7 +972,7 @@ export default function FactoryManagement() {
                     <div>
                       <p className="text-sm font-medium text-red-600">Out of Stock</p>
                       <p className="text-2xl font-bold text-red-800">
-                        {products.filter(p => p.inventoryStatus === 'out_of_stock').length}
+                        {(products || []).filter(p => p.inventoryStatus === 'out_of_stock').length}
                       </p>
                     </div>
                     <XCircle className="w-8 h-8 text-red-600" />
@@ -985,7 +985,7 @@ export default function FactoryManagement() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-blue-600">Total Products</p>
-                      <p className="text-2xl font-bold text-blue-800">{products.length}</p>
+                      <p className="text-2xl font-bold text-blue-800">{(products || []).length}</p>
                     </div>
                     <Package className="w-8 w-8 text-blue-600" />
                   </div>
