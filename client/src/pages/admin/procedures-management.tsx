@@ -1134,7 +1134,7 @@ export default function ProceduresManagement() {
                           <div className="flex items-center gap-2 mb-2">
                             <FileText className="h-5 w-5 text-blue-600" />
                             <h3 className="font-semibold text-lg">{document.title}</h3>
-                            <Badge variant="outline">نسخه {document.version}</Badge>
+                            <Badge variant="outline">نسخه {document.version || '1.0'}</Badge>
                           </div>
                           
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
@@ -1144,7 +1144,7 @@ export default function ProceduresManagement() {
                             </div>
                             <div>
                               <span className="font-medium">حجم:</span>
-                              <p>{formatFileSize(document.fileSize)}</p>
+                              <p>{formatFileSize(document.fileSize || 0)}</p>
                             </div>
                             <div>
                               <span className="font-medium">آپلود کننده:</span>
@@ -1152,7 +1152,7 @@ export default function ProceduresManagement() {
                             </div>
                             <div>
                               <span className="font-medium">تاریخ آپلود:</span>
-                              <p>{new Date(document.uploadDate).toLocaleDateString('fa-IR')}</p>
+                              <p>{document.uploadDate ? new Date(document.uploadDate).toLocaleDateString('fa-IR') : 'نامشخص'}</p>
                             </div>
                           </div>
                           
@@ -1164,7 +1164,7 @@ export default function ProceduresManagement() {
                           )}
                           
                           <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>تعداد دانلود: {document.downloadCount}</span>
+                            <span>تعداد دانلود: {document.downloadCount || 0}</span>
                             {document.lastDownloadedAt && (
                               <span>
                                 آخرین دانلود: {new Date(document.lastDownloadedAt).toLocaleDateString('fa-IR')}
