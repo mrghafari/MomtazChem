@@ -166,18 +166,31 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              © 2024 Momtazchem. All rights reserved.
+              © 2025 Momtazchem. All rights reserved.
             </div>
-            <div className="flex space-x-6 text-sm">
-              <a href="#privacy" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Privacy Policy
-              </a>
-              <a href="#terms" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Terms of Service
-              </a>
-              <a href="#cookies" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Cookie Policy
-              </a>
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
+              <div className="flex space-x-6 text-sm">
+                <a href="#privacy" className="text-gray-400 hover:text-white transition-colors duration-200">
+                  Privacy Policy
+                </a>
+                <a href="#terms" className="text-gray-400 hover:text-white transition-colors duration-200">
+                  Terms of Service
+                </a>
+                <a href="#cookies" className="text-gray-400 hover:text-white transition-colors duration-200">
+                  Cookie Policy
+                </a>
+              </div>
+              <div className="text-gray-400 text-sm">
+                Design by{" "}
+                <a 
+                  href="https://wa.me/358411546489"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-green-400 hover:text-green-300 transition-colors duration-200 font-medium"
+                >
+                  MRG
+                </a>
+              </div>
             </div>
           </div>
         </div>
