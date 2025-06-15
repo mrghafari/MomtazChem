@@ -550,6 +550,7 @@ ${data.data.map((item: any) =>
             <TabsTrigger value="inventory">Inventory Management</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
             <TabsTrigger value="accounting">Accounting</TabsTrigger>
+            <TabsTrigger value="reports">Sales Reports</TabsTrigger>
           </TabsList>
 
           {/* Orders Management */}

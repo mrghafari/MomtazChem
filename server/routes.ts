@@ -3790,6 +3790,109 @@ ${procedure.content}
     }
   });
 
+  // Sales Reports API
+  app.get("/api/reports/sales", requireAuth, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Start date and end date are required" 
+        });
+      }
+
+      // Get all orders within date range
+      const orders = await customerStorage.getAllOrders();
+      const filteredOrders = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        const start = new Date(startDate as string);
+        const end = new Date(endDate as string);
+        end.setHours(23, 59, 59, 999); // Include full end date
+        
+        return orderDate >= start && orderDate <= end;
+      });
+
+      // Calculate total sales metrics
+      const totalSales = filteredOrders.reduce((sum, order) => 
+        sum + parseFloat(order.totalAmount), 0
+      );
+      const totalOrders = filteredOrders.length;
+
+      // Get detailed order items for product analysis
+      const productSalesMap = new Map();
+      let totalQuantity = 0;
+
+      for (const order of filteredOrders) {
+        const items = await customerStorage.getOrderItems(order.id);
+        
+        for (const item of items) {
+          const key = item.productName;
+          const existing = productSalesMap.get(key) || {
+            productName: item.productName,
+            quantity: 0,
+            totalAmount: 0,
+            orders: new Set()
+          };
+          
+          existing.quantity += item.quantity;
+          existing.totalAmount += parseFloat(item.unitPrice.toString()) * item.quantity;
+          existing.orders.add(order.id.toString());
+          totalQuantity += item.quantity;
+          
+          productSalesMap.set(key, existing);
+        }
+      }
+
+      // Convert to array and add order count
+      const productSales = Array.from(productSalesMap.values()).map(product => ({
+        ...product,
+        orders: product.orders.size
+      })).sort((a, b) => b.totalAmount - a.totalAmount);
+
+      // Create top products for pie chart (top 8 products)
+      const topProducts = productSales.slice(0, 8).map(product => {
+        const percentage = totalSales > 0 ? ((product.totalAmount / totalSales) * 100) : 0;
+        return {
+          name: product.productName,
+          value: product.totalAmount,
+          percentage: Math.round(percentage * 10) / 10
+        };
+      });
+
+      // Create daily breakdown
+      const dailyMap = new Map();
+      filteredOrders.forEach(order => {
+        const date = new Date(order.createdAt).toISOString().split('T')[0];
+        const existing = dailyMap.get(date) || { date, sales: 0, orders: 0 };
+        existing.sales += parseFloat(order.totalAmount);
+        existing.orders += 1;
+        dailyMap.set(date, existing);
+      });
+
+      const dailyBreakdown = Array.from(dailyMap.values()).sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+
+      const reportData = {
+        totalSales,
+        totalOrders,
+        totalQuantity,
+        productSales,
+        dailyBreakdown,
+        topProducts
+      };
+
+      res.json(reportData);
+    } catch (error) {
+      console.error("Error generating sales report:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to generate sales report" 
+      });
+    }
+  });
+
   // Discount settings management
   app.get("/api/shop/discounts", async (req, res) => {
     try {
