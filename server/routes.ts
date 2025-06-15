@@ -3691,6 +3691,9 @@ ${procedure.content}
             customer,
             orderDate: order.createdAt, // Map for compatibility
             orderNumber: order.orderNumber,
+            // Include shipping method information
+            carrier: order.carrier,
+            paymentMethod: order.paymentMethod,
           };
         })
       );
