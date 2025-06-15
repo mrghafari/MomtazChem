@@ -605,9 +605,18 @@ ${data.data.map((item: any) =>
                                   {(order as any).customer.email && ` (${(order as any).customer.email})`}
                                 </p>
                               )}
+                              {/* Payment Method */}
+                              {order.paymentMethod && (
+                                <p className="text-sm text-purple-600">
+                                  روش پرداخت: {order.paymentMethod === 'bank_transfer' ? 'انتقال بانکی' : 
+                                             order.paymentMethod === 'cash_on_delivery' ? 'پرداخت در محل' :
+                                             order.paymentMethod === 'company_credit' ? 'اعتبار شرکت' : order.paymentMethod}
+                                </p>
+                              )}
+                              {/* Shipping Method */}
                               {(order as any).carrier && (
                                 <p className="text-sm text-green-600">
-                                  حمل: {(order as any).carrier}
+                                  نوع ارسال: {(order as any).carrier}
                                   {(order as any).trackingNumber && ` - کد پیگیری: ${(order as any).trackingNumber}`}
                                 </p>
                               )}
