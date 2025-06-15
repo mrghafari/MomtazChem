@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { MapPin, Phone, Mail, Clock, IdCard } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, IdCard, Briefcase } from "lucide-react";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -94,6 +94,17 @@ const Contact = () => {
         "Saturday: 9:00 AM - 1:00 PM"
       ],
       bgColor: "bg-primary-blue"
+    },
+    {
+      icon: <Briefcase className="h-6 w-6 text-white" />,
+      title: "Career Opportunities",
+      content: [
+        "Join our growing team",
+        "Chemical Engineers, Lab Technicians",
+        "Sales Representatives, Quality Control"
+      ],
+      bgColor: "bg-green-600",
+      link: "mailto:careers@momtazchem.com"
     }
   ];
 
@@ -256,6 +267,13 @@ const Contact = () => {
                             ) : info.title === "Email" ? (
                               <a 
                                 href={`mailto:${line}`}
+                                className="hover:text-primary transition-colors duration-200 cursor-pointer"
+                              >
+                                {line}
+                              </a>
+                            ) : info.title === "Career Opportunities" && info.link ? (
+                              <a 
+                                href={info.link}
                                 className="hover:text-primary transition-colors duration-200 cursor-pointer"
                               >
                                 {line}
