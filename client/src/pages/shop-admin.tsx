@@ -37,6 +37,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
+import SalesReport from "@/pages/sales-report";
 
 // Discount Form Component
 const DiscountForm = ({ discount, products, onSave, onCancel }: {
@@ -961,6 +962,11 @@ ${data.data.map((item: any) =>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Sales Reports */}
+          <TabsContent value="reports">
+            <SalesReport />
           </TabsContent>
         </Tabs>
       </div>

@@ -3836,8 +3836,8 @@ ${procedure.content}
           };
           
           existing.quantity += item.quantity;
-          existing.totalAmount += parseFloat(item.unitPrice.toString()) * item.quantity;
-          existing.orders.add(order.id.toString());
+          existing.totalAmount += parseFloat(String(item.unitPrice)) * item.quantity;
+          existing.orders.add(order.id);
           totalQuantity += item.quantity;
           
           productSalesMap.set(key, existing);
