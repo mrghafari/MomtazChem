@@ -628,18 +628,6 @@ ${data.data.map((item: any) =>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
                               <p className="font-semibold">${order.totalAmount}</p>
-                              <p className="text-sm text-gray-600">
-                                {(order as any).customer ? 
-                                  `Customer: ${(order as any).customer.firstName} ${(order as any).customer.lastName}` : 
-                                  `Customer ID: ${order.customerId}`
-                                }
-                              </p>
-                              {(order as any).carrier && (
-                                <p className="text-xs text-green-600 mt-1">
-                                  {(order as any).carrier}
-                                  {(order as any).trackingNumber && ` (#${(order as any).trackingNumber})`}
-                                </p>
-                              )}
                             </div>
                             <div className="flex gap-2">
                               <Button
