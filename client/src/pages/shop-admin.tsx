@@ -606,18 +606,18 @@ ${data.data.map((item: any) =>
                                 </p>
                               )}
                               {/* Payment Method */}
-                              {order.paymentMethod && (
+                              {(order as any).paymentMethod && (
                                 <p className="text-sm text-purple-600">
-                                  روش پرداخت: {order.paymentMethod === 'bank_transfer' ? 'انتقال بانکی' : 
-                                             order.paymentMethod === 'cash_on_delivery' ? 'پرداخت در محل' :
-                                             order.paymentMethod === 'company_credit' ? 'اعتبار شرکت' : order.paymentMethod}
+                                  Payment: {(order as any).paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 
+                                           (order as any).paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' :
+                                           (order as any).paymentMethod === 'company_credit' ? 'Company Credit' : (order as any).paymentMethod}
                                 </p>
                               )}
                               {/* Shipping Method */}
                               {(order as any).carrier && (
                                 <p className="text-sm text-green-600">
-                                  نوع ارسال: {(order as any).carrier}
-                                  {(order as any).trackingNumber && ` - کد پیگیری: ${(order as any).trackingNumber}`}
+                                  Shipping: {(order as any).carrier}
+                                  {(order as any).trackingNumber && ` - Tracking: ${(order as any).trackingNumber}`}
                                 </p>
                               )}
                             </div>
