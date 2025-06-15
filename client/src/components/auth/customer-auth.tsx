@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Lock, Phone, MapPin, Building } from "lucide-react";
+import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle } from "lucide-react";
 
 // Form schemas
 const loginSchema = z.object({
@@ -45,6 +46,9 @@ interface CustomerAuthProps {
 export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: CustomerAuthProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
+  const [emailExists, setEmailExists] = useState(false);
+  const [duplicateEmail, setDuplicateEmail] = useState("");
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -126,15 +130,32 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
       if (result.success) {
         toast({
           title: "Registration Successful",
-          description: "Your account has been created. You can now log in",
+          description: "Your account has been created and you're now logged in",
         });
+        onLoginSuccess(result.customer);
+        onOpenChange(false);
         registerForm.reset();
+        setEmailExists(false);
+        setDuplicateEmail("");
       } else {
-        toast({
-          variant: "destructive",
-          title: "Registration Error",
-          description: result.message || "An error occurred during registration",
-        });
+        // Check for duplicate email error
+        if (result.message?.includes("already exists") || result.message?.includes("duplicate") || result.message?.includes("موجود")) {
+          setEmailExists(true);
+          setDuplicateEmail(data.email);
+          setActiveTab("login");
+          loginForm.setValue("email", data.email);
+          toast({
+            title: "Email Already Registered",
+            description: "This email is already registered. Please login instead.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Registration Error",
+            description: result.message || "An error occurred during registration",
+          });
+        }
       }
     } catch (error) {
       console.error('Register error:', error);
@@ -148,6 +169,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
     }
   };
 
+  const switchToLogin = () => {
+    setActiveTab("login");
+    setEmailExists(false);
+    setDuplicateEmail("");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -158,7 +185,24 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="login" className="w-full">
+        {emailExists && (
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Email "{duplicateEmail}" is already registered. Please login instead.
+              <Button 
+                variant="link" 
+                size="sm" 
+                onClick={switchToLogin}
+                className="p-0 h-auto ml-2"
+              >
+                Switch to Login
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="register">Register</TabsTrigger>

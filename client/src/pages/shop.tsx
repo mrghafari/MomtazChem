@@ -540,24 +540,40 @@ const Shop = () => {
         </div>
       </div>
 
-      {/* Authentication-Aware Checkout Modal */}
+      {/* Checkout Modal */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>تسویه حساب</DialogTitle>
-            <DialogDescription>
-              برای تکمیل سفارش، لطفاً وارد حساب کاربری شوید یا ثبت نام کنید
-            </DialogDescription>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Checkout</DialogTitle>
+            <DialogDescription>Complete your order and provide shipping information</DialogDescription>
           </DialogHeader>
-          <AuthCheckout 
-            cart={cart} 
-            products={products}
-            onOrderComplete={() => {
-              setCart({});
-              setShowCheckout(false);
-            }}
-            onClose={() => setShowCheckout(false)}
-          />
+          {customer ? (
+            <Checkout 
+              cart={cart} 
+              products={products}
+              onOrderComplete={() => {
+                setCart({});
+                setShowCheckout(false);
+              }}
+            />
+          ) : (
+            <div className="p-8">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Authentication Required</h2>
+                <p className="text-gray-600">Please login or register to complete your order. Your cart will be preserved.</p>
+              </div>
+              <div className="max-w-md mx-auto">
+                <CustomerAuth 
+                  open={true}
+                  onOpenChange={() => {}}
+                  onLoginSuccess={(customerData) => {
+                    setCustomer(customerData);
+                    // Cart is automatically preserved
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
