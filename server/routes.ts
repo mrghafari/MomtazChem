@@ -2369,7 +2369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
-      const { items, customerInfo, totalAmount, notes } = req.body;
+      const { items, customerInfo, totalAmount, notes, shippingMethod, paymentMethod } = req.body;
 
       let finalCustomerInfo = customerInfo;
       let finalCrmCustomerId = crmCustomerId;

@@ -181,6 +181,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       })),
       totalAmount,
       notes: data.notes || '',
+      shippingMethod: data.shippingMethod,
+      paymentMethod: data.paymentMethod,
     };
 
     createOrderMutation.mutate(orderData);

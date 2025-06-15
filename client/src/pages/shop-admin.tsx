@@ -605,6 +605,12 @@ ${data.data.map((item: any) =>
                                   {(order as any).customer.email && ` (${(order as any).customer.email})`}
                                 </p>
                               )}
+                              {order.carrier && (
+                                <p className="text-sm text-green-600">
+                                  حمل: {order.carrier}
+                                  {order.trackingNumber && ` - کد پیگیری: ${order.trackingNumber}`}
+                                </p>
+                              )}
                             </div>
                             <Badge className={getStatusColor(order.status)}>
                               {order.status}
@@ -619,6 +625,12 @@ ${data.data.map((item: any) =>
                                   `Customer ID: ${order.customerId}`
                                 }
                               </p>
+                              {order.carrier && (
+                                <p className="text-xs text-green-600 mt-1">
+                                  {order.carrier}
+                                  {order.trackingNumber && ` (#${order.trackingNumber})`}
+                                </p>
+                              )}
                             </div>
                             <div className="flex gap-2">
                               <Button
