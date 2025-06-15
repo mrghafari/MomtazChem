@@ -626,6 +626,21 @@ ${data.data.map((item: any) =>
                             </Badge>
                           </div>
                           <div className="flex items-center gap-4">
+                            {/* Middle section with shipping and payment info */}
+                            <div className="flex-1 text-center">
+                              {(order as any).paymentMethod && (
+                                <p className="text-sm text-purple-600 font-medium">
+                                  {(order as any).paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 
+                                   (order as any).paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' :
+                                   (order as any).paymentMethod === 'company_credit' ? 'Company Credit' : (order as any).paymentMethod}
+                                </p>
+                              )}
+                              {(order as any).carrier && (
+                                <p className="text-sm text-green-600 font-medium">
+                                  {(order as any).carrier}
+                                </p>
+                              )}
+                            </div>
                             <div className="text-right">
                               <p className="font-semibold">${order.totalAmount}</p>
                             </div>
