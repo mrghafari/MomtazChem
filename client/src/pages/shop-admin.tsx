@@ -599,6 +599,12 @@ ${data.data.map((item: any) =>
                               <p className="text-sm text-gray-600">
                                 Order Date: {formatDate(order.orderDate.toString())}
                               </p>
+                              {(order as any).customer && (
+                                <p className="text-sm text-blue-600">
+                                  {(order as any).customer.firstName} {(order as any).customer.lastName}
+                                  {(order as any).customer.email && ` (${(order as any).customer.email})`}
+                                </p>
+                              )}
                             </div>
                             <Badge className={getStatusColor(order.status)}>
                               {order.status}
@@ -607,7 +613,12 @@ ${data.data.map((item: any) =>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
                               <p className="font-semibold">${order.totalAmount}</p>
-                              <p className="text-sm text-gray-600">Customer ID: {order.customerId}</p>
+                              <p className="text-sm text-gray-600">
+                                {(order as any).customer ? 
+                                  `Customer: ${(order as any).customer.firstName} ${(order as any).customer.lastName}` : 
+                                  `Customer ID: ${order.customerId}`
+                                }
+                              </p>
                             </div>
                             <div className="flex gap-2">
                               <Button
