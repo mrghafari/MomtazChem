@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
+import AuthCheckout from "@/components/auth-checkout";
 import LiveChat from "@/components/ui/live-chat";
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -539,20 +540,23 @@ const Shop = () => {
         </div>
       </div>
 
-      {/* Checkout Modal */}
+      {/* Authentication-Aware Checkout Modal */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Checkout</DialogTitle>
-            <DialogDescription>Complete your order and provide shipping information</DialogDescription>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>تسویه حساب</DialogTitle>
+            <DialogDescription>
+              برای تکمیل سفارش، لطفاً وارد حساب کاربری شوید یا ثبت نام کنید
+            </DialogDescription>
           </DialogHeader>
-          <Checkout 
+          <AuthCheckout 
             cart={cart} 
             products={products}
             onOrderComplete={() => {
               setCart({});
               setShowCheckout(false);
             }}
+            onClose={() => setShowCheckout(false)}
           />
         </DialogContent>
       </Dialog>
