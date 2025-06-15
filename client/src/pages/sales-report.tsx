@@ -76,6 +76,13 @@ export default function SalesReport() {
     }).format(amount);
   };
 
+  const formatQuantity = (quantity: number) => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(quantity);
+  };
+
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'MMM dd, yyyy');
   };
@@ -291,7 +298,7 @@ export default function SalesReport() {
                             <div className="font-medium text-gray-900">{product.productName}</div>
                           </td>
                           <td className="p-3 text-right">
-                            <Badge variant="secondary">{product.quantity}</Badge>
+                            <Badge variant="secondary">{formatQuantity(product.quantity)} units</Badge>
                           </td>
                           <td className="p-3 text-right font-semibold text-green-600">
                             {formatCurrency(product.totalAmount)}
@@ -307,7 +314,7 @@ export default function SalesReport() {
                       <tr className="border-t-2 bg-gray-50">
                         <td className="p-3 font-bold text-gray-900">TOTAL</td>
                         <td className="p-3 text-right font-bold">
-                          <Badge variant="default">{reportData.totalQuantity}</Badge>
+                          <Badge variant="default">{formatQuantity(reportData.totalQuantity)} units</Badge>
                         </td>
                         <td className="p-3 text-right font-bold text-green-600">
                           {formatCurrency(reportData.totalSales)}
