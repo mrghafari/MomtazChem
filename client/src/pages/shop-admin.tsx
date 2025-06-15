@@ -605,10 +605,10 @@ ${data.data.map((item: any) =>
                                   {(order as any).customer.email && ` (${(order as any).customer.email})`}
                                 </p>
                               )}
-                              {order.carrier && (
+                              {(order as any).carrier && (
                                 <p className="text-sm text-green-600">
-                                  حمل: {order.carrier}
-                                  {order.trackingNumber && ` - کد پیگیری: ${order.trackingNumber}`}
+                                  حمل: {(order as any).carrier}
+                                  {(order as any).trackingNumber && ` - کد پیگیری: ${(order as any).trackingNumber}`}
                                 </p>
                               )}
                             </div>
@@ -625,10 +625,10 @@ ${data.data.map((item: any) =>
                                   `Customer ID: ${order.customerId}`
                                 }
                               </p>
-                              {order.carrier && (
+                              {(order as any).carrier && (
                                 <p className="text-xs text-green-600 mt-1">
-                                  {order.carrier}
-                                  {order.trackingNumber && ` (#${order.trackingNumber})`}
+                                  {(order as any).carrier}
+                                  {(order as any).trackingNumber && ` (#${(order as any).trackingNumber})`}
                                 </p>
                               )}
                             </div>

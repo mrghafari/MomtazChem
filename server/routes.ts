@@ -2402,6 +2402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerId: customerId || null,
         totalAmount: totalAmount.toString(),
         status: 'pending' as const,
+        paymentMethod: paymentMethod || 'bank_transfer',
         shippingAddress: {
           address: finalCustomerInfo.address,
           city: finalCustomerInfo.city,
@@ -2412,6 +2413,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           guestEmail: finalCustomerInfo.email,
           guestName: `${finalCustomerInfo.firstName} ${finalCustomerInfo.lastName}`,
         }),
+        // Store shipping method information
+        carrier: shippingMethod === 'standard' ? 'Standard Shipping (5-7 days)' : 
+                shippingMethod === 'express' ? 'Express Shipping (2-3 days)' : 
+                shippingMethod === 'overnight' ? 'Overnight Shipping' : 
+                'Standard Shipping',
       };
 
       const order = await customerStorage.createOrder(orderData);
