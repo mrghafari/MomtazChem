@@ -47,6 +47,17 @@ export default function SalesReport() {
 
   const { data: reportData, isLoading, refetch } = useQuery<SalesReportData>({
     queryKey: ["/api/reports/sales", startDate, endDate],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        startDate: startDate,
+        endDate: endDate
+      });
+      const response = await fetch(`/api/reports/sales?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch sales report: ${response.statusText}`);
+      }
+      return response.json();
+    },
     enabled: !!startDate && !!endDate,
   });
 
