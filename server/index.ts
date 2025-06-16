@@ -4,6 +4,7 @@ import path from "path";
 import { registerRoutes } from "./routes";
 import InventoryAlertService from "./inventory-alerts";
 import { setupVite, serveStatic, log } from "./vite";
+import connectPgSimple from "connect-pg-simple";
 
 const app = express();
 app.use(express.json());
@@ -11,8 +12,16 @@ app.use(express.urlencoded({ extended: false }));
 
 
 
-// Session configuration
+// Initialize PostgreSQL session store
+const PgSession = connectPgSimple(session);
+
+// Session configuration with PostgreSQL store
 app.use(session({
+  store: new PgSession({
+    conString: process.env.DATABASE_URL,
+    tableName: 'session', // Use 'session' table for session storage
+    createTableIfMissing: true
+  }),
   secret: process.env.SESSION_SECRET || "momtazchem-admin-secret-key",
   resave: false,
   saveUninitialized: false,
