@@ -16,7 +16,6 @@ import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
 import SpecialistsAdmin from "@/pages/admin/specialists";
-import ChatLogs from "@/pages/admin/chat-logs";
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
 import DatabaseManagement from "@/pages/admin/database-management";
 import UserManagement from "@/pages/admin/user-management";
@@ -59,7 +58,6 @@ function Router() {
           <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin/users" component={AdminUsers} />
           <Route path="/admin/specialists" component={SpecialistsAdmin} />
-          <Route path="/admin/chat-logs" component={ChatLogs} />
           <Route path="/admin/barcode-inventory" component={BarcodeInventory} />
           <Route path="/admin/database-management" component={DatabaseManagement} />
           <Route path="/admin/user-management" component={UserManagement} />

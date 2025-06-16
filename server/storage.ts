@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, specialists, specialistCorrespondence, correspondenceThreads, chatLogs, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist, type SpecialistCorrespondence, type InsertSpecialistCorrespondence, type CorrespondenceThread, type InsertCorrespondenceThread, type ChatLog, type InsertChatLog } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, specialists, specialistCorrespondence, correspondenceThreads, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist, type SpecialistCorrespondence, type InsertSpecialistCorrespondence, type CorrespondenceThread, type InsertCorrespondenceThread } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -69,13 +69,6 @@ export interface IStorage {
   updateSpecialist(id: string, specialist: Partial<InsertSpecialist>): Promise<Specialist>;
   updateSpecialistStatus(id: string, status: string): Promise<void>;
   deleteSpecialist(id: string): Promise<void>;
-
-  // Simple chat logging (1 month retention)
-  logChatMessage(chatData: InsertChatLog): Promise<ChatLog>;
-  getChatsByMobile(mobile: string): Promise<ChatLog[]>;
-  getChatsBySpecialist(specialistId: string): Promise<ChatLog[]>;
-  getAllChats(limit?: number): Promise<ChatLog[]>;
-  cleanupExpiredChats(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -698,49 +691,6 @@ export class DatabaseStorage implements IStorage {
       pendingFollowUps: pendingFollowUps[0]?.count || 0,
       messagesByChannel: messagesByChannel || []
     };
-  }
-
-  // Simple chat logging methods
-  async logChatMessage(chatData: InsertChatLog): Promise<ChatLog> {
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days retention
-    const [chatLog] = await db
-      .insert(chatLogs)
-      .values({
-        ...chatData,
-        expiresAt
-      })
-      .returning();
-    return chatLog;
-  }
-
-  async getChatsByMobile(mobile: string): Promise<ChatLog[]> {
-    return await db
-      .select()
-      .from(chatLogs)
-      .where(eq(chatLogs.mobile, mobile))
-      .orderBy(desc(chatLogs.createdAt));
-  }
-
-  async getChatsBySpecialist(specialistId: string): Promise<ChatLog[]> {
-    return await db
-      .select()
-      .from(chatLogs)
-      .where(eq(chatLogs.specialistId, specialistId))
-      .orderBy(desc(chatLogs.createdAt));
-  }
-
-  async getAllChats(limit: number = 100): Promise<ChatLog[]> {
-    return await db
-      .select()
-      .from(chatLogs)
-      .orderBy(desc(chatLogs.createdAt))
-      .limit(limit);
-  }
-
-  async cleanupExpiredChats(): Promise<void> {
-    await db
-      .delete(chatLogs)
-      .where(lt(chatLogs.expiresAt, new Date()));
   }
 }
 

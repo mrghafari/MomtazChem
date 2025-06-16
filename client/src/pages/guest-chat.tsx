@@ -114,107 +114,41 @@ export default function GuestChat() {
     setMessages([welcomeMessage]);
   };
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!newMessage.trim() || !selectedSpecialist || !guestUser) return;
 
-    const messageContent = newMessage.trim();
+    const message: ChatMessage = {
+      id: `msg_${Date.now()}`,
+      content: newMessage.trim(),
+      sender: 'guest',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, message]);
     setNewMessage("");
 
-    try {
-      // Send guest message to API
-      const response = await fetch('/api/chat/message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mobile: guestUser.mobile,
-          firstName: guestUser.firstName,
-          lastName: guestUser.lastName,
-          specialistId: selectedSpecialist.id,
-          messageContent,
-          senderType: 'user'
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        const message: ChatMessage = {
-          id: result.chatLog.id.toString(),
-          content: messageContent,
-          sender: 'guest',
-          timestamp: new Date(result.chatLog.createdAt)
-        };
-
-        setMessages(prev => [...prev, message]);
-
-        // Simulate specialist response after a delay
-        setTimeout(async () => {
-          const responses = [
-            "Thank you for your message. Let me help you with that.",
-            "I understand your concern. Could you provide more details?",
-            "That's a great question. Let me check our available options for you.",
-            "I'll be happy to assist you with this inquiry.",
-            "Let me connect you with the right information."
-          ];
-          
-          const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-          
-          try {
-            // Send specialist response to API
-            const specialistResponse = await fetch('/api/chat/message', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                mobile: guestUser.mobile,
-                firstName: guestUser.firstName,
-                lastName: guestUser.lastName,
-                specialistId: selectedSpecialist.id,
-                messageContent: randomResponse,
-                senderType: 'specialist'
-              }),
-            });
-
-            const specialistResult = await specialistResponse.json();
-
-            if (specialistResult.success) {
-              const specialistMessage: ChatMessage = {
-                id: specialistResult.chatLog.id.toString(),
-                content: randomResponse,
-                sender: 'specialist',
-                timestamp: new Date(specialistResult.chatLog.createdAt),
-                specialistName: selectedSpecialist.name
-              };
-              
-              setMessages(prev => [...prev, specialistMessage]);
-            }
-          } catch (error) {
-            console.error('Error sending specialist response:', error);
-          }
-        }, 1000 + Math.random() * 2000);
-
-      } else {
-        toast({
-          title: "Message Failed",
-          description: result.message || "Unable to send message",
-          variant: "destructive",
-        });
-        // Restore the message input
-        setNewMessage(messageContent);
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Message Failed",
-        description: "Network error. Please try again.",
-        variant: "destructive",
-      });
-      // Restore the message input
-      setNewMessage(messageContent);
-    }
+    // Simulate specialist response after a delay
+    setTimeout(() => {
+      const responses = [
+        "Thank you for your message. Let me help you with that.",
+        "I understand your concern. Could you provide more details?",
+        "That's a great question. Let me check our available options for you.",
+        "I'll be happy to assist you with this inquiry.",
+        "Let me connect you with the right information."
+      ];
+      
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      
+      const specialistMessage: ChatMessage = {
+        id: `msg_${Date.now()}_specialist`,
+        content: randomResponse,
+        sender: 'specialist',
+        timestamp: new Date(),
+        specialistName: selectedSpecialist.name
+      };
+      
+      setMessages(prev => [...prev, specialistMessage]);
+    }, 1000 + Math.random() * 2000);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

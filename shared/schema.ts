@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, decimal, boolean, integer, json, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, decimal, boolean, integer, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -199,36 +199,13 @@ export const insertSpecialistSchema = createInsertSchema(specialists).omit({
 export type InsertSpecialist = z.infer<typeof insertSpecialistSchema>;
 export type Specialist = typeof specialists.$inferSelect;
 
-// Simple chat logs table for all conversations (1 month retention)
-export const chatLogs = pgTable("chat_logs", {
-  id: serial("id").primaryKey(),
-  mobile: text("mobile").notNull(), // Primary identifier for conversations
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
-  specialistId: text("specialist_id").notNull().references(() => specialists.id),
-  specialistName: text("specialist_name").notNull(),
-  messageContent: text("message_content").notNull(),
-  senderType: text("sender_type").notNull(), // "user" or "specialist"
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  expiresAt: timestamp("expires_at").notNull(), // 30 days from creation
-}, (table) => ({
-  // Index for efficient queries by mobile number
-  mobileIdx: index("chat_logs_mobile_idx").on(table.mobile),
-  // Index for queries by specialist
-  specialistIdx: index("chat_logs_specialist_idx").on(table.specialistId),
-  // Index for time-based queries
-  createdAtIdx: index("chat_logs_created_at_idx").on(table.createdAt),
-}));
-
 // Specialist correspondence storage for one month retention
 export const specialistCorrespondence = pgTable("specialist_correspondence", {
   id: serial("id").primaryKey(),
   specialistId: text("specialist_id").notNull().references(() => specialists.id),
   customerId: integer("customer_id"), // Optional: link to customer if applicable
-  guestSessionId: text("guest_session_id"), // Link to guest session
   customerEmail: text("customer_email"),
   customerName: text("customer_name"),
-  customerMobile: text("customer_mobile"), // Added for guest users
   messageType: text("message_type").notNull(), // "incoming", "outgoing", "internal_note"
   subject: text("subject"),
   messageContent: text("message_content").notNull(),
@@ -260,13 +237,6 @@ export const correspondenceThreads = pgTable("correspondence_threads", {
   expiresAt: timestamp("expires_at").notNull(),
 });
 
-// Insert schema for simple chat logs
-export const insertChatLogSchema = createInsertSchema(chatLogs).omit({
-  id: true,
-  createdAt: true,
-  expiresAt: true,
-});
-
 export const insertSpecialistCorrespondenceSchema = createInsertSchema(specialistCorrespondence).omit({
   id: true,
   createdAt: true,
@@ -280,9 +250,6 @@ export const insertCorrespondenceThreadSchema = createInsertSchema(correspondenc
   expiresAt: true,
 });
 
-// Export types
-export type InsertChatLog = z.infer<typeof insertChatLogSchema>;
-export type ChatLog = typeof chatLogs.$inferSelect;
 export type InsertSpecialistCorrespondence = z.infer<typeof insertSpecialistCorrespondenceSchema>;
 export type SpecialistCorrespondence = typeof specialistCorrespondence.$inferSelect;
 export type InsertCorrespondenceThread = z.infer<typeof insertCorrespondenceThreadSchema>;
