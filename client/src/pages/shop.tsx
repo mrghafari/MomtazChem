@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
 import AuthCheckout from "@/components/auth-checkout";
-
+import LiveChat from "@/components/ui/live-chat";
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -584,7 +584,8 @@ const Shop = () => {
         onLoginSuccess={handleLoginSuccess}
       />
 
-
+      {/* Live Chat Support */}
+      <LiveChat />
     </div>
   );
 };

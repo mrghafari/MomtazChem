@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import LiveChatWidget from "@/components/ui/live-chat-widget";
 import Home from "@/pages/home";
 import About from "@/pages/about";
 import Services from "@/pages/services";
@@ -16,9 +15,7 @@ import ShopAdmin from "@/pages/shop-admin";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
-import SpecialistsAdmin from "@/pages/admin/specialists-simple";
-import SpecialistChatPanel from "@/pages/specialist-chat";
-import SpecialistLogin from "@/pages/specialist-login";
+import SpecialistsAdmin from "@/pages/admin/specialists";
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
 import DatabaseManagement from "@/pages/admin/database-management";
 import UserManagement from "@/pages/admin/user-management";
@@ -42,9 +39,6 @@ import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
 import QuotePage from "@/pages/quote";
 import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
-import GuestChat from "@/pages/guest-chat";
-import LiveChat from "@/pages/live-chat";
-import SpecialistChat from "@/pages/specialist-chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -86,10 +80,6 @@ function Router() {
           <Route path="/products/paint-thinner" component={PaintThinner} />
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/quote" component={QuotePage} />
-          <Route path="/chat" component={GuestChat} />
-          <Route path="/live-chat" component={LiveChat} />
-          <Route path="/specialist-login" component={SpecialistLogin} />
-          <Route path="/specialist-chat" component={SpecialistChatPanel} />
           <Route component={NotFound} />
         </Switch>
       </main>

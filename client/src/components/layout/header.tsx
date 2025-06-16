@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, MessageCircle } from 'lucide-react';
+import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   NavigationMenu,
@@ -176,29 +176,6 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
-            {/* Live Chat Button */}
-            <Link href="/live-chat">
-              <Button 
-                variant="default" 
-                size="sm"
-                className="hidden sm:flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Live Chat
-              </Button>
-            </Link>
-            
-            {/* Mobile chat button */}
-            <Link href="/live-chat">
-              <Button
-                variant="default"
-                size="sm"
-                className="sm:hidden p-2 bg-green-600 hover:bg-green-700 text-white"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </Button>
-            </Link>
-            
             {/* Mobile menu button */}
             <Button
               variant="ghost"
@@ -303,8 +280,6 @@ export default function Header() {
                     </div>
                   </div>
                 </motion.div>
-
-
 
               </nav>
             </motion.div>

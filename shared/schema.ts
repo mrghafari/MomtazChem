@@ -9,8 +9,6 @@ import { z } from "zod";
 // Import showcase and shop schemas
 export * from "./showcase-schema";
 export * from "./shop-schema";
-export * from "./correspondence-schema";
-export * from "./live-chat-schema";
 
 // Admin roles table
 export const adminRoles = pgTable("admin_roles", {
@@ -200,113 +198,6 @@ export const insertSpecialistSchema = createInsertSchema(specialists).omit({
 
 export type InsertSpecialist = z.infer<typeof insertSpecialistSchema>;
 export type Specialist = typeof specialists.$inferSelect;
-
-// Specialist correspondence storage for one month retention
-export const specialistCorrespondence = pgTable("specialist_correspondence", {
-  id: serial("id").primaryKey(),
-  specialistId: text("specialist_id").notNull().references(() => specialists.id),
-  customerId: integer("customer_id"), // Optional: link to customer if applicable
-  customerEmail: text("customer_email"),
-  customerName: text("customer_name"),
-  messageType: text("message_type").notNull(), // "incoming", "outgoing", "internal_note"
-  subject: text("subject"),
-  messageContent: text("message_content").notNull(),
-  channel: text("channel").notNull(), // "email", "chat", "phone", "internal"
-  priority: text("priority").default("normal"), // "low", "normal", "high", "urgent"
-  status: text("status").default("active"), // "active", "resolved", "archived"
-  tags: json("tags").$type<string[]>().default([]),
-  attachments: json("attachments").$type<string[]>().default([]),
-  responseTime: integer("response_time"), // Response time in minutes
-  followUpRequired: boolean("follow_up_required").default(false),
-  followUpDate: timestamp("follow_up_date"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  expiresAt: timestamp("expires_at").notNull(),
-});
-
-// Correspondence threads for tracking conversation chains
-export const correspondenceThreads = pgTable("correspondence_threads", {
-  id: serial("id").primaryKey(),
-  threadId: text("thread_id").notNull().unique(),
-  specialistId: text("specialist_id").notNull().references(() => specialists.id),
-  customerIdentifier: text("customer_identifier"), // Email or customer ID
-  subject: text("subject").notNull(),
-  status: text("status").default("open"), // "open", "closed", "pending"
-  priority: text("priority").default("normal"),
-  messageCount: integer("message_count").default(0),
-  lastMessageAt: timestamp("last_message_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  expiresAt: timestamp("expires_at").notNull(),
-});
-
-export const insertSpecialistCorrespondenceSchema = createInsertSchema(specialistCorrespondence).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  expiresAt: true,
-});
-
-export const insertCorrespondenceThreadSchema = createInsertSchema(correspondenceThreads).omit({
-  id: true,
-  createdAt: true,
-  expiresAt: true,
-});
-
-export type InsertSpecialistCorrespondence = z.infer<typeof insertSpecialistCorrespondenceSchema>;
-export type SpecialistCorrespondence = typeof specialistCorrespondence.$inferSelect;
-export type InsertCorrespondenceThread = z.infer<typeof insertCorrespondenceThreadSchema>;
-export type CorrespondenceThread = typeof correspondenceThreads.$inferSelect;
-
-// Specialist chat sessions for real-time conversation management
-export const specialistChatSessions = pgTable("specialist_chat_sessions", {
-  id: serial("id").primaryKey(),
-  sessionId: text("session_id").notNull().unique(),
-  specialistId: text("specialist_id").notNull().references(() => specialists.id),
-  customerPhone: text("customer_phone").notNull(),
-  customerName: text("customer_name").notNull(),
-  status: text("status").notNull().default("active"), // "active", "completed", "abandoned"
-  startedAt: timestamp("started_at").notNull().defaultNow(),
-  lastMessageAt: timestamp("last_message_at").notNull().defaultNow(),
-  endedAt: timestamp("ended_at"),
-  messageCount: integer("message_count").default(0),
-  isSpecialistTyping: boolean("is_specialist_typing").default(false),
-  isCustomerTyping: boolean("is_customer_typing").default(false),
-  customerRating: integer("customer_rating"), // 1-5 rating after session
-  sessionNotes: text("session_notes"),
-  tags: json("tags").$type<string[]>().default([]),
-  expiresAt: timestamp("expires_at").notNull(), // Auto-cleanup after 30 days
-});
-
-// Chat messages for specialist sessions
-export const specialistChatMessages = pgTable("specialist_chat_messages", {
-  id: serial("id").primaryKey(),
-  sessionId: text("session_id").notNull().references(() => specialistChatSessions.sessionId),
-  sender: text("sender").notNull(), // "specialist", "customer"
-  message: text("message").notNull(),
-  messageType: text("message_type").default("text"), // "text", "image", "file", "system"
-  isRead: boolean("is_read").default(false),
-  readAt: timestamp("read_at"),
-  attachments: json("attachments").$type<string[]>().default([]),
-  metadata: json("metadata"), // Additional message data
-  timestamp: timestamp("timestamp").notNull().defaultNow(),
-});
-
-export const insertSpecialistChatSessionSchema = createInsertSchema(specialistChatSessions).omit({
-  id: true,
-  startedAt: true,
-  lastMessageAt: true,
-  expiresAt: true,
-});
-
-export const insertSpecialistChatMessageSchema = createInsertSchema(specialistChatMessages).omit({
-  id: true,
-  timestamp: true,
-});
-
-export type InsertSpecialistChatSession = z.infer<typeof insertSpecialistChatSessionSchema>;
-export type SpecialistChatSession = typeof specialistChatSessions.$inferSelect;
-export type InsertSpecialistChatMessage = z.infer<typeof insertSpecialistChatMessageSchema>;
-export type SpecialistChatMessage = typeof specialistChatMessages.$inferSelect;
 
 // Leads table for CRM system
 export const leads = pgTable("leads", {
