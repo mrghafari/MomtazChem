@@ -595,56 +595,44 @@ ${data.data.map((item: any) =>
                     <div className="space-y-3">
                       {filteredOrders.map(order => (
                         <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                          <div className="flex items-center gap-4">
-                            <div>
+                          {/* Left section: Order details and customer */}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
                               <h3 className="font-semibold text-gray-900">#{order.orderNumber}</h3>
-                              <p className="text-sm text-gray-600">
-                                Order Date: {formatDate(order.orderDate.toString())}
+                              <Badge className={getStatusColor(order.status)}>
+                                {order.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              {formatDate(order.orderDate.toString())}
+                            </p>
+                            {(order as any).customer && (
+                              <p className="text-sm text-blue-600">
+                                {(order as any).customer.firstName} {(order as any).customer.lastName}
                               </p>
-                              {(order as any).customer && (
-                                <p className="text-sm text-blue-600">
-                                  {(order as any).customer.firstName} {(order as any).customer.lastName}
-                                  {(order as any).customer.email && ` (${(order as any).customer.email})`}
-                                </p>
-                              )}
-                              {/* Payment Method */}
-                              {(order as any).paymentMethod && (
-                                <p className="text-sm text-purple-600">
-                                  Payment: {(order as any).paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 
-                                           (order as any).paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' :
-                                           (order as any).paymentMethod === 'company_credit' ? 'Company Credit' : (order as any).paymentMethod}
-                                </p>
-                              )}
-                              {/* Shipping Method */}
-                              {(order as any).carrier && (
-                                <p className="text-sm text-green-600">
-                                  Shipping: {(order as any).carrier}
-                                  {(order as any).trackingNumber && ` - Tracking: ${(order as any).trackingNumber}`}
-                                </p>
-                              )}
-                            </div>
-                            <Badge className={getStatusColor(order.status)}>
-                              {order.status}
-                            </Badge>
+                            )}
                           </div>
+
+                          {/* Center section: Payment and shipping */}
+                          <div className="flex-1 text-center">
+                            {(order as any).paymentMethod && (
+                              <p className="text-sm text-purple-600 font-medium mb-1">
+                                {(order as any).paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 
+                                 (order as any).paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' :
+                                 (order as any).paymentMethod === 'company_credit' ? 'Company Credit' : (order as any).paymentMethod}
+                              </p>
+                            )}
+                            {(order as any).carrier && (
+                              <p className="text-sm text-green-600 font-medium">
+                                {(order as any).carrier}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Right section: Amount and actions */}
                           <div className="flex items-center gap-4">
-                            {/* Middle section with shipping and payment info */}
-                            <div className="flex-1 text-center">
-                              {(order as any).paymentMethod && (
-                                <p className="text-sm text-purple-600 font-medium">
-                                  {(order as any).paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 
-                                   (order as any).paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' :
-                                   (order as any).paymentMethod === 'company_credit' ? 'Company Credit' : (order as any).paymentMethod}
-                                </p>
-                              )}
-                              {(order as any).carrier && (
-                                <p className="text-sm text-green-600 font-medium">
-                                  {(order as any).carrier}
-                                </p>
-                              )}
-                            </div>
                             <div className="text-right">
-                              <p className="font-semibold">${order.totalAmount}</p>
+                              <p className="font-semibold text-lg">${order.totalAmount}</p>
                             </div>
                             <div className="flex gap-2">
                               <Button
