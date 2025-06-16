@@ -312,6 +312,33 @@ export default function SpecialistsAdmin() {
                     {specialist.expertise && specialist.expertise.length > 0 && (
                       <div>تخصص‌ها: {Array.isArray(specialist.expertise) ? specialist.expertise.join(", ") : specialist.expertise}</div>
                     )}
+                    <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-blue-500">
+                      <div className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        اطلاعات دسترسی کارشناس
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-blue-700">
+                          <span className="font-medium">ایمیل ورود:</span> 
+                          <span className="font-mono bg-white px-2 py-1 rounded text-sm ml-2">{specialist.email}</span>
+                        </div>
+                        <div className="text-blue-700">
+                          <span className="font-medium">رمز عبور:</span> 
+                          <span className="font-mono bg-white px-2 py-1 rounded text-sm ml-2">specialist123</span>
+                        </div>
+                        <div className="text-blue-700 mt-2">
+                          <span className="font-medium">لینک ورود:</span>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="ml-2 h-6 text-xs"
+                            onClick={() => window.open('/specialist-login', '_blank')}
+                          >
+                            ورود به پنل چت
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 

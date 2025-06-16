@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 
@@ -450,7 +450,16 @@ export default function AdminPage() {
             className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
           >
             <User className="w-4 h-4 mr-2" />
-            Specialists
+            مدیریت کارشناسان
+          </Button>
+
+          <Button 
+            variant="outline"
+            onClick={() => window.open("/specialist-login", "_blank")}
+            className="border-green-300 text-green-600 hover:bg-green-50 h-12 text-sm"
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            پنل چت کارشناس
           </Button>
           
           <Button 
