@@ -137,32 +137,38 @@ export default function SpecialistsAdmin() {
     setCorrespondenceData(data);
   };
 
-  // Search correspondence by phone number (localStorage implementation)
-  const searchCorrespondence = () => {
+  // Search correspondence by phone number (Database API implementation)
+  const searchCorrespondence = async () => {
     if (!customerPhone.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a phone number",
+        title: "خطا",
+        description: "لطفاً شماره تلفن را وارد کنید",
         variant: "destructive"
       });
       return;
     }
 
-    // Clean up expired entries first
-    cleanupExpiredEntries();
-
-    // Search for correspondence by phone number
-    const phoneResults = correspondenceData.filter(entry => 
-      entry.customerPhone?.includes(customerPhone) || 
-      entry.customerName.toLowerCase().includes(customerPhone.toLowerCase())
-    );
-
-    setSearchResults(phoneResults);
-    
-    toast({
-      title: "Search Complete",
-      description: `Found ${phoneResults.length} correspondence entries for this phone number`,
-    });
+    try {
+      const response = await fetch(`/api/correspondence/search?phone=${encodeURIComponent(customerPhone)}`);
+      if (!response.ok) {
+        throw new Error('Failed to search correspondence');
+      }
+      
+      const phoneResults = await response.json();
+      setSearchResults(phoneResults);
+      
+      toast({
+        title: "جستجو کامل شد",
+        description: `${phoneResults.length} مورد مکاتبه برای این شماره تلفن یافت شد`,
+      });
+    } catch (error) {
+      console.error('Search error:', error);
+      toast({
+        title: "خطا در جستجو",
+        description: "خطا در جستجوی مکاتبات",
+        variant: "destructive"
+      });
+    }
   };
 
   // Add new correspondence entry (localStorage implementation)
