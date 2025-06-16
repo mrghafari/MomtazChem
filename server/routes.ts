@@ -5900,6 +5900,291 @@ ${procedure.content}
     }
   });
 
+  // =============================================================================
+  // API ENDPOINTS برای سیستم چت زنده
+  // =============================================================================
+
+  // شروع جلسه چت جدید (برای مشتریان غیر لاگین)
+  app.post("/api/live-chat/start-session", async (req, res) => {
+    try {
+      const { firstName, lastName, phone, email } = req.body;
+
+      if (!firstName || !lastName || !phone) {
+        return res.status(400).json({
+          success: false,
+          message: "نام، نام خانوادگی و شماره تلفن الزامی است"
+        });
+      }
+
+      // ایجاد session ID منحصر به فرد
+      const sessionId = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // ذخیره فرم مشتری
+      const guestForm = await liveChatStorage.saveGuestForm({
+        sessionId,
+        firstName,
+        lastName,
+        phone,
+        email,
+        isCompleted: true
+      });
+
+      // ایجاد جلسه چت
+      const chatSession = await liveChatStorage.createChatSession({
+        sessionId,
+        customerName: firstName,
+        customerLastName: lastName,
+        customerPhone: phone,
+        customerEmail: email,
+        isLoggedIn: false,
+        status: "waiting"
+      });
+
+      // همگام‌سازی با CRM
+      const crmCustomerId = await liveChatStorage.syncGuestToCrm(sessionId);
+
+      // ارسال پیام خوش‌آمدگویی سیستم
+      await liveChatStorage.addMessage({
+        sessionId,
+        sender: "system",
+        senderName: "سیستم",
+        message: `سلام ${firstName} عزیز! به چت پشتیبانی ما خوش آمدید. یکی از کارشناسان ما به زودی با شما تماس خواهد گرفت.`,
+        messageType: "system_notification"
+      });
+
+      res.json({
+        success: true,
+        sessionId,
+        message: "جلسه چت با موفقیت آغاز شد",
+        customer: {
+          name: `${firstName} ${lastName}`,
+          phone,
+          email,
+          crmId: crmCustomerId
+        }
+      });
+    } catch (error) {
+      console.error("Error starting chat session:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در شروع جلسه چت"
+      });
+    }
+  });
+
+  // ادامه جلسه چت برای مشتریان لاگین‌شده
+  app.post("/api/live-chat/continue-session", async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "ابتدا وارد حساب کاربری خود شوید"
+        });
+      }
+
+      const customerId = req.session.customerId;
+      
+      // دریافت اطلاعات مشتری از دیتابیس
+      const customer = await customerStorage.getCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          message: "مشتری یافت نشد"
+        });
+      }
+
+      // بررسی وجود مشتری در CRM
+      let crmCustomer = await crmStorage.getCrmCustomerByEmail(customer.email);
+      if (!crmCustomer) {
+        // ایجاد خودکار در CRM
+        crmCustomer = await crmStorage.createOrUpdateCustomerFromOrder({
+          email: customer.email,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          phone: customer.phone || "",
+          orderValue: 0
+        });
+      }
+
+      // ایجاد session ID
+      const sessionId = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // ایجاد جلسه چت
+      const chatSession = await liveChatStorage.createChatSession({
+        sessionId,
+        customerName: customer.firstName,
+        customerLastName: customer.lastName,
+        customerPhone: customer.phone || "",
+        customerEmail: customer.email,
+        isLoggedIn: true,
+        crmCustomerId: crmCustomer.id,
+        status: "waiting"
+      });
+
+      // ثبت فعالیت در CRM
+      await crmStorage.logCustomerActivity({
+        customerId: crmCustomer.id,
+        activityType: 'chat',
+        description: `مشتری وارد چت زنده شد - جلسه: ${sessionId}`,
+        activityData: {
+          sessionId,
+          channel: 'live_chat',
+          customerType: 'logged_in'
+        }
+      });
+
+      // پیام خوش‌آمدگویی
+      await liveChatStorage.addMessage({
+        sessionId,
+        sender: "system",
+        senderName: "سیستم",
+        message: `سلام ${customer.firstName} عزیز! خوش برگشتید. یکی از کارشناسان ما آماده پاسخگویی به سوالات شماست.`,
+        messageType: "system_notification"
+      });
+
+      res.json({
+        success: true,
+        sessionId,
+        message: "جلسه چت با موفقیت آغاز شد",
+        customer: {
+          name: `${customer.firstName} ${customer.lastName}`,
+          phone: customer.phone,
+          email: customer.email,
+          crmId: crmCustomer.id,
+          isLoggedIn: true
+        }
+      });
+    } catch (error) {
+      console.error("Error continuing chat session:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ادامه جلسه چت"
+      });
+    }
+  });
+
+  // ارسال پیام در چت
+  app.post("/api/live-chat/send-message", async (req, res) => {
+    try {
+      const { sessionId, message, sender = "customer" } = req.body;
+
+      if (!sessionId || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه جلسه و متن پیام الزامی است"
+        });
+      }
+
+      // بررسی وجود جلسه
+      const session = await liveChatStorage.getChatSession(sessionId);
+      if (!session) {
+        return res.status(404).json({
+          success: false,
+          message: "جلسه چت یافت نشد"
+        });
+      }
+
+      // ارسال پیام
+      const newMessage = await liveChatStorage.addMessage({
+        sessionId,
+        sender,
+        senderName: sender === "customer" ? `${session.customerName} ${session.customerLastName}` : null,
+        message,
+        messageType: "text"
+      });
+
+      res.json({
+        success: true,
+        message: newMessage,
+        sessionInfo: {
+          sessionId: session.sessionId,
+          status: session.status,
+          customerName: `${session.customerName} ${session.customerLastName}`
+        }
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ارسال پیام"
+      });
+    }
+  });
+
+  // دریافت پیام‌های جلسه چت
+  app.get("/api/live-chat/messages/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+
+      const messages = await liveChatStorage.getSessionMessages(sessionId);
+      
+      res.json({
+        success: true,
+        messages,
+        count: messages.length
+      });
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت پیام‌ها"
+      });
+    }
+  });
+
+  // دریافت اطلاعات جلسه چت
+  app.get("/api/live-chat/session/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+
+      const session = await liveChatStorage.getChatSession(sessionId);
+      if (!session) {
+        return res.status(404).json({
+          success: false,
+          message: "جلسه یافت نشد"
+        });
+      }
+
+      res.json({
+        success: true,
+        session
+      });
+    } catch (error) {
+      console.error("Error fetching session:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت اطلاعات جلسه"
+      });
+    }
+  });
+
+  // پایان جلسه چت با ارزیابی
+  app.post("/api/live-chat/end-session", async (req, res) => {
+    try {
+      const { sessionId, rating, feedback } = req.body;
+
+      if (!sessionId) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه جلسه الزامی است"
+        });
+      }
+
+      await liveChatStorage.endChatSession(sessionId, rating, feedback);
+
+      res.json({
+        success: true,
+        message: "جلسه چت با موفقیت پایان یافت"
+      });
+    } catch (error) {
+      console.error("Error ending chat session:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در پایان جلسه"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
