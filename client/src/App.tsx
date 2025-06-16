@@ -16,7 +16,7 @@ import ShopAdmin from "@/pages/shop-admin";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
-import SpecialistsAdmin from "@/pages/admin/specialists";
+import SpecialistsAdmin from "@/pages/admin/specialists-simple";
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
 import DatabaseManagement from "@/pages/admin/database-management";
 import UserManagement from "@/pages/admin/user-management";
