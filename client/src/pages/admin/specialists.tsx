@@ -502,14 +502,14 @@ export default function SpecialistsAdmin() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="specialists" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            کارشناسان
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="specialists" className="flex items-center gap-2 text-lg py-3">
+            <Users className="w-5 h-5" />
+            مدیریت کارشناسان
           </TabsTrigger>
-          <TabsTrigger value="correspondence" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            مکاتبات ({correspondenceData.length})
+          <TabsTrigger value="correspondence" className="flex items-center gap-2 text-lg py-3 bg-blue-50 data-[state=active]:bg-blue-100">
+            <MessageSquare className="w-5 h-5" />
+            چت‌ها و مکاتبات ({correspondenceData.length})
           </TabsTrigger>
         </TabsList>
 
