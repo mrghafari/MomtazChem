@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, specialists, specialistCorrespondence, correspondenceThreads, guestChatSessions, chatMessages, chatThreads, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist, type SpecialistCorrespondence, type InsertSpecialistCorrespondence, type CorrespondenceThread, type InsertCorrespondenceThread, type GuestChatSession, type InsertGuestChatSession, type ChatMessage, type InsertChatMessage, type ChatThread, type InsertChatThread } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, specialists, specialistCorrespondence, correspondenceThreads, chatLogs, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist, type SpecialistCorrespondence, type InsertSpecialistCorrespondence, type CorrespondenceThread, type InsertCorrespondenceThread, type ChatLog, type InsertChatLog } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -70,28 +70,12 @@ export interface IStorage {
   updateSpecialistStatus(id: string, status: string): Promise<void>;
   deleteSpecialist(id: string): Promise<void>;
 
-  // Guest chat sessions
-  createGuestChatSession(session: InsertGuestChatSession): Promise<GuestChatSession>;
-  getGuestChatSession(sessionId: string): Promise<GuestChatSession | undefined>;
-  updateGuestChatSession(sessionId: string, updates: Partial<InsertGuestChatSession>): Promise<GuestChatSession>;
-  getActiveGuestSessions(): Promise<GuestChatSession[]>;
-  expireGuestSession(sessionId: string): Promise<void>;
-
-  // Chat messages
-  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
-  getChatMessages(sessionId: string, limit?: number): Promise<ChatMessage[]>;
-  markMessageAsRead(messageId: number): Promise<void>;
-  getChatMessagesByThread(threadId: string): Promise<ChatMessage[]>;
-
-  // Chat threads
-  createChatThread(thread: InsertChatThread): Promise<ChatThread>;
-  getChatThread(threadId: string): Promise<ChatThread | undefined>;
-  updateChatThread(threadId: string, updates: Partial<InsertChatThread>): Promise<ChatThread>;
-  getActiveChatThreads(specialistId?: string): Promise<ChatThread[]>;
-  closeChatThread(threadId: string): Promise<void>;
-
-  // Enhanced correspondence with guest chat integration
-  logGuestChatToCorrespondence(sessionId: string, specialistId: string, messageContent: string, messageType: 'incoming' | 'outgoing'): Promise<SpecialistCorrespondence>;
+  // Simple chat logging (1 month retention)
+  logChatMessage(chatData: InsertChatLog): Promise<ChatLog>;
+  getChatsByMobile(mobile: string): Promise<ChatLog[]>;
+  getChatsBySpecialist(specialistId: string): Promise<ChatLog[]>;
+  getAllChats(limit?: number): Promise<ChatLog[]>;
+  cleanupExpiredChats(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -716,207 +700,47 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // Guest chat session methods
-  async createGuestChatSession(sessionData: InsertGuestChatSession): Promise<GuestChatSession> {
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
-    const [session] = await db
-      .insert(guestChatSessions)
-      .values({
-        ...sessionData,
-        expiresAt
-      })
-      .returning();
-    return session;
-  }
-
-  async getGuestChatSession(sessionId: string): Promise<GuestChatSession | undefined> {
-    const [session] = await db
-      .select()
-      .from(guestChatSessions)
-      .where(and(
-        eq(guestChatSessions.sessionId, sessionId),
-        eq(guestChatSessions.isActive, true),
-        gt(guestChatSessions.expiresAt, new Date())
-      ));
-    return session;
-  }
-
-  async updateGuestChatSession(sessionId: string, updates: Partial<InsertGuestChatSession>): Promise<GuestChatSession> {
-    const [session] = await db
-      .update(guestChatSessions)
-      .set({
-        ...updates,
-        lastActiveAt: new Date()
-      })
-      .where(eq(guestChatSessions.sessionId, sessionId))
-      .returning();
-    return session;
-  }
-
-  async getActiveGuestSessions(): Promise<GuestChatSession[]> {
-    return await db
-      .select()
-      .from(guestChatSessions)
-      .where(and(
-        eq(guestChatSessions.isActive, true),
-        gt(guestChatSessions.expiresAt, new Date())
-      ))
-      .orderBy(desc(guestChatSessions.lastActiveAt));
-  }
-
-  async expireGuestSession(sessionId: string): Promise<void> {
-    await db
-      .update(guestChatSessions)
-      .set({ isActive: false })
-      .where(eq(guestChatSessions.sessionId, sessionId));
-  }
-
-  // Chat message methods
-  async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
+  // Simple chat logging methods
+  async logChatMessage(chatData: InsertChatLog): Promise<ChatLog> {
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days retention
-    const [message] = await db
-      .insert(chatMessages)
+    const [chatLog] = await db
+      .insert(chatLogs)
       .values({
-        sessionId: messageData.sessionId,
-        specialistId: messageData.specialistId,
-        messageContent: messageData.messageContent,
-        senderType: messageData.senderType,
-        senderName: messageData.senderName,
-        isRead: messageData.isRead,
-        attachments: messageData.attachments,
-        metadata: messageData.metadata,
+        ...chatData,
         expiresAt
       })
       .returning();
-    return message;
+    return chatLog;
   }
 
-  async getChatMessages(sessionId: string, limit: number = 50): Promise<ChatMessage[]> {
+  async getChatsByMobile(mobile: string): Promise<ChatLog[]> {
     return await db
       .select()
-      .from(chatMessages)
-      .where(eq(chatMessages.sessionId, sessionId))
-      .orderBy(desc(chatMessages.createdAt))
+      .from(chatLogs)
+      .where(eq(chatLogs.mobile, mobile))
+      .orderBy(desc(chatLogs.createdAt));
+  }
+
+  async getChatsBySpecialist(specialistId: string): Promise<ChatLog[]> {
+    return await db
+      .select()
+      .from(chatLogs)
+      .where(eq(chatLogs.specialistId, specialistId))
+      .orderBy(desc(chatLogs.createdAt));
+  }
+
+  async getAllChats(limit: number = 100): Promise<ChatLog[]> {
+    return await db
+      .select()
+      .from(chatLogs)
+      .orderBy(desc(chatLogs.createdAt))
       .limit(limit);
   }
 
-  async markMessageAsRead(messageId: number): Promise<void> {
+  async cleanupExpiredChats(): Promise<void> {
     await db
-      .update(chatMessages)
-      .set({ isRead: true })
-      .where(eq(chatMessages.id, messageId));
-  }
-
-  async getChatMessagesByThread(threadId: string): Promise<ChatMessage[]> {
-    const results = await db
-      .select({
-        id: chatMessages.id,
-        sessionId: chatMessages.sessionId,
-        specialistId: chatMessages.specialistId,
-        messageContent: chatMessages.messageContent,
-        senderType: chatMessages.senderType,
-        senderName: chatMessages.senderName,
-        isRead: chatMessages.isRead,
-        attachments: chatMessages.attachments,
-        metadata: chatMessages.metadata,
-        createdAt: chatMessages.createdAt,
-        expiresAt: chatMessages.expiresAt,
-      })
-      .from(chatMessages)
-      .innerJoin(chatThreads, eq(chatMessages.sessionId, chatThreads.sessionId))
-      .where(eq(chatThreads.threadId, threadId))
-      .orderBy(chatMessages.createdAt);
-    
-    return results;
-  }
-
-  // Chat thread methods
-  async createChatThread(threadData: InsertChatThread): Promise<ChatThread> {
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days retention
-    const [thread] = await db
-      .insert(chatThreads)
-      .values({
-        ...threadData,
-        expiresAt
-      })
-      .returning();
-    return thread;
-  }
-
-  async getChatThread(threadId: string): Promise<ChatThread | undefined> {
-    const [thread] = await db
-      .select()
-      .from(chatThreads)
-      .where(eq(chatThreads.threadId, threadId));
-    return thread;
-  }
-
-  async updateChatThread(threadId: string, updates: Partial<InsertChatThread>): Promise<ChatThread> {
-    const [thread] = await db
-      .update(chatThreads)
-      .set(updates)
-      .where(eq(chatThreads.threadId, threadId))
-      .returning();
-    return thread;
-  }
-
-  async getActiveChatThreads(specialistId?: string): Promise<ChatThread[]> {
-    const conditions = [eq(chatThreads.status, 'active')];
-    if (specialistId) {
-      conditions.push(eq(chatThreads.specialistId, specialistId));
-    }
-
-    return await db
-      .select()
-      .from(chatThreads)
-      .where(and(...conditions))
-      .orderBy(desc(chatThreads.lastMessageAt));
-  }
-
-  async closeChatThread(threadId: string): Promise<void> {
-    await db
-      .update(chatThreads)
-      .set({ 
-        status: 'closed',
-        closedAt: new Date()
-      })
-      .where(eq(chatThreads.threadId, threadId));
-  }
-
-  // Enhanced correspondence with guest chat integration
-  async logGuestChatToCorrespondence(
-    sessionId: string, 
-    specialistId: string, 
-    messageContent: string, 
-    messageType: 'incoming' | 'outgoing'
-  ): Promise<SpecialistCorrespondence> {
-    // Get guest session details
-    const guestSession = await this.getGuestChatSession(sessionId);
-    if (!guestSession) {
-      throw new Error('Guest session not found');
-    }
-
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days retention
-    const [correspondence] = await db
-      .insert(specialistCorrespondence)
-      .values({
-        specialistId,
-        guestSessionId: sessionId,
-        customerName: `${guestSession.firstName} ${guestSession.lastName}`,
-        customerMobile: guestSession.mobile,
-        customerEmail: guestSession.email || undefined,
-        messageType,
-        subject: 'Live Chat Session',
-        messageContent,
-        channel: 'chat',
-        priority: 'normal',
-        status: 'active',
-        tags: ['guest-chat'],
-        attachments: [],
-        expiresAt
-      })
-      .returning();
-    return correspondence;
+      .delete(chatLogs)
+      .where(lt(chatLogs.expiresAt, new Date()));
   }
 }
 

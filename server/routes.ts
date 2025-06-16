@@ -743,208 +743,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Guest chat session endpoints
-  app.post("/api/chat/session", async (req, res) => {
-    try {
-      const { firstName, lastName, mobile } = req.body;
-      
-      if (!firstName || !lastName || !mobile) {
-        return res.status(400).json({
-          success: false,
-          message: "First name, last name, and mobile number are required"
-        });
-      }
-
-      // Generate unique session ID
-      const sessionId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      const session = await storage.createGuestChatSession({
-        sessionId,
-        firstName,
-        lastName,
-        mobile,
-        email: req.body.email || null,
-        isActive: true
-      });
-
-      res.json({
-        success: true,
-        session: {
-          sessionId: session.sessionId,
-          firstName: session.firstName,
-          lastName: session.lastName,
-          mobile: session.mobile,
-          isActive: session.isActive
-        }
-      });
-    } catch (error) {
-      console.error("Error creating guest chat session:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to create chat session"
-      });
-    }
-  });
-
-  app.get("/api/chat/session/:sessionId", async (req, res) => {
-    try {
-      const { sessionId } = req.params;
-      const session = await storage.getGuestChatSession(sessionId);
-      
-      if (!session) {
-        return res.status(404).json({
-          success: false,
-          message: "Chat session not found or expired"
-        });
-      }
-
-      res.json({
-        success: true,
-        session: {
-          sessionId: session.sessionId,
-          firstName: session.firstName,
-          lastName: session.lastName,
-          mobile: session.mobile,
-          email: session.email,
-          isActive: session.isActive,
-          createdAt: session.createdAt,
-          lastActiveAt: session.lastActiveAt
-        }
-      });
-    } catch (error) {
-      console.error("Error getting guest chat session:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to get chat session"
-      });
-    }
-  });
-
+  // Simple chat logging endpoints
   app.post("/api/chat/message", async (req, res) => {
     try {
-      const { sessionId, messageContent, senderType, senderName, specialistId } = req.body;
+      const { mobile, firstName, lastName, specialistId, messageContent, senderType } = req.body;
       
-      if (!sessionId || !messageContent || !senderType) {
+      if (!mobile || !firstName || !lastName || !specialistId || !messageContent || !senderType) {
         return res.status(400).json({
           success: false,
-          message: "Session ID, message content, and sender type are required"
+          message: "Mobile, first name, last name, specialist ID, message content, and sender type are required"
         });
       }
 
-      // Verify session exists and is active
-      const session = await storage.getGuestChatSession(sessionId);
-      if (!session) {
+      // Get specialist name
+      const specialist = await storage.getSpecialistById(specialistId);
+      if (!specialist) {
         return res.status(404).json({
           success: false,
-          message: "Chat session not found or expired"
+          message: "Specialist not found"
         });
       }
 
-      // Create chat message
-      const message = await storage.createChatMessage({
-        sessionId,
-        specialistId: specialistId || null,
+      // Log chat message
+      const chatLog = await storage.logChatMessage({
+        mobile,
+        firstName,
+        lastName,
+        specialistId,
+        specialistName: specialist.name,
         messageContent,
-        senderType,
-        senderName: senderName || `${session.firstName} ${session.lastName}`,
-        isRead: false,
-        attachments: req.body.attachments || [],
-        metadata: req.body.metadata || {}
+        senderType
       });
-
-      // Log to correspondence system if specialist is involved
-      if (specialistId && senderType === 'specialist') {
-        await storage.logGuestChatToCorrespondence(
-          sessionId,
-          specialistId,
-          messageContent,
-          'outgoing'
-        );
-      } else if (senderType === 'guest') {
-        // Log guest message as incoming if there's an active specialist
-        if (specialistId) {
-          await storage.logGuestChatToCorrespondence(
-            sessionId,
-            specialistId,
-            messageContent,
-            'incoming'
-          );
-        }
-      }
-
-      // Update session last active time
-      await storage.updateGuestChatSession(sessionId, {});
 
       res.json({
         success: true,
-        message: {
-          id: message.id,
-          sessionId: message.sessionId,
-          messageContent: message.messageContent,
-          senderType: message.senderType,
-          senderName: message.senderName,
-          createdAt: message.createdAt
+        chatLog: {
+          id: chatLog.id,
+          mobile: chatLog.mobile,
+          firstName: chatLog.firstName,
+          lastName: chatLog.lastName,
+          specialistName: chatLog.specialistName,
+          messageContent: chatLog.messageContent,
+          senderType: chatLog.senderType,
+          createdAt: chatLog.createdAt
         }
       });
     } catch (error) {
-      console.error("Error creating chat message:", error);
+      console.error("Error logging chat message:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to send message"
+        message: "Failed to log message"
       });
     }
   });
 
-  app.get("/api/chat/messages/:sessionId", async (req, res) => {
+  app.get("/api/chat/mobile/:mobile", async (req, res) => {
     try {
-      const { sessionId } = req.params;
-      const limit = parseInt(req.query.limit as string) || 50;
-      
-      const messages = await storage.getChatMessages(sessionId, limit);
+      const { mobile } = req.params;
+      const chats = await storage.getChatsByMobile(mobile);
       
       res.json({
         success: true,
-        messages: messages.map(msg => ({
-          id: msg.id,
-          sessionId: msg.sessionId,
-          messageContent: msg.messageContent,
-          senderType: msg.senderType,
-          senderName: msg.senderName,
-          specialistId: msg.specialistId,
-          isRead: msg.isRead,
-          createdAt: msg.createdAt
+        chats: chats.map(chat => ({
+          id: chat.id,
+          firstName: chat.firstName,
+          lastName: chat.lastName,
+          specialistName: chat.specialistName,
+          messageContent: chat.messageContent,
+          senderType: chat.senderType,
+          createdAt: chat.createdAt
         }))
       });
     } catch (error) {
-      console.error("Error getting chat messages:", error);
+      console.error("Error getting chats by mobile:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to get messages"
+        message: "Failed to get chats"
       });
     }
   });
 
-  app.get("/api/chat/active-sessions", async (req, res) => {
+  app.get("/api/chat/specialist/:specialistId", async (req, res) => {
     try {
-      const sessions = await storage.getActiveGuestSessions();
+      const { specialistId } = req.params;
+      const chats = await storage.getChatsBySpecialist(specialistId);
       
       res.json({
         success: true,
-        sessions: sessions.map(session => ({
-          sessionId: session.sessionId,
-          firstName: session.firstName,
-          lastName: session.lastName,
-          mobile: session.mobile,
-          email: session.email,
-          createdAt: session.createdAt,
-          lastActiveAt: session.lastActiveAt
+        chats: chats.map(chat => ({
+          id: chat.id,
+          mobile: chat.mobile,
+          firstName: chat.firstName,
+          lastName: chat.lastName,
+          messageContent: chat.messageContent,
+          senderType: chat.senderType,
+          createdAt: chat.createdAt
         }))
       });
     } catch (error) {
-      console.error("Error getting active sessions:", error);
+      console.error("Error getting chats by specialist:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to get active sessions"
+        message: "Failed to get chats"
+      });
+    }
+  });
+
+  app.get("/api/chat/all", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const chats = await storage.getAllChats(limit);
+      
+      res.json({
+        success: true,
+        chats: chats.map(chat => ({
+          id: chat.id,
+          mobile: chat.mobile,
+          firstName: chat.firstName,
+          lastName: chat.lastName,
+          specialistName: chat.specialistName,
+          messageContent: chat.messageContent,
+          senderType: chat.senderType,
+          createdAt: chat.createdAt
+        }))
+      });
+    } catch (error) {
+      console.error("Error getting all chats:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get chats"
       });
     }
   });
