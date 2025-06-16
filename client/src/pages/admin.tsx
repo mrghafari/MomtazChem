@@ -450,7 +450,7 @@ export default function AdminPage() {
             className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
           >
             <User className="w-4 h-4 mr-2" />
-            مدیریت کارشناسان
+            Specialists Management
           </Button>
 
           <Button 
@@ -459,7 +459,7 @@ export default function AdminPage() {
             className="border-green-300 text-green-600 hover:bg-green-50 h-12 text-sm"
           >
             <Mail className="w-4 h-4 mr-2" />
-            پنل چت کارشناس
+            Specialist Chat Panel
           </Button>
           
           <Button 
