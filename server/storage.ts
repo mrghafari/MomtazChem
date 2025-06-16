@@ -456,9 +456,10 @@ export class DatabaseStorage implements IStorage {
 
   // Specialist management methods
   async createSpecialist(insertSpecialist: InsertSpecialist): Promise<Specialist> {
+    const specialistData: any = { ...insertSpecialist };
     const [specialist] = await db
       .insert(specialists)
-      .values(insertSpecialist)
+      .values(specialistData)
       .returning();
     return specialist;
   }
@@ -487,9 +488,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSpecialist(id: string, updateData: Partial<InsertSpecialist>): Promise<Specialist> {
+    const updatePayload: any = { ...updateData, updatedAt: new Date() };
     const [specialist] = await db
       .update(specialists)
-      .set({ ...updateData, updatedAt: new Date() })
+      .set(updatePayload)
       .where(eq(specialists.id, id))
       .returning();
     return specialist;
@@ -512,12 +514,14 @@ export class DatabaseStorage implements IStorage {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
     
+    const correspondencePayload: any = {
+      ...correspondenceData,
+      expiresAt
+    };
+    
     const [correspondence] = await db
       .insert(specialistCorrespondence)
-      .values({
-        ...correspondenceData,
-        expiresAt
-      })
+      .values(correspondencePayload)
       .returning();
     return correspondence;
   }
@@ -544,9 +548,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCorrespondence(id: number, updates: Partial<InsertSpecialistCorrespondence>): Promise<SpecialistCorrespondence> {
+    const updatePayload: any = { ...updates, updatedAt: new Date() };
     const [correspondence] = await db
       .update(specialistCorrespondence)
-      .set({ ...updates, updatedAt: new Date() })
+      .set(updatePayload)
       .where(eq(specialistCorrespondence.id, id))
       .returning();
     return correspondence;
