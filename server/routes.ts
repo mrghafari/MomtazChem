@@ -11,6 +11,7 @@ import { simpleCustomerStorage } from "./simple-customer-storage";
 import { shopStorage } from "./shop-storage";
 import { customerStorage } from "./customer-storage";
 import { emailStorage } from "./email-storage";
+import { correspondenceStorage } from "./correspondence-storage";
 import { crmStorage } from "./crm-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCrmCustomerSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
@@ -427,6 +428,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // =============================================================================
+  // CORRESPONDENCE ROUTES (Monthly tracking with phone lookup)
+  // =============================================================================
+  
+  // Search correspondence by phone number (last month only)
+  app.get('/api/correspondence/search', async (req, res) => {
+    try {
+      const { phone } = req.query;
+      
+      if (!phone || typeof phone !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number is required'
+        });
+      }
+      
+      const correspondence = await correspondenceStorage.getCorrespondenceByPhone(phone);
+      res.json(correspondence);
+    } catch (error) {
+      console.error('Error searching correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to search correspondence'
+      });
+    }
+  });
+
+  // Add new correspondence
+  app.post('/api/correspondence', requireAuth, async (req, res) => {
+    try {
+      const { customerPhone, customerName, specialistId, specialistName, subject, message, channel, type } = req.body;
+      
+      if (!customerPhone || !customerName || !specialistId || !specialistName || !subject || !message || !channel || !type) {
+        return res.status(400).json({
+          success: false,
+          message: 'All fields are required'
+        });
+      }
+      
+      const correspondence = await correspondenceStorage.createCorrespondence({
+        customerPhone,
+        customerName,
+        specialistId,
+        specialistName,
+        subject,
+        message,
+        channel,
+        type,
+        status: 'active'
+      });
+      
+      res.json({
+        success: true,
+        correspondence
+      });
+    } catch (error) {
+      console.error('Error creating correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create correspondence'
+      });
+    }
+  });
+
+  // Update correspondence status
+  app.patch('/api/correspondence/:id/status', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!status || !['active', 'resolved'].includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Valid status is required (active or resolved)'
+        });
+      }
+      
+      const correspondence = await correspondenceStorage.updateCorrespondenceStatus(parseInt(id), status);
+      
+      res.json({
+        success: true,
+        correspondence
+      });
+    } catch (error) {
+      console.error('Error updating correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update correspondence'
+      });
+    }
+  });
+
+  // Get correspondence stats
+  app.get('/api/correspondence/stats', requireAuth, async (req, res) => {
+    try {
+      const stats = await correspondenceStorage.getCorrespondenceStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Error getting correspondence stats:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get correspondence statistics'
+      });
+    }
+  });
+
+  // =============================================================================
+  // ADMIN MANAGEMENT ROUTES
+  // =============================================================================
 
   // Admin management endpoints
   app.get("/api/admin/users", requireAuth, async (req, res) => {

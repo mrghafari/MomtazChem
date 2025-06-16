@@ -682,28 +682,61 @@ export default function SpecialistsAdmin() {
         </TabsContent>
 
         <TabsContent value="correspondence" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {/* Phone Number Lookup */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Phone className="w-5 h-5" />
-                  Customer Correspondence Lookup
+                  Monthly Correspondence Tracking
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Customer Phone Number</label>
-                  <Input
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    placeholder="+1234567890 or 1234567890"
-                    type="tel"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Customer Phone Number</label>
+                    <Input
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="+1234567890"
+                      type="tel"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <Button onClick={searchCorrespondence} className="w-full">
+                      Search Last Month Records
+                    </Button>
+                  </div>
                 </div>
-                <Button onClick={searchCorrespondence} className="w-full">
-                  Search Correspondence (Last Month)
-                </Button>
+                
+                {searchResults.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2">Found {searchResults.length} correspondence entries:</h4>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {searchResults.map((item: any, index: number) => (
+                        <div key={index} className="p-3 border rounded-lg text-sm">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p><strong>Subject:</strong> {item.subject}</p>
+                              <p><strong>Customer:</strong> {item.customerName}</p>
+                              <p><strong>Specialist:</strong> {item.specialistName}</p>
+                              <p><strong>Channel:</strong> {item.channel}</p>
+                              <p className="text-gray-600 mt-1">{item.message}</p>
+                            </div>
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              item.status === 'active' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                            }`}>
+                              {item.status}
+                            </span>
+                          </div>
+                          <p className="text-gray-500 text-xs mt-2">
+                            {new Date(item.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

@@ -9,6 +9,7 @@ import { z } from "zod";
 // Import showcase and shop schemas
 export * from "./showcase-schema";
 export * from "./shop-schema";
+export * from "./correspondence-schema";
 
 // Admin roles table
 export const adminRoles = pgTable("admin_roles", {
