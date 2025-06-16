@@ -10,6 +10,7 @@ import { z } from "zod";
 export * from "./showcase-schema";
 export * from "./shop-schema";
 export * from "./correspondence-schema";
+export * from "./live-chat-schema";
 
 // Admin roles table
 export const adminRoles = pgTable("admin_roles", {
