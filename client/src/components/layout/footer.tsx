@@ -1,24 +1,26 @@
 import { Link } from "wouter";
-
+import { useLanguage } from "@/contexts/LanguageContext";
 import company_logo from "@assets/company-logo.png";
 
 const Footer = () => {
+  const { t } = useLanguage();
+  
   const productLinks = [
-    { name: "Fuel Additives", href: "/products/fuel-additives" },
-    { name: "Water Treatment", href: "/products/water-treatment" },
-    { name: "Paint & Thinner", href: "/products/paint-thinner" },
-    { name: "Agricultural Fertilizers", href: "/products/agricultural-fertilizers" },
+    { name: t.fuelAdditives, href: "/products/fuel-additives" },
+    { name: t.waterTreatment, href: "/products/water-treatment" },
+    { name: t.paintThinner, href: "/products/paint-thinner" },
+    { name: t.agriculturalFertilizers, href: "/products/agricultural-fertilizers" },
   ];
 
   const companyLinks = [
-    { name: "About Us", href: "/about" },
-    { name: "Services", href: "/services" },
-    { name: "Shop", href: "/shop" },
+    { name: t.about, href: "/about" },
+    { name: t.services, href: "/services" },
+    { name: t.shop, href: "/shop" },
     { name: "Careers", href: "#careers" },
   ];
 
   const supportLinks = [
-    { name: "Contact Us", href: "/contact" },
+    { name: t.contact, href: "/contact" },
     { name: "Technical Support", href: "#technical-support" },
     { name: "Documentation", href: "#documentation" },
     { name: "Safety Data Sheets", href: "#safety-data" },
