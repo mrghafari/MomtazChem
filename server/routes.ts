@@ -743,6 +743,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Guest chat session endpoints
+  app.post("/api/chat/session", async (req, res) => {
+    try {
+      const { firstName, lastName, mobile } = req.body;
+      
+      if (!firstName || !lastName || !mobile) {
+        return res.status(400).json({
+          success: false,
+          message: "First name, last name, and mobile number are required"
+        });
+      }
+
+      // Generate unique session ID
+      const sessionId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const session = await storage.createGuestChatSession({
+        sessionId,
+        firstName,
+        lastName,
+        mobile,
+        email: req.body.email || null,
+        isActive: true
+      });
+
+      res.json({
+        success: true,
+        session: {
+          sessionId: session.sessionId,
+          firstName: session.firstName,
+          lastName: session.lastName,
+          mobile: session.mobile,
+          isActive: session.isActive
+        }
+      });
+    } catch (error) {
+      console.error("Error creating guest chat session:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create chat session"
+      });
+    }
+  });
+
+  app.get("/api/chat/session/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const session = await storage.getGuestChatSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({
+          success: false,
+          message: "Chat session not found or expired"
+        });
+      }
+
+      res.json({
+        success: true,
+        session: {
+          sessionId: session.sessionId,
+          firstName: session.firstName,
+          lastName: session.lastName,
+          mobile: session.mobile,
+          email: session.email,
+          isActive: session.isActive,
+          createdAt: session.createdAt,
+          lastActiveAt: session.lastActiveAt
+        }
+      });
+    } catch (error) {
+      console.error("Error getting guest chat session:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get chat session"
+      });
+    }
+  });
+
+  app.post("/api/chat/message", async (req, res) => {
+    try {
+      const { sessionId, messageContent, senderType, senderName, specialistId } = req.body;
+      
+      if (!sessionId || !messageContent || !senderType) {
+        return res.status(400).json({
+          success: false,
+          message: "Session ID, message content, and sender type are required"
+        });
+      }
+
+      // Verify session exists and is active
+      const session = await storage.getGuestChatSession(sessionId);
+      if (!session) {
+        return res.status(404).json({
+          success: false,
+          message: "Chat session not found or expired"
+        });
+      }
+
+      // Create chat message
+      const message = await storage.createChatMessage({
+        sessionId,
+        specialistId: specialistId || null,
+        messageContent,
+        senderType,
+        senderName: senderName || `${session.firstName} ${session.lastName}`,
+        isRead: false,
+        attachments: req.body.attachments || [],
+        metadata: req.body.metadata || {}
+      });
+
+      // Log to correspondence system if specialist is involved
+      if (specialistId && senderType === 'specialist') {
+        await storage.logGuestChatToCorrespondence(
+          sessionId,
+          specialistId,
+          messageContent,
+          'outgoing'
+        );
+      } else if (senderType === 'guest') {
+        // Log guest message as incoming if there's an active specialist
+        if (specialistId) {
+          await storage.logGuestChatToCorrespondence(
+            sessionId,
+            specialistId,
+            messageContent,
+            'incoming'
+          );
+        }
+      }
+
+      // Update session last active time
+      await storage.updateGuestChatSession(sessionId, {});
+
+      res.json({
+        success: true,
+        message: {
+          id: message.id,
+          sessionId: message.sessionId,
+          messageContent: message.messageContent,
+          senderType: message.senderType,
+          senderName: message.senderName,
+          createdAt: message.createdAt
+        }
+      });
+    } catch (error) {
+      console.error("Error creating chat message:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send message"
+      });
+    }
+  });
+
+  app.get("/api/chat/messages/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      const messages = await storage.getChatMessages(sessionId, limit);
+      
+      res.json({
+        success: true,
+        messages: messages.map(msg => ({
+          id: msg.id,
+          sessionId: msg.sessionId,
+          messageContent: msg.messageContent,
+          senderType: msg.senderType,
+          senderName: msg.senderName,
+          specialistId: msg.specialistId,
+          isRead: msg.isRead,
+          createdAt: msg.createdAt
+        }))
+      });
+    } catch (error) {
+      console.error("Error getting chat messages:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get messages"
+      });
+    }
+  });
+
+  app.get("/api/chat/active-sessions", async (req, res) => {
+    try {
+      const sessions = await storage.getActiveGuestSessions();
+      
+      res.json({
+        success: true,
+        sessions: sessions.map(session => ({
+          sessionId: session.sessionId,
+          firstName: session.firstName,
+          lastName: session.lastName,
+          mobile: session.mobile,
+          email: session.email,
+          createdAt: session.createdAt,
+          lastActiveAt: session.lastActiveAt
+        }))
+      });
+    } catch (error) {
+      console.error("Error getting active sessions:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get active sessions"
+      });
+    }
+  });
+
   // Get all contacts (for admin purposes)
   app.get("/api/contacts", async (req, res) => {
     try {

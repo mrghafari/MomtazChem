@@ -777,7 +777,14 @@ export class DatabaseStorage implements IStorage {
     const [message] = await db
       .insert(chatMessages)
       .values({
-        ...messageData,
+        sessionId: messageData.sessionId,
+        specialistId: messageData.specialistId,
+        messageContent: messageData.messageContent,
+        senderType: messageData.senderType,
+        senderName: messageData.senderName,
+        isRead: messageData.isRead,
+        attachments: messageData.attachments,
+        metadata: messageData.metadata,
         expiresAt
       })
       .returning();
@@ -801,12 +808,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChatMessagesByThread(threadId: string): Promise<ChatMessage[]> {
-    return await db
-      .select()
+    const results = await db
+      .select({
+        id: chatMessages.id,
+        sessionId: chatMessages.sessionId,
+        specialistId: chatMessages.specialistId,
+        messageContent: chatMessages.messageContent,
+        senderType: chatMessages.senderType,
+        senderName: chatMessages.senderName,
+        isRead: chatMessages.isRead,
+        attachments: chatMessages.attachments,
+        metadata: chatMessages.metadata,
+        createdAt: chatMessages.createdAt,
+        expiresAt: chatMessages.expiresAt,
+      })
       .from(chatMessages)
       .innerJoin(chatThreads, eq(chatMessages.sessionId, chatThreads.sessionId))
       .where(eq(chatThreads.threadId, threadId))
       .orderBy(chatMessages.createdAt);
+    
+    return results;
   }
 
   // Chat thread methods

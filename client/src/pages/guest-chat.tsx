@@ -60,7 +60,7 @@ export default function GuestChat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleRegistration = () => {
+  const handleRegistration = async () => {
     if (!registrationData.firstName || !registrationData.lastName || !registrationData.mobile) {
       toast({
         title: "Incomplete Information",
@@ -81,22 +81,51 @@ export default function GuestChat() {
       return;
     }
 
-    const sessionId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const user: GuestUser = {
-      ...registrationData,
-      sessionId
-    };
+    try {
+      // Create guest chat session via API
+      const response = await fetch('/api/chat/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
+      });
 
-    setGuestUser(user);
-    setIsRegistered(true);
-    
-    // Save to localStorage for session persistence
-    localStorage.setItem('guestChatUser', JSON.stringify(user));
+      const result = await response.json();
 
-    toast({
-      title: "Registration Successful",
-      description: "Welcome! Please select a specialist to start chatting.",
-    });
+      if (result.success) {
+        const user: GuestUser = {
+          firstName: result.session.firstName,
+          lastName: result.session.lastName,
+          mobile: result.session.mobile,
+          sessionId: result.session.sessionId
+        };
+
+        setGuestUser(user);
+        setIsRegistered(true);
+        
+        // Save to localStorage for session persistence
+        localStorage.setItem('guestChatUser', JSON.stringify(user));
+
+        toast({
+          title: "Registration Successful",
+          description: "Welcome! Please select a specialist to start chatting.",
+        });
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: result.message || "Unable to create chat session",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Registration Failed",
+        description: "Network error. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const selectSpecialist = (specialist: Specialist) => {
@@ -114,41 +143,105 @@ export default function GuestChat() {
     setMessages([welcomeMessage]);
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!newMessage.trim() || !selectedSpecialist || !guestUser) return;
 
-    const message: ChatMessage = {
-      id: `msg_${Date.now()}`,
-      content: newMessage.trim(),
-      sender: 'guest',
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, message]);
+    const messageContent = newMessage.trim();
     setNewMessage("");
 
-    // Simulate specialist response after a delay
-    setTimeout(() => {
-      const responses = [
-        "Thank you for your message. Let me help you with that.",
-        "I understand your concern. Could you provide more details?",
-        "That's a great question. Let me check our available options for you.",
-        "I'll be happy to assist you with this inquiry.",
-        "Let me connect you with the right information."
-      ];
-      
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      
-      const specialistMessage: ChatMessage = {
-        id: `msg_${Date.now()}_specialist`,
-        content: randomResponse,
-        sender: 'specialist',
-        timestamp: new Date(),
-        specialistName: selectedSpecialist.name
-      };
-      
-      setMessages(prev => [...prev, specialistMessage]);
-    }, 1000 + Math.random() * 2000);
+    try {
+      // Send guest message to API
+      const response = await fetch('/api/chat/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: guestUser.sessionId,
+          messageContent,
+          senderType: 'guest',
+          senderName: `${guestUser.firstName} ${guestUser.lastName}`,
+          specialistId: selectedSpecialist.id
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const message: ChatMessage = {
+          id: result.message.id.toString(),
+          content: messageContent,
+          sender: 'guest',
+          timestamp: new Date(result.message.createdAt)
+        };
+
+        setMessages(prev => [...prev, message]);
+
+        // Simulate specialist response after a delay
+        setTimeout(async () => {
+          const responses = [
+            "Thank you for your message. Let me help you with that.",
+            "I understand your concern. Could you provide more details?",
+            "That's a great question. Let me check our available options for you.",
+            "I'll be happy to assist you with this inquiry.",
+            "Let me connect you with the right information."
+          ];
+          
+          const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+          
+          try {
+            // Send specialist response to API
+            const specialistResponse = await fetch('/api/chat/message', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                sessionId: guestUser.sessionId,
+                messageContent: randomResponse,
+                senderType: 'specialist',
+                senderName: selectedSpecialist.name,
+                specialistId: selectedSpecialist.id
+              }),
+            });
+
+            const specialistResult = await specialistResponse.json();
+
+            if (specialistResult.success) {
+              const specialistMessage: ChatMessage = {
+                id: specialistResult.message.id.toString(),
+                content: randomResponse,
+                sender: 'specialist',
+                timestamp: new Date(specialistResult.message.createdAt),
+                specialistName: selectedSpecialist.name
+              };
+              
+              setMessages(prev => [...prev, specialistMessage]);
+            }
+          } catch (error) {
+            console.error('Error sending specialist response:', error);
+          }
+        }, 1000 + Math.random() * 2000);
+
+      } else {
+        toast({
+          title: "Message Failed",
+          description: result.message || "Unable to send message",
+          variant: "destructive",
+        });
+        // Restore the message input
+        setNewMessage(messageContent);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Message Failed",
+        description: "Network error. Please try again.",
+        variant: "destructive",
+      });
+      // Restore the message input
+      setNewMessage(messageContent);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
