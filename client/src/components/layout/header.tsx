@@ -176,28 +176,6 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
-            {/* Live Chat Button */}
-            <Link href="/live-chat">
-              <Button 
-                variant="default" 
-                size="sm"
-                className="hidden sm:flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Live Chat
-              </Button>
-            </Link>
-            
-            {/* Mobile chat button */}
-            <Link href="/live-chat">
-              <Button
-                variant="default"
-                size="sm"
-                className="sm:hidden p-2 bg-green-600 hover:bg-green-700 text-white"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </Button>
-            </Link>
             
             {/* Mobile menu button */}
             <Button
@@ -304,25 +282,7 @@ export default function Header() {
                   </div>
                 </motion.div>
 
-                {/* Mobile Chat Button */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
-                >
-                  <Link href="/chat">
-                    <motion.div
-                      className={cn(
-                        "flex items-center gap-2 px-4 py-2 text-sm rounded-md transition-all duration-200 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
-                      )}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      <span className="font-medium">Start Live Chat</span>
-                    </motion.div>
-                  </Link>
-                </motion.div>
+
 
               </nav>
             </motion.div>
