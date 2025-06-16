@@ -82,16 +82,18 @@ export default function SpecialistsAdmin() {
   const [activeTab, setActiveTab] = useState("specialists");
   const [selectedSpecialist, setSelectedSpecialist] = useState<string | null>(null);
   const [correspondenceData, setCorrespondenceData] = useState<CorrespondenceEntry[]>([]);
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [newCorrespondence, setNewCorrespondence] = useState<{
     customerName: string;
-    customerEmail: string;
+    customerPhone: string;
     subject: string;
     message: string;
     channel: 'email' | 'chat' | 'phone';
     type: 'incoming' | 'outgoing';
   }>({
     customerName: '',
-    customerEmail: '',
+    customerPhone: '',
     subject: '',
     message: '',
     channel: 'email',
@@ -135,52 +137,113 @@ export default function SpecialistsAdmin() {
     setCorrespondenceData(data);
   };
 
-  // Add new correspondence entry
-  const addCorrespondenceEntry = () => {
-    if (!selectedSpecialist || !newCorrespondence.customerName || !newCorrespondence.message) {
+  // Search correspondence by phone number
+  const searchCorrespondence = async () => {
+    if (!customerPhone.trim()) {
       toast({
-        title: "خطا",
-        description: "لطفاً تمام فیلدهای الزامی را پر کنید",
+        title: "Error",
+        description: "Please enter a phone number",
         variant: "destructive"
       });
       return;
     }
 
-    const now = new Date();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
+    try {
+      const response = await fetch(`/api/correspondence/search?phone=${encodeURIComponent(customerPhone)}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSearchResults(data);
+        toast({
+          title: "Success",
+          description: `Found ${data.length} correspondence entries`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to search correspondence",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to search correspondence",
+        variant: "destructive"
+      });
+    }
+  };
 
-    const entry: CorrespondenceEntry = {
-      id: `correspondence_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      specialistId: selectedSpecialist,
-      customerName: newCorrespondence.customerName,
-      customerEmail: newCorrespondence.customerEmail,
-      subject: newCorrespondence.subject,
-      message: newCorrespondence.message,
-      channel: newCorrespondence.channel,
-      type: newCorrespondence.type,
-      status: 'active',
-      createdAt: now.toISOString(),
-      expiresAt: expiresAt.toISOString()
-    };
+  // Add new correspondence entry
+  const addCorrespondenceEntry = async () => {
+    if (!selectedSpecialist || !newCorrespondence.customerName || !newCorrespondence.customerPhone || !newCorrespondence.message) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    const updatedData = [...correspondenceData, entry];
-    saveCorrespondence(updatedData);
+    const selectedSpec = specialists.find(s => s.id === selectedSpecialist);
+    if (!selectedSpec) {
+      toast({
+        title: "Error",
+        description: "Please select a valid specialist",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    // Reset form
-    setNewCorrespondence({
-      customerName: '',
-      customerEmail: '',
-      subject: '',
-      message: '',
-      channel: 'email',
-      type: 'incoming'
-    });
+    try {
+      const response = await fetch('/api/correspondence', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerPhone: newCorrespondence.customerPhone,
+          customerName: newCorrespondence.customerName,
+          specialistId: selectedSpecialist,
+          specialistName: selectedSpec.name,
+          subject: newCorrespondence.subject,
+          message: newCorrespondence.message,
+          channel: newCorrespondence.channel,
+          type: newCorrespondence.type,
+        }),
+      });
 
-    toast({
-      title: "موفق",
-      description: "مکاتبه با موفقیت ثبت شد",
-    });
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Reset form
+        setNewCorrespondence({
+          customerName: '',
+          customerPhone: '',
+          subject: '',
+          message: '',
+          channel: 'email',
+          type: 'incoming'
+        });
+
+        toast({
+          title: "Success",
+          description: "Correspondence added successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to add correspondence",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add correspondence",
+        variant: "destructive"
+      });
+    }
   };
 
   // Update correspondence status
@@ -620,6 +683,30 @@ export default function SpecialistsAdmin() {
 
         <TabsContent value="correspondence" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Phone Number Lookup */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="w-5 h-5" />
+                  Customer Correspondence Lookup
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Customer Phone Number</label>
+                  <Input
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="+1234567890 or 1234567890"
+                    type="tel"
+                  />
+                </div>
+                <Button onClick={searchCorrespondence} className="w-full">
+                  Search Correspondence (Last Month)
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* Add new correspondence */}
             <Card>
               <CardHeader>
@@ -655,12 +742,12 @@ export default function SpecialistsAdmin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Customer Email</label>
+                    <label className="block text-sm font-medium mb-2">Customer Phone</label>
                     <Input
-                      type="email"
-                      value={newCorrespondence.customerEmail}
-                      onChange={(e) => setNewCorrespondence(prev => ({ ...prev, customerEmail: e.target.value }))}
-                      placeholder="Customer email"
+                      type="tel"
+                      value={newCorrespondence.customerPhone}
+                      onChange={(e) => setNewCorrespondence(prev => ({ ...prev, customerPhone: e.target.value }))}
+                      placeholder="Customer phone number"
                     />
                   </div>
                 </div>
