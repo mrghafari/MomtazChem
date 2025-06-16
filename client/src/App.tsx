@@ -17,6 +17,8 @@ import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
 import SpecialistsAdmin from "@/pages/admin/specialists-simple";
+import SpecialistChatPanel from "@/pages/specialist-chat";
+import SpecialistLogin from "@/pages/specialist-login";
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
 import DatabaseManagement from "@/pages/admin/database-management";
 import UserManagement from "@/pages/admin/user-management";
@@ -86,7 +88,8 @@ function Router() {
           <Route path="/quote" component={QuotePage} />
           <Route path="/chat" component={GuestChat} />
           <Route path="/live-chat" component={LiveChat} />
-          <Route path="/specialist-chat" component={SpecialistChat} />
+          <Route path="/specialist-login" component={SpecialistLogin} />
+          <Route path="/specialist-chat" component={SpecialistChatPanel} />
           <Route component={NotFound} />
         </Switch>
       </main>

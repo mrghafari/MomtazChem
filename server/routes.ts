@@ -6215,6 +6215,191 @@ ${procedure.content}
     }
   });
 
+  // =============================================================================
+  // SPECIALIST CHAT PANEL API ROUTES
+  // =============================================================================
+
+  // Specialist login
+  app.post("/api/specialist/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ success: false, message: "Email and password required" });
+      }
+
+      const specialists = await storage.getSpecialists();
+      const specialist = specialists.find(s => s.email === email);
+      
+      if (!specialist) {
+        return res.status(401).json({ success: false, message: "Invalid credentials" });
+      }
+
+      // For now, simple password check (in production, use proper hashing)
+      if (password !== "specialist123") {
+        return res.status(401).json({ success: false, message: "Invalid credentials" });
+      }
+
+      // Set specialist session
+      (req.session as any).specialistId = specialist.id;
+      (req.session as any).specialistName = specialist.name;
+      (req.session as any).isSpecialistAuthenticated = true;
+
+      res.json({
+        success: true,
+        message: "Login successful",
+        specialist: {
+          id: specialist.id,
+          name: specialist.name,
+          email: specialist.email,
+          department: specialist.department
+        }
+      });
+    } catch (error) {
+      console.error("Error in specialist login:", error);
+      res.status(500).json({ success: false, message: "Login failed" });
+    }
+  });
+
+  // Get current specialist info
+  app.get("/api/specialist/me", async (req, res) => {
+    try {
+      const specialistId = (req.session as any).specialistId;
+      if (!specialistId) {
+        return res.status(401).json({ success: false, message: "Specialist not authenticated" });
+      }
+
+      const specialists = await storage.getSpecialists();
+      const specialist = specialists.find(s => s.id === specialistId);
+      
+      if (!specialist) {
+        return res.status(404).json({ success: false, message: "Specialist not found" });
+      }
+
+      res.json(specialist);
+    } catch (error) {
+      console.error("Error fetching specialist info:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch specialist info" });
+    }
+  });
+
+  // Get chat sessions for specialist panel
+  app.get("/api/specialist-chat/sessions", requireAuth, async (req, res) => {
+    try {
+      const specialistId = req.session.specialistId;
+      
+      // Get all chat sessions
+      const allSessions = await liveChatStorage.getAllChatSessions();
+      
+      // Filter sessions based on specialist assignment
+      const sessions = allSessions.map(session => ({
+        id: session.id,
+        customerName: session.customerName,
+        customerPhone: session.customerPhone,
+        status: session.status,
+        specialistId: session.specialistId,
+        createdAt: session.createdAt,
+        lastMessageAt: session.lastMessageAt || session.createdAt,
+        priority: session.priority || 'normal',
+        channel: session.channel || 'website'
+      }));
+
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching chat sessions:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch sessions" });
+    }
+  });
+
+  // Get messages for a specific session
+  app.get("/api/specialist-chat/messages/:sessionId", requireAuth, async (req, res) => {
+    try {
+      const sessionId = req.params.sessionId;
+      const messages = await liveChatStorage.getChatMessages(sessionId);
+      
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch messages" });
+    }
+  });
+
+  // Send message from specialist
+  app.post("/api/specialist-chat/send-message", requireAuth, async (req, res) => {
+    try {
+      const { sessionId, message } = req.body;
+      const specialistId = req.session.specialistId;
+      
+      if (!specialistId) {
+        return res.status(401).json({ success: false, message: "Specialist not authenticated" });
+      }
+
+      // Get specialist info
+      const specialists = await storage.getSpecialists();
+      const specialist = specialists.find(s => s.id === specialistId);
+      
+      if (!specialist) {
+        return res.status(404).json({ success: false, message: "Specialist not found" });
+      }
+
+      const newMessage = await liveChatStorage.addMessage({
+        sessionId,
+        message,
+        senderType: 'specialist',
+        senderName: specialist.name,
+        timestamp: new Date().toISOString(),
+        isRead: false
+      });
+
+      res.status(201).json({
+        success: true,
+        message: newMessage
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ success: false, message: "Failed to send message" });
+    }
+  });
+
+  // Assign chat session to specialist
+  app.post("/api/specialist-chat/assign/:sessionId", requireAuth, async (req, res) => {
+    try {
+      const sessionId = req.params.sessionId;
+      const specialistId = req.session.specialistId;
+      
+      if (!specialistId) {
+        return res.status(401).json({ success: false, message: "Specialist not authenticated" });
+      }
+
+      await liveChatStorage.assignSpecialist(sessionId, specialistId);
+      
+      res.json({
+        success: true,
+        message: "Chat assigned successfully"
+      });
+    } catch (error) {
+      console.error("Error assigning chat:", error);
+      res.status(500).json({ success: false, message: "Failed to assign chat" });
+    }
+  });
+
+  // Resolve/close chat session
+  app.post("/api/specialist-chat/resolve/:sessionId", requireAuth, async (req, res) => {
+    try {
+      const sessionId = req.params.sessionId;
+      
+      await liveChatStorage.endChatSession(sessionId);
+      
+      res.json({
+        success: true,
+        message: "Chat resolved successfully"
+      });
+    } catch (error) {
+      console.error("Error resolving chat:", error);
+      res.status(500).json({ success: false, message: "Failed to resolve chat" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
