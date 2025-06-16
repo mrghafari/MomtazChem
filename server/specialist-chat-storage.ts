@@ -101,7 +101,7 @@ export class SpecialistChatStorage implements ISpecialistChatStorage {
   }
 
   async getActiveSessionForSpecialist(specialistId: string): Promise<ChatSession | undefined> {
-    for (const session of this.sessions.values()) {
+    for (const session of Array.from(this.sessions.values())) {
       if (session.specialistId === specialistId && session.status === "active") {
         return session;
       }
@@ -110,7 +110,7 @@ export class SpecialistChatStorage implements ISpecialistChatStorage {
   }
 
   async getActiveSessionByPhone(customerPhone: string): Promise<ChatSession | undefined> {
-    for (const session of this.sessions.values()) {
+    for (const session of Array.from(this.sessions.values())) {
       if (session.customerPhone === customerPhone && session.status === "active") {
         return session;
       }
@@ -186,7 +186,7 @@ export class SpecialistChatStorage implements ISpecialistChatStorage {
 
   async getAllActiveSessions(): Promise<ChatSession[]> {
     const activeSessions: ChatSession[] = [];
-    for (const session of this.sessions.values()) {
+    for (const session of Array.from(this.sessions.values())) {
       if (session.status === "active") {
         activeSessions.push(session);
       }

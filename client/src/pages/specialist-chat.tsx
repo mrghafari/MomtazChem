@@ -79,7 +79,7 @@ export default function SpecialistChat() {
 
   // Update messages when sessionMessages changes
   useEffect(() => {
-    if (sessionMessages) {
+    if (Array.isArray(sessionMessages)) {
       setMessages(sessionMessages.map((msg: any) => ({
         ...msg,
         timestamp: new Date(msg.timestamp)
@@ -104,12 +104,9 @@ export default function SpecialistChat() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: { sessionId: string; message: string }) => {
-      return await apiRequest("/api/specialist-chat/send-message", {
-        method: "POST",
-        body: JSON.stringify({
-          ...messageData,
-          sender: "specialist"
-        }),
+      return await apiRequest("/api/specialist-chat/send-message", "POST", {
+        ...messageData,
+        sender: "specialist"
       });
     },
     onSuccess: () => {
@@ -134,10 +131,7 @@ export default function SpecialistChat() {
   // End session mutation
   const endSessionMutation = useMutation({
     mutationFn: async (data: { sessionId: string; notes?: string; rating?: number }) => {
-      return await apiRequest("/api/specialist-chat/end-session", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("/api/specialist-chat/end-session", "POST", data);
     },
     onSuccess: () => {
       setActiveSession(null);

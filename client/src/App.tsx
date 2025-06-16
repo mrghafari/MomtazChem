@@ -85,6 +85,7 @@ function Router() {
           <Route path="/quote" component={QuotePage} />
           <Route path="/chat" component={GuestChat} />
           <Route path="/live-chat" component={LiveChat} />
+          <Route path="/specialist-chat" component={SpecialistChat} />
           <Route component={NotFound} />
         </Switch>
       </main>
