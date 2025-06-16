@@ -1,9 +1,9 @@
-import { users, leads, leadActivities, passwordResets, specialists, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, specialists, specialistCorrespondence, correspondenceThreads, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist, type SpecialistCorrespondence, type InsertSpecialistCorrespondence, type CorrespondenceThread, type InsertCorrespondenceThread } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
 import { shopStorage } from "./shop-storage";
-import { eq, desc, and, or, like, sql } from "drizzle-orm";
+import { eq, desc, and, or, like, sql, gt, lt, gte, ilike, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   createContact(contact: InsertContact): Promise<Contact>;
@@ -504,6 +504,188 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSpecialist(id: string): Promise<void> {
     await db.delete(specialists).where(eq(specialists.id, id));
+  }
+
+  // Specialist Correspondence Management
+  async createCorrespondence(correspondenceData: InsertSpecialistCorrespondence): Promise<SpecialistCorrespondence> {
+    // Set expiration date to 30 days from now
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+    
+    const [correspondence] = await db
+      .insert(specialistCorrespondence)
+      .values({
+        ...correspondenceData,
+        expiresAt
+      })
+      .returning();
+    return correspondence;
+  }
+
+  async getCorrespondenceBySpecialist(specialistId: string, limit: number = 50): Promise<SpecialistCorrespondence[]> {
+    return await db
+      .select()
+      .from(specialistCorrespondence)
+      .where(eq(specialistCorrespondence.specialistId, specialistId))
+      .orderBy(desc(specialistCorrespondence.createdAt))
+      .limit(limit);
+  }
+
+  async getActiveCorrespondence(): Promise<SpecialistCorrespondence[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(specialistCorrespondence)
+      .where(and(
+        eq(specialistCorrespondence.status, "active"),
+        gt(specialistCorrespondence.expiresAt, now)
+      ))
+      .orderBy(desc(specialistCorrespondence.createdAt));
+  }
+
+  async updateCorrespondence(id: number, updates: Partial<InsertSpecialistCorrespondence>): Promise<SpecialistCorrespondence> {
+    const [correspondence] = await db
+      .update(specialistCorrespondence)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(specialistCorrespondence.id, id))
+      .returning();
+    return correspondence;
+  }
+
+  async searchCorrespondence(query: string, specialistId?: string): Promise<SpecialistCorrespondence[]> {
+    let whereCondition = or(
+      ilike(specialistCorrespondence.subject, `%${query}%`),
+      ilike(specialistCorrespondence.messageContent, `%${query}%`),
+      ilike(specialistCorrespondence.customerName, `%${query}%`),
+      ilike(specialistCorrespondence.customerEmail, `%${query}%`)
+    );
+
+    if (specialistId) {
+      whereCondition = and(
+        whereCondition,
+        eq(specialistCorrespondence.specialistId, specialistId)
+      );
+    }
+
+    return await db
+      .select()
+      .from(specialistCorrespondence)
+      .where(whereCondition)
+      .orderBy(desc(specialistCorrespondence.createdAt))
+      .limit(100);
+  }
+
+  // Correspondence Thread Management
+  async createThread(threadData: InsertCorrespondenceThread): Promise<CorrespondenceThread> {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+    
+    const [thread] = await db
+      .insert(correspondenceThreads)
+      .values({
+        ...threadData,
+        expiresAt
+      })
+      .returning();
+    return thread;
+  }
+
+  async getThreadsBySpecialist(specialistId: string): Promise<CorrespondenceThread[]> {
+    return await db
+      .select()
+      .from(correspondenceThreads)
+      .where(eq(correspondenceThreads.specialistId, specialistId))
+      .orderBy(desc(correspondenceThreads.lastMessageAt));
+  }
+
+  async updateThread(threadId: string, updates: Partial<InsertCorrespondenceThread>): Promise<CorrespondenceThread> {
+    const [thread] = await db
+      .update(correspondenceThreads)
+      .set(updates)
+      .where(eq(correspondenceThreads.threadId, threadId))
+      .returning();
+    return thread;
+  }
+
+  // Clean up expired correspondence (automated cleanup)
+  async cleanupExpiredCorrespondence(): Promise<number> {
+    const now = new Date();
+    const deletedCorrespondence = await db
+      .delete(specialistCorrespondence)
+      .where(lt(specialistCorrespondence.expiresAt, now));
+    
+    const deletedThreads = await db
+      .delete(correspondenceThreads)
+      .where(lt(correspondenceThreads.expiresAt, now));
+
+    return deletedCorrespondence.rowCount + deletedThreads.rowCount;
+  }
+
+  // Get correspondence statistics
+  async getCorrespondenceStats(specialistId?: string): Promise<{
+    totalActive: number;
+    totalThisMonth: number;
+    averageResponseTime: number;
+    pendingFollowUps: number;
+    messagesByChannel: Array<{ channel: string; count: number }>;
+  }> {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    let baseQuery = db.select().from(specialistCorrespondence);
+    if (specialistId) {
+      baseQuery = baseQuery.where(eq(specialistCorrespondence.specialistId, specialistId));
+    }
+
+    const totalActive = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(specialistCorrespondence)
+      .where(and(
+        eq(specialistCorrespondence.status, "active"),
+        specialistId ? eq(specialistCorrespondence.specialistId, specialistId) : undefined
+      ));
+
+    const totalThisMonth = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(specialistCorrespondence)
+      .where(and(
+        gte(specialistCorrespondence.createdAt, monthStart),
+        specialistId ? eq(specialistCorrespondence.specialistId, specialistId) : undefined
+      ));
+
+    const avgResponseTime = await db
+      .select({ avg: sql<number>`avg(${specialistCorrespondence.responseTime})` })
+      .from(specialistCorrespondence)
+      .where(and(
+        isNotNull(specialistCorrespondence.responseTime),
+        specialistId ? eq(specialistCorrespondence.specialistId, specialistId) : undefined
+      ));
+
+    const pendingFollowUps = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(specialistCorrespondence)
+      .where(and(
+        eq(specialistCorrespondence.followUpRequired, true),
+        eq(specialistCorrespondence.status, "active"),
+        specialistId ? eq(specialistCorrespondence.specialistId, specialistId) : undefined
+      ));
+
+    const messagesByChannel = await db
+      .select({
+        channel: specialistCorrespondence.channel,
+        count: sql<number>`count(*)`
+      })
+      .from(specialistCorrespondence)
+      .where(specialistId ? eq(specialistCorrespondence.specialistId, specialistId) : undefined)
+      .groupBy(specialistCorrespondence.channel);
+
+    return {
+      totalActive: totalActive[0]?.count || 0,
+      totalThisMonth: totalThisMonth[0]?.count || 0,
+      averageResponseTime: avgResponseTime[0]?.avg || 0,
+      pendingFollowUps: pendingFollowUps[0]?.count || 0,
+      messagesByChannel: messagesByChannel || []
+    };
   }
 }
 

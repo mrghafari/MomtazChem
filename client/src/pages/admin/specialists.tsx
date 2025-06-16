@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -19,7 +21,12 @@ import {
   Circle,
   Phone,
   Mail,
-  Clock
+  Clock,
+  MessageSquare,
+  Calendar,
+  Search,
+  Filter,
+  Archive
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -53,10 +60,36 @@ interface Specialist {
   updatedAt: string;
 }
 
+// Simple correspondence interface without database complexity
+interface CorrespondenceEntry {
+  id: string;
+  specialistId: string;
+  customerName: string;
+  customerEmail: string;
+  subject: string;
+  message: string;
+  channel: 'email' | 'chat' | 'phone';
+  type: 'incoming' | 'outgoing';
+  status: 'active' | 'resolved';
+  createdAt: string;
+  expiresAt: string;
+}
+
 export default function SpecialistsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingSpecialist, setEditingSpecialist] = useState<Specialist | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("specialists");
+  const [selectedSpecialist, setSelectedSpecialist] = useState<string | null>(null);
+  const [correspondenceData, setCorrespondenceData] = useState<CorrespondenceEntry[]>([]);
+  const [newCorrespondence, setNewCorrespondence] = useState({
+    customerName: '',
+    customerEmail: '',
+    subject: '',
+    message: '',
+    channel: 'email' as const,
+    type: 'incoming' as const
+  });
   const { toast } = useToast();
 
   const { data: specialists = [], isLoading, refetch } = useQuery<Specialist[]>({
