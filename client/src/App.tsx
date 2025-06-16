@@ -41,6 +41,7 @@ import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
 import GuestChat from "@/pages/guest-chat";
 import LiveChat from "@/pages/live-chat";
+import SpecialistChat from "@/pages/specialist-chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {

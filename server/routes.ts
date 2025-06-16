@@ -13,6 +13,7 @@ import { customerStorage } from "./customer-storage";
 import { emailStorage } from "./email-storage";
 import { correspondenceStorage } from "./correspondence-storage";
 import { crmStorage } from "./crm-storage";
+import { specialistChatStorage } from "./specialist-chat-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCrmCustomerSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
@@ -5673,6 +5674,227 @@ ${procedure.content}
       res.status(500).json({
         success: false,
         message: "Failed to fetch segments"
+      });
+    }
+  });
+
+  // =============================================================================
+  // SPECIALIST CHAT MANAGEMENT API ROUTES
+  // =============================================================================
+
+  // Get all active chat sessions (for admin overview)
+  app.get("/api/specialist-chat/active-sessions", async (req, res) => {
+    try {
+      const sessions = await specialistChatStorage.getAllActiveSessions();
+      
+      // Enhance sessions with specialist names
+      const enhancedSessions = await Promise.all(sessions.map(async (session) => {
+        const specialists = await storage.getSpecialists();
+        const specialist = specialists.find(s => s.id === session.specialistId);
+        return {
+          ...session,
+          specialistName: specialist?.name || 'Unknown Specialist'
+        };
+      }));
+
+      res.json(enhancedSessions);
+    } catch (error) {
+      console.error("Error fetching active sessions:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch active sessions" 
+      });
+    }
+  });
+
+  // Get active session for a specific specialist
+  app.get("/api/specialist-chat/specialist/:specialistId/active", async (req, res) => {
+    try {
+      const { specialistId } = req.params;
+      const session = await specialistChatStorage.getActiveSessionForSpecialist(specialistId);
+      
+      if (!session) {
+        return res.json(null);
+      }
+
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching specialist active session:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch specialist session" 
+      });
+    }
+  });
+
+  // Create new chat session
+  app.post("/api/specialist-chat/create-session", async (req, res) => {
+    try {
+      const { specialistId, customerPhone, customerName } = req.body;
+
+      if (!specialistId || !customerPhone || !customerName) {
+        return res.status(400).json({
+          success: false,
+          message: "Specialist ID, customer phone, and customer name are required"
+        });
+      }
+
+      const session = await specialistChatStorage.createChatSession({
+        specialistId,
+        customerPhone,
+        customerName
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Chat session created successfully",
+        session
+      });
+    } catch (error) {
+      console.error("Error creating chat session:", error);
+      if (error.message.includes("already has an active")) {
+        res.status(400).json({
+          success: false,
+          message: error.message
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to create chat session"
+        });
+      }
+    }
+  });
+
+  // Send message in chat session
+  app.post("/api/specialist-chat/send-message", async (req, res) => {
+    try {
+      const { sessionId, sender, message, messageType = "text" } = req.body;
+
+      if (!sessionId || !sender || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "Session ID, sender, and message are required"
+        });
+      }
+
+      if (!["specialist", "customer"].includes(sender)) {
+        return res.status(400).json({
+          success: false,
+          message: "Sender must be either 'specialist' or 'customer'"
+        });
+      }
+
+      const chatMessage = await specialistChatStorage.addMessage({
+        sessionId,
+        sender,
+        message,
+        messageType
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Message sent successfully",
+        chatMessage
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send message"
+      });
+    }
+  });
+
+  // Get messages for a chat session
+  app.get("/api/specialist-chat/messages/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const messages = await specialistChatStorage.getSessionMessages(sessionId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching session messages:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch messages"
+      });
+    }
+  });
+
+  // End chat session
+  app.post("/api/specialist-chat/end-session", async (req, res) => {
+    try {
+      const { sessionId, notes, rating } = req.body;
+
+      if (!sessionId) {
+        return res.status(400).json({
+          success: false,
+          message: "Session ID is required"
+        });
+      }
+
+      const session = await specialistChatStorage.endChatSession(sessionId, notes, rating);
+
+      res.json({
+        success: true,
+        message: "Chat session ended successfully",
+        session
+      });
+    } catch (error) {
+      console.error("Error ending chat session:", error);
+      if (error.message === "Session not found") {
+        res.status(404).json({
+          success: false,
+          message: "Chat session not found"
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to end chat session"
+        });
+      }
+    }
+  });
+
+  // Get session by ID
+  app.get("/api/specialist-chat/session/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const session = await specialistChatStorage.getSessionById(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({
+          success: false,
+          message: "Session not found"
+        });
+      }
+
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching session:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch session"
+      });
+    }
+  });
+
+  // Check if customer has active session (for customer-side)
+  app.get("/api/specialist-chat/customer/:customerPhone/active", async (req, res) => {
+    try {
+      const { customerPhone } = req.params;
+      const session = await specialistChatStorage.getActiveSessionByPhone(customerPhone);
+      
+      if (!session) {
+        return res.json(null);
+      }
+
+      res.json(session);
+    } catch (error) {
+      console.error("Error checking customer active session:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to check customer session"
       });
     }
   });
