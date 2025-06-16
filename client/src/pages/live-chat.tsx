@@ -67,22 +67,6 @@ export default function LiveChat() {
     retry: false,
   });
 
-  // Auto-skip form for logged-in users
-  useEffect(() => {
-    if (currentUser && !isUserLoading) {
-      // User is logged in, skip form and use their info
-      setCustomerInfo({
-        firstName: currentUser.firstName || '',
-        lastName: currentUser.lastName || '',
-        phone: currentUser.phone || '',
-        foundInCrm: true,
-        crmName: `${currentUser.firstName} ${currentUser.lastName}`
-      });
-      // Skip directly to waiting for specialist
-      handleStartChat();
-    }
-  }, [currentUser, isUserLoading]);
-
   // Scroll to bottom of messages
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
@@ -217,6 +201,22 @@ export default function LiveChat() {
       }
     }, 2000);
   };
+
+  // Auto-skip form for logged-in users
+  useEffect(() => {
+    if (currentUser && !isUserLoading && step === 'form') {
+      // User is logged in, skip form and use their info
+      setCustomerInfo({
+        firstName: currentUser.firstName || '',
+        lastName: currentUser.lastName || '',
+        phone: currentUser.phone || '',
+        foundInCrm: true,
+        crmName: `${currentUser.firstName} ${currentUser.lastName}`
+      });
+      // Skip directly to waiting for specialist
+      handleStartChat();
+    }
+  }, [currentUser, isUserLoading, step]);
 
   // Send message
   const sendMessage = () => {
