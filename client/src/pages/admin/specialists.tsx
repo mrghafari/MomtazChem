@@ -274,6 +274,7 @@ export default function SpecialistsAdmin() {
       const response = await fetch('/api/admin/specialists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           ...data,
           expertise: data.expertise ? data.expertise.split(',').map(s => s.trim()) : []
@@ -312,6 +313,7 @@ export default function SpecialistsAdmin() {
       const response = await fetch(`/api/admin/specialists/${data.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           ...data,
           expertise: data.expertise ? data.expertise.split(',').map(s => s.trim()) : []
@@ -343,6 +345,7 @@ export default function SpecialistsAdmin() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/admin/specialists/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to delete specialist');
       return response.json();
