@@ -51,7 +51,7 @@ interface CorrespondenceEntry {
   id: string;
   specialistId: string;
   customerName: string;
-  customerEmail: string;
+  customerPhone: string;
   subject: string;
   message: string;
   channel: 'email' | 'chat' | 'phone';
@@ -137,8 +137,8 @@ export default function SpecialistsAdmin() {
     setCorrespondenceData(data);
   };
 
-  // Search correspondence by phone number
-  const searchCorrespondence = async () => {
+  // Search correspondence by phone number (localStorage implementation)
+  const searchCorrespondence = () => {
     if (!customerPhone.trim()) {
       toast({
         title: "Error",
@@ -148,34 +148,25 @@ export default function SpecialistsAdmin() {
       return;
     }
 
-    try {
-      const response = await fetch(`/api/correspondence/search?phone=${encodeURIComponent(customerPhone)}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setSearchResults(data);
-        toast({
-          title: "Success",
-          description: `Found ${data.length} correspondence entries`,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: data.message || "Failed to search correspondence",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to search correspondence",
-        variant: "destructive"
-      });
-    }
+    // Clean up expired entries first
+    cleanupExpiredEntries();
+
+    // Search for correspondence by phone number
+    const phoneResults = correspondenceData.filter(entry => 
+      entry.customerPhone?.includes(customerPhone) || 
+      entry.customerName.toLowerCase().includes(customerPhone.toLowerCase())
+    );
+
+    setSearchResults(phoneResults);
+    
+    toast({
+      title: "Search Complete",
+      description: `Found ${phoneResults.length} correspondence entries for this phone number`,
+    });
   };
 
-  // Add new correspondence entry
-  const addCorrespondenceEntry = async () => {
+  // Add new correspondence entry (localStorage implementation)
+  const addCorrespondenceEntry = () => {
     if (!selectedSpecialist || !newCorrespondence.customerName || !newCorrespondence.customerPhone || !newCorrespondence.message) {
       toast({
         title: "Error",
@@ -195,55 +186,41 @@ export default function SpecialistsAdmin() {
       return;
     }
 
-    try {
-      const response = await fetch('/api/correspondence', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerPhone: newCorrespondence.customerPhone,
-          customerName: newCorrespondence.customerName,
-          specialistId: selectedSpecialist,
-          specialistName: selectedSpec.name,
-          subject: newCorrespondence.subject,
-          message: newCorrespondence.message,
-          channel: newCorrespondence.channel,
-          type: newCorrespondence.type,
-        }),
-      });
+    const now = new Date();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Reset form
-        setNewCorrespondence({
-          customerName: '',
-          customerPhone: '',
-          subject: '',
-          message: '',
-          channel: 'email',
-          type: 'incoming'
-        });
+    const entry: CorrespondenceEntry = {
+      id: `correspondence_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      specialistId: selectedSpecialist,
+      customerName: newCorrespondence.customerName,
+      customerPhone: newCorrespondence.customerPhone,
+      subject: newCorrespondence.subject,
+      message: newCorrespondence.message,
+      channel: newCorrespondence.channel,
+      type: newCorrespondence.type,
+      status: 'active',
+      createdAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString()
+    };
 
-        toast({
-          title: "Success",
-          description: "Correspondence added successfully",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: data.message || "Failed to add correspondence",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add correspondence",
-        variant: "destructive"
-      });
-    }
+    const updatedData = [...correspondenceData, entry];
+    saveCorrespondence(updatedData);
+
+    // Reset form
+    setNewCorrespondence({
+      customerName: '',
+      customerPhone: '',
+      subject: '',
+      message: '',
+      channel: 'email',
+      type: 'incoming'
+    });
+
+    toast({
+      title: "Success",
+      description: "Correspondence added successfully",
+    });
   };
 
   // Update correspondence status
@@ -956,9 +933,9 @@ export default function SpecialistsAdmin() {
                           
                           <div className="space-y-2">
                             <div className="flex items-center gap-4 text-sm">
-                              <span className="font-medium">{specialist?.name || 'نامشخص'}</span>
+                              <span className="font-medium">{specialist?.name || 'Unknown'}</span>
                               <span>{entry.customerName}</span>
-                              {entry.customerEmail && <span className="text-blue-600">{entry.customerEmail}</span>}
+                              {entry.customerPhone && <span className="text-blue-600">{entry.customerPhone}</span>}
                             </div>
                             
                             {entry.subject && (
