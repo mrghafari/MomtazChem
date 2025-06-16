@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { 
   MessageCircle, 
   Send, 
@@ -59,6 +60,28 @@ export default function LiveChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Check if user is logged in
+  const { data: currentUser, isLoading: isUserLoading } = useQuery({
+    queryKey: ["/api/customers/me"],
+    retry: false,
+  });
+
+  // Auto-skip form for logged-in users
+  useEffect(() => {
+    if (currentUser && !isUserLoading) {
+      // User is logged in, skip form and use their info
+      setCustomerInfo({
+        firstName: currentUser.firstName || '',
+        lastName: currentUser.lastName || '',
+        phone: currentUser.phone || '',
+        foundInCrm: true,
+        crmName: `${currentUser.firstName} ${currentUser.lastName}`
+      });
+      // Skip directly to waiting for specialist
+      handleStartChat();
+    }
+  }, [currentUser, isUserLoading]);
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {

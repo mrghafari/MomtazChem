@@ -178,7 +178,7 @@ export default function LiveChat() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center">
               <Headphones className="w-5 h-5 mr-2" />
-              {isConnected ? `گفتگو با ${currentSpecialist?.name}` : "پشتیبانی آنلاین"}
+              {isConnected ? `گفتگو با ${currentSpecialist?.name}` : "Live Chat"}
             </CardTitle>
             <Button
               variant="ghost"
