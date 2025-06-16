@@ -193,10 +193,10 @@ export default function SpecialistChat() {
 
   // Filter sessions by specialist
   const getSpecialistSessions = () => {
-    if (!selectedSpecialist) return activeSessions;
-    return activeSessions.filter((session: SpecialistChatSession) => 
+    if (!selectedSpecialist) return Array.isArray(activeSessions) ? activeSessions : [];
+    return Array.isArray(activeSessions) ? activeSessions.filter((session: SpecialistChatSession) => 
       session.specialistId === selectedSpecialist
-    );
+    ) : [];
   };
 
   const formatTime = (date: Date) => {
@@ -237,7 +237,7 @@ export default function SpecialistChat() {
                 className="w-full p-2 border rounded-md"
               >
                 <option value="">All Specialists</option>
-                {specialists.map((specialist: any) => (
+                {Array.isArray(specialists) && specialists.map((specialist: any) => (
                   <option key={specialist.id} value={specialist.id}>
                     {specialist.name} - {specialist.department}
                   </option>
