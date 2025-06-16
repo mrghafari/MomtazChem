@@ -14,6 +14,7 @@ import { emailStorage } from "./email-storage";
 import { correspondenceStorage } from "./correspondence-storage";
 import { crmStorage } from "./crm-storage";
 import { specialistChatStorage } from "./specialist-chat-storage";
+import { liveChatStorage } from "./live-chat-storage-simple";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCrmCustomerSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
