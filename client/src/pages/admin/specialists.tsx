@@ -486,14 +486,14 @@ export default function SpecialistsAdmin() {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingSpecialist ? "ویرایش کارشناس" : "افزودن کارشناس جدید"}
-              </DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingSpecialist ? "ویرایش کارشناس" : "افزودن کارشناس جدید"}
+                </DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="name"
