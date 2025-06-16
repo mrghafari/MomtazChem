@@ -199,6 +199,62 @@ export const insertSpecialistSchema = createInsertSchema(specialists).omit({
 export type InsertSpecialist = z.infer<typeof insertSpecialistSchema>;
 export type Specialist = typeof specialists.$inferSelect;
 
+// Specialist correspondence storage for one month retention
+export const specialistCorrespondence = pgTable("specialist_correspondence", {
+  id: serial("id").primaryKey(),
+  specialistId: text("specialist_id").notNull().references(() => specialists.id),
+  customerId: integer("customer_id"), // Optional: link to customer if applicable
+  customerEmail: text("customer_email"),
+  customerName: text("customer_name"),
+  messageType: text("message_type").notNull(), // "incoming", "outgoing", "internal_note"
+  subject: text("subject"),
+  messageContent: text("message_content").notNull(),
+  channel: text("channel").notNull(), // "email", "chat", "phone", "internal"
+  priority: text("priority").default("normal"), // "low", "normal", "high", "urgent"
+  status: text("status").default("active"), // "active", "resolved", "archived"
+  tags: json("tags").$type<string[]>().default([]),
+  attachments: json("attachments").$type<string[]>().default([]),
+  responseTime: integer("response_time"), // Response time in minutes
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: timestamp("follow_up_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+// Correspondence threads for tracking conversation chains
+export const correspondenceThreads = pgTable("correspondence_threads", {
+  id: serial("id").primaryKey(),
+  threadId: text("thread_id").notNull().unique(),
+  specialistId: text("specialist_id").notNull().references(() => specialists.id),
+  customerIdentifier: text("customer_identifier"), // Email or customer ID
+  subject: text("subject").notNull(),
+  status: text("status").default("open"), // "open", "closed", "pending"
+  priority: text("priority").default("normal"),
+  messageCount: integer("message_count").default(0),
+  lastMessageAt: timestamp("last_message_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export const insertSpecialistCorrespondenceSchema = createInsertSchema(specialistCorrespondence).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  expiresAt: true,
+});
+
+export const insertCorrespondenceThreadSchema = createInsertSchema(correspondenceThreads).omit({
+  id: true,
+  createdAt: true,
+  expiresAt: true,
+});
+
+export type InsertSpecialistCorrespondence = z.infer<typeof insertSpecialistCorrespondenceSchema>;
+export type SpecialistCorrespondence = typeof specialistCorrespondence.$inferSelect;
+export type InsertCorrespondenceThread = z.infer<typeof insertCorrespondenceThreadSchema>;
+export type CorrespondenceThread = typeof correspondenceThreads.$inferSelect;
+
 // Leads table for CRM system
 export const leads = pgTable("leads", {
   id: serial("id").primaryKey(),
