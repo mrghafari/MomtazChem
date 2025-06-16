@@ -430,6 +430,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // CRM PHONE LOOKUP FOR LIVE CHAT
+  // =============================================================================
+
+  // Search CRM customers by phone number (for live chat)
+  app.get('/api/crm/customers/search', async (req, res) => {
+    try {
+      const { phone } = req.query;
+      
+      if (!phone || typeof phone !== 'string') {
+        return res.status(400).json([]);
+      }
+      
+      const customers = await crmStorage.searchCrmCustomers(phone);
+      res.json(customers);
+    } catch (error) {
+      console.error('Error searching CRM customers by phone:', error);
+      res.json([]);
+    }
+  });
+
+  // =============================================================================
   // CORRESPONDENCE ROUTES (Monthly tracking with phone lookup)
   // =============================================================================
   

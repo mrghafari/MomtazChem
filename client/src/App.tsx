@@ -40,6 +40,7 @@ import QuotePage from "@/pages/quote";
 import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
 import GuestChat from "@/pages/guest-chat";
+import LiveChat from "@/pages/live-chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -82,6 +83,7 @@ function Router() {
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/quote" component={QuotePage} />
           <Route path="/chat" component={GuestChat} />
+          <Route path="/live-chat" component={LiveChat} />
           <Route component={NotFound} />
         </Switch>
       </main>
