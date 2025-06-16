@@ -319,8 +319,8 @@ const AgriculturalFertilizersPage = () => {
         </div>
       </section>
 
-      {/* Live Chat Support */}
-      <LiveChat />
+
+
     </div>
   );
 };

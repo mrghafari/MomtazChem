@@ -326,8 +326,8 @@ const FuelAdditives = () => {
         </div>
       </section>
 
-      {/* Live Chat Support */}
-      <LiveChat />
+
+
     </div>
   );
 };

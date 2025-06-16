@@ -282,8 +282,8 @@ const PaintThinnerPage = () => {
         </div>
       </section>
 
-      {/* Live Chat Support */}
-      <LiveChat />
+
+
     </div>
   );
 };
