@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
-import LiveChat from "@/components/ui/live-chat";
+
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 import MolecularHoverEffect from "@/components/ui/molecular-hover-effect";
 // import ProductInquiryForm from "@/components/product-inquiry-form";
