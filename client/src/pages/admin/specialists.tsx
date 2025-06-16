@@ -541,16 +541,16 @@ export default function SpecialistsAdmin() {
                         )}
                         {specialist.workingHours && (
                           <div className="text-sm">
-                            <strong>ساعات کاری:</strong> {specialist.workingHours}
+                            <strong>ساعات کاری:</strong> {typeof specialist.workingHours === 'string' ? specialist.workingHours : JSON.stringify(specialist.workingHours)}
                           </div>
                         )}
                       </div>
 
-                      {specialist.expertise && specialist.expertise.length > 0 && (
+                      {specialist.expertise && Array.isArray(specialist.expertise) && specialist.expertise.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {specialist.expertise.map((skill, index) => (
                             <Badge key={index} variant="secondary" className="text-xs">
-                              {skill}
+                              {typeof skill === 'string' ? skill : String(skill)}
                             </Badge>
                           ))}
                         </div>
@@ -601,9 +601,253 @@ export default function SpecialistsAdmin() {
         </TabsContent>
 
         <TabsContent value="correspondence" className="space-y-6">
-          <div className="text-center py-8 text-gray-500">
-            مکاتبات در حال توسعه است
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Add new correspondence */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="w-5 h-5" />
+                  ثبت مکاتبه جدید
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">انتخاب کارشناس</label>
+                  <Select value={selectedSpecialist || ""} onValueChange={setSelectedSpecialist}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="کارشناس را انتخاب کنید" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialists.map((spec) => (
+                        <SelectItem key={spec.id} value={spec.id}>
+                          {spec.name} - {spec.department}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">نام مشتری</label>
+                    <Input
+                      value={newCorrespondence.customerName}
+                      onChange={(e) => setNewCorrespondence(prev => ({ ...prev, customerName: e.target.value }))}
+                      placeholder="نام مشتری"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">ایمیل مشتری</label>
+                    <Input
+                      type="email"
+                      value={newCorrespondence.customerEmail}
+                      onChange={(e) => setNewCorrespondence(prev => ({ ...prev, customerEmail: e.target.value }))}
+                      placeholder="ایمیل مشتری"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">موضوع</label>
+                  <Input
+                    value={newCorrespondence.subject}
+                    onChange={(e) => setNewCorrespondence(prev => ({ ...prev, subject: e.target.value }))}
+                    placeholder="موضوع مکاتبه"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">کانال ارتباطی</label>
+                    <Select 
+                      value={newCorrespondence.channel} 
+                      onValueChange={(value: 'email' | 'chat' | 'phone') => 
+                        setNewCorrespondence(prev => ({ ...prev, channel: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="email">ایمیل</SelectItem>
+                        <SelectItem value="chat">چت آنلاین</SelectItem>
+                        <SelectItem value="phone">تلفن</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">نوع پیام</label>
+                    <Select 
+                      value={newCorrespondence.type} 
+                      onValueChange={(value: 'incoming' | 'outgoing') => 
+                        setNewCorrespondence(prev => ({ ...prev, type: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="incoming">دریافتی</SelectItem>
+                        <SelectItem value="outgoing">ارسالی</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">متن پیام</label>
+                  <Textarea
+                    value={newCorrespondence.message}
+                    onChange={(e) => setNewCorrespondence(prev => ({ ...prev, message: e.target.value }))}
+                    placeholder="متن پیام یا مکاتبه..."
+                    rows={4}
+                  />
+                </div>
+
+                <Button onClick={addCorrespondenceEntry} className="w-full">
+                  ثبت مکاتبه
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Statistics */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  آمار مکاتبات
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{correspondenceData.length}</div>
+                    <div className="text-sm text-gray-600">کل مکاتبات</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {correspondenceData.filter(c => c.status === 'active').length}
+                    </div>
+                    <div className="text-sm text-gray-600">فعال</div>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {correspondenceData.filter(c => c.status === 'resolved').length}
+                    </div>
+                    <div className="text-sm text-gray-600">حل شده</div>
+                  </div>
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-600">
+                      {correspondenceData.filter(c => {
+                        const expiryDate = new Date(c.expiresAt);
+                        const now = new Date();
+                        const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                        return daysLeft <= 7;
+                      }).length}
+                    </div>
+                    <div className="text-sm text-gray-600">منقضی در هفته</div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-medium">توزیع بر اساس کانال:</h4>
+                  {['email', 'chat', 'phone'].map(channel => {
+                    const count = correspondenceData.filter(c => c.channel === channel).length;
+                    const percentage = correspondenceData.length > 0 ? Math.round((count / correspondenceData.length) * 100) : 0;
+                    return (
+                      <div key={channel} className="flex items-center justify-between text-sm">
+                        <span>{channel === 'email' ? 'ایمیل' : channel === 'chat' ? 'چت' : 'تلفن'}</span>
+                        <span>{count} ({percentage}%)</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          {/* Correspondence List */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                لیست مکاتبات (ذخیره شده برای یک ماه)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {correspondenceData.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  هنوز مکاتبه‌ای ثبت نشده است
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {correspondenceData
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .map((entry) => {
+                      const specialist = specialists.find(s => s.id === entry.specialistId);
+                      const expiryDate = new Date(entry.expiresAt);
+                      const daysLeft = Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                      
+                      return (
+                        <div key={entry.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <Badge variant={entry.status === 'active' ? 'default' : 'secondary'}>
+                                {entry.status === 'active' ? 'فعال' : 'حل شده'}
+                              </Badge>
+                              <Badge variant="outline">
+                                {entry.channel === 'email' ? 'ایمیل' : entry.channel === 'chat' ? 'چت' : 'تلفن'}
+                              </Badge>
+                              <Badge variant={entry.type === 'incoming' ? 'destructive' : 'default'}>
+                                {entry.type === 'incoming' ? 'دریافتی' : 'ارسالی'}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-gray-500">
+                                {daysLeft > 0 ? `${daysLeft} روز باقی مانده` : 'منقضی شده'}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateCorrespondenceStatus(entry.id, entry.status === 'active' ? 'resolved' : 'active')}
+                              >
+                                {entry.status === 'active' ? 'حل شد' : 'فعال کن'}
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-4 text-sm">
+                              <span className="font-medium">{specialist?.name || 'نامشخص'}</span>
+                              <span>{entry.customerName}</span>
+                              {entry.customerEmail && <span className="text-blue-600">{entry.customerEmail}</span>}
+                            </div>
+                            
+                            {entry.subject && (
+                              <div className="font-medium text-gray-900">{entry.subject}</div>
+                            )}
+                            
+                            <div className="text-gray-700 text-sm bg-gray-50 p-3 rounded">
+                              {entry.message}
+                            </div>
+                            
+                            <div className="text-xs text-gray-500">
+                              {new Date(entry.createdAt).toLocaleDateString('fa-IR', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
