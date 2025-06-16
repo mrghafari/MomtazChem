@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, specialists, specialistCorrespondence, correspondenceThreads, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist, type SpecialistCorrespondence, type InsertSpecialistCorrespondence, type CorrespondenceThread, type InsertCorrespondenceThread } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, specialists, specialistCorrespondence, correspondenceThreads, guestChatSessions, chatMessages, chatThreads, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist, type SpecialistCorrespondence, type InsertSpecialistCorrespondence, type CorrespondenceThread, type InsertCorrespondenceThread, type GuestChatSession, type InsertGuestChatSession, type ChatMessage, type InsertChatMessage, type ChatThread, type InsertChatThread } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -69,6 +69,29 @@ export interface IStorage {
   updateSpecialist(id: string, specialist: Partial<InsertSpecialist>): Promise<Specialist>;
   updateSpecialistStatus(id: string, status: string): Promise<void>;
   deleteSpecialist(id: string): Promise<void>;
+
+  // Guest chat sessions
+  createGuestChatSession(session: InsertGuestChatSession): Promise<GuestChatSession>;
+  getGuestChatSession(sessionId: string): Promise<GuestChatSession | undefined>;
+  updateGuestChatSession(sessionId: string, updates: Partial<InsertGuestChatSession>): Promise<GuestChatSession>;
+  getActiveGuestSessions(): Promise<GuestChatSession[]>;
+  expireGuestSession(sessionId: string): Promise<void>;
+
+  // Chat messages
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  getChatMessages(sessionId: string, limit?: number): Promise<ChatMessage[]>;
+  markMessageAsRead(messageId: number): Promise<void>;
+  getChatMessagesByThread(threadId: string): Promise<ChatMessage[]>;
+
+  // Chat threads
+  createChatThread(thread: InsertChatThread): Promise<ChatThread>;
+  getChatThread(threadId: string): Promise<ChatThread | undefined>;
+  updateChatThread(threadId: string, updates: Partial<InsertChatThread>): Promise<ChatThread>;
+  getActiveChatThreads(specialistId?: string): Promise<ChatThread[]>;
+  closeChatThread(threadId: string): Promise<void>;
+
+  // Enhanced correspondence with guest chat integration
+  logGuestChatToCorrespondence(sessionId: string, specialistId: string, messageContent: string, messageType: 'incoming' | 'outgoing'): Promise<SpecialistCorrespondence>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -691,6 +714,188 @@ export class DatabaseStorage implements IStorage {
       pendingFollowUps: pendingFollowUps[0]?.count || 0,
       messagesByChannel: messagesByChannel || []
     };
+  }
+
+  // Guest chat session methods
+  async createGuestChatSession(sessionData: InsertGuestChatSession): Promise<GuestChatSession> {
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+    const [session] = await db
+      .insert(guestChatSessions)
+      .values({
+        ...sessionData,
+        expiresAt
+      })
+      .returning();
+    return session;
+  }
+
+  async getGuestChatSession(sessionId: string): Promise<GuestChatSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(guestChatSessions)
+      .where(and(
+        eq(guestChatSessions.sessionId, sessionId),
+        eq(guestChatSessions.isActive, true),
+        gt(guestChatSessions.expiresAt, new Date())
+      ));
+    return session;
+  }
+
+  async updateGuestChatSession(sessionId: string, updates: Partial<InsertGuestChatSession>): Promise<GuestChatSession> {
+    const [session] = await db
+      .update(guestChatSessions)
+      .set({
+        ...updates,
+        lastActiveAt: new Date()
+      })
+      .where(eq(guestChatSessions.sessionId, sessionId))
+      .returning();
+    return session;
+  }
+
+  async getActiveGuestSessions(): Promise<GuestChatSession[]> {
+    return await db
+      .select()
+      .from(guestChatSessions)
+      .where(and(
+        eq(guestChatSessions.isActive, true),
+        gt(guestChatSessions.expiresAt, new Date())
+      ))
+      .orderBy(desc(guestChatSessions.lastActiveAt));
+  }
+
+  async expireGuestSession(sessionId: string): Promise<void> {
+    await db
+      .update(guestChatSessions)
+      .set({ isActive: false })
+      .where(eq(guestChatSessions.sessionId, sessionId));
+  }
+
+  // Chat message methods
+  async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days retention
+    const [message] = await db
+      .insert(chatMessages)
+      .values({
+        ...messageData,
+        expiresAt
+      })
+      .returning();
+    return message;
+  }
+
+  async getChatMessages(sessionId: string, limit: number = 50): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.sessionId, sessionId))
+      .orderBy(desc(chatMessages.createdAt))
+      .limit(limit);
+  }
+
+  async markMessageAsRead(messageId: number): Promise<void> {
+    await db
+      .update(chatMessages)
+      .set({ isRead: true })
+      .where(eq(chatMessages.id, messageId));
+  }
+
+  async getChatMessagesByThread(threadId: string): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .innerJoin(chatThreads, eq(chatMessages.sessionId, chatThreads.sessionId))
+      .where(eq(chatThreads.threadId, threadId))
+      .orderBy(chatMessages.createdAt);
+  }
+
+  // Chat thread methods
+  async createChatThread(threadData: InsertChatThread): Promise<ChatThread> {
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days retention
+    const [thread] = await db
+      .insert(chatThreads)
+      .values({
+        ...threadData,
+        expiresAt
+      })
+      .returning();
+    return thread;
+  }
+
+  async getChatThread(threadId: string): Promise<ChatThread | undefined> {
+    const [thread] = await db
+      .select()
+      .from(chatThreads)
+      .where(eq(chatThreads.threadId, threadId));
+    return thread;
+  }
+
+  async updateChatThread(threadId: string, updates: Partial<InsertChatThread>): Promise<ChatThread> {
+    const [thread] = await db
+      .update(chatThreads)
+      .set(updates)
+      .where(eq(chatThreads.threadId, threadId))
+      .returning();
+    return thread;
+  }
+
+  async getActiveChatThreads(specialistId?: string): Promise<ChatThread[]> {
+    const conditions = [eq(chatThreads.status, 'active')];
+    if (specialistId) {
+      conditions.push(eq(chatThreads.specialistId, specialistId));
+    }
+
+    return await db
+      .select()
+      .from(chatThreads)
+      .where(and(...conditions))
+      .orderBy(desc(chatThreads.lastMessageAt));
+  }
+
+  async closeChatThread(threadId: string): Promise<void> {
+    await db
+      .update(chatThreads)
+      .set({ 
+        status: 'closed',
+        closedAt: new Date()
+      })
+      .where(eq(chatThreads.threadId, threadId));
+  }
+
+  // Enhanced correspondence with guest chat integration
+  async logGuestChatToCorrespondence(
+    sessionId: string, 
+    specialistId: string, 
+    messageContent: string, 
+    messageType: 'incoming' | 'outgoing'
+  ): Promise<SpecialistCorrespondence> {
+    // Get guest session details
+    const guestSession = await this.getGuestChatSession(sessionId);
+    if (!guestSession) {
+      throw new Error('Guest session not found');
+    }
+
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days retention
+    const [correspondence] = await db
+      .insert(specialistCorrespondence)
+      .values({
+        specialistId,
+        guestSessionId: sessionId,
+        customerName: `${guestSession.firstName} ${guestSession.lastName}`,
+        customerMobile: guestSession.mobile,
+        customerEmail: guestSession.email || undefined,
+        messageType,
+        subject: 'Live Chat Session',
+        messageContent,
+        channel: 'chat',
+        priority: 'normal',
+        status: 'active',
+        tags: ['guest-chat'],
+        attachments: [],
+        expiresAt
+      })
+      .returning();
+    return correspondence;
   }
 }
 

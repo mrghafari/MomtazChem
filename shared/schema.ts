@@ -199,13 +199,60 @@ export const insertSpecialistSchema = createInsertSchema(specialists).omit({
 export type InsertSpecialist = z.infer<typeof insertSpecialistSchema>;
 export type Specialist = typeof specialists.$inferSelect;
 
+// Guest chat sessions for unregistered users
+export const guestChatSessions = pgTable("guest_chat_sessions", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull().unique(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  mobile: text("mobile").notNull(),
+  email: text("email"), // Optional if provided later
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastActiveAt: timestamp("last_active_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(), // 24 hours from creation
+});
+
+// Chat messages for guest and customer conversations
+export const chatMessages = pgTable("chat_messages", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull(), // Links to guest session or customer session
+  specialistId: text("specialist_id").references(() => specialists.id),
+  messageContent: text("message_content").notNull(),
+  senderType: text("sender_type").notNull(), // "guest", "customer", "specialist"
+  senderName: text("sender_name"),
+  isRead: boolean("is_read").default(false),
+  attachments: json("attachments").$type<string[]>().default([]),
+  metadata: json("metadata").$type<Record<string, any>>().default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(), // 30 days retention
+});
+
+// Chat threads for organizing conversations
+export const chatThreads = pgTable("chat_threads", {
+  id: serial("id").primaryKey(),
+  threadId: text("thread_id").notNull().unique(),
+  sessionId: text("session_id").notNull(),
+  specialistId: text("specialist_id").references(() => specialists.id),
+  subject: text("subject"),
+  status: text("status").default("active"), // "active", "closed", "transferred"
+  priority: text("priority").default("normal"), // "low", "normal", "high", "urgent"
+  messageCount: integer("message_count").default(0),
+  lastMessageAt: timestamp("last_message_at"),
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  closedAt: timestamp("closed_at"),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
 // Specialist correspondence storage for one month retention
 export const specialistCorrespondence = pgTable("specialist_correspondence", {
   id: serial("id").primaryKey(),
   specialistId: text("specialist_id").notNull().references(() => specialists.id),
   customerId: integer("customer_id"), // Optional: link to customer if applicable
+  guestSessionId: text("guest_session_id"), // Link to guest session
   customerEmail: text("customer_email"),
   customerName: text("customer_name"),
+  customerMobile: text("customer_mobile"), // Added for guest users
   messageType: text("message_type").notNull(), // "incoming", "outgoing", "internal_note"
   subject: text("subject"),
   messageContent: text("message_content").notNull(),
@@ -237,6 +284,26 @@ export const correspondenceThreads = pgTable("correspondence_threads", {
   expiresAt: timestamp("expires_at").notNull(),
 });
 
+// Insert schemas for new chat tables
+export const insertGuestChatSessionSchema = createInsertSchema(guestChatSessions).omit({
+  id: true,
+  createdAt: true,
+  lastActiveAt: true,
+  expiresAt: true,
+});
+
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+  expiresAt: true,
+});
+
+export const insertChatThreadSchema = createInsertSchema(chatThreads).omit({
+  id: true,
+  startedAt: true,
+  expiresAt: true,
+});
+
 export const insertSpecialistCorrespondenceSchema = createInsertSchema(specialistCorrespondence).omit({
   id: true,
   createdAt: true,
@@ -250,6 +317,13 @@ export const insertCorrespondenceThreadSchema = createInsertSchema(correspondenc
   expiresAt: true,
 });
 
+// Export types
+export type InsertGuestChatSession = z.infer<typeof insertGuestChatSessionSchema>;
+export type GuestChatSession = typeof guestChatSessions.$inferSelect;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatThread = z.infer<typeof insertChatThreadSchema>;
+export type ChatThread = typeof chatThreads.$inferSelect;
 export type InsertSpecialistCorrespondence = z.infer<typeof insertSpecialistCorrespondenceSchema>;
 export type SpecialistCorrespondence = typeof specialistCorrespondence.$inferSelect;
 export type InsertCorrespondenceThread = z.infer<typeof insertCorrespondenceThreadSchema>;
