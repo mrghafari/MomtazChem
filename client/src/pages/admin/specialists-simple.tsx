@@ -186,19 +186,7 @@ export default function SpecialistsAdmin() {
     }
   };
 
-  const testCreateSpecialist = async () => {
-    try {
-      await createSpecialistMutation.mutateAsync({
-        name: "تست کارشناس",
-        email: `test${Date.now()}@example.com`,
-        department: "فنی",
-        phone: "09123456789",
-        expertise: ["تست"]
-      });
-    } catch (error) {
-      console.error('Test creation failed:', error);
-    }
-  };
+
 
   return (
     <div className="space-y-6">
@@ -211,14 +199,6 @@ export default function SpecialistsAdmin() {
         </div>
         
         <div className="flex gap-2">
-          <Button 
-            onClick={testCreateSpecialist}
-            variant="outline"
-            size="sm"
-          >
-            تست ایجاد کارشناس
-          </Button>
-          
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={openCreateDialog}>
