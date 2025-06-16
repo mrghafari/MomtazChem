@@ -21,18 +21,19 @@ import companyLogoPath from '@assets/company-logo.png';
 export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useLanguage();
 
   const navigation = [
-    { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
-    { href: '/services', label: 'Services' },
-    { href: '/contact', label: 'Contact' },
-    { href: '/shop', label: 'Shop' },
+    { href: '/', label: t.home },
+    { href: '/about', label: t.about },
+    { href: '/services', label: t.services },
+    { href: '/contact', label: t.contact },
+    { href: '/shop', label: t.shop },
   ];
 
   const productCategories = [
     {
-      title: "Fuel Additives",
+      title: t.fuelAdditives,
       href: "/products/fuel-additives",
       description: "High-performance fuel additives for enhanced engine efficiency",
       icon: <Beaker className="h-6 w-6" />,
@@ -42,7 +43,7 @@ export default function Header() {
       titleHover: "group-hover:text-blue-600 dark:group-hover:text-blue-400"
     },
     {
-      title: "Water Treatment",
+      title: t.waterTreatment,
       href: "/products/water-treatment", 
       description: "Comprehensive water treatment solutions for all applications",
       icon: <Droplet className="h-6 w-6" />,
@@ -52,7 +53,7 @@ export default function Header() {
       titleHover: "group-hover:text-cyan-600 dark:group-hover:text-cyan-400"
     },
     {
-      title: "Paint & Thinner",
+      title: t.paintThinner,
       href: "/products/paint-thinner",
       description: "Premium paint formulations and specialty thinners",
       icon: <Package className="h-6 w-6" />,
@@ -62,7 +63,7 @@ export default function Header() {
       titleHover: "group-hover:text-orange-600 dark:group-hover:text-orange-400"
     },
     {
-      title: "Agricultural Fertilizers", 
+      title: t.agriculturalFertilizers, 
       href: "/products/agricultural-fertilizers",
       description: "Advanced fertilizer solutions for sustainable farming",
       icon: <Wheat className="h-6 w-6" />,
@@ -138,7 +139,7 @@ export default function Header() {
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   )}>
-                    Products
+                    {t.products}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="!left-auto !right-0 !origin-top-right">
                     <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
@@ -178,6 +179,11 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
+            {/* Language Switcher - Desktop */}
+            <div className="hidden md:block">
+              <LanguageSwitcher />
+            </div>
+            
             {/* Mobile menu button */}
             <Button
               variant="ghost"
@@ -247,7 +253,7 @@ export default function Header() {
                         ? "text-blue-600 dark:text-blue-400"
                         : "text-gray-600 dark:text-gray-300"
                     )}>
-                      Products
+                      {t.products}
                     </div>
                     <div className="ml-4 space-y-1">
                       {productCategories.map((category, categoryIndex) => (
