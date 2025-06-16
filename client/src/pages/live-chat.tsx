@@ -205,16 +205,22 @@ export default function LiveChat() {
   // Auto-skip form for logged-in users
   useEffect(() => {
     if (currentUser && !isUserLoading && step === 'form') {
-      // User is logged in, skip form and use their info
-      setCustomerInfo({
-        firstName: currentUser.firstName || '',
-        lastName: currentUser.lastName || '',
-        phone: currentUser.phone || '',
-        foundInCrm: true,
-        crmName: `${currentUser.firstName} ${currentUser.lastName}`
-      });
-      // Skip directly to waiting for specialist
-      handleStartChat();
+      // Extract customer data from response
+      const customer = (currentUser as any).customer || currentUser;
+      console.log('Current user data:', customer); // Debug log
+      
+      if (customer && (customer.firstName || customer.lastName || customer.phone)) {
+        // User is logged in, skip form and use their info
+        setCustomerInfo({
+          firstName: customer.firstName || '',
+          lastName: customer.lastName || '',
+          phone: customer.phone || '',
+          foundInCrm: true,
+          crmName: `${customer.firstName || ''} ${customer.lastName || ''}`.trim()
+        });
+        // Skip directly to waiting for specialist
+        handleStartChat();
+      }
     }
   }, [currentUser, isUserLoading, step]);
 
