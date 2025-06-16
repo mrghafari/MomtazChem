@@ -428,14 +428,64 @@ export default function SpecialistsAdmin() {
           </p>
         </div>
         
-        <Dialog open={isAddDialogOpen || isEditDialogOpen} onOpenChange={handleCloseDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              افزودن کارشناس
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+        <div className="flex gap-2">
+          <Button 
+            onClick={async () => {
+              console.log('Testing direct API call...');
+              try {
+                const response = await fetch('/api/admin/specialists', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    name: "تست مستقیم",
+                    email: `test${Date.now()}@example.com`,
+                    department: "فنی",
+                    phone: "09123456789",
+                    expertise: ["تست"]
+                  }),
+                });
+                
+                console.log('Response status:', response.status);
+                const result = await response.text();
+                console.log('Response text:', result);
+                
+                if (response.ok) {
+                  toast({
+                    title: "موفق",
+                    description: "تست مستقیم API موفق بود!",
+                  });
+                  refetch();
+                } else {
+                  toast({
+                    title: "خطا",
+                    description: `تست API ناموفق: ${result}`,
+                    variant: "destructive",
+                  });
+                }
+              } catch (error) {
+                console.error('Direct API test error:', error);
+                toast({
+                  title: "خطا",
+                  description: `خطای شبکه: ${error}`,
+                  variant: "destructive",
+                });
+              }
+            }}
+            variant="outline"
+            size="sm"
+          >
+            تست API
+          </Button>
+          
+          <Dialog open={isAddDialogOpen || isEditDialogOpen} onOpenChange={handleCloseDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                افزودن کارشناس
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
                 {editingSpecialist ? "ویرایش کارشناس" : "افزودن کارشناس جدید"}
@@ -564,16 +614,17 @@ export default function SpecialistsAdmin() {
               </form>
             </Form>
           </DialogContent>
-        </Dialog>
-        
-        <Button 
-          variant="outline" 
-          onClick={cleanupExpiredEntries}
-          className="flex items-center gap-2"
-        >
-          <Archive className="w-4 h-4" />
-          پاکسازی منقضی شده
-        </Button>
+          </Dialog>
+          
+          <Button 
+            variant="outline" 
+            onClick={cleanupExpiredEntries}
+            className="flex items-center gap-2"
+          >
+            <Archive className="w-4 h-4" />
+            پاکسازی منقضی شده
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
