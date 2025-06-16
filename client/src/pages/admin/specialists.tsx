@@ -505,11 +505,11 @@ export default function SpecialistsAdmin() {
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="specialists" className="flex items-center gap-2 text-lg py-3">
             <Users className="w-5 h-5" />
-            مدیریت کارشناسان
+            Specialists Management
           </TabsTrigger>
           <TabsTrigger value="correspondence" className="flex items-center gap-2 text-lg py-3 bg-blue-50 data-[state=active]:bg-blue-100">
             <MessageSquare className="w-5 h-5" />
-            چت‌ها و مکاتبات ({correspondenceData.length})
+            Chats & Correspondence ({correspondenceData.length})
           </TabsTrigger>
         </TabsList>
 
@@ -607,15 +607,15 @@ export default function SpecialistsAdmin() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Plus className="w-5 h-5" />
-                  ثبت مکاتبه جدید
+                  Add New Correspondence
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">انتخاب کارشناس</label>
+                  <label className="block text-sm font-medium mb-2">Select Specialist</label>
                   <Select value={selectedSpecialist || ""} onValueChange={setSelectedSpecialist}>
                     <SelectTrigger>
-                      <SelectValue placeholder="کارشناس را انتخاب کنید" />
+                      <SelectValue placeholder="Choose a specialist" />
                     </SelectTrigger>
                     <SelectContent>
                       {specialists.map((spec) => (
@@ -629,36 +629,36 @@ export default function SpecialistsAdmin() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">نام مشتری</label>
+                    <label className="block text-sm font-medium mb-2">Customer Name</label>
                     <Input
                       value={newCorrespondence.customerName}
                       onChange={(e) => setNewCorrespondence(prev => ({ ...prev, customerName: e.target.value }))}
-                      placeholder="نام مشتری"
+                      placeholder="Customer name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">ایمیل مشتری</label>
+                    <label className="block text-sm font-medium mb-2">Customer Email</label>
                     <Input
                       type="email"
                       value={newCorrespondence.customerEmail}
                       onChange={(e) => setNewCorrespondence(prev => ({ ...prev, customerEmail: e.target.value }))}
-                      placeholder="ایمیل مشتری"
+                      placeholder="Customer email"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">موضوع</label>
+                  <label className="block text-sm font-medium mb-2">Subject</label>
                   <Input
                     value={newCorrespondence.subject}
                     onChange={(e) => setNewCorrespondence(prev => ({ ...prev, subject: e.target.value }))}
-                    placeholder="موضوع مکاتبه"
+                    placeholder="Correspondence subject"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">کانال ارتباطی</label>
+                    <label className="block text-sm font-medium mb-2">Communication Channel</label>
                     <Select 
                       value={newCorrespondence.channel} 
                       onValueChange={(value: 'email' | 'chat' | 'phone') => 
@@ -669,14 +669,14 @@ export default function SpecialistsAdmin() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="email">ایمیل</SelectItem>
-                        <SelectItem value="chat">چت آنلاین</SelectItem>
-                        <SelectItem value="phone">تلفن</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="chat">Live Chat</SelectItem>
+                        <SelectItem value="phone">Phone</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">نوع پیام</label>
+                    <label className="block text-sm font-medium mb-2">Message Type</label>
                     <Select 
                       value={newCorrespondence.type} 
                       onValueChange={(value: 'incoming' | 'outgoing') => 
@@ -687,25 +687,25 @@ export default function SpecialistsAdmin() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="incoming">دریافتی</SelectItem>
-                        <SelectItem value="outgoing">ارسالی</SelectItem>
+                        <SelectItem value="incoming">Incoming</SelectItem>
+                        <SelectItem value="outgoing">Outgoing</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">متن پیام</label>
+                  <label className="block text-sm font-medium mb-2">Message Content</label>
                   <Textarea
                     value={newCorrespondence.message}
                     onChange={(e) => setNewCorrespondence(prev => ({ ...prev, message: e.target.value }))}
-                    placeholder="متن پیام یا مکاتبه..."
+                    placeholder="Message content or correspondence..."
                     rows={4}
                   />
                 </div>
 
                 <Button onClick={addCorrespondenceEntry} className="w-full">
-                  ثبت مکاتبه
+                  Submit Correspondence
                 </Button>
               </CardContent>
             </Card>

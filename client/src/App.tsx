@@ -39,6 +39,7 @@ import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
 import QuotePage from "@/pages/quote";
 import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
+import GuestChat from "@/pages/guest-chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -80,6 +81,7 @@ function Router() {
           <Route path="/products/paint-thinner" component={PaintThinner} />
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/quote" component={QuotePage} />
+          <Route path="/chat" component={GuestChat} />
           <Route component={NotFound} />
         </Switch>
       </main>
