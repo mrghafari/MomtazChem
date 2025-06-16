@@ -29,6 +29,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     localStorage.setItem('language', language);
     document.documentElement.dir = direction;
     document.documentElement.lang = language;
+    document.documentElement.className = `lang-${language}`;
   }, [language, direction]);
 
   const value = {

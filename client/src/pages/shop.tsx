@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Shop = () => {
   const { toast } = useToast();
+  const { t, direction } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
@@ -185,7 +187,7 @@ const Shop = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading products...</p>
+            <p className="mt-4 text-gray-600">{t.loading}</p>
           </div>
         </div>
       </div>
@@ -198,7 +200,7 @@ const Shop = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">Chemical Products Shop</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t.shop}</h1>
             
             {/* User Account & Cart */}
             <div className="flex items-center gap-4">
@@ -223,7 +225,7 @@ const Shop = () => {
                         className="flex items-center gap-1"
                       >
                         <LogOut className="w-4 h-4" />
-                        Logout
+{t.logout}
                       </Button>
                     </div>
                   ) : (
@@ -234,7 +236,7 @@ const Shop = () => {
                       className="flex items-center gap-2"
                     >
                       <User className="w-4 h-4" />
-                      Login / Register
+{t.login} / {t.register}
                     </Button>
                   )}
                 </div>

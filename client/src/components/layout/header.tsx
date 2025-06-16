@@ -289,6 +289,19 @@ export default function Header() {
                   </div>
                 </motion.div>
 
+                {/* Language Switcher - Mobile */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
+                  className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
+                >
+                  <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                    Language
+                  </div>
+                  <LanguageSwitcher />
+                </motion.div>
+
               </nav>
             </motion.div>
           )}
