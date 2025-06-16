@@ -20,23 +20,30 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
-/* RTL layout fixes */
-[dir="rtl"] .flex {
+/* RTL text direction */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="ltr"] {
+  text-align: left;
+}
+
+/* RTL-specific utilities */
+.rtl-flex {
+  display: flex;
   flex-direction: row-reverse;
 }
 
-[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
-  margin-right: 0.5rem;
-  margin-left: 0;
+.ltr-flex {
+  display: flex;
+  flex-direction: row;
 }
 
-[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
-  margin-right: 1rem;
-  margin-left: 0;
-}
-
-[dir="rtl"] .gap-2 {
-  gap: 0.5rem;
+/* Better Arabic font rendering */
+.lang-ar {
+  font-feature-settings: "liga" 1, "kern" 1;
+  text-rendering: optimizeLegibility;
 }
 
 /* RTL spacing utilities */

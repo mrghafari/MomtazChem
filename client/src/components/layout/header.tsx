@@ -21,7 +21,7 @@ import companyLogoPath from '@assets/company-logo.png';
 export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t, direction } = useLanguage();
 
   const navigation = [
     { href: '/', label: t.home },
@@ -88,7 +88,7 @@ export default function Header() {
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center space-x-2 rtl:space-x-reverse"
+              className="flex items-center gap-2"
             >
               <img 
                 src={companyLogoPath} 
@@ -102,7 +102,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
+          <nav className="hidden md:flex items-center gap-6">
             {navigation.map((item) => (
               <Link key={item.href} href={item.href}>
                 <motion.span
@@ -178,7 +178,7 @@ export default function Header() {
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             {/* Language Switcher - Desktop */}
             <div className="hidden md:block">
               <LanguageSwitcher />
