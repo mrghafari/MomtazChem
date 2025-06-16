@@ -39,7 +39,11 @@ interface Specialist {
   expertise?: string[];
   isActive?: boolean;
   lastActive?: string;
-  workingHours?: string;
+  workingHours?: string | {
+    start: string;
+    end: string;
+    days?: string[];
+  };
   bio?: string;
 }
 
@@ -315,6 +319,14 @@ export default function SpecialistsAdmin() {
 
   const handleEdit = (specialist: Specialist) => {
     setEditingSpecialist(specialist);
+    
+    // Convert workingHours to string format for the form
+    const workingHoursString = typeof specialist.workingHours === 'string' 
+      ? specialist.workingHours 
+      : typeof specialist.workingHours === 'object' && specialist.workingHours !== null
+        ? `${(specialist.workingHours as any).start || '08:00'} - ${(specialist.workingHours as any).end || '17:00'}`
+        : "08:00 - 17:00";
+    
     form.reset({
       name: specialist.name,
       email: specialist.email,
@@ -323,7 +335,7 @@ export default function SpecialistsAdmin() {
       status: specialist.status || "online",
       expertise: specialist.expertise?.join(', ') || "",
       bio: specialist.bio || "",
-      workingHours: specialist.workingHours || "9:00 - 17:00",
+      workingHours: workingHoursString,
     });
     setIsEditDialogOpen(true);
   };
@@ -455,9 +467,9 @@ export default function SpecialistsAdmin() {
                   name="workingHours"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ساعات کاری</FormLabel>
+                      <FormLabel>Working Hours</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="9:00 - 17:00" />
+                        <Input {...field} placeholder="08:00 - 17:00, Monday-Friday" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -469,9 +481,9 @@ export default function SpecialistsAdmin() {
                   name="bio"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>بیوگرافی</FormLabel>
+                      <FormLabel>Biography</FormLabel>
                       <FormControl>
-                        <Textarea {...field} placeholder="توضیحات کوتاه در مورد کارشناس" />
+                        <Textarea {...field} placeholder="Brief description about the specialist" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -541,7 +553,13 @@ export default function SpecialistsAdmin() {
                         )}
                         {specialist.workingHours && (
                           <div className="text-sm">
-                            <strong>ساعات کاری:</strong> {typeof specialist.workingHours === 'string' ? specialist.workingHours : JSON.stringify(specialist.workingHours)}
+                            <strong>Working Hours:</strong> {
+                              typeof specialist.workingHours === 'string' 
+                                ? specialist.workingHours 
+                                : typeof specialist.workingHours === 'object' && specialist.workingHours !== null
+                                  ? `${(specialist.workingHours as any).start || '08:00'} - ${(specialist.workingHours as any).end || '17:00'}`
+                                  : 'Not specified'
+                            }
                           </div>
                         )}
                       </div>
