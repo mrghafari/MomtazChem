@@ -16,7 +16,7 @@ interface ChatLog {
 }
 
 export default function ChatLogs() {
-  const { data: chats = [], isLoading } = useQuery<{ success: boolean; chats: ChatLog[] }>({
+  const { data: chats, isLoading } = useQuery({
     queryKey: ['/api/chat/all?limit=200'],
   });
 
@@ -60,7 +60,7 @@ export default function ChatLogs() {
     );
   }
 
-  const chatData = chats.success ? chats.chats : [];
+  const chatData = (chats as any)?.success ? (chats as any).chats : [];
   const groupedChats = groupChatsByMobile(chatData);
 
   return (
