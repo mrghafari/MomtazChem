@@ -60,7 +60,7 @@ export default function GuestChat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleRegistration = async () => {
+  const handleRegistration = () => {
     if (!registrationData.firstName || !registrationData.lastName || !registrationData.mobile) {
       toast({
         title: "Incomplete Information",
@@ -81,51 +81,22 @@ export default function GuestChat() {
       return;
     }
 
-    try {
-      // Create guest chat session via API
-      const response = await fetch('/api/chat/session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registrationData),
-      });
+    const sessionId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const user: GuestUser = {
+      ...registrationData,
+      sessionId
+    };
 
-      const result = await response.json();
+    setGuestUser(user);
+    setIsRegistered(true);
+    
+    // Save to localStorage for session persistence
+    localStorage.setItem('guestChatUser', JSON.stringify(user));
 
-      if (result.success) {
-        const user: GuestUser = {
-          firstName: result.session.firstName,
-          lastName: result.session.lastName,
-          mobile: result.session.mobile,
-          sessionId: result.session.sessionId
-        };
-
-        setGuestUser(user);
-        setIsRegistered(true);
-        
-        // Save to localStorage for session persistence
-        localStorage.setItem('guestChatUser', JSON.stringify(user));
-
-        toast({
-          title: "Registration Successful",
-          description: "Welcome! Please select a specialist to start chatting.",
-        });
-      } else {
-        toast({
-          title: "Registration Failed",
-          description: result.message || "Unable to create chat session",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast({
-        title: "Registration Failed",
-        description: "Network error. Please try again.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Registration Successful",
+      description: "Welcome! Please select a specialist to start chatting.",
+    });
   };
 
   const selectSpecialist = (specialist: Specialist) => {
@@ -157,11 +128,12 @@ export default function GuestChat() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sessionId: guestUser.sessionId,
+          mobile: guestUser.mobile,
+          firstName: guestUser.firstName,
+          lastName: guestUser.lastName,
+          specialistId: selectedSpecialist.id,
           messageContent,
-          senderType: 'guest',
-          senderName: `${guestUser.firstName} ${guestUser.lastName}`,
-          specialistId: selectedSpecialist.id
+          senderType: 'user'
         }),
       });
 
@@ -169,10 +141,10 @@ export default function GuestChat() {
 
       if (result.success) {
         const message: ChatMessage = {
-          id: result.message.id.toString(),
+          id: result.chatLog.id.toString(),
           content: messageContent,
           sender: 'guest',
-          timestamp: new Date(result.message.createdAt)
+          timestamp: new Date(result.chatLog.createdAt)
         };
 
         setMessages(prev => [...prev, message]);
@@ -197,11 +169,12 @@ export default function GuestChat() {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                sessionId: guestUser.sessionId,
+                mobile: guestUser.mobile,
+                firstName: guestUser.firstName,
+                lastName: guestUser.lastName,
+                specialistId: selectedSpecialist.id,
                 messageContent: randomResponse,
-                senderType: 'specialist',
-                senderName: selectedSpecialist.name,
-                specialistId: selectedSpecialist.id
+                senderType: 'specialist'
               }),
             });
 
@@ -209,10 +182,10 @@ export default function GuestChat() {
 
             if (specialistResult.success) {
               const specialistMessage: ChatMessage = {
-                id: specialistResult.message.id.toString(),
+                id: specialistResult.chatLog.id.toString(),
                 content: randomResponse,
                 sender: 'specialist',
-                timestamp: new Date(specialistResult.message.createdAt),
+                timestamp: new Date(specialistResult.chatLog.createdAt),
                 specialistName: selectedSpecialist.name
               };
               
