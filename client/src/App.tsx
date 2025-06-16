@@ -91,7 +91,6 @@ function Router() {
         </Switch>
       </main>
       <Footer />
-      <LiveChatWidget />
     </div>
   );
 }
