@@ -367,9 +367,15 @@ export default function SpecialistsAdmin() {
   });
 
   const onSubmit = (data: SpecialistForm) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form errors:', form.formState.errors);
+    console.log('Is editing?', !!editingSpecialist);
+    
     if (editingSpecialist) {
+      console.log('Updating specialist:', editingSpecialist.id);
       updateSpecialistMutation.mutate({ ...data, id: editingSpecialist.id });
     } else {
+      console.log('Creating new specialist');
       createSpecialistMutation.mutate(data);
     }
   };
