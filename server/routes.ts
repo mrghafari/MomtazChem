@@ -4860,29 +4860,55 @@ ${procedure.content}
   app.post("/api/admin/specialists", requireAuth, async (req, res) => {
     try {
       const specialistData = req.body;
+      console.log('Received specialist data:', JSON.stringify(specialistData, null, 2));
       
       if (!specialistData.name || !specialistData.email || !specialistData.department) {
-        return res.status(400).json({ message: "Missing required fields" });
+        console.log('Missing required fields:', {
+          name: !!specialistData.name,
+          email: !!specialistData.email,
+          department: !!specialistData.department
+        });
+        return res.status(400).json({ message: "Missing required fields: name, email, and department are required" });
       }
 
       // Remove timestamp fields and let the database handle them
       const { createdAt, updatedAt, id, ...cleanSpecialistData } = specialistData;
+      
+      // Generate unique ID for specialist
+      const specialistId = `spec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const finalSpecialistData = {
+        ...cleanSpecialistData,
+        id: specialistId,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      console.log('Final specialist data to insert:', JSON.stringify(finalSpecialistData, null, 2));
 
       const [newSpecialist] = await db.insert(schema.specialists)
-        .values({
-          ...cleanSpecialistData,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
+        .values(finalSpecialistData)
         .returning();
 
+      console.log('Created specialist successfully:', newSpecialist);
       res.status(201).json(newSpecialist);
     } catch (error: any) {
       console.error("Error creating specialist:", error);
+      console.error("Error details:", {
+        code: error.code,
+        message: error.message,
+        detail: error.detail,
+        stack: error.stack
+      });
+      
       if (error.code === '23505') { // Unique violation
         res.status(409).json({ message: "Email already exists" });
       } else {
-        res.status(500).json({ message: "Failed to create specialist" });
+        res.status(500).json({ 
+          message: "Failed to create specialist",
+          error: error.message,
+          details: error.detail || 'No additional details'
+        });
       }
     }
   });

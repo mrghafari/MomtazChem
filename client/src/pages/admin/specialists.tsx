@@ -270,6 +270,7 @@ export default function SpecialistsAdmin() {
 
   const createSpecialistMutation = useMutation({
     mutationFn: async (data: SpecialistForm) => {
+      console.log('Creating specialist with data:', data);
       const response = await fetch('/api/admin/specialists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -278,7 +279,13 @@ export default function SpecialistsAdmin() {
           expertise: data.expertise ? data.expertise.split(',').map(s => s.trim()) : []
         }),
       });
-      if (!response.ok) throw new Error('Failed to create specialist');
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Specialist creation failed:', response.status, errorData);
+        throw new Error(`Failed to create specialist: ${response.status} ${errorData}`);
+      }
+      
       return response.json();
     },
     onSuccess: () => {
@@ -291,9 +298,10 @@ export default function SpecialistsAdmin() {
       });
     },
     onError: (error) => {
+      console.error('Specialist creation error:', error);
       toast({
         title: "خطا",
-        description: "خطا در اضافه کردن کارشناس",
+        description: `خطا در اضافه کردن کارشناس: ${error.message}`,
         variant: "destructive",
       });
     },
