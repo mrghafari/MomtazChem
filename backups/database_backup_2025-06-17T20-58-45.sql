@@ -2530,6 +2530,7 @@ COPY public.customer_activities (id, customer_id, activity_type, activity_data, 
 70	6	login	{"source":"website","loginDate":"2025-06-16T15:38:32.364Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}	مشتری وارد فروشگاه آنلاین شد	\N	\N	\N	2025-06-16 15:38:32.375669
 71	6	login	{"source":"website","loginDate":"2025-06-17T18:07:37.287Z","userAgent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"}	مشتری وارد فروشگاه آنلاین شد	\N	\N	\N	2025-06-17 18:07:37.299892
 72	6	order_placed	{"orderId":20,"totalAmount":99.8675,"itemCount":1,"source":"website","orderDate":"2025-06-17T18:08:03.074Z"}	سفارش جدید به مبلغ $99.8675 ثبت شد	\N	20	\N	2025-06-17 18:08:03.233045
+73	6	login	{"source":"website","loginDate":"2025-06-17T20:55:01.404Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}	مشتری وارد فروشگاه آنلاین شد	\N	\N	\N	2025-06-17 20:55:01.415108
 \.
 
 
@@ -3189,7 +3190,7 @@ SELECT pg_catalog.setval('public.crm_customers_id_seq', 7, true);
 -- Name: customer_activities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.customer_activities_id_seq', 72, true);
+SELECT pg_catalog.setval('public.customer_activities_id_seq', 73, true);
 
 
 --

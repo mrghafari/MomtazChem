@@ -1060,8 +1060,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { filename } = req.params;
       
-      // Security check - only allow .sql files and prevent directory traversal
-      if (!filename.endsWith('.sql') || filename.includes('..') || filename.includes('/')) {
+      // Security check - only allow .sql and .sql.gz files and prevent directory traversal
+      if ((!filename.endsWith('.sql') && !filename.endsWith('.sql.gz')) || filename.includes('..') || filename.includes('/')) {
         return res.status(400).json({
           success: false,
           message: 'Invalid filename'
@@ -1097,8 +1097,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { filename } = req.params;
       
-      // Security check - only allow .sql files and prevent directory traversal
-      if (!filename.endsWith('.sql') || filename.includes('..') || filename.includes('/')) {
+      // Security check - only allow .sql and .sql.gz files and prevent directory traversal
+      if ((!filename.endsWith('.sql') && !filename.endsWith('.sql.gz')) || filename.includes('..') || filename.includes('/')) {
         return res.status(400).json({
           success: false,
           message: 'Invalid filename'
