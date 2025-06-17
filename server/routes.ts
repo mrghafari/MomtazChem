@@ -4193,37 +4193,41 @@ ${procedure.content}
       }
 
       if (format === 'csv') {
-        // Generate CSV
+        // Generate CSV with proper UTF-8 encoding for Arabic/Persian text
         const csvHeaders = [
-          'Order Number', 'Order Date', 'Customer Name', 'Customer Email',
-          'Product Name', 'Quantity', 'Unit Price', 'Item Total',
-          'Order Status', 'Payment Status', 'Subtotal', 'Tax Amount',
-          'Shipping Amount', 'Total Amount', 'Currency'
+          'رقم الطلب', 'تاريخ الطلب', 'اسم العميل', 'البريد الإلكتروني',
+          'اسم المنتج', 'الكمية', 'سعر الوحدة', 'إجمالي البند',
+          'حالة الطلب', 'حالة الدفع', 'المجموع الفرعي', 'مبلغ الضريبة',
+          'مبلغ الشحن', 'المبلغ الإجمالي', 'العملة'
         ].join(',');
         
         const csvRows = reportData.map(row => [
-          row.orderNumber,
-          row.orderDate,
+          `"${row.orderNumber}"`,
+          `"${row.orderDate}"`,
           `"${row.customerName}"`,
-          row.customerEmail,
+          `"${row.customerEmail}"`,
           `"${row.productName}"`,
           row.quantity,
           row.unitPrice.toFixed(2),
           row.itemTotal.toFixed(2),
-          row.orderStatus,
-          row.paymentStatus,
+          `"${row.orderStatus}"`,
+          `"${row.paymentStatus}"`,
           row.subtotal.toFixed(2),
           row.taxAmount.toFixed(2),
           row.shippingAmount.toFixed(2),
           row.totalAmount.toFixed(2),
-          row.currency
+          `"${row.currency}"`
         ].join(','));
         
         const csvContent = [csvHeaders, ...csvRows].join('\n');
         
-        res.setHeader('Content-Type', 'text/csv');
+        // Add UTF-8 BOM (Byte Order Mark) for proper Excel encoding
+        const bom = '\uFEFF';
+        const csvWithBom = bom + csvContent;
+        
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="sales-report-${new Date().toISOString().split('T')[0]}.csv"`);
-        res.send(csvContent);
+        res.send(Buffer.from(csvWithBom, 'utf8'));
       } else {
         // Return JSON for other formats or direct download
         res.json({
