@@ -2547,9 +2547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       // In a real app, you would send an email here
-      // For now, we'll log it for development
-      console.log(`Password reset token for ${email}: ${token}`);
-      console.log(`Reset link: ${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${token}`);
+      // TODO: Implement email sending functionality
 
       res.json({
         success: true,
