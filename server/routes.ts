@@ -3778,8 +3778,8 @@ ${procedure.content}
       const totalOrders = filteredOrders.length;
 
       // Get detailed order items for product analysis
-      const productSalesMap = new Map();
-      let totalQuantity = 0;
+      const productSalesMap = new Map<string, { productName: string; quantity: number; totalAmount: number; orders: Set<number> }>();
+      let totalQuantity: number = 0;
 
       for (const order of filteredOrders) {
         const items = await customerStorage.getOrderItems(order.id);
@@ -3793,10 +3793,10 @@ ${procedure.content}
             orders: new Set()
           };
           
-          existing.quantity += item.quantity;
-          existing.totalAmount += parseFloat(String(item.unitPrice)) * item.quantity;
+          existing.quantity += Number(item.quantity);
+          existing.totalAmount += parseFloat(String(item.unitPrice)) * Number(item.quantity);
           existing.orders.add(order.id);
-          totalQuantity += item.quantity;
+          totalQuantity += Number(item.quantity);
           
           productSalesMap.set(key, existing);
         }
