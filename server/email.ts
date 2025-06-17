@@ -44,6 +44,13 @@ export interface ContactFormData {
   message: string;
 }
 
+export interface PasswordResetData {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  token: string;
+}
+
 export async function sendContactEmail(formData: ContactFormData): Promise<void> {
   try {
     const transporter = await createTransporter('admin');
