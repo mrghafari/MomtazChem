@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { 
   Database, 
   Download, 
@@ -15,7 +16,8 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
-  ArrowLeft
+  ArrowLeft,
+  Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -72,6 +74,25 @@ export default function DatabaseManagement() {
         description: "مشکلی در ایجاد بک‌آپ رخ داده است",
       });
       setIsCreatingBackup(false);
+    },
+  });
+
+  // Delete backup mutation
+  const deleteBackupMutation = useMutation({
+    mutationFn: (filename: string) => apiRequest(`/api/admin/backup/delete/${filename}`, "DELETE"),
+    onSuccess: (_, filename) => {
+      toast({
+        title: "بک‌آپ حذف شد",
+        description: `فایل ${filename} با موفقیت حذف شد`,
+      });
+      refetchBackups();
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "خطا در حذف بک‌آپ",
+        description: "مشکلی در حذف فایل بک‌آپ رخ داده است",
+      });
     },
   });
 
@@ -209,15 +230,47 @@ export default function DatabaseManagement() {
                       </span>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownloadBackup(backup.filename)}
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    دانلود
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownloadBackup(backup.filename)}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      دانلود
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2 text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          حذف
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>حذف فایل بک‌آپ</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            آیا مطمئن هستید که می‌خواهید فایل بک‌آپ "{backup.filename}" را حذف کنید؟ این عمل قابل بازگشت نیست.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>لغو</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteBackupMutation.mutate(backup.filename)}
+                            className="bg-red-600 hover:bg-red-700"
+                            disabled={deleteBackupMutation.isPending}
+                          >
+                            {deleteBackupMutation.isPending ? "در حال حذف..." : "حذف"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
               ))}
             </div>

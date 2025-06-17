@@ -1094,6 +1094,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete database backup
+  app.delete("/api/admin/backup/delete/:filename", requireAuth, async (req, res) => {
+    try {
+      const { filename } = req.params;
+      const path = require('path');
+      const fs = require('fs');
+      
+      // Security check - only allow .sql files and prevent directory traversal
+      if (!filename.endsWith('.sql') || filename.includes('..') || filename.includes('/')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid filename'
+        });
+      }
+      
+      const backupPath = path.join('./backups', filename);
+      
+      if (!fs.existsSync(backupPath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Backup file not found'
+        });
+      }
+      
+      // Delete the backup file
+      fs.unlinkSync(backupPath);
+      
+      res.json({
+        success: true,
+        message: 'Backup file deleted successfully'
+      });
+      
+    } catch (error) {
+      console.error("Error deleting backup:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // List available backups
   app.get("/api/admin/backup/list", requireAuth, async (req, res) => {
     try {
