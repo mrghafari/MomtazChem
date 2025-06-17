@@ -4566,6 +4566,62 @@ ${procedure.content}
     }
   });
 
+  // Create inquiry response (admin only)
+  app.post("/api/inquiries/:id/response", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid inquiry ID"
+        });
+      }
+
+      const { responseText, responseType = 'follow_up' } = req.body;
+      
+      if (!responseText?.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Response text is required"
+        });
+      }
+
+      // Get the inquiry first to verify it exists
+      const inquiry = await simpleCustomerStorage.getInquiryById(id);
+      if (!inquiry) {
+        return res.status(404).json({
+          success: false,
+          message: "Inquiry not found"
+        });
+      }
+
+      // Create the response
+      const response = await simpleCustomerStorage.createInquiryResponse({
+        inquiryId: id,
+        responseText,
+        responseType,
+        createdBy: req.session.adminId,
+      });
+
+      // Update inquiry status to 'in_progress' if it was 'open'
+      if (inquiry.status === 'open') {
+        await simpleCustomerStorage.updateInquiry(id, { status: 'in_progress' });
+      }
+
+      res.json({
+        success: true,
+        message: "Response sent successfully",
+        response
+      });
+    } catch (error) {
+      console.error("Error creating inquiry response:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create response"
+      });
+    }
+  });
+
   // Quote request routes (public)
   app.post("/api/quote-requests", async (req, res) => {
     try {
