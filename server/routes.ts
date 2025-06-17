@@ -4195,39 +4195,48 @@ ${procedure.content}
       if (format === 'csv') {
         // Generate CSV with proper UTF-8 encoding for Arabic/Persian text
         const csvHeaders = [
-          'رقم الطلب', 'تاريخ الطلب', 'اسم العميل', 'البريد الإلكتروني',
-          'اسم المنتج', 'الكمية', 'سعر الوحدة', 'إجمالي البند',
-          'حالة الطلب', 'حالة الدفع', 'المجموع الفرعي', 'مبلغ الضريبة',
-          'مبلغ الشحن', 'المبلغ الإجمالي', 'العملة'
+          'Order Number', 'Order Date', 'Customer Name', 'Customer Email',
+          'Product Name', 'Quantity', 'Unit Price', 'Item Total',
+          'Order Status', 'Payment Status', 'Subtotal', 'Tax Amount',
+          'Shipping Amount', 'Total Amount', 'Currency'
         ].join(',');
         
-        const csvRows = reportData.map(row => [
-          `"${row.orderNumber}"`,
-          `"${row.orderDate}"`,
-          `"${row.customerName}"`,
-          `"${row.customerEmail}"`,
-          `"${row.productName}"`,
-          row.quantity,
-          row.unitPrice.toFixed(2),
-          row.itemTotal.toFixed(2),
-          `"${row.orderStatus}"`,
-          `"${row.paymentStatus}"`,
-          row.subtotal.toFixed(2),
-          row.taxAmount.toFixed(2),
-          row.shippingAmount.toFixed(2),
-          row.totalAmount.toFixed(2),
-          `"${row.currency}"`
-        ].join(','));
+        const csvRows = reportData.map(row => {
+          // Ensure all text fields are properly escaped and encoded
+          const escapeForCsv = (str) => {
+            if (str == null) return '';
+            return `"${String(str).replace(/"/g, '""')}"`;
+          };
+          
+          return [
+            escapeForCsv(row.orderNumber),
+            escapeForCsv(row.orderDate),
+            escapeForCsv(row.customerName),
+            escapeForCsv(row.customerEmail),
+            escapeForCsv(row.productName),
+            row.quantity,
+            row.unitPrice.toFixed(2),
+            row.itemTotal.toFixed(2),
+            escapeForCsv(row.orderStatus),
+            escapeForCsv(row.paymentStatus),
+            row.subtotal.toFixed(2),
+            row.taxAmount.toFixed(2),
+            row.shippingAmount.toFixed(2),
+            row.totalAmount.toFixed(2),
+            escapeForCsv(row.currency)
+          ].join(',');
+        });
         
-        const csvContent = [csvHeaders, ...csvRows].join('\n');
+        const csvContent = [csvHeaders, ...csvRows].join('\r\n');
         
-        // Add UTF-8 BOM (Byte Order Mark) for proper Excel encoding
-        const bom = '\uFEFF';
-        const csvWithBom = bom + csvContent;
+        // Add UTF-8 BOM for Excel compatibility with Arabic/Persian text
+        const bom = Buffer.from([0xEF, 0xBB, 0xBF]);
+        const csvBuffer = Buffer.from(csvContent, 'utf8');
+        const finalBuffer = Buffer.concat([bom, csvBuffer]);
         
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-        res.setHeader('Content-Disposition', `attachment; filename="sales-report-${new Date().toISOString().split('T')[0]}.csv"`);
-        res.send(Buffer.from(csvWithBom, 'utf8'));
+        res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''sales-report-${new Date().toISOString().split('T')[0]}.csv`);
+        res.send(finalBuffer);
       } else {
         // Return JSON for other formats or direct download
         res.json({
