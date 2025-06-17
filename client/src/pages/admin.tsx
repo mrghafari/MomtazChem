@@ -444,14 +444,7 @@ export default function AdminPage() {
             {syncProductsMutation.isPending ? 'Syncing...' : 'Sync Shop'}
           </Button>
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/specialists")}
-            className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
-          >
-            <User className="w-4 h-4 mr-2" />
-            Specialists
-          </Button>
+
           
           <Button 
             variant="outline"

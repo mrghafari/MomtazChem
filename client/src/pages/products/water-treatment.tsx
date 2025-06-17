@@ -340,7 +340,7 @@ const WaterTreatment = () => {
       </section>
 
       {/* Live Chat Support */}
-      <LiveChat />
+
     </div>
   );
 };

@@ -320,7 +320,7 @@ const AgriculturalFertilizersPage = () => {
       </section>
 
       {/* Live Chat Support */}
-      <LiveChat />
+
     </div>
   );
 };
