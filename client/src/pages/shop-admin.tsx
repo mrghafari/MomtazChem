@@ -449,8 +449,8 @@ ${data.data.map((item: any) =>
     return matchesStatus && matchesSearch;
   }) : [];
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateInput: string | Date) => {
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -604,7 +604,7 @@ ${data.data.map((item: any) =>
                               </Badge>
                             </div>
                             <p className="text-sm text-gray-600 mb-1">
-                              {formatDate(order.orderDate.toString())}
+                              {formatDate(order.createdAt.toString())}
                             </p>
                             {(order as any).customer && (
                               <p className="text-sm text-blue-600">
@@ -682,20 +682,71 @@ ${data.data.map((item: any) =>
           <TabsContent value="inventory">
             <Card>
               <CardHeader>
-                <CardTitle>Inventory Management</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    Inventory Management
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+                        toast({ title: "Refreshed", description: "Inventory data refreshed" });
+                      }}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refresh
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {products.map((product: any) => (
-                      <Card key={product.id} className="p-4">
-                        <h3 className="font-semibold">{product.name}</h3>
-                        <p className="text-sm text-gray-600">SKU: {product.sku}</p>
-                        <p className="text-sm">Stock: {product.stockQuantity}</p>
-                        <p className="text-sm">Price: ${product.price}</p>
-                      </Card>
-                    ))}
-                  </div>
+                  {products && products.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {products.map((product: any) => (
+                        <Card key={product.id} className="p-4 hover:shadow-md transition-shadow">
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between">
+                              <h3 className="font-semibold text-gray-900 leading-tight">{product.name}</h3>
+                              <Badge variant={product.isActive ? "default" : "secondary"}>
+                                {product.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-gray-600">SKU: <span className="font-medium">{product.sku}</span></p>
+                              <p className="text-gray-600">
+                                Stock: <span className={`font-medium ${
+                                  product.stockQuantity <= 10 ? 'text-red-600' : 
+                                  product.stockQuantity <= 50 ? 'text-orange-600' : 
+                                  'text-green-600'
+                                }`}>
+                                  {product.stockQuantity}
+                                </span>
+                              </p>
+                              <p className="text-gray-600">Price: <span className="font-medium text-green-600">${product.price}</span></p>
+                              {product.category && (
+                                <p className="text-gray-600">Category: <span className="font-medium">{product.category}</span></p>
+                              )}
+                            </div>
+                            {product.stockQuantity <= 10 && (
+                              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                                <p className="text-xs text-red-600 font-medium">Low Stock Alert</p>
+                              </div>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 text-lg">No products found</p>
+                      <p className="text-gray-400 text-sm">Add products to manage inventory</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -759,6 +810,18 @@ ${data.data.map((item: any) =>
                               }}
                             >
                               <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete the discount "${discount.name}"?`)) {
+                                  deleteDiscountMutation.mutate(discount.id);
+                                }
+                              }}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
