@@ -22,7 +22,9 @@ import {
   TrendingDown,
   RefreshCw,
   BarChart3,
-  CreditCard
+  CreditCard,
+  FileText,
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1020,6 +1022,181 @@ ${data.data.map((item: any) =>
             <SalesReport />
           </TabsContent>
         </Tabs>
+
+        {/* Order Details Dialog */}
+        {selectedOrder && (
+          <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Order Details - #{selectedOrder.orderNumber}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6">
+                {/* Customer Information */}
+                <div className="border rounded-lg p-4 bg-blue-50">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Customer Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Name</p>
+                      <p className="font-medium">
+                        {selectedOrder.customer?.firstName || 'N/A'} {selectedOrder.customer?.lastName || ''}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Email</p>
+                      <p className="font-medium">{selectedOrder.customer?.email || 'N/A'}</p>
+                    </div>
+                    {selectedOrder.customer?.phone && (
+                      <div>
+                        <p className="text-sm text-gray-600">Phone</p>
+                        <p className="font-medium">{selectedOrder.customer.phone}</p>
+                      </div>
+                    )}
+                    {selectedOrder.customer?.company && (
+                      <div>
+                        <p className="text-sm text-gray-600">Company</p>
+                        <p className="font-medium">{selectedOrder.customer.company}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Order Summary */}
+                <div className="border rounded-lg p-4 bg-green-50">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <ShoppingCart className="w-4 h-4" />
+                    Order Summary
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Order Date</p>
+                      <p className="font-medium">{formatDate(selectedOrder.createdAt)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Status</p>
+                      <Badge className={getStatusColor(selectedOrder.status)}>
+                        {selectedOrder.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Total Amount</p>
+                      <p className="font-bold text-lg text-green-600">${selectedOrder.totalAmount}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Items */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    Order Items ({selectedOrder.items?.length || 0})
+                  </h3>
+                  <div className="space-y-3">
+                    {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                      selectedOrder.items.map((item: any, index: number) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{item.productName || 'Product Name'}</p>
+                            <p className="text-sm text-gray-600">SKU: {item.productSku || 'N/A'}</p>
+                            <p className="text-sm text-blue-600">Unit Price: ${item.price || 0}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">Qty: {item.quantity || 1}</p>
+                            <p className="text-lg font-bold text-green-600">
+                              ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-6 text-gray-500">
+                        <Package className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p>No items found for this order</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Shipping Information */}
+                {(selectedOrder.shippingAddress || selectedOrder.shippingCity) && (
+                  <div className="border rounded-lg p-4 bg-orange-50">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Truck className="w-4 h-4" />
+                      Shipping Information
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {selectedOrder.shippingAddress && (
+                        <div>
+                          <p className="text-sm text-gray-600">Address</p>
+                          <p className="font-medium">{selectedOrder.shippingAddress}</p>
+                        </div>
+                      )}
+                      {selectedOrder.shippingCity && (
+                        <div>
+                          <p className="text-sm text-gray-600">City</p>
+                          <p className="font-medium">{selectedOrder.shippingCity}</p>
+                        </div>
+                      )}
+                      {selectedOrder.shippingCountry && (
+                        <div>
+                          <p className="text-sm text-gray-600">Country</p>
+                          <p className="font-medium">{selectedOrder.shippingCountry}</p>
+                        </div>
+                      )}
+                      {selectedOrder.postalCode && (
+                        <div>
+                          <p className="text-sm text-gray-600">Postal Code</p>
+                          <p className="font-medium">{selectedOrder.postalCode}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Payment Information */}
+                <div className="border rounded-lg p-4 bg-purple-50">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    Payment Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Payment Method</p>
+                      <p className="font-medium">
+                        {selectedOrder.paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 
+                         selectedOrder.paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' :
+                         selectedOrder.paymentMethod === 'company_credit' ? 'Company Credit' : 
+                         selectedOrder.paymentMethod || 'Not specified'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Payment Status</p>
+                      <Badge variant={selectedOrder.paymentStatus === 'paid' ? 'default' : 'secondary'}>
+                        {selectedOrder.paymentStatus || 'pending'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                {selectedOrder.notes && (
+                  <div className="border rounded-lg p-4 bg-yellow-50">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Order Notes
+                    </h3>
+                    <p className="text-gray-700 bg-white p-3 rounded border">{selectedOrder.notes}</p>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
