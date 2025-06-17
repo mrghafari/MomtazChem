@@ -1059,8 +1059,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/backup/download/:filename", requireAuth, async (req, res) => {
     try {
       const { filename } = req.params;
-      const path = require('path');
-      const fs = require('fs');
       
       // Security check - only allow .sql files and prevent directory traversal
       if (!filename.endsWith('.sql') || filename.includes('..') || filename.includes('/')) {
@@ -1098,8 +1096,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/backup/delete/:filename", requireAuth, async (req, res) => {
     try {
       const { filename } = req.params;
-      const path = require('path');
-      const fs = require('fs');
       
       // Security check - only allow .sql files and prevent directory traversal
       if (!filename.endsWith('.sql') || filename.includes('..') || filename.includes('/')) {
