@@ -33,6 +33,7 @@ import CustomerResetPassword from "@/pages/customer-reset-password";
 import CRMPage from "@/pages/crm";
 import CustomerProfile from "@/pages/customer-profile";
 import SalesAnalytics from "@/pages/sales-analytics";
+import Products from "@/pages/products";
 import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
@@ -76,6 +77,7 @@ function Router() {
           <Route path="/crm" component={CRMPage} />
           <Route path="/customer/profile" component={CustomerProfile} />
           <Route path="/analytics/sales" component={SalesAnalytics} />
+          <Route path="/products" component={Products} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />
           <Route path="/products/water-treatment" component={WaterTreatment} />
           <Route path="/products/paint-thinner" component={PaintThinner} />
