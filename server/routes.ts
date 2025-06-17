@@ -4598,9 +4598,10 @@ ${procedure.content}
       // Create the response
       const response = await simpleCustomerStorage.createInquiryResponse({
         inquiryId: id,
-        responseText,
-        responseType,
-        createdBy: req.session.adminId,
+        senderId: req.session.adminId,
+        senderType: 'admin',
+        message: responseText,
+        isInternal: false,
       });
 
       // Update inquiry status to 'in_progress' if it was 'open'

@@ -46,9 +46,12 @@ interface Inquiry {
 interface InquiryResponse {
   id: number;
   inquiryId: number;
-  responseText: string;
-  responseType: string;
-  createdBy: number;
+  senderId: number;
+  senderType: string;
+  message: string;
+  attachments?: any;
+  isInternal: boolean;
+  readAt?: string;
   createdAt: string;
 }
 
@@ -110,8 +113,7 @@ const InquiryDetail = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          responseText: followUpMessage,
-          responseType: 'follow_up'
+          responseText: followUpMessage
         }),
       });
 
@@ -290,14 +292,14 @@ const InquiryDetail = () => {
                             <User className="h-4 w-4 text-gray-400" />
                             <span className="font-medium text-gray-900">Support Team</span>
                             <Badge variant="outline" className="text-xs">
-                              {response.responseType}
+                              {response.senderType}
                             </Badge>
                           </div>
                           <span className="text-sm text-gray-500">
                             {format(new Date(response.createdAt), 'MMM dd, yyyy HH:mm')}
                           </span>
                         </div>
-                        <p className="text-gray-700 whitespace-pre-wrap">{response.responseText}</p>
+                        <p className="text-gray-700 whitespace-pre-wrap">{response.message}</p>
                       </div>
                     ))}
                   </div>
