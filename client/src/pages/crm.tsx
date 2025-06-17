@@ -158,6 +158,60 @@ export default function CRM() {
     }
   });
 
+  // Update customer mutation
+  const updateCustomerMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/crm/customers/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update customer");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "موفقیت", description: "اطلاعات مشتری با موفقیت بروزرسانی شد" });
+      queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
+      setIsEditCustomerDialogOpen(false);
+      setEditingCustomer(null);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "خطا", 
+        description: "خطا در بروزرسانی اطلاعات مشتری",
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Delete customer mutation
+  const deleteCustomerMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/crm/customers/${id}`, {
+        method: "DELETE"
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete customer");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "موفقیت", description: "مشتری با موفقیت حذف شد" });
+      queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "خطا", 
+        description: "خطا در حذف مشتری",
+        variant: "destructive" 
+      });
+    }
+  });
+
   const handleCreateCustomer = () => {
     if (!newCustomer.email || !newCustomer.firstName || !newCustomer.lastName) {
       toast({
@@ -168,6 +222,29 @@ export default function CRM() {
       return;
     }
     createCustomerMutation.mutate(newCustomer);
+  };
+
+  const handleEditCustomer = (customer: CrmCustomer) => {
+    setEditingCustomer(customer);
+    setIsEditCustomerDialogOpen(true);
+  };
+
+  const handleUpdateCustomer = () => {
+    if (!editingCustomer || !editingCustomer.email || !editingCustomer.firstName || !editingCustomer.lastName) {
+      toast({
+        title: "خطا",
+        description: "لطفاً فیلدهای ضروری را پر کنید",
+        variant: "destructive"
+      });
+      return;
+    }
+    updateCustomerMutation.mutate({ id: editingCustomer.id, data: editingCustomer });
+  };
+
+  const handleDeleteCustomer = (id: number) => {
+    if (confirm("آیا از حذف این مشتری اطمینان دارید؟")) {
+      deleteCustomerMutation.mutate(id);
+    }
   };
 
   const formatCurrency = (amount: string | number) => {
@@ -598,6 +675,109 @@ export default function CRM() {
                   <Label>تاریخ عضویت</Label>
                   <p className="font-medium">{formatDate(selectedCustomer.createdAt)}</p>
                 </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Customer Dialog */}
+      <Dialog open={isEditCustomerDialogOpen} onOpenChange={setIsEditCustomerDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>ویرایش مشتری</DialogTitle>
+            <DialogDescription>اطلاعات مشتری را ویرایش کنید</DialogDescription>
+          </DialogHeader>
+          {editingCustomer && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editFirstName">نام</Label>
+                  <Input
+                    id="editFirstName"
+                    value={editingCustomer.firstName}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, firstName: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editLastName">نام خانوادگی</Label>
+                  <Input
+                    id="editLastName"
+                    value={editingCustomer.lastName}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, lastName: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="editEmail">ایمیل</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={editingCustomer.email}
+                  onChange={(e) => setEditingCustomer({ ...editingCustomer, email: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="editCompany">شرکت</Label>
+                <Input
+                  id="editCompany"
+                  value={editingCustomer.company || ""}
+                  onChange={(e) => setEditingCustomer({ ...editingCustomer, company: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="editPhone">تلفن</Label>
+                <Input
+                  id="editPhone"
+                  value={editingCustomer.phone || ""}
+                  onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editCustomerType">نوع مشتری</Label>
+                  <Select value={editingCustomer.customerType} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerType: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="retail">خرده‌فروشی</SelectItem>
+                      <SelectItem value="wholesale">عمده‌فروشی</SelectItem>
+                      <SelectItem value="b2b">B2B</SelectItem>
+                      <SelectItem value="distributor">توزیع‌کننده</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="editCustomerStatus">وضعیت</Label>
+                  <Select value={editingCustomer.customerStatus} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerStatus: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">فعال</SelectItem>
+                      <SelectItem value="inactive">غیرفعال</SelectItem>
+                      <SelectItem value="vip">VIP</SelectItem>
+                      <SelectItem value="blacklisted">بلک‌لیست</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setIsEditCustomerDialogOpen(false)}>
+                  انصراف
+                </Button>
+                <Button 
+                  onClick={handleUpdateCustomer}
+                  disabled={updateCustomerMutation.isPending}
+                >
+                  {updateCustomerMutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
+                </Button>
               </div>
             </div>
           )}
