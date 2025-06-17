@@ -11,7 +11,7 @@ const createTransporter = async (categoryKey: string) => {
 
   const smtp = categorySettings.smtp;
   
-  return nodemailer.createTransport({
+  return nodemailer.createTransporter({
     host: smtp.host,
     port: smtp.port,
     secure: smtp.port === 465 ? true : false,
@@ -294,6 +294,7 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
     throw error;
   }
 }
+
 export async function sendPasswordResetEmail(resetData: PasswordResetData): Promise<void> {
   try {
     const transporter = await createTransporter('admin');
@@ -398,10 +399,6 @@ momtazchem.com
   }
 }
 
-
-
-
-// Quote Request Email Interface
 export interface QuoteRequestEmailData {
   to: string;
   subject: string;
@@ -417,7 +414,6 @@ export interface QuoteRequestEmailData {
   inquiryType: string;
 }
 
-// Send quote request email
 export async function sendQuoteRequestEmail(quoteData: QuoteRequestEmailData): Promise<void> {
   try {
     const transporter = await createTransporter('admin');
