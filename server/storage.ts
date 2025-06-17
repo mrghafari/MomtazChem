@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, specialists, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type Specialist, type InsertSpecialist } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -61,14 +61,7 @@ export interface IStorage {
     averageDealSize: number;
   }>;
   
-  // Specialist management
-  createSpecialist(specialist: InsertSpecialist): Promise<Specialist>;
-  getSpecialists(): Promise<Specialist[]>;
-  getOnlineSpecialists(): Promise<Specialist[]>;
-  getSpecialistById(id: string): Promise<Specialist | undefined>;
-  updateSpecialist(id: string, specialist: Partial<InsertSpecialist>): Promise<Specialist>;
-  updateSpecialistStatus(id: string, status: string): Promise<void>;
-  deleteSpecialist(id: string): Promise<void>;
+
 }
 
 export class DatabaseStorage implements IStorage {
@@ -454,57 +447,7 @@ export class DatabaseStorage implements IStorage {
     return contact || undefined;
   }
 
-  // Specialist management methods
-  async createSpecialist(insertSpecialist: InsertSpecialist): Promise<Specialist> {
-    const [specialist] = await db
-      .insert(specialists)
-      .values(insertSpecialist)
-      .returning();
-    return specialist;
-  }
 
-  async getSpecialists(): Promise<Specialist[]> {
-    return await db.select().from(specialists).orderBy(specialists.name);
-  }
-
-  async getOnlineSpecialists(): Promise<Specialist[]> {
-    return await db
-      .select()
-      .from(specialists)
-      .where(and(
-        eq(specialists.isActive, true),
-        or(
-          eq(specialists.status, "online"),
-          eq(specialists.status, "busy")
-        )
-      ))
-      .orderBy(specialists.name);
-  }
-
-  async getSpecialistById(id: string): Promise<Specialist | undefined> {
-    const [specialist] = await db.select().from(specialists).where(eq(specialists.id, id));
-    return specialist || undefined;
-  }
-
-  async updateSpecialist(id: string, updateData: Partial<InsertSpecialist>): Promise<Specialist> {
-    const [specialist] = await db
-      .update(specialists)
-      .set({ ...updateData, updatedAt: new Date() })
-      .where(eq(specialists.id, id))
-      .returning();
-    return specialist;
-  }
-
-  async updateSpecialistStatus(id: string, status: string): Promise<void> {
-    await db
-      .update(specialists)
-      .set({ status, updatedAt: new Date() })
-      .where(eq(specialists.id, id));
-  }
-
-  async deleteSpecialist(id: string): Promise<void> {
-    await db.delete(specialists).where(eq(specialists.id, id));
-  }
 }
 
 export const storage = new DatabaseStorage();
