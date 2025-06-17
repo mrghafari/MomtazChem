@@ -367,66 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/reset-password", async (req, res) => {
-    try {
-      const { token, newPassword } = req.body;
-      
-      if (!token || !newPassword) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Token and new password are required" 
-        });
-      }
 
-      // Verify reset token
-      const resetRecord = await storage.getPasswordResetByToken(token);
-      if (!resetRecord) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Invalid or expired reset token" 
-        });
-      }
-
-      // Check if token is expired
-      if (new Date() > resetRecord.expiresAt) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Reset token has expired" 
-        });
-      }
-
-      // Find user by email
-      const user = await storage.getUserByUsername(resetRecord.email);
-      if (!user) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "User not found" 
-        });
-      }
-
-      // Hash new password
-      const newPasswordHash = await bcrypt.hash(newPassword, 10);
-
-      // Update user password
-      await storage.updateUserPassword(user.id, newPasswordHash);
-
-      // Mark reset token as used
-      await storage.markPasswordResetAsUsed(token);
-
-      // Clean up expired tokens
-      await storage.cleanupExpiredResets();
-
-      res.json({ 
-        success: true, 
-        message: "Password reset successfully" 
-      });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: "Internal server error" 
-      });
-    }
-  });
 
   // Admin management endpoints
   app.get("/api/admin/users", requireAuth, async (req, res) => {
@@ -677,29 +618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test email endpoint
-  app.post("/api/test-email", async (req, res) => {
-    try {
-      const testData = {
-        firstName: "Test",
-        lastName: "User",
-        email: "test@example.com",
-        company: "Test Company",
-        productInterest: "Test Product",
-        message: "This is a test email message"
-      };
-      
-      await sendContactEmail(testData);
-      res.json({ success: true, message: "Test email sent successfully" });
-    } catch (error) {
-      console.error("Test email failed:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Test email failed",
-        error: error instanceof Error ? error.message : String(error)
-      });
-    }
-  });
+
 
   // Contact form submission
   app.post("/api/contact", async (req, res) => {
@@ -2634,9 +2553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        message: "لینک بازیابی رمز عبور به ایمیل شما ارسال شد",
-        // Remove this in production:
-        resetLink: `/reset-password?token=${token}`
+        message: "لینک بازیابی رمز عبور به ایمیل شما ارسال شد"
       });
 
     } catch (error) {
