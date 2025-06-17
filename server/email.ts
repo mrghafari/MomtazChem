@@ -294,3 +294,106 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
     throw error;
   }
 }
+export async function sendPasswordResetEmail(resetData: PasswordResetData): Promise<void> {
+  try {
+    const transporter = await createTransporter('admin');
+    const categorySettings = await emailStorage.getCategoryWithSettings('admin');
+    
+    if (!categorySettings?.smtp) {
+      throw new Error('No email configuration found for password reset');
+    }
+
+    const smtp = categorySettings.smtp;
+    const resetUrl = `${process.env.FRONTEND_URL || 'https://momtazchem.com'}/customer-reset-password?token=${resetData.token}`;
+    
+    const mailOptions = {
+      from: `${smtp.fromName} <${smtp.fromEmail}>`,
+      to: resetData.email,
+      subject: 'بازیابی رمز عبور - Momtaz Chemical',
+      html: `
+        <div style="direction: rtl; text-align: right; font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb;">بازیابی رمز عبور</h2>
+          <p>سلام ${resetData.firstName ? `${resetData.firstName} ${resetData.lastName || ''}` : ''}،</p>
+          
+          <p>درخواست بازیابی رمز عبور برای حساب کاربری شما دریافت شد.</p>
+          
+          <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>برای تنظیم رمز عبور جدید، روی لینک زیر کلیک کنید:</strong></p>
+            <a href="${resetUrl}" 
+               style="display: inline-block; background: #2563eb; color: white; 
+                      padding: 12px 24px; text-decoration: none; border-radius: 6px; 
+                      margin: 10px 0; font-weight: bold;">
+              تنظیم رمز عبور جدید
+            </a>
+            <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+              این لینک تا 1 ساعت معتبر است.
+            </p>
+          </div>
+          
+          <p>اگر شما این درخواست را نداده‌اید، این ایمیل را نادیده بگیرید.</p>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+          <p style="color: #666; font-size: 14px;">
+            با تشکر،<br>
+            تیم فنی مومتاز کمیکال<br>
+            <a href="https://momtazchem.com" style="color: #2563eb;">momtazchem.com</a>
+          </p>
+        </div>
+      `,
+      text: `
+بازیابی رمز عبور
+
+سلام ${resetData.firstName ? `${resetData.firstName} ${resetData.lastName || ''}` : ''}،
+
+درخواست بازیابی رمز عبور برای حساب کاربری شما دریافت شد.
+
+برای تنظیم رمز عبور جدید، روی لینک زیر کلیک کنید:
+${resetUrl}
+
+این لینک تا 1 ساعت معتبر است.
+
+اگر شما این درخواست را نداده‌اید، این ایمیل را نادیده بگیرید.
+
+با تشکر،
+تیم فنی مومتاز کمیکال
+momtazchem.com
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Password reset email sent successfully to:', resetData.email);
+
+    // Log email
+    await emailStorage.logEmail({
+      categoryId: categorySettings.category.id,
+      toEmail: resetData.email,
+      fromEmail: smtp.fromEmail,
+      subject: mailOptions.subject,
+      status: 'sent',
+      sentAt: new Date(),
+    });
+
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    
+    // Log failed email
+    try {
+      const categorySettings = await emailStorage.getCategoryWithSettings('admin');
+      if (categorySettings) {
+        await emailStorage.logEmail({
+          categoryId: categorySettings.category.id,
+          toEmail: resetData.email,
+          fromEmail: categorySettings.smtp?.fromEmail || '',
+          subject: 'Password Reset Email (Failed)',
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          sentAt: new Date(),
+        });
+      }
+    } catch (logError) {
+      console.error('Failed to log password reset email error:', logError);
+    }
+    
+    throw error;
+  }
+}

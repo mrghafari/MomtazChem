@@ -2546,8 +2546,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         [email, token, expiresAt]
       );
 
-      // In a real app, you would send an email here
-      // TODO: Implement email sending functionality
+      // Send password reset email
+      const { sendPasswordResetEmail } = await import('./email');
+      await sendPasswordResetEmail({
+        email,
+        firstName: customer?.firstName,
+        lastName: customer?.lastName,
+        token
+      });
 
       res.json({
         success: true,
