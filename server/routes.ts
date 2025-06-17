@@ -5368,18 +5368,57 @@ ${procedure.content}
         });
       }
 
-      // Send email to sales team
+      // Send email to sales team using direct nodemailer approach
       try {
-        const { sendContactEmail } = await import('./email');
-        await sendContactEmail({
+        const nodemailer = await import('nodemailer');
+        const { emailStorage } = await import('./email-storage');
+        
+        // Get admin SMTP settings
+        const categorySettings = await emailStorage.getCategoryWithSettings('admin');
+        
+        if (!categorySettings?.smtp) {
+          throw new Error('No SMTP configuration found');
+        }
+
+        const smtp = categorySettings.smtp;
+        
+        // Create transporter
+        const transporter = nodemailer.default.createTransporter({
+          host: smtp.host,
+          port: smtp.port,
+          secure: smtp.port === 465,
+          auth: {
+            user: smtp.username,
+            pass: smtp.password,
+          },
+        });
+
+        // Send email directly to sales team
+        await transporter.sendMail({
+          from: `${smtp.fromName} <${smtp.fromEmail}>`,
           to: "sales@momtazchem.com",
+          replyTo: email,
           subject: "New Sales Inquiry from Website",
-          customerName: name,
-          customerEmail: email,
-          customerCompany: company || "Not specified",
-          customerPhone: phone || "Not provided",
-          message: message,
-          inquiryType: "sales_contact"
+          html: `
+            <h2>New Sales Inquiry</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Company:</strong> ${company || 'Not specified'}</p>
+            <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+            <p><strong>Message:</strong></p>
+            <p>${message}</p>
+          `,
+          text: `
+New Sales Inquiry
+
+Name: ${name}
+Email: ${email}
+Company: ${company || 'Not specified'}
+Phone: ${phone || 'Not provided'}
+
+Message:
+${message}
+          `
         });
 
         // Also log this as a CRM activity if we can match to existing customer
@@ -5406,8 +5445,7 @@ ${procedure.content}
               email: email,
               company: company || null,
               phone: phone || null,
-              customerType: 'prospect',
-              source: 'website_contact_form'
+              customerType: 'prospect'
             });
 
             await crmStorage.logCustomerActivity({
@@ -5470,22 +5508,74 @@ ${procedure.content}
         });
       }
 
-      // Send detailed quote request email to sales team
+      // Send detailed quote request email to sales team using direct approach
       try {
-        const { sendQuoteRequestEmail } = await import('./email');
-        await sendQuoteRequestEmail({
+        const nodemailer = await import('nodemailer');
+        const { emailStorage } = await import('./email-storage');
+        
+        // Get admin SMTP settings
+        const categorySettings = await emailStorage.getCategoryWithSettings('admin');
+        
+        if (!categorySettings?.smtp) {
+          throw new Error('No SMTP configuration found');
+        }
+
+        const smtp = categorySettings.smtp;
+        
+        // Create transporter
+        const transporter = nodemailer.default.createTransporter({
+          host: smtp.host,
+          port: smtp.port,
+          secure: smtp.port === 465,
+          auth: {
+            user: smtp.username,
+            pass: smtp.password,
+          },
+        });
+
+        // Send quote request email
+        await transporter.sendMail({
+          from: `${smtp.fromName} <${smtp.fromEmail}>`,
           to: "sales@momtazchem.com",
+          replyTo: email,
           subject: `New Quote Request - ${productCategory}`,
-          customerName: name,
-          customerEmail: email,
-          customerCompany: company,
-          customerPhone: phone || "Not provided",
-          productCategory: productCategory,
-          quantity: quantity,
-          specifications: specifications,
-          timeline: timeline || "Not specified",
-          additionalMessage: message || "No additional requirements",
-          inquiryType: "quote_request"
+          html: `
+            <h2>New Quote Request</h2>
+            <h3>Customer Information</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Company:</strong> ${company}</p>
+            <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+            
+            <h3>Product Requirements</h3>
+            <p><strong>Product Category:</strong> ${productCategory}</p>
+            <p><strong>Quantity:</strong> ${quantity}</p>
+            <p><strong>Timeline:</strong> ${timeline || 'Not specified'}</p>
+            
+            <h3>Specifications</h3>
+            <p>${specifications}</p>
+            
+            ${message ? `<h3>Additional Requirements</h3><p>${message}</p>` : ''}
+          `,
+          text: `
+New Quote Request
+
+Customer Information:
+Name: ${name}
+Email: ${email}
+Company: ${company}
+Phone: ${phone || 'Not provided'}
+
+Product Requirements:
+Product Category: ${productCategory}
+Quantity: ${quantity}
+Timeline: ${timeline || 'Not specified'}
+
+Specifications:
+${specifications}
+
+${message ? `Additional Requirements:\n${message}` : ''}
+          `
         });
 
         // Log this in CRM system
@@ -5500,8 +5590,7 @@ ${procedure.content}
               email: email,
               company: company,
               phone: phone || null,
-              customerType: 'prospect',
-              source: 'website_quote_request'
+              customerType: 'prospect'
             });
           }
 

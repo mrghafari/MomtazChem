@@ -397,3 +397,161 @@ momtazchem.com
     throw error;
   }
 }
+
+
+
+
+// Quote Request Email Interface
+export interface QuoteRequestEmailData {
+  to: string;
+  subject: string;
+  customerName: string;
+  customerEmail: string;
+  customerCompany: string;
+  customerPhone: string;
+  productCategory: string;
+  quantity: string;
+  specifications: string;
+  timeline: string;
+  additionalMessage: string;
+  inquiryType: string;
+}
+
+// Send quote request email
+export async function sendQuoteRequestEmail(quoteData: QuoteRequestEmailData): Promise<void> {
+  try {
+    const transporter = await createTransporter('admin');
+    const categorySettings = await emailStorage.getCategoryWithSettings('admin');
+    
+    if (!categorySettings?.smtp) {
+      throw new Error('No email configuration found for quote request emails');
+    }
+
+    const smtp = categorySettings.smtp;
+    
+    const mailOptions = {
+      from: `${smtp.fromName} <${smtp.fromEmail}>`,
+      to: quoteData.to,
+      replyTo: quoteData.customerEmail,
+      subject: quoteData.subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #059669; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
+            New Quote Request from Website
+          </h2>
+          
+          <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="color: #065f46; margin-top: 0;">Customer Information</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #666;">Name:</td>
+                <td style="padding: 8px 0;">${quoteData.customerName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #666;">Email:</td>
+                <td style="padding: 8px 0;">
+                  <a href="mailto:${quoteData.customerEmail}" style="color: #059669;">${quoteData.customerEmail}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #666;">Company:</td>
+                <td style="padding: 8px 0;">${quoteData.customerCompany}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #666;">Phone:</td>
+                <td style="padding: 8px 0;">${quoteData.customerPhone}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="color: #92400e; margin-top: 0;">Product Requirements</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #666;">Product Category:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #059669;">${quoteData.productCategory}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #666;">Required Quantity:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #dc2626;">${quoteData.quantity}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #666;">Timeline:</td>
+                <td style="padding: 8px 0;">${quoteData.timeline}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background: #fff; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #374151; margin-top: 0;">Product Specifications</h3>
+            <p style="line-height: 1.6; color: #4b5563; white-space: pre-wrap; background: #f9fafb; padding: 15px; border-radius: 6px;">${quoteData.specifications}</p>
+          </div>
+          
+          ${quoteData.additionalMessage ? `
+          <div style="background: #fff; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #374151; margin-top: 0;">Additional Requirements</h3>
+            <p style="line-height: 1.6; color: #4b5563; white-space: pre-wrap;">${quoteData.additionalMessage}</p>
+          </div>
+          ` : ''}
+          
+          <div style="margin-top: 30px; padding: 20px; background: #f3f4f6; border-radius: 8px;">
+            <h4 style="color: #059669; margin-top: 0;">Next Steps:</h4>
+            <ul style="color: #666; line-height: 1.6;">
+              <li>Review product requirements and specifications</li>
+              <li>Prepare detailed pricing and availability information</li>
+              <li>Contact customer within 24 hours with preliminary quote</li>
+              <li>Schedule follow-up meeting if needed</li>
+            </ul>
+            <p style="margin: 15px 0 0 0; color: #666; font-size: 14px; font-style: italic;">
+              This quote request was submitted through the Momtaz Chemical website.
+            </p>
+          </div>
+        </div>
+      `,
+      text: `
+New Quote Request from Website
+
+Customer Information:
+Name: ${quoteData.customerName}
+Email: ${quoteData.customerEmail}
+Company: ${quoteData.customerCompany}
+Phone: ${quoteData.customerPhone}
+
+Product Requirements:
+Product Category: ${quoteData.productCategory}
+Required Quantity: ${quoteData.quantity}
+Timeline: ${quoteData.timeline}
+
+Product Specifications:
+${quoteData.specifications}
+
+${quoteData.additionalMessage ? `Additional Requirements:\n${quoteData.additionalMessage}\n` : ''}
+
+Next Steps:
+- Review product requirements and specifications
+- Prepare detailed pricing and availability information
+- Contact customer within 24 hours with preliminary quote
+- Schedule follow-up meeting if needed
+
+This quote request was submitted through the Momtaz Chemical website.
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Quote request email sent successfully to:', quoteData.to);
+
+    // Log email
+    await emailStorage.logEmail({
+      categoryId: categorySettings.category.id,
+      toEmail: quoteData.to,
+      fromEmail: smtp.fromEmail,
+      subject: mailOptions.subject,
+      status: 'sent',
+      sentAt: new Date(),
+    });
+
+  } catch (error) {
+    console.error('Error sending quote request email:', error);
+    throw error;
+  }
+}

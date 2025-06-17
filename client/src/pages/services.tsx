@@ -325,7 +325,7 @@ const Services = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               onClick={() => setIsContactDialogOpen(true)}
-              className="bg-primary-blue hover:bg-primary-blue-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-200"
+              className="bg-[#f4cc19] hover:bg-primary-blue-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-200"
             >
               <Mail className="h-4 w-4 mr-2" />
               Contact Sales Team
