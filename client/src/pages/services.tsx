@@ -333,7 +333,7 @@ const Services = () => {
             <Button 
               onClick={() => setIsQuoteDialogOpen(true)}
               variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-3 rounded-lg font-semibold transition-all duration-200"
+              className="h-10 border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-3 rounded-lg font-semibold transition-all duration-200 bg-[#a0c514]"
             >
               <FileText className="h-4 w-4 mr-2" />
               Request Quote

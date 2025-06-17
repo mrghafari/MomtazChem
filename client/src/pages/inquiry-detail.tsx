@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft,
   MessageSquare,
@@ -51,6 +55,13 @@ interface InquiryResponse {
 const InquiryDetail = () => {
   const [location] = useLocation();
   const inquiryId = location.split('/')[3]; // Get ID from /admin/inquiry/123
+  const { toast } = useToast();
+  
+  // State for dialogs
+  const [isFollowUpDialogOpen, setIsFollowUpDialogOpen] = useState(false);
+  const [isProductsDialogOpen, setIsProductsDialogOpen] = useState(false);
+  const [followUpMessage, setFollowUpMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Check authentication status
   useEffect(() => {
@@ -79,6 +90,60 @@ const InquiryDetail = () => {
     queryFn: () => fetch(`/api/inquiries/${inquiryId}/responses`).then(res => res.json()),
     enabled: !!inquiryId,
   });
+
+  // Handler for sending follow-up
+  const handleSendFollowUp = async () => {
+    if (!followUpMessage.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a follow-up message",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/inquiries/${inquiryId}/response`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          responseText: followUpMessage,
+          responseType: 'follow_up'
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Follow-up sent successfully",
+        });
+        setFollowUpMessage('');
+        setIsFollowUpDialogOpen(false);
+        // Refresh the responses
+        window.location.reload();
+      } else {
+        throw new Error('Failed to send follow-up');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send follow-up message",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handler for viewing related products
+  const handleViewRelatedProducts = () => {
+    // Navigate to products page with category filter
+    const category = inquiry?.category || '';
+    window.open(`/products?category=${encodeURIComponent(category)}`, '_blank');
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -316,11 +381,19 @@ const InquiryDetail = () => {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setIsFollowUpDialogOpen(true)}
+                >
                   <Mail className="h-4 w-4 mr-2" />
                   Send Follow-up
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleViewRelatedProducts}
+                >
                   <Package className="h-4 w-4 mr-2" />
                   View Related Products
                 </Button>
@@ -329,6 +402,47 @@ const InquiryDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Follow-up Dialog */}
+      <Dialog open={isFollowUpDialogOpen} onOpenChange={setIsFollowUpDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Send Follow-up
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="follow-up-message">Follow-up Message *</Label>
+              <Textarea
+                id="follow-up-message"
+                value={followUpMessage}
+                onChange={(e) => setFollowUpMessage(e.target.value)}
+                placeholder="Enter your follow-up message for the customer..."
+                rows={4}
+                required
+              />
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsFollowUpDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSendFollowUp} 
+                disabled={isSubmitting} 
+                className="flex-1"
+              >
+                {isSubmitting ? "Sending..." : "Send Follow-up"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
