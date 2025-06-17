@@ -2933,7 +2933,7 @@ ${procedure.content}
       const tableStats = await pool.query(`
         SELECT 
           schemaname,
-          tablename,
+          relname as tablename,
           n_tup_ins as total_inserts,
           n_tup_upd as total_updates,
           n_tup_del as total_deletes,
@@ -5241,6 +5241,25 @@ ${procedure.content}
       res.status(500).json({
         success: false,
         message: "Failed to update customer"
+      });
+    }
+  });
+
+  // Delete CRM customer
+  app.delete("/api/crm/customers/:id", requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      
+      await crmStorage.deleteCrmCustomer(customerId);
+      res.json({
+        success: true,
+        message: "Customer deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting CRM customer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete customer"
       });
     }
   });
