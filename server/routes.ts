@@ -5352,6 +5352,201 @@ ${procedure.content}
     }
   });
 
+  // =============================================================================
+  // CONTACT SALES AND QUOTE REQUEST ENDPOINTS
+  // =============================================================================
+
+  // Contact sales team
+  app.post("/api/contact/sales", async (req, res) => {
+    try {
+      const { name, email, company, phone, message, type } = req.body;
+
+      if (!name || !email || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "Name, email, and message are required"
+        });
+      }
+
+      // Send email to sales team
+      try {
+        const { sendContactEmail } = await import('./email');
+        await sendContactEmail({
+          to: "sales@momtazchem.com",
+          subject: "New Sales Inquiry from Website",
+          customerName: name,
+          customerEmail: email,
+          customerCompany: company || "Not specified",
+          customerPhone: phone || "Not provided",
+          message: message,
+          inquiryType: "sales_contact"
+        });
+
+        // Also log this as a CRM activity if we can match to existing customer
+        try {
+          const existingCustomer = await crmStorage.getCrmCustomerByEmail(email);
+          if (existingCustomer) {
+            await crmStorage.logCustomerActivity({
+              customerId: existingCustomer.id,
+              activityType: 'contact_form',
+              description: `Sales inquiry submitted via website: ${message.substring(0, 100)}...`,
+              activityData: {
+                source: 'website_contact_form',
+                contactType: 'sales_inquiry',
+                company: company,
+                phone: phone,
+                fullMessage: message
+              }
+            });
+          } else {
+            // Create new CRM customer for this inquiry
+            const newCrmCustomer = await crmStorage.createCrmCustomer({
+              firstName: name.split(' ')[0] || name,
+              lastName: name.split(' ').slice(1).join(' ') || '',
+              email: email,
+              company: company || null,
+              phone: phone || null,
+              customerType: 'prospect',
+              source: 'website_contact_form'
+            });
+
+            await crmStorage.logCustomerActivity({
+              customerId: newCrmCustomer.id,
+              activityType: 'contact_form',
+              description: `First contact via sales inquiry form: ${message.substring(0, 100)}...`,
+              activityData: {
+                source: 'website_contact_form',
+                contactType: 'sales_inquiry',
+                company: company,
+                phone: phone,
+                fullMessage: message
+              }
+            });
+          }
+        } catch (crmError) {
+          console.error("Error logging to CRM:", crmError);
+          // Don't fail the request if CRM logging fails
+        }
+
+        res.json({
+          success: true,
+          message: "Your message has been sent to our sales team. We'll contact you within 24 hours."
+        });
+      } catch (emailError) {
+        console.error("Error sending sales contact email:", emailError);
+        res.status(500).json({
+          success: false,
+          message: "Failed to send message. Please try again or contact us directly."
+        });
+      }
+    } catch (error) {
+      console.error("Error in sales contact endpoint:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
+  // Quote request
+  app.post("/api/contact/quote", async (req, res) => {
+    try {
+      const { 
+        name, 
+        email, 
+        company, 
+        phone, 
+        productCategory, 
+        quantity, 
+        specifications, 
+        timeline, 
+        message 
+      } = req.body;
+
+      if (!name || !email || !company || !productCategory || !quantity || !specifications) {
+        return res.status(400).json({
+          success: false,
+          message: "Name, email, company, product category, quantity, and specifications are required"
+        });
+      }
+
+      // Send detailed quote request email to sales team
+      try {
+        const { sendQuoteRequestEmail } = await import('./email');
+        await sendQuoteRequestEmail({
+          to: "sales@momtazchem.com",
+          subject: `New Quote Request - ${productCategory}`,
+          customerName: name,
+          customerEmail: email,
+          customerCompany: company,
+          customerPhone: phone || "Not provided",
+          productCategory: productCategory,
+          quantity: quantity,
+          specifications: specifications,
+          timeline: timeline || "Not specified",
+          additionalMessage: message || "No additional requirements",
+          inquiryType: "quote_request"
+        });
+
+        // Log this in CRM system
+        try {
+          let crmCustomer = await crmStorage.getCrmCustomerByEmail(email);
+          
+          if (!crmCustomer) {
+            // Create new CRM customer for this quote request
+            crmCustomer = await crmStorage.createCrmCustomer({
+              firstName: name.split(' ')[0] || name,
+              lastName: name.split(' ').slice(1).join(' ') || '',
+              email: email,
+              company: company,
+              phone: phone || null,
+              customerType: 'prospect',
+              source: 'website_quote_request'
+            });
+          }
+
+          await crmStorage.logCustomerActivity({
+            customerId: crmCustomer.id,
+            activityType: 'quote_request',
+            description: `Quote requested for ${productCategory} - Qty: ${quantity}`,
+            activityData: {
+              source: 'website_quote_form',
+              productCategory: productCategory,
+              quantity: quantity,
+              specifications: specifications,
+              timeline: timeline,
+              additionalMessage: message,
+              estimatedValue: 0 // Could be calculated based on product category
+            }
+          });
+
+          // Update customer metrics
+          await crmStorage.updateCustomerMetrics(crmCustomer.id);
+        } catch (crmError) {
+          console.error("Error logging quote request to CRM:", crmError);
+          // Don't fail the request if CRM logging fails
+        }
+
+        res.json({
+          success: true,
+          message: "Your quote request has been submitted. Our team will prepare a detailed quote and respond within 24 hours."
+        });
+      } catch (emailError) {
+        console.error("Error sending quote request email:", emailError);
+        res.status(500).json({
+          success: false,
+          message: "Failed to submit quote request. Please try again or contact us directly."
+        });
+      }
+    } catch (error) {
+      console.error("Error in quote request endpoint:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
