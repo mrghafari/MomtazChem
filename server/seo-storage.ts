@@ -5,6 +5,8 @@ import {
   seoAnalytics,
   sitemapEntries,
   redirects,
+  supportedLanguages,
+  multilingualKeywords,
   type InsertSeoSetting,
   type SeoSetting,
   type InsertSeoAnalytics,
@@ -13,16 +15,41 @@ import {
   type SitemapEntry,
   type InsertRedirect,
   type Redirect,
+  type InsertSupportedLanguage,
+  type SupportedLanguage,
+  type InsertMultilingualKeyword,
+  type MultilingualKeyword,
 } from "../shared/schema";
 
 export interface ISeoStorage {
   // SEO Settings Management
   createSeoSetting(setting: InsertSeoSetting): Promise<SeoSetting>;
-  getSeoSettings(): Promise<SeoSetting[]>;
+  getSeoSettings(language?: string): Promise<SeoSetting[]>;
   getSeoSettingById(id: number): Promise<SeoSetting | undefined>;
-  getSeoSettingByPage(pageType: string, pageIdentifier?: string): Promise<SeoSetting | undefined>;
+  getSeoSettingByPage(pageType: string, language?: string, pageIdentifier?: string): Promise<SeoSetting | undefined>;
   updateSeoSetting(id: number, setting: Partial<InsertSeoSetting>): Promise<SeoSetting>;
   deleteSeoSetting(id: number): Promise<void>;
+  
+  // Language Management
+  createSupportedLanguage(language: InsertSupportedLanguage): Promise<SupportedLanguage>;
+  getSupportedLanguages(): Promise<SupportedLanguage[]>;
+  getDefaultLanguage(): Promise<SupportedLanguage | undefined>;
+  updateSupportedLanguage(id: number, language: Partial<InsertSupportedLanguage>): Promise<SupportedLanguage>;
+  deleteSupportedLanguage(id: number): Promise<void>;
+  
+  // Multilingual Keywords Management
+  createMultilingualKeyword(keyword: InsertMultilingualKeyword): Promise<MultilingualKeyword>;
+  getMultilingualKeywords(seoSettingId?: number, language?: string): Promise<MultilingualKeyword[]>;
+  updateKeywordPosition(id: number, position: number): Promise<void>;
+  getKeywordPerformance(language?: string): Promise<{
+    totalKeywords: number;
+    averagePosition: number;
+    topKeywords: Array<{
+      keyword: string;
+      position: number;
+      language: string;
+    }>;
+  }>;
   
   // SEO Analytics
   createSeoAnalytics(analytics: InsertSeoAnalytics): Promise<SeoAnalytics>;
@@ -43,10 +70,11 @@ export interface ISeoStorage {
   
   // Sitemap Management
   createSitemapEntry(entry: InsertSitemapEntry): Promise<SitemapEntry>;
-  getSitemapEntries(): Promise<SitemapEntry[]>;
+  getSitemapEntries(language?: string): Promise<SitemapEntry[]>;
   updateSitemapEntry(id: number, entry: Partial<InsertSitemapEntry>): Promise<SitemapEntry>;
   deleteSitemapEntry(id: number): Promise<void>;
-  generateSitemap(): Promise<string>; // Returns XML sitemap
+  generateSitemap(language?: string): Promise<string>; // Returns XML sitemap
+  generateMultilingualSitemap(): Promise<string>; // Returns sitemap index with all languages
   
   // Redirects Management
   createRedirect(redirect: InsertRedirect): Promise<Redirect>;
@@ -59,6 +87,20 @@ export interface ISeoStorage {
   // Utility functions
   generateRobotsTxt(): Promise<string>;
   validateSeoSettings(setting: InsertSeoSetting): Promise<string[]>; // Returns validation errors
+  generateHreflangTags(pageType: string, pageIdentifier?: string): Promise<string[]>; // Returns hreflang tags
+  getMultilingualAnalytics(): Promise<{
+    byLanguage: Array<{
+      language: string;
+      totalImpressions: number;
+      totalClicks: number;
+      averagePosition: number;
+    }>;
+    byCountry: Array<{
+      country: string;
+      totalImpressions: number;
+      totalClicks: number;
+    }>;
+  }>;
 }
 
 export class SeoStorage implements ISeoStorage {
@@ -67,8 +109,14 @@ export class SeoStorage implements ISeoStorage {
     return setting;
   }
 
-  async getSeoSettings(): Promise<SeoSetting[]> {
-    return await seoDb.select().from(seoSettings).orderBy(desc(seoSettings.createdAt));
+  async getSeoSettings(language?: string): Promise<SeoSetting[]> {
+    let query = seoDb.select().from(seoSettings);
+    
+    if (language) {
+      query = query.where(eq(seoSettings.language, language));
+    }
+    
+    return await query.orderBy(desc(seoSettings.createdAt));
   }
 
   async getSeoSettingById(id: number): Promise<SeoSetting | undefined> {
@@ -76,25 +124,18 @@ export class SeoStorage implements ISeoStorage {
     return setting;
   }
 
-  async getSeoSettingByPage(pageType: string, pageIdentifier?: string): Promise<SeoSetting | undefined> {
-    let query = seoDb.select().from(seoSettings).where(
-      and(
-        eq(seoSettings.pageType, pageType),
-        eq(seoSettings.isActive, true)
-      )
-    );
+  async getSeoSettingByPage(pageType: string, language: string = 'fa', pageIdentifier?: string): Promise<SeoSetting | undefined> {
+    let conditions = [
+      eq(seoSettings.pageType, pageType),
+      eq(seoSettings.language, language),
+      eq(seoSettings.isActive, true)
+    ];
 
     if (pageIdentifier) {
-      query = seoDb.select().from(seoSettings).where(
-        and(
-          eq(seoSettings.pageType, pageType),
-          eq(seoSettings.pageIdentifier, pageIdentifier),
-          eq(seoSettings.isActive, true)
-        )
-      );
+      conditions.push(eq(seoSettings.pageIdentifier, pageIdentifier));
     }
 
-    const [setting] = await query;
+    const [setting] = await seoDb.select().from(seoSettings).where(and(...conditions));
     return setting;
   }
 
@@ -175,12 +216,14 @@ export class SeoStorage implements ISeoStorage {
     return entry;
   }
 
-  async getSitemapEntries(): Promise<SitemapEntry[]> {
-    return await seoDb
-      .select()
-      .from(sitemapEntries)
-      .where(eq(sitemapEntries.isActive, true))
-      .orderBy(desc(sitemapEntries.priority));
+  async getSitemapEntries(language?: string): Promise<SitemapEntry[]> {
+    let query = seoDb.select().from(sitemapEntries).where(eq(sitemapEntries.isActive, true));
+    
+    if (language) {
+      query = query.where(and(eq(sitemapEntries.isActive, true), eq(sitemapEntries.language, language)));
+    }
+    
+    return await query.orderBy(desc(sitemapEntries.priority));
   }
 
   async updateSitemapEntry(id: number, entryUpdate: Partial<InsertSitemapEntry>): Promise<SitemapEntry> {
@@ -196,11 +239,11 @@ export class SeoStorage implements ISeoStorage {
     await seoDb.delete(sitemapEntries).where(eq(sitemapEntries.id, id));
   }
 
-  async generateSitemap(): Promise<string> {
-    const entries = await this.getSitemapEntries();
+  async generateSitemap(language?: string): Promise<string> {
+    const entries = await this.getSitemapEntries(language);
     
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
     
     for (const entry of entries) {
       xml += '  <url>\n';
@@ -208,10 +251,36 @@ export class SeoStorage implements ISeoStorage {
       xml += `    <lastmod>${entry.lastModified.toISOString()}</lastmod>\n`;
       xml += `    <changefreq>${entry.changeFreq}</changefreq>\n`;
       xml += `    <priority>${entry.priority}</priority>\n`;
+      
+      // Add hreflang alternatives for this URL
+      const hreflangTags = await this.generateHreflangTags(entry.pageType || 'page');
+      for (const tag of hreflangTags) {
+        xml += `    ${tag}\n`;
+      }
+      
       xml += '  </url>\n';
     }
     
     xml += '</urlset>';
+    return xml;
+  }
+
+  async generateMultilingualSitemap(): Promise<string> {
+    const languages = await this.getSupportedLanguages();
+    
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
+    for (const language of languages) {
+      if (language.isActive) {
+        xml += '  <sitemap>\n';
+        xml += `    <loc>/sitemap-${language.code}.xml</loc>\n`;
+        xml += `    <lastmod>${new Date().toISOString()}</lastmod>\n`;
+        xml += '  </sitemap>\n';
+      }
+    }
+    
+    xml += '</sitemapindex>';
     return xml;
   }
 
@@ -297,12 +366,195 @@ export class SeoStorage implements ISeoStorage {
     }
     
     // Check for duplicate settings
-    const existing = await this.getSeoSettingByPage(setting.pageType, setting.pageIdentifier || undefined);
+    const existing = await this.getSeoSettingByPage(setting.pageType, setting.language || 'fa', setting.pageIdentifier || undefined);
     if (existing) {
-      errors.push('SEO settings already exist for this page');
+      errors.push('SEO settings already exist for this page and language');
     }
     
     return errors;
+  }
+
+  // Language Management Methods
+  async createSupportedLanguage(languageData: InsertSupportedLanguage): Promise<SupportedLanguage> {
+    const [language] = await seoDb.insert(supportedLanguages).values(languageData).returning();
+    return language;
+  }
+
+  async getSupportedLanguages(): Promise<SupportedLanguage[]> {
+    return await seoDb.select().from(supportedLanguages).orderBy(desc(supportedLanguages.priority));
+  }
+
+  async getDefaultLanguage(): Promise<SupportedLanguage | undefined> {
+    const [language] = await seoDb.select().from(supportedLanguages).where(eq(supportedLanguages.isDefault, true));
+    return language;
+  }
+
+  async updateSupportedLanguage(id: number, languageUpdate: Partial<InsertSupportedLanguage>): Promise<SupportedLanguage> {
+    const [language] = await seoDb
+      .update(supportedLanguages)
+      .set({ ...languageUpdate, updatedAt: new Date() })
+      .where(eq(supportedLanguages.id, id))
+      .returning();
+    return language;
+  }
+
+  async deleteSupportedLanguage(id: number): Promise<void> {
+    await seoDb.delete(supportedLanguages).where(eq(supportedLanguages.id, id));
+  }
+
+  // Multilingual Keywords Methods
+  async createMultilingualKeyword(keywordData: InsertMultilingualKeyword): Promise<MultilingualKeyword> {
+    const [keyword] = await seoDb.insert(multilingualKeywords).values(keywordData).returning();
+    return keyword;
+  }
+
+  async getMultilingualKeywords(seoSettingId?: number, language?: string): Promise<MultilingualKeyword[]> {
+    let query = seoDb.select().from(multilingualKeywords);
+    
+    const conditions = [];
+    if (seoSettingId) {
+      conditions.push(eq(multilingualKeywords.seoSettingId, seoSettingId));
+    }
+    if (language) {
+      conditions.push(eq(multilingualKeywords.language, language));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(multilingualKeywords.createdAt));
+  }
+
+  async updateKeywordPosition(id: number, position: number): Promise<void> {
+    await seoDb
+      .update(multilingualKeywords)
+      .set({ 
+        currentPosition: position, 
+        lastChecked: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(multilingualKeywords.id, id));
+  }
+
+  async getKeywordPerformance(language?: string): Promise<{
+    totalKeywords: number;
+    averagePosition: number;
+    topKeywords: Array<{
+      keyword: string;
+      position: number;
+      language: string;
+    }>;
+  }> {
+    let query = seoDb.select().from(multilingualKeywords);
+    
+    if (language) {
+      query = query.where(eq(multilingualKeywords.language, language));
+    }
+    
+    const keywords = await query;
+    
+    const totalKeywords = keywords.length;
+    const averagePosition = keywords.length > 0 
+      ? keywords.reduce((sum, k) => sum + (k.currentPosition || 0), 0) / keywords.length 
+      : 0;
+    
+    const topKeywords = keywords
+      .filter(k => k.currentPosition && k.currentPosition <= 10)
+      .sort((a, b) => (a.currentPosition || 100) - (b.currentPosition || 100))
+      .slice(0, 10)
+      .map(k => ({
+        keyword: k.keyword,
+        position: k.currentPosition || 0,
+        language: k.language,
+      }));
+
+    return {
+      totalKeywords,
+      averagePosition,
+      topKeywords,
+    };
+  }
+
+  async generateHreflangTags(pageType: string, pageIdentifier?: string): Promise<string[]> {
+    const settings = await this.getSeoSettings();
+    const pageSettings = settings.filter(s => 
+      s.pageType === pageType && 
+      s.pageIdentifier === pageIdentifier &&
+      s.isActive
+    );
+    
+    const hreflangTags: string[] = [];
+    
+    for (const setting of pageSettings) {
+      if (setting.hreflangUrl) {
+        hreflangTags.push(
+          `<xhtml:link rel="alternate" hreflang="${setting.language}" href="${setting.hreflangUrl}" />`
+        );
+      }
+    }
+    
+    return hreflangTags;
+  }
+
+  async getMultilingualAnalytics(): Promise<{
+    byLanguage: Array<{
+      language: string;
+      totalImpressions: number;
+      totalClicks: number;
+      averagePosition: number;
+    }>;
+    byCountry: Array<{
+      country: string;
+      totalImpressions: number;
+      totalClicks: number;
+    }>;
+  }> {
+    const analytics = await seoDb.select().from(seoAnalytics);
+    
+    // Group by language
+    const languageMap = new Map<string, { impressions: number; clicks: number; positions: number[] }>();
+    const countryMap = new Map<string, { impressions: number; clicks: number }>();
+    
+    for (const record of analytics) {
+      // Language statistics
+      if (!languageMap.has(record.language)) {
+        languageMap.set(record.language, { impressions: 0, clicks: 0, positions: [] });
+      }
+      const langData = languageMap.get(record.language)!;
+      langData.impressions += record.impressions || 0;
+      langData.clicks += record.clicks || 0;
+      if (record.position) {
+        langData.positions.push(parseFloat(record.position.toString()));
+      }
+      
+      // Country statistics
+      if (record.country) {
+        if (!countryMap.has(record.country)) {
+          countryMap.set(record.country, { impressions: 0, clicks: 0 });
+        }
+        const countryData = countryMap.get(record.country)!;
+        countryData.impressions += record.impressions || 0;
+        countryData.clicks += record.clicks || 0;
+      }
+    }
+    
+    const byLanguage = Array.from(languageMap.entries()).map(([language, data]) => ({
+      language,
+      totalImpressions: data.impressions,
+      totalClicks: data.clicks,
+      averagePosition: data.positions.length > 0 
+        ? data.positions.reduce((sum, pos) => sum + pos, 0) / data.positions.length 
+        : 0,
+    }));
+    
+    const byCountry = Array.from(countryMap.entries()).map(([country, data]) => ({
+      country,
+      totalImpressions: data.impressions,
+      totalClicks: data.clicks,
+    }));
+    
+    return { byLanguage, byCountry };
   }
 }
 

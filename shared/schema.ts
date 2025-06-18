@@ -19,6 +19,7 @@ export const seoSettings = pgTable("seo_settings", {
   id: serial("id").primaryKey(),
   pageType: text("page_type").notNull(), // 'global', 'home', 'products', 'category', 'about', etc.
   pageIdentifier: text("page_identifier"), // category ID, product ID, or null for global
+  language: text("language").notNull().default("fa"), // Language code: 'fa', 'en', 'ar', etc.
   title: text("title").notNull(),
   description: text("description").notNull(),
   keywords: text("keywords"), // comma-separated keywords
@@ -33,6 +34,7 @@ export const seoSettings = pgTable("seo_settings", {
   schema: json("schema"), // JSON-LD structured data
   isActive: boolean("is_active").default(true),
   priority: integer("priority").default(0), // for ordering/priority
+  hreflangUrl: text("hreflang_url"), // URL for hreflang alternate
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -42,6 +44,9 @@ export const seoAnalytics = pgTable("seo_analytics", {
   id: serial("id").primaryKey(),
   seoSettingId: integer("seo_setting_id").notNull().references(() => seoSettings.id),
   pageUrl: text("page_url").notNull(),
+  language: text("language").notNull().default("fa"), // Language code for analytics
+  country: text("country"), // Country code for geo-targeting
+  device: text("device").default("desktop"), // desktop, mobile, tablet
   impressions: integer("impressions").default(0),
   clicks: integer("clicks").default(0),
   position: decimal("position", { precision: 10, scale: 2 }),
@@ -53,13 +58,46 @@ export const seoAnalytics = pgTable("seo_analytics", {
 // Sitemap entries for XML sitemap generation
 export const sitemapEntries = pgTable("sitemap_entries", {
   id: serial("id").primaryKey(),
-  url: text("url").notNull().unique(),
+  url: text("url").notNull(),
+  language: text("language").notNull().default("fa"), // Language code
   priority: decimal("priority", { precision: 3, scale: 2 }).default("0.5"),
   changeFreq: text("change_freq").default("weekly"), // always, hourly, daily, weekly, monthly, yearly, never
   lastModified: timestamp("last_modified").notNull().defaultNow(),
   isActive: boolean("is_active").default(true),
   pageType: text("page_type"), // 'product', 'category', 'page', etc.
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Languages table for managing supported languages
+export const supportedLanguages = pgTable("supported_languages", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(), // 'fa', 'en', 'ar', etc.
+  name: text("name").notNull(), // 'فارسی', 'English', 'العربية'
+  nativeName: text("native_name").notNull(), // Native language name
+  direction: text("direction").notNull().default("rtl"), // 'rtl' or 'ltr'
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(0), // for ordering
+  googleAnalyticsCode: text("google_analytics_code"), // GA tracking code for this language
+  searchConsoleProperty: text("search_console_property"), // GSC property URL
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Multilingual keywords table for tracking different language keywords
+export const multilingualKeywords = pgTable("multilingual_keywords", {
+  id: serial("id").primaryKey(),
+  seoSettingId: integer("seo_setting_id").notNull().references(() => seoSettings.id),
+  keyword: text("keyword").notNull(),
+  language: text("language").notNull(),
+  searchVolume: integer("search_volume").default(0),
+  difficulty: integer("difficulty").default(0), // 1-100 scale
+  currentPosition: integer("current_position"),
+  targetPosition: integer("target_position").default(1),
+  isTracking: boolean("is_tracking").default(true),
+  lastChecked: timestamp("last_checked"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Redirects table for managing URL redirects
@@ -324,6 +362,18 @@ export const insertRedirectSchema = createInsertSchema(redirects).omit({
   hitCount: true,
 });
 
+export const insertSupportedLanguageSchema = createInsertSchema(supportedLanguages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMultilingualKeywordSchema = createInsertSchema(multilingualKeywords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertSeoSetting = z.infer<typeof insertSeoSettingSchema>;
 export type SeoSetting = typeof seoSettings.$inferSelect;
 
@@ -335,3 +385,9 @@ export type SitemapEntry = typeof sitemapEntries.$inferSelect;
 
 export type InsertRedirect = z.infer<typeof insertRedirectSchema>;
 export type Redirect = typeof redirects.$inferSelect;
+
+export type InsertSupportedLanguage = z.infer<typeof insertSupportedLanguageSchema>;
+export type SupportedLanguage = typeof supportedLanguages.$inferSelect;
+
+export type InsertMultilingualKeyword = z.infer<typeof insertMultilingualKeywordSchema>;
+export type MultilingualKeyword = typeof multilingualKeywords.$inferSelect;
