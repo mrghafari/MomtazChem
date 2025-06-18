@@ -469,40 +469,75 @@ export default function SeoManagement() {
         <TabsContent value="analytics" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>SEO Analytics</CardTitle>
+              <CardTitle>Multilingual SEO Analytics</CardTitle>
               <CardDescription>
-                Track your website's search engine performance
+                Track your website's search engine performance across different languages and countries
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoadingAnalytics ? (
-                <div className="text-center py-8">Loading analytics...</div>
-              ) : seoAnalytics ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
-                    <h3 className="font-semibold text-blue-900 dark:text-blue-100">Total Impressions</h3>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {seoAnalytics.totalImpressions.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
-                    <h3 className="font-semibold text-green-900 dark:text-green-100">Total Clicks</h3>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {seoAnalytics.totalClicks.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="bg-yellow-50 dark:bg-yellow-950 p-4 rounded-lg">
-                    <h3 className="font-semibold text-yellow-900 dark:text-yellow-100">Average CTR</h3>
-                    <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                      {(seoAnalytics.averageCtr * 100).toFixed(2)}%
-                    </p>
-                  </div>
-                  <div className="bg-purple-50 dark:bg-purple-950 p-4 rounded-lg">
-                    <h3 className="font-semibold text-purple-900 dark:text-purple-100">Avg Position</h3>
-                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {seoAnalytics.averagePosition.toFixed(1)}
-                    </p>
-                  </div>
+              {isLoadingMultilingualAnalytics ? (
+                <div className="text-center py-8">Loading multilingual analytics...</div>
+              ) : multilingualAnalytics ? (
+                <div className="space-y-6">
+                  {multilingualAnalytics.byLanguage && multilingualAnalytics.byLanguage.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-3">Performance by Language</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {multilingualAnalytics.byLanguage.map((lang) => (
+                          <div key={lang.language} className="border rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-medium">{lang.language.toUpperCase()}</h5>
+                              <Badge variant="outline">{supportedLanguages.find(l => l.code === lang.language)?.nativeName}</Badge>
+                            </div>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span>Impressions:</span>
+                                <span className="font-medium">{lang.totalImpressions.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Clicks:</span>
+                                <span className="font-medium">{lang.totalClicks.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Avg Position:</span>
+                                <span className="font-medium">{lang.averagePosition.toFixed(1)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {multilingualAnalytics.byCountry && multilingualAnalytics.byCountry.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-3">Performance by Country</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {multilingualAnalytics.byCountry.slice(0, 8).map((country) => (
+                          <div key={country.country} className="border rounded-lg p-4">
+                            <h5 className="font-medium mb-2">{country.country}</h5>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span>Impressions:</span>
+                                <span className="font-medium">{country.totalImpressions.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Clicks:</span>
+                                <span className="font-medium">{country.totalClicks.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(!multilingualAnalytics.byLanguage || multilingualAnalytics.byLanguage.length === 0) && 
+                   (!multilingualAnalytics.byCountry || multilingualAnalytics.byCountry.length === 0) && (
+                    <div className="text-center py-8 text-gray-500">
+                      No multilingual analytics data available yet. Data will appear once you start getting traffic from different languages and countries.
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
@@ -748,22 +783,40 @@ export default function SeoManagement() {
                 )}
               />
 
-              <FormField
-                control={seoForm.control}
-                name="keywords"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Keywords</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="keyword1, keyword2, keyword3" />
-                    </FormControl>
-                    <FormDescription>
-                      Comma-separated keywords (optional, less important for modern SEO)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={seoForm.control}
+                  name="keywords"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Keywords</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="keyword1, keyword2, keyword3" />
+                      </FormControl>
+                      <FormDescription>
+                        Comma-separated keywords (optional, less important for modern SEO)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={seoForm.control}
+                  name="hreflangUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hreflang URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://example.com/page" />
+                      </FormControl>
+                      <FormDescription>
+                        URL for this language version (for hreflang tags)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
