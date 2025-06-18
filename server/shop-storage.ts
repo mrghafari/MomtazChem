@@ -34,6 +34,16 @@ import { shopDb } from "./shop-db";
 import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
 
 export interface IShopStorage {
+  // Category management
+  getCategories(): Promise<ShopCategory[]>;
+  getCategoryById(id: number): Promise<ShopCategory | undefined>;
+  getCategoryBySlug(slug: string): Promise<ShopCategory | undefined>;
+  createCategory(category: InsertShopCategory): Promise<ShopCategory>;
+  updateCategory(id: number, category: Partial<InsertShopCategory>): Promise<ShopCategory>;
+  deleteCategory(id: number): Promise<void>;
+  getSubcategories(parentId: number): Promise<ShopCategory[]>;
+  getProductsByCategory(categoryId: number): Promise<ShopProduct[]>;
+  
   // Shop products with inventory management
   getShopProducts(): Promise<ShopProduct[]>;
   getShopProductsByCategory(category: string): Promise<ShopProduct[]>;

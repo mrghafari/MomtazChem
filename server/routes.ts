@@ -5706,6 +5706,158 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // =============================================================================
+  // CATEGORY MANAGEMENT API ROUTES
+  // =============================================================================
+
+  // Get all categories
+  app.get("/api/admin/categories", requireAuth, async (req, res) => {
+    try {
+      const { shopStorage } = await import('./shop-storage');
+      const categories = await shopStorage.getCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch categories" });
+    }
+  });
+
+  // Get category by ID
+  app.get("/api/admin/categories/:id", requireAuth, async (req, res) => {
+    try {
+      const { shopStorage } = await import('./shop-storage');
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid category ID" });
+      }
+      
+      const category = await shopStorage.getCategoryById(id);
+      if (!category) {
+        return res.status(404).json({ success: false, message: "Category not found" });
+      }
+      
+      res.json(category);
+    } catch (error) {
+      console.error("Error fetching category:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch category" });
+    }
+  });
+
+  // Create new category
+  app.post("/api/admin/categories", requireAuth, async (req, res) => {
+    try {
+      const { shopStorage } = await import('./shop-storage');
+      const { insertShopCategorySchema } = await import('../shared/shop-schema');
+      
+      const categoryData = insertShopCategorySchema.parse(req.body);
+      const category = await shopStorage.createCategory(categoryData);
+      
+      res.json({
+        success: true,
+        message: "Category created successfully",
+        category
+      });
+    } catch (error) {
+      console.error("Error creating category:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category data",
+          errors: error.errors
+        });
+      }
+      res.status(500).json({ success: false, message: "Failed to create category" });
+    }
+  });
+
+  // Update category
+  app.put("/api/admin/categories/:id", requireAuth, async (req, res) => {
+    try {
+      const { shopStorage } = await import('./shop-storage');
+      const { insertShopCategorySchema } = await import('../shared/shop-schema');
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid category ID" });
+      }
+      
+      const categoryData = insertShopCategorySchema.partial().parse(req.body);
+      const category = await shopStorage.updateCategory(id, categoryData);
+      
+      res.json({
+        success: true,
+        message: "Category updated successfully",
+        category
+      });
+    } catch (error) {
+      console.error("Error updating category:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category data",
+          errors: error.errors
+        });
+      }
+      res.status(500).json({ success: false, message: "Failed to update category" });
+    }
+  });
+
+  // Delete category
+  app.delete("/api/admin/categories/:id", requireAuth, async (req, res) => {
+    try {
+      const { shopStorage } = await import('./shop-storage');
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid category ID" });
+      }
+      
+      // Check if category has products
+      const products = await shopStorage.getProductsByCategory(id);
+      if (products.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Cannot delete category with existing products"
+        });
+      }
+      
+      // Check if category has subcategories
+      const subcategories = await shopStorage.getSubcategories(id);
+      if (subcategories.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Cannot delete category with existing subcategories"
+        });
+      }
+      
+      await shopStorage.deleteCategory(id);
+      
+      res.json({
+        success: true,
+        message: "Category deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ success: false, message: "Failed to delete category" });
+    }
+  });
+
+  // Get products by category
+  app.get("/api/admin/categories/:id/products", requireAuth, async (req, res) => {
+    try {
+      const { shopStorage } = await import('./shop-storage');
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid category ID" });
+      }
+      
+      const products = await shopStorage.getProductsByCategory(id);
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products by category:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch products" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
