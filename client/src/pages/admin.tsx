@@ -125,7 +125,7 @@ export default function AdminPage() {
     resolver: zodResolver(insertShowcaseProductSchema),
     defaultValues: {
       name: "",
-      category: "fuel-additives",
+      category: categories.length > 0 ? categories[0].value : "",
       description: "",
       shortDescription: "",
       priceRange: "Contact for pricing",

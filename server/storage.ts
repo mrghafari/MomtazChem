@@ -79,9 +79,19 @@ export class DatabaseStorage implements IStorage {
 
   // Showcase Product management methods
   async createProduct(insertProduct: InsertShowcaseProduct): Promise<ShowcaseProduct> {
+    // Validate that the category exists
+    const categoryExists = await this.getCategoryBySlug(insertProduct.category);
+    if (!categoryExists) {
+      throw new Error(`Category '${insertProduct.category}' does not exist. Please create the category first.`);
+    }
+
+    // Map category slug to category name for proper storage
+    const categoryName = categoryExists.name;
+
     // Ensure JSON fields are properly handled for PostgreSQL
     const productData = {
       ...insertProduct,
+      category: categoryName, // Store the full category name
       specifications: insertProduct.specifications && typeof insertProduct.specifications === 'object' && !Array.isArray(insertProduct.specifications) && Object.keys(insertProduct.specifications).length > 0 ? insertProduct.specifications : null,
       features: Array.isArray(insertProduct.features) && insertProduct.features.length > 0 ? insertProduct.features : null,
       applications: Array.isArray(insertProduct.applications) && insertProduct.applications.length > 0 ? insertProduct.applications : null,
@@ -113,6 +123,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
+    // If category is being updated, validate it exists and map to category name
+    if (productUpdate.category) {
+      const categoryExists = await this.getCategoryBySlug(productUpdate.category);
+      if (!categoryExists) {
+        throw new Error(`Category '${productUpdate.category}' does not exist.`);
+      }
+      productUpdate.category = categoryExists.name; // Store the full category name
+    }
+
     // Ensure JSON fields are properly handled for PostgreSQL
     const updateData = {
       ...productUpdate,
