@@ -19,12 +19,7 @@ import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User,
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 
-const categories = [
-  { value: "fuel-additives", label: "Fuel Additives", icon: <Beaker className="w-4 h-4" /> },
-  { value: "water-treatment", label: "Water Treatment", icon: <Droplet className="w-4 h-4" /> },
-  { value: "paint-thinner", label: "Paint & Thinner", icon: <Package className="w-4 h-4" /> },
-  { value: "agricultural-fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
-];
+// Categories will be fetched from API
 
 // Inventory status helper functions
 const getInventoryStatusColor = (status: string) => {
@@ -125,7 +120,7 @@ export default function AdminPage() {
     resolver: zodResolver(insertShowcaseProductSchema),
     defaultValues: {
       name: "",
-      category: categories.length > 0 ? categories[0].value : "",
+      category: "",
       description: "",
       shortDescription: "",
       priceRange: "Contact for pricing",
