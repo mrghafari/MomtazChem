@@ -1,4 +1,4 @@
-import { desc, eq, and, like } from "drizzle-orm";
+import { desc, eq, and, like, sql } from "drizzle-orm";
 import { seoDb } from "./seo-db";
 import {
   seoSettings,
@@ -77,15 +77,24 @@ export class SeoStorage implements ISeoStorage {
   }
 
   async getSeoSettingByPage(pageType: string, pageIdentifier?: string): Promise<SeoSetting | undefined> {
-    const conditions = [eq(seoSettings.pageType, pageType), eq(seoSettings.isActive, true)];
-    
+    let query = seoDb.select().from(seoSettings).where(
+      and(
+        eq(seoSettings.pageType, pageType),
+        eq(seoSettings.isActive, true)
+      )
+    );
+
     if (pageIdentifier) {
-      conditions.push(eq(seoSettings.pageIdentifier, pageIdentifier));
-    } else {
-      conditions.push(eq(seoSettings.pageIdentifier, null));
+      query = seoDb.select().from(seoSettings).where(
+        and(
+          eq(seoSettings.pageType, pageType),
+          eq(seoSettings.pageIdentifier, pageIdentifier),
+          eq(seoSettings.isActive, true)
+        )
+      );
     }
 
-    const [setting] = await seoDb.select().from(seoSettings).where(and(...conditions));
+    const [setting] = await query;
     return setting;
   }
 
@@ -237,10 +246,14 @@ export class SeoStorage implements ISeoStorage {
   }
 
   async incrementRedirectHit(id: number): Promise<void> {
-    await seoDb
-      .update(redirects)
-      .set({ hitCount: redirects.hitCount + 1 })
-      .where(eq(redirects.id, id));
+    // Get current redirect first
+    const redirect = await this.getRedirectByFromUrl('');
+    if (redirect) {
+      await seoDb
+        .update(redirects)
+        .set({ hitCount: (redirect.hitCount || 0) + 1 })
+        .where(eq(redirects.id, id));
+    }
   }
 
   async generateRobotsTxt(): Promise<string> {
@@ -250,7 +263,7 @@ export class SeoStorage implements ISeoStorage {
     let robotsTxt = 'User-agent: *\n';
     
     // Add disallow rules based on robots meta settings
-    if (globalSetting?.robots?.includes('noindex')) {
+    if (globalSetting?.robots && globalSetting.robots.includes('noindex')) {
       robotsTxt += 'Disallow: /\n';
     } else {
       robotsTxt += 'Disallow: /admin/\n';
@@ -284,7 +297,7 @@ export class SeoStorage implements ISeoStorage {
     }
     
     // Check for duplicate settings
-    const existing = await this.getSeoSettingByPage(setting.pageType, setting.pageIdentifier);
+    const existing = await this.getSeoSettingByPage(setting.pageType, setting.pageIdentifier || undefined);
     if (existing) {
       errors.push('SEO settings already exist for this page');
     }

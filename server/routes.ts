@@ -5858,6 +5858,200 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // =============================================================================
+  // SEO MANAGEMENT ROUTES
+  // =============================================================================
+
+  // Get all SEO settings
+  app.get("/api/admin/seo/settings", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const settings = await seoStorage.getSeoSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching SEO settings:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch SEO settings" });
+    }
+  });
+
+  // Create SEO setting
+  app.post("/api/admin/seo/settings", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const { insertSeoSettingSchema } = await import('../shared/schema');
+      
+      const validatedData = insertSeoSettingSchema.parse(req.body);
+      
+      // Validate SEO settings
+      const validationErrors = await seoStorage.validateSeoSettings(validatedData);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: validationErrors
+        });
+      }
+      
+      const setting = await seoStorage.createSeoSetting(validatedData);
+      res.status(201).json({
+        success: true,
+        message: "SEO setting created successfully",
+        data: setting
+      });
+    } catch (error) {
+      console.error("Error creating SEO setting:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: error.errors
+        });
+      }
+      res.status(500).json({ success: false, message: "Failed to create SEO setting" });
+    }
+  });
+
+  // Update SEO setting
+  app.put("/api/admin/seo/settings/:id", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const { insertSeoSettingSchema } = await import('../shared/schema');
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid SEO setting ID" });
+      }
+      
+      const validatedData = insertSeoSettingSchema.partial().parse(req.body);
+      const setting = await seoStorage.updateSeoSetting(id, validatedData);
+      
+      res.json({
+        success: true,
+        message: "SEO setting updated successfully",
+        data: setting
+      });
+    } catch (error) {
+      console.error("Error updating SEO setting:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: error.errors
+        });
+      }
+      res.status(500).json({ success: false, message: "Failed to update SEO setting" });
+    }
+  });
+
+  // Delete SEO setting
+  app.delete("/api/admin/seo/settings/:id", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid SEO setting ID" });
+      }
+      
+      await seoStorage.deleteSeoSetting(id);
+      res.json({
+        success: true,
+        message: "SEO setting deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting SEO setting:", error);
+      res.status(500).json({ success: false, message: "Failed to delete SEO setting" });
+    }
+  });
+
+  // Get SEO analytics summary
+  app.get("/api/admin/seo/analytics", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const summary = await seoStorage.getSeoAnalyticsSummary();
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching SEO analytics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch SEO analytics" });
+    }
+  });
+
+  // Get sitemap entries
+  app.get("/api/admin/seo/sitemap", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const entries = await seoStorage.getSitemapEntries();
+      res.json(entries);
+    } catch (error) {
+      console.error("Error fetching sitemap entries:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch sitemap entries" });
+    }
+  });
+
+  // Generate and serve XML sitemap
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const sitemapXml = await seoStorage.generateSitemap();
+      res.set('Content-Type', 'application/xml');
+      res.send(sitemapXml);
+    } catch (error) {
+      console.error("Error generating sitemap:", error);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
+  // Generate and serve robots.txt
+  app.get("/robots.txt", async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const robotsTxt = await seoStorage.generateRobotsTxt();
+      res.set('Content-Type', 'text/plain');
+      res.send(robotsTxt);
+    } catch (error) {
+      console.error("Error generating robots.txt:", error);
+      res.status(500).send("Error generating robots.txt");
+    }
+  });
+
+  // Get redirects
+  app.get("/api/admin/seo/redirects", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const redirectsList = await seoStorage.getRedirects();
+      res.json(redirectsList);
+    } catch (error) {
+      console.error("Error fetching redirects:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch redirects" });
+    }
+  });
+
+  // Create redirect
+  app.post("/api/admin/seo/redirects", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const { insertRedirectSchema } = await import('../shared/schema');
+      
+      const validatedData = insertRedirectSchema.parse(req.body);
+      const redirect = await seoStorage.createRedirect(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        message: "Redirect created successfully",
+        data: redirect
+      });
+    } catch (error) {
+      console.error("Error creating redirect:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: error.errors
+        });
+      }
+      res.status(500).json({ success: false, message: "Failed to create redirect" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -43,6 +43,7 @@ import QuotePage from "@/pages/quote";
 import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
 import CategoryManagement from "@/pages/category-management";
+import SeoManagement from "@/pages/seo-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -79,6 +80,7 @@ function Router() {
           <Route path="/crm" component={CRMPage} />
           <Route path="/customer/profile" component={CustomerProfile} />
           <Route path="/category-management" component={CategoryManagement} />
+          <Route path="/seo-management" component={SeoManagement} />
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />
