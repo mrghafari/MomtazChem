@@ -5,5 +5,11 @@ import * as crmSchema from "../shared/customer-schema";
 
 neonConfig.webSocketConstructor = ws;
 
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL must be set. Did you forget to provision a database?",
+  );
+}
+
 export const crmPool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const crmDb = drizzle({ client: crmPool, schema: crmSchema });

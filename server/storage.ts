@@ -77,6 +77,13 @@ export class DatabaseStorage implements IStorage {
     return await showcaseDb.select().from(contacts).orderBy(desc(contacts.createdAt));
   }
 
+  // Category helper method
+  async getCategoryBySlug(slug: string): Promise<{ name: string; slug: string } | undefined> {
+    // For showcase products, we'll use shop categories as the source of truth
+    const category = await shopStorage.getCategoryBySlug(slug);
+    return category ? { name: category.name, slug: category.slug } : undefined;
+  }
+
   // Showcase Product management methods
   async createProduct(insertProduct: InsertShowcaseProduct): Promise<ShowcaseProduct> {
     // Validate that the category exists
