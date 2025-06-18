@@ -200,7 +200,8 @@ export default function CategoryManagement() {
   };
 
   // Get parent categories for dropdown
-  const parentCategories = Array.isArray(categories) ? categories.filter((cat: Category) => !cat.parentId) : [];
+  const categoriesArray = Array.isArray(categories) ? categories as Category[] : [];
+  const parentCategories = categoriesArray.filter((cat: Category) => !cat.parentId);
 
   if (isLoading) {
     return (
@@ -465,13 +466,13 @@ export default function CategoryManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {Array.isArray(categories) && categories.map((category: Category) => (
+              {categoriesArray.map((category: Category) => (
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell className="text-gray-600">{category.slug}</TableCell>
                   <TableCell>
-                    {category.parentId && Array.isArray(categories)
-                      ? categories.find((c: Category) => c.id === category.parentId)?.name || "-"
+                    {category.parentId
+                      ? categoriesArray.find((c: Category) => c.id === category.parentId)?.name || "-"
                       : "-"}
                   </TableCell>
                   <TableCell>{category.displayOrder}</TableCell>
@@ -510,7 +511,7 @@ export default function CategoryManagement() {
               ))}
             </TableBody>
           </Table>
-          {(!Array.isArray(categories) || categories.length === 0) && (
+          {categoriesArray.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               هیچ دسته‌بندی‌ای یافت نشد
             </div>

@@ -142,6 +142,75 @@ export interface IShopStorage {
 }
 
 export class ShopStorage implements IShopStorage {
+  // Category Management
+  async getCategories(): Promise<ShopCategory[]> {
+    return await shopDb
+      .select()
+      .from(shopCategories)
+      .orderBy(shopCategories.displayOrder, shopCategories.name);
+  }
+
+  async getCategoryById(id: number): Promise<ShopCategory | undefined> {
+    const result = await shopDb
+      .select()
+      .from(shopCategories)
+      .where(eq(shopCategories.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async getCategoryBySlug(slug: string): Promise<ShopCategory | undefined> {
+    const result = await shopDb
+      .select()
+      .from(shopCategories)
+      .where(eq(shopCategories.slug, slug))
+      .limit(1);
+    return result[0];
+  }
+
+  async createCategory(categoryData: InsertShopCategory): Promise<ShopCategory> {
+    const result = await shopDb
+      .insert(shopCategories)
+      .values(categoryData)
+      .returning();
+    return result[0];
+  }
+
+  async updateCategory(id: number, categoryData: Partial<InsertShopCategory>): Promise<ShopCategory> {
+    const result = await shopDb
+      .update(shopCategories)
+      .set({ ...categoryData, updatedAt: new Date() })
+      .where(eq(shopCategories.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    await shopDb
+      .delete(shopCategories)
+      .where(eq(shopCategories.id, id));
+  }
+
+  async getSubcategories(parentId: number): Promise<ShopCategory[]> {
+    return await shopDb
+      .select()
+      .from(shopCategories)
+      .where(eq(shopCategories.parentId, parentId))
+      .orderBy(shopCategories.displayOrder, shopCategories.name);
+  }
+
+  async getProductsByCategory(categoryId: number): Promise<ShopProduct[]> {
+    // Get category info first
+    const category = await this.getCategoryById(categoryId);
+    if (!category) return [];
+    
+    return await shopDb
+      .select()
+      .from(shopProducts)
+      .where(eq(shopProducts.category, category.name))
+      .orderBy(shopProducts.name);
+  }
+
   // Shop Products
   async getShopProducts(): Promise<ShopProduct[]> {
     return await shopDb
