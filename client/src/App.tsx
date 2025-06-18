@@ -1,3 +1,4 @@
+import React, { lazy } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -41,6 +42,7 @@ import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
 import QuotePage from "@/pages/quote";
 import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
+import CategoryManagement from "@/pages/category-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -76,6 +78,7 @@ function Router() {
           <Route path="/customer/reset-password" component={CustomerResetPassword} />
           <Route path="/crm" component={CRMPage} />
           <Route path="/customer/profile" component={CustomerProfile} />
+          <Route path="/category-management" component={CategoryManagement} />
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />
