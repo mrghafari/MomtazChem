@@ -10,6 +10,70 @@ import { z } from "zod";
 export * from "./showcase-schema";
 export * from "./shop-schema";
 
+// =============================================================================
+// SEO MANAGEMENT SCHEMA
+// =============================================================================
+
+// SEO Settings table for managing site-wide and page-specific SEO
+export const seoSettings = pgTable("seo_settings", {
+  id: serial("id").primaryKey(),
+  pageType: text("page_type").notNull(), // 'global', 'home', 'products', 'category', 'about', etc.
+  pageIdentifier: text("page_identifier"), // category ID, product ID, or null for global
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  keywords: text("keywords"), // comma-separated keywords
+  ogTitle: text("og_title"), // Open Graph title
+  ogDescription: text("og_description"), // Open Graph description
+  ogImage: text("og_image"), // Open Graph image URL
+  twitterTitle: text("twitter_title"),
+  twitterDescription: text("twitter_description"),
+  twitterImage: text("twitter_image"),
+  canonicalUrl: text("canonical_url"),
+  robots: text("robots").default("index,follow"), // robots meta tag
+  schema: json("schema"), // JSON-LD structured data
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(0), // for ordering/priority
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// SEO Analytics table for tracking performance
+export const seoAnalytics = pgTable("seo_analytics", {
+  id: serial("id").primaryKey(),
+  seoSettingId: integer("seo_setting_id").notNull().references(() => seoSettings.id),
+  pageUrl: text("page_url").notNull(),
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  position: decimal("position", { precision: 10, scale: 2 }),
+  ctr: decimal("ctr", { precision: 5, scale: 4 }), // click-through rate
+  dateRecorded: timestamp("date_recorded").notNull().defaultNow(),
+  source: text("source").default("manual"), // 'google_search_console', 'manual', etc.
+});
+
+// Sitemap entries for XML sitemap generation
+export const sitemapEntries = pgTable("sitemap_entries", {
+  id: serial("id").primaryKey(),
+  url: text("url").notNull().unique(),
+  priority: decimal("priority", { precision: 3, scale: 2 }).default("0.5"),
+  changeFreq: text("change_freq").default("weekly"), // always, hourly, daily, weekly, monthly, yearly, never
+  lastModified: timestamp("last_modified").notNull().defaultNow(),
+  isActive: boolean("is_active").default(true),
+  pageType: text("page_type"), // 'product', 'category', 'page', etc.
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Redirects table for managing URL redirects
+export const redirects = pgTable("redirects", {
+  id: serial("id").primaryKey(),
+  fromUrl: text("from_url").notNull().unique(),
+  toUrl: text("to_url").notNull(),
+  statusCode: integer("status_code").default(301), // 301, 302, etc.
+  isActive: boolean("is_active").default(true),
+  hitCount: integer("hit_count").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Admin roles table
 export const adminRoles = pgTable("admin_roles", {
   id: serial("id").primaryKey(),
@@ -232,3 +296,42 @@ export const insertLeadActivitySchema = createInsertSchema(leadActivities).omit(
 
 export type InsertLeadActivity = z.infer<typeof insertLeadActivitySchema>;
 export type LeadActivity = typeof leadActivities.$inferSelect;
+
+// =============================================================================
+// SEO SCHEMA TYPES AND VALIDATION
+// =============================================================================
+
+export const insertSeoSettingSchema = createInsertSchema(seoSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSeoAnalyticsSchema = createInsertSchema(seoAnalytics).omit({
+  id: true,
+  dateRecorded: true,
+});
+
+export const insertSitemapEntrySchema = createInsertSchema(sitemapEntries).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRedirectSchema = createInsertSchema(redirects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  hitCount: true,
+});
+
+export type InsertSeoSetting = z.infer<typeof insertSeoSettingSchema>;
+export type SeoSetting = typeof seoSettings.$inferSelect;
+
+export type InsertSeoAnalytics = z.infer<typeof insertSeoAnalyticsSchema>;
+export type SeoAnalytics = typeof seoAnalytics.$inferSelect;
+
+export type InsertSitemapEntry = z.infer<typeof insertSitemapEntrySchema>;
+export type SitemapEntry = typeof sitemapEntries.$inferSelect;
+
+export type InsertRedirect = z.infer<typeof insertRedirectSchema>;
+export type Redirect = typeof redirects.$inferSelect;
