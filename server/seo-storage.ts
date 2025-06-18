@@ -218,13 +218,15 @@ export class SeoStorage implements ISeoStorage {
   }
 
   async getSitemapEntries(language?: string): Promise<SitemapEntry[]> {
-    let query = seoDb.select().from(sitemapEntries).where(eq(sitemapEntries.isActive, true));
-    
     if (language) {
-      query = query.where(and(eq(sitemapEntries.isActive, true), eq(sitemapEntries.language, language)));
+      return await seoDb.select().from(sitemapEntries)
+        .where(and(eq(sitemapEntries.isActive, true), eq(sitemapEntries.language, language)))
+        .orderBy(desc(sitemapEntries.priority));
     }
     
-    return await query.orderBy(desc(sitemapEntries.priority));
+    return await seoDb.select().from(sitemapEntries)
+      .where(eq(sitemapEntries.isActive, true))
+      .orderBy(desc(sitemapEntries.priority));
   }
 
   async updateSitemapEntry(id: number, entryUpdate: Partial<InsertSitemapEntry>): Promise<SitemapEntry> {
@@ -410,8 +412,6 @@ export class SeoStorage implements ISeoStorage {
   }
 
   async getMultilingualKeywords(seoSettingId?: number, language?: string): Promise<MultilingualKeyword[]> {
-    let query = seoDb.select().from(multilingualKeywords);
-    
     const conditions = [];
     if (seoSettingId) {
       conditions.push(eq(multilingualKeywords.seoSettingId, seoSettingId));
@@ -421,10 +421,13 @@ export class SeoStorage implements ISeoStorage {
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await seoDb.select().from(multilingualKeywords)
+        .where(and(...conditions))
+        .orderBy(desc(multilingualKeywords.createdAt));
     }
     
-    return await query.orderBy(desc(multilingualKeywords.createdAt));
+    return await seoDb.select().from(multilingualKeywords)
+      .orderBy(desc(multilingualKeywords.createdAt));
   }
 
   async updateKeywordPosition(id: number, position: number): Promise<void> {
@@ -447,13 +450,14 @@ export class SeoStorage implements ISeoStorage {
       language: string;
     }>;
   }> {
-    let query = seoDb.select().from(multilingualKeywords);
+    let keywords: MultilingualKeyword[];
     
     if (language) {
-      query = query.where(eq(multilingualKeywords.language, language));
+      keywords = await seoDb.select().from(multilingualKeywords)
+        .where(eq(multilingualKeywords.language, language));
+    } else {
+      keywords = await seoDb.select().from(multilingualKeywords);
     }
-    
-    const keywords = await query;
     
     const totalKeywords = keywords.length;
     const averagePosition = keywords.length > 0 

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ interface SeoSetting {
   id: number;
   pageType: string;
   pageIdentifier?: string;
+  language: string;
   title: string;
   description: string;
   keywords?: string;
@@ -38,6 +39,37 @@ interface SeoSetting {
   schema?: any;
   isActive: boolean;
   priority: number;
+  hreflangUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface SupportedLanguage {
+  id: number;
+  code: string;
+  name: string;
+  nativeName: string;
+  direction: string;
+  isDefault: boolean;
+  isActive: boolean;
+  priority: number;
+  googleAnalyticsCode?: string;
+  searchConsoleProperty?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface MultilingualKeyword {
+  id: number;
+  seoSettingId: number;
+  keyword: string;
+  language: string;
+  searchVolume: number;
+  difficulty: number;
+  currentPosition?: number;
+  targetPosition: number;
+  isTracking: boolean;
+  lastChecked?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -66,6 +98,7 @@ interface Redirect {
 const seoSettingFormSchema = z.object({
   pageType: z.string().min(1, "Page type is required"),
   pageIdentifier: z.string().optional(),
+  language: z.string().min(1, "Language is required"),
   title: z.string().min(10, "Title must be at least 10 characters").max(60, "Title should not exceed 60 characters"),
   description: z.string().min(50, "Description must be at least 50 characters").max(160, "Description should not exceed 160 characters"),
   keywords: z.string().optional(),
@@ -76,9 +109,20 @@ const seoSettingFormSchema = z.object({
   twitterDescription: z.string().optional(),
   twitterImage: z.string().url().optional().or(z.literal("")),
   canonicalUrl: z.string().url().optional().or(z.literal("")),
+  hreflangUrl: z.string().url().optional().or(z.literal("")),
   robots: z.string().default("index,follow"),
   isActive: z.boolean().default(true),
   priority: z.number().min(0).max(100).default(0),
+});
+
+const keywordFormSchema = z.object({
+  seoSettingId: z.number().min(1, "SEO setting is required"),
+  keyword: z.string().min(1, "Keyword is required"),
+  language: z.string().min(1, "Language is required"),
+  searchVolume: z.number().min(0).default(0),
+  difficulty: z.number().min(0).max(100).default(0),
+  targetPosition: z.number().min(1).max(100).default(1),
+  isTracking: z.boolean().default(true),
 });
 
 const redirectFormSchema = z.object({
@@ -93,12 +137,27 @@ export default function SeoManagement() {
   const [selectedSetting, setSelectedSetting] = useState<SeoSetting | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("fa");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Queries
   const { data: seoSettings = [], isLoading: isLoadingSettings } = useQuery<SeoSetting[]>({
-    queryKey: ["/api/admin/seo/settings"],
+    queryKey: ["/api/admin/seo/settings", selectedLanguage],
+    queryFn: () => fetch(`/api/admin/seo/settings?language=${selectedLanguage}`).then(res => res.json()),
+  });
+
+  const { data: supportedLanguages = [], isLoading: isLoadingLanguages } = useQuery<SupportedLanguage[]>({
+    queryKey: ["/api/admin/seo/languages"],
+  });
+
+  const { data: multilingualAnalytics, isLoading: isLoadingMultilingualAnalytics } = useQuery({
+    queryKey: ["/api/admin/seo/multilingual-analytics"],
+  });
+
+  const { data: keywordPerformance, isLoading: isLoadingKeywordPerformance } = useQuery({
+    queryKey: ["/api/admin/seo/keywords/performance", selectedLanguage],
+    queryFn: () => fetch(`/api/admin/seo/keywords/performance?language=${selectedLanguage}`).then(res => res.json()),
   });
 
   const { data: seoAnalytics, isLoading: isLoadingAnalytics } = useQuery<{
@@ -130,11 +189,25 @@ export default function SeoManagement() {
     resolver: zodResolver(seoSettingFormSchema),
     defaultValues: {
       pageType: "",
+      language: selectedLanguage,
       title: "",
       description: "",
       robots: "index,follow",
       isActive: true,
       priority: 0,
+    },
+  });
+
+  const keywordForm = useForm<z.infer<typeof keywordFormSchema>>({
+    resolver: zodResolver(keywordFormSchema),
+    defaultValues: {
+      seoSettingId: 0,
+      keyword: "",
+      language: selectedLanguage,
+      searchVolume: 0,
+      difficulty: 0,
+      targetPosition: 1,
+      isTracking: true,
     },
   });
 
@@ -276,10 +349,18 @@ export default function SeoManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             SEO Settings
+          </TabsTrigger>
+          <TabsTrigger value="languages" className="flex items-center gap-2">
+            <Languages className="h-4 w-4" />
+            Languages
+          </TabsTrigger>
+          <TabsTrigger value="keywords" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Keywords
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -298,14 +379,14 @@ export default function SeoManagement() {
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>SEO Settings</CardTitle>
+              <CardTitle>Multilingual SEO Settings</CardTitle>
               <CardDescription>
-                Configure meta tags, Open Graph data, and other SEO settings for different pages
+                Configure meta tags, Open Graph data, and SEO settings for different languages and pages
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="mb-4">
-                <div className="relative">
+              <div className="mb-4 flex gap-4">
+                <div className="relative flex-1">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search SEO settings..."
@@ -314,6 +395,19 @@ export default function SeoManagement() {
                     className="pl-8"
                   />
                 </div>
+                <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Languages</SelectItem>
+                    {supportedLanguages.map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code}>
+                        {lang.nativeName} ({lang.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {isLoadingSettings ? (
@@ -330,6 +424,7 @@ export default function SeoManagement() {
                               {setting.isActive ? "Active" : "Inactive"}
                             </Badge>
                             <Badge variant="outline">{setting.pageType}</Badge>
+                            <Badge variant="secondary">{setting.language}</Badge>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                             {setting.description}

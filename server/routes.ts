@@ -5866,11 +5866,145 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   app.get("/api/admin/seo/settings", requireAuth, async (req, res) => {
     try {
       const { seoStorage } = await import('./seo-storage');
-      const settings = await seoStorage.getSeoSettings();
+      const language = req.query.language as string;
+      const settings = await seoStorage.getSeoSettings(language);
       res.json(settings);
     } catch (error) {
       console.error("Error fetching SEO settings:", error);
       res.status(500).json({ success: false, message: "Failed to fetch SEO settings" });
+    }
+  });
+
+  // Get supported languages
+  app.get("/api/admin/seo/languages", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const languages = await seoStorage.getSupportedLanguages();
+      res.json(languages);
+    } catch (error) {
+      console.error("Error fetching supported languages:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch supported languages" });
+    }
+  });
+
+  // Create supported language
+  app.post("/api/admin/seo/languages", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const { insertSupportedLanguageSchema } = await import('../shared/schema');
+      
+      const validatedData = insertSupportedLanguageSchema.parse(req.body);
+      const language = await seoStorage.createSupportedLanguage(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        message: "Language created successfully",
+        data: language
+      });
+    } catch (error) {
+      console.error("Error creating language:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: error.errors
+        });
+      }
+      res.status(500).json({ success: false, message: "Failed to create language" });
+    }
+  });
+
+  // Get multilingual analytics
+  app.get("/api/admin/seo/multilingual-analytics", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const analytics = await seoStorage.getMultilingualAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching multilingual analytics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch multilingual analytics" });
+    }
+  });
+
+  // Get keywords performance
+  app.get("/api/admin/seo/keywords/performance", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const language = req.query.language as string;
+      const performance = await seoStorage.getKeywordPerformance(language);
+      res.json(performance);
+    } catch (error) {
+      console.error("Error fetching keyword performance:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch keyword performance" });
+    }
+  });
+
+  // Create multilingual keyword
+  app.post("/api/admin/seo/keywords", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const { insertMultilingualKeywordSchema } = await import('../shared/schema');
+      
+      const validatedData = insertMultilingualKeywordSchema.parse(req.body);
+      const keyword = await seoStorage.createMultilingualKeyword(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        message: "Keyword created successfully",
+        data: keyword
+      });
+    } catch (error) {
+      console.error("Error creating keyword:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: error.errors
+        });
+      }
+      res.status(500).json({ success: false, message: "Failed to create keyword" });
+    }
+  });
+
+  // Generate hreflang tags
+  app.get("/api/admin/seo/hreflang/:pageType", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const { pageType } = req.params;
+      const pageIdentifier = req.query.pageIdentifier as string;
+      
+      const hreflangTags = await seoStorage.generateHreflangTags(pageType, pageIdentifier);
+      res.json({ tags: hreflangTags });
+    } catch (error) {
+      console.error("Error generating hreflang tags:", error);
+      res.status(500).json({ success: false, message: "Failed to generate hreflang tags" });
+    }
+  });
+
+  // Generate multilingual sitemap
+  app.get("/api/admin/seo/sitemap/multilingual", requireAuth, async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const sitemapXml = await seoStorage.generateMultilingualSitemap();
+      res.set('Content-Type', 'application/xml');
+      res.send(sitemapXml);
+    } catch (error) {
+      console.error("Error generating multilingual sitemap:", error);
+      res.status(500).send("Error generating multilingual sitemap");
+    }
+  });
+
+  // Generate language-specific sitemap
+  app.get("/sitemap-:language.xml", async (req, res) => {
+    try {
+      const { seoStorage } = await import('./seo-storage');
+      const { language } = req.params;
+      const sitemapXml = await seoStorage.generateSitemap(language);
+      res.set('Content-Type', 'application/xml');
+      res.send(sitemapXml);
+    } catch (error) {
+      console.error("Error generating language-specific sitemap:", error);
+      res.status(500).send("Error generating sitemap");
     }
   });
 
