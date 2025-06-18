@@ -110,14 +110,21 @@ export class SeoStorage implements ISeoStorage {
   }
 
   async getSeoSettings(language?: string): Promise<SeoSetting[]> {
-    if (language) {
-      return await seoDb.select().from(seoSettings)
-        .where(eq(seoSettings.language, language))
+    try {
+      if (language && language !== 'all') {
+        const results = await seoDb.select().from(seoSettings)
+          .where(eq(seoSettings.language, language))
+          .orderBy(desc(seoSettings.createdAt));
+        return results;
+      }
+      
+      const results = await seoDb.select().from(seoSettings)
         .orderBy(desc(seoSettings.createdAt));
+      return results;
+    } catch (error) {
+      console.error('Error in getSeoSettings:', error);
+      return [];
     }
-    
-    return await seoDb.select().from(seoSettings)
-      .orderBy(desc(seoSettings.createdAt));
   }
 
   async getSeoSettingById(id: number): Promise<SeoSetting | undefined> {

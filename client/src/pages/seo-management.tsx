@@ -144,7 +144,14 @@ export default function SeoManagement() {
   // Queries
   const { data: seoSettings = [], isLoading: isLoadingSettings } = useQuery<SeoSetting[]>({
     queryKey: ["/api/admin/seo/settings", selectedLanguage],
-    queryFn: () => fetch(`/api/admin/seo/settings?language=${selectedLanguage}`).then(res => res.json()),
+    queryFn: async () => {
+      const url = selectedLanguage === "all" ? 
+        "/api/admin/seo/settings" : 
+        `/api/admin/seo/settings?language=${selectedLanguage}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    },
   });
 
   const { data: supportedLanguages = [], isLoading: isLoadingLanguages } = useQuery<SupportedLanguage[]>({
@@ -153,11 +160,20 @@ export default function SeoManagement() {
 
   const { data: multilingualAnalytics, isLoading: isLoadingMultilingualAnalytics } = useQuery({
     queryKey: ["/api/admin/seo/multilingual-analytics"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/seo/multilingual-analytics");
+      const data = await res.json();
+      return data || {};
+    },
   });
 
   const { data: keywordPerformance, isLoading: isLoadingKeywordPerformance } = useQuery({
     queryKey: ["/api/admin/seo/keywords/performance", selectedLanguage],
-    queryFn: () => fetch(`/api/admin/seo/keywords/performance?language=${selectedLanguage}`).then(res => res.json()),
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/seo/keywords/performance?language=${selectedLanguage}`);
+      const data = await res.json();
+      return data || { totalKeywords: 0, averagePosition: 0, topKeywords: [] };
+    },
   });
 
   const { data: seoAnalytics, isLoading: isLoadingAnalytics } = useQuery<{
@@ -328,10 +344,11 @@ export default function SeoManagement() {
     createRedirect.mutate(data);
   };
 
-  const filteredSettings = (seoSettings as SeoSetting[]).filter((setting: SeoSetting) =>
-    setting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    setting.pageType.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSettings = Array.isArray(seoSettings) ? 
+    seoSettings.filter((setting: SeoSetting) =>
+      setting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      setting.pageType.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -479,11 +496,11 @@ export default function SeoManagement() {
                 <div className="text-center py-8">Loading multilingual analytics...</div>
               ) : multilingualAnalytics ? (
                 <div className="space-y-6">
-                  {multilingualAnalytics.byLanguage && multilingualAnalytics.byLanguage.length > 0 && (
+                  {multilingualAnalytics?.byLanguage && multilingualAnalytics.byLanguage.length > 0 && (
                     <div>
                       <h4 className="font-semibold mb-3">Performance by Language</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {multilingualAnalytics.byLanguage.map((lang) => (
+                        {multilingualAnalytics.byLanguage.map((lang: any) => (
                           <div key={lang.language} className="border rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
                               <h5 className="font-medium">{lang.language.toUpperCase()}</h5>
@@ -509,11 +526,11 @@ export default function SeoManagement() {
                     </div>
                   )}
 
-                  {multilingualAnalytics.byCountry && multilingualAnalytics.byCountry.length > 0 && (
+                  {multilingualAnalytics?.byCountry && multilingualAnalytics.byCountry.length > 0 && (
                     <div>
                       <h4 className="font-semibold mb-3">Performance by Country</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {multilingualAnalytics.byCountry.slice(0, 8).map((country) => (
+                        {multilingualAnalytics.byCountry.slice(0, 8).map((country: any) => (
                           <div key={country.country} className="border rounded-lg p-4">
                             <h5 className="font-medium mb-2">{country.country}</h5>
                             <div className="space-y-1 text-sm">
@@ -532,8 +549,8 @@ export default function SeoManagement() {
                     </div>
                   )}
 
-                  {(!multilingualAnalytics.byLanguage || multilingualAnalytics.byLanguage.length === 0) && 
-                   (!multilingualAnalytics.byCountry || multilingualAnalytics.byCountry.length === 0) && (
+                  {(!multilingualAnalytics?.byLanguage || multilingualAnalytics.byLanguage.length === 0) && 
+                   (!multilingualAnalytics?.byCountry || multilingualAnalytics.byCountry.length === 0) && (
                     <div className="text-center py-8 text-gray-500">
                       No multilingual analytics data available yet. Data will appear once you start getting traffic from different languages and countries.
                     </div>
