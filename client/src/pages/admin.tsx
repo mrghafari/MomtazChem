@@ -639,9 +639,9 @@ export default function AdminPage() {
       )}
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-        <TabsList className={`grid w-full grid-cols-${Math.min(categories.length + 1, 6)}`}>
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="all">All Products</TabsTrigger>
-          {categories.map((category: any) => (
+          {categories.slice(0, 4).map((category: CategoryOption) => (
             <TabsTrigger key={category.value} value={category.value}>
               <span className="flex items-center gap-2">
                 {category.icon}
@@ -717,8 +717,8 @@ export default function AdminPage() {
                       <div>
                         <CardTitle className="text-lg">{product.name}</CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-2">
-                          {categories.find(c => c.value === product.category)?.icon}
-                          {categories.find(c => c.value === product.category)?.label}
+                          {categories.find((c: CategoryOption) => c.value === product.category)?.icon}
+                          {categories.find((c: CategoryOption) => c.value === product.category)?.label}
                         </CardDescription>
                       </div>
                       <Badge variant={product.isActive ? "default" : "secondary"}>
