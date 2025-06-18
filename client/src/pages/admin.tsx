@@ -94,6 +94,34 @@ export default function AdminPage() {
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
 
+  // Fetch categories from API
+  const { data: categoriesData = [] } = useQuery({
+    queryKey: ["/api/admin/categories"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/categories");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to fetch categories');
+      }
+      return data;
+    },
+    enabled: isAuthenticated,
+  });
+
+  // Transform categories data for use in form
+  const categories = categoriesData.map((cat: any) => ({
+    value: cat.slug,
+    label: cat.name,
+    icon: <Package className="w-4 h-4" />
+  }));
+
+  // Define category type for TypeScript
+  type CategoryOption = {
+    value: string;
+    label: string;
+    icon: React.ReactNode;
+  };
+
   // All hooks must be called before any conditional returns
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: selectedCategory === "all" ? ["/api/products"] : ["/api/products", selectedCategory],
@@ -611,9 +639,9 @@ export default function AdminPage() {
       )}
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className={`grid w-full grid-cols-${Math.min(categories.length + 1, 6)}`}>
           <TabsTrigger value="all">All Products</TabsTrigger>
-          {categories.map((category) => (
+          {categories.map((category: any) => (
             <TabsTrigger key={category.value} value={category.value}>
               <span className="flex items-center gap-2">
                 {category.icon}
@@ -884,7 +912,7 @@ export default function AdminPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories.map((category) => (
+                          {categories.map((category: CategoryOption) => (
                             <SelectItem key={category.value} value={category.value}>
                               {category.label}
                             </SelectItem>
