@@ -311,16 +311,16 @@ export default function CategoryManagement() {
                         <FormItem>
                           <FormLabel>دسته‌بندی والد</FormLabel>
                           <Select
-                            value={field.value?.toString() || ""}
-                            onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
+                            value={field.value?.toString() || "none"}
+                            onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="انتخاب دسته‌بندی والد (اختیاری)" />
+                                <SelectValue placeholder="Select parent category (optional)" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">بدون والد</SelectItem>
+                              <SelectItem value="none">No Parent</SelectItem>
                               {parentCategories.map((category: Category) => (
                                 <SelectItem key={category.id} value={category.id.toString()}>
                                   {category.name}
