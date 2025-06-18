@@ -97,19 +97,31 @@ export default function SeoManagement() {
   const queryClient = useQueryClient();
 
   // Queries
-  const { data: seoSettings = [], isLoading: isLoadingSettings } = useQuery({
+  const { data: seoSettings = [], isLoading: isLoadingSettings } = useQuery<SeoSetting[]>({
     queryKey: ["/api/admin/seo/settings"],
   });
 
-  const { data: seoAnalytics, isLoading: isLoadingAnalytics } = useQuery({
+  const { data: seoAnalytics, isLoading: isLoadingAnalytics } = useQuery<{
+    totalImpressions: number;
+    totalClicks: number;
+    averageCtr: number;
+    averagePosition: number;
+    topPages: Array<{
+      pageUrl: string;
+      impressions: number;
+      clicks: number;
+      ctr: number;
+      position: number;
+    }>;
+  }>({
     queryKey: ["/api/admin/seo/analytics"],
   });
 
-  const { data: sitemapEntries = [], isLoading: isLoadingSitemap } = useQuery({
+  const { data: sitemapEntries = [], isLoading: isLoadingSitemap } = useQuery<SitemapEntry[]>({
     queryKey: ["/api/admin/seo/sitemap"],
   });
 
-  const { data: redirects = [], isLoading: isLoadingRedirects } = useQuery({
+  const { data: redirects = [], isLoading: isLoadingRedirects } = useQuery<Redirect[]>({
     queryKey: ["/api/admin/seo/redirects"],
   });
 
@@ -243,7 +255,7 @@ export default function SeoManagement() {
     createRedirect.mutate(data);
   };
 
-  const filteredSettings = seoSettings.filter((setting: SeoSetting) =>
+  const filteredSettings = (seoSettings as SeoSetting[]).filter((setting: SeoSetting) =>
     setting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     setting.pageType.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -427,7 +439,7 @@ export default function SeoManagement() {
                 <div className="text-center py-8">Loading sitemap entries...</div>
               ) : (
                 <div className="space-y-2">
-                  {sitemapEntries.map((entry: SitemapEntry) => (
+                  {(sitemapEntries as SitemapEntry[]).map((entry: SitemapEntry) => (
                     <div key={entry.id} className="flex items-center justify-between p-3 border rounded">
                       <div>
                         <p className="font-medium">{entry.url}</p>
@@ -441,7 +453,7 @@ export default function SeoManagement() {
                     </div>
                   ))}
 
-                  {sitemapEntries.length === 0 && (
+                  {(sitemapEntries as SitemapEntry[]).length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       No sitemap entries found.
                     </div>
@@ -522,7 +534,7 @@ export default function SeoManagement() {
                 <div className="text-center py-8">Loading redirects...</div>
               ) : (
                 <div className="space-y-2">
-                  {redirects.map((redirect: Redirect) => (
+                  {(redirects as Redirect[]).map((redirect: Redirect) => (
                     <div key={redirect.id} className="flex items-center justify-between p-3 border rounded">
                       <div>
                         <p className="font-medium">{redirect.fromUrl} → {redirect.toUrl}</p>
@@ -536,7 +548,7 @@ export default function SeoManagement() {
                     </div>
                   ))}
 
-                  {redirects.length === 0 && (
+                  {(redirects as Redirect[]).length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       No redirects configured.
                     </div>
