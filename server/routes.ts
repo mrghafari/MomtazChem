@@ -2527,7 +2527,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't reveal if email exists or not for security
         return res.json({
           success: true,
-          message: "اگر ایمیل معتبر باشد، لینک بازیابی رمز عبور ارسال شد"
+          message: "If the email is valid, password reset link has been sent"
         });
       }
 
@@ -2557,14 +2557,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        message: "لینک بازیابی رمز عبور به ایمیل شما ارسال شد"
+        message: "Password reset link sent to your email"
       });
 
     } catch (error) {
       console.error("Error in forgot password:", error);
       res.status(500).json({
         success: false,
-        message: "خطا در درخواست بازیابی رمز عبور"
+        message: "Error in password reset request"
       });
     }
   });
@@ -2577,14 +2577,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token || !newPassword) {
         return res.status(400).json({
           success: false,
-          message: "توکن و رمز عبور جدید الزامی است"
+          message: "Token and new password are required"
         });
       }
 
       if (newPassword.length < 6) {
         return res.status(400).json({
           success: false,
-          message: "رمز عبور باید حداقل 6 کاراکتر باشد"
+          message: "Password must be at least 6 characters"
         });
       }
 
@@ -2599,7 +2599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (tokenResult.rows.length === 0) {
         return res.status(400).json({
           success: false,
-          message: "توکن نامعتبر یا منقضی شده"
+          message: "Invalid or expired token"
         });
       }
 
@@ -2622,7 +2622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        message: "رمز عبور با موفقیت تغییر کرد"
+        message: "Password successfully changed"
       });
 
     } catch (error) {
