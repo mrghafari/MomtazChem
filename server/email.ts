@@ -310,43 +310,46 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: resetData.email,
-      subject: 'بازیابی رمز عبور - Momtaz Chemical',
+      subject: 'Password Reset - Momtaz Chemical',
       html: `
-        <div style="direction: rtl; text-align: right; font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">بازیابی رمز عبور</h2>
-          <p>سلام ${resetData.firstName ? `${resetData.firstName} ${resetData.lastName || ''}` : ''}،</p>
+        <div style="direction: ltr; text-align: left; font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb;">Password Reset</h2>
+          <p>Hello ${resetData.firstName ? `${resetData.firstName} ${resetData.lastName || ''}` : ''},</p>
           
-          <p>درخواست بازیابی رمز عبور برای حساب کاربری شما دریافت شد.</p>
+          <p>We received a request to reset your password.</p>
           
           <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0;"><strong>برای تنظیم رمز عبور جدید، روی لینک زیر کلیک کنید:</strong></p>
+            <p style="margin: 0;"><strong>To reset your password, click the link below:</strong></p>
             <a href="${resetUrl}" 
                style="display: inline-block; background: #2563eb; color: white; 
                       padding: 12px 24px; text-decoration: none; border-radius: 6px; 
                       margin: 10px 0; font-weight: bold;">
-              تنظیم رمز عبور جدید
+              Reset Password
             </a>
             <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
-              این لینک تا 1 ساعت معتبر است.
+              This link is valid for 1 hour.
+            </p>
+            <p style="margin: 10px 0 0 0; font-size: 12px; color: #888; word-break: break-all;">
+              Or copy this link: ${resetUrl}
             </p>
           </div>
           
-          <p>اگر شما این درخواست را نداده‌اید، این ایمیل را نادیده بگیرید.</p>
+          <p>If you did not request this, please ignore this email.</p>
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
           <p style="color: #666; font-size: 14px;">
-            با تشکر،<br>
-            تیم فنی مومتاز کمیکال<br>
+            Thank you,<br>
+            Momtaz Chemical Technical Team<br>
             <a href="https://momtazchem.com" style="color: #2563eb;">momtazchem.com</a>
           </p>
         </div>
       `,
       text: `
-بازیابی رمز عبور
+Password Reset
 
-سلام ${resetData.firstName ? `${resetData.firstName} ${resetData.lastName || ''}` : ''}،
+Hello ${resetData.firstName ? `${resetData.firstName} ${resetData.lastName || ''}` : ''},
 
-درخواست بازیابی رمز عبور برای حساب کاربری شما دریافت شد.
+We received a request to reset your password.
 
 برای تنظیم رمز عبور جدید، روی لینک زیر کلیک کنید:
 ${resetUrl}
