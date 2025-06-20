@@ -306,7 +306,7 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
 
     const smtp = categorySettings.smtp;
     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
-    const resetUrl = `${baseUrl}/customer-reset-password?token=${encodeURIComponent(resetData.token)}`;
+    const resetUrl = `${baseUrl}/customer-reset-password?token=${resetData.token}`;
     
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
@@ -330,9 +330,10 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
             <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
               This link is valid for 1 hour.
             </p>
-            <p style="margin: 10px 0 0 0; font-size: 12px; color: #888; word-break: break-all;">
-              Or copy this link: ${resetUrl}
-            </p>
+            <div style="margin: 10px 0 0 0; padding: 10px; background: #f9f9f9; border-radius: 4px;">
+              <p style="margin: 0; font-size: 12px; color: #666;">Copy this URL:</p>
+              <p style="margin: 5px 0 0 0; font-size: 12px; color: #333; word-break: break-all; font-family: monospace;">${resetUrl}</p>
+            </div>
           </div>
           
           <p>If you did not request this, please ignore this email.</p>
