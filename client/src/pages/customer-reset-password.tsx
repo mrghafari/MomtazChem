@@ -43,7 +43,13 @@ export default function CustomerResetPassword() {
     
     // Handle email encoding issues where = becomes =3D
     if (tokenParam) {
-      tokenParam = decodeURIComponent(tokenParam.replace(/=3D/g, '='));
+      // Clean up email encoding issues
+      tokenParam = tokenParam
+        .replace(/=3D/g, '=')
+        .replace(/=20/g, ' ')
+        .replace(/=\r?\n/g, '')
+        .trim();
+      
       setToken(tokenParam);
       setIsValidToken(true);
       console.log('Reset token extracted:', tokenParam);
