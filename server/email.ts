@@ -11,7 +11,7 @@ const createTransporter = async (categoryKey: string) => {
 
   const smtp = categorySettings.smtp;
   
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: smtp.host,
     port: smtp.port,
     secure: smtp.port === 465 ? true : false,
