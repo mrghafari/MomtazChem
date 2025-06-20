@@ -5111,7 +5111,7 @@ ${procedure.content}
 
       const nodemailer = require('nodemailer');
       
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         host,
         port: parseInt(port),
         secure: secure || port == 465,
