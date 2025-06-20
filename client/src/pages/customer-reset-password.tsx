@@ -39,13 +39,17 @@ export default function CustomerResetPassword() {
   useEffect(() => {
     // Get token from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenParam = urlParams.get('token');
+    let tokenParam = urlParams.get('token');
     
+    // Handle email encoding issues where = becomes =3D
     if (tokenParam) {
+      tokenParam = decodeURIComponent(tokenParam.replace(/=3D/g, '='));
       setToken(tokenParam);
       setIsValidToken(true);
+      console.log('Reset token extracted:', tokenParam);
     } else {
       setIsValidToken(false);
+      console.log('No token found in URL');
     }
   }, []);
 

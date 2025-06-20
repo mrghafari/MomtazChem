@@ -305,7 +305,8 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
     }
 
     const smtp = categorySettings.smtp;
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/customer-reset-password?token=${resetData.token}`;
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
+    const resetUrl = `${baseUrl}/customer-reset-password?token=${encodeURIComponent(resetData.token)}`;
     
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
