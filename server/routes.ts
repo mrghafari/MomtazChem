@@ -2517,7 +2517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!email) {
         return res.status(400).json({
           success: false,
-          message: "ایمیل الزامی است"
+          message: "Email is required"
         });
       }
 
@@ -2610,7 +2610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!customer) {
         return res.status(404).json({
           success: false,
-          message: "مشتری یافت نشد"
+          message: "Customer not found"
         });
       }
 
@@ -2629,7 +2629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error in reset password:", error);
       res.status(500).json({
         success: false,
-        message: "خطا در تغییر رمز عبور"
+        message: "Error changing password"
       });
     }
   });
