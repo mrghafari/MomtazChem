@@ -151,10 +151,21 @@ const Footer = () => {
               <div className="flex items-center space-x-2">
                 <i className="fas fa-phone w-4"></i>
                 <a 
-                  href="tel:+9647099996771"
+                  href="tel:+9647709996771"
                   className="hover:text-white transition-colors duration-200"
                 >
-                  +967 709 996 771
+                  +9647709996771
+                </a>
+              </div>
+              <div className="flex items-center space-x-2">
+                <i className="fab fa-whatsapp w-4"></i>
+                <a 
+                  href="https://wa.me/9647709996771"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors duration-200"
+                >
+                  WhatsApp
                 </a>
               </div>
               <div className="flex items-center space-x-2">

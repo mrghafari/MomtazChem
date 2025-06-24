@@ -69,10 +69,10 @@ const Contact = () => {
     },
     {
       icon: <Phone className="h-6 w-6 text-white" />,
-      title: "Phone",
+      title: "Phone & WhatsApp",
       content: [
-        "+967 709 996 771",
-        "+967 509 996 771"
+        "+9647709996771",
+        "Available on WhatsApp"
       ],
       bgColor: "bg-primary-green"
     },
@@ -257,13 +257,28 @@ const Contact = () => {
                         <h3 className="font-semibold text-gray-900 mb-1">{info.title}</h3>
                         {info.content.map((line, lineIndex) => (
                           <p key={lineIndex} className="text-gray-600">
-                            {info.title === "Phone" ? (
-                              <a 
-                                href={`tel:${line.replace(/\s+/g, '')}`}
-                                className="hover:text-primary transition-colors duration-200 cursor-pointer"
-                              >
-                                {line}
-                              </a>
+                            {info.title === "Phone & WhatsApp" ? (
+                              line.includes("+9647709996771") ? (
+                                <div className="flex items-center gap-2">
+                                  <a 
+                                    href={`tel:${line.replace(/\s+/g, '')}`}
+                                    className="hover:text-primary transition-colors duration-200 cursor-pointer"
+                                  >
+                                    {line}
+                                  </a>
+                                  <a
+                                    href="https://wa.me/9647709996771"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center px-3 py-1 text-sm bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors duration-200"
+                                  >
+                                    <i className="fab fa-whatsapp mr-1"></i>
+                                    WhatsApp
+                                  </a>
+                                </div>
+                              ) : (
+                                <span>{line}</span>
+                              )
                             ) : info.title === "Email" ? (
                               <a 
                                 href={`mailto:${line}`}
