@@ -33,20 +33,24 @@ export default function AdminLogin() {
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginForm) => apiRequest("/api/admin/login", "POST", data),
-    onSuccess: async () => {
+    onSuccess: async (response) => {
+      console.log("Login response:", response);
+      
       // Clear existing cache and refetch auth state
       queryClient.removeQueries({ queryKey: ["/api/admin/me"] });
       
       // Wait a moment for session to be established
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       // Prefetch the auth data to ensure it's available
       await queryClient.prefetchQuery({
         queryKey: ["/api/admin/me"],
-        queryFn: () => fetch("/api/admin/me").then(res => res.json()),
+        queryFn: () => fetch("/api/admin/me", { credentials: 'include' }).then(res => res.json()),
       });
       
-      toast({ title: "Success", description: "Logged in successfully" });
+      toast({ title: "Success", description: "Admin login successful" });
+      
+      // Navigate to admin panel
       setLocation("/admin");
     },
     onError: (error: any) => {
