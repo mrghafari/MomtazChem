@@ -19,7 +19,7 @@ import {
   type InsertEmailTemplate,
 } from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
-import { eq, desc, and, or, ilike, count, sql } from "drizzle-orm";
+import { eq, desc, and, or, ilike, count, sql, sum } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 export interface ICustomerStorage {
@@ -152,6 +152,12 @@ export class CustomerStorage implements ICustomerStorage {
         orderNumber,
       })
       .returning();
+    
+    // Update customer metrics after creating order
+    if (order.customerId) {
+      await this.updateCustomerMetricsAfterOrder(order.customerId);
+    }
+    
     return order;
   }
 
@@ -188,6 +194,38 @@ export class CustomerStorage implements ICustomerStorage {
       .select()
       .from(customerOrders)
       .orderBy(desc(customerOrders.createdAt));
+  }
+
+  // Helper method to update customer metrics after order creation
+  private async updateCustomerMetricsAfterOrder(customerId: number): Promise<void> {
+    try {
+      // Calculate metrics from orders
+      const result = await customerDb
+        .select({
+          totalOrders: count(customerOrders.id),
+          totalSpent: sum(customerOrders.totalAmount),
+          lastOrderDate: sql<Date>`MAX(${customerOrders.createdAt})`,
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.customerId, customerId));
+
+      if (result.length > 0) {
+        const metrics = result[0];
+        
+        // Update customer record with actual database column names
+        await customerDb
+          .update(customers)
+          .set({
+            totalOrders: metrics.totalOrders || 0,
+            totalSpent: metrics.totalSpent?.toString() || "0",
+            lastOrderDate: metrics.lastOrderDate,
+            updatedAt: new Date(),
+          })
+          .where(eq(customers.id, customerId));
+      }
+    } catch (error) {
+      console.error("Error updating customer metrics after order:", error);
+    }
   }
 
   // Order items

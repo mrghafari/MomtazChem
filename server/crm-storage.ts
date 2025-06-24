@@ -2,6 +2,7 @@ import { eq, desc, and, or, sql, count, sum, avg } from "drizzle-orm";
 import { customerDb } from "./customer-db";
 import { 
   customers, 
+  customerOrders,
   customerActivities, 
   customerSegments,
   type InsertCustomer, 
