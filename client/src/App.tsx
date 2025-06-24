@@ -33,6 +33,7 @@ import CustomerForgotPassword from "@/pages/customer-forgot-password";
 import CustomerResetPassword from "@/pages/customer-reset-password";
 import CRMPage from "@/pages/crm";
 import CustomerProfile from "@/pages/customer-profile";
+import CustomerRegister from "@/pages/customer-register";
 import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
 import FuelAdditives from "@/pages/products/fuel-additives";
