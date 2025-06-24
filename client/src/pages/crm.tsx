@@ -481,7 +481,7 @@ export default function CRM() {
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="جستجو در مشتریان..."
+                placeholder="Search customers..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
@@ -532,7 +532,7 @@ export default function CRM() {
                         </TableCell>
                         <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
                         <TableCell>
-                          {customer.lastOrderDate ? formatDate(customer.lastOrderDate) : '-'}
+                          {customer.lastOrderDate ? formatDate(customer.lastOrderDate) : 'No orders yet'}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
