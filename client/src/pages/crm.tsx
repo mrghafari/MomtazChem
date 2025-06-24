@@ -492,12 +492,12 @@ export default function CRM() {
           {/* Customers Table */}
           <Card>
             <CardHeader>
-              <CardTitle>لیست مشتریان</CardTitle>
-              <CardDescription>مدیریت اطلاعات مشتریان فروشگاه</CardDescription>
+              <CardTitle>Customer List</CardTitle>
+              <CardDescription>Manage store customer information</CardDescription>
             </CardHeader>
             <CardContent>
               {customersLoading ? (
-                <div className="text-center py-8">در حال بارگذاری...</div>
+                <div className="text-center py-8">Loading...</div>
               ) : (
                 <Table>
                   <TableHeader>
@@ -609,13 +609,13 @@ export default function CRM() {
       <Dialog open={isNewCustomerDialogOpen} onOpenChange={setIsNewCustomerDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>مشتری جدید</DialogTitle>
-            <DialogDescription>اطلاعات مشتری جدید را وارد کنید</DialogDescription>
+            <DialogTitle>New Customer</DialogTitle>
+            <DialogDescription>Enter new customer information</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName">نام</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
                   value={newCustomer.firstName}
@@ -623,7 +623,7 @@ export default function CRM() {
                 />
               </div>
               <div>
-                <Label htmlFor="lastName">نام خانوادگی</Label>
+                <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
                   value={newCustomer.lastName}
@@ -633,7 +633,7 @@ export default function CRM() {
             </div>
             
             <div>
-              <Label htmlFor="email">ایمیل</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -643,7 +643,7 @@ export default function CRM() {
             </div>
 
             <div>
-              <Label htmlFor="company">شرکت</Label>
+              <Label htmlFor="company">Company</Label>
               <Input
                 id="company"
                 value={newCustomer.company}
@@ -652,7 +652,7 @@ export default function CRM() {
             </div>
 
             <div>
-              <Label htmlFor="phone">تلفن</Label>
+              <Label htmlFor="phone">Phone</Label>
               <Input
                 id="phone"
                 value={newCustomer.phone}
@@ -662,39 +662,39 @@ export default function CRM() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="customerType">نوع مشتری</Label>
+                <Label htmlFor="customerType">Customer Type</Label>
                 <Select value={newCustomer.customerType} onValueChange={(value) => setNewCustomer({ ...newCustomer, customerType: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="retail">خرده‌فروشی</SelectItem>
-                    <SelectItem value="wholesale">عمده‌فروشی</SelectItem>
+                    <SelectItem value="retail">Retail</SelectItem>
+                    <SelectItem value="wholesale">Wholesale</SelectItem>
                     <SelectItem value="b2b">B2B</SelectItem>
-                    <SelectItem value="distributor">توزیع‌کننده</SelectItem>
+                    <SelectItem value="distributor">Distributor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div>
-                <Label htmlFor="customerSource">منبع مشتری</Label>
+                <Label htmlFor="customerSource">Customer Source</Label>
                 <Select value={newCustomer.customerSource} onValueChange={(value) => setNewCustomer({ ...newCustomer, customerSource: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="website">وبسایت</SelectItem>
-                    <SelectItem value="referral">معرفی</SelectItem>
-                    <SelectItem value="marketing">بازاریابی</SelectItem>
-                    <SelectItem value="cold_call">تماس سرد</SelectItem>
-                    <SelectItem value="trade_show">نمایشگاه</SelectItem>
+                    <SelectItem value="website">Website</SelectItem>
+                    <SelectItem value="referral">Referral</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="cold_call">Cold Call</SelectItem>
+                    <SelectItem value="trade_show">Trade Show</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div>
-              <Label htmlFor="internalNotes">یادداشت داخلی</Label>
+              <Label htmlFor="internalNotes">Internal Notes</Label>
               <Textarea
                 id="internalNotes"
                 value={newCustomer.internalNotes}
@@ -705,10 +705,10 @@ export default function CRM() {
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsNewCustomerDialogOpen(false)}>
-                لغو
+                Cancel
               </Button>
               <Button onClick={handleCreateCustomer} disabled={createCustomerMutation.isPending}>
-                {createCustomerMutation.isPending ? "در حال ایجاد..." : "ایجاد مشتری"}
+                {createCustomerMutation.isPending ? "Creating..." : "Create Customer"}
               </Button>
             </div>
           </div>
@@ -719,34 +719,34 @@ export default function CRM() {
       <Dialog open={isCustomerDetailDialogOpen} onOpenChange={setIsCustomerDetailDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>جزئیات مشتری</DialogTitle>
-            <DialogDescription>اطلاعات کامل مشتری</DialogDescription>
+            <DialogTitle>Customer Details</DialogTitle>
+            <DialogDescription>Complete customer information</DialogDescription>
           </DialogHeader>
           {selectedCustomer && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>نام کامل</Label>
+                  <Label>Full Name</Label>
                   <p className="font-medium">{selectedCustomer.firstName} {selectedCustomer.lastName}</p>
                 </div>
                 <div>
-                  <Label>ایمیل</Label>
+                  <Label>Email</Label>
                   <p className="font-medium">{selectedCustomer.email}</p>
                 </div>
                 <div>
-                  <Label>شرکت</Label>
+                  <Label>Company</Label>
                   <p className="font-medium">{selectedCustomer.company || '-'}</p>
                 </div>
                 <div>
-                  <Label>تلفن</Label>
+                  <Label>Phone</Label>
                   <p className="font-medium">{selectedCustomer.phone || '-'}</p>
                 </div>
                 <div>
-                  <Label>کل خرید</Label>
+                  <Label>Total Purchases</Label>
                   <p className="font-medium">{formatCurrency(selectedCustomer.totalSpent)}</p>
                 </div>
                 <div>
-                  <Label>تعداد سفارشات</Label>
+                  <Label>Number of Orders</Label>
                   <p className="font-medium">{selectedCustomer.totalOrdersCount}</p>
                 </div>
                 <div>
