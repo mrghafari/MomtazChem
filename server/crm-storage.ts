@@ -1,11 +1,11 @@
 import { eq, desc, and, or, sql, count, sum, avg } from "drizzle-orm";
-import { crmDb } from "./crm-db";
+import { customerDb } from "./customer-db";
 import { 
-  crmCustomers, 
+  customers, 
   customerActivities, 
   customerSegments,
-  type InsertCrmCustomer, 
-  type CrmCustomer,
+  type InsertCustomer, 
+  type Customer,
   type InsertCustomerActivity,
   type CustomerActivity,
   type InsertCustomerSegment,
@@ -13,14 +13,14 @@ import {
 } from "../shared/customer-schema";
 
 export interface ICrmStorage {
-  // CRM Customer Management
-  createCrmCustomer(customer: InsertCrmCustomer): Promise<CrmCustomer>;
-  getCrmCustomerById(id: number): Promise<CrmCustomer | undefined>;
-  getCrmCustomerByEmail(email: string): Promise<CrmCustomer | undefined>;
-  updateCrmCustomer(id: number, customer: Partial<InsertCrmCustomer>): Promise<CrmCustomer>;
+  // CRM Customer Management (now using unified customer table)
+  createCrmCustomer(customer: InsertCustomer): Promise<Customer>;
+  getCrmCustomerById(id: number): Promise<Customer | undefined>;
+  getCrmCustomerByEmail(email: string): Promise<Customer | undefined>;
+  updateCrmCustomer(id: number, customer: Partial<InsertCustomer>): Promise<Customer>;
   deleteCrmCustomer(id: number): Promise<void>;
-  searchCrmCustomers(query: string): Promise<CrmCustomer[]>;
-  getCrmCustomers(limit?: number, offset?: number): Promise<CrmCustomer[]>;
+  searchCrmCustomers(query: string): Promise<Customer[]>;
+  getCrmCustomers(limit?: number, offset?: number): Promise<Customer[]>;
   
   // Auto-capture from shop purchases
   createOrUpdateCustomerFromOrder(orderData: {
@@ -28,13 +28,13 @@ export interface ICrmStorage {
     firstName: string;
     lastName: string;
     company?: string;
-    phone?: string;
-    country?: string;
-    city?: string;
-    address?: string;
+    phone: string;
+    country: string;
+    city: string;
+    address: string;
     postalCode?: string;
     orderValue: number;
-  }): Promise<CrmCustomer>;
+  }): Promise<Customer>;
   
   // Customer Analytics
   updateCustomerMetrics(customerId: number): Promise<void>;
@@ -54,7 +54,7 @@ export interface ICrmStorage {
   // Customer Segmentation
   createCustomerSegment(segment: InsertCustomerSegment): Promise<CustomerSegment>;
   getCustomerSegments(): Promise<CustomerSegment[]>;
-  getCustomersInSegment(segmentId: number): Promise<CrmCustomer[]>;
+  getCustomersInSegment(segmentId: number): Promise<Customer[]>;
   
   // CRM Dashboard Stats
   getCrmDashboardStats(): Promise<{
@@ -98,20 +98,20 @@ export class CrmStorage implements ICrmStorage {
     return customer;
   }
 
-  async getCrmCustomerById(id: number): Promise<CrmCustomer | undefined> {
-    const [customer] = await crmDb
+  async getCrmCustomerById(id: number): Promise<Customer | undefined> {
+    const [customer] = await customerDb
       .select()
-      .from(crmCustomers)
-      .where(eq(crmCustomers.id, id))
+      .from(customers)
+      .where(eq(customers.id, id))
       .limit(1);
     return customer;
   }
 
-  async getCrmCustomerByEmail(email: string): Promise<CrmCustomer | undefined> {
-    const [customer] = await crmDb
+  async getCrmCustomerByEmail(email: string): Promise<Customer | undefined> {
+    const [customer] = await customerDb
       .select()
-      .from(crmCustomers)
-      .where(eq(crmCustomers.email, email))
+      .from(customers)
+      .where(eq(customers.email, email))
       .limit(1);
     return customer;
   }

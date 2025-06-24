@@ -6,7 +6,7 @@ import { z } from "zod";
 // CUSTOMER PORTAL SCHEMA
 // =============================================================================
 
-// Customer accounts table
+// Customer accounts table - merged with CRM requirements
 export const customers = pgTable("customers", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -14,11 +14,47 @@ export const customers = pgTable("customers", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   company: text("company"),
-  phone: text("phone"),
-  country: text("country"),
-  city: text("city"),
-  address: text("address"),
+  phone: text("phone").notNull(), // Now mandatory
+  country: text("country").notNull(), // Now mandatory
+  city: text("city").notNull(), // Now mandatory
+  address: text("address").notNull(), // Now mandatory
   postalCode: text("postal_code"),
+  
+  // Additional CRM fields for comprehensive customer management
+  alternatePhone: text("alternate_phone"),
+  state: text("state"),
+  industry: text("industry"),
+  businessType: text("business_type"), // manufacturer, distributor, retailer, end_user
+  companySize: text("company_size"), // small, medium, large, enterprise
+  customerType: text("customer_type").notNull().default("retail"), // retail, wholesale, b2b, distributor
+  customerStatus: text("customer_status").notNull().default("active"), // active, inactive, vip, blacklisted
+  customerSource: text("customer_source").notNull().default("website"), // website, referral, marketing, cold_call, trade_show
+  
+  // Purchase behavior analytics (auto-calculated)
+  totalOrdersCount: integer("total_orders_count").default(0),
+  totalSpent: decimal("total_spent", { precision: 12, scale: 2 }).default("0"),
+  averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).default("0"),
+  lastOrderDate: timestamp("last_order_date"),
+  firstOrderDate: timestamp("first_order_date"),
+  
+  // Communication preferences
+  communicationPreference: text("communication_preference").default("email"), // email, phone, sms, whatsapp
+  preferredLanguage: text("preferred_language").default("en"),
+  marketingConsent: boolean("marketing_consent").default(false),
+  productInterests: json("product_interests"), // Array of product categories
+  
+  // Credit and payment
+  creditLimit: decimal("credit_limit", { precision: 10, scale: 2 }),
+  paymentTerms: text("payment_terms").default("immediate"), // immediate, net_30, net_60, net_90
+  preferredPaymentMethod: text("preferred_payment_method"),
+  
+  // Internal management
+  assignedSalesRep: text("assigned_sales_rep"),
+  tags: json("tags"), // Array of custom tags
+  internalNotes: text("internal_notes"),
+  publicNotes: text("public_notes"), // Notes visible to customer
+  
+  // System fields
   isActive: boolean("is_active").default(true),
   emailVerified: boolean("email_verified").default(false),
   verificationToken: text("verification_token"),
@@ -30,8 +66,19 @@ export const customers = pgTable("customers", {
 
 export const insertCustomerSchema = createInsertSchema(customers).omit({
   id: true,
+  totalOrdersCount: true,
+  totalSpent: true,
+  averageOrderValue: true,
+  lastOrderDate: true,
+  firstOrderDate: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Ensure mandatory fields are required
+  phone: z.string().min(1, "Phone number is required"),
+  country: z.string().min(1, "Country is required"),
+  city: z.string().min(1, "City is required"),
+  address: z.string().min(1, "Address is required"),
 });
 
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
@@ -151,85 +198,8 @@ export const insertInquiryResponseSchema = createInsertSchema(inquiryResponses).
 export type InsertInquiryResponse = z.infer<typeof insertInquiryResponseSchema>;
 export type InquiryResponse = typeof inquiryResponses.$inferSelect;
 
-// =============================================================================
-// CRM CUSTOMERS - Enhanced customer management for shop purchases
-// =============================================================================
-
-// CRM Customers table - for shop customers with advanced tracking
-export const crmCustomers = pgTable("crm_customers", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
-  company: text("company"),
-  phone: text("phone"),
-  alternatePhone: text("alternate_phone"),
-  country: text("country"),
-  state: text("state"),
-  city: text("city"),
-  address: text("address"),
-  postalCode: text("postal_code"),
-  
-  // Business information
-  industry: text("industry"),
-  businessType: text("business_type"), // manufacturer, distributor, retailer, end_user
-  companySize: text("company_size"), // small, medium, large, enterprise
-  annualRevenue: text("annual_revenue"), // <1M, 1M-10M, 10M-100M, 100M+
-  
-  // Customer classification
-  customerType: text("customer_type").notNull().default("retail"), // retail, wholesale, b2b, distributor
-  customerStatus: text("customer_status").notNull().default("active"), // active, inactive, vip, blacklisted
-  customerSource: text("customer_source").notNull().default("website"), // website, referral, marketing, cold_call, trade_show
-  assignedSalesRep: text("assigned_sales_rep"),
-  
-  // Purchase behavior analytics
-  totalOrdersCount: integer("total_orders_count").default(0),
-  totalSpent: decimal("total_spent", { precision: 12, scale: 2 }).default("0"),
-  averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).default("0"),
-  lastOrderDate: timestamp("last_order_date"),
-  firstOrderDate: timestamp("first_order_date"),
-  
-  // Engagement metrics
-  lastContactDate: timestamp("last_contact_date"),
-  nextFollowUpDate: timestamp("next_follow_up_date"),
-  communicationPreference: text("communication_preference").default("email"), // email, phone, sms, whatsapp
-  preferredLanguage: text("preferred_language").default("en"),
-  
-  // Marketing and preferences
-  marketingConsent: boolean("marketing_consent").default(false),
-  productInterests: json("product_interests"), // Array of product categories
-  priceRange: text("price_range"), // budget, standard, premium
-  orderFrequency: text("order_frequency"), // weekly, monthly, quarterly, yearly
-  
-  // Credit and payment
-  creditLimit: decimal("credit_limit", { precision: 10, scale: 2 }),
-  paymentTerms: text("payment_terms").default("immediate"), // immediate, net_30, net_60, net_90
-  preferredPaymentMethod: text("preferred_payment_method"),
-  creditStatus: text("credit_status").default("good"), // good, fair, poor, blocked
-  
-  // Internal notes and tags
-  tags: json("tags"), // Array of custom tags
-  internalNotes: text("internal_notes"),
-  publicNotes: text("public_notes"), // Notes visible to customer
-  
-  // System fields
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  createdBy: text("created_by").default("system"), // auto, admin_user_id, import
-});
-
-export const insertCrmCustomerSchema = createInsertSchema(crmCustomers).omit({
-  id: true,
-  totalOrdersCount: true,
-  totalSpent: true,
-  averageOrderValue: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertCrmCustomer = z.infer<typeof insertCrmCustomerSchema>;
-export type CrmCustomer = typeof crmCustomers.$inferSelect;
+// Note: CRM functionality is now merged into the main customers table above
+// This provides unified customer management for both portal and CRM features
 
 // Customer activities log
 export const customerActivities = pgTable("customer_activities", {

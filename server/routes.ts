@@ -12,7 +12,7 @@ import { shopStorage } from "./shop-storage";
 import { customerStorage } from "./customer-storage";
 import { emailStorage } from "./email-storage";
 import { crmStorage } from "./crm-storage";
-import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCrmCustomerSchema } from "@shared/customer-schema";
+import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
