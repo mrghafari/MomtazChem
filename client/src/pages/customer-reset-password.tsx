@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Lock, ArrowLeft, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { useLocation } from "wouter";
 
 const resetPasswordSchema = z.object({
@@ -27,6 +27,8 @@ export default function CustomerResetPassword() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [token, setToken] = useState<string>("");
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
@@ -194,11 +196,27 @@ export default function CustomerResetPassword() {
                       New Password
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="Enter your new password" 
-                        {...field} 
-                      />
+                      <div className="relative">
+                        <Input 
+                          type={showNewPassword ? "text" : "password"} 
+                          placeholder="Enter your new password" 
+                          className="pr-10"
+                          {...field} 
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-400" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -215,11 +233,27 @@ export default function CustomerResetPassword() {
                       Confirm Password
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="Confirm your new password" 
-                        {...field} 
-                      />
+                      <div className="relative">
+                        <Input 
+                          type={showConfirmPassword ? "text" : "password"} 
+                          placeholder="Confirm your new password" 
+                          className="pr-10"
+                          {...field} 
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-400" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

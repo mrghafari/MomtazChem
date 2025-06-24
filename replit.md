@@ -131,6 +131,8 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 24, 2025: Added show/hide password functionality to all login and authentication forms
+- June 24, 2025: Fixed admin and customer login systems with proper authentication
 - June 24, 2025: Updated customer dashboard with real-time metrics calculation
 - June 24, 2025: Implemented PDF export functionality for customer analytics and individual reports
 - June 24, 2025: Changed customer list to use Gregorian dates instead of Persian dates
