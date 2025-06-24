@@ -132,7 +132,7 @@ export default function CRM() {
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "موفقیت", description: "مشتری جدید با موفقیت ایجاد شد" });
+      toast({ title: "Success", description: "New customer created successfully" });
       queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
       setIsNewCustomerDialogOpen(false);
@@ -151,8 +151,8 @@ export default function CRM() {
     },
     onError: (error) => {
       toast({ 
-        title: "خطا", 
-        description: "خطا در ایجاد مشتری جدید",
+        title: "Error", 
+        description: "Failed to create new customer",
         variant: "destructive" 
       });
     }
@@ -172,7 +172,7 @@ export default function CRM() {
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "موفقیت", description: "اطلاعات مشتری با موفقیت بروزرسانی شد" });
+      toast({ title: "Success", description: "Customer information updated successfully" });
       queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
       setIsEditCustomerDialogOpen(false);
@@ -180,8 +180,8 @@ export default function CRM() {
     },
     onError: (error) => {
       toast({ 
-        title: "خطا", 
-        description: "خطا در بروزرسانی اطلاعات مشتری",
+        title: "Error", 
+        description: "Failed to update customer information",
         variant: "destructive" 
       });
     }
@@ -199,14 +199,14 @@ export default function CRM() {
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "موفقیت", description: "مشتری با موفقیت حذف شد" });
+      toast({ title: "Success", description: "Customer deleted successfully" });
       queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
     },
     onError: (error) => {
       toast({ 
-        title: "خطا", 
-        description: "خطا در حذف مشتری",
+        title: "Error", 
+        description: "Failed to delete customer",
         variant: "destructive" 
       });
     }
@@ -215,8 +215,8 @@ export default function CRM() {
   const handleCreateCustomer = () => {
     if (!newCustomer.email || !newCustomer.firstName || !newCustomer.lastName) {
       toast({
-        title: "خطا",
-        description: "لطفاً فیلدهای ضروری را پر کنید",
+        title: "Error",
+        description: "Please fill in all required fields",
         variant: "destructive"
       });
       return;
@@ -232,8 +232,8 @@ export default function CRM() {
   const handleUpdateCustomer = () => {
     if (!editingCustomer || !editingCustomer.email || !editingCustomer.firstName || !editingCustomer.lastName) {
       toast({
-        title: "خطا",
-        description: "لطفاً فیلدهای ضروری را پر کنید",
+        title: "Error",
+        description: "Please fill in all required fields",
         variant: "destructive"
       });
       return;
@@ -242,14 +242,14 @@ export default function CRM() {
   };
 
   const handleDeleteCustomer = (id: number) => {
-    if (confirm("آیا از حذف این مشتری اطمینان دارید؟")) {
+    if (confirm("Are you sure you want to delete this customer?")) {
       deleteCustomerMutation.mutate(id);
     }
   };
 
   const formatCurrency = (amount: string | number) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat('fa-IR', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2
@@ -257,7 +257,7 @@ export default function CRM() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fa-IR');
+    return new Date(dateString).toLocaleDateString('en-US');
   };
 
   const getStatusBadgeColor = (status: string) => {
@@ -281,7 +281,7 @@ export default function CRM() {
   };
 
   if (authLoading) {
-    return <div className="flex items-center justify-center min-h-screen">در حال بارگذاری...</div>;
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   if (!isAuthenticated) {
@@ -294,10 +294,10 @@ export default function CRM() {
         <div>
           <div className="mb-4">
             <h1 className="text-3xl font-bold text-gray-900">
-              Welcome to CRM Dashboard!
+              CRM Dashboard
             </h1>
             <p className="text-lg text-blue-600 mt-1">
-              Your customer management center is ready
+              Customer Relationship Management System
             </p>
           </div>
           <div>

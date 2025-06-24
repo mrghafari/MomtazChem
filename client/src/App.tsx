@@ -78,6 +78,7 @@ function Router() {
           <Route path="/reset-password" component={ResetPassword} />
           <Route path="/customer/forgot-password" component={CustomerForgotPassword} />
           <Route path="/customer/reset-password" component={CustomerResetPassword} />
+          <Route path="/customer/register" component={CustomerRegister} />
           <Route path="/crm" component={CRMPage} />
           <Route path="/customer/profile" component={CustomerProfile} />
           <Route path="/category-management" component={CategoryManagement} />

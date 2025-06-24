@@ -16,22 +16,22 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 
-// Checkout form validation schema
+// Checkout form validation schema - simplified for logged-in customers
 const checkoutFormSchema = z.object({
-  // Customer Information
-  email: z.string().email("Please enter a valid email address"),
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
+  // Customer Information (optional if logged in)
+  email: z.string().email("Please enter a valid email address").optional(),
+  firstName: z.string().min(2, "First name must be at least 2 characters").optional(),
+  lastName: z.string().min(2, "Last name must be at least 2 characters").optional(),
+  phone: z.string().min(10, "Please enter a valid phone number").optional(),
   company: z.string().optional(),
   
-  // Billing Address
-  billingAddress1: z.string().min(5, "Address is required"),
+  // Billing Address (optional if logged in and has saved address)
+  billingAddress1: z.string().min(5, "Address is required").optional(),
   billingAddress2: z.string().optional(),
-  billingCity: z.string().min(2, "City is required"),
-  billingState: z.string().min(2, "State/Province is required"),
-  billingPostalCode: z.string().min(3, "Postal code is required"),
-  billingCountry: z.string().min(2, "Country is required"),
+  billingCity: z.string().min(2, "City is required").optional(),
+  billingState: z.string().min(2, "State/Province is required").optional(),
+  billingPostalCode: z.string().min(3, "Postal code is required").optional(),
+  billingCountry: z.string().min(2, "Country is required").optional(),
   
   // Shipping Address
   sameAsShipping: z.boolean().default(true),
