@@ -136,39 +136,39 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async deleteCrmCustomer(id: number): Promise<void> {
-    await crmDb
-      .update(crmCustomers)
+    await customerDb
+      .update(customers)
       .set({ isActive: false, updatedAt: new Date() })
-      .where(eq(crmCustomers.id, id));
+      .where(eq(customers.id, id));
   }
 
-  async searchCrmCustomers(query: string): Promise<CrmCustomer[]> {
+  async searchCrmCustomers(query: string): Promise<Customer[]> {
     const searchTerm = `%${query}%`;
-    return await crmDb
+    return await customerDb
       .select()
-      .from(crmCustomers)
+      .from(customers)
       .where(
         and(
-          eq(crmCustomers.isActive, true),
+          eq(customers.isActive, true),
           or(
-            sql`${crmCustomers.firstName} ILIKE ${searchTerm}`,
-            sql`${crmCustomers.lastName} ILIKE ${searchTerm}`,
-            sql`${crmCustomers.email} ILIKE ${searchTerm}`,
-            sql`${crmCustomers.company} ILIKE ${searchTerm}`,
-            sql`${crmCustomers.phone} ILIKE ${searchTerm}`
+            sql`${customers.firstName} ILIKE ${searchTerm}`,
+            sql`${customers.lastName} ILIKE ${searchTerm}`,
+            sql`${customers.email} ILIKE ${searchTerm}`,
+            sql`${customers.company} ILIKE ${searchTerm}`,
+            sql`${customers.phone} ILIKE ${searchTerm}`
           )
         )
       )
-      .orderBy(desc(crmCustomers.lastOrderDate))
+      .orderBy(desc(customers.lastOrderDate))
       .limit(50);
   }
 
-  async getCrmCustomers(limit: number = 50, offset: number = 0): Promise<CrmCustomer[]> {
-    return await crmDb
+  async getCrmCustomers(limit: number = 50, offset: number = 0): Promise<Customer[]> {
+    return await customerDb
       .select()
-      .from(crmCustomers)
-      .where(eq(crmCustomers.isActive, true))
-      .orderBy(desc(crmCustomers.createdAt))
+      .from(customers)
+      .where(eq(customers.isActive, true))
+      .orderBy(desc(customers.createdAt))
       .limit(limit)
       .offset(offset);
   }
@@ -178,13 +178,13 @@ export class CrmStorage implements ICrmStorage {
     firstName: string;
     lastName: string;
     company?: string;
-    phone?: string;
-    country?: string;
-    city?: string;
-    address?: string;
+    phone: string;
+    country: string;
+    city: string;
+    address: string;
     postalCode?: string;
     orderValue: number;
-  }): Promise<CrmCustomer> {
+  }): Promise<Customer> {
     // Check if customer already exists
     let customer = await this.getCrmCustomerByEmail(orderData.email);
     
@@ -224,8 +224,9 @@ export class CrmStorage implements ICrmStorage {
       
     } else {
       // Create new customer
-      const newCustomerData: InsertCrmCustomer = {
+      const newCustomerData: InsertCustomer = {
         email: orderData.email,
+        passwordHash: '', // Will be set when customer creates account
         firstName: orderData.firstName,
         lastName: orderData.lastName,
         company: orderData.company,
@@ -239,8 +240,7 @@ export class CrmStorage implements ICrmStorage {
         customerType: "retail",
         firstOrderDate: new Date(),
         lastOrderDate: new Date(),
-        lastContactDate: new Date(),
-        createdBy: "auto_order",
+        isActive: true,
       };
       
       customer = await this.createCrmCustomer(newCustomerData);
