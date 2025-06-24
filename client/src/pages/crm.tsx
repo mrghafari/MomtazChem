@@ -300,34 +300,30 @@ export default function CRM() {
               Customer Relationship Management System
             </p>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700">سیستم CRM</h2>
-            <p className="text-muted-foreground">مدیریت حرفه‌ای مشتریان فروشگاه</p>
-          </div>
         </div>
         <Button onClick={() => setIsNewCustomerDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          مشتری جدید
+          New Customer
         </Button>
       </div>
 
       <Tabs defaultValue="dashboard" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="dashboard">داشبورد</TabsTrigger>
-          <TabsTrigger value="customers">مشتریان</TabsTrigger>
-          <TabsTrigger value="activities">فعالیت‌ها</TabsTrigger>
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="customers">Customers</TabsTrigger>
+          <TabsTrigger value="activities">Activities</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-4">
           {statsLoading ? (
-            <div className="text-center py-8">در حال بارگذاری آمار...</div>
+            <div className="text-center py-8">Loading statistics...</div>
           ) : (
             <>
               {/* Overview Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">کل مشتریان</CardTitle>
+                    <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -337,7 +333,7 @@ export default function CRM() {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">مشتریان فعال</CardTitle>
+                    <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -347,7 +343,7 @@ export default function CRM() {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">مشتریان جدید این ماه</CardTitle>
+                    <CardTitle className="text-sm font-medium">New This Month</CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -357,7 +353,7 @@ export default function CRM() {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">کل درآمد</CardTitle>
+                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -371,17 +367,17 @@ export default function CRM() {
               {/* Top Customers */}
               <Card>
                 <CardHeader>
-                  <CardTitle>برترین مشتریان</CardTitle>
-                  <CardDescription>مشتریان با بیشترین خرید</CardDescription>
+                  <CardTitle>Top Customers</CardTitle>
+                  <CardDescription>Customers with highest purchase amounts</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>نام</TableHead>
-                        <TableHead>ایمیل</TableHead>
-                        <TableHead>کل خرید</TableHead>
-                        <TableHead>تعداد سفارش</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Total Spent</TableHead>
+                        <TableHead>Orders</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
