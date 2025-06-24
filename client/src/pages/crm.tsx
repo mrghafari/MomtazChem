@@ -13,7 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2 } from "lucide-react";
+import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CrmCustomer {
@@ -247,6 +247,74 @@ export default function CRM() {
     }
   };
 
+  const handleExportAnalytics = async () => {
+    try {
+      const response = await fetch('/api/crm/analytics/export-pdf', {
+        method: 'GET',
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `customer-analytics-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Success",
+        description: "Customer analytics PDF downloaded successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to export analytics to PDF",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleExportCustomer = async (customerId: number) => {
+    try {
+      const response = await fetch(`/api/crm/customers/${customerId}/export-pdf`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate customer PDF');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Success",
+        description: "Customer report PDF downloaded successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to export customer report to PDF",
+        variant: "destructive"
+      });
+    }
+  };
+
   const formatCurrency = (amount: string | number) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     return new Intl.NumberFormat('en-US', {
@@ -301,10 +369,20 @@ export default function CRM() {
             </p>
           </div>
         </div>
-        <Button onClick={() => setIsNewCustomerDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Customer
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => handleExportAnalytics()}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export Analytics
+          </Button>
+          <Button onClick={() => setIsNewCustomerDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Customer
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="dashboard" className="space-y-4">
@@ -474,6 +552,14 @@ export default function CRM() {
                               onClick={() => handleEditCustomer(customer)}
                             >
                               <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleExportCustomer(customer.id)}
+                              title="Export customer report to PDF"
+                            >
+                              <FileText className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="outline"
