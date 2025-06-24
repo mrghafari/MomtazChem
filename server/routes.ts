@@ -2194,6 +2194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verify customer credentials
       const customer = await customerStorage.verifyCustomerPassword(email, password);
+      
       if (!customer) {
         return res.status(401).json({ 
           success: false, 
