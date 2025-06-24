@@ -259,18 +259,36 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async updateCustomerMetrics(customerId: number): Promise<void> {
-    // This would calculate metrics from actual order data
-    // For now, we'll implement a placeholder that can be enhanced later
-    const customer = await this.getCrmCustomerById(customerId);
-    if (!customer) return;
-    
-    // Update last contact date
-    await customerDb
-      .update(customers)
-      .set({ 
-        updatedAt: new Date()
-      })
-      .where(eq(customers.id, customerId));
+    try {
+      // Calculate real metrics from customer orders
+      const result = await customerDb
+        .select({
+          totalOrders: count(customerOrders.id),
+          totalSpent: sum(customerOrders.totalAmount),
+          averageOrderValue: avg(customerOrders.totalAmount),
+          lastOrderDate: sql<Date>`MAX(${customerOrders.createdAt})`,
+          firstOrderDate: sql<Date>`MIN(${customerOrders.createdAt})`,
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.customerId, customerId));
+
+      if (result.length > 0) {
+        const metrics = result[0];
+        
+        // Update customer with calculated metrics using actual database column names
+        await customerDb
+          .update(customers)
+          .set({
+            totalOrders: metrics.totalOrders || 0,
+            totalSpent: metrics.totalSpent?.toString() || "0",
+            lastOrderDate: metrics.lastOrderDate,
+            updatedAt: new Date(),
+          })
+          .where(eq(customers.id, customerId));
+      }
+    } catch (error) {
+      console.error("Error updating customer metrics:", error);
+    }
   }
 
   async getCustomerAnalytics(customerId: number): Promise<{
@@ -390,38 +408,45 @@ export class CrmStorage implements ICrmStorage {
         )
       );
     
-    // Get total revenue
+    // Get total revenue from actual orders
     const [totalRevenueResult] = await customerDb
       .select({ 
-        totalRevenue: sum(customers.totalSpent),
-        avgOrderValue: avg(customers.averageOrderValue)
+        totalRevenue: sum(customerOrders.totalAmount),
+        avgOrderValue: avg(customerOrders.totalAmount)
       })
-      .from(customers)
-      .where(eq(customers.isActive, true));
+      .from(customerOrders);
     
-    // Get top customers
+    // Get top customers based on actual order data
     const topCustomers = await customerDb
       .select({
         id: customers.id,
         name: sql<string>`${customers.firstName} || ' ' || ${customers.lastName}`,
         email: customers.email,
-        totalSpent: customers.totalSpent,
-        totalOrders: customers.totalOrdersCount,
+        totalSpent: sql<string>`COALESCE(SUM(${customerOrders.totalAmount}), 0)`,
+        totalOrders: sql<number>`COUNT(${customerOrders.id})`,
       })
       .from(customers)
+      .leftJoin(customerOrders, eq(customers.id, customerOrders.customerId))
       .where(eq(customers.isActive, true))
-      .orderBy(desc(customers.totalSpent))
+      .groupBy(customers.id, customers.firstName, customers.lastName, customers.email)
+      .orderBy(sql`SUM(${customerOrders.totalAmount}) DESC NULLS LAST`)
       .limit(10);
     
-    // Get customers by type
+    // Get customers by type (using available customer_type if exists, otherwise default categorization)
     const customersByType = await customerDb
       .select({
-        type: customers.customerType,
+        type: sql<string>`CASE 
+          WHEN ${customers.company} IS NOT NULL AND ${customers.company} != '' THEN 'business'
+          ELSE 'individual'
+        END`,
         count: count()
       })
       .from(customers)
       .where(eq(customers.isActive, true))
-      .groupBy(customers.customerType);
+      .groupBy(sql`CASE 
+        WHEN ${customers.company} IS NOT NULL AND ${customers.company} != '' THEN 'business'
+        ELSE 'individual'
+      END`);
     
     // Get recent activities
     const recentActivities = await customerDb
