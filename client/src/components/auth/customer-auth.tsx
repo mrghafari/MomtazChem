@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle } from "lucide-react";
+import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 // Form schemas
 const loginSchema = z.object({
@@ -49,6 +49,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
   const [activeTab, setActiveTab] = useState("login");
   const [emailExists, setEmailExists] = useState(false);
   const [duplicateEmail, setDuplicateEmail] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -237,7 +240,27 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                         Password
                       </FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your password" {...field} />
+                        <div className="relative">
+                          <Input 
+                            type={showLoginPassword ? "text" : "password"} 
+                            placeholder="Enter your password" 
+                            className="pr-10"
+                            {...field} 
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowLoginPassword(!showLoginPassword)}
+                          >
+                            {showLoginPassword ? (
+                              <EyeOff className="h-4 w-4 text-gray-400" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-gray-400" />
+                            )}
+                          </Button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -326,7 +349,27 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                           Password
                         </FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Password" {...field} />
+                          <div className="relative">
+                            <Input 
+                              type={showRegisterPassword ? "text" : "password"} 
+                              placeholder="Password" 
+                              className="pr-10"
+                              {...field} 
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                            >
+                              {showRegisterPassword ? (
+                                <EyeOff className="h-4 w-4 text-gray-400" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-gray-400" />
+                              )}
+                            </Button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -339,7 +382,27 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                       <FormItem>
                         <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Confirm Password" {...field} />
+                          <div className="relative">
+                            <Input 
+                              type={showConfirmPassword ? "text" : "password"} 
+                              placeholder="Confirm Password" 
+                              className="pr-10"
+                              {...field} 
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                              {showConfirmPassword ? (
+                                <EyeOff className="h-4 w-4 text-gray-400" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-gray-400" />
+                              )}
+                            </Button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
