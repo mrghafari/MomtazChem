@@ -131,6 +131,7 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 24, 2025: Changed CRM customer forms to English language and fixed customer purchase information display
 - June 24, 2025: Added show/hide password functionality to all login and authentication forms
 - June 24, 2025: Fixed admin and customer login systems with proper authentication
 - June 24, 2025: Updated customer dashboard with real-time metrics calculation

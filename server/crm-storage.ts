@@ -165,13 +165,53 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async getCrmCustomers(limit: number = 50, offset: number = 0): Promise<Customer[]> {
-    return await customerDb
-      .select()
+    const customerData = await customerDb
+      .select({
+        id: customers.id,
+        email: customers.email,
+        firstName: customers.firstName,
+        lastName: customers.lastName,
+        company: customers.company,
+        phone: customers.phone,
+        country: customers.country,
+        city: customers.city,
+        customerType: customers.customerType,
+        customerStatus: customers.customerStatus,
+        customerSource: customers.customerSource,
+        lastOrderDate: customers.lastOrderDate,
+        createdAt: customers.createdAt,
+        isActive: customers.isActive,
+        totalOrdersCount: sql<number>`COUNT(${customerOrders.id})`,
+        totalSpent: sql<string>`COALESCE(SUM(${customerOrders.totalAmount}), 0)`,
+        averageOrderValue: sql<string>`CASE 
+          WHEN COUNT(${customerOrders.id}) > 0 THEN COALESCE(SUM(${customerOrders.totalAmount}), 0) / COUNT(${customerOrders.id})
+          ELSE 0 
+        END`,
+      })
       .from(customers)
+      .leftJoin(customerOrders, eq(customers.id, customerOrders.customerId))
       .where(eq(customers.isActive, true))
-      .orderBy(desc(customers.createdAt))
+      .groupBy(
+        customers.id,
+        customers.email,
+        customers.firstName,
+        customers.lastName,
+        customers.company,
+        customers.phone,
+        customers.country,
+        customers.city,
+        customers.customerType,
+        customers.customerStatus,
+        customers.customerSource,
+        customers.lastOrderDate,
+        customers.createdAt,
+        customers.isActive
+      )
+      .orderBy(sql`COALESCE(SUM(${customerOrders.totalAmount}), 0) DESC`)
       .limit(limit)
       .offset(offset);
+
+    return customerData;
   }
 
   async createOrUpdateCustomerFromOrder(orderData: {

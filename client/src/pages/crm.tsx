@@ -502,14 +502,14 @@ export default function CRM() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>نام</TableHead>
-                      <TableHead>ایمیل</TableHead>
-                      <TableHead>شرکت</TableHead>
-                      <TableHead>نوع</TableHead>
-                      <TableHead>وضعیت</TableHead>
-                      <TableHead>کل خرید</TableHead>
-                      <TableHead>آخرین سفارش</TableHead>
-                      <TableHead>عملیات</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Company</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Total Purchases</TableHead>
+                      <TableHead>Last Order</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -750,11 +750,11 @@ export default function CRM() {
                   <p className="font-medium">{selectedCustomer.totalOrdersCount}</p>
                 </div>
                 <div>
-                  <Label>میانگین خرید</Label>
+                  <Label>Average Order Value</Label>
                   <p className="font-medium">{formatCurrency(selectedCustomer.averageOrderValue)}</p>
                 </div>
                 <div>
-                  <Label>تاریخ عضویت</Label>
+                  <Label>Join Date</Label>
                   <p className="font-medium">{formatDate(selectedCustomer.createdAt)}</p>
                 </div>
               </div>
@@ -767,14 +767,14 @@ export default function CRM() {
       <Dialog open={isEditCustomerDialogOpen} onOpenChange={setIsEditCustomerDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>ویرایش مشتری</DialogTitle>
-            <DialogDescription>اطلاعات مشتری را ویرایش کنید</DialogDescription>
+            <DialogTitle>Edit Customer</DialogTitle>
+            <DialogDescription>Edit customer information</DialogDescription>
           </DialogHeader>
           {editingCustomer && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="editFirstName">نام</Label>
+                  <Label htmlFor="editFirstName">First Name</Label>
                   <Input
                     id="editFirstName"
                     value={editingCustomer.firstName}
@@ -782,7 +782,7 @@ export default function CRM() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="editLastName">نام خانوادگی</Label>
+                  <Label htmlFor="editLastName">Last Name</Label>
                   <Input
                     id="editLastName"
                     value={editingCustomer.lastName}
@@ -792,7 +792,7 @@ export default function CRM() {
               </div>
               
               <div>
-                <Label htmlFor="editEmail">ایمیل</Label>
+                <Label htmlFor="editEmail">Email</Label>
                 <Input
                   id="editEmail"
                   type="email"
@@ -802,7 +802,7 @@ export default function CRM() {
               </div>
 
               <div>
-                <Label htmlFor="editCompany">شرکت</Label>
+                <Label htmlFor="editCompany">Company</Label>
                 <Input
                   id="editCompany"
                   value={editingCustomer.company || ""}
@@ -811,7 +811,7 @@ export default function CRM() {
               </div>
 
               <div>
-                <Label htmlFor="editPhone">تلفن</Label>
+                <Label htmlFor="editPhone">Phone</Label>
                 <Input
                   id="editPhone"
                   value={editingCustomer.phone || ""}
@@ -821,30 +821,30 @@ export default function CRM() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="editCustomerType">نوع مشتری</Label>
+                  <Label htmlFor="editCustomerType">Customer Type</Label>
                   <Select value={editingCustomer.customerType} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerType: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="retail">خرده‌فروشی</SelectItem>
-                      <SelectItem value="wholesale">عمده‌فروشی</SelectItem>
+                      <SelectItem value="retail">Retail</SelectItem>
+                      <SelectItem value="wholesale">Wholesale</SelectItem>
                       <SelectItem value="b2b">B2B</SelectItem>
-                      <SelectItem value="distributor">توزیع‌کننده</SelectItem>
+                      <SelectItem value="distributor">Distributor</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="editCustomerStatus">وضعیت</Label>
+                  <Label htmlFor="editCustomerStatus">Status</Label>
                   <Select value={editingCustomer.customerStatus} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerStatus: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">فعال</SelectItem>
-                      <SelectItem value="inactive">غیرفعال</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
                       <SelectItem value="vip">VIP</SelectItem>
-                      <SelectItem value="blacklisted">بلک‌لیست</SelectItem>
+                      <SelectItem value="blacklisted">Blacklisted</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -852,13 +852,13 @@ export default function CRM() {
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setIsEditCustomerDialogOpen(false)}>
-                  انصراف
+                  Cancel
                 </Button>
                 <Button 
                   onClick={handleUpdateCustomer}
                   disabled={updateCustomerMutation.isPending}
                 >
-                  {updateCustomerMutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
+                  {updateCustomerMutation.isPending ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </div>
