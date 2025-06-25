@@ -111,16 +111,36 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
   // Update customer mutation
   const updateCustomerMutation = useMutation({
     mutationFn: async (updateData: Partial<CustomerProfile>) => {
-      return apiRequest(`/api/crm/customers/${customerId}`, 'PUT', updateData);
+      console.log("Frontend update mutation data:", updateData);
+      
+      // Clean the updates data - remove undefined values and ensure proper formatting
+      const cleanedUpdates = Object.entries(updateData).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          // Handle specific field types
+          if (key === 'customerType' || key === 'customerStatus' || key === 'customerSource') {
+            acc[key] = String(value); // Ensure these are strings
+          } else {
+            acc[key] = value;
+          }
+        }
+        return acc;
+      }, {} as any);
+      
+      console.log("Cleaned updates:", cleanedUpdates);
+      
+      return apiRequest(`/api/crm/customers/${customerId}`, 'PUT', cleanedUpdates);
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log("Update success:", result);
       toast({ title: "Success", description: "Customer profile updated successfully" });
       setIsEditing(false);
       setEditData({});
       queryClient.invalidateQueries({ queryKey: ['/api/crm/customers', customerId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/crm/customers'] });
       onUpdate?.();
     },
     onError: (error: any) => {
+      console.error("Update error:", error);
       toast({ 
         title: "Error", 
         description: error.message || "Failed to update customer profile",
@@ -207,12 +227,47 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
           </h1>
           <p className="text-gray-600">{customer.email}</p>
           <div className="flex items-center gap-2 mt-2">
-            <Badge className={getStatusColor(customer.customerStatus)}>
-              {customer.customerStatus.toUpperCase()}
-            </Badge>
-            <Badge variant="outline">
-              {customer.customerType.toUpperCase()}
-            </Badge>
+            {isEditing ? (
+              <div className="flex gap-2">
+                <Select
+                  value={displayValue('customerStatus') || customer.customerStatus}
+                  onValueChange={(value) => handleEditChange('customerStatus', value)}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="vip">VIP</SelectItem>
+                    <SelectItem value="blacklisted">Blacklisted</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={displayValue('customerType') || customer.customerType}
+                  onValueChange={(value) => handleEditChange('customerType', value)}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="wholesale">Wholesale</SelectItem>
+                    <SelectItem value="retail">Retail</SelectItem>
+                    <SelectItem value="distributor">Distributor</SelectItem>
+                    <SelectItem value="end_user">End User</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <>
+                <Badge className={getStatusColor(customer.customerStatus)}>
+                  {customer.customerStatus.toUpperCase()}
+                </Badge>
+                <Badge variant="outline">
+                  {customer.customerType.toUpperCase()}
+                </Badge>
+              </>
+            )}
           </div>
         </div>
         {mode === 'admin' && (

@@ -118,22 +118,57 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async updateCrmCustomer(id: number, customerUpdate: Partial<InsertCustomer>): Promise<Customer> {
-    const [customer] = await customerDb
-      .update(customers)
-      .set({ ...customerUpdate, updatedAt: new Date() })
-      .where(eq(customers.id, id))
-      .returning();
+    console.log("CrmStorage updateCrmCustomer called:", { id, customerUpdate });
     
-    // Log update activity
-    await this.logCustomerActivity({
-      customerId: id,
-      activityType: "customer_updated",
-      description: `Customer information was updated`,
-      performedBy: "admin",
-      activityData: { updatedFields: Object.keys(customerUpdate) }
-    });
-    
-    return customer;
+    try {
+      // Handle date fields properly - convert strings to Date objects if needed
+      const processedUpdate = { ...customerUpdate };
+      
+      // Handle updatedAt - always set to current date
+      processedUpdate.updatedAt = new Date();
+      
+      // Handle other date fields if they exist in the update
+      if (processedUpdate.createdAt && typeof processedUpdate.createdAt === 'string') {
+        processedUpdate.createdAt = new Date(processedUpdate.createdAt);
+      }
+      if (processedUpdate.lastOrderDate && typeof processedUpdate.lastOrderDate === 'string') {
+        processedUpdate.lastOrderDate = new Date(processedUpdate.lastOrderDate);
+      }
+      if (processedUpdate.firstOrderDate && typeof processedUpdate.firstOrderDate === 'string') {
+        processedUpdate.firstOrderDate = new Date(processedUpdate.firstOrderDate);
+      }
+      if (processedUpdate.lastContactDate && typeof processedUpdate.lastContactDate === 'string') {
+        processedUpdate.lastContactDate = new Date(processedUpdate.lastContactDate);
+      }
+      
+      console.log("Processed update data:", processedUpdate);
+      
+      const [customer] = await customerDb
+        .update(customers)
+        .set(processedUpdate)
+        .where(eq(customers.id, id))
+        .returning();
+      
+      console.log("CrmStorage updateCrmCustomer result:", customer);
+      
+      if (!customer) {
+        throw new Error("Customer not found");
+      }
+      
+      // Log update activity
+      await this.logCustomerActivity({
+        customerId: id,
+        activityType: "customer_updated",
+        description: `Customer information was updated`,
+        performedBy: "admin",
+        activityData: { updatedFields: Object.keys(customerUpdate) }
+      });
+      
+      return customer;
+    } catch (error) {
+      console.error("CrmStorage updateCrmCustomer error:", error);
+      throw error;
+    }
   }
 
   async deleteCrmCustomer(id: number): Promise<void> {
