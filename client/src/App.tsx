@@ -34,6 +34,7 @@ import CustomerForgotPassword from "@/pages/customer-forgot-password";
 import CustomerResetPassword from "@/pages/customer-reset-password";
 import CRMPage from "@/pages/crm";
 import CustomerProfile from "@/pages/customer-profile";
+import CustomerProfileEdit from "@/pages/customer-profile-edit";
 import CustomerRegister from "@/pages/customer-register";
 import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
@@ -84,6 +85,7 @@ function Router() {
           <Route path="/customer/register" component={CustomerRegister} />
           <Route path="/crm" component={CRMPage} />
           <Route path="/customer/profile" component={CustomerProfile} />
+          <Route path="/customer/profile/edit" component={CustomerProfileEdit} />
           <Route path="/category-management" component={CategoryManagement} />
           <Route path="/seo-management" component={SeoManagement} />
           <Route path="/admin/sms-management" component={AdminSmsManagement} />

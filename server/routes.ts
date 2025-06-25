@@ -5574,6 +5574,108 @@ ${procedure.content}
     }
   });
 
+  // Get current customer profile
+  app.get("/api/customers/me", async (req: Request, res: Response) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت نشده"
+        });
+      }
+
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          message: "مشتری یافت نشد"
+        });
+      }
+
+      res.json({
+        success: true,
+        data: customer
+      });
+
+    } catch (error) {
+      console.error("Error fetching customer profile:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت اطلاعات پروفایل"
+      });
+    }
+  });
+
+  // Customer profile update endpoint
+  app.put("/api/customers/profile", async (req: Request, res: Response) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت نشده"
+        });
+      }
+
+      const {
+        firstName,
+        lastName,
+        phone,
+        company,
+        country,
+        city,
+        address,
+        postalCode,
+        businessType,
+        notes
+      } = req.body;
+
+      // Validate required fields
+      if (!firstName || !lastName || !phone || !country || !city || !address) {
+        return res.status(400).json({
+          success: false,
+          message: "فیلدهای اجباری را تکمیل کنید"
+        });
+      }
+
+      // Update customer profile in CRM
+      const updatedCustomer = await crmStorage.updateCrmCustomer(customerId, {
+        firstName,
+        lastName,
+        phone,
+        company: company || null,
+        country,
+        city,
+        address,
+        postalCode: postalCode || null,
+        businessType: businessType || null,
+        notes: notes || null
+      });
+
+      // Log activity
+      await crmStorage.logCustomerActivity({
+        customerId,
+        activityType: 'profile_updated',
+        description: `Customer updated their profile information`,
+        performedBy: 'Customer'
+      });
+
+      res.json({
+        success: true,
+        message: "پروفایل با موفقیت بروزرسانی شد",
+        customer: updatedCustomer
+      });
+
+    } catch (error) {
+      console.error("Error updating customer profile:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بروزرسانی پروفایل"
+      });
+    }
+  });
+
   // Create customer segment
   app.post("/api/crm/segments", requireAuth, async (req, res) => {
     try {
