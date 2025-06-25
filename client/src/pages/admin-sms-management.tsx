@@ -214,12 +214,23 @@ export default function AdminSmsManagement() {
 
       const result = await response.json();
       if (result.success) {
+        // Immediately update local state for instant UI feedback
+        setCustomersWithSms(prev => 
+          prev.map(customer => 
+            customer.id === customerId 
+              ? { ...customer, smsEnabled: enable }
+              : customer
+          )
+        );
+        
         toast({
           title: enable ? "SMS فعال شد" : "SMS غیرفعال شد",
           description: result.message,
         });
-        loadCustomersWithSms();
-        loadSmsStats();
+        
+        // Reload data to ensure consistency
+        await loadCustomersWithSms();
+        await loadSmsStats();
       } else {
         toast({
           title: "خطا",
@@ -252,12 +263,20 @@ export default function AdminSmsManagement() {
 
       const result = await response.json();
       if (result.success) {
+        // Immediately update all customers' SMS status for instant UI feedback
+        const enableSms = action === 'enable';
+        setCustomersWithSms(prev => 
+          prev.map(customer => ({ ...customer, smsEnabled: enableSms }))
+        );
+        
         toast({
           title: action === 'enable' ? "SMS برای همه فعال شد" : "SMS برای همه غیرفعال شد",
           description: result.message,
         });
-        loadCustomersWithSms();
-        loadSmsStats();
+        
+        // Reload data to ensure consistency
+        await loadCustomersWithSms();
+        await loadSmsStats();
       } else {
         toast({
           title: "خطا",
