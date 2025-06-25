@@ -66,7 +66,7 @@ const CustomerRegister = () => {
   const registerMutation = useMutation({
     mutationFn: async (data: CustomerRegistrationData) => {
       const { confirmPassword, ...registerData } = data;
-      return await apiRequest("/api/customer/register", "POST", {
+      return await apiRequest("/api/customers/register", "POST", {
         ...registerData,
         passwordHash: registerData.password,
         customerSource: "website",

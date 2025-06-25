@@ -5236,16 +5236,58 @@ ${procedure.content}
     }
   });
 
-  // Create new CRM customer
+  // Create new CRM customer (enhanced with password handling)
   app.post("/api/crm/customers", requireAuth, async (req, res) => {
     try {
-      const validatedData = insertCrmCustomerSchema.parse(req.body);
-      validatedData.createdBy = "admin";
+      const { password, ...customerData } = req.body;
       
-      const customer = await crmStorage.createCrmCustomer(validatedData);
+      // Hash password if provided
+      let passwordHash = '';
+      if (password && password.trim()) {
+        passwordHash = await bcrypt.hash(password.trim(), 10);
+      }
+      
+      const validatedData = {
+        ...customerData,
+        passwordHash,
+        createdBy: "admin",
+        isActive: true,
+        customerStatus: customerData.customerStatus || "active",
+        emailVerified: false,
+        // Ensure required fields have defaults
+        phone: customerData.phone || '',
+        country: customerData.country || '',
+        city: customerData.city || '',
+        address: customerData.address || '',
+      };
+      
+      // Create CRM customer
+      const crmCustomer = await crmStorage.createCrmCustomer(validatedData);
+      
+      // Also create in customer portal system if password provided
+      if (passwordHash) {
+        try {
+          const portalCustomer = await customerStorage.createCustomer({
+            ...validatedData,
+            crmCustomerId: crmCustomer.id,
+          });
+          
+          // Log activity
+          await crmStorage.logCustomerActivity({
+            customerId: crmCustomer.id,
+            activityType: 'created',
+            description: 'Customer created with portal access from CRM',
+            performedBy: 'admin',
+            activityData: { hasPortalAccess: true, portalCustomerId: portalCustomer.id }
+          });
+        } catch (portalError) {
+          console.log('Portal customer creation failed, continuing with CRM-only customer');
+        }
+      }
+      
       res.status(201).json({
         success: true,
-        data: customer
+        data: crmCustomer
       });
     } catch (error) {
       console.error("Error creating CRM customer:", error);

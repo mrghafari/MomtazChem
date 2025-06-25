@@ -79,8 +79,11 @@ export default function CRM() {
     phone: "",
     country: "",
     city: "",
+    address: "",
+    password: "",
     customerType: "retail",
     customerSource: "website",
+    customerStatus: "active",
     internalNotes: ""
   });
 
@@ -156,8 +159,11 @@ export default function CRM() {
         phone: "",
         country: "",
         city: "",
+        address: "",
+        password: "",
         customerType: "retail",
         customerSource: "website",
+        customerStatus: "active",
         internalNotes: ""
       });
     },
@@ -597,8 +603,8 @@ export default function CRM() {
         <TabsContent value="activities" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>فعالیت‌های اخیر</CardTitle>
-              <CardDescription>آخرین فعالیت‌های سیستم CRM</CardDescription>
+              <CardTitle>Recent Activities</CardTitle>
+              <CardDescription>Latest CRM system activities</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -608,7 +614,7 @@ export default function CRM() {
                     <div className="flex-1">
                       <p className="font-medium">{activity.description}</p>
                       <p className="text-sm text-muted-foreground">
-                        توسط {activity.performedBy} در {formatDate(activity.createdAt)}
+                        By {activity.performedBy} on {formatDate(activity.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -705,6 +711,45 @@ export default function CRM() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  value={newCustomer.country}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, country: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={newCustomer.city}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                value={newCustomer.address || ""}
+                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password (Optional)</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Leave empty if creating from admin"
+                value={newCustomer.password || ""}
+                onChange={(e) => setNewCustomer({ ...newCustomer, password: e.target.value })}
+              />
             </div>
 
             <div>
