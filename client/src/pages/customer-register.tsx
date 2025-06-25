@@ -236,7 +236,7 @@ const CustomerRegister = () => {
                       <FormItem>
                         <FormLabel>City *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your city" {...field} />
+                          <Input placeholder="Enter your city" {...field} required />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -251,7 +251,7 @@ const CustomerRegister = () => {
                     <FormItem>
                       <FormLabel>Address *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your full address" {...field} />
+                        <Input placeholder="Enter your full address" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
