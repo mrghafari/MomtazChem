@@ -31,7 +31,7 @@ import {
   type InsertSalesReport
 } from "@shared/shop-schema";
 import { shopDb } from "./shop-db";
-import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, count, or, like, ilike, asc } from "drizzle-orm";
 
 export interface IShopStorage {
   // Category management
@@ -48,6 +48,25 @@ export interface IShopStorage {
   getShopProducts(): Promise<ShopProduct[]>;
   getShopProductsByCategory(category: string): Promise<ShopProduct[]>;
   getShopProductById(id: number): Promise<ShopProduct | undefined>;
+  searchShopProducts(query: string, filters?: {
+    category?: string;
+    priceMin?: number;
+    priceMax?: number;
+    inStock?: boolean;
+    tags?: string[];
+    sortBy?: 'name' | 'price' | 'created' | 'relevance';
+    sortOrder?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    products: ShopProduct[];
+    total: number;
+    filters: {
+      categories: { name: string; count: number }[];
+      priceRange: { min: number; max: number };
+      availableTags: string[];
+    };
+  }>;
   getShopProductBySku(sku: string): Promise<ShopProduct | undefined>;
   createShopProduct(product: InsertShopProduct): Promise<ShopProduct>;
   updateShopProduct(id: number, product: Partial<InsertShopProduct>): Promise<ShopProduct>;
@@ -269,6 +288,166 @@ export class ShopStorage implements IShopStorage {
       .update(shopProducts)
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(shopProducts.id, id));
+  }
+
+  async searchShopProducts(query: string, filters: {
+    category?: string;
+    priceMin?: number;
+    priceMax?: number;
+    inStock?: boolean;
+    tags?: string[];
+    sortBy?: 'name' | 'price' | 'created' | 'relevance';
+    sortOrder?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<{
+    products: ShopProduct[];
+    total: number;
+    filters: {
+      categories: { name: string; count: number }[];
+      priceRange: { min: number; max: number };
+      availableTags: string[];
+    };
+  }> {
+    const {
+      category,
+      priceMin,
+      priceMax,
+      inStock,
+      tags,
+      sortBy = 'relevance',
+      sortOrder = 'desc',
+      limit = 20,
+      offset = 0
+    } = filters;
+
+    // Build WHERE conditions
+    const whereConditions = [eq(shopProducts.isActive, true)];
+
+    // Text search in multiple fields
+    if (query && query.trim()) {
+      const searchTerm = `%${query.trim()}%`;
+      whereConditions.push(
+        or(
+          ilike(shopProducts.name, searchTerm),
+          ilike(shopProducts.description, searchTerm),
+          ilike(shopProducts.shortDescription, searchTerm),
+          ilike(shopProducts.category, searchTerm),
+          ilike(shopProducts.sku, searchTerm),
+          sql`${shopProducts.tags}::text ILIKE ${searchTerm}`,
+          sql`${shopProducts.specifications}::text ILIKE ${searchTerm}`,
+          sql`${shopProducts.features}::text ILIKE ${searchTerm}`,
+          sql`${shopProducts.applications}::text ILIKE ${searchTerm}`
+        )
+      );
+    }
+
+    // Category filter
+    if (category) {
+      whereConditions.push(eq(shopProducts.category, category));
+    }
+
+    // Price range filter
+    if (priceMin !== undefined) {
+      whereConditions.push(gte(shopProducts.price, priceMin.toString()));
+    }
+    if (priceMax !== undefined) {
+      whereConditions.push(lte(shopProducts.price, priceMax.toString()));
+    }
+
+    // Stock filter
+    if (inStock !== undefined) {
+      whereConditions.push(eq(shopProducts.inStock, inStock));
+    }
+
+    // Tags filter
+    if (tags && tags.length > 0) {
+      const tagConditions = tags.map(tag => 
+        sql`${shopProducts.tags}::text ILIKE ${`%${tag}%`}`
+      );
+      whereConditions.push(or(...tagConditions));
+    }
+
+    // Build ORDER BY clause
+    let orderByClause;
+    switch (sortBy) {
+      case 'name':
+        orderByClause = sortOrder === 'asc' ? asc(shopProducts.name) : desc(shopProducts.name);
+        break;
+      case 'price':
+        orderByClause = sortOrder === 'asc' ? asc(shopProducts.price) : desc(shopProducts.price);
+        break;
+      case 'created':
+        orderByClause = sortOrder === 'asc' ? asc(shopProducts.createdAt) : desc(shopProducts.createdAt);
+        break;
+      case 'relevance':
+      default:
+        // For relevance, prioritize featured products and then by name
+        orderByClause = [desc(shopProducts.isFeatured), asc(shopProducts.name)];
+        break;
+    }
+
+    // Get filtered products
+    const products = await shopDb
+      .select()
+      .from(shopProducts)
+      .where(and(...whereConditions))
+      .orderBy(orderByClause)
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count
+    const [totalResult] = await shopDb
+      .select({ count: count() })
+      .from(shopProducts)
+      .where(and(...whereConditions));
+
+    // Get filter metadata
+    const categoriesResult = await shopDb
+      .select({
+        category: shopProducts.category,
+        count: count()
+      })
+      .from(shopProducts)
+      .where(eq(shopProducts.isActive, true))
+      .groupBy(shopProducts.category);
+
+    const priceRangeResult = await shopDb
+      .select({
+        min: sql<number>`MIN(CAST(${shopProducts.price} AS NUMERIC))`,
+        max: sql<number>`MAX(CAST(${shopProducts.price} AS NUMERIC))`
+      })
+      .from(shopProducts)
+      .where(eq(shopProducts.isActive, true));
+
+    // Extract available tags
+    const allTagsResult = await shopDb
+      .select({ tags: shopProducts.tags })
+      .from(shopProducts)
+      .where(eq(shopProducts.isActive, true));
+
+    const availableTags = [...new Set(
+      allTagsResult
+        .filter(item => item.tags)
+        .flatMap(item => Array.isArray(item.tags) ? item.tags : [])
+        .filter(tag => typeof tag === 'string' && tag.trim())
+    )];
+
+    return {
+      products,
+      total: totalResult.count,
+      filters: {
+        categories: categoriesResult.map(cat => ({
+          name: cat.category,
+          count: cat.count
+        })),
+        priceRange: {
+          min: priceRangeResult[0]?.min || 0,
+          max: priceRangeResult[0]?.max || 0
+        },
+        availableTags: availableTags as string[]
+      }
+    };
   }
 
   // Categories

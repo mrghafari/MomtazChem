@@ -3462,6 +3462,60 @@ ${procedure.content}
     }
   });
 
+  // Advanced shop product search
+  app.get("/api/shop/search", async (req, res) => {
+    try {
+      const {
+        q: query = '',
+        category,
+        priceMin,
+        priceMax,
+        inStock,
+        tags,
+        sortBy = 'relevance',
+        sortOrder = 'desc',
+        limit = 20,
+        offset = 0
+      } = req.query;
+
+      const filters = {
+        category: category as string,
+        priceMin: priceMin ? parseFloat(priceMin as string) : undefined,
+        priceMax: priceMax ? parseFloat(priceMax as string) : undefined,
+        inStock: inStock ? inStock === 'true' : undefined,
+        tags: tags ? (Array.isArray(tags) ? tags as string[] : [tags as string]) : undefined,
+        sortBy: sortBy as 'name' | 'price' | 'created' | 'relevance',
+        sortOrder: sortOrder as 'asc' | 'desc',
+        limit: parseInt(limit as string) || 20,
+        offset: parseInt(offset as string) || 0
+      };
+
+      const searchResults = await shopStorage.searchShopProducts(query as string, filters);
+      
+      res.json({
+        success: true,
+        data: searchResults,
+        query: {
+          searchTerm: query,
+          filters: filters,
+          pagination: {
+            limit: filters.limit,
+            offset: filters.offset,
+            total: searchResults.total,
+            pages: Math.ceil(searchResults.total / filters.limit)
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error searching shop products:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to search products",
+        error: error.message 
+      });
+    }
+  });
+
   // Shop categories management
   app.post("/api/shop/categories", requireAuth, async (req, res) => {
     try {
