@@ -5,10 +5,12 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { User, Mail, Lock, Phone, MapPin, Building, AlertCircle, Eye, EyeOff } from "lucide-react";
 
@@ -82,14 +84,6 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
       country: "",
       city: "",
       address: "",
-      postalCode: "",
-      alternatePhone: "",
-      industry: "",
-      businessType: undefined,
-      companySize: undefined,
-      communicationPreference: "email",
-      preferredLanguage: "en",
-      marketingConsent: false,
     },
   });
 
@@ -137,11 +131,21 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
     try {
       const { confirmPassword, ...registerData } = data;
       
+      // Include all CRM fields in registration request
+      const fullRegistrationData = {
+        ...registerData,
+        customerType: 'retail',
+        customerSource: 'website',
+        communicationPreference: registerData.communicationPreference || 'email',
+        preferredLanguage: registerData.preferredLanguage || 'en',
+        marketingConsent: registerData.marketingConsent || false,
+      };
+      
       const response = await fetch('/api/customers/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(registerData),
+        body: JSON.stringify(fullRegistrationData),
       });
 
       const result = await response.json();
@@ -508,7 +512,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                 />
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Registering..." : "Register"}
+                  {isLoading ? "Creating Account..." : "Create Account"}
                 </Button>
               </form>
             </Form>
