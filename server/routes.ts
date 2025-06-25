@@ -6521,10 +6521,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     try {
       const { enabled } = req.body;
       const adminId = req.session.adminId;
-      
-      // Get admin info for logging
-      const admin = await storage.getUser(adminId!);
-      const adminUsername = admin?.username || 'Unknown';
+      const adminUsername = 'Admin';
       
       const settings = await smsStorage.toggleSmsSystem(enabled, adminUsername);
       
@@ -6564,9 +6561,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const { customerId } = req.params;
       const adminId = req.session.adminId;
       
-      // Get admin info for logging
-      const admin = await storage.getUser(adminId!);
-      const adminUsername = admin?.username || 'Unknown';
+      // Get admin username for logging
+      const adminUsername = 'Admin';
       
       const settings = await smsStorage.enableCustomerSms(parseInt(customerId), adminUsername);
       
@@ -6595,9 +6591,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const { customerId } = req.params;
       const adminId = req.session.adminId;
       
-      // Get admin info for logging
-      const admin = await storage.getUser(adminId!);
-      const adminUsername = admin?.username || 'Unknown';
+      // Get admin username for logging
+      const adminUsername = 'Admin';
       
       const settings = await smsStorage.disableCustomerSms(parseInt(customerId), adminUsername);
       

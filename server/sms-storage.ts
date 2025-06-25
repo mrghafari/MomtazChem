@@ -122,8 +122,7 @@ export class SmsStorage implements ISmsStorage {
   
   async toggleSmsSystem(enabled: boolean, adminUsername: string): Promise<SmsSettings> {
     return await this.updateSmsSettings({ 
-      isEnabled: enabled,
-      updatedAt: new Date()
+      isEnabled: enabled
     });
   }
   

@@ -86,6 +86,7 @@ function Router() {
           <Route path="/customer/profile" component={CustomerProfile} />
           <Route path="/category-management" component={CategoryManagement} />
           <Route path="/seo-management" component={SeoManagement} />
+          <Route path="/admin/sms-management" component={AdminSmsManagement} />
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />
