@@ -6223,6 +6223,74 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Customer PDF export routes
+  app.get("/api/crm/customers/:id/export-pdf", requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      if (isNaN(customerId)) {
+        return res.status(400).json({ success: false, message: "Invalid customer ID" });
+      }
+
+      // Get customer data
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "Customer not found" });
+      }
+
+      // Get customer analytics
+      const analytics = await crmStorage.getCustomerAnalytics(customerId);
+      
+      // Get customer activities
+      const activities = await crmStorage.getCustomerActivities(customerId, 20);
+
+      // Generate PDF
+      const { generateCustomerDetailPDF } = await import('./customer-analytics-pdf');
+      const pdfBuffer = await generateCustomerDetailPDF(customer, analytics, activities);
+
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.pdf"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      // Send PDF buffer
+      res.send(pdfBuffer);
+      
+    } catch (error) {
+      console.error("Error generating customer PDF:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to generate customer PDF report" 
+      });
+    }
+  });
+
+  // CRM Analytics PDF export
+  app.get("/api/crm/analytics/export-pdf", requireAuth, async (req, res) => {
+    try {
+      // Get dashboard statistics
+      const dashboardStats = await crmStorage.getCrmDashboardStats();
+      
+      // Generate PDF
+      const { generateCustomerAnalyticsPDF } = await import('./customer-analytics-pdf');
+      const pdfBuffer = await generateCustomerAnalyticsPDF(dashboardStats);
+
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.pdf"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      // Send PDF buffer
+      res.send(pdfBuffer);
+      
+    } catch (error) {
+      console.error("Error generating analytics PDF:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to generate analytics PDF report" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
