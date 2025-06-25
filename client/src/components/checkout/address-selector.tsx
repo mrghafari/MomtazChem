@@ -32,8 +32,6 @@ interface CustomerAddress {
 interface AddressFormData {
   title: string;
   recipientName: string;
-  firstName: string;
-  lastName: string;
   company?: string;
   phone: string;
   country: string;
@@ -56,8 +54,6 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
   const [formData, setFormData] = useState<AddressFormData>({
     title: '',
     recipientName: '',
-    firstName: '',
-    lastName: '',
     company: '',
     phone: '',
     country: 'ایران',
@@ -101,8 +97,6 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
         setFormData(prev => ({
           ...prev,
           recipientName: defaultRecipientName,
-          firstName: customerInfo.firstName || '',
-          lastName: customerInfo.lastName || '',
           phone: customerInfo.phone || '',
           country: customerInfo.country || 'ایران',
           city: customerInfo.city || '',
@@ -200,8 +194,6 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
     setFormData({
       title: '',
       recipientName: '',
-      firstName: '',
-      lastName: '',
       company: '',
       phone: '',
       country: 'ایران',
@@ -217,8 +209,6 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
     setFormData({
       title: address.title,
       recipientName: address.recipientName,
-      firstName: address.firstName,
-      lastName: address.lastName,
       company: address.company || '',
       phone: address.phone,
       country: address.country,
@@ -310,27 +300,6 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                   placeholder="نام کامل تحویل‌گیرنده"
                   required
                 />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName">نام</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lastName">نام خانوادگی</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    required
-                  />
-                </div>
               </div>
 
               <div>
