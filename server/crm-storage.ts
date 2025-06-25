@@ -21,12 +21,12 @@ import {
 export interface ICrmStorage {
   // CRM Customer Management (using proper CRM table)
   createCrmCustomer(customer: InsertCrmCustomer): Promise<CrmCustomer>;
-  getCrmCustomerById(id: number): Promise<Customer | undefined>;
-  getCrmCustomerByEmail(email: string): Promise<Customer | undefined>;
-  updateCrmCustomer(id: number, customer: Partial<InsertCustomer>): Promise<Customer>;
+  getCrmCustomerById(id: number): Promise<CrmCustomer | undefined>;
+  getCrmCustomerByEmail(email: string): Promise<CrmCustomer | undefined>;
+  updateCrmCustomer(id: number, customer: Partial<InsertCrmCustomer>): Promise<CrmCustomer>;
   deleteCrmCustomer(id: number): Promise<void>;
-  searchCrmCustomers(query: string): Promise<Customer[]>;
-  getCrmCustomers(limit?: number, offset?: number): Promise<Customer[]>;
+  searchCrmCustomers(query: string): Promise<CrmCustomer[]>;
+  getCrmCustomers(limit?: number, offset?: number): Promise<CrmCustomer[]>;
   
   // Auto-capture from shop purchases
   createOrUpdateCustomerFromOrder(orderData: {
@@ -40,7 +40,7 @@ export interface ICrmStorage {
     address: string;
     postalCode?: string;
     orderValue: number;
-  }): Promise<Customer>;
+  }): Promise<CrmCustomer>;
   
   // Customer Analytics
   updateCustomerMetrics(customerId: number): Promise<void>;
@@ -60,7 +60,7 @@ export interface ICrmStorage {
   // Customer Segmentation
   createCustomerSegment(segment: InsertCustomerSegment): Promise<CustomerSegment>;
   getCustomerSegments(): Promise<CustomerSegment[]>;
-  getCustomersInSegment(segmentId: number): Promise<Customer[]>;
+  getCustomersInSegment(segmentId: number): Promise<CrmCustomer[]>;
   
   // CRM Dashboard Stats
   getCrmDashboardStats(): Promise<{
@@ -104,20 +104,20 @@ export class CrmStorage implements ICrmStorage {
     return customer;
   }
 
-  async getCrmCustomerById(id: number): Promise<Customer | undefined> {
+  async getCrmCustomerById(id: number): Promise<CrmCustomer | undefined> {
     const [customer] = await customerDb
       .select()
-      .from(customers)
-      .where(eq(customers.id, id))
+      .from(crmCustomers)
+      .where(eq(crmCustomers.id, id))
       .limit(1);
     return customer;
   }
 
-  async getCrmCustomerByEmail(email: string): Promise<Customer | undefined> {
+  async getCrmCustomerByEmail(email: string): Promise<CrmCustomer | undefined> {
     const [customer] = await customerDb
       .select()
-      .from(customers)
-      .where(eq(customers.email, email))
+      .from(crmCustomers)
+      .where(eq(crmCustomers.email, email))
       .limit(1);
     return customer;
   }
