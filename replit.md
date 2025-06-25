@@ -131,6 +131,12 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: Implemented unified customer profile management across all platforms
+- June 25, 2025: Created comprehensive customer profile component with tabbed interface
+- June 25, 2025: Added customer profile API endpoints for unified data access
+- June 25, 2025: Integrated unified profile into CRM and customer portal
+- June 25, 2025: Enhanced customer profile with complete contact, business, and financial information
+- June 25, 2025: Added real-time customer activity tracking and order history display
 - June 25, 2025: Unified customer management - removed dual customer tables, CRM is now single source of truth
 - June 25, 2025: Updated all customer endpoints to use CRM customers table exclusively
 - June 25, 2025: Modified order creation to link directly to CRM customer IDs

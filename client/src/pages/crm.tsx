@@ -13,7 +13,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText } from "lucide-react";
+import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog } from "lucide-react";
+import UnifiedCustomerProfile from "@/components/unified-customer-profile";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CrmCustomer {
