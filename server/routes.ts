@@ -10,10 +10,11 @@ import { insertContactSchema, insertShowcaseProductSchema } from "@shared/showca
 import { simpleCustomerStorage } from "./simple-customer-storage";
 import { shopStorage } from "./shop-storage";
 import { customerStorage } from "./customer-storage";
+import { customerAddressStorage } from "./customer-address-storage";
 import { emailStorage } from "./email-storage";
 import { crmStorage } from "./crm-storage";
 import { smsStorage } from "./sms-storage";
-import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema } from "@shared/customer-schema";
+import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
@@ -24,10 +25,11 @@ import { sql, eq, and } from "drizzle-orm";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 
-// Extend session type to include admin user
+// Extend session type to include admin user and customer user
 declare module "express-session" {
   interface SessionData {
     adminId?: number;
+    customerId?: number;
     isAuthenticated?: boolean;
   }
 }
@@ -6891,6 +6893,111 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error("Error verifying SMS code:", error);
       res.status(500).json({ success: false, message: "خطا در تأیید کد" });
+    }
+  });
+
+  // ============================================================================
+  // CUSTOMER ADDRESS MANAGEMENT ROUTES
+  // ============================================================================
+
+  // Get customer addresses
+  app.get("/api/customers/addresses", async (req: Request, res: Response) => {
+    try {
+      if (!req.session?.customerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+
+      const addresses = await customerAddressStorage.getCustomerAddresses(req.session.customerId);
+      res.json({ success: true, addresses });
+    } catch (error) {
+      console.error("Error fetching customer addresses:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت آدرس‌ها" });
+    }
+  });
+
+  // Create new address
+  app.post("/api/customers/addresses", async (req: Request, res: Response) => {
+    try {
+      if (!req.session?.customerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+
+      const addressData = insertCustomerAddressSchema.parse({
+        ...req.body,
+        customerId: req.session.customerId
+      });
+
+      const newAddress = await customerAddressStorage.createAddress(addressData);
+      res.json({ success: true, address: newAddress, message: "آدرس جدید با موفقیت ایجاد شد" });
+    } catch (error) {
+      console.error("Error creating address:", error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد آدرس جدید" });
+    }
+  });
+
+  // Update address
+  app.put("/api/customers/addresses/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.session?.customerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+
+      const addressId = parseInt(req.params.id);
+      const existingAddress = await customerAddressStorage.getAddressById(addressId);
+      
+      if (!existingAddress || existingAddress.customerId !== req.session.customerId) {
+        return res.status(404).json({ success: false, message: "آدرس یافت نشد" });
+      }
+
+      const updatedAddress = await customerAddressStorage.updateAddress(addressId, req.body);
+      res.json({ success: true, address: updatedAddress, message: "آدرس با موفقیت بروزرسانی شد" });
+    } catch (error) {
+      console.error("Error updating address:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی آدرس" });
+    }
+  });
+
+  // Delete address
+  app.delete("/api/customers/addresses/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.session?.customerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+
+      const addressId = parseInt(req.params.id);
+      const existingAddress = await customerAddressStorage.getAddressById(addressId);
+      
+      if (!existingAddress || existingAddress.customerId !== req.session.customerId) {
+        return res.status(404).json({ success: false, message: "آدرس یافت نشد" });
+      }
+
+      await customerAddressStorage.deleteAddress(addressId);
+      res.json({ success: true, message: "آدرس با موفقیت حذف شد" });
+    } catch (error) {
+      console.error("Error deleting address:", error);
+      res.status(500).json({ success: false, message: "خطا در حذف آدرس" });
+    }
+  });
+
+  // Set default address
+  app.post("/api/customers/addresses/:id/set-default", async (req: Request, res: Response) => {
+    try {
+      if (!req.session?.customerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+
+      const addressId = parseInt(req.params.id);
+      const existingAddress = await customerAddressStorage.getAddressById(addressId);
+      
+      if (!existingAddress || existingAddress.customerId !== req.session.customerId) {
+        return res.status(404).json({ success: false, message: "آدرس یافت نشد" });
+      }
+
+      await customerAddressStorage.setDefaultAddress(req.session.customerId, addressId);
+      res.json({ success: true, message: "آدرس پیش‌فرض تنظیم شد" });
+    } catch (error) {
+      console.error("Error setting default address:", error);
+      res.status(500).json({ success: false, message: "خطا در تنظیم آدرس پیش‌فرض" });
     }
   });
 
