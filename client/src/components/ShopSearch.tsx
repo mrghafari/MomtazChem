@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -53,6 +54,7 @@ interface SearchResults {
 }
 
 export default function ShopSearch() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({
@@ -155,17 +157,18 @@ export default function ShopSearch() {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-4">Shop Products</h1>
+        <h1 className="text-3xl font-bold mb-2">Advanced Product Search</h1>
+        <p className="text-gray-600 mb-4">Search through our comprehensive chemical product catalog with advanced filters</p>
         
         {/* Search Bar */}
         <div className="flex gap-4 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search products, categories, specifications..."
+              placeholder="Search products, categories, specifications, SKU, features..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-lg py-3"
             />
           </div>
           <Button
@@ -388,9 +391,13 @@ export default function ShopSearch() {
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">No products found matching your criteria.</p>
+              <div className="mb-4">
+                <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+                <p className="text-gray-400 text-sm mt-2">Try adjusting your search terms or clearing filters</p>
+              </div>
               <Button variant="outline" onClick={clearFilters} className="mt-4">
-                Clear filters
+                Clear all filters
               </Button>
             </div>
           ) : (
@@ -459,7 +466,17 @@ export default function ShopSearch() {
                       )}
 
                       <div className="flex gap-2">
-                        <Button size="sm" className="flex-1" disabled={!product.inStock}>
+                        <Button 
+                          size="sm" 
+                          className="flex-1" 
+                          disabled={!product.inStock}
+                          onClick={() => {
+                            toast({
+                              title: "Added to Cart",
+                              description: `${product.name} has been added to your cart.`,
+                            });
+                          }}
+                        >
                           <ShoppingCart className="w-3 h-3 mr-1" />
                           Add to Cart
                         </Button>
