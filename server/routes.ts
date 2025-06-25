@@ -2174,10 +2174,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create corresponding customer portal entry with CRM reference
       let portalCustomer = null;
       try {
-        portalCustomer = await customerStorage.createCustomer({
-          ...crmCustomerData,
-          crmCustomerId: crmCustomer.id,
-        });
+        const portalData = {
+          email: crmCustomerData.email,
+          passwordHash: crmCustomerData.passwordHash,
+          firstName: crmCustomerData.firstName,
+          lastName: crmCustomerData.lastName,
+          company: crmCustomerData.company,
+          phone: crmCustomerData.phone,
+          country: crmCustomerData.country,
+          city: crmCustomerData.city,
+          address: crmCustomerData.address,
+          postalCode: crmCustomerData.postalCode,
+          isActive: true,
+        };
+        portalCustomer = await customerStorage.createCustomer(portalData);
       } catch (portalError) {
         console.log('Portal customer creation failed, CRM customer created successfully');
       }
@@ -2223,50 +2233,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // Verify customer credentials
-      const customer = await customerStorage.verifyCustomerPassword(email, password);
+      // First, try to authenticate via CRM (primary source)
+      const crmCustomer = await crmStorage.getCrmCustomerByEmail(email);
+      let authenticatedCustomer = null;
       
-      if (!customer) {
+      if (crmCustomer && crmCustomer.passwordHash) {
+        // Verify password against CRM customer
+        const isValidPassword = await bcrypt.compare(password, crmCustomer.passwordHash);
+        if (isValidPassword) {
+          authenticatedCustomer = crmCustomer;
+        }
+      }
+      
+      // Fallback: Check customer portal for legacy accounts
+      if (!authenticatedCustomer) {
+        const portalCustomer = await customerStorage.verifyCustomerPassword(email, password);
+        if (portalCustomer) {
+          authenticatedCustomer = portalCustomer;
+          // If portal customer exists but no CRM customer, migrate to CRM
+          if (!crmCustomer) {
+            try {
+              const migratedCrmCustomer = await crmStorage.createCrmCustomer({
+                email: portalCustomer.email,
+                firstName: portalCustomer.firstName,
+                lastName: portalCustomer.lastName,
+                company: portalCustomer.company || '',
+                phone: portalCustomer.phone || '',
+                country: portalCustomer.country || '',
+                city: portalCustomer.city || '',
+                address: portalCustomer.address || '',
+                postalCode: portalCustomer.postalCode,
+                passwordHash: portalCustomer.passwordHash,
+                customerSource: 'legacy_migration',
+                customerType: 'retail',
+                customerStatus: 'active',
+                isActive: true,
+                emailVerified: false,
+                internalNotes: 'Migrated from legacy customer portal',
+              });
+              (authenticatedCustomer as any).migratedCrmId = migratedCrmCustomer.id;
+            } catch (migrationError) {
+              console.log('CRM migration failed for legacy customer');
+            }
+          }
+        }
+      }
+
+      if (!authenticatedCustomer) {
         return res.status(401).json({ 
           success: false, 
           message: "ایمیل یا رمز عبور اشتباه است" 
         });
       }
 
-      // Get CRM customer data
-      const crmCustomer = await crmStorage.getCrmCustomerByEmail(email);
+      // Store customer session - use CRM ID as primary
+      const finalCrmCustomer = crmCustomer || (authenticatedCustomer as any).migratedCrmId ? 
+        await crmStorage.getCrmCustomerById((authenticatedCustomer as any).migratedCrmId) : null;
+        
+      (req.session as any).customerId = authenticatedCustomer.id;
+      (req.session as any).customerEmail = authenticatedCustomer.email;
+      (req.session as any).crmCustomerId = finalCrmCustomer?.id || crmCustomer?.id;
+      (req.session as any).isAuthenticated = true;
 
-      // Store customer session with both IDs
-      (req.session as any).customerId = customer.id;
-      (req.session as any).customerEmail = customer.email;
-      if (crmCustomer) {
-        (req.session as any).crmCustomerId = crmCustomer.id;
-      }
-
-      // Log login activity in CRM if customer exists there
-      if (crmCustomer) {
-        await crmStorage.logCustomerActivity({
-          customerId: crmCustomer.id,
+      // Log login activity in CRM
+      if (finalCrmCustomer || crmCustomer) {
+        const crmId = finalCrmCustomer?.id || crmCustomer?.id;
+        if (crmId) {
+          await crmStorage.logCustomerActivity({
+            customerId: crmId,
           activityType: 'login',
           description: 'مشتری وارد فروشگاه آنلاین شد',
+          performedBy: 'customer',
           activityData: {
             source: 'website',
             loginDate: new Date().toISOString(),
             userAgent: req.headers['user-agent'] || 'unknown',
+            loginMethod: crmCustomer ? 'crm_direct' : 'portal_fallback'
           }
-        });
+          });
+        }
       }
 
       res.json({
         success: true,
         message: "ورود موفق",
         customer: {
-          id: customer.id,
-          firstName: customer.firstName,
-          lastName: customer.lastName,
-          email: customer.email,
-          company: customer.company,
-          crmId: crmCustomer?.id,
+          id: authenticatedCustomer.id,
+          firstName: authenticatedCustomer.firstName,
+          lastName: authenticatedCustomer.lastName,
+          email: authenticatedCustomer.email,
+          company: authenticatedCustomer.company,
+          phone: authenticatedCustomer.phone,
+          country: authenticatedCustomer.country,
+          city: authenticatedCustomer.city,
+          address: authenticatedCustomer.address,
+          crmId: finalCrmCustomer?.id || crmCustomer?.id,
         }
       });
     } catch (error) {
@@ -2307,25 +2368,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
       
-      if (!customerId) {
+      if (!customerId && !crmCustomerId) {
         return res.status(401).json({ 
           success: false, 
           message: "احراز هویت نشده" 
         });
       }
 
-      const customer = await customerStorage.getCustomerById(customerId);
+      // Prioritize CRM customer data
+      let customer = null;
+      let crmCustomer = null;
+
+      if (crmCustomerId) {
+        crmCustomer = await crmStorage.getCrmCustomerById(crmCustomerId);
+        if (crmCustomer) {
+          customer = crmCustomer; // Use CRM as primary source
+        }
+      }
+
+      // Fallback to portal customer if CRM not available
+      if (!customer && customerId) {
+        const portalCustomer = await customerStorage.getCustomerById(customerId);
+        if (portalCustomer) {
+          customer = portalCustomer;
+        }
+      }
+
       if (!customer) {
         return res.status(404).json({ 
           success: false, 
           message: "مشتری یافت نشد" 
         });
-      }
-
-      // Get CRM customer data if available
-      let crmCustomer = null;
-      if (crmCustomerId) {
-        crmCustomer = await crmStorage.getCrmCustomerById(crmCustomerId);
       }
 
       res.json({
@@ -2335,12 +2408,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstName: customer.firstName,
           lastName: customer.lastName,
           email: customer.email,
-          company: customer.company,
-          phone: customer.phone,
-          country: customer.country,
-          city: customer.city,
-          address: customer.address,
-          crmId: crmCustomer?.id,
+          company: customer.company || '',
+          phone: customer.phone || '',
+          country: customer.country || '',
+          city: customer.city || '',
+          address: customer.address || '',
+          postalCode: customer.postalCode,
+          crmId: crmCustomer?.id || customer.id,
+          totalOrders: crmCustomer?.totalOrders || 0,
+          totalOrderValue: crmCustomer?.totalOrderValue || 0,
+          averageOrderValue: crmCustomer?.averageOrderValue || 0,
+          lastOrderDate: crmCustomer?.lastOrderDate,
+          customerStatus: crmCustomer?.customerStatus || 'active',
+          customerType: crmCustomer?.customerType || 'retail',
         }
       });
     } catch (error) {
