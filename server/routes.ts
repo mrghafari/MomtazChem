@@ -14,6 +14,7 @@ import { customerAddressStorage } from "./customer-address-storage";
 import { emailStorage } from "./email-storage";
 import { crmStorage } from "./crm-storage";
 import { smsStorage } from "./sms-storage";
+import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
@@ -7016,6 +7017,192 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error("Error setting default address:", error);
       res.status(500).json({ success: false, message: "خطا در تنظیم آدرس پیش‌فرض" });
+    }
+  });
+
+  // =============================================================================
+  // WIDGET RECOMMENDATION API ROUTES
+  // =============================================================================
+
+  // Get available dashboard widgets
+  app.get("/api/admin/widgets", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { category, userLevel } = req.query;
+      const widgets = await widgetRecommendationStorage.getWidgets(
+        category as string, 
+        userLevel as string || 'admin'
+      );
+      res.json({ success: true, data: widgets });
+    } catch (error) {
+      console.error("Error fetching widgets:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت ویجت‌ها" });
+    }
+  });
+
+  // Get user's widget preferences
+  app.get("/api/admin/widgets/preferences", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.adminId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const preferences = await widgetRecommendationStorage.getUserPreferences(userId);
+      res.json({ success: true, data: preferences });
+    } catch (error) {
+      console.error("Error fetching widget preferences:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات ویجت‌ها" });
+    }
+  });
+
+  // Toggle widget visibility
+  app.post("/api/admin/widgets/:widgetId/toggle", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.adminId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const widgetId = parseInt(req.params.widgetId);
+      const preference = await widgetRecommendationStorage.toggleWidgetVisibility(userId, widgetId);
+      
+      res.json({ 
+        success: true, 
+        data: preference,
+        message: `ویجت ${preference.isVisible ? 'نمایش داده می‌شود' : 'مخفی شد'}` 
+      });
+    } catch (error) {
+      console.error("Error toggling widget visibility:", error);
+      res.status(500).json({ success: false, message: "خطا در تغییر نمایش ویجت" });
+    }
+  });
+
+  // Track widget usage
+  app.post("/api/admin/widgets/:widgetId/track", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.adminId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const widgetId = parseInt(req.params.widgetId);
+      const { action, duration, sessionId } = req.body;
+
+      await widgetRecommendationStorage.trackWidgetUsage({
+        userId,
+        widgetId,
+        action,
+        duration,
+        sessionId,
+        userAgent: req.headers['user-agent'],
+        ipAddress: req.ip
+      });
+
+      res.json({ success: true, message: "استفاده از ویجت ثبت شد" });
+    } catch (error) {
+      console.error("Error tracking widget usage:", error);
+      res.status(500).json({ success: false, message: "خطا در ثبت استفاده از ویجت" });
+    }
+  });
+
+  // Get widget recommendations for user
+  app.get("/api/admin/widgets/recommendations", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.adminId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const recommendations = await widgetRecommendationStorage.getRecommendationsForUser(userId);
+      res.json({ success: true, data: recommendations });
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت پیشنهادات" });
+    }
+  });
+
+  // Generate new recommendations
+  app.post("/api/admin/widgets/recommendations/generate", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.adminId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const recommendations = await widgetRecommendationStorage.generateRecommendations(userId);
+      res.json({ 
+        success: true, 
+        data: recommendations,
+        message: `${recommendations.length} پیشنهاد جدید تولید شد` 
+      });
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
+      res.status(500).json({ success: false, message: "خطا در تولید پیشنهادات" });
+    }
+  });
+
+  // Accept recommendation
+  app.post("/api/admin/widgets/recommendations/:recommendationId/accept", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.adminId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const recommendationId = parseInt(req.params.recommendationId);
+      await widgetRecommendationStorage.acceptRecommendation(userId, recommendationId);
+      
+      res.json({ success: true, message: "پیشنهاد پذیرفته شد و ویجت اضافه شد" });
+    } catch (error) {
+      console.error("Error accepting recommendation:", error);
+      res.status(500).json({ success: false, message: "خطا در پذیرش پیشنهاد" });
+    }
+  });
+
+  // Dismiss recommendation
+  app.post("/api/admin/widgets/recommendations/:recommendationId/dismiss", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.adminId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const recommendationId = parseInt(req.params.recommendationId);
+      await widgetRecommendationStorage.dismissRecommendation(userId, recommendationId);
+      
+      res.json({ success: true, message: "پیشنهاد رد شد" });
+    } catch (error) {
+      console.error("Error dismissing recommendation:", error);
+      res.status(500).json({ success: false, message: "خطا در رد پیشنهاد" });
+    }
+  });
+
+  // Get popular widgets
+  app.get("/api/admin/widgets/popular", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const popularWidgets = await widgetRecommendationStorage.getPopularWidgets(limit);
+      res.json({ success: true, data: popularWidgets });
+    } catch (error) {
+      console.error("Error fetching popular widgets:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت ویجت‌های محبوب" });
+    }
+  });
+
+  // Get user activity summary
+  app.get("/api/admin/widgets/activity", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.adminId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const days = parseInt(req.query.days as string) || 30;
+      const activity = await widgetRecommendationStorage.getUserActivitySummary(userId, days);
+      res.json({ success: true, data: activity });
+    } catch (error) {
+      console.error("Error fetching user activity:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت فعالیت کاربر" });
     }
   });
 

@@ -485,6 +485,103 @@ export const insertLeadActivitySchema = createInsertSchema(leadActivities).omit(
 export type InsertLeadActivity = z.infer<typeof insertLeadActivitySchema>;
 export type LeadActivity = typeof leadActivities.$inferSelect;
 
+// Dashboard widget usage tracking
+export const dashboardWidgets = pgTable("dashboard_widgets", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // sales_overview, recent_orders, customer_analytics, etc.
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // analytics, sales, customers, inventory, system
+  iconName: text("icon_name").default("BarChart3"), // Lucide icon name
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(0), // Higher = more important
+  minUserLevel: text("min_user_level").default("admin"), // admin, super_admin
+  dependencies: json("dependencies"), // Array of required features/permissions
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertDashboardWidgetSchema = createInsertSchema(dashboardWidgets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertDashboardWidget = z.infer<typeof insertDashboardWidgetSchema>;
+export type DashboardWidget = typeof dashboardWidgets.$inferSelect;
+
+// User widget preferences and usage tracking
+export const userWidgetPreferences = pgTable("user_widget_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  widgetId: integer("widget_id").notNull(),
+  isVisible: boolean("is_visible").default(true),
+  position: integer("position").default(0), // Dashboard position
+  size: text("size").default("medium"), // small, medium, large
+  customSettings: json("custom_settings"), // Widget-specific configuration
+  lastViewed: timestamp("last_viewed"),
+  viewCount: integer("view_count").default(0),
+  clickCount: integer("click_count").default(0),
+  timeSpent: integer("time_spent").default(0), // Total seconds spent viewing
+  isStarred: boolean("is_starred").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertUserWidgetPreferenceSchema = createInsertSchema(userWidgetPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUserWidgetPreference = z.infer<typeof insertUserWidgetPreferenceSchema>;
+export type UserWidgetPreference = typeof userWidgetPreferences.$inferSelect;
+
+// Widget usage analytics
+export const widgetUsageAnalytics = pgTable("widget_usage_analytics", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  widgetId: integer("widget_id").notNull(),
+  action: text("action").notNull(), // view, click, interact, configure, hide, show
+  sessionId: text("session_id"),
+  duration: integer("duration"), // Seconds spent on action
+  metadata: json("metadata"), // Additional context about the action
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+});
+
+export const insertWidgetUsageAnalyticsSchema = createInsertSchema(widgetUsageAnalytics).omit({
+  id: true,
+  timestamp: true,
+});
+
+export type InsertWidgetUsageAnalytics = z.infer<typeof insertWidgetUsageAnalyticsSchema>;
+export type WidgetUsageAnalytics = typeof widgetUsageAnalytics.$inferSelect;
+
+// Widget recommendations based on user behavior
+export const widgetRecommendations = pgTable("widget_recommendations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  widgetId: integer("widget_id").notNull(),
+  score: decimal("score", { precision: 5, scale: 2 }).notNull(), // Recommendation strength 0-100
+  reason: text("reason").notNull(), // similar_users, usage_pattern, role_based, trending
+  explanation: text("explanation"), // Human-readable explanation
+  isAccepted: boolean("is_accepted"),
+  isDismissed: boolean("is_dismissed").default(false),
+  generatedAt: timestamp("generated_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  metadata: json("metadata"), // Additional recommendation context
+});
+
+export const insertWidgetRecommendationSchema = createInsertSchema(widgetRecommendations).omit({
+  id: true,
+  generatedAt: true,
+});
+
+export type InsertWidgetRecommendation = z.infer<typeof insertWidgetRecommendationSchema>;
+export type WidgetRecommendation = typeof widgetRecommendations.$inferSelect;
+
 // =============================================================================
 // SEO SCHEMA TYPES AND VALIDATION
 // =============================================================================
