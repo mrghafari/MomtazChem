@@ -131,6 +131,10 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: FIXED customer authentication system - registration and login now work seamlessly
+- June 25, 2025: Added passwordHash field to CRM table for unified authentication across platforms
+- June 25, 2025: Verified complete customer journey: registration → data storage → successful login
+- June 25, 2025: Updated Tawk.to live chat script for enhanced customer support integration
 - June 25, 2025: SUCCESSFULLY COMPLETED comprehensive CRM customer registration system
 - June 25, 2025: Verified all 40+ customer data fields are properly stored in CRM database  
 - June 25, 2025: Fixed TypeScript errors and confirmed data integrity in customer management
