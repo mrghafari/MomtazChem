@@ -370,20 +370,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   </CardContent>
                 </Card>
 
-                {/* Address Selection - Only for logged in users */}
-                {isLoggedIn && (
-                  <AddressSelector
-                    selectedAddressId={selectedAddress?.id}
-                    onAddressSelect={setSelectedAddress}
-                  />
-                )}
-
-                {/* Address Selection - For logged in users use saved addresses */}
+                {/* Address Section */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CreditCard className="w-5 h-5" />
-                      {isUserLoggedIn ? 'انتخاب آدرس' : 'Billing Address'}
+                      آدرس تحویل
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -407,7 +399,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           name="billingAddress1"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Address Line 1 *</FormLabel>
+                              <FormLabel>آدرس کامل *</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -415,39 +407,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             </FormItem>
                           )}
                         />
-                        <FormField
-                          control={form.control}
-                          name="billingAddress2"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Address Line 2 (Optional)</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
                             name="billingCity"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>City *</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="billingState"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>State/Province *</FormLabel>
+                                <FormLabel>شهر *</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>
@@ -460,7 +426,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             name="billingPostalCode"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Postal Code *</FormLabel>
+                                <FormLabel>کد پستی</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>

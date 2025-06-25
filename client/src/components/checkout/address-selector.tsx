@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -286,7 +287,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="مثل: منزل، محل کار، انبار"
+                  placeholder="مثل: منزل، محل کار"
                   required
                 />
               </div>
@@ -299,75 +300,42 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                   onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
                   placeholder="نام کامل تحویل‌گیرنده"
                   required
+                  disabled
                 />
+                <p className="text-xs text-muted-foreground mt-1">نام از حساب کاربری شما پر می‌شود</p>
               </div>
 
               <div>
-                <Label htmlFor="company">شرکت (اختیاری)</Label>
-                <Input
-                  id="company"
-                  value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="phone">شماره تلفن</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                <Label htmlFor="address">آدرس کامل</Label>
+                <Textarea
+                  id="address"
+                  value={formData.address}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="آدرس کامل خود را وارد کنید"
+                  rows={3}
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="country">کشور</Label>
+                  <Label htmlFor="city">شهر</Label>
                   <Input
-                    id="country"
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="state">استان (اختیاری)</Label>
+                  <Label htmlFor="postalCode">کد پستی</Label>
                   <Input
-                    id="state"
-                    value={formData.state}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    id="postalCode"
+                    value={formData.postalCode}
+                    onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                    placeholder="اختیاری"
                   />
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="city">شهر</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="address">آدرس کامل</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="postalCode">کد پستی (اختیاری)</Label>
-                <Input
-                  id="postalCode"
-                  value={formData.postalCode}
-                  onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                />
               </div>
 
               <div className="flex gap-2">
