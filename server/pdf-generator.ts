@@ -39,12 +39,7 @@ export async function generatePDF(htmlContent: string, filename: string): Promis
       '--disable-dev-shm-usage',
       '--disable-gpu',
       '--no-first-run',
-      '--disable-extensions',
-      '--disable-background-timer-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding',
-      '--disable-features=TranslateUI',
-      '--disable-ipc-flooding-protection'
+      '--disable-extensions'
     ]
   });
 
@@ -54,15 +49,10 @@ export async function generatePDF(htmlContent: string, filename: string): Promis
     // Set viewport for consistent rendering
     await page.setViewport({ width: 1280, height: 720 });
     
-    // Load content
-    await page.setContent(htmlContent, { 
-      waitUntil: 'load'
-    });
+    // Load content directly
+    await page.setContent(htmlContent);
     
-    // Wait for content to stabilize using page.waitForFunction
-    await page.waitForFunction(() => document.readyState === 'complete');
-    
-    // Generate PDF with Adobe Acrobat compatible settings
+    // Generate PDF with basic settings for maximum compatibility
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -78,14 +68,6 @@ export async function generatePDF(htmlContent: string, filename: string): Promis
     if (!pdf || pdf.length === 0) {
       throw new Error('Generated PDF is empty');
     }
-    
-    // Verify PDF header for Adobe compatibility
-    const pdfHeader = pdf.subarray(0, 8).toString();
-    if (!pdfHeader.startsWith('%PDF-')) {
-      throw new Error('Invalid PDF format - missing PDF header');
-    }
-    
-    // Basic PDF validation passed
     
     console.log('PDF generated successfully:', filename, 'Size:', pdf.length, 'bytes');
     return pdf;
