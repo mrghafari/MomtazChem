@@ -109,6 +109,12 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
       city: "",
       address: "",
       postalCode: "",
+      alternatePhone: "",
+      industry: "",
+      businessType: "retail",
+      communicationPreference: "email",
+      preferredLanguage: "fa",
+      marketingConsent: false,
     },
   });
 
@@ -457,9 +463,9 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
                           name="company"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>شرکت (اختیاری)</FormLabel>
+                              <FormLabel>نام شرکت *</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} required />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -519,6 +525,102 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
                             </FormItem>
                           )}
                         />
+                        <FormField
+                          control={registerForm.control}
+                          name="alternatePhone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>تلفن دوم</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={registerForm.control}
+                          name="industry"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>صنعت</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="مثال: شیمیایی، نفت و گاز" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={registerForm.control}
+                            name="businessType"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>نوع کسب و کار</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="retail">خرده فروشی</SelectItem>
+                                    <SelectItem value="wholesale">عمده فروشی</SelectItem>
+                                    <SelectItem value="distributor">توزیع کننده</SelectItem>
+                                    <SelectItem value="manufacturer">تولید کننده</SelectItem>
+                                    <SelectItem value="end_user">مصرف کننده نهایی</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={registerForm.control}
+                            name="communicationPreference"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>روش ارتباط ترجیحی</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="email">ایمیل</SelectItem>
+                                    <SelectItem value="phone">تلفن</SelectItem>
+                                    <SelectItem value="sms">پیامک</SelectItem>
+                                    <SelectItem value="whatsapp">واتساپ</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <FormField
+                            control={registerForm.control}
+                            name="marketingConsent"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center space-x-2">
+                                <FormControl>
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={field.onChange}
+                                    className="rounded border-gray-300"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm">
+                                  موافقت با دریافت اطلاعیه‌های بازاریابی
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
                             control={registerForm.control}
