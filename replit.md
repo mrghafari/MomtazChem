@@ -139,6 +139,8 @@ Changelog:
 - June 25, 2025: Added comprehensive activity logging for all customer interactions in CRM
 - June 25, 2025: FIXED frontend customer registration form to make phone, country, city, address mandatory fields
 - June 25, 2025: Updated registration form validation to match CRM requirements with proper field marking
+- June 25, 2025: COMPLETED full integration - registration API working perfectly with CRM
+- June 25, 2025: Fixed duplicate key warning in shop page pagination and search functionality
 - June 25, 2025: Successfully integrated advanced search system into main shop page
 - June 25, 2025: Enhanced existing shop with comprehensive search filters (category, price, stock, tags, sorting)
 - June 25, 2025: Added real-time search with debouncing, advanced filtering sidebar, and pagination

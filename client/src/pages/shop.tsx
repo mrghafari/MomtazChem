@@ -582,7 +582,7 @@ const Shop = () => {
                 Array.from({ length: 6 }).map((_, index) => (
                   <ProductCardSkeleton key={index} viewMode={viewMode} />
                 ))
-              ) : currentProducts.length === 0 ? (
+              ) : filteredProducts.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <div className="mb-4">
                     <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -757,7 +757,7 @@ const Shop = () => {
                     const pageNum = Math.max(0, Math.min(currentPage - 2 + i, totalPages - 1));
                     return (
                       <Button
-                        key={`page-${pageNum}`}
+                        key={`pagination-page-${pageNum}-${i}`}
                         variant={currentPage === pageNum ? "default" : "outline"}
                         size="sm"
                         onClick={() => setCurrentPage(pageNum)}
