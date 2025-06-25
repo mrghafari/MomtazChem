@@ -84,6 +84,34 @@ export const insertCustomerSchema = createInsertSchema(customers).omit({
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 export type Customer = typeof customers.$inferSelect;
 
+// Customer addresses table - multiple shipping addresses per customer
+export const customerAddresses = pgTable("customer_addresses", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull(),
+  title: text("title").notNull(), // Home, Office, Warehouse, etc.
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  company: text("company"),
+  phone: text("phone").notNull(),
+  country: text("country").notNull(),
+  state: text("state"),
+  city: text("city").notNull(),
+  address: text("address").notNull(),
+  postalCode: text("postal_code"),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCustomerAddressSchema = createInsertSchema(customerAddresses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCustomerAddress = z.infer<typeof insertCustomerAddressSchema>;
+export type CustomerAddress = typeof customerAddresses.$inferSelect;
+
 // Customer orders table
 export const customerOrders = pgTable("customer_orders", {
   id: serial("id").primaryKey(),
