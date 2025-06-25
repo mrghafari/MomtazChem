@@ -6248,13 +6248,21 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const pdfBuffer = await generateCustomerDetailPDF(customer, analytics, activities);
 
       // Set response headers for PDF download
+      // Validate PDF buffer before sending
+      if (!pdfBuffer || pdfBuffer.length === 0) {
+        throw new Error('Generated PDF is empty');
+      }
+      
+      console.log('Customer PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+      
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Content-Length', pdfBuffer.length);
       res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Accept-Ranges', 'bytes');
       
       // Send PDF buffer
-      res.end(pdfBuffer, 'binary');
+      res.end(pdfBuffer);
       
     } catch (error) {
       console.error("Error generating customer PDF:", error);
@@ -6276,13 +6284,21 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const pdfBuffer = await generateCustomerAnalyticsPDF(dashboardStats);
 
       // Set response headers for PDF download
+      // Validate PDF buffer before sending
+      if (!pdfBuffer || pdfBuffer.length === 0) {
+        throw new Error('Generated PDF is empty');
+      }
+      
+      console.log('Analytics PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+      
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Content-Length', pdfBuffer.length);
       res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Accept-Ranges', 'bytes');
       
       // Send PDF buffer
-      res.end(pdfBuffer, 'binary');
+      res.end(pdfBuffer);
       
     } catch (error) {
       console.error("Error generating analytics PDF:", error);
