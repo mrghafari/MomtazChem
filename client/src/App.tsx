@@ -48,6 +48,7 @@ import InquiryDetail from "@/pages/inquiry-detail";
 import CategoryManagement from "@/pages/category-management";
 import SeoManagement from "@/pages/seo-management";
 import AdminSmsManagement from "@/pages/admin-sms-management";
+import WidgetRecommendations from "@/pages/widget-recommendations";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -90,6 +91,7 @@ function Router() {
           <Route path="/seo-management" component={SeoManagement} />
           <Route path="/admin/sms-management" component={AdminSmsManagement} />
           <Route path="/admin/sms" component={AdminSmsManagement} />
+          <Route path="/admin/widgets" component={WidgetRecommendations} />
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />

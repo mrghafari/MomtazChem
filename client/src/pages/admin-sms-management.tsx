@@ -201,7 +201,15 @@ export default function AdminSmsManagement() {
   };
 
   const handleToggleCustomerSms = async (customerId: number, enable: boolean) => {
-    setLoading(true);
+    // Immediately update local state for instant UI feedback
+    setCustomersWithSms(prev => 
+      prev.map(customer => 
+        customer.id === customerId 
+          ? { ...customer, smsEnabled: enable }
+          : customer
+      )
+    );
+
     try {
       const response = await fetch(`/api/admin/sms/customers/${customerId}`, {
         method: 'PUT',
@@ -214,24 +222,23 @@ export default function AdminSmsManagement() {
 
       const result = await response.json();
       if (result.success) {
-        // Immediately update local state for instant UI feedback
-        setCustomersWithSms(prev => 
-          prev.map(customer => 
-            customer.id === customerId 
-              ? { ...customer, smsEnabled: enable }
-              : customer
-          )
-        );
-        
         toast({
           title: enable ? "SMS فعال شد" : "SMS غیرفعال شد",
           description: result.message,
         });
         
-        // Reload data to ensure consistency
-        await loadCustomersWithSms();
+        // Only reload stats, not the customer list to maintain UI state
         await loadSmsStats();
       } else {
+        // Revert the local state change if API call failed
+        setCustomersWithSms(prev => 
+          prev.map(customer => 
+            customer.id === customerId 
+              ? { ...customer, smsEnabled: !enable }
+              : customer
+          )
+        );
+        
         toast({
           title: "خطا",
           description: result.message,
@@ -239,18 +246,35 @@ export default function AdminSmsManagement() {
         });
       }
     } catch (error) {
+      // Revert the local state change if API call failed
+      setCustomersWithSms(prev => 
+        prev.map(customer => 
+          customer.id === customerId 
+            ? { ...customer, smsEnabled: !enable }
+            : customer
+        )
+      );
+      
       toast({
         title: "خطا",
         description: "خطا در تغییر تنظیمات SMS مشتری",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleBulkSmsToggle = async (action: 'enable' | 'disable') => {
     setLoading(true);
+    const enableSms = action === 'enable';
+    
+    // Store previous state for potential rollback
+    const previousState = [...customersWithSms];
+    
+    // Immediately update all customers' SMS status for instant UI feedback
+    setCustomersWithSms(prev => 
+      prev.map(customer => ({ ...customer, smsEnabled: enableSms }))
+    );
+
     try {
       const response = await fetch('/api/admin/sms/customers/bulk', {
         method: 'POST',
@@ -263,21 +287,17 @@ export default function AdminSmsManagement() {
 
       const result = await response.json();
       if (result.success) {
-        // Immediately update all customers' SMS status for instant UI feedback
-        const enableSms = action === 'enable';
-        setCustomersWithSms(prev => 
-          prev.map(customer => ({ ...customer, smsEnabled: enableSms }))
-        );
-        
         toast({
           title: action === 'enable' ? "SMS برای همه فعال شد" : "SMS برای همه غیرفعال شد",
           description: result.message,
         });
         
-        // Reload data to ensure consistency
-        await loadCustomersWithSms();
+        // Only reload stats, not the customer list to maintain UI state
         await loadSmsStats();
       } else {
+        // Revert to previous state if API call failed
+        setCustomersWithSms(previousState);
+        
         toast({
           title: "خطا",
           description: result.message,
@@ -285,6 +305,9 @@ export default function AdminSmsManagement() {
         });
       }
     } catch (error) {
+      // Revert to previous state if API call failed
+      setCustomersWithSms(previousState);
+      
       toast({
         title: "خطا",
         description: "خطا در تغییر انبوه تنظیمات SMS",
