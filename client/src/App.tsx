@@ -58,8 +58,8 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/services" component={Services} />
           <Route path="/contact" component={Contact} />
-          <Route path="/shop" component={ShopSearch} />
-          <Route path="/shop-legacy" component={Shop} />
+          <Route path="/shop" component={Shop} />
+          <Route path="/shop-search" component={ShopSearch} />
           <Route path="/shop-admin" component={ShopAdmin} />
           <Route path="/admin" component={AdminPage} />
           <Route path="/admin/login" component={AdminLogin} />

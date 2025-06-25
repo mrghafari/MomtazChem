@@ -505,7 +505,7 @@ export default function ShopSearch() {
                       const pageNum = Math.max(0, Math.min(currentPage - 2 + i, totalPages - 1));
                       return (
                         <Button
-                          key={pageNum}
+                          key={`page-${pageNum}`}
                           variant={currentPage === pageNum ? "default" : "outline"}
                           size="sm"
                           onClick={() => setCurrentPage(pageNum)}
