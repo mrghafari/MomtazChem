@@ -131,6 +131,8 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: Made phone, country, city, and address mandatory fields in all registration forms (CRM and shop)
+- June 25, 2025: Added validation for required fields in customer registration endpoints
 - June 25, 2025: Unified customer management - CRM now serves as central repository for all customer data
 - June 25, 2025: Updated customer registration to create CRM entries first, then sync to portal
 - June 25, 2025: Converted CRM new customer form to English with enhanced fields (address, password)
