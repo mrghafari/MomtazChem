@@ -1,36 +1,34 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { User, Phone, Shield, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ArrowLeft, Save, Shield, Phone } from "lucide-react";
 
 const editProfileSchema = z.object({
-  firstName: z.string().min(2, "نام باید حداقل 2 کاراکتر باشد"),
-  lastName: z.string().min(2, "نام خانوادگی باید حداقل 2 کاراکتر باشد"),
-  phone: z.string().min(10, "شماره تلفن باید حداقل 10 رقم باشد"),
+  firstName: z.string().min(1, "نام الزامی است"),
+  lastName: z.string().min(1, "نام خانوادگی الزامی است"),
+  phone: z.string().min(1, "شماره تلفن الزامی است"),
   company: z.string().optional(),
-  country: z.string().min(2, "کشور الزامی است"),
-  city: z.string().min(2, "شهر الزامی است"),
-  address: z.string().min(10, "آدرس باید حداقل 10 کاراکتر باشد"),
+  country: z.string().min(1, "کشور الزامی است"),
+  city: z.string().min(1, "شهر الزامی است"),
+  address: z.string().min(1, "آدرس الزامی است"),
   postalCode: z.string().optional(),
-  website: z.string().optional(),
   businessType: z.string().optional(),
   notes: z.string().optional(),
 });
 
 const smsVerificationSchema = z.object({
-  code: z.string().length(6, "کد باید 6 رقم باشد")
+  code: z.string().min(4, "کد تایید باید حداقل 4 رقم باشد"),
 });
 
 type EditProfileForm = z.infer<typeof editProfileSchema>;
@@ -41,9 +39,8 @@ export default function CustomerProfileEdit() {
   const { toast } = useToast();
   const [showSmsDialog, setShowSmsDialog] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<EditProfileForm | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
 
-  // Fetch current customer profile
+  // Fetch customer data
   const { data: customer, isLoading } = useQuery({
     queryKey: ["/api/customers/me"],
   });
@@ -64,9 +61,16 @@ export default function CustomerProfileEdit() {
     },
   });
 
+  const smsForm = useForm<SmsVerificationForm>({
+    resolver: zodResolver(smsVerificationSchema),
+    defaultValues: {
+      code: ""
+    }
+  });
+
   // Update form values when customer data is loaded
   React.useEffect(() => {
-    if (customer?.success && customer.data) {
+    if (customer?.data) {
       const customerData = customer.data;
       form.reset({
         firstName: customerData.firstName || "",
@@ -82,13 +86,6 @@ export default function CustomerProfileEdit() {
       });
     }
   }, [customer, form]);
-
-  const smsForm = useForm<SmsVerificationForm>({
-    resolver: zodResolver(smsVerificationSchema),
-    defaultValues: {
-      code: ""
-    }
-  });
 
   // Send SMS verification code
   const sendSmsCodeMutation = useMutation({
@@ -106,7 +103,7 @@ export default function CustomerProfileEdit() {
     onSuccess: () => {
       toast({
         title: "کد تایید ارسال شد",
-        description: "کد 6 رقمی به شماره موبایل شما ارسال شد",
+        description: "کد تایید به شماره تلفن شما ارسال شد",
       });
     },
     onError: (error: any) => {
@@ -122,24 +119,34 @@ export default function CustomerProfileEdit() {
   const verifySmsAndUpdateMutation = useMutation({
     mutationFn: async ({ code, profileData }: { code: string; profileData: EditProfileForm }) => {
       // First verify the SMS code
-      const verifyResponse = await apiRequest(`/api/sms/verify-code`, {
-        method: "POST",
-        body: { 
+      const verifyResponse = await fetch('/api/sms/verify-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
           phone: profileData.phone, 
           code, 
           purpose: "profile_update" 
-        }
+        })
       });
+      const verifyData = await verifyResponse.json();
 
-      if (!verifyResponse.success) {
-        throw new Error(verifyResponse.message || "کد تایید اشتباه است");
+      if (!verifyData.success) {
+        throw new Error(verifyData.message || "کد تایید اشتباه است");
       }
 
       // Then update the profile
-      return await apiRequest(`/api/customers/profile`, {
-        method: "PUT",
-        body: profileData
+      const updateResponse = await fetch('/api/customers/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(profileData)
       });
+      return updateResponse.json();
     },
     onSuccess: () => {
       toast({
@@ -162,7 +169,7 @@ export default function CustomerProfileEdit() {
 
   const onSubmit = async (data: EditProfileForm) => {
     // Check if phone number has changed
-    const phoneChanged = data.phone !== customer?.phone;
+    const phoneChanged = data.phone !== customer?.data?.phone;
     
     if (phoneChanged) {
       // Store pending changes and send SMS
@@ -172,12 +179,17 @@ export default function CustomerProfileEdit() {
     } else {
       // No SMS verification needed, update directly
       try {
-        const response = await apiRequest(`/api/customers/profile`, {
-          method: "PUT",
-          body: data
+        const response = await fetch('/api/customers/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(data)
         });
+        const result = await response.json();
         
-        if (response.success) {
+        if (result.success) {
           toast({
             title: "پروفایل بروزرسانی شد",
             description: "اطلاعات پروفایل شما با موفقیت بروزرسانی شد",
@@ -206,56 +218,60 @@ export default function CustomerProfileEdit() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center">
+          <div className="text-lg">در حال بارگذاری...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!customer?.data) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center">
+          <div className="text-lg text-red-600">خطا در دریافت اطلاعات مشتری</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="outline"
-            onClick={() => setLocation("/customer/profile")}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            بازگشت به پروفایل
-          </Button>
-        </div>
-        <div className="flex items-center gap-3">
-          <User className="w-8 h-8 text-blue-600" />
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">ویرایش پروفایل</h1>
-            <p className="text-gray-600">اطلاعات شخصی و تجاری خود را بروزرسانی کنید</p>
-          </div>
-        </div>
+    <div className="container mx-auto py-8 space-y-6" dir="rtl">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setLocation("/customer/profile")}
+        >
+          <ArrowLeft className="h-4 w-4 ml-2" />
+          بازگشت
+        </Button>
+        <h1 className="text-2xl font-bold">ویرایش پروفایل</h1>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            اطلاعات شخصی
+            <Shield className="h-5 w-5" />
+            ویرایش اطلاعات شخصی
           </CardTitle>
+          <CardDescription>
+            در صورت تغییر شماره تلفن، کد تایید برای شما ارسال خواهد شد
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>نام *</FormLabel>
+                      <FormLabel>نام</FormLabel>
                       <FormControl>
-                        <Input placeholder="نام خود را وارد کنید" {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -267,9 +283,9 @@ export default function CustomerProfileEdit() {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>نام خانوادگی *</FormLabel>
+                      <FormLabel>نام خانوادگی</FormLabel>
                       <FormControl>
-                        <Input placeholder="نام خانوادگی خود را وارد کنید" {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -281,17 +297,9 @@ export default function CustomerProfileEdit() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
-                        شماره موبایل *
-                        {field.value !== customer?.phone && (
-                          <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
-                            نیاز به تایید SMS
-                          </span>
-                        )}
-                      </FormLabel>
+                      <FormLabel>شماره تلفن</FormLabel>
                       <FormControl>
-                        <Input placeholder="09123456789" {...field} />
+                        <Input {...field} placeholder="09xxxxxxxxx" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -305,7 +313,7 @@ export default function CustomerProfileEdit() {
                     <FormItem>
                       <FormLabel>شرکت</FormLabel>
                       <FormControl>
-                        <Input placeholder="نام شرکت" {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -317,21 +325,10 @@ export default function CustomerProfileEdit() {
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>کشور *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="کشور را انتخاب کنید" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Iran">ایران</SelectItem>
-                          <SelectItem value="UAE">امارات متحده عربی</SelectItem>
-                          <SelectItem value="Turkey">ترکیه</SelectItem>
-                          <SelectItem value="Iraq">عراق</SelectItem>
-                          <SelectItem value="Afghanistan">افغانستان</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>کشور</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -342,9 +339,23 @@ export default function CustomerProfileEdit() {
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>شهر *</FormLabel>
+                      <FormLabel>شهر</FormLabel>
                       <FormControl>
-                        <Input placeholder="شهر خود را وارد کنید" {...field} />
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>آدرس</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -358,21 +369,7 @@ export default function CustomerProfileEdit() {
                     <FormItem>
                       <FormLabel>کد پستی</FormLabel>
                       <FormControl>
-                        <Input placeholder="کد پستی" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="website"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>وب‌سایت</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://example.com" {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -385,84 +382,19 @@ export default function CustomerProfileEdit() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>نوع کسب و کار</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="نوع کسب و کار را انتخاب کنید" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Manufacturing">تولیدی</SelectItem>
-                          <SelectItem value="Trading">بازرگانی</SelectItem>
-                          <SelectItem value="Services">خدماتی</SelectItem>
-                          <SelectItem value="Agriculture">کشاورزی</SelectItem>
-                          <SelectItem value="Mining">معدنی</SelectItem>
-                          <SelectItem value="Other">سایر</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>آدرس کامل *</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="آدرس کامل خود را وارد کنید"
-                        className="min-h-[100px]"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>یادداشت‌ها</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="توضیحات اضافی در مورد کسب و کار شما"
-                        className="min-h-[100px]"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end gap-4 pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setLocation("/customer/profile")}
-                >
-                  انصراف
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={sendSmsCodeMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {sendSmsCodeMutation.isPending ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      ارسال کد تایید...
-                    </>
-                  ) : (
-                    "ذخیره تغییرات"
-                  )}
+              <div className="flex justify-end pt-4">
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  <Save className="h-4 w-4 ml-2" />
+                  ذخیره تغییرات
                 </Button>
               </div>
             </form>
@@ -472,84 +404,50 @@ export default function CustomerProfileEdit() {
 
       {/* SMS Verification Dialog */}
       <Dialog open={showSmsDialog} onOpenChange={setShowSmsDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-600" />
-              تایید شماره موبایل
+              <Phone className="h-5 w-5" />
+              تایید شماره تلفن
             </DialogTitle>
+            <DialogDescription>
+              کد تایید به شماره {pendingChanges?.phone} ارسال شد
+            </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              کد 6 رقمی ارسال شده به شماره {pendingChanges?.phone} را وارد کنید:
-            </p>
+          <Form {...smsForm}>
+            <form onSubmit={smsForm.handleSubmit(onSmsVerify)} className="space-y-4">
+              <FormField
+                control={smsForm.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>کد تایید</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="1234" maxLength={6} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Form {...smsForm}>
-              <form onSubmit={smsForm.handleSubmit(onSmsVerify)} className="space-y-4">
-                <FormField
-                  control={smsForm.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>کد تایید</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="123456" 
-                          className="text-center text-2xl font-mono tracking-widest"
-                          maxLength={6}
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowSmsDialog(false);
-                      setPendingChanges(null);
-                    }}
-                  >
-                    انصراف
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={verifySmsAndUpdateMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {verifySmsAndUpdateMutation.isPending ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        در حال تایید...
-                      </>
-                    ) : (
-                      "تایید و ذخیره"
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-
-            <div className="text-center">
-              <Button
-                variant="link"
-                className="text-sm text-blue-600"
-                onClick={() => {
-                  if (pendingChanges) {
-                    sendSmsCodeMutation.mutate(pendingChanges.phone);
-                  }
-                }}
-                disabled={sendSmsCodeMutation.isPending}
-              >
-                ارسال مجدد کد
-              </Button>
-            </div>
-          </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowSmsDialog(false)}
+                >
+                  انصراف
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={verifySmsAndUpdateMutation.isPending}
+                >
+                  تایید و ذخیره
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>
