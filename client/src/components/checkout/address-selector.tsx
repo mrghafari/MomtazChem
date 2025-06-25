@@ -55,6 +55,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
   const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
   const [formData, setFormData] = useState<AddressFormData>({
     title: '',
+    recipientName: '',
     firstName: '',
     lastName: '',
     company: '',
@@ -78,7 +79,37 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
     }
   });
 
+  // Fetch customer info for default recipient name
+  const { data: customerInfo } = useQuery({
+    queryKey: ['/api/customers/profile'],
+    queryFn: async () => {
+      const response = await fetch('/api/customers/profile', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('خطا در دریافت اطلاعات مشتری');
+      return response.json();
+    }
+  });
+
   const addresses = addressesResponse?.addresses || [];
+
+  // Set default recipient name when opening add new address dialog
+  useEffect(() => {
+    if (isDialogOpen && !editingAddress && customerInfo) {
+      const defaultRecipientName = `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim();
+      if (defaultRecipientName && !formData.recipientName) {
+        setFormData(prev => ({
+          ...prev,
+          recipientName: defaultRecipientName,
+          firstName: customerInfo.firstName || '',
+          lastName: customerInfo.lastName || '',
+          phone: customerInfo.phone || '',
+          country: customerInfo.country || 'ایران',
+          city: customerInfo.city || '',
+        }));
+      }
+    }
+  }, [isDialogOpen, editingAddress, customerInfo]);
 
   // Create address mutation
   const createAddressMutation = useMutation({
@@ -168,6 +199,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
   const resetForm = () => {
     setFormData({
       title: '',
+      recipientName: '',
       firstName: '',
       lastName: '',
       company: '',
@@ -184,6 +216,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
     setEditingAddress(address);
     setFormData({
       title: address.title,
+      recipientName: address.recipientName,
       firstName: address.firstName,
       lastName: address.lastName,
       company: address.company || '',
@@ -264,6 +297,17 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="مثل: منزل، محل کار، انبار"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="recipientName">نام تحویل‌گیرنده</Label>
+                <Input
+                  id="recipientName"
+                  value={formData.recipientName}
+                  onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
+                  placeholder="نام کامل تحویل‌گیرنده"
                   required
                 />
               </div>
@@ -440,6 +484,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                         </div>
                       </div>
                       <div className="text-sm text-muted-foreground">
+                        <div className="font-medium text-foreground">تحویل گیرنده: {address.recipientName}</div>
                         <div>{address.firstName} {address.lastName}</div>
                         {address.company && <div>{address.company}</div>}
                         <div>{address.city}، {address.country}</div>
