@@ -6941,9 +6941,17 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(401).json({ success: false, message: "احراز هویت نشده" });
       }
 
+      // Get customer info to auto-fill firstName and lastName
+      const customer = await crmStorage.getCrmCustomerById(req.session.customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+
       const addressData = insertCustomerAddressSchema.parse({
         ...req.body,
-        customerId: req.session.customerId
+        customerId: req.session.customerId,
+        firstName: customer.firstName,
+        lastName: customer.lastName
       });
 
       const newAddress = await customerAddressStorage.createAddress(addressData);

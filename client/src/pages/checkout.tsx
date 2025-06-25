@@ -378,49 +378,36 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   />
                 )}
 
-                {/* Billing Address - For non-logged in users or manual entry */}
-                {!isLoggedIn && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <CreditCard className="w-5 h-5" />
-                        Billing Address
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="billingAddress1"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Address Line 1 *</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                {/* Address Selection - For logged in users use saved addresses */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="w-5 h-5" />
+                      {isUserLoggedIn ? 'انتخاب آدرس' : 'Billing Address'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isUserLoggedIn ? (
+                      <AddressSelector
+                        selectedAddressId={selectedAddress?.id}
+                        onAddressSelect={(address) => {
+                          setSelectedAddress(address);
+                          // Auto-fill form fields from selected address
+                          form.setValue('billingAddress1', address.address);
+                          form.setValue('billingCity', address.city);
+                          form.setValue('billingState', address.state || '');
+                          form.setValue('billingPostalCode', address.postalCode || '');
+                          form.setValue('billingCountry', address.country);
+                        }}
                       />
-                      <FormField
-                        control={form.control}
-                        name="billingAddress2"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Address Line 2 (Optional)</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    ) : (
+                      <div className="space-y-4">
                         <FormField
                           control={form.control}
-                          name="billingCity"
+                          name="billingAddress1"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>City *</FormLabel>
+                              <FormLabel>Address Line 1 *</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -430,10 +417,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         />
                         <FormField
                           control={form.control}
-                          name="billingState"
+                          name="billingAddress2"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>State/Province *</FormLabel>
+                              <FormLabel>Address Line 2 (Optional)</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -441,23 +428,51 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             </FormItem>
                           )}
                         />
-                        <FormField
-                          control={form.control}
-                          name="billingPostalCode"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Postal Code *</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="billingCity"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="billingState"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>State/Province *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="billingPostalCode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Postal Code *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Shipping & Payment */}
                 <Card>
