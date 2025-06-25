@@ -274,6 +274,77 @@ export type BarcodeSettings = typeof barcodeSettings.$inferSelect;
 
 
 // =============================================================================
+// SMS AUTHENTICATION SCHEMA
+// =============================================================================
+
+// SMS verification codes table
+export const smsVerifications = pgTable("sms_verifications", {
+  id: serial("id").primaryKey(),
+  phone: text("phone").notNull(),
+  code: text("code").notNull(),
+  purpose: text("purpose").notNull(), // 'login', 'registration', 'password_reset'
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  attempts: integer("attempts").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// SMS authentication settings
+export const smsSettings = pgTable("sms_settings", {
+  id: serial("id").primaryKey(),
+  isEnabled: boolean("is_enabled").default(false), // Global SMS system toggle
+  provider: text("provider").default("twilio"), // 'twilio', 'kavenegar', 'ippanel'
+  apiKey: text("api_key"),
+  apiSecret: text("api_secret"),
+  senderNumber: text("sender_number"),
+  codeLength: integer("code_length").default(6),
+  codeExpiry: integer("code_expiry").default(300), // seconds (5 minutes)
+  maxAttempts: integer("max_attempts").default(3),
+  rateLimitMinutes: integer("rate_limit_minutes").default(60),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Customer SMS preferences
+export const customerSmsSettings = pgTable("customer_sms_settings", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull(),
+  smsAuthEnabled: boolean("sms_auth_enabled").default(false),
+  enabledBy: text("enabled_by"), // admin username who enabled it
+  enabledAt: timestamp("enabled_at"),
+  disabledBy: text("disabled_by"),
+  disabledAt: timestamp("disabled_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Create insert schemas for SMS tables
+export const insertSmsVerificationSchema = createInsertSchema(smsVerifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSmsSettingsSchema = createInsertSchema(smsSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCustomerSmsSettingsSchema = createInsertSchema(customerSmsSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Export types
+export type InsertSmsVerification = z.infer<typeof insertSmsVerificationSchema>;
+export type SmsVerification = typeof smsVerifications.$inferSelect;
+export type InsertSmsSettings = z.infer<typeof insertSmsSettingsSchema>;
+export type SmsSettings = typeof smsSettings.$inferSelect;
+export type InsertCustomerSmsSettings = z.infer<typeof insertCustomerSmsSettingsSchema>;
+export type CustomerSmsSettings = typeof customerSmsSettings.$inferSelect;
+
+// =============================================================================
 // CRM CUSTOMERS SCHEMA - Main Customer Management
 // =============================================================================
 
