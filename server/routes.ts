@@ -12,6 +12,7 @@ import { shopStorage } from "./shop-storage";
 import { customerStorage } from "./customer-storage";
 import { emailStorage } from "./email-storage";
 import { crmStorage } from "./crm-storage";
+import { smsStorage } from "./sms-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
@@ -6463,6 +6464,272 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         success: false, 
         message: "Failed to generate analytics PDF report" 
       });
+    }
+  });
+
+  // =============================================================================
+  // SMS AUTHENTICATION MANAGEMENT ROUTES
+  // =============================================================================
+
+  // Get SMS settings (admin only)
+  app.get("/api/admin/sms/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const settings = await smsStorage.getSmsSettings();
+      res.json({ 
+        success: true, 
+        data: settings || {
+          isEnabled: false,
+          provider: 'kavenegar',
+          codeLength: 6,
+          codeExpiry: 300,
+          maxAttempts: 3,
+          rateLimitMinutes: 60
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات SMS" });
+    }
+  });
+
+  // Update SMS settings (admin only)
+  app.put("/api/admin/sms/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { isEnabled, provider, apiKey, apiSecret, senderNumber, codeLength, codeExpiry, maxAttempts, rateLimitMinutes } = req.body;
+      
+      const settings = await smsStorage.updateSmsSettings({
+        isEnabled,
+        provider,
+        apiKey,
+        apiSecret,
+        senderNumber,
+        codeLength,
+        codeExpiry,
+        maxAttempts,
+        rateLimitMinutes
+      });
+
+      res.json({ success: true, data: settings, message: "تنظیمات SMS با موفقیت به‌روزرسانی شد" });
+    } catch (error) {
+      console.error("Error updating SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی تنظیمات SMS" });
+    }
+  });
+
+  // Toggle SMS system (admin only)
+  app.post("/api/admin/sms/toggle", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { enabled } = req.body;
+      const adminId = req.session.adminId;
+      
+      // Get admin info for logging
+      const admin = await storage.getUser(adminId!);
+      const adminUsername = admin?.username || 'Unknown';
+      
+      const settings = await smsStorage.toggleSmsSystem(enabled, adminUsername);
+      
+      res.json({ 
+        success: true, 
+        data: settings, 
+        message: enabled ? "سیستم SMS فعال شد" : "سیستم SMS غیرفعال شد"
+      });
+    } catch (error) {
+      console.error("Error toggling SMS system:", error);
+      res.status(500).json({ success: false, message: "خطا در تغییر وضعیت سیستم SMS" });
+    }
+  });
+
+  // Get customer SMS settings (admin only)
+  app.get("/api/admin/customers/:customerId/sms", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { customerId } = req.params;
+      const settings = await smsStorage.getCustomerSmsSettings(parseInt(customerId));
+      
+      res.json({ 
+        success: true, 
+        data: settings || { 
+          customerId: parseInt(customerId),
+          smsAuthEnabled: false
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching customer SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات SMS مشتری" });
+    }
+  });
+
+  // Enable SMS for customer (admin only)
+  app.post("/api/admin/customers/:customerId/sms/enable", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { customerId } = req.params;
+      const adminId = req.session.adminId;
+      
+      // Get admin info for logging
+      const admin = await storage.getUser(adminId!);
+      const adminUsername = admin?.username || 'Unknown';
+      
+      const settings = await smsStorage.enableCustomerSms(parseInt(customerId), adminUsername);
+      
+      // Log activity in CRM
+      await crmStorage.logCustomerActivity({
+        customerId: parseInt(customerId),
+        activityType: 'sms_enabled',
+        description: `SMS authentication enabled by admin: ${adminUsername}`,
+        performedBy: adminUsername
+      });
+      
+      res.json({ 
+        success: true, 
+        data: settings, 
+        message: "احراز هویت SMS برای مشتری فعال شد"
+      });
+    } catch (error) {
+      console.error("Error enabling customer SMS:", error);
+      res.status(500).json({ success: false, message: "خطا در فعال‌سازی SMS مشتری" });
+    }
+  });
+
+  // Disable SMS for customer (admin only)
+  app.post("/api/admin/customers/:customerId/sms/disable", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { customerId } = req.params;
+      const adminId = req.session.adminId;
+      
+      // Get admin info for logging
+      const admin = await storage.getUser(adminId!);
+      const adminUsername = admin?.username || 'Unknown';
+      
+      const settings = await smsStorage.disableCustomerSms(parseInt(customerId), adminUsername);
+      
+      // Log activity in CRM
+      await crmStorage.logCustomerActivity({
+        customerId: parseInt(customerId),
+        activityType: 'sms_disabled',
+        description: `SMS authentication disabled by admin: ${adminUsername}`,
+        performedBy: adminUsername
+      });
+      
+      res.json({ 
+        success: true, 
+        data: settings, 
+        message: "احراز هویت SMS برای مشتری غیرفعال شد"
+      });
+    } catch (error) {
+      console.error("Error disabling customer SMS:", error);
+      res.status(500).json({ success: false, message: "خطا در غیرفعال‌سازی SMS مشتری" });
+    }
+  });
+
+  // Get customers with SMS enabled (admin only)
+  app.get("/api/admin/sms/customers", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const customersWithSms = await smsStorage.getCustomersWithSmsEnabled();
+      
+      // Get customer details for each SMS setting
+      const customerDetails = await Promise.all(
+        customersWithSms.map(async (smsSetting) => {
+          const customer = await crmStorage.getCrmCustomerById(smsSetting.customerId);
+          return {
+            ...smsSetting,
+            customer: customer ? {
+              id: customer.id,
+              firstName: customer.firstName,
+              lastName: customer.lastName,
+              email: customer.email,
+              phone: customer.phone,
+              company: customer.company
+            } : null
+          };
+        })
+      );
+      
+      res.json({ success: true, data: customerDetails });
+    } catch (error) {
+      console.error("Error fetching customers with SMS enabled:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت مشتریان با SMS فعال" });
+    }
+  });
+
+  // Get SMS statistics (admin only)
+  app.get("/api/admin/sms/stats", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const stats = await smsStorage.getSmsStats();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("Error fetching SMS stats:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت آمار SMS" });
+    }
+  });
+
+  // Send SMS verification code (public endpoint for customer login)
+  app.post("/api/sms/send-verification", async (req: Request, res: Response) => {
+    try {
+      const { phone, purpose } = req.body;
+      
+      if (!phone || !purpose) {
+        return res.status(400).json({ success: false, message: "شماره تلفن و هدف الزامی است" });
+      }
+      
+      // Check if SMS system is enabled
+      const settings = await smsStorage.getSmsSettings();
+      if (!settings?.isEnabled) {
+        return res.status(503).json({ success: false, message: "سیستم احراز هویت SMS غیرفعال است" });
+      }
+      
+      // Generate verification code
+      const code = Math.random().toString().slice(2, 2 + (settings.codeLength || 6));
+      const expiresAt = new Date(Date.now() + (settings.codeExpiry || 300) * 1000);
+      
+      // Save verification code
+      await smsStorage.createVerification({
+        phone,
+        code,
+        purpose,
+        expiresAt
+      });
+      
+      // Here you would integrate with SMS provider (Kavenegar, etc.)
+      // For now, we'll just log the code for development
+      console.log(`SMS Verification Code for ${phone}: ${code}`);
+      
+      res.json({ 
+        success: true, 
+        message: "کد تأیید ارسال شد",
+        // In production, don't send the code in response
+        ...(process.env.NODE_ENV === 'development' && { code })
+      });
+    } catch (error) {
+      console.error("Error sending SMS verification:", error);
+      res.status(500).json({ success: false, message: "خطا در ارسال کد تأیید" });
+    }
+  });
+
+  // Verify SMS code (public endpoint for customer login)
+  app.post("/api/sms/verify-code", async (req: Request, res: Response) => {
+    try {
+      const { phone, code, purpose } = req.body;
+      
+      if (!phone || !code || !purpose) {
+        return res.status(400).json({ success: false, message: "شماره تلفن، کد تأیید و هدف الزامی است" });
+      }
+      
+      // Find verification
+      const verification = await smsStorage.getVerification(phone, code, purpose);
+      
+      if (!verification) {
+        return res.status(400).json({ success: false, message: "کد تأیید نامعتبر یا منقضی شده است" });
+      }
+      
+      // Mark as used
+      await smsStorage.markVerificationUsed(verification.id);
+      
+      res.json({ 
+        success: true, 
+        message: "کد تأیید با موفقیت تأیید شد"
+      });
+    } catch (error) {
+      console.error("Error verifying SMS code:", error);
+      res.status(500).json({ success: false, message: "خطا در تأیید کد" });
     }
   });
 

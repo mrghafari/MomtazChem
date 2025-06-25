@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import { eq, and, gt, desc } from "drizzle-orm";
+import pkg from "pg";
+const { Pool } = pkg;
+import { eq, and, gt, desc, sql } from "drizzle-orm";
 import { 
   smsVerifications, 
   smsSettings, 
@@ -82,14 +83,14 @@ export class SmsStorage implements ISmsStorage {
   async incrementVerificationAttempts(id: number): Promise<void> {
     await smsDb
       .update(smsVerifications)
-      .set({ attempts: smsVerifications.attempts + 1 })
+      .set({ attempts: sql`${smsVerifications.attempts} + 1` })
       .where(eq(smsVerifications.id, id));
   }
   
   async cleanupExpiredVerifications(): Promise<void> {
     await smsDb
       .delete(smsVerifications)
-      .where(gt(new Date(), smsVerifications.expiresAt));
+      .where(sql`expires_at < NOW()`);
   }
   
   async getSmsSettings(): Promise<SmsSettings | undefined> {

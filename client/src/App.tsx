@@ -46,6 +46,7 @@ import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
 import CategoryManagement from "@/pages/category-management";
 import SeoManagement from "@/pages/seo-management";
+import AdminSmsManagement from "@/pages/admin-sms-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {
