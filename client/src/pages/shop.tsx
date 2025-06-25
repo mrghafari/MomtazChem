@@ -391,53 +391,158 @@ const Shop = () => {
                 <CardTitle className="text-lg">Filters</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Search */}
+                {/* Advanced Search */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Search</label>
-                  <Input
-                    placeholder="Search products..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
-                  />
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Search Products</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Search products, SKU, specifications..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10"
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Sort Options */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Sort by</label>
+                  <div className="space-y-2">
+                    <Select 
+                      value={filters.sortBy} 
+                      onValueChange={(value) => handleFilterChange('sortBy', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="relevance">Relevance</SelectItem>
+                        <SelectItem value="name">Name</SelectItem>
+                        <SelectItem value="price">Price</SelectItem>
+                        <SelectItem value="created">Newest</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select 
+                      value={filters.sortOrder} 
+                      onValueChange={(value) => handleFilterChange('sortOrder', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="asc">A-Z / Low-High</SelectItem>
+                        <SelectItem value="desc">Z-A / High-Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <Separator />
 
                 {/* Categories */}
+                {availableFilters?.categories && availableFilters.categories.length > 0 && (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Categories</label>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {availableFilters.categories.map((cat: any) => (
+                          <div key={cat.name} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`cat-${cat.name}`}
+                              checked={filters.category === cat.name}
+                              onCheckedChange={(checked) => 
+                                handleFilterChange('category', checked ? cat.name : "")
+                              }
+                            />
+                            <label 
+                              htmlFor={`cat-${cat.name}`}
+                              className="text-sm cursor-pointer flex-1"
+                            >
+                              {cat.name} ({cat.count})
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <Separator />
+                  </>
+                )}
+
+                {/* Price Range */}
+                {availableFilters?.priceRange && (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Price Range: ${priceRange[0]} - ${priceRange[1]}
+                      </label>
+                      <div className="mt-2">
+                        <Slider
+                          value={priceRange}
+                          onValueChange={handlePriceRangeChange}
+                          max={availableFilters.priceRange.max}
+                          min={availableFilters.priceRange.min}
+                          step={10}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                    <Separator />
+                  </>
+                )}
+
+                {/* Stock Status */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Category</label>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map(category => (
-                        <SelectItem key={category.id} value={category.slug}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Availability</label>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="in-stock"
+                      checked={filters.inStock === true}
+                      onCheckedChange={(checked) => 
+                        handleFilterChange('inStock', checked ? true : undefined)
+                      }
+                    />
+                    <label htmlFor="in-stock" className="text-sm cursor-pointer">
+                      In Stock Only
+                    </label>
+                  </div>
                 </div>
+
+                {/* Tags */}
+                {availableFilters?.availableTags && availableFilters.availableTags.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Tags</label>
+                      <div className="flex flex-wrap gap-1">
+                        {availableFilters.availableTags.slice(0, 12).map((tag: any) => (
+                          <Badge
+                            key={tag}
+                            variant={filters.tags?.includes(tag) ? "default" : "outline"}
+                            className="cursor-pointer text-xs"
+                            onClick={() => handleTagToggle(tag)}
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <Separator />
 
-                {/* Sort */}
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Sort By</label>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="name">Name A-Z</SelectItem>
-                      <SelectItem value="price-low">Price: Low to High</SelectItem>
-                      <SelectItem value="price-high">Price: High to Low</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Clear Filters */}
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={clearFilters}
+                  disabled={!Object.values(filters).some(v => v && (Array.isArray(v) ? v.length > 0 : true))}
+                >
+                  Clear All Filters
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -467,12 +572,136 @@ const Shop = () => {
               </div>
             </div>
 
-            {/* Products */}
-            {filteredProducts.length > 0 ? (
-              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
-                {filteredProducts.map(product => (
-                  <Card key={product.id} className={viewMode === "list" ? "flex" : ""}>
-                    {viewMode === "grid" ? (
+            {/* Products Grid */}
+            <div className={`${
+              viewMode === "grid" 
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+                : "flex flex-col gap-4"
+            }`}>
+              {productsLoading ? (
+                Array.from({ length: 6 }).map((_, index) => (
+                  <ProductCardSkeleton key={index} viewMode={viewMode} />
+                ))
+              ) : currentProducts.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <div className="mb-4">
+                    <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 text-lg mb-2">No products found matching your criteria</p>
+                    <p className="text-gray-400 text-sm">Try adjusting your search terms or clearing filters</p>
+                  </div>
+                  <Button variant="outline" onClick={clearFilters} className="mt-4">
+                    Clear all filters
+                  </Button>
+                </div>
+              ) : (
+                currentProducts.map((product) => (
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    viewMode={viewMode}
+                    onAddToCart={() => addToCart(product.id)}
+                    onRemoveFromCart={() => removeFromCart(product.id)}
+                    cartQuantity={cart[product.id] || 0}
+                    getDiscountedPrice={getDiscountedPrice}
+                    customer={customer}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <Button
+                  variant="outline"
+                  disabled={currentPage === 0}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                >
+                  Previous
+                </Button>
+                
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    const pageNum = Math.max(0, Math.min(currentPage - 2 + i, totalPages - 1));
+                    return (
+                      <Button
+                        key={`page-${pageNum}`}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum + 1}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  disabled={currentPage === totalPages - 1}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Checkout Dialog */}
+      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Checkout</DialogTitle>
+          </DialogHeader>
+          {customer ? (
+            <AuthCheckout 
+              customer={customer}
+              cart={cart}
+              products={products}
+              onOrderComplete={() => {
+                setCart({});
+                setShowCheckout(false);
+              }}
+            />
+          ) : (
+            <Checkout 
+              onOrderComplete={() => {
+                setCart({});
+                setShowCheckout(false);
+              }}
+              cart={cart}
+              products={products}
+              onCustomerUpdate={setCustomer}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Auth Dialog */}
+      <CustomerAuth 
+        open={showAuth}
+        onOpenChange={setShowAuth}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    </div>
+  );
+};
+
+// Helper components for skeleton loading
+const ProductCardSkeleton = ({ viewMode }: { viewMode: "grid" | "list" }) => (
+  <Card className={`animate-pulse ${viewMode === "list" ? "flex" : ""}`}>
+    <div className={`bg-gray-200 ${viewMode === "list" ? "w-32 h-32" : "aspect-square"} rounded-t-lg`}></div>
+    <CardContent className="p-4">
+      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+      <div className="h-3 bg-gray-200 rounded mb-2"></div>
+      <div className="h-6 bg-gray-200 rounded"></div>
+    </CardContent>
+  </Card>
+);
+
+export default Shop;
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
                           {product.thumbnailUrl ? (
