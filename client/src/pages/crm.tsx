@@ -672,11 +672,12 @@ export default function CRM() {
             </div>
 
             <div>
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">Mobile Phone *</Label>
               <Input
                 id="phone"
                 value={newCustomer.phone}
                 onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                required
               />
             </div>
 
