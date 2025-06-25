@@ -277,10 +277,11 @@ export type BarcodeSettings = typeof barcodeSettings.$inferSelect;
 // CRM CUSTOMERS SCHEMA - Main Customer Management
 // =============================================================================
 
-// CRM Customers table - comprehensive customer data without passwords
+// CRM Customers table - comprehensive customer data with authentication
 export const crmCustomers = pgTable("crm_customers", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
+  passwordHash: text("password_hash"), // For unified authentication
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   company: text("company"),

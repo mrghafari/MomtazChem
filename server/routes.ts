@@ -2157,9 +2157,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const finalPassword = password || passwordHash;
       const hashedPassword = await bcrypt.hash(finalPassword, 10);
 
-      // Create CRM customer first (central repository) - no password field
+      // Create CRM customer first (central repository) with password for unified auth
       const crmCustomerData = {
         email,
+        passwordHash: hashedPassword,
         firstName,
         lastName,
         company: company || null,
