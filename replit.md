@@ -137,6 +137,8 @@ Changelog:
 - June 25, 2025: Implemented automatic migration of legacy portal customers to CRM system
 - June 25, 2025: Fixed customer information endpoints to prioritize CRM data over portal data
 - June 25, 2025: Added comprehensive activity logging for all customer interactions in CRM
+- June 25, 2025: FIXED frontend customer registration form to make phone, country, city, address mandatory fields
+- June 25, 2025: Updated registration form validation to match CRM requirements with proper field marking
 - June 25, 2025: Successfully integrated advanced search system into main shop page
 - June 25, 2025: Enhanced existing shop with comprehensive search filters (category, price, stock, tags, sorting)
 - June 25, 2025: Added real-time search with debouncing, advanced filtering sidebar, and pagination

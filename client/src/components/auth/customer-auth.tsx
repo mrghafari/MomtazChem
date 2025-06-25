@@ -24,11 +24,11 @@ const registerSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
-  phone: z.string().optional(),
+  phone: z.string().min(10, "Phone number is required"),
   company: z.string().optional(),
-  country: z.string().optional(),
-  city: z.string().optional(),
-  address: z.string().optional(),
+  country: z.string().min(2, "Country is required"),
+  city: z.string().min(2, "City is required"),
+  address: z.string().min(5, "Address is required"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Password and confirm password must match",
   path: ["confirmPassword"],
@@ -297,7 +297,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <User className="h-4 w-4" />
-                          First Name
+                          First Name *
                         </FormLabel>
                         <FormControl>
                           <Input placeholder="First Name" {...field} />
@@ -311,7 +311,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Name</FormLabel>
+                        <FormLabel>Last Name *</FormLabel>
                         <FormControl>
                           <Input placeholder="Last Name" {...field} />
                         </FormControl>
@@ -346,7 +346,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Lock className="h-4 w-4" />
-                          Password
+                          Password *
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
@@ -380,7 +380,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
+                        <FormLabel>Confirm Password *</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input 
@@ -418,10 +418,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
-                          Phone
+                          Phone *
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="Phone (optional)" {...field} />
+                          <Input placeholder="Phone number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -451,9 +451,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Country</FormLabel>
+                        <FormLabel>Country *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Country (optional)" {...field} />
+                          <Input placeholder="Country" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -464,9 +464,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City</FormLabel>
+                        <FormLabel>City *</FormLabel>
                         <FormControl>
-                          <Input placeholder="City (optional)" {...field} />
+                          <Input placeholder="City" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -481,10 +481,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: Cus
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
-                        Address
+                        Address *
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Address (optional)" {...field} />
+                        <Input placeholder="Full address" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
