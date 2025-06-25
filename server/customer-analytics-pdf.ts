@@ -28,6 +28,7 @@ interface CustomerAnalytics {
 }
 
 export async function generateCustomerAnalyticsPDF(analytics: CustomerAnalytics): Promise<Buffer> {
+  console.log('Starting analytics PDF generation...');
   const browser = await puppeteer.launch({
     headless: 'new',
     executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
@@ -434,6 +435,7 @@ function generateAnalyticsHTML(analytics: CustomerAnalytics): string {
 }
 
 export async function generateCustomerDetailPDF(customer: any, analytics: any, activities: any[]): Promise<Buffer> {
+  console.log('Starting customer detail PDF generation for:', customer?.firstName, customer?.lastName);
   const browser = await puppeteer.launch({
     headless: 'new',
     executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
