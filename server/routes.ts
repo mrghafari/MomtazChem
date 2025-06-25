@@ -2133,6 +2133,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Validate mandatory fields
+      if (!phone || !country || !city || !address) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Phone, country, city, and address are required fields" 
+        });
+      }
+
       // Hash password
       const finalPassword = password || passwordHash;
       const hashedPassword = await bcrypt.hash(finalPassword, 10);
@@ -2144,10 +2152,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName,
         lastName,
         company: company || '',
-        phone: phone || '',
-        country: country || '',
-        city: city || '',
-        address: address || '',
+        phone,
+        country,
+        city,
+        address,
         postalCode,
         communicationPreference,
         preferredLanguage,
@@ -5267,6 +5275,14 @@ ${procedure.content}
         passwordHash = await bcrypt.hash(password.trim(), 10);
       }
       
+      // Validate mandatory fields
+      if (!customerData.phone || !customerData.country || !customerData.city || !customerData.address) {
+        return res.status(400).json({
+          success: false,
+          message: "Phone, country, city, and address are required fields"
+        });
+      }
+
       const validatedData = {
         ...customerData,
         passwordHash,
@@ -5274,11 +5290,6 @@ ${procedure.content}
         isActive: true,
         customerStatus: customerData.customerStatus || "active",
         emailVerified: false,
-        // Ensure required fields have defaults
-        phone: customerData.phone || '',
-        country: customerData.country || '',
-        city: customerData.city || '',
-        address: customerData.address || '',
       };
       
       // Create CRM customer

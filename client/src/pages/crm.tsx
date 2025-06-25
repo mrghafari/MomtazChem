@@ -715,17 +715,21 @@ export default function CRM() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country">Country *</Label>
                 <Input
                   id="country"
+                  required
+                  placeholder="Customer's country"
                   value={newCustomer.country}
                   onChange={(e) => setNewCustomer({ ...newCustomer, country: e.target.value })}
                 />
               </div>
               <div>
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city">City *</Label>
                 <Input
                   id="city"
+                  required
+                  placeholder="Customer's city"
                   value={newCustomer.city}
                   onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })}
                 />
@@ -733,9 +737,11 @@ export default function CRM() {
             </div>
 
             <div>
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address">Address *</Label>
               <Input
                 id="address"
+                required
+                placeholder="Full address"
                 value={newCustomer.address || ""}
                 onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
               />

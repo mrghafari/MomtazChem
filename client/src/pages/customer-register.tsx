@@ -31,6 +31,10 @@ const customerRegistrationSchema = insertCustomerSchema.omit({
 }).extend({
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
+  phone: z.string().min(1, "Phone number is required"),
+  country: z.string().min(1, "Country is required"),
+  city: z.string().min(1, "City is required"),
+  address: z.string().min(1, "Address is required"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],

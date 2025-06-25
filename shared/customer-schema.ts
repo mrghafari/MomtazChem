@@ -14,10 +14,10 @@ export const customers = pgTable("customers", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   company: text("company"),
-  phone: text("phone").notNull(), // Now mandatory
-  country: text("country").notNull(), // Now mandatory
-  city: text("city").notNull(), // Now mandatory
-  address: text("address").notNull(), // Now mandatory
+  phone: text("phone").notNull(), // Mandatory mobile phone
+  country: text("country").notNull(), // Mandatory country
+  city: text("city").notNull(), // Mandatory city
+  address: text("address").notNull(), // Mandatory address
   postalCode: text("postal_code"),
   
   // Additional CRM fields for comprehensive customer management
