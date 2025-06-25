@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
@@ -29,10 +33,117 @@ const Shop = () => {
   const [customer, setCustomer] = useState<any>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
 
-  // Fetch shop products
-  const { data: products = [], isLoading: productsLoading } = useQuery<ShopProduct[]>({
-    queryKey: ["/api/shop/products"],
+  // Advanced search state
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [filters, setFilters] = useState({
+    category: "",
+    priceMin: undefined as number | undefined,
+    priceMax: undefined as number | undefined,
+    inStock: undefined as boolean | undefined,
+    tags: [] as string[],
+    sortBy: 'relevance' as 'name' | 'price' | 'created' | 'relevance',
+    sortOrder: 'desc' as 'asc' | 'desc'
   });
+  const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 12;
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchTerm);
+      setCurrentPage(0);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Advanced search query
+  const { data: searchResults, isLoading: productsLoading } = useQuery({
+    queryKey: ['shopSearch', debouncedQuery, filters, currentPage],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        q: debouncedQuery,
+        limit: itemsPerPage.toString(),
+        offset: (currentPage * itemsPerPage).toString(),
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder
+      });
+
+      if (filters.category) params.append('category', filters.category);
+      if (filters.priceMin !== undefined) params.append('priceMin', filters.priceMin.toString());
+      if (filters.priceMax !== undefined) params.append('priceMax', filters.priceMax.toString());
+      if (filters.inStock !== undefined) params.append('inStock', filters.inStock.toString());
+      if (filters.tags?.length) {
+        filters.tags.forEach(tag => params.append('tags', tag));
+      }
+
+      const response = await fetch(`/api/shop/search?${params}`);
+      if (!response.ok) throw new Error('Search failed');
+      return response.json();
+    }
+  });
+
+  // Fetch shop products (fallback)
+  const { data: products = [] } = useQuery<ShopProduct[]>({
+    queryKey: ["/api/shop/products"],
+    enabled: !searchResults
+  });
+
+  // Get data from search results or fallback to regular products
+  const currentProducts = searchResults?.data?.products || products;
+  const totalResults = searchResults?.data?.total || products.length;
+  const availableFilters = searchResults?.data?.filters;
+  const totalPages = Math.ceil(totalResults / itemsPerPage);
+
+  // Update price range when search results change
+  useEffect(() => {
+    if (availableFilters?.priceRange) {
+      const { min, max } = availableFilters.priceRange;
+      if (min !== priceRange[0] || max !== priceRange[1]) {
+        setPriceRange([min, max]);
+        if (!filters.priceMin && !filters.priceMax) {
+          setFilters(prev => ({ ...prev, priceMin: min, priceMax: max }));
+        }
+      }
+    }
+  }, [availableFilters?.priceRange]);
+
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentPage(0);
+  };
+
+  const handlePriceRangeChange = (value: [number, number]) => {
+    setPriceRange(value);
+    setFilters(prev => ({ ...prev, priceMin: value[0], priceMax: value[1] }));
+    setCurrentPage(0);
+  };
+
+  const handleTagToggle = (tag: string) => {
+    const currentTags = filters.tags || [];
+    const newTags = currentTags.includes(tag)
+      ? currentTags.filter(t => t !== tag)
+      : [...currentTags, tag];
+    handleFilterChange('tags', newTags.length ? newTags : []);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      category: "",
+      priceMin: undefined,
+      priceMax: undefined,
+      inStock: undefined,
+      tags: [],
+      sortBy: 'relevance',
+      sortOrder: 'desc'
+    });
+    setCurrentPage(0);
+    if (availableFilters?.priceRange) {
+      const { min, max } = availableFilters.priceRange;
+      setPriceRange([min, max]);
+    }
+  };
 
   // Fetch shop categories
   const { data: categories = [] } = useQuery<ShopCategory[]>({
