@@ -30,7 +30,17 @@ interface CustomerAnalytics {
 export async function generateCustomerAnalyticsPDF(analytics: CustomerAnalytics): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    executablePath: '/nix/store/*/bin/chromium',
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-extensions'
+    ]
   });
 
   try {
@@ -417,7 +427,17 @@ function generateAnalyticsHTML(analytics: CustomerAnalytics): string {
 export async function generateCustomerDetailPDF(customer: any, analytics: any, activities: any[]): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    executablePath: '/nix/store/*/bin/chromium',
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-extensions'
+    ]
   });
 
   try {
@@ -445,6 +465,7 @@ export async function generateCustomerDetailPDF(customer: any, analytics: any, a
 
 function generateCustomerDetailHTML(customer: any, analytics: any, activities: any[]): string {
   const currentDate = format(new Date(), 'MMMM dd, yyyy');
+  const generatedTime = format(new Date(), 'HH:mm:ss');
   
   return `
     <!DOCTYPE html>
@@ -602,33 +623,33 @@ function generateCustomerDetailHTML(customer: any, analytics: any, activities: a
       <h2 class="section-title">Customer Analytics</h2>
       <div class="metrics-grid">
         <div class="metric-card">
-          <div class="metric-value">${analytics.totalOrders}</div>
+          <div class="metric-value">${analytics?.totalOrders || 0}</div>
           <div class="metric-label">Total Orders</div>
         </div>
         <div class="metric-card">
-          <div class="metric-value">$${analytics.totalSpent.toLocaleString()}</div>
+          <div class="metric-value">$${(analytics?.totalSpent || 0).toLocaleString()}</div>
           <div class="metric-label">Total Spent</div>
         </div>
         <div class="metric-card">
-          <div class="metric-value">$${analytics.averageOrderValue.toFixed(2)}</div>
+          <div class="metric-value">$${(analytics?.averageOrderValue || 0).toFixed(2)}</div>
           <div class="metric-label">Average Order</div>
         </div>
         <div class="metric-card">
-          <div class="metric-value">${analytics.daysSinceLastOrder || 'N/A'}</div>
+          <div class="metric-value">${analytics?.daysSinceLastOrder || 'N/A'}</div>
           <div class="metric-label">Days Since Last Order</div>
         </div>
       </div>
 
       <h2 class="section-title">Recent Activities</h2>
-      ${activities.slice(0, 15).map(activity => `
+      ${activities && activities.length > 0 ? activities.slice(0, 15).map(activity => `
         <div class="activity-item">
-          <div class="activity-type">${activity.activityType.replace(/_/g, ' ')}</div>
-          <div class="activity-description">${activity.description}</div>
+          <div class="activity-type">${activity.activityType?.replace(/_/g, ' ') || 'Activity'}</div>
+          <div class="activity-description">${activity.description || 'No description available'}</div>
           <div class="activity-meta">
-            ${format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm')}
+            ${activity.createdAt ? format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm') : 'Unknown date'}
           </div>
         </div>
-      `).join('')}
+      `).join('') : '<div class="activity-item">No recent activities found</div>'}
     </body>
     </html>
   `;

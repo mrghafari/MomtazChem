@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: Fixed PDF export functionality for customer reports - files now download and open properly
+- June 25, 2025: Added missing PDF export API endpoints for individual customers and analytics
+- June 25, 2025: Enhanced PDF generation with better error handling and data validation
 - June 25, 2025: Implemented unified customer profile management across all platforms
 - June 25, 2025: Created comprehensive customer profile component with tabbed interface
 - June 25, 2025: Added customer profile API endpoints for unified data access
