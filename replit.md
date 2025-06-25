@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: FIXED SMS management authentication issues - admin can now toggle customer SMS settings
+- June 25, 2025: Fixed API response structure for customer profile editing - removed customer.data vs customer.customer mismatch
+- June 25, 2025: Enhanced authentication middleware to properly handle admin sessions for SMS management
 - June 25, 2025: FIXED customer authentication system - registration and login now work seamlessly
 - June 25, 2025: Added passwordHash field to CRM table for unified authentication across platforms
 - June 25, 2025: Verified complete customer journey: registration → data storage → successful login

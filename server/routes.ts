@@ -133,7 +133,7 @@ const upload = multer({
   }
 });
 
-// Authentication middleware
+// Admin authentication middleware
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   console.log('Auth check:', {
     isAuthenticated: req.session.isAuthenticated,
@@ -145,7 +145,16 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     next();
   } else {
     console.log('Authentication failed for:', req.path);
-    res.status(401).json({ success: false, message: "Authentication required" });
+    res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+  }
+};
+
+// Customer authentication middleware  
+const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (req.session.customerId) {
+    next();
+  } else {
+    res.status(401).json({ success: false, message: "احراز هویت مشتری مورد نیاز است" });
   }
 };
 
