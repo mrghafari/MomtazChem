@@ -1,404 +1,529 @@
 import puppeteer from 'puppeteer';
-import { marked } from 'marked';
-import path from 'path';
-import fs from 'fs';
+import { format } from 'date-fns';
 
-export class PDFGenerator {
-  static async generateProcedurePDF(procedure: any, outlines: any[], documents: any[]): Promise<string> {
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+interface CustomerAnalytics {
+  totalCustomers: number;
+  activeCustomers: number;
+  newCustomersThisMonth: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  topCustomers: Array<{
+    id: number;
+    name: string;
+    email: string;
+    totalSpent: number;
+    totalOrders: number;
+  }>;
+  customersByType: Array<{
+    type: string;
+    count: number;
+  }>;
+  recentActivities: Array<{
+    id: number;
+    activityType: string;
+    description: string;
+    performedBy: string;
+    createdAt: string;
+  }>;
+}
+
+export async function generatePDF(htmlContent: string, filename: string): Promise<Buffer> {
+  console.log('Starting PDF generation for:', filename);
+  
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-first-run',
+      '--disable-extensions',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding',
+      '--disable-features=TranslateUI',
+      '--disable-ipc-flooding-protection'
+    ]
+  });
+
+  try {
+    const page = await browser.newPage();
+    
+    // Set viewport and user agent for consistent rendering
+    await page.setViewport({ width: 1280, height: 720 });
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+    
+    // Load content with proper waiting
+    await page.setContent(htmlContent, { 
+      waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
+      timeout: 60000 
     });
     
-    try {
-      const page = await browser.newPage();
-      
-      // Create HTML content
-      const htmlContent = this.createProcedureHTML(procedure, outlines, documents);
-      
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-      
-      // Generate PDF
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        margin: {
-          top: '20mm',
-          right: '15mm',
-          bottom: '20mm',
-          left: '15mm'
-        },
-        printBackground: true,
-        displayHeaderFooter: true,
-        headerTemplate: `
-          <div style="font-size: 10px; margin: 0 auto; color: #666;">
-            <span>دستورالعمل: ${procedure.title}</span>
-          </div>
-        `,
-        footerTemplate: `
-          <div style="font-size: 10px; margin: 0 auto; color: #666;">
-            <span>صفحه <span class="pageNumber"></span> از <span class="totalPages"></span></span>
-            <span style="margin-left: 20px;">تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')}</span>
-          </div>
-        `
-      });
-      
-      // Save PDF file
-      const fileName = `procedure-${procedure.id}-${Date.now()}.pdf`;
-      const filePath = path.join(process.cwd(), 'uploads', 'documents', fileName);
-      
-      fs.writeFileSync(filePath, pdfBuffer);
-      
-      return fileName;
-    } finally {
-      await browser.close();
+    // Additional wait for content stabilization
+    await page.waitForTimeout(2000);
+    
+    // Generate PDF with Adobe Acrobat compatible settings
+    const pdf = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      preferCSSPageSize: false,
+      displayHeaderFooter: false,
+      margin: {
+        top: '20mm',
+        right: '15mm',
+        bottom: '20mm',
+        left: '15mm'
+      },
+      scale: 1.0,
+      tagged: false,
+      outline: false,
+      timeout: 30000
+    });
+
+    // Validate PDF
+    if (!pdf || pdf.length === 0) {
+      throw new Error('Generated PDF is empty');
     }
-  }
-
-  private static createProcedureHTML(procedure: any, outlines: any[], documents: any[]): string {
-    // Convert markdown content to HTML
-    const contentHTML = marked(procedure.content);
     
-    // Group outlines by level for hierarchical display
-    const groupedOutlines = this.groupOutlinesByLevel(outlines);
+    // Verify PDF header for Adobe compatibility
+    const pdfHeader = pdf.subarray(0, 8).toString();
+    if (!pdfHeader.startsWith('%PDF-')) {
+      throw new Error('Invalid PDF format - missing PDF header');
+    }
     
-    return `
-    <!DOCTYPE html>
-    <html dir="rtl" lang="fa">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${procedure.title}</title>
-      <style>
-        body {
-          font-family: 'Tahoma', 'Arial', sans-serif;
-          line-height: 1.6;
-          color: #333;
-          margin: 0;
-          padding: 20px;
-          direction: rtl;
-        }
-        
-        .header {
-          border-bottom: 3px solid #2563eb;
-          padding-bottom: 20px;
-          margin-bottom: 30px;
-          text-align: center;
-        }
-        
-        .title {
-          font-size: 24px;
-          font-weight: bold;
-          color: #1e40af;
-          margin-bottom: 10px;
-        }
-        
-        .metadata {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          background: #f8fafc;
-          padding: 15px;
-          border-radius: 8px;
-          margin-bottom: 30px;
-          font-size: 14px;
-        }
-        
-        .metadata-item {
-          display: flex;
-          justify-content: space-between;
-        }
-        
-        .metadata-label {
-          font-weight: bold;
-          color: #475569;
-        }
-        
-        .outline {
-          margin: 20px 0;
-        }
-        
-        .outline-level-1 {
-          font-size: 18px;
-          font-weight: bold;
-          color: #1e40af;
-          margin: 20px 0 10px 0;
-          padding: 10px;
-          background: #eff6ff;
-          border-right: 4px solid #2563eb;
-        }
-        
-        .outline-level-2 {
-          font-size: 16px;
-          font-weight: 600;
-          color: #1e40af;
-          margin: 15px 0 8px 20px;
-          padding: 8px;
-          background: #f1f5f9;
-          border-right: 3px solid #64748b;
-        }
-        
-        .outline-content {
-          margin: 10px 0;
-          padding: 10px;
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          border-radius: 4px;
-        }
-        
-        .content {
-          margin: 30px 0;
-          padding: 20px;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-        }
-        
-        .documents {
-          margin: 30px 0;
-        }
-        
-        .documents-title {
-          font-size: 18px;
-          font-weight: bold;
-          color: #1e40af;
-          margin-bottom: 15px;
-          padding-bottom: 10px;
-          border-bottom: 2px solid #e2e8f0;
-        }
-        
-        .document-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 10px;
-          margin: 10px 0;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 6px;
-        }
-        
-        .document-info {
-          flex: 1;
-        }
-        
-        .document-title {
-          font-weight: 600;
-          color: #374151;
-        }
-        
-        .document-meta {
-          font-size: 12px;
-          color: #6b7280;
-          margin-top: 4px;
-        }
-        
-        .status-badge {
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 12px;
-          font-weight: 600;
-        }
-        
-        .status-approved {
-          background: #dcfce7;
-          color: #166534;
-        }
-        
-        .status-review {
-          background: #dbeafe;
-          color: #1e40af;
-        }
-        
-        .status-draft {
-          background: #fef3c7;
-          color: #92400e;
-        }
-        
-        .priority-critical {
-          background: #fecaca;
-          color: #991b1b;
-        }
-        
-        .priority-high {
-          background: #fed7aa;
-          color: #9a3412;
-        }
-        
-        .priority-normal {
-          background: #dbeafe;
-          color: #1e40af;
-        }
-        
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 15px 0;
-        }
-        
-        th, td {
-          border: 1px solid #e2e8f0;
-          padding: 8px 12px;
-          text-align: right;
-        }
-        
-        th {
-          background: #f1f5f9;
-          font-weight: 600;
-        }
-        
-        .page-break {
-          page-break-before: always;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-          color: #1e40af;
-          margin-top: 25px;
-          margin-bottom: 15px;
-        }
-        
-        ul, ol {
-          margin: 15px 0;
-          padding-right: 30px;
-        }
-        
-        blockquote {
-          margin: 15px 0;
-          padding: 10px 15px;
-          background: #f8fafc;
-          border-right: 4px solid #2563eb;
-          color: #475569;
-        }
-        
-        pre {
-          background: #f1f5f9;
-          padding: 15px;
-          border-radius: 6px;
-          overflow-x: auto;
-          font-family: 'Courier New', monospace;
-        }
-        
-        code {
-          background: #f1f5f9;
-          padding: 2px 4px;
-          border-radius: 3px;
-          font-family: 'Courier New', monospace;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <div class="title">${procedure.title}</div>
-        <div style="color: #6b7280; font-size: 14px;">نسخه ${procedure.version}</div>
-      </div>
-      
-      <div class="metadata">
-        <div class="metadata-item">
-          <span class="metadata-label">وضعیت:</span>
-          <span class="status-badge status-${procedure.status}">
-            ${procedure.status === 'approved' ? 'تأیید شده' :
-              procedure.status === 'review' ? 'در بررسی' :
-              procedure.status === 'draft' ? 'پیش‌نویس' : 'بایگانی'}
-          </span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">اولویت:</span>
-          <span class="status-badge priority-${procedure.priority}">
-            ${procedure.priority === 'critical' ? 'بحرانی' :
-              procedure.priority === 'high' ? 'بالا' :
-              procedure.priority === 'normal' ? 'عادی' : 'پایین'}
-          </span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">تاریخ اجرا:</span>
-          <span>${procedure.effectiveDate ? new Date(procedure.effectiveDate).toLocaleDateString('fa-IR') : 'تعیین نشده'}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">تاریخ بازنگری:</span>
-          <span>${procedure.reviewDate ? new Date(procedure.reviewDate).toLocaleDateString('fa-IR') : 'تعیین نشده'}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">سطح دسترسی:</span>
-          <span>${procedure.accessLevel === 'public' ? 'عمومی' :
-                   procedure.accessLevel === 'internal' ? 'داخلی' :
-                   procedure.accessLevel === 'restricted' ? 'محدود' : 'محرمانه'}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">برچسب‌ها:</span>
-          <span>${procedure.tags ? procedure.tags.join(', ') : 'ندارد'}</span>
-        </div>
-      </div>
-
-      ${procedure.description ? `
-      <div class="outline">
-        <div class="outline-level-1">خلاصه توضیحات</div>
-        <div class="outline-content">${procedure.description}</div>
-      </div>
-      ` : ''}
-
-      ${outlines.length > 0 ? `
-      <div class="page-break"></div>
-      <div class="outline">
-        <div class="outline-level-1">فهرست مطالب</div>
-        ${this.generateOutlinesHTML(groupedOutlines)}
-      </div>
-      ` : ''}
-
-      <div class="page-break"></div>
-      <div class="content">
-        <div class="outline-level-1">محتوای دستورالعمل</div>
-        ${contentHTML}
-      </div>
-
-      ${documents.length > 0 ? `
-      <div class="page-break"></div>
-      <div class="documents">
-        <div class="documents-title">مستندات و پیوست‌ها</div>
-        ${documents.map(doc => `
-          <div class="document-item">
-            <div class="document-info">
-              <div class="document-title">${doc.title}</div>
-              <div class="document-meta">
-                نوع فایل: ${doc.fileType} | اندازه: ${this.formatFileSize(doc.fileSize)} | 
-                آپلود شده در: ${new Date(doc.uploadDate).toLocaleDateString('fa-IR')}
-                ${doc.outlineTitle ? ` | مربوط به: ${doc.outlineTitle}` : ''}
-              </div>
-              ${doc.description ? `<div style="margin-top: 8px; color: #6b7280;">${doc.description}</div>` : ''}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      ` : ''}
-
-      <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #6b7280; font-size: 12px;">
-        <p>این مستند به صورت خودکار تولید شده است</p>
-        <p>تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')} - ساعت: ${new Date().toLocaleTimeString('fa-IR')}</p>
-      </div>
-    </body>
-    </html>
-    `;
+    // Check for PDF trailer
+    const pdfEnd = pdf.subarray(-10).toString();
+    if (!pdfEnd.includes('%%EOF')) {
+      throw new Error('Invalid PDF format - missing EOF marker');
+    }
+    
+    console.log('PDF generated successfully:', filename, 'Size:', pdf.length, 'bytes');
+    return pdf;
+    
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+    throw new Error(`PDF generation failed: ${error.message}`);
+  } finally {
+    await browser.close();
   }
+}
 
-  private static groupOutlinesByLevel(outlines: any[]): any[] {
-    return outlines.sort((a, b) => {
-      if (a.level !== b.level) return a.level - b.level;
-      return a.orderNumber - b.orderNumber;
-    });
-  }
+export function generateCustomerReportHTML(customer: any, analytics: any, activities: any[]): string {
+  const currentDate = format(new Date(), 'MMMM dd, yyyy');
+  const generatedTime = format(new Date(), 'HH:mm:ss');
+  
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Report - ${customer.firstName} ${customer.lastName}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      line-height: 1.4;
+      color: #333;
+      background: white;
+      font-size: 14px;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 25px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .header .subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
+    .customer-info {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .section-title {
+      font-size: 18px;
+      color: #1e40af;
+      margin-bottom: 15px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #e2e8f0;
+      font-weight: bold;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .info-label {
+      font-weight: bold;
+      color: #475569;
+    }
+    
+    .info-value {
+      color: #1e293b;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .metric-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+    }
+    
+    .metric-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1e40af;
+      margin-bottom: 5px;
+    }
+    
+    .metric-label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    
+    .activity-item {
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    .activity-type {
+      font-weight: bold;
+      color: #1e40af;
+      text-transform: capitalize;
+      font-size: 12px;
+    }
+    
+    .activity-description {
+      margin: 5px 0;
+      color: #475569;
+      font-size: 12px;
+    }
+    
+    .activity-meta {
+      font-size: 10px;
+      color: #64748b;
+    }
+    
+    .footer {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+      font-size: 11px;
+    }
+    
+    @media print {
+      body { -webkit-print-color-adjust: exact; color-adjust: exact; }
+      .header { break-inside: avoid; }
+      .metric-card { break-inside: avoid; }
+      .activity-item { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Customer Detail Report</h1>
+    <div class="subtitle">Momtazchem CRM System</div>
+    <div class="subtitle">${customer.firstName} ${customer.lastName}</div>
+  </div>
 
-  private static generateOutlinesHTML(outlines: any[]): string {
-    return outlines.map(outline => `
-      <div class="outline-level-${outline.level}">
-        ${outline.orderNumber}. ${outline.title}
+  <div class="customer-info">
+    <h2 class="section-title">Customer Information</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Full Name:</span>
+        <span class="info-value">${customer.firstName} ${customer.lastName}</span>
       </div>
-      ${outline.content ? `<div class="outline-content">${outline.content}</div>` : ''}
-    `).join('');
-  }
+      <div class="info-item">
+        <span class="info-label">Email:</span>
+        <span class="info-value">${customer.email}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Phone:</span>
+        <span class="info-value">${customer.phone || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Company:</span>
+        <span class="info-value">${customer.company || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Country:</span>
+        <span class="info-value">${customer.country || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">City:</span>
+        <span class="info-value">${customer.city || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Customer Type:</span>
+        <span class="info-value">${customer.customerType || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Status:</span>
+        <span class="info-value">${customer.customerStatus || 'N/A'}</span>
+      </div>
+    </div>
+  </div>
 
-  private static formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 بایت';
-    const k = 1024;
-    const sizes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
+  <h2 class="section-title">Customer Analytics</h2>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-value">${analytics?.totalOrders || 0}</div>
+      <div class="metric-label">Total Orders</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">$${(analytics?.totalSpent || 0).toLocaleString()}</div>
+      <div class="metric-label">Total Spent</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">$${(analytics?.averageOrderValue || 0).toFixed(2)}</div>
+      <div class="metric-label">Average Order</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">${analytics?.daysSinceLastOrder || 'N/A'}</div>
+      <div class="metric-label">Days Since Last Order</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Recent Activities</h2>
+  ${activities && activities.length > 0 ? activities.slice(0, 10).map(activity => `
+    <div class="activity-item">
+      <div class="activity-type">${activity.activityType?.replace(/_/g, ' ') || 'Activity'}</div>
+      <div class="activity-description">${activity.description || 'No description available'}</div>
+      <div class="activity-meta">
+        ${activity.createdAt ? format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm') : 'Unknown date'}
+      </div>
+    </div>
+  `).join('') : '<div class="activity-item">No recent activities found</div>'}
+
+  <div class="footer">
+    <p>This report was generated by Momtazchem CRM System</p>
+    <p>Generated on ${currentDate} at ${generatedTime}</p>
+    <p>&copy; ${new Date().getFullYear()} Momtazchem - Customer Detail Report</p>
+  </div>
+</body>
+</html>`;
+}
+
+export function generateAnalyticsReportHTML(analytics: CustomerAnalytics): string {
+  const currentDate = format(new Date(), 'MMMM dd, yyyy');
+  const generatedTime = format(new Date(), 'HH:mm:ss');
+  
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Analytics Report</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      line-height: 1.4;
+      color: #333;
+      background: white;
+      font-size: 14px;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 25px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .section-title {
+      font-size: 18px;
+      color: #1e40af;
+      margin-bottom: 15px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #e2e8f0;
+      font-weight: bold;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    
+    .metric-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .metric-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1e40af;
+      margin-bottom: 8px;
+    }
+    
+    .metric-label {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+    
+    .table th {
+      background: #f1f5f9;
+      color: #1e293b;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .footer {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+      font-size: 11px;
+    }
+    
+    @media print {
+      body { -webkit-print-color-adjust: exact; color-adjust: exact; }
+      .header { break-inside: avoid; }
+      .metric-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Customer Analytics Report</h1>
+    <div>Momtazchem CRM System</div>
+    <div>Generated: ${currentDate} ${generatedTime}</div>
+  </div>
+
+  <h2 class="section-title">Key Metrics Overview</h2>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-value">${analytics.totalCustomers}</div>
+      <div class="metric-label">Total Customers</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">${analytics.activeCustomers}</div>
+      <div class="metric-label">Active Customers</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">${analytics.newCustomersThisMonth}</div>
+      <div class="metric-label">New This Month</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">$${analytics.totalRevenue.toLocaleString()}</div>
+      <div class="metric-label">Total Revenue</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">$${analytics.averageOrderValue.toFixed(2)}</div>
+      <div class="metric-label">Average Order Value</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Top Customers by Revenue</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Customer Name</th>
+        <th>Email Address</th>
+        <th>Total Spent</th>
+        <th>Total Orders</th>
+        <th>Average Order</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${analytics.topCustomers.map(customer => `
+        <tr>
+          <td>${customer.name}</td>
+          <td>${customer.email}</td>
+          <td>$${customer.totalSpent.toLocaleString()}</td>
+          <td>${customer.totalOrders}</td>
+          <td>$${(customer.totalSpent / customer.totalOrders).toFixed(2)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <p>This report was generated by Momtazchem CRM System</p>
+    <p>&copy; ${new Date().getFullYear()} Momtazchem - Customer Analytics Report</p>
+  </div>
+</body>
+</html>`;
 }

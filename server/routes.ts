@@ -6243,9 +6243,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get customer activities
       const activities = await crmStorage.getCustomerActivities(customerId, 20);
 
-      // Generate PDF
-      const { generateCustomerDetailPDF } = await import('./customer-analytics-pdf');
-      const pdfBuffer = await generateCustomerDetailPDF(customer, analytics, activities);
+      // Generate PDF with new compatible generator
+      const { generatePDF, generateCustomerReportHTML } = await import('./pdf-generator');
+      const htmlContent = generateCustomerReportHTML(customer, analytics, activities);
+      const pdfBuffer = await generatePDF(htmlContent, `customer-report-${customerId}`);
 
       // Set response headers for PDF download
       // Validate PDF buffer before sending
@@ -6279,9 +6280,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get dashboard statistics
       const dashboardStats = await crmStorage.getCrmDashboardStats();
       
-      // Generate PDF
-      const { generateCustomerAnalyticsPDF } = await import('./customer-analytics-pdf');
-      const pdfBuffer = await generateCustomerAnalyticsPDF(dashboardStats);
+      // Generate PDF with new compatible generator
+      const { generatePDF, generateAnalyticsReportHTML } = await import('./pdf-generator');
+      const htmlContent = generateAnalyticsReportHTML(dashboardStats);
+      const pdfBuffer = await generatePDF(htmlContent, 'customer-analytics');
 
       // Set response headers for PDF download
       // Validate PDF buffer before sending
