@@ -6716,33 +6716,28 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Get customers with SMS enabled (admin only)
+  // Get all customers with SMS settings (admin only)
   app.get("/api/admin/sms/customers", requireAuth, async (req: Request, res: Response) => {
     try {
-      const customersWithSms = await smsStorage.getCustomersWithSmsEnabled();
+      const customers = await crmStorage.getCrmCustomers(100, 0);
       
-      // Get customer details for each SMS setting
-      const customerDetails = await Promise.all(
-        customersWithSms.map(async (smsSetting) => {
-          const customer = await crmStorage.getCrmCustomerById(smsSetting.customerId);
-          return {
-            ...smsSetting,
-            customer: customer ? {
-              id: customer.id,
-              firstName: customer.firstName,
-              lastName: customer.lastName,
-              email: customer.email,
-              phone: customer.phone,
-              company: customer.company
-            } : null
-          };
-        })
-      );
+      const customerSmsData = customers.map(customer => ({
+        id: customer.id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone || '',
+        company: customer.company,
+        smsEnabled: customer.smsEnabled || false,
+        customerStatus: customer.customerStatus,
+        totalOrders: customer.totalOrdersCount || 0,
+        lastOrderDate: customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString('fa-IR') : null
+      }));
       
-      res.json({ success: true, data: customerDetails });
+      res.json({ success: true, data: customerSmsData });
     } catch (error) {
-      console.error("Error fetching customers with SMS enabled:", error);
-      res.status(500).json({ success: false, message: "خطا در دریافت مشتریان با SMS فعال" });
+      console.error("Error fetching customer SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات SMS مشتریان" });
     }
   });
 

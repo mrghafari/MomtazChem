@@ -27,20 +27,15 @@ interface SmsSettings {
 
 interface CustomerSmsSettings {
   id: number;
-  customerId: number;
-  smsAuthEnabled: boolean;
-  enabledBy?: string;
-  enabledAt?: string;
-  disabledBy?: string;
-  disabledAt?: string;
-  customer?: {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    company?: string;
-  };
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company?: string;
+  smsEnabled: boolean;
+  customerStatus: string;
+  totalOrders: number;
+  lastOrderDate?: string;
 }
 
 interface SmsStats {
