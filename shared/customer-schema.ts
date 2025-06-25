@@ -99,6 +99,10 @@ export const customerAddresses = pgTable("customer_addresses", {
   city: text("city").notNull(),
   address: text("address").notNull(),
   postalCode: text("postal_code"),
+  // GPS Location fields
+  latitude: decimal("latitude", { precision: 10, scale: 8 }), // GPS موقعیت عرض جغرافیایی
+  longitude: decimal("longitude", { precision: 11, scale: 8 }), // GPS موقعیت طول جغرافیایی
+  locationAccuracy: decimal("location_accuracy", { precision: 6, scale: 2 }), // دقت موقعیت به متر
   isDefault: boolean("is_default").default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

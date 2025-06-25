@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, MapPin, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Check, Navigation } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -40,6 +40,9 @@ interface AddressFormData {
   city: string;
   address: string;
   postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  locationAccuracy?: number;
 }
 
 interface AddressSelectorProps {
@@ -52,6 +55,7 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [formData, setFormData] = useState<AddressFormData>({
     title: '',
     recipientName: '',
@@ -61,7 +65,10 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
     state: '',
     city: '',
     address: '',
-    postalCode: ''
+    postalCode: '',
+    latitude: undefined,
+    longitude: undefined,
+    locationAccuracy: undefined
   });
 
   // Fetch customer addresses
@@ -89,6 +96,58 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
   });
 
   const addresses = addressesResponse?.addresses || [];
+
+  // Get current GPS location
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: 'خطا',
+        description: 'مرورگر شما از موقعیت‌یابی پشتیبانی نمی‌کند',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        setFormData(prev => ({
+          ...prev,
+          latitude,
+          longitude,
+          locationAccuracy: accuracy
+        }));
+        toast({
+          title: 'موقعیت دریافت شد',
+          description: `موقعیت فعلی شما با دقت ${Math.round(accuracy)} متر ثبت شد`
+        });
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        let errorMessage = 'خطا در دریافت موقعیت';
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMessage = 'دسترسی به موقعیت رد شد. لطفاً دسترسی را در تنظیمات مرورگر فعال کنید';
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorMessage = 'موقعیت در دسترس نیست';
+        } else if (error.code === error.TIMEOUT) {
+          errorMessage = 'زمان دریافت موقعیت به پایان رسید';
+        }
+        
+        toast({
+          title: 'خطا در دریافت موقعیت',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+        setIsGettingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      }
+    );
+  };
 
   // Set default recipient name when opening add new address dialog
   useEffect(() => {
@@ -336,6 +395,38 @@ export default function AddressSelector({ selectedAddressId, onAddressSelect }: 
                     placeholder="اختیاری"
                   />
                 </div>
+              </div>
+
+              {/* GPS Location Button */}
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Label>موقعیت جغرافیایی (GPS)</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={getCurrentLocation}
+                    disabled={isGettingLocation}
+                  >
+                    {isGettingLocation ? (
+                      <>در حال دریافت...</>
+                    ) : (
+                      <>
+                        <Navigation className="h-4 w-4 mr-2" />
+                        دریافت موقعیت فعلی
+                      </>
+                    )}
+                  </Button>
+                </div>
+                {formData.latitude && formData.longitude && (
+                  <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                    <div>عرض جغرافیایی: {formData.latitude.toFixed(6)}</div>
+                    <div>طول جغرافیایی: {formData.longitude.toFixed(6)}</div>
+                    {formData.locationAccuracy && (
+                      <div>دقت: {Math.round(formData.locationAccuracy)} متر</div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2">
