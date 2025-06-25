@@ -28,6 +28,8 @@ interface CustomerAnalytics {
 }
 
 export async function generateSimplePDF(htmlContent: string): Promise<Buffer> {
+  console.log('Starting PDF generation with simple generator...');
+  
   const browser = await puppeteer.launch({
     headless: 'new',
     executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
@@ -35,14 +37,17 @@ export async function generateSimplePDF(htmlContent: string): Promise<Buffer> {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
-      '--disable-gpu'
+      '--disable-gpu',
+      '--no-first-run'
     ]
   });
 
   try {
     const page = await browser.newPage();
+    console.log('Setting page content...');
     await page.setContent(htmlContent);
     
+    console.log('Generating PDF...');
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -54,7 +59,16 @@ export async function generateSimplePDF(htmlContent: string): Promise<Buffer> {
       }
     });
 
+    console.log('PDF generated successfully, size:', pdf.length, 'bytes');
+    
+    if (!pdf || pdf.length === 0) {
+      throw new Error('Generated PDF is empty');
+    }
+
     return pdf;
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    throw error;
   } finally {
     await browser.close();
   }
