@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: Fixed PDF export functionality for Adobe Acrobat compatibility - improved format validation
+- June 25, 2025: Enhanced PDF generation with proper headers and format verification
+- June 25, 2025: Updated Puppeteer configuration for better PDF compatibility
 - June 25, 2025: Fixed PDF export functionality for customer reports - files now download and open properly
 - June 25, 2025: Added missing PDF export API endpoints for individual customers and analytics
 - June 25, 2025: Enhanced PDF generation with better error handling and data validation
