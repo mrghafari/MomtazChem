@@ -15,6 +15,7 @@ import { CheckCircle, ShoppingCart, CreditCard, Truck, User } from "lucide-react
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import AddressSelector from "@/components/checkout/address-selector";
 
 // Dynamic checkout form validation schema - required fields only if not logged in
 const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
@@ -61,6 +62,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [isOrderComplete, setIsOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -168,12 +170,28 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   });
 
   const onSubmit = (data: CheckoutFormData) => {
-    const shippingAddress = data.sameAsShipping ? 
-      `${data.billingAddress1}, ${data.billingAddress2 || ''}, ${data.billingCity}, ${data.billingState}, ${data.billingPostalCode}, ${data.billingCountry}`.trim() :
-      `${data.shippingAddress1}, ${data.shippingAddress2 || ''}, ${data.shippingCity}, ${data.shippingState}, ${data.shippingPostalCode}, ${data.shippingCountry}`.trim();
-
-    const orderData = {
-      customerInfo: {
+    // Use selected address for logged in users, otherwise use form data
+    let customerInfo;
+    
+    if (isLoggedIn && selectedAddress) {
+      // Use selected address from address selector
+      customerInfo = {
+        email: customerData?.customer?.email || data.email,
+        firstName: selectedAddress.firstName,
+        lastName: selectedAddress.lastName,
+        phone: selectedAddress.phone,
+        company: selectedAddress.company || '',
+        country: selectedAddress.country,
+        city: selectedAddress.city,
+        address: `${selectedAddress.address}${selectedAddress.postalCode ? `, ${selectedAddress.postalCode}` : ''}`,
+      };
+    } else {
+      // Use form data for non-logged in users
+      const shippingAddress = data.sameAsShipping ? 
+        `${data.billingAddress1}, ${data.billingAddress2 || ''}, ${data.billingCity}, ${data.billingState}, ${data.billingPostalCode}, ${data.billingCountry}`.trim() :
+        `${data.shippingAddress1}, ${data.shippingAddress2 || ''}, ${data.shippingCity}, ${data.shippingState}, ${data.shippingPostalCode}, ${data.shippingCountry}`.trim();
+      
+      customerInfo = {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -182,7 +200,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         country: data.billingCountry,
         city: data.billingCity,
         address: shippingAddress,
-      },
+      };
+    }
+
+    const orderData = {
+      customerInfo,
       items: cartItems.map(item => ({
         productId: item.id,
         productName: item.name,
@@ -348,48 +370,30 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   </CardContent>
                 </Card>
 
-                {/* Billing Address */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="w-5 h-5" />
-                      Billing Address
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="billingAddress1"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address Line 1 *</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="billingAddress2"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address Line 2 (Optional)</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Address Selection - Only for logged in users */}
+                {isLoggedIn && (
+                  <AddressSelector
+                    selectedAddressId={selectedAddress?.id}
+                    onAddressSelect={setSelectedAddress}
+                  />
+                )}
+
+                {/* Billing Address - For non-logged in users or manual entry */}
+                {!isLoggedIn && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <CreditCard className="w-5 h-5" />
+                        Billing Address
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                       <FormField
                         control={form.control}
-                        name="billingCity"
+                        name="billingAddress1"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>City *</FormLabel>
+                            <FormLabel>Address Line 1 *</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -399,10 +403,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       />
                       <FormField
                         control={form.control}
-                        name="billingState"
+                        name="billingAddress2"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>State/Province *</FormLabel>
+                            <FormLabel>Address Line 2 (Optional)</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -410,22 +414,50 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={form.control}
-                        name="billingPostalCode"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Postal Code *</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="billingCity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>City *</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="billingState"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>State/Province *</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="billingPostalCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Postal Code *</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Shipping & Payment */}
                 <Card>
