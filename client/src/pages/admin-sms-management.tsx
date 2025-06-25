@@ -185,33 +185,72 @@ export default function AdminSmsManagement() {
   const handleToggleCustomerSms = async (customerId: number, enable: boolean) => {
     setLoading(true);
     try {
-      const endpoint = enable ? 'enable' : 'disable';
-      const response = await fetch(`/api/admin/customers/${customerId}/sms/${endpoint}`, {
-        method: 'POST',
+      const response = await fetch(`/api/admin/sms/customers/${customerId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
+        body: JSON.stringify({ smsEnabled: enable })
       });
 
       const result = await response.json();
       if (result.success) {
         toast({
-          title: "Success",
+          title: enable ? "SMS فعال شد" : "SMS غیرفعال شد",
           description: result.message,
         });
         loadCustomersWithSms();
         loadSmsStats();
       } else {
         toast({
-          title: "Error",
+          title: "خطا",
           description: result.message,
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title: "خطا",
         description: "خطا در تغییر تنظیمات SMS مشتری",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkSmsToggle = async (action: 'enable' | 'disable') => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/sms/customers/bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ action })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        toast({
+          title: action === 'enable' ? "SMS برای همه فعال شد" : "SMS برای همه غیرفعال شد",
+          description: result.message,
+        });
+        loadCustomersWithSms();
+        loadSmsStats();
+      } else {
+        toast({
+          title: "خطا",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در تغییر انبوه تنظیمات SMS",
         variant: "destructive",
       });
     } finally {
@@ -464,10 +503,28 @@ export default function AdminSmsManagement() {
         <TabsContent value="customers" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Customer SMS Access Control</CardTitle>
+              <CardTitle>مدیریت دسترسی SMS مشتریان</CardTitle>
               <CardDescription>
-                Manage SMS authentication access for individual customers
+                مدیریت دسترسی احراز هویت SMS برای مشتریان به صورت جداگانه
               </CardDescription>
+              <div className="flex gap-2 mt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleBulkSmsToggle('enable')}
+                  disabled={loading}
+                >
+                  فعال کردن همه
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleBulkSmsToggle('disable')}
+                  disabled={loading}
+                >
+                  غیرفعال کردن همه
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {customersWithSms.length === 0 ? (
@@ -480,34 +537,31 @@ export default function AdminSmsManagement() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {customersWithSms.map((customerSms) => (
-                    <div key={customerSms.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  {customersWithSms.map((customer) => (
+                    <div key={customer.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="space-y-1">
                         <div className="font-medium">
-                          {customerSms.customer?.firstName} {customerSms.customer?.lastName}
+                          {customer.firstName} {customer.lastName}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {customerSms.customer?.email} • {customerSms.customer?.phone}
+                          {customer.email} • {customer.phone}
                         </div>
-                        {customerSms.customer?.company && (
+                        {customer.company && (
                           <div className="text-sm text-muted-foreground">
-                            Company: {customerSms.customer.company}
+                            شرکت: {customer.company}
                           </div>
                         )}
                         <div className="text-xs text-muted-foreground">
-                          {customerSms.smsAuthEnabled 
-                            ? `Enabled by ${customerSms.enabledBy} on ${new Date(customerSms.enabledAt!).toLocaleDateString()}`
-                            : `Disabled by ${customerSms.disabledBy} on ${new Date(customerSms.disabledAt!).toLocaleDateString()}`
-                          }
+                          {customer.totalOrders} سفارش • آخرین سفارش: {customer.lastOrderDate || 'هیچ'}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={customerSms.smsAuthEnabled ? "default" : "secondary"}>
-                          {customerSms.smsAuthEnabled ? "Enabled" : "Disabled"}
+                      <div className="flex items-center space-x-2 gap-2">
+                        <Badge variant={customer.smsEnabled ? "default" : "secondary"}>
+                          {customer.smsEnabled ? "فعال" : "غیرفعال"}
                         </Badge>
                         <Switch
-                          checked={customerSms.smsAuthEnabled}
-                          onCheckedChange={(checked) => handleToggleCustomerSms(customerSms.customerId, checked)}
+                          checked={customer.smsEnabled}
+                          onCheckedChange={(checked) => handleToggleCustomerSms(customer.id, checked)}
                           disabled={loading}
                         />
                       </div>

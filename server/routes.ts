@@ -6741,6 +6741,76 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Update individual customer SMS setting (admin only)
+  app.put("/api/admin/sms/customers/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const { smsEnabled } = req.body;
+      
+      if (typeof smsEnabled !== 'boolean') {
+        return res.status(400).json({ success: false, message: "مقدار SMS نامعتبر است" });
+      }
+      
+      // Update customer SMS setting
+      await crmStorage.updateCrmCustomer(customerId, { smsEnabled });
+      
+      // Log activity
+      await crmStorage.logCustomerActivity({
+        customerId,
+        activityType: "sms_setting_changed",
+        description: `SMS ${smsEnabled ? 'فعال' : 'غیرفعال'} شد توسط ادمین`,
+        performedBy: req.session?.adminId?.toString() || 'admin',
+        activityData: { smsEnabled, changedBy: 'admin' }
+      });
+      
+      res.json({ 
+        success: true, 
+        message: `SMS برای مشتری ${smsEnabled ? 'فعال' : 'غیرفعال'} شد`
+      });
+    } catch (error) {
+      console.error("Error updating customer SMS setting:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی تنظیمات SMS" });
+    }
+  });
+
+  // Bulk enable/disable SMS for all customers (admin only)
+  app.post("/api/admin/sms/customers/bulk", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { action } = req.body; // 'enable' or 'disable'
+      
+      if (!['enable', 'disable'].includes(action)) {
+        return res.status(400).json({ success: false, message: "عملیات نامعتبر است" });
+      }
+      
+      const smsEnabled = action === 'enable';
+      
+      // Get all customers
+      const customers = await crmStorage.getCrmCustomers(1000, 0);
+      
+      // Update all customers
+      for (const customer of customers) {
+        await crmStorage.updateCrmCustomer(customer.id, { smsEnabled });
+        
+        // Log activity for each customer
+        await crmStorage.logCustomerActivity({
+          customerId: customer.id,
+          activityType: "sms_bulk_setting_changed",
+          description: `SMS ${smsEnabled ? 'فعال' : 'غیرفعال'} شد برای همه مشتریان توسط ادمین`,
+          performedBy: req.session?.adminId?.toString() || 'admin',
+          activityData: { smsEnabled, action: 'bulk', changedBy: 'admin' }
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `SMS برای ${customers.length} مشتری ${smsEnabled ? 'فعال' : 'غیرفعال'} شد`
+      });
+    } catch (error) {
+      console.error("Error bulk updating customer SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی انبوه تنظیمات SMS" });
+    }
+  });
+
   // Get SMS statistics (admin only)
   app.get("/api/admin/sms/stats", requireAuth, async (req: Request, res: Response) => {
     try {
