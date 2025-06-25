@@ -89,6 +89,7 @@ export const customerAddresses = pgTable("customer_addresses", {
   id: serial("id").primaryKey(),
   customerId: integer("customer_id").notNull(),
   title: text("title").notNull(), // Home, Office, Warehouse, etc.
+  recipientName: text("recipient_name").notNull(), // نام تحویل‌گیرنده
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   company: text("company"),
@@ -107,6 +108,9 @@ export const insertCustomerAddressSchema = createInsertSchema(customerAddresses)
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Ensure recipient name defaults to customer's full name if not provided
+  recipientName: z.string().min(1, "نام تحویل‌گیرنده الزامی است"),
 });
 
 export type InsertCustomerAddress = z.infer<typeof insertCustomerAddressSchema>;

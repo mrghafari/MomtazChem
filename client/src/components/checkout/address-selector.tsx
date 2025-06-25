@@ -14,6 +14,7 @@ interface CustomerAddress {
   id: number;
   customerId: number;
   title: string;
+  recipientName: string;
   firstName: string;
   lastName: string;
   company?: string;
@@ -30,6 +31,7 @@ interface CustomerAddress {
 
 interface AddressFormData {
   title: string;
+  recipientName: string;
   firstName: string;
   lastName: string;
   company?: string;
