@@ -12,10 +12,15 @@ import {
   type InsertCustomerSegment,
   type CustomerSegment
 } from "../shared/customer-schema";
+import { 
+  crmCustomers,
+  type InsertCrmCustomer, 
+  type CrmCustomer
+} from "../shared/schema";
 
 export interface ICrmStorage {
-  // CRM Customer Management (now using unified customer table)
-  createCrmCustomer(customer: InsertCustomer): Promise<Customer>;
+  // CRM Customer Management (using proper CRM table)
+  createCrmCustomer(customer: InsertCrmCustomer): Promise<CrmCustomer>;
   getCrmCustomerById(id: number): Promise<Customer | undefined>;
   getCrmCustomerByEmail(email: string): Promise<Customer | undefined>;
   updateCrmCustomer(id: number, customer: Partial<InsertCustomer>): Promise<Customer>;
@@ -81,9 +86,9 @@ export interface ICrmStorage {
 
 export class CrmStorage implements ICrmStorage {
   
-  async createCrmCustomer(customerData: InsertCustomer): Promise<Customer> {
+  async createCrmCustomer(customerData: InsertCrmCustomer): Promise<CrmCustomer> {
     const [customer] = await customerDb
-      .insert(customers)
+      .insert(crmCustomers)
       .values(customerData)
       .returning();
     

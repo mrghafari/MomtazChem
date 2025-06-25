@@ -2157,10 +2157,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const finalPassword = password || passwordHash;
       const hashedPassword = await bcrypt.hash(finalPassword, 10);
 
-      // Create CRM customer first (central repository)
+      // Create CRM customer first (central repository) - no password field
       const crmCustomerData = {
         email,
-        passwordHash: hashedPassword,
         firstName,
         lastName,
         company: company || null,
@@ -2190,17 +2189,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: 'customer_registration',
         internalNotes: 'Customer registered through online shop',
         isActive: true,
-        emailVerified: false,
       };
 
       const crmCustomer = await crmStorage.createCrmCustomer(crmCustomerData);
 
-      // Create corresponding customer portal entry with CRM reference
+      // Create corresponding customer portal entry with password (for authentication)
       let portalCustomer = null;
       try {
         const portalData = {
           email: crmCustomerData.email,
-          passwordHash: crmCustomerData.passwordHash,
+          passwordHash: hashedPassword, // Password stored only in portal for authentication
           firstName: crmCustomerData.firstName,
           lastName: crmCustomerData.lastName,
           company: crmCustomerData.company,
