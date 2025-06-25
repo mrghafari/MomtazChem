@@ -47,17 +47,26 @@ export async function generateCustomerAnalyticsPDF(analytics: CustomerAnalytics)
     const page = await browser.newPage();
     
     const html = generateAnalyticsHTML(analytics);
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { 
+      waitUntil: 'networkidle0',
+      timeout: 30000 
+    });
+    
+    await page.waitForTimeout(1000);
     
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,
+      preferCSSPageSize: false,
+      displayHeaderFooter: false,
       margin: {
         top: '20mm',
         right: '15mm',
         bottom: '20mm',
         left: '15mm'
-      }
+      },
+      tagged: true,
+      waitForFonts: true
     });
 
     return pdf;
@@ -444,17 +453,26 @@ export async function generateCustomerDetailPDF(customer: any, analytics: any, a
     const page = await browser.newPage();
     
     const html = generateCustomerDetailHTML(customer, analytics, activities);
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { 
+      waitUntil: 'networkidle0',
+      timeout: 30000 
+    });
+    
+    await page.waitForTimeout(1000);
     
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,
+      preferCSSPageSize: false,
+      displayHeaderFooter: false,
       margin: {
         top: '20mm',
         right: '15mm',
         bottom: '20mm',
         left: '15mm'
-      }
+      },
+      tagged: true,
+      waitForFonts: true
     });
 
     return pdf;

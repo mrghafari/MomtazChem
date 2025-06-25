@@ -6251,9 +6251,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Content-Length', pdfBuffer.length);
+      res.setHeader('Cache-Control', 'no-cache');
       
       // Send PDF buffer
-      res.send(pdfBuffer);
+      res.end(pdfBuffer, 'binary');
       
     } catch (error) {
       console.error("Error generating customer PDF:", error);
@@ -6278,9 +6279,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Content-Length', pdfBuffer.length);
+      res.setHeader('Cache-Control', 'no-cache');
       
       // Send PDF buffer
-      res.send(pdfBuffer);
+      res.end(pdfBuffer, 'binary');
       
     } catch (error) {
       console.error("Error generating analytics PDF:", error);
