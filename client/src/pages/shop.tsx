@@ -594,17 +594,149 @@ const Shop = () => {
                   </Button>
                 </div>
               ) : (
-                currentProducts.map((product) => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    viewMode={viewMode}
-                    onAddToCart={() => addToCart(product.id)}
-                    onRemoveFromCart={() => removeFromCart(product.id)}
-                    cartQuantity={cart[product.id] || 0}
-                    getDiscountedPrice={getDiscountedPrice}
-                    customer={customer}
-                  />
+                currentProducts.map((product: any) => (
+                  <Card key={product.id} className={viewMode === "list" ? "flex" : ""}>
+                    {viewMode === "grid" ? (
+                      <>
+                        <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+                          {product.thumbnailUrl ? (
+                            <img 
+                              src={product.thumbnailUrl} 
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {product.shortDescription || product.description}
+                          </p>
+                          
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <span className="text-2xl font-bold text-green-600">
+                                ${parseFloat(product.price).toFixed(2)}
+                              </span>
+                              <span className="text-sm text-gray-500 ml-1">
+                                / {product.priceUnit}
+                              </span>
+                            </div>
+                            <Badge variant={product.inStock ? "secondary" : "destructive"}>
+                              {product.inStock ? "In Stock" : "Out of Stock"}
+                            </Badge>
+                          </div>
+
+                          {product.inStock && (
+                            <div className="flex items-center gap-2">
+                              {cart[product.id] && cart[product.id] > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => removeFromCart(product.id)}
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </Button>
+                                  <span className="w-8 text-center">{cart[product.id]}</span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => addToCart(product.id)}
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  className="w-full"
+                                  onClick={() => addToCart(product.id)}
+                                >
+                                  <ShoppingCart className="w-4 h-4 mr-2" />
+                                  Add to Cart
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </>
+                    ) : (
+                      <div className="flex">
+                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0">
+                          {product.thumbnailUrl ? (
+                            <img 
+                              src={product.thumbnailUrl} 
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+                        <CardContent className="p-6 flex-1">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
+                              <p className="text-gray-600 mb-4">
+                                {product.description}
+                              </p>
+                              
+                              <div className="flex items-center gap-4 mb-4">
+                                <div>
+                                  <span className="text-2xl font-bold text-green-600">
+                                    ${parseFloat(product.price).toFixed(2)}
+                                  </span>
+                                  <span className="text-sm text-gray-500 ml-1">
+                                    / {product.priceUnit}
+                                  </span>
+                                </div>
+                                <Badge variant={product.inStock ? "secondary" : "destructive"}>
+                                  {product.inStock ? "In Stock" : "Out of Stock"}
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            <div className="ml-6">
+                              {product.inStock && (
+                                <div className="flex items-center gap-2">
+                                  {cart[product.id] && cart[product.id] > 0 ? (
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => removeFromCart(product.id)}
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </Button>
+                                      <span className="w-8 text-center">{cart[product.id]}</span>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => addToCart(product.id)}
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <Button onClick={() => addToCart(product.id)}>
+                                      <ShoppingCart className="w-4 h-4 mr-2" />
+                                      Add to Cart
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </div>
+                    )}
+                  </Card>
                 ))
               )}
             </div>
@@ -656,10 +788,9 @@ const Shop = () => {
             <DialogTitle>Checkout</DialogTitle>
           </DialogHeader>
           {customer ? (
-            <AuthCheckout 
-              customer={customer}
+            <Checkout 
               cart={cart}
-              products={products}
+              products={currentProducts}
               onOrderComplete={() => {
                 setCart({});
                 setShowCheckout(false);
@@ -672,8 +803,7 @@ const Shop = () => {
                 setShowCheckout(false);
               }}
               cart={cart}
-              products={products}
-              onCustomerUpdate={setCustomer}
+              products={currentProducts}
             />
           )}
         </DialogContent>
@@ -700,235 +830,5 @@ const ProductCardSkeleton = ({ viewMode }: { viewMode: "grid" | "list" }) => (
     </CardContent>
   </Card>
 );
-
-export default Shop;
-                      <>
-                        <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
-                          {product.thumbnailUrl ? (
-                            <img 
-                              src={product.thumbnailUrl} 
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              No Image
-                            </div>
-                          )}
-                        </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                            {product.shortDescription || product.description}
-                          </p>
-                          
-                          <div className="flex items-center justify-between mb-3">
-                            <div>
-                              {cart[product.id] && cart[product.id] > 0 ? (
-                                <div>
-                                  <span className="text-2xl font-bold text-green-600">
-                                    ${getDiscountedPrice(product, cart[product.id] || 1).toFixed(2)}
-                                  </span>
-                                  {getDiscountedPrice(product, cart[product.id] || 1) < parseFloat(product.price) && (
-                                    <span className="text-sm line-through text-gray-400 ml-2">
-                                      ${product.price}
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="text-2xl font-bold text-green-600">
-                                  ${product.price}
-                                </span>
-                              )}
-                              <span className="text-sm text-gray-500 ml-1">
-                                / {product.priceUnit}
-                              </span>
-                            </div>
-                            <Badge variant={product.inStock ? "secondary" : "destructive"}>
-                              {product.inStock ? "In Stock" : "Out of Stock"}
-                            </Badge>
-                          </div>
-
-                          {/* Quantity Discounts */}
-                          {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
-                            <div className="mb-3">
-                              <p className="text-xs font-medium text-gray-700 mb-1">Quantity Discounts:</p>
-                              <div className="space-y-1">
-                                {product.quantityDiscounts.map((discount: any, index: number) => (
-                                  <div key={index} className="text-xs text-gray-600">
-                                    {discount.minQty}+ units: {(discount.discount * 100).toFixed(0)}% off
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ) : null}
-
-                          {product.inStock && (
-                            <div className="flex items-center gap-2">
-                              {cart[product.id] && cart[product.id] > 0 ? (
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => removeFromCart(product.id)}
-                                  >
-                                    <Minus className="w-4 h-4" />
-                                  </Button>
-                                  <span className="w-8 text-center">{cart[product.id]}</span>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => addToCart(product.id)}
-                                  >
-                                    <Plus className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <Button
-                                  className="w-full"
-                                  onClick={() => addToCart(product.id)}
-                                >
-                                  Add to Cart
-                                </Button>
-                              )}
-                            </div>
-                          )}
-                        </CardContent>
-                      </>
-                    ) : (
-                      <div className="flex">
-                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0">
-                          {product.thumbnailUrl ? (
-                            <img 
-                              src={product.thumbnailUrl} 
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              No Image
-                            </div>
-                          )}
-                        </div>
-                        <CardContent className="p-6 flex-1">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
-                              <p className="text-gray-600 mb-4">
-                                {product.description}
-                              </p>
-                              
-                              <div className="flex items-center gap-4 mb-4">
-                                <div>
-                                  <span className="text-2xl font-bold text-green-600">
-                                    ${product.price}
-                                  </span>
-                                  <span className="text-sm text-gray-500 ml-1">
-                                    / {product.priceUnit}
-                                  </span>
-                                </div>
-                                <Badge variant={product.inStock ? "secondary" : "destructive"}>
-                                  {product.inStock ? "In Stock" : "Out of Stock"}
-                                </Badge>
-                              </div>
-                            </div>
-                            
-                            <div className="ml-6">
-                              {product.inStock && (
-                                <div className="flex items-center gap-2">
-                                  {cart[product.id] && cart[product.id] > 0 ? (
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => removeFromCart(product.id)}
-                                      >
-                                        <Minus className="w-4 h-4" />
-                                      </Button>
-                                      <span className="w-8 text-center">{cart[product.id]}</span>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => addToCart(product.id)}
-                                      >
-                                        <Plus className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                  ) : (
-                                    <Button onClick={() => addToCart(product.id)}>
-                                      Add to Cart
-                                    </Button>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </div>
-                    )}
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">No products found</h3>
-                  <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Checkout Modal */}
-      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Checkout</DialogTitle>
-            <DialogDescription>Complete your order and provide shipping information</DialogDescription>
-          </DialogHeader>
-          {customer ? (
-            <Checkout 
-              cart={cart} 
-              products={products}
-              onOrderComplete={() => {
-                setCart({});
-                setShowCheckout(false);
-              }}
-            />
-          ) : (
-            <div className="p-8">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Authentication Required</h2>
-                <p className="text-gray-600">Please login or register to complete your order. Your cart will be preserved.</p>
-              </div>
-              <div className="max-w-md mx-auto">
-                <CustomerAuth 
-                  open={true}
-                  onOpenChange={() => {}}
-                  onLoginSuccess={(customerData) => {
-                    setCustomer(customerData);
-                    // Cart is automatically preserved
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Customer Authentication Modal */}
-      <CustomerAuth 
-        open={showAuth}
-        onOpenChange={setShowAuth}
-        onLoginSuccess={handleLoginSuccess}
-      />
-
-
-    </div>
-  );
-};
 
 export default Shop;
