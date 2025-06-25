@@ -67,6 +67,7 @@ export default function AdminSmsManagement() {
     customersWithSmsEnabled: 0,
     systemEnabled: false
   });
+  const [pendingChanges, setPendingChanges] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadSmsSettings();
@@ -114,12 +115,34 @@ export default function AdminSmsManagement() {
     }
   };
 
-  const loadCustomersWithSms = async () => {
+  const loadCustomersWithSms = async (preserveLocalChanges = false) => {
     try {
       const response = await fetch('/api/admin/sms/customers');
       const result = await response.json();
       if (result.success && result.data) {
-        setCustomersWithSms(result.data);
+        if (preserveLocalChanges) {
+          // Preserve any recent local state changes by merging with server data
+          setCustomersWithSms(prev => {
+            const serverData = result.data;
+            // Create a map of current local state changes
+            const localChanges = new Map();
+            prev.forEach(customer => {
+              localChanges.set(customer.id, customer);
+            });
+            
+            // Apply server data but preserve any recent local changes
+            return serverData.map((serverCustomer: any) => {
+              const localCustomer = localChanges.get(serverCustomer.id);
+              if (localCustomer && localCustomer.updatedAt > serverCustomer.updatedAt) {
+                // Keep local changes if they're more recent
+                return localCustomer;
+              }
+              return serverCustomer;
+            });
+          });
+        } else {
+          setCustomersWithSms(result.data);
+        }
       }
     } catch (error) {
       console.error('Error loading customers with SMS:', error);
@@ -201,11 +224,14 @@ export default function AdminSmsManagement() {
   };
 
   const handleToggleCustomerSms = async (customerId: number, enable: boolean) => {
+    // Mark customer as having pending changes
+    setPendingChanges(prev => new Set(prev).add(customerId));
+    
     // Immediately update local state for instant UI feedback
     setCustomersWithSms(prev => 
       prev.map(customer => 
         customer.id === customerId 
-          ? { ...customer, smsEnabled: enable }
+          ? { ...customer, smsEnabled: enable, updatedAt: new Date() }
           : customer
       )
     );
@@ -222,15 +248,28 @@ export default function AdminSmsManagement() {
 
       const result = await response.json();
       if (result.success) {
+        // Remove from pending changes
+        setPendingChanges(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(customerId);
+          return newSet;
+        });
+        
         toast({
           title: enable ? "SMS فعال شد" : "SMS غیرفعال شد",
           description: result.message,
         });
         
-        // Only reload stats, not the customer list to maintain UI state
+        // Only reload stats to update counters
         await loadSmsStats();
       } else {
-        // Revert the local state change if API call failed
+        // Remove from pending and revert the local state change if API call failed
+        setPendingChanges(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(customerId);
+          return newSet;
+        });
+        
         setCustomersWithSms(prev => 
           prev.map(customer => 
             customer.id === customerId 
@@ -246,7 +285,13 @@ export default function AdminSmsManagement() {
         });
       }
     } catch (error) {
-      // Revert the local state change if API call failed
+      // Remove from pending and revert the local state change if API call failed
+      setPendingChanges(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(customerId);
+        return newSet;
+      });
+      
       setCustomersWithSms(prev => 
         prev.map(customer => 
           customer.id === customerId 
@@ -267,12 +312,20 @@ export default function AdminSmsManagement() {
     setLoading(true);
     const enableSms = action === 'enable';
     
+    // Mark all customers as having pending changes
+    const allCustomerIds = customersWithSms.map(c => c.id);
+    setPendingChanges(prev => new Set([...prev, ...allCustomerIds]));
+    
     // Store previous state for potential rollback
     const previousState = [...customersWithSms];
     
     // Immediately update all customers' SMS status for instant UI feedback
     setCustomersWithSms(prev => 
-      prev.map(customer => ({ ...customer, smsEnabled: enableSms }))
+      prev.map(customer => ({ 
+        ...customer, 
+        smsEnabled: enableSms,
+        updatedAt: new Date()
+      }))
     );
 
     try {
@@ -287,15 +340,19 @@ export default function AdminSmsManagement() {
 
       const result = await response.json();
       if (result.success) {
+        // Clear all pending changes
+        setPendingChanges(new Set());
+        
         toast({
           title: action === 'enable' ? "SMS برای همه فعال شد" : "SMS برای همه غیرفعال شد",
           description: result.message,
         });
         
-        // Only reload stats, not the customer list to maintain UI state
+        // Only reload stats to update counters
         await loadSmsStats();
       } else {
-        // Revert to previous state if API call failed
+        // Clear pending changes and revert to previous state if API call failed
+        setPendingChanges(new Set());
         setCustomersWithSms(previousState);
         
         toast({
@@ -305,7 +362,8 @@ export default function AdminSmsManagement() {
         });
       }
     } catch (error) {
-      // Revert to previous state if API call failed
+      // Clear pending changes and revert to previous state if API call failed
+      setPendingChanges(new Set());
       setCustomersWithSms(previousState);
       
       toast({
