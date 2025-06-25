@@ -106,11 +106,15 @@ export default function CRM() {
     queryKey: ["/api/crm/customers", { search: searchTerm }],
     queryFn: async () => {
       if (searchTerm.length >= 2) {
-        const response = await fetch(`/api/crm/customers/search?q=${encodeURIComponent(searchTerm)}`);
+        const response = await fetch(`/api/crm/customers/search?q=${encodeURIComponent(searchTerm)}`, {
+          credentials: 'include',
+        });
         const result = await response.json();
         return result.data || [];
       } else {
-        const response = await fetch("/api/crm/customers?limit=50");
+        const response = await fetch("/api/crm/customers?limit=50", {
+          credentials: 'include',
+        });
         const result = await response.json();
         return result.data || [];
       }
