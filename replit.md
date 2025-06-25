@@ -131,6 +131,10 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: Converted shop customer management to English with Gregorian dates and enhanced purchase info
+- June 25, 2025: Updated CRM customer metrics calculation with real-time order data synchronization
+- June 25, 2025: Changed currency formatting from IRR to USD across all customer interfaces
+- June 25, 2025: Enhanced customer purchase information display with order details and payment methods
 - June 25, 2025: Made phone, country, city, and address mandatory fields in all registration forms (CRM and shop)
 - June 25, 2025: Added validation for required fields in customer registration endpoints
 - June 25, 2025: Unified customer management - CRM now serves as central repository for all customer data

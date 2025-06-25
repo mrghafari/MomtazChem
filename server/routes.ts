@@ -2195,6 +2195,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           portalCustomerId: portalCustomer?.id,
         }
       });
+
+      // Update customer metrics immediately after registration
+      await crmStorage.updateCustomerMetrics(crmCustomer.id);
       
       res.json({
         success: true,
