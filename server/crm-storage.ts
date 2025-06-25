@@ -82,8 +82,8 @@ export interface ICrmStorage {
 export class CrmStorage implements ICrmStorage {
   
   async createCrmCustomer(customerData: InsertCustomer): Promise<Customer> {
-    const [customer] = await crmDb
-      .insert(crmCustomers)
+    const [customer] = await customerDb
+      .insert(customers)
       .values(customerData)
       .returning();
     
@@ -118,10 +118,10 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async updateCrmCustomer(id: number, customerUpdate: Partial<InsertCustomer>): Promise<Customer> {
-    const [customer] = await crmDb
-      .update(crmCustomers)
+    const [customer] = await customerDb
+      .update(customers)
       .set({ ...customerUpdate, updatedAt: new Date() })
-      .where(eq(crmCustomers.id, id))
+      .where(eq(customers.id, id))
       .returning();
     
     // Log update activity
