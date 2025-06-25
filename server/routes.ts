@@ -2102,80 +2102,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Customer authentication routes
+  // Customer registration endpoint - CRM-centric approach
   app.post("/api/customers/register", async (req, res) => {
     try {
-      const { firstName, lastName, email, password, phone, company, country, city, address } = req.body;
+      const { 
+        firstName, 
+        lastName, 
+        email, 
+        password, 
+        passwordHash, // Support both password and passwordHash
+        phone, 
+        company, 
+        country, 
+        city, 
+        address,
+        postalCode,
+        communicationPreference,
+        preferredLanguage,
+        marketingConsent,
+        customerType,
+        customerSource
+      } = req.body;
       
-      // Check if customer already exists in regular customer table
-      const existingCustomer = await customerStorage.getCustomerByEmail(email);
-      if (existingCustomer) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "ایمیل قبلاً ثبت شده است" 
-        });
-      }
-
-      // Check if customer already exists in CRM
+      // Check if customer already exists in CRM (primary check)
       const existingCrmCustomer = await crmStorage.getCrmCustomerByEmail(email);
       if (existingCrmCustomer) {
         return res.status(400).json({ 
           success: false, 
-          message: "ایمیل قبلاً در CRM ثبت شده است" 
+          message: "Email already exists in our system" 
         });
       }
 
-      // Create customer in regular customer table for authentication
-      const customerData = {
-        firstName,
-        lastName,
-        email,
-        passwordHash: password, // Will be hashed in storage
-        phone: phone || null,
-        company: company || null,
-        country: country || null,
-        city: city || null,
-        address: address || null,
-      };
+      // Hash password
+      const finalPassword = password || passwordHash;
+      const hashedPassword = await bcrypt.hash(finalPassword, 10);
 
-      const customer = await customerStorage.createCustomer(customerData);
-
-      // Also create customer in CRM for comprehensive tracking
+      // Create CRM customer first (central repository)
       const crmCustomerData = {
+        email,
+        passwordHash: hashedPassword,
         firstName,
         lastName,
-        email,
-        phone: phone || null,
-        company: company || null,
-        country: country || null,
-        city: city || null,
-        address: address || null,
-        customerType: 'retail' as const,
-        source: 'website_registration' as const,
-        notes: 'مشتری از طریق فروشگاه آنلاین ثبت نام کرده است',
+        company: company || '',
+        phone: phone || '',
+        country: country || '',
+        city: city || '',
+        address: address || '',
+        postalCode,
+        communicationPreference,
+        preferredLanguage,
+        marketingConsent,
+        customerType: customerType || 'retail',
+        customerSource: customerSource || 'website',
+        customerStatus: 'active',
+        createdBy: 'customer_registration',
+        internalNotes: 'Customer registered through online shop',
+        isActive: true,
+        emailVerified: false,
       };
 
       const crmCustomer = await crmStorage.createCrmCustomer(crmCustomerData);
+
+      // Create corresponding customer portal entry with CRM reference
+      let portalCustomer = null;
+      try {
+        portalCustomer = await customerStorage.createCustomer({
+          ...crmCustomerData,
+          crmCustomerId: crmCustomer.id,
+        });
+      } catch (portalError) {
+        console.log('Portal customer creation failed, CRM customer created successfully');
+      }
 
       // Log registration activity in CRM
       await crmStorage.logCustomerActivity({
         customerId: crmCustomer.id,
         activityType: 'registration',
-        description: 'مشتری در فروشگاه آنلاین ثبت نام کرد',
+        description: 'Customer registered through online shop',
+        performedBy: 'system',
         activityData: {
           source: 'website',
           registrationDate: new Date().toISOString(),
+          hasPortalAccess: !!portalCustomer,
+          portalCustomerId: portalCustomer?.id,
         }
       });
       
       res.json({
         success: true,
-        message: "ثبت نام با موفقیت انجام شد",
+        message: "Registration successful",
         customer: {
-          id: customer.id,
-          firstName: customer.firstName,
-          lastName: customer.lastName,
-          email: customer.email,
+          id: portalCustomer?.id || crmCustomer.id,
+          firstName: crmCustomer.firstName,
+          lastName: crmCustomer.lastName,
+          email: crmCustomer.email,
           crmId: crmCustomer.id,
         }
       });
@@ -2183,7 +2203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error registering customer:", error);
       res.status(500).json({ 
         success: false, 
-        message: "خطا در ثبت نام" 
+        message: "Registration failed" 
       });
     }
   });

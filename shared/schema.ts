@@ -1,6 +1,7 @@
 import { pgTable, text, serial, timestamp, decimal, boolean, integer, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { customers, insertCustomerSchema, type InsertCustomer, type Customer } from "./customer-schema";
 
 // =============================================================================
 // MAIN CRM & ADMIN SYSTEM SCHEMA

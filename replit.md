@@ -131,6 +131,10 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: Unified customer management - CRM now serves as central repository for all customer data
+- June 25, 2025: Updated customer registration to create CRM entries first, then sync to portal
+- June 25, 2025: Converted CRM new customer form to English with enhanced fields (address, password)
+- June 25, 2025: Converted CRM activities section to English language
 - June 25, 2025: Removed manual testing functionality from SMTP Configuration & Validation section
 - June 24, 2025: Changed CRM customer forms to English language and fixed customer purchase information display
 - June 24, 2025: Added show/hide password functionality to all login and authentication forms
