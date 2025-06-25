@@ -98,6 +98,13 @@ export default function CRM() {
   // Fetch dashboard statistics
   const { data: dashboardStats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/crm/dashboard"],
+    queryFn: async () => {
+      const response = await fetch("/api/crm/dashboard", {
+        credentials: 'include',
+      });
+      const result = await response.json();
+      return result.data;
+    },
     enabled: isAuthenticated,
   });
 
@@ -128,7 +135,8 @@ export default function CRM() {
       const response = await fetch("/api/crm/customers", {
         method: "POST",
         body: JSON.stringify(customerData),
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error("Failed to create customer");
@@ -168,7 +176,8 @@ export default function CRM() {
       const response = await fetch(`/api/crm/customers/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error("Failed to update customer");
@@ -195,7 +204,8 @@ export default function CRM() {
   const deleteCustomerMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/crm/customers/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error("Failed to delete customer");
