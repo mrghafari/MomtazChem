@@ -91,7 +91,12 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
   });
 
   const registerForm = useForm({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema.extend({
+      phone: z.string().min(1, "Phone number is required"),
+      country: z.string().min(1, "Country is required"),
+      city: z.string().min(1, "City is required"),
+      address: z.string().min(1, "Address is required"),
+    })),
     defaultValues: {
       email: "",
       password: "",
@@ -100,6 +105,9 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
       lastName: "",
       phone: "",
       company: "",
+      country: "",
+      city: "",
+      address: "",
     },
   });
 
@@ -435,9 +443,9 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
                           name="phone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>شماره تلفن</FormLabel>
+                              <FormLabel>شماره تلفن *</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} required />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -451,6 +459,47 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
                               <FormLabel>شرکت (اختیاری)</FormLabel>
                               <FormControl>
                                 <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={registerForm.control}
+                            name="country"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>کشور *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} required />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={registerForm.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>شهر *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} required />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={registerForm.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>آدرس *</FormLabel>
+                              <FormControl>
+                                <Input {...field} required />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
