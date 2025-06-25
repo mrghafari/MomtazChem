@@ -70,8 +70,8 @@ export default function CustomerProfileEdit() {
 
   // Update form values when customer data is loaded
   React.useEffect(() => {
-    if (customer?.data) {
-      const customerData = customer.data;
+    if (customer?.customer) {
+      const customerData = customer.customer;
       form.reset({
         firstName: customerData.firstName || "",
         lastName: customerData.lastName || "",
@@ -169,7 +169,7 @@ export default function CustomerProfileEdit() {
 
   const onSubmit = async (data: EditProfileForm) => {
     // Check if phone number has changed
-    const phoneChanged = data.phone !== customer?.data?.phone;
+    const phoneChanged = data.phone !== customer?.customer?.phone;
     
     if (phoneChanged) {
       // Store pending changes and send SMS
@@ -226,7 +226,7 @@ export default function CustomerProfileEdit() {
     );
   }
 
-  if (!customer?.data) {
+  if (!customer?.customer) {
     return (
       <div className="container mx-auto py-8">
         <div className="flex items-center justify-center">
