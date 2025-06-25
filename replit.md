@@ -131,6 +131,12 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: COMPLETED unified CRM-Shop customer management integration
+- June 25, 2025: Updated customer registration to create accounts directly in CRM with mandatory fields
+- June 25, 2025: Enhanced customer login to authenticate primarily via CRM with legacy portal fallback
+- June 25, 2025: Implemented automatic migration of legacy portal customers to CRM system
+- June 25, 2025: Fixed customer information endpoints to prioritize CRM data over portal data
+- June 25, 2025: Added comprehensive activity logging for all customer interactions in CRM
 - June 25, 2025: Successfully integrated advanced search system into main shop page
 - June 25, 2025: Enhanced existing shop with comprehensive search filters (category, price, stock, tags, sorting)
 - June 25, 2025: Added real-time search with debouncing, advanced filtering sidebar, and pagination
