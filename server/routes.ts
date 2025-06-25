@@ -2259,7 +2259,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const crmCustomer = await crmStorage.getCrmCustomerByEmail(email);
       let authenticatedCustomer = null;
       
-      // CRM customers don't store passwords - authentication is handled by portal
+      // Check CRM customer authentication first
+      if (crmCustomer && crmCustomer.passwordHash) {
+        const isValidPassword = await bcrypt.compare(password, crmCustomer.passwordHash);
+        if (isValidPassword) {
+          authenticatedCustomer = crmCustomer;
+        }
+      }
       
       // Fallback: Check customer portal for legacy accounts
       if (!authenticatedCustomer) {
