@@ -16,22 +16,22 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 
-// Checkout form validation schema - simplified for logged-in customers
-const checkoutFormSchema = z.object({
-  // Customer Information (optional if logged in)
-  email: z.string().email("Please enter a valid email address").optional(),
-  firstName: z.string().min(2, "First name must be at least 2 characters").optional(),
-  lastName: z.string().min(2, "Last name must be at least 2 characters").optional(),
-  phone: z.string().min(10, "Please enter a valid phone number").optional(),
+// Dynamic checkout form validation schema - required fields only if not logged in
+const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
+  // Customer Information (required if not logged in)
+  email: isLoggedIn ? z.string().optional() : z.string().email("Please enter a valid email address"),
+  firstName: isLoggedIn ? z.string().optional() : z.string().min(2, "First name must be at least 2 characters"),
+  lastName: isLoggedIn ? z.string().optional() : z.string().min(2, "Last name must be at least 2 characters"),
+  phone: isLoggedIn ? z.string().optional() : z.string().min(10, "Please enter a valid phone number"),
   company: z.string().optional(),
   
-  // Billing Address (optional if logged in and has saved address)
-  billingAddress1: z.string().min(5, "Address is required").optional(),
+  // Billing Address (pre-filled if logged in)
+  billingAddress1: z.string().min(5, "Address is required"),
   billingAddress2: z.string().optional(),
-  billingCity: z.string().min(2, "City is required").optional(),
-  billingState: z.string().min(2, "State/Province is required").optional(),
-  billingPostalCode: z.string().min(3, "Postal code is required").optional(),
-  billingCountry: z.string().min(2, "Country is required").optional(),
+  billingCity: z.string().min(2, "City is required"),
+  billingState: z.string().min(2, "State/Province is required"),
+  billingPostalCode: z.string().min(3, "Postal code is required"),
+  billingCountry: z.string().min(2, "Country is required"),
   
   // Shipping Address
   sameAsShipping: z.boolean().default(true),
@@ -48,7 +48,7 @@ const checkoutFormSchema = z.object({
   notes: z.string().optional(),
 });
 
-type CheckoutFormData = z.infer<typeof checkoutFormSchema>;
+type CheckoutFormData = z.infer<ReturnType<typeof createCheckoutFormSchema>>;
 
 interface CheckoutProps {
   cart: {[key: number]: number};
@@ -70,8 +70,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     retry: false,
   });
 
+  // Determine if user is logged in first
+  const isUserLoggedIn = customerData?.success && customerData.customer;
+  
   const form = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutFormSchema),
+    resolver: zodResolver(createCheckoutFormSchema(!!isUserLoggedIn)),
     defaultValues: {
       email: "",
       firstName: "",
@@ -104,14 +107,22 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       form.setValue("phone", customer.phone || "");
       form.setValue("company", customer.company || "");
       
+      // Auto-fill address data from CRM
       if (customer.address) {
-        form.setValue("billingAddress1", customer.address || "");
+        form.setValue("billingAddress1", customer.address);
       }
       if (customer.city) {
-        form.setValue("billingCity", customer.city || "");
+        form.setValue("billingCity", customer.city);
       }
       if (customer.country) {
-        form.setValue("billingCountry", customer.country || "");
+        form.setValue("billingCountry", customer.country);
+      }
+      if (customer.postalCode) {
+        form.setValue("billingPostalCode", customer.postalCode);
+      }
+      // Since customer has complete address info, set state/province to city for simplicity
+      if (customer.city) {
+        form.setValue("billingState", customer.city);
       }
     } else {
       setIsLoggedIn(false);
@@ -271,7 +282,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>First Name *</FormLabel>
+                            <FormLabel>First Name {!isLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -284,7 +295,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Last Name *</FormLabel>
+                            <FormLabel>Last Name {!isLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -299,7 +310,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email Address *</FormLabel>
+                            <FormLabel>Email Address {!isLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} type="email" />
                             </FormControl>
@@ -312,7 +323,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Phone Number *</FormLabel>
+                            <FormLabel>Phone Number {!isLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
