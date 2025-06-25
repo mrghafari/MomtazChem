@@ -5,14 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, XCircle, Mail, Settings, AlertTriangle, Zap, Eye, EyeOff } from 'lucide-react';
 
-interface TestResult {
-  success: boolean;
-  message: string;
-}
+
 
 interface EmailProvider {
   name: string;
@@ -41,12 +38,6 @@ interface ValidationResult {
 }
 
 export default function SMTPTestPage() {
-  const [connectionResult, setConnectionResult] = useState<TestResult | null>(null);
-  const [emailResult, setEmailResult] = useState<TestResult | null>(null);
-  const [testEmail, setTestEmail] = useState('info@momtazchem.com');
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
-  
   // One-click validator state
   const [validatorEmail, setValidatorEmail] = useState('');
   const [validatorPassword, setValidatorPassword] = useState('');
@@ -57,60 +48,7 @@ export default function SMTPTestPage() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [detectedProvider, setDetectedProvider] = useState<EmailProvider | null>(null);
 
-  const testConnection = async () => {
-    setIsTestingConnection(true);
-    setConnectionResult(null);
-    
-    try {
-      const response = await fetch('/api/admin/test-smtp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const result = await response.json();
-      setConnectionResult(result);
-    } catch (error: any) {
-      setConnectionResult({
-        success: false,
-        message: error.message || 'Failed to test SMTP connection'
-      });
-    } finally {
-      setIsTestingConnection(false);
-    }
-  };
 
-  const sendTestEmail = async () => {
-    if (!testEmail.trim()) {
-      setEmailResult({
-        success: false,
-        message: 'Please enter a valid email address'
-      });
-      return;
-    }
-
-    setIsSendingEmail(true);
-    setEmailResult(null);
-    
-    try {
-      const response = await fetch('/api/admin/test-email', {
-        method: 'POST',
-        body: JSON.stringify({ email: testEmail }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const result = await response.json();
-      setEmailResult(result);
-    } catch (error: any) {
-      setEmailResult({
-        success: false,
-        message: error.message || 'Failed to send test email'
-      });
-    } finally {
-      setIsSendingEmail(false);
-    }
-  };
 
   // One-click validator functions
   const detectEmailProvider = async (email: string) => {
@@ -207,14 +145,10 @@ export default function SMTPTestPage() {
       </div>
 
       <Tabs defaultValue="validator" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="validator" className="flex items-center gap-2">
             <Zap className="w-4 h-4" />
-            One-Click Validator
-          </TabsTrigger>
-          <TabsTrigger value="manual" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Manual Testing
+            SMTP Validator
           </TabsTrigger>
           <TabsTrigger value="setup" className="flex items-center gap-2">
             <Mail className="w-4 h-4" />
@@ -426,94 +360,7 @@ export default function SMTPTestPage() {
           </Card>
         </TabsContent>
 
-        {/* Manual Testing Tab */}
-        <TabsContent value="manual" className="space-y-6">
-          {/* Configuration Overview */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="w-5 h-5" />
-                Current SMTP Configuration
-              </CardTitle>
-              <CardDescription>
-                Review and test your current email settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Connection Test */}
-              <div className="space-y-4">
-                <Button 
-                  onClick={testConnection}
-                  disabled={isTestingConnection}
-                  className="w-full md:w-auto"
-                >
-                  {isTestingConnection ? 'Testing...' : 'Test SMTP Connection'}
-                </Button>
 
-                {connectionResult && (
-                  <Alert className={connectionResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                    <div className="flex items-center gap-2">
-                      {connectionResult.success ? (
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-red-600" />
-                      )}
-                      <Badge variant={connectionResult.success ? 'default' : 'destructive'}>
-                        {connectionResult.success ? 'Success' : 'Failed'}
-                      </Badge>
-                    </div>
-                    <AlertDescription className="mt-2">
-                      {connectionResult.message}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Email Test */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="testEmail">Test Email Address</Label>
-                  <Input
-                    id="testEmail"
-                    type="email"
-                    placeholder="Enter email address"
-                    value={testEmail}
-                    onChange={(e) => setTestEmail(e.target.value)}
-                    className="max-w-md"
-                  />
-                </div>
-
-                <Button 
-                  onClick={sendTestEmail}
-                  disabled={isSendingEmail || !testEmail.trim()}
-                  className="w-full md:w-auto"
-                >
-                  {isSendingEmail ? 'Sending...' : 'Send Test Email'}
-                </Button>
-
-                {emailResult && (
-                  <Alert className={emailResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                    <div className="flex items-center gap-2">
-                      {emailResult.success ? (
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-red-600" />
-                      )}
-                      <Badge variant={emailResult.success ? 'default' : 'destructive'}>
-                        {emailResult.success ? 'Sent' : 'Failed'}
-                      </Badge>
-                    </div>
-                    <AlertDescription className="mt-2">
-                      {emailResult.message}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* Setup Guide Tab */}
         <TabsContent value="setup" className="space-y-6">

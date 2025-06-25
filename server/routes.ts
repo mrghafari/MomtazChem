@@ -4747,21 +4747,7 @@ ${procedure.content}
     }
   });
 
-  // Send test email
-  app.post("/api/admin/test-email", requireAuth, async (req, res) => {
-    try {
-      const { email } = req.body;
-      const { sendTestEmail } = await import('./test-smtp');
-      const result = await sendTestEmail(email);
-      res.json(result);
-    } catch (error) {
-      console.error("Error sending test email:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to send test email"
-      });
-    }
-  });
+
 
   // SMTP Configuration Validator
   app.post("/api/admin/validate-smtp", requireAuth, async (req, res) => {
