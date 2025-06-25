@@ -6739,7 +6739,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         email: customer.email,
         phone: customer.phone || '',
         company: customer.company,
-        smsEnabled: customer.smsEnabled || false,
+        smsEnabled: customer.smsEnabled === true, // Explicit boolean check
         customerStatus: customer.customerStatus,
         totalOrders: customer.totalOrdersCount || 0,
         lastOrderDate: customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString('fa-IR') : null
@@ -6760,6 +6760,15 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       if (typeof smsEnabled !== 'boolean') {
         return res.status(400).json({ success: false, message: "مقدار SMS نامعتبر است" });
+      }
+      
+      // First check if customer exists
+      const existingCustomer = await crmStorage.getCrmCustomerById(customerId);
+      if (!existingCustomer) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "مشتری یافت نشد" 
+        });
       }
       
       // Update customer SMS setting
