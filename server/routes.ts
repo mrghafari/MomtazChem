@@ -5649,8 +5649,7 @@ ${procedure.content}
         city,
         address,
         postalCode: postalCode || null,
-        businessType: businessType || null,
-        notes: notes || null
+        businessType: businessType || null
       });
 
       // Log activity

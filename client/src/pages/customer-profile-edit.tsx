@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -51,19 +51,37 @@ export default function CustomerProfileEdit() {
   const form = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
-      firstName: customer?.firstName || "",
-      lastName: customer?.lastName || "",
-      phone: customer?.phone || "",
-      company: customer?.company || "",
-      country: customer?.country || "",
-      city: customer?.city || "",
-      address: customer?.address || "",
-      postalCode: customer?.postalCode || "",
-      website: customer?.website || "",
-      businessType: customer?.businessType || "",
-      notes: customer?.notes || "",
+      firstName: "",
+      lastName: "",
+      phone: "",
+      company: "",
+      country: "",
+      city: "",
+      address: "",
+      postalCode: "",
+      businessType: "",
+      notes: "",
     },
   });
+
+  // Update form values when customer data is loaded
+  React.useEffect(() => {
+    if (customer?.success && customer.data) {
+      const customerData = customer.data;
+      form.reset({
+        firstName: customerData.firstName || "",
+        lastName: customerData.lastName || "",
+        phone: customerData.phone || "",
+        company: customerData.company || "",
+        country: customerData.country || "",
+        city: customerData.city || "",
+        address: customerData.address || "",
+        postalCode: customerData.postalCode || "",
+        businessType: customerData.businessType || "",
+        notes: customerData.notes || "",
+      });
+    }
+  }, [customer, form]);
 
   const smsForm = useForm<SmsVerificationForm>({
     resolver: zodResolver(smsVerificationSchema),
@@ -75,10 +93,15 @@ export default function CustomerProfileEdit() {
   // Send SMS verification code
   const sendSmsCodeMutation = useMutation({
     mutationFn: async (phone: string) => {
-      return await apiRequest(`/api/sms/send-verification`, {
-        method: "POST",
-        body: { phone, purpose: "profile_update" }
+      const response = await fetch('/api/sms/send-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ phone, purpose: "profile_update" })
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({
