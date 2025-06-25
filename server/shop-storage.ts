@@ -388,19 +388,19 @@ export class ShopStorage implements IShopStorage {
     }
 
     // Get filtered products with proper query building
-    let query = shopDb
+    let baseQuery = shopDb
       .select()
       .from(shopProducts)
       .where(and(...whereConditions));
 
     // Apply ordering
     if (sortBy === 'relevance') {
-      query = query.orderBy(desc(shopProducts.isFeatured), asc(shopProducts.name));
+      baseQuery = baseQuery.orderBy(desc(shopProducts.isFeatured), asc(shopProducts.name));
     } else {
-      query = query.orderBy(orderByClause);
+      baseQuery = baseQuery.orderBy(orderByClause);
     }
 
-    const products = await query
+    const products = await baseQuery
       .limit(limit)
       .offset(offset);
 
