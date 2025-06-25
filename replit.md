@@ -131,14 +131,16 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 25, 2025: Unified customer management - removed dual customer tables, CRM is now single source of truth
+- June 25, 2025: Updated all customer endpoints to use CRM customers table exclusively
+- June 25, 2025: Modified order creation to link directly to CRM customer IDs
+- June 25, 2025: Enhanced customer login and registration to work with unified CRM system
+- June 25, 2025: Made phone, country, city, and address mandatory fields in all registration forms
 - June 25, 2025: Converted shop customer management to English with Gregorian dates and enhanced purchase info
 - June 25, 2025: Updated CRM customer metrics calculation with real-time order data synchronization
 - June 25, 2025: Changed currency formatting from IRR to USD across all customer interfaces
 - June 25, 2025: Enhanced customer purchase information display with order details and payment methods
-- June 25, 2025: Made phone, country, city, and address mandatory fields in all registration forms (CRM and shop)
 - June 25, 2025: Added validation for required fields in customer registration endpoints
-- June 25, 2025: Unified customer management - CRM now serves as central repository for all customer data
-- June 25, 2025: Updated customer registration to create CRM entries first, then sync to portal
 - June 25, 2025: Converted CRM new customer form to English with enhanced fields (address, password)
 - June 25, 2025: Converted CRM activities section to English language
 - June 25, 2025: Removed manual testing functionality from SMTP Configuration & Validation section
