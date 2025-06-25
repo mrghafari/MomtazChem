@@ -67,13 +67,25 @@ export default function AdminSmsManagement() {
     customersWithSmsEnabled: 0,
     systemEnabled: false
   });
-  const [localSmsStates, setLocalSmsStates] = useState<Record<number, boolean>>({});
+  const [localSmsStates, setLocalSmsStates] = useState<Record<number, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('sms-local-states');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
 
   useEffect(() => {
     loadSmsSettings();
     loadSmsStats();
     loadCustomersWithSms();
   }, []);
+
+  // Save local SMS states to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('sms-local-states', JSON.stringify(localSmsStates));
+  }, [localSmsStates]);
 
   // Filter customers based on search query
   useEffect(() => {
@@ -115,34 +127,22 @@ export default function AdminSmsManagement() {
     }
   };
 
-  const loadCustomersWithSms = async (preserveLocalChanges = false) => {
+  const loadCustomersWithSms = async () => {
     try {
       const response = await fetch('/api/admin/sms/customers');
       const result = await response.json();
       if (result.success && result.data) {
-        if (preserveLocalChanges) {
-          // Preserve any recent local state changes by merging with server data
-          setCustomersWithSms(prev => {
-            const serverData = result.data;
-            // Create a map of current local state changes
-            const localChanges = new Map();
-            prev.forEach(customer => {
-              localChanges.set(customer.id, customer);
-            });
-            
-            // Apply server data but preserve any recent local changes
-            return serverData.map((serverCustomer: any) => {
-              const localCustomer = localChanges.get(serverCustomer.id);
-              if (localCustomer && localCustomer.updatedAt > serverCustomer.updatedAt) {
-                // Keep local changes if they're more recent
-                return localCustomer;
-              }
-              return serverCustomer;
-            });
-          });
-        } else {
-          setCustomersWithSms(result.data);
-        }
+        // Apply server data but maintain local state overrides
+        setCustomersWithSms(result.data.map((serverCustomer: any) => {
+          // If we have a local state override for this customer, use it
+          if (localSmsStates[serverCustomer.id] !== undefined) {
+            return {
+              ...serverCustomer,
+              smsEnabled: localSmsStates[serverCustomer.id]
+            };
+          }
+          return serverCustomer;
+        }));
       }
     } catch (error) {
       console.error('Error loading customers with SMS:', error);
@@ -224,11 +224,21 @@ export default function AdminSmsManagement() {
   };
 
   const handleToggleCustomerSms = async (customerId: number, enable: boolean) => {
-    // Store the new state permanently in local storage
-    setLocalSmsStates(prev => ({
-      ...prev,
+    // Immediately update local state and prevent any further data loading
+    const newStates = {
+      ...localSmsStates,
       [customerId]: enable
-    }));
+    };
+    setLocalSmsStates(newStates);
+    
+    // Also update the customers list directly to prevent conflicts
+    setCustomersWithSms(prev => 
+      prev.map(customer => 
+        customer.id === customerId 
+          ? { ...customer, smsEnabled: enable }
+          : customer
+      )
+    );
 
     try {
       const response = await fetch(`/api/admin/sms/customers/${customerId}`, {
@@ -250,11 +260,19 @@ export default function AdminSmsManagement() {
         // Only reload stats to update counters
         await loadSmsStats();
       } else {
-        // Revert the local state change if API call failed
+        // Revert both local state and customers list if API call failed
         setLocalSmsStates(prev => ({
           ...prev,
           [customerId]: !enable
         }));
+        
+        setCustomersWithSms(prev => 
+          prev.map(customer => 
+            customer.id === customerId 
+              ? { ...customer, smsEnabled: !enable }
+              : customer
+          )
+        );
         
         toast({
           title: "خطا",
@@ -263,11 +281,19 @@ export default function AdminSmsManagement() {
         });
       }
     } catch (error) {
-      // Revert the local state change if API call failed
+      // Revert both local state and customers list if API call failed
       setLocalSmsStates(prev => ({
         ...prev,
         [customerId]: !enable
       }));
+      
+      setCustomersWithSms(prev => 
+        prev.map(customer => 
+          customer.id === customerId 
+            ? { ...customer, smsEnabled: !enable }
+            : customer
+        )
+      );
       
       toast({
         title: "خطا",
