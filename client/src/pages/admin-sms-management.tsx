@@ -58,6 +58,8 @@ export default function AdminSmsManagement() {
     rateLimitMinutes: 60
   });
   const [customersWithSms, setCustomersWithSms] = useState<CustomerSmsSettings[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<CustomerSmsSettings[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState<SmsStats>({
     totalVerifications: 0,
     verificationsSentToday: 0,
@@ -71,6 +73,22 @@ export default function AdminSmsManagement() {
     loadSmsStats();
     loadCustomersWithSms();
   }, []);
+
+  // Filter customers based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredCustomers(customersWithSms);
+    } else {
+      const filtered = customersWithSms.filter(customer => 
+        customer.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.phone.includes(searchQuery) ||
+        (customer.company && customer.company.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      setFilteredCustomers(filtered);
+    }
+  }, [customersWithSms, searchQuery]);
 
   const loadSmsSettings = async () => {
     try {
@@ -507,37 +525,63 @@ export default function AdminSmsManagement() {
               <CardDescription>
                 مدیریت دسترسی احراز هویت SMS برای مشتریان به صورت جداگانه
               </CardDescription>
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleBulkSmsToggle('enable')}
-                  disabled={loading}
-                >
-                  فعال کردن همه
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleBulkSmsToggle('disable')}
-                  disabled={loading}
-                >
-                  غیرفعال کردن همه
-                </Button>
+              
+              {/* Search Box */}
+              <div className="space-y-4 mt-4">
+                <div className="flex items-center space-x-4 gap-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="جستجو مشتریان (نام، ایمیل، تلفن، شرکت)..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="max-w-md"
+                    />
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {filteredCustomers.length} از {customersWithSms.length} مشتری
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleBulkSmsToggle('enable')}
+                    disabled={loading}
+                  >
+                    فعال کردن همه
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleBulkSmsToggle('disable')}
+                    disabled={loading}
+                  >
+                    غیرفعال کردن همه
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
               {customersWithSms.length === 0 ? (
                 <div className="text-center py-8">
                   <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No customers with SMS enabled</h3>
+                  <h3 className="text-lg font-semibold mb-2">مشتری با SMS فعال وجود ندارد</h3>
                   <p className="text-muted-foreground">
-                    Enable SMS authentication for customers from their individual profiles in the CRM section.
+                    احراز هویت SMS را برای مشتریان از پروفایل‌های جداگانه آن‌ها در بخش CRM فعال کنید.
+                  </p>
+                </div>
+              ) : filteredCustomers.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">مشتری یافت نشد</h3>
+                  <p className="text-muted-foreground">
+                    هیچ مشتری با این جستجو پیدا نشد. جستجوی خود را تغییر دهید.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {customersWithSms.map((customer) => (
+                  {filteredCustomers.map((customer) => (
                     <div key={customer.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="space-y-1">
                         <div className="font-medium">
