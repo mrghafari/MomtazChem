@@ -369,7 +369,7 @@ export class ShopStorage implements IShopStorage {
     }
 
     // Build ORDER BY clause
-    let orderByClause;
+    let orderByClause = asc(shopProducts.name); // Default fallback
     switch (sortBy) {
       case 'name':
         orderByClause = sortOrder === 'asc' ? asc(shopProducts.name) : desc(shopProducts.name);
@@ -383,7 +383,7 @@ export class ShopStorage implements IShopStorage {
       case 'relevance':
       default:
         // For relevance, prioritize featured products and then by name
-        orderByClause = [desc(shopProducts.isFeatured), asc(shopProducts.name)];
+        orderByClause = desc(shopProducts.isFeatured);
         break;
     }
 
