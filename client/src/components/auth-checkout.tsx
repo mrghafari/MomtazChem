@@ -108,6 +108,7 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
       country: "",
       city: "",
       address: "",
+      postalCode: "",
     },
   });
 
@@ -500,6 +501,19 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
                               <FormLabel>آدرس *</FormLabel>
                               <FormControl>
                                 <Input {...field} required />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={registerForm.control}
+                          name="postalCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>کد پستی</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
