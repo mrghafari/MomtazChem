@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED administrative dashboard restructuring - moved all product management from admin dashboard to dedicated /admin/products page
+- June 26, 2025: Streamlined admin dashboard to contain only Site Management and Products navigation buttons for clean, focused interface
+- June 26, 2025: Added proper routing for /admin/products with full product catalog management capabilities
 - June 26, 2025: Added Products as 17th Quick Action button to Site Management with violet styling and Box icon for future product management functionality
 - June 26, 2025: COMPLETED Order Management migration to Site Management - moved three-department order workflow system to centralized interface
 - June 26, 2025: Added Order Management as 16th Quick Action button with orange styling and Truck icon for Finance→Warehouse→Logistics workflow
