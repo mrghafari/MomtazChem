@@ -11,11 +11,12 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAuthSuccess: () => void;
+  initialMode?: 'login' | 'register';
 }
 
-export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode }: AuthModalProps) {
   const { toast } = useToast();
-  const [currentView, setCurrentView] = useState<'choice' | 'login' | 'register'>('choice');
+  const [currentView, setCurrentView] = useState<'choice' | 'login' | 'register'>(initialMode || 'choice');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   

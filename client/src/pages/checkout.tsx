@@ -65,6 +65,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -287,18 +288,35 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
             {!isUserLoggedIn ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>Authentication Required</CardTitle>
+                  <CardTitle className="text-center">Welcome to Checkout</CardTitle>
                 </CardHeader>
-                <CardContent className="text-center py-8">
-                  <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Please Login or Sign Up</h3>
-                  <p className="text-gray-500 mb-6">You need to be logged in to complete your purchase.</p>
-                  <Button 
-                    onClick={() => setAuthModalOpen(true)}
-                    className="w-full max-w-sm"
-                  >
-                    Login or Sign Up to Continue
-                  </Button>
+                <CardContent className="text-center py-8 space-y-6">
+                  <User className="w-16 h-16 text-gray-300 mx-auto" />
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700">Choose an option to continue</h3>
+                    <div className="grid grid-cols-1 gap-3 max-w-sm mx-auto">
+                      <Button 
+                        onClick={() => {
+                          setAuthMode('login');
+                          setAuthModalOpen(true);
+                        }}
+                        variant="default"
+                        className="h-12 text-base"
+                      >
+                        Login to Existing Account
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          setAuthMode('register');
+                          setAuthModalOpen(true);
+                        }}
+                        variant="outline"
+                        className="h-12 text-base"
+                      >
+                        Create New Account
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ) : (
@@ -610,6 +628,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           // Refresh customer data after successful auth
           window.location.reload();
         }}
+        initialMode={authMode}
       />
     </div>
   );
