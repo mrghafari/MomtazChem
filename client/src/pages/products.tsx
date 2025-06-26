@@ -194,19 +194,20 @@ export default function ProductsPage() {
       name: "",
       description: "",
       category: "",
-      features: "",
+      shortDescription: "",
+      priceRange: "",
+      imageUrl: "",
+      pdfCatalogUrl: "",
       specifications: "",
+      features: "",
+      applications: "",
       barcode: "",
       sku: "",
-      tags: "",
       inventoryStatus: "in_stock",
-      currentStock: 0,
+      stockQuantity: 0,
       minStockLevel: 0,
       maxStockLevel: 0,
-      unitPrice: 0,
-      currency: "USD",
-      imageUrl: "",
-      catalogUrl: "",
+      isActive: true,
     },
   });
 
@@ -259,10 +260,10 @@ export default function ProductsPage() {
 
     setUploadingCatalog(true);
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('catalog', file);
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload/catalog', {
         method: 'POST',
         body: formData,
       });
@@ -272,7 +273,7 @@ export default function ProductsPage() {
       }
 
       const { url } = await response.json();
-      form.setValue('catalogUrl', url);
+      form.setValue('pdfCatalogUrl', url);
       setCatalogPreview(url);
       
       toast({
@@ -301,24 +302,22 @@ export default function ProductsPage() {
   const openEditDialog = (product: ShowcaseProduct) => {
     setEditingProduct(product);
     setImagePreview(product.imageUrl || null);
-    setCatalogPreview(product.catalogUrl || null);
+    setCatalogPreview(product.pdfCatalogUrl || null);
     form.reset({
       name: product.name,
       description: product.description || "",
       category: product.category,
-      features: product.features || "",
-      specifications: product.specifications || "",
+      features: Array.isArray(product.features) ? product.features.join('\n') : (product.features || ""),
+      specifications: typeof product.specifications === 'object' ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
-      tags: product.tags || "",
       inventoryStatus: product.inventoryStatus || "in_stock",
-      currentStock: product.currentStock || 0,
+      stockQuantity: product.stockQuantity || 0,
       minStockLevel: product.minStockLevel || 0,
       maxStockLevel: product.maxStockLevel || 0,
-      unitPrice: product.unitPrice || 0,
-      currency: product.currency || "USD",
+      priceRange: product.priceRange || "",
       imageUrl: product.imageUrl || "",
-      catalogUrl: product.catalogUrl || "",
+      pdfCatalogUrl: product.pdfCatalogUrl || "",
     });
     setDialogOpen(true);
   };
@@ -603,32 +602,32 @@ export default function ProductsPage() {
                           {getInventoryStatusIcon(product.inventoryStatus || 'in_stock')}
                           {getInventoryStatusLabel(product.inventoryStatus || 'in_stock')}
                         </Badge>
-                        {product.unitPrice && (
+                        {product.priceRange && (
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            ${product.unitPrice} {product.currency || 'USD'}
+                            {product.priceRange}
                           </span>
                         )}
                       </div>
 
                       {/* Stock Level Indicator */}
-                      {product.currentStock !== undefined && product.maxStockLevel && (
+                      {product.stockQuantity !== undefined && product.maxStockLevel && (
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                            <span>Stock: {product.currentStock}</span>
+                            <span>Stock: {product.stockQuantity}</span>
                             <span>Max: {product.maxStockLevel}</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 getStockLevelIndicator(
-                                  product.currentStock, 
+                                  product.stockQuantity, 
                                   product.minStockLevel || 0, 
                                   product.maxStockLevel
                                 ).color
                               }`}
                               style={{ 
                                 width: `${getStockLevelIndicator(
-                                  product.currentStock, 
+                                  product.stockQuantity, 
                                   product.minStockLevel || 0, 
                                   product.maxStockLevel
                                 ).width}%` 
