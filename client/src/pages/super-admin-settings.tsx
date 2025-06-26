@@ -209,15 +209,15 @@ export default function SuperAdminSettings() {
     },
     onSuccess: (response) => {
       toast({
-        title: "حذف سوپر ادمین",
-        description: response.message || "سوپر ادمین حذف شد",
+        title: "Super Admin Deleted",
+        description: response.message || "Super admin deleted successfully",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/admins'] });
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در حذف سوپر ادمین",
+        title: "Error",
+        description: error.message || "Error deleting super admin",
         variant: "destructive"
       });
     }
@@ -226,16 +226,16 @@ export default function SuperAdminSettings() {
   const handleCreateAdmin = () => {
     if (newAdminData.password !== newAdminData.confirmPassword) {
       toast({
-        title: "خطا",
-        description: "رمز عبور و تایید رمز عبور یکسان نیستند",
+        title: "Error",
+        description: "Password and confirm password do not match",
         variant: "destructive"
       });
       return;
     }
     if (newAdminData.password.length < 6) {
       toast({
-        title: "خطا",
-        description: "رمز عبور باید حداقل 6 کاراکتر باشد",
+        title: "Error",
+        description: "Password must be at least 6 characters long",
         variant: "destructive"
       });
       return;
@@ -246,16 +246,16 @@ export default function SuperAdminSettings() {
   const handleResetPassword = () => {
     if (resetEmailData.newPassword !== resetEmailData.confirmNewPassword) {
       toast({
-        title: "خطا",
-        description: "رمز عبور جدید و تایید آن یکسان نیستند",
+        title: "Error",
+        description: "New password and confirmation do not match",
         variant: "destructive"
       });
       return;
     }
     if (resetEmailData.newPassword.length < 6) {
       toast({
-        title: "خطا",
-        description: "رمز عبور باید حداقل 6 کاراکتر باشد",
+        title: "Error",
+        description: "Password must be at least 6 characters long",
         variant: "destructive"
       });
       return;
@@ -269,19 +269,19 @@ export default function SuperAdminSettings() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
             <Shield className="h-8 w-8 text-blue-600" />
-            مدیریت سوپر ادمین
+            Super Admin Management
           </h1>
           <p className="text-slate-600 dark:text-slate-300 mt-2">
-            ایجاد، مدیریت و تایید حساب‌های سوپر ادمین
+            Create, manage and verify super admin accounts
           </p>
         </div>
 
         <Tabs defaultValue="create" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="create">ایجاد سوپر ادمین</TabsTrigger>
-            <TabsTrigger value="manage">مدیریت ادمین‌ها</TabsTrigger>
-            <TabsTrigger value="verify">تایید حساب</TabsTrigger>
-            <TabsTrigger value="reset">بازیابی رمز</TabsTrigger>
+            <TabsTrigger value="create">Create Super Admin</TabsTrigger>
+            <TabsTrigger value="manage">Manage Admins</TabsTrigger>
+            <TabsTrigger value="verify">Verify Account</TabsTrigger>
+            <TabsTrigger value="reset">Reset Password</TabsTrigger>
           </TabsList>
 
           {/* Create Super Admin */}
@@ -290,48 +290,48 @@ export default function SuperAdminSettings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <UserPlus className="h-5 w-5" />
-                  ایجاد سوپر ادمین جدید
+                  Create New Super Admin
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="username">نام کاربری</Label>
+                    <Label htmlFor="username">Username</Label>
                     <Input
                       id="username"
                       value={newAdminData.username}
                       onChange={(e) => setNewAdminData(prev => ({ ...prev, username: e.target.value }))}
-                      placeholder="نام کاربری را وارد کنید"
+                      placeholder="Enter username"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="email">ایمیل</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       type="email"
                       value={newAdminData.email}
                       onChange={(e) => setNewAdminData(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="آدرس ایمیل را وارد کنید"
+                      placeholder="Enter email address"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="phone">شماره تلفن (اختیاری)</Label>
+                    <Label htmlFor="phone">Phone Number (Optional)</Label>
                     <Input
                       id="phone"
                       value={newAdminData.phone}
                       onChange={(e) => setNewAdminData(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="شماره تلفن را وارد کنید"
+                      placeholder="Enter phone number"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="password">رمز عبور</Label>
+                    <Label htmlFor="password">Password</Label>
                     <div className="relative">
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
                         value={newAdminData.password}
                         onChange={(e) => setNewAdminData(prev => ({ ...prev, password: e.target.value }))}
-                        placeholder="رمز عبور را وارد کنید"
+                        placeholder="Enter password"
                       />
                       <Button
                         type="button"
@@ -345,14 +345,14 @@ export default function SuperAdminSettings() {
                     </div>
                   </div>
                   <div className="md:col-span-2">
-                    <Label htmlFor="confirmPassword">تایید رمز عبور</Label>
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
                     <div className="relative">
                       <Input
                         id="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
                         value={newAdminData.confirmPassword}
                         onChange={(e) => setNewAdminData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        placeholder="رمز عبور را مجدداً وارد کنید"
+                        placeholder="Confirm password"
                       />
                       <Button
                         type="button"
