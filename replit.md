@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED final administrative centralization - removed Products button from admin dashboard as it's fully integrated into Site Management
+- June 26, 2025: Admin dashboard now contains only Site Management button providing access to all 17 administrative functions including product management
+- June 26, 2025: Updated admin dashboard welcome message to reflect complete centralization of all administrative tools
 - June 26, 2025: COMPLETED administrative dashboard restructuring - moved all product management from admin dashboard to dedicated /admin/products page
 - June 26, 2025: Streamlined admin dashboard to contain only Site Management and Products navigation buttons for clean, focused interface
 - June 26, 2025: Added proper routing for /admin/products with full product catalog management capabilities

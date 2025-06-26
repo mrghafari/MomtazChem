@@ -537,9 +537,30 @@ export default function ProductsPage() {
               {filteredProducts.map((product: ShowcaseProduct) => (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold mb-1 text-gray-900 dark:text-white">
+                    <div className="flex items-start gap-3">
+                      {/* Product Thumbnail */}
+                      <div className="flex-shrink-0">
+                        {product.imageUrl ? (
+                          <img 
+                            src={product.imageUrl} 
+                            alt={product.name}
+                            className="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className={`w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center ${product.imageUrl ? 'hidden' : 'flex'}`}
+                        >
+                          <Package className="w-8 h-8 text-gray-400" />
+                        </div>
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg font-semibold mb-1 text-gray-900 dark:text-white truncate">
                           {product.name}
                         </CardTitle>
                         <div className="flex items-center gap-2 mb-2">
@@ -549,6 +570,8 @@ export default function ProductsPage() {
                           </span>
                         </div>
                       </div>
+
+                      {/* Action Buttons */}
                       <div className="flex items-center gap-1">
                         <Button
                           variant="ghost"

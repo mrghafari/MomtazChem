@@ -70,43 +70,26 @@ export default function AdminPage() {
             <Package className="w-6 h-6 mb-2" />
             Site Management
           </Button>
-
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/products")}
-            className="border-violet-300 text-violet-600 hover:bg-violet-50 h-20 flex flex-col items-center justify-center text-sm"
-          >
-            <Package className="w-6 h-6 mb-2" />
-            Products
-          </Button>
         </div>
 
         {/* Welcome Message */}
         <div className="mt-8 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome to Admin Dashboard</h3>
           <p className="text-gray-600 mb-4">
-            Access comprehensive administrative tools through the centralized Site Management interface, 
-            or manage your product catalog through the dedicated Products section.
+            Access all administrative tools through the centralized Site Management interface 
+            which includes comprehensive management for all system components.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-            <div>
-              <h4 className="font-medium text-gray-900 mb-2">Site Management</h4>
-              <ul className="space-y-1">
-                <li>• 17 integrated administrative functions</li>
-                <li>• CRM and customer management</li>
-                <li>• Order workflow and logistics</li>
-                <li>• Email and SMS management</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-gray-900 mb-2">Products</h4>
-              <ul className="space-y-1">
-                <li>• Complete product catalog management</li>
-                <li>• Inventory tracking and alerts</li>
-                <li>• Category organization</li>
-                <li>• Advanced search and filtering</li>
-              </ul>
-            </div>
+          <div className="text-sm text-gray-600">
+            <h4 className="font-medium text-gray-900 mb-2">Site Management Features</h4>
+            <ul className="space-y-1">
+              <li>• 17 integrated administrative functions</li>
+              <li>• Product catalog and inventory management</li>
+              <li>• CRM and customer relationship management</li>
+              <li>• Order workflow and logistics control</li>
+              <li>• Email and SMS communication systems</li>
+              <li>• User management and security settings</li>
+              <li>• Database backup and system maintenance</li>
+            </ul>
           </div>
         </div>
       </div>
