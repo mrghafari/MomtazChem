@@ -518,14 +518,7 @@ export default function AdminPage() {
           
 
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/sms-management")}
-            className="border-orange-300 text-orange-600 hover:bg-orange-50 h-12 text-sm"
-          >
-            <Mail className="w-4 h-4 mr-2" />
-            SMS Management
-          </Button>
+
 
           <Button 
             variant="outline"

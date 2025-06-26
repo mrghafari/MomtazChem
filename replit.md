@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED SMS management functionality migration to Site Management - moved SMS customer communication settings from admin dashboard to centralized management interface
+- June 26, 2025: Added SMS management as ninth Quick Action button in Site Management with proper green styling and MessageSquare icon
+- June 26, 2025: Removed SMS management button from main admin dashboard to complete centralization of administrative operations
 - June 26, 2025: COMPLETED category management functionality migration to Site Management - moved category management from admin dashboard to centralized management interface
 - June 26, 2025: Added category management as eighth Quick Action button in Site Management with proper blue styling and Package icon
 - June 26, 2025: Removed category management button from main admin dashboard to continue centralizing administrative operations
