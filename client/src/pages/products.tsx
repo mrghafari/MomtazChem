@@ -127,6 +127,7 @@ export default function ProductsPage() {
     { value: "laboratory", label: "Laboratory", icon: <Beaker className="w-4 h-4" /> },
     { value: "pharmaceutical", label: "Pharmaceutical", icon: <Package className="w-4 h-4" /> },
     { value: "specialty", label: "Specialty", icon: <Droplet className="w-4 h-4" /> },
+    { value: "other", label: "سایر محصولات", icon: <Package className="w-4 h-4" /> },
   ];
 
   const { data: products, isLoading } = useQuery({
@@ -389,7 +390,7 @@ export default function ProductsPage() {
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Product Management</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">Manage products across four categories</p>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Manage products across five categories</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -503,9 +504,9 @@ export default function ProductsPage() {
       )}
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="all">All Products</TabsTrigger>
-          {categories.slice(0, 4).map((category: CategoryOption) => (
+          {categories.map((category: CategoryOption) => (
             <TabsTrigger key={category.value} value={category.value}>
               <span className="flex items-center gap-2">
                 {category.icon}
