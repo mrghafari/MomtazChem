@@ -521,14 +521,7 @@ export default function AdminPage() {
             Shop
           </Button>
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/crm")}
-            className="border-pink-300 text-pink-600 hover:bg-pink-50 h-12 text-sm"
-          >
-            <User className="w-4 h-4 mr-2" />
-            CRM
-          </Button>
+
           
           <Button 
             variant="outline"

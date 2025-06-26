@@ -151,6 +151,15 @@ export default function SiteManagement() {
                     <Database className="h-6 w-6 mb-2" />
                     <span className="text-sm">Database Backup</span>
                   </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-pink-300 text-pink-600 hover:bg-pink-50"
+                    onClick={() => setLocation("/crm")}
+                  >
+                    <Users className="h-6 w-6 mb-2" />
+                    <span className="text-sm">CRM</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
