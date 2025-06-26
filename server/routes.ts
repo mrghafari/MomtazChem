@@ -769,7 +769,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update product (PATCH method)
   app.patch("/api/products/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid product ID" 
+        });
+      }
+
+      const productData = insertShowcaseProductSchema.partial().parse(req.body);
+      const product = await storage.updateProduct(id, productData);
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid product data", 
+          errors: error.errors 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: "Internal server error",
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+  });
+
+  // Update product (PUT method - for compatibility)
+  app.put("/api/products/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
