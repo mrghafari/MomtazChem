@@ -3118,18 +3118,50 @@ ${procedure.content}
     try {
       const { pool } = await import('./db');
       
+      // Get actual row counts for major tables
+      const getTableCount = async (tableName: string) => {
+        try {
+          const result = await pool.query(`SELECT COUNT(*) FROM ${tableName}`);
+          return parseInt(result.rows[0].count);
+        } catch {
+          return 0;
+        }
+      };
+
+      // Get table sizes and statistics
       const tableStats = await pool.query(`
         SELECT 
-          schemaname,
-          relname as tablename,
-          n_tup_ins as total_inserts,
-          n_tup_upd as total_updates,
-          n_tup_del as total_deletes,
-          n_live_tup as live_rows,
-          n_dead_tup as dead_rows
-        FROM pg_stat_user_tables
-        ORDER BY n_live_tup DESC;
+          t.table_name as tablename,
+          COALESCE(s.n_tup_ins, 0) as total_inserts,
+          COALESCE(s.n_tup_upd, 0) as total_updates,
+          COALESCE(s.n_tup_del, 0) as total_deletes,
+          COALESCE(s.n_live_tup, 0) as live_rows,
+          pg_size_pretty(pg_total_relation_size(c.oid)) as table_size,
+          pg_total_relation_size(c.oid) as size_bytes
+        FROM information_schema.tables t
+        LEFT JOIN pg_stat_user_tables s ON s.relname = t.table_name
+        LEFT JOIN pg_class c ON c.relname = t.table_name
+        WHERE t.table_schema = 'public' 
+          AND t.table_type = 'BASE TABLE'
+        ORDER BY pg_total_relation_size(c.oid) DESC
+        LIMIT 20;
       `);
+
+      // Get actual counts for important tables
+      const importantTables = ['users', 'products', 'showcase_products', 'shop_products', 'orders', 'crm_customers', 'customer_orders'];
+      const tableStatsWithCounts = await Promise.all(
+        tableStats.rows.map(async (table) => {
+          let actualCount = table.live_rows;
+          if (importantTables.includes(table.tablename)) {
+            actualCount = await getTableCount(table.tablename);
+          }
+          return {
+            ...table,
+            live_rows: actualCount,
+            actual_count: actualCount
+          };
+        })
+      );
       
       const dbSize = await pool.query(`
         SELECT pg_size_pretty(pg_database_size(current_database())) as database_size;
@@ -3138,13 +3170,29 @@ ${procedure.content}
       const tableCount = await pool.query(`
         SELECT COUNT(*) as table_count 
         FROM information_schema.tables 
-        WHERE table_schema = 'public';
+        WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
       `);
+
+      // Get total records across all main tables
+      const totalRecords = await Promise.all([
+        getTableCount('users'),
+        getTableCount('products'),
+        getTableCount('showcase_products'),
+        getTableCount('shop_products'),
+        getTableCount('orders'),
+        getTableCount('customer_orders'),
+        getTableCount('crm_customers'),
+        getTableCount('leads'),
+        getTableCount('customer_inquiries')
+      ]);
+
+      const sumRecords = totalRecords.reduce((sum, count) => sum + count, 0);
       
       res.json({
         database_size: dbSize.rows[0].database_size,
         table_count: parseInt(tableCount.rows[0].table_count),
-        table_stats: tableStats.rows
+        total_records: sumRecords,
+        table_stats: tableStatsWithCounts.sort((a, b) => b.actual_count - a.actual_count)
       });
     } catch (error) {
       console.error("Error getting database stats:", error);

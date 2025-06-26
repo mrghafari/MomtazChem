@@ -32,12 +32,16 @@ interface BackupFile {
 interface DatabaseStats {
   database_size: string;
   table_count: number;
+  total_records: number;
   table_stats: Array<{
     tablename: string;
     live_rows: number;
+    actual_count: number;
     total_inserts: number;
     total_updates: number;
     total_deletes: number;
+    table_size: string;
+    size_bytes: number;
   }>;
 }
 
@@ -142,22 +146,22 @@ export default function DatabaseManagement() {
       </div>
 
       {/* Database Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">حجم دیتابیس</CardTitle>
+            <CardTitle className="text-sm font-medium">Database Size</CardTitle>
             <HardDrive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {statsLoading ? "..." : dbStats?.database_size || "نامشخص"}
+              {statsLoading ? "..." : dbStats?.database_size || "Unknown"}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">تعداد جداول</CardTitle>
+            <CardTitle className="text-sm font-medium">Tables Count</CardTitle>
             <Table className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -169,7 +173,19 @@ export default function DatabaseManagement() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">تعداد بک‌آپ‌ها</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Records</CardTitle>
+            <Database className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {statsLoading ? "..." : dbStats?.total_records?.toLocaleString() || 0}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Backups Count</CardTitle>
             <FileDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -283,28 +299,46 @@ export default function DatabaseManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Table className="h-5 w-5" />
-            آمار جداول دیتابیس
+            Database Table Statistics
           </CardTitle>
         </CardHeader>
         <CardContent>
           {statsLoading ? (
-            <div className="text-center py-8">در حال بارگذاری...</div>
+            <div className="text-center py-8">Loading...</div>
           ) : (
             <div className="space-y-4">
-              {dbStats?.table_stats.map((table) => (
-                <div key={table.tablename} className="space-y-2">
+              {dbStats?.table_stats.slice(0, 15).map((table) => (
+                <div key={table.tablename} className="space-y-2 p-4 border rounded-lg">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{table.tablename}</span>
-                    <Badge variant="outline">{table.live_rows} رکورد</Badge>
+                    <span className="font-medium text-lg">{table.tablename}</span>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="bg-blue-50">
+                        {table.actual_count?.toLocaleString() || table.live_rows?.toLocaleString() || 0} records
+                      </Badge>
+                      <Badge variant="secondary" className="bg-green-50">
+                        {table.table_size || 'Unknown size'}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
-                    <span>درج: {table.total_inserts}</span>
-                    <span>بروزرسانی: {table.total_updates}</span>
-                    <span>حذف: {table.total_deletes}</span>
+                  <div className="grid grid-cols-4 gap-4 text-sm text-muted-foreground">
+                    <span>Inserts: {table.total_inserts?.toLocaleString() || 0}</span>
+                    <span>Updates: {table.total_updates?.toLocaleString() || 0}</span>
+                    <span>Deletes: {table.total_deletes?.toLocaleString() || 0}</span>
+                    <span>Live Rows: {table.live_rows?.toLocaleString() || 0}</span>
                   </div>
-                  <Progress value={(table.live_rows / Math.max(...dbStats.table_stats.map(t => t.live_rows))) * 100} className="h-2" />
+                  {table.actual_count > 0 && (
+                    <Progress 
+                      value={(table.actual_count / Math.max(...dbStats.table_stats.map(t => t.actual_count || t.live_rows || 0))) * 100} 
+                      className="h-2" 
+                    />
+                  )}
                 </div>
               ))}
+              {dbStats?.table_stats && dbStats.table_stats.length > 15 && (
+                <div className="text-center text-sm text-muted-foreground py-2">
+                  Showing top 15 tables by size. Total tables: {dbStats.table_count}
+                </div>
+              )}
             </div>
           )}
         </CardContent>
