@@ -17,6 +17,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
 import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft } from "lucide-react";
+
+// Custom form schema that handles string inputs for numeric fields
+const formSchema = insertShowcaseProductSchema.extend({
+  unitPrice: z.string(),
+  stockQuantity: z.coerce.number().min(0),
+  minStockLevel: z.coerce.number().min(0),
+  maxStockLevel: z.coerce.number().min(0),
+});
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 
@@ -189,8 +197,8 @@ export default function ProductsPage() {
     },
   });
 
-  const form = useForm<InsertShowcaseProduct>({
-    resolver: zodResolver(insertShowcaseProductSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -225,9 +233,9 @@ export default function ProductsPage() {
     };
     
     if (editingProduct) {
-      updateProduct({ id: editingProduct.id, data: processedData });
+      updateProduct({ id: editingProduct.id, data: processedData as Partial<InsertShowcaseProduct> });
     } else {
-      createProduct(processedData);
+      createProduct(processedData as InsertShowcaseProduct);
     }
   };
 
