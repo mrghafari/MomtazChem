@@ -217,7 +217,7 @@ export default function ProductsPage() {
       minStockLevel: 0,
       maxStockLevel: 0,
       unitPrice: "0",
-      currency: "USD",
+      currency: "IQD",
       isActive: true,
     },
   });

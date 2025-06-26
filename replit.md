@@ -131,6 +131,8 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: SET Iraqi Dinar (IQD) as default currency across all forms and formatCurrency functions throughout the application
+- June 26, 2025: Updated default currency in product forms, sales analytics, sales reports, CRM, and unified customer profile components
 - June 26, 2025: FIXED unit price persistence issue - added unitPrice and currency fields to showcase schema with proper database column creation
 - June 26, 2025: Enhanced product form to properly handle unit price and currency data with correct form initialization and data conversion
 - June 26, 2025: Verified database connection and confirmed unit price updates are being stored correctly in PostgreSQL

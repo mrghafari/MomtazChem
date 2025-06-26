@@ -336,9 +336,9 @@ export default function CRM() {
     }
   };
 
-  const formatCurrency = (amount: string | number, currency: string = 'USD') => {
+  const formatCurrency = (amount: string | number, currency: string = 'IQD') => {
     const validCurrencies = ['USD', 'EUR', 'IQD'];
-    const currencyCode = validCurrencies.includes(currency) ? currency : 'USD';
+    const currencyCode = validCurrencies.includes(currency) ? currency : 'IQD';
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     
     return new Intl.NumberFormat('en-US', {

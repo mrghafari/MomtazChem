@@ -111,9 +111,9 @@ export default function SalesAnalytics() {
     );
   }
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
+  const formatCurrency = (amount: number, currency: string = 'IQD') => {
     const validCurrencies = ['USD', 'EUR', 'IQD'];
-    const currencyCode = validCurrencies.includes(currency) ? currency : 'USD';
+    const currencyCode = validCurrencies.includes(currency) ? currency : 'IQD';
     
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
