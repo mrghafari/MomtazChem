@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -134,9 +134,13 @@ export default function SiteManagement() {
                     <span className="text-sm">Barcode</span>
                   </Button>
                   
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-                    <Zap className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Function 4</span>
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                    onClick={() => setLocation("/admin/advanced-email-settings")}
+                  >
+                    <Mail className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Email Settings</span>
                   </Button>
                 </div>
               </CardContent>
