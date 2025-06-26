@@ -69,10 +69,13 @@ export default function SalesReport() {
     window.print();
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    const validCurrencies = ['USD', 'EUR', 'IQD'];
+    const currencyCode = validCurrencies.includes(currency) ? currency : 'USD';
+    
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: currencyCode
     }).format(amount);
   };
 

@@ -886,7 +886,7 @@ export default function ProductsPage() {
                             <SelectContent>
                               <SelectItem value="USD">USD</SelectItem>
                               <SelectItem value="EUR">EUR</SelectItem>
-                              <SelectItem value="IRR">IRR</SelectItem>
+                              <SelectItem value="IQD">IQD</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
