@@ -516,14 +516,7 @@ export default function AdminPage() {
           
 
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/category-management")}
-            className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
-          >
-            <Package className="w-4 h-4 mr-2" />
-            Category Management
-          </Button>
+
           
           <Button 
             variant="outline"

@@ -169,6 +169,15 @@ export default function SiteManagement() {
                     <Globe className="h-6 w-6 mb-2" />
                     <span className="text-sm">SEO</span>
                   </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-blue-300 text-blue-600 hover:bg-blue-50"
+                    onClick={() => setLocation("/category-management")}
+                  >
+                    <Package className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Categories</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
