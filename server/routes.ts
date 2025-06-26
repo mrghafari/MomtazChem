@@ -27,6 +27,7 @@ import { sql, eq, and, or, isNull, desc } from "drizzle-orm";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 import { orderManagement } from "@shared/order-management-schema";
+import nodemailer from "nodemailer";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -5800,7 +5801,7 @@ ${procedure.content}
         const smtp = categorySettings.smtp;
         
         // Create transporter
-        const transporter = nodemailer.default.createTransporter({
+        const transporter = nodemailer.createTransport({
           host: smtp.host,
           port: smtp.port,
           secure: smtp.port === 465,
@@ -5940,7 +5941,7 @@ ${message}
         const smtp = categorySettings.smtp;
         
         // Create transporter
-        const transporter = nodemailer.default.createTransporter({
+        const transporter = nodemailer.createTransport({
           host: smtp.host,
           port: smtp.port,
           secure: smtp.port === 465,
@@ -8130,10 +8131,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             },
           });
 
-          // Send password reset email
+          // Send password reset email using super admin's email
           await transporter.sendMail({
             from: `${smtp.fromName} <${smtp.fromEmail}>`,
             to: email,
+            replyTo: smtp.fromEmail,
             subject: "کد بازیابی رمز عبور - مومتاز کمیکال",
             html: `
               <div style="direction: rtl; text-align: right; font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
