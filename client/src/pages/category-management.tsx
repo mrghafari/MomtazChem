@@ -1,162 +1,143 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit, Trash2, ArrowLeft, Eye, EyeOff, Globe } from "lucide-react";
 import { useLocation } from "wouter";
-import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Edit2, Trash2, ArrowLeft, Globe } from "lucide-react";
 
-// Bilingual translations
+// Translations
 const translations = {
   en: {
-    // Page titles and navigation
-    categoryManagement: "Category Management",
-    backToAdmin: "Back to Admin",
-    createCategory: "Create Category",
-    editCategory: "Edit Category",
-    deleteCategory: "Delete Category",
-    
-    // Form fields
+    title: "Product Category Management",
+    subtitle: "Create, edit and manage product categories",
+    newCategory: "New Category",
     categoryName: "Category Name",
     slug: "Slug",
     description: "Description",
     imageUrl: "Image URL",
     parentCategory: "Parent Category",
-    noParent: "No Parent",
-    status: "Status",
-    active: "Active",
-    inactive: "Inactive",
+    isActive: "Active",
     displayOrder: "Display Order",
     metaTitle: "Meta Title",
     metaDescription: "Meta Description",
-    
-    // Actions
-    create: "Create",
-    update: "Update",
+    save: "Save",
     cancel: "Cancel",
     edit: "Edit",
     delete: "Delete",
-    save: "Save",
-    
-    // Validation messages
-    nameRequired: "Category name must be at least 2 characters",
-    slugRequired: "Slug must be at least 2 characters",
-    
-    // Placeholders
-    namePlaceholder: "Enter category name",
-    slugPlaceholder: "enter-category-slug",
-    descriptionPlaceholder: "Enter category description",
-    imageUrlPlaceholder: "https://example.com/image.jpg",
-    metaTitlePlaceholder: "SEO title for this category",
-    metaDescriptionPlaceholder: "SEO description for this category",
-    
-    // Table headers
-    name: "Name",
-    parent: "Parent",
-    order: "Order",
     actions: "Actions",
-    
-    // Status messages
     createSuccess: "Category created successfully",
     updateSuccess: "Category updated successfully",
     deleteSuccess: "Category deleted successfully",
-    createError: "Failed to create category",
-    updateError: "Failed to update category",
-    deleteError: "Failed to delete category",
-    
-    // Confirmation
+    createError: "Error creating category",
+    updateError: "Error updating category",
+    deleteError: "Error deleting category",
     deleteConfirm: "Are you sure you want to delete this category?",
-    
-    // Language switcher
-    switchLanguage: "العربية",
-    language: "Language"
+    selectParent: "Select parent category",
+    none: "None",
+    active: "Active",
+    inactive: "Inactive",
+    createdAt: "Created At",
+    updatedAt: "Updated At",
+    enterName: "Enter category name",
+    enterSlug: "Enter slug",
+    enterDescription: "Enter description",
+    enterImageUrl: "Enter image URL",
+    enterMetaTitle: "Enter meta title",
+    enterMetaDescription: "Enter meta description",
+    createCategoryTitle: "Create New Category",
+    editCategoryTitle: "Edit Category",
+    backToAdmin: "Back to Admin"
   },
   ar: {
-    // Page titles and navigation
-    categoryManagement: "إدارة الفئات",
-    backToAdmin: "العودة إلى الإدارة",
-    createCategory: "إنشاء فئة",
-    editCategory: "تعديل الفئة",
-    deleteCategory: "حذف الفئة",
-    
-    // Form fields
+    title: "إدارة فئات المنتجات",
+    subtitle: "إنشاء وتعديل وإدارة فئات المنتجات",
+    newCategory: "فئة جديدة",
     categoryName: "اسم الفئة",
     slug: "الرابط المختصر",
     description: "الوصف",
     imageUrl: "رابط الصورة",
-    parentCategory: "الفئة الأساسية",
-    noParent: "بدون فئة أساسية",
-    status: "الحالة",
-    active: "نشط",
-    inactive: "غير نشط",
+    parentCategory: "الفئة الأب",
+    isActive: "نشط",
     displayOrder: "ترتيب العرض",
-    metaTitle: "عنوان السيو",
-    metaDescription: "وصف السيو",
-    
-    // Actions
-    create: "إنشاء",
-    update: "تحديث",
+    metaTitle: "عنوان الصفحة",
+    metaDescription: "وصف الصفحة",
+    save: "حفظ",
     cancel: "إلغاء",
     edit: "تعديل",
     delete: "حذف",
-    save: "حفظ",
-    
-    // Validation messages
-    nameRequired: "اسم الفئة يجب أن يكون على الأقل حرفين",
-    slugRequired: "الرابط المختصر يجب أن يكون على الأقل حرفين",
-    
-    // Placeholders
-    namePlaceholder: "أدخل اسم الفئة",
-    slugPlaceholder: "ادخل-رابط-الفئة",
-    descriptionPlaceholder: "أدخل وصف الفئة",
-    imageUrlPlaceholder: "https://example.com/image.jpg",
-    metaTitlePlaceholder: "عنوان السيو لهذه الفئة",
-    metaDescriptionPlaceholder: "وصف السيو لهذه الفئة",
-    
-    // Table headers
-    name: "الاسم",
-    parent: "الفئة الأساسية",
-    order: "الترتيب",
     actions: "الإجراءات",
-    
-    // Status messages
     createSuccess: "تم إنشاء الفئة بنجاح",
     updateSuccess: "تم تحديث الفئة بنجاح",
     deleteSuccess: "تم حذف الفئة بنجاح",
-    createError: "فشل في إنشاء الفئة",
-    updateError: "فشل في تحديث الفئة",
-    deleteError: "فشل في حذف الفئة",
-    
-    // Confirmation
+    createError: "خطأ في إنشاء الفئة",
+    updateError: "خطأ في تحديث الفئة",
+    deleteError: "خطأ في حذف الفئة",
     deleteConfirm: "هل أنت متأكد من حذف هذه الفئة؟",
-    
-    // Language switcher
-    switchLanguage: "English",
-    language: "اللغة"
+    selectParent: "اختر الفئة الأب",
+    none: "لا شيء",
+    active: "نشط",
+    inactive: "غير نشط",
+    createdAt: "تاريخ الإنشاء",
+    updatedAt: "تاريخ التحديث",
+    enterName: "أدخل اسم الفئة",
+    enterSlug: "أدخل الرابط المختصر",
+    enterDescription: "أدخل الوصف",
+    enterImageUrl: "أدخل رابط الصورة",
+    enterMetaTitle: "أدخل عنوان الصفحة",
+    enterMetaDescription: "أدخل وصف الصفحة",
+    createCategoryTitle: "إنشاء فئة جديدة",
+    editCategoryTitle: "تعديل الفئة",
+    backToAdmin: "العودة إلى لوحة الإدارة"
   }
 };
 
+// Form schema
 const categoryFormSchema = z.object({
-  name: z.string().min(2, "Category name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug must be at least 2 characters"),
+  name: z.string().min(1, "Category name is required"),
+  slug: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
   parentId: z.number().optional(),
   isActive: z.boolean().default(true),
-  displayOrder: z.number().min(0).default(0),
+  displayOrder: z.number().default(0),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
 });
@@ -346,7 +327,7 @@ export default function CategoryManagement() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg">در حال بارگذاری...</div>
+          <div className="text-lg">{language === 'en' ? 'Loading...' : 'جارٍ التحميل...'}</div>
         </div>
       </div>
     );
@@ -356,293 +337,286 @@ export default function CategoryManagement() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
-          <div className="text-red-600">خطا در بارگذاری داده‌ها</div>
+          <div className="text-red-600">{language === 'en' ? 'Error loading data' : 'خطأ في تحميل البيانات'}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className={`container mx-auto px-4 py-8 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            مدیریت دسته‌بندی محصولات
+            {t.title}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            ایجاد، ویرایش و مدیریت دسته‌بندی‌های محصولات
+            {t.subtitle}
           </p>
         </div>
-        <div className="flex gap-4">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={handleNewCategory} className="bg-[#a0c514] hover:bg-[#8fb012]">
-                <Plus className="w-4 h-4 mr-2" />
-                دسته‌بندی جدید
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingCategory ? "ویرایش دسته‌بندی" : "ایجاد دسته‌بندی جدید"}
-                </DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>نام دسته‌بندی</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="نام دسته‌بندی را وارد کنید"
-                              onChange={(e) => {
-                                field.onChange(e);
-                                if (!editingCategory) {
-                                  form.setValue("slug", generateSlug(e.target.value));
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={toggleLanguage}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Globe className="h-4 w-4" />
+            {language === 'en' ? 'عربي' : 'English'}
+          </Button>
+          <Button
+            onClick={() => setLocation("/admin")}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t.backToAdmin}
+          </Button>
+        </div>
+      </div>
 
-                    <FormField
-                      control={form.control}
-                      name="slug"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>نامک (Slug)</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="category-slug" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
+      <div className="flex gap-4 mb-6">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={handleNewCategory} className="bg-[#a0c514] hover:bg-[#8fb012]">
+              <Plus className="w-4 h-4 mr-2" />
+              {t.newCategory}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingCategory ? t.editCategoryTitle : t.createCategoryTitle}
+              </DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="description"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>توضیحات</FormLabel>
+                        <FormLabel>{t.categoryName}</FormLabel>
                         <FormControl>
-                          <Textarea {...field} placeholder="توضیحات دسته‌بندی..." rows={3} />
+                          <Input
+                            {...field}
+                            placeholder={t.enterName}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (!editingCategory) {
+                                form.setValue("slug", generateSlug(e.target.value));
+                              }
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="parentId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>دسته‌بندی والد</FormLabel>
-                          <Select
-                            value={field.value?.toString() || "none"}
-                            onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select parent category (optional)" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="none">No Parent</SelectItem>
-                              {parentCategories.map((category: Category) => (
-                                <SelectItem key={category.id} value={category.id.toString()}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.slug}</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder={t.enterSlug} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                    <FormField
-                      control={form.control}
-                      name="displayOrder"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>ترتیب نمایش</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t.description}</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} placeholder={t.enterDescription} rows={3} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t.imageUrl}</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder={t.enterImageUrl} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="parentId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.parentCategory}</FormLabel>
+                        <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} value={field.value?.toString()}>
                           <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                            />
+                            <SelectTrigger>
+                              <SelectValue placeholder={t.selectParent} />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                          <SelectContent>
+                            <SelectItem value="">{t.none}</SelectItem>
+                            {parentCategories.map((category: Category) => (
+                              <SelectItem key={category.id} value={category.id.toString()}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
-                    name="imageUrl"
+                    name="displayOrder"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>آدرس تصویر</FormLabel>
+                        <FormLabel>{t.displayOrder}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="https://example.com/image.jpg" />
+                          <Input
+                            type="number"
+                            {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="metaTitle"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>عنوان SEO</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="عنوان برای موتورهای جستجو" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="isActive"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>{t.isActive}</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                    <FormField
-                      control={form.control}
-                      name="isActive"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                          <div className="space-y-0.5">
-                            <FormLabel>فعال</FormLabel>
-                            <div className="text-sm text-gray-600">
-                              دسته‌بندی فعال در سایت نمایش داده می‌شود
-                            </div>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="metaTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.metaTitle}</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder={t.enterMetaTitle} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
                     name="metaDescription"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>توضیحات SEO</FormLabel>
+                        <FormLabel>{t.metaDescription}</FormLabel>
                         <FormControl>
-                          <Textarea {...field} placeholder="توضیحات برای موتورهای جستجو..." rows={2} />
+                          <Textarea {...field} placeholder={t.enterMetaDescription} rows={2} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                </div>
 
-                  <div className="flex justify-end gap-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      انصراف
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
-                      className="bg-[#a0c514] hover:bg-[#8fb012]"
-                    >
-                      {createCategoryMutation.isPending || updateCategoryMutation.isPending
-                        ? "در حال پردازش..."
-                        : editingCategory
-                        ? "بروزرسانی"
-                        : "ایجاد"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-          <Button variant="outline" onClick={() => setLocation("/admin")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            بازگشت
-          </Button>
-        </div>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    {t.cancel}
+                  </Button>
+                  <Button type="submit" disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}>
+                    {t.save}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>لیست دسته‌بندی‌ها</CardTitle>
+          <CardTitle>{t.title}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>نام</TableHead>
-                <TableHead>نامک</TableHead>
-                <TableHead>دسته‌بندی والد</TableHead>
-                <TableHead>ترتیب</TableHead>
-                <TableHead>وضعیت</TableHead>
-                <TableHead>تاریخ ایجاد</TableHead>
-                <TableHead>عملیات</TableHead>
+                <TableHead>{t.categoryName}</TableHead>
+                <TableHead>{t.slug}</TableHead>
+                <TableHead>{t.parentCategory}</TableHead>
+                <TableHead>{t.isActive}</TableHead>
+                <TableHead>{t.displayOrder}</TableHead>
+                <TableHead>{t.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categoriesArray.map((category: Category) => (
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">{category.name}</TableCell>
-                  <TableCell className="text-gray-600">{category.slug}</TableCell>
+                  <TableCell className="text-muted-foreground">{category.slug}</TableCell>
                   <TableCell>
-                    {category.parentId
+                    {category.parentId 
                       ? categoriesArray.find((c: Category) => c.id === category.parentId)?.name || "-"
-                      : "-"}
+                      : "-"
+                    }
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={category.isActive ? "default" : "secondary"}>
+                      {category.isActive ? t.active : t.inactive}
+                    </Badge>
                   </TableCell>
                   <TableCell>{category.displayOrder}</TableCell>
                   <TableCell>
-                    <Badge variant={category.isActive ? "default" : "secondary"}>
-                      {category.isActive ? (
-                        <><Eye className="w-3 h-3 mr-1" />فعال</>
-                      ) : (
-                        <><EyeOff className="w-3 h-3 mr-1" />غیرفعال</>
-                      )}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(category.createdAt).toLocaleDateString("fa-IR")}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(category)}
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit2 className="w-4 h-4" />
+                        {t.edit}
                       </Button>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(category.id)}
-                        disabled={deleteCategoryMutation.isPending}
+                        className="text-red-600 hover:text-red-700"
                       >
                         <Trash2 className="w-4 h-4" />
+                        {t.delete}
                       </Button>
                     </div>
                   </TableCell>
@@ -650,11 +624,6 @@ export default function CategoryManagement() {
               ))}
             </TableBody>
           </Table>
-          {categoriesArray.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              هیچ دسته‌بندی‌ای یافت نشد
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
