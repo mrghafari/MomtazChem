@@ -346,7 +346,7 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm font-medium text-blue-600">Total Products</p>
                       <p className="text-2xl font-bold text-blue-800">
-                        {products?.length || 0}
+                        {Array.isArray(products) ? products.length : 0}
                       </p>
                     </div>
                     <Package className="w-8 h-8 text-blue-600" />
@@ -360,7 +360,7 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm font-medium text-green-600">In Stock</p>
                       <p className="text-2xl font-bold text-green-800">
-                        {products?.filter((p: ShowcaseProduct) => p.inventoryStatus === 'in_stock').length || 0}
+                        {Array.isArray(products) ? products.filter((p: any) => p.inventoryStatus === 'in_stock').length : 0}
                       </p>
                     </div>
                     <CheckCircle className="w-8 h-8 text-green-600" />
@@ -374,7 +374,7 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm font-medium text-yellow-600">Low Stock</p>
                       <p className="text-2xl font-bold text-yellow-800">
-                        {products?.filter((p: ShowcaseProduct) => p.inventoryStatus === 'low_stock').length || 0}
+                        {Array.isArray(products) ? products.filter((p: any) => p.inventoryStatus === 'low_stock').length : 0}
                       </p>
                     </div>
                     <AlertTriangle className="w-8 h-8 text-yellow-600" />
@@ -388,7 +388,7 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm font-medium text-red-600">Out of Stock</p>
                       <p className="text-2xl font-bold text-red-800">
-                        {products?.filter((p: ShowcaseProduct) => p.inventoryStatus === 'out_of_stock').length || 0}
+                        {Array.isArray(products) ? products.filter((p: any) => p.inventoryStatus === 'out_of_stock').length : 0}
                       </p>
                     </div>
                     <XCircle className="w-8 h-8 text-red-600" />
