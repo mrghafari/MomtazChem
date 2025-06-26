@@ -38,6 +38,7 @@ import CustomerProfileEdit from "@/pages/customer-profile-edit";
 import CustomerRegister from "@/pages/customer-register";
 import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
+import ProductsPage from "@/pages/products";
 import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
