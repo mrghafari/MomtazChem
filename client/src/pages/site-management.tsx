@@ -1,0 +1,196 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap } from "lucide-react";
+
+export default function SiteManagement() {
+  const [, setLocation] = useLocation();
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => setLocation("/admin")}
+              className="hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Admin
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Site Management
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Comprehensive website management and configuration
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Management Tabs */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-6">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Website Status</CardTitle>
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">Online</div>
+                  <p className="text-xs text-muted-foreground">All services operational</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">0</div>
+                  <p className="text-xs text-muted-foreground">Currently online</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">System Health</CardTitle>
+                  <Monitor className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">Healthy</div>
+                  <p className="text-xs text-muted-foreground">All systems operational</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>
+                  Common site management tasks - functions will be added based on your requirements
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                    <Settings className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Function 1</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                    <Database className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Function 2</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                    <Shield className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Function 3</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                    <Zap className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Function 4</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Content Management Tab */}
+          <TabsContent value="content" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Content Management</CardTitle>
+                <CardDescription>
+                  Manage website content, pages, and media
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Content management functions will be added here based on your specifications.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* User Management Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Management</CardTitle>
+                <CardDescription>
+                  Manage user accounts, permissions, and access
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">User management functions will be added here based on your specifications.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Security Tab */}
+          <TabsContent value="security" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Security Settings</CardTitle>
+                <CardDescription>
+                  Configure security policies and monitoring
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Security management functions will be added here based on your specifications.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Performance Tab */}
+          <TabsContent value="performance" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance Monitoring</CardTitle>
+                <CardDescription>
+                  Monitor site performance and optimization
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Performance monitoring functions will be added here based on your specifications.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Settings</CardTitle>
+                <CardDescription>
+                  Configure system-wide settings and preferences
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">System settings functions will be added here based on your specifications.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

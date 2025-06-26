@@ -58,6 +58,7 @@ import WarehouseLogin from "@/pages/warehouse-login";
 import LogisticsLogin from "@/pages/logistics-login";
 import SuperAdminDepartmentManagement from "@/pages/super-admin-department-management";
 import SuperAdminSettings from "@/pages/super-admin-settings";
+import SiteManagement from "@/pages/site-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {

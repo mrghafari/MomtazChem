@@ -597,6 +597,15 @@ export default function AdminPage() {
 
           <Button 
             variant="outline"
+            onClick={() => setLocation("/admin/site-management")}
+            className="border-teal-300 text-teal-600 hover:bg-teal-50 h-12 text-sm"
+          >
+            <Package className="w-4 h-4 mr-2" />
+            Site Management
+          </Button>
+
+          <Button 
+            variant="outline"
             onClick={() => setLocation("/super-admin/settings")}
             className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
           >
