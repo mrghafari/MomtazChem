@@ -523,7 +523,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     className="w-full bg-blue-600 hover:bg-blue-700"
                     onClick={() => setAuthModalOpen(true)}
                   >
-                    ورود یا ثبت نام برای ادامه خرید
+                    Login or Sign Up to Continue
                   </Button>
                 ) : (
                   <Button 

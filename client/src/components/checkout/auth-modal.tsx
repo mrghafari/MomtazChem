@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, UserPlus, LogIn } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('login');
+  const [currentView, setCurrentView] = useState<'choice' | 'login' | 'register'>('choice');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -32,10 +32,34 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     confirmPassword: '',
     phone: '',
     company: '',
-    country: 'ایران',
+    country: 'Iran',
     city: '',
     address: ''
   });
+
+  const resetModal = () => {
+    setCurrentView('choice');
+    setLoginData({ email: '', password: '' });
+    setRegisterData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      phone: '',
+      company: '',
+      country: 'Iran',
+      city: '',
+      address: ''
+    });
+    setShowPassword(false);
+    setIsLoading(false);
+  };
+
+  const handleClose = () => {
+    resetModal();
+    onClose();
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,22 +83,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
       if (data.success) {
         toast({
-          title: 'خوش آمدید',
-          description: 'ورود موفقیت‌آمیز بود'
+          title: 'Welcome Back',
+          description: 'Successfully logged in'
         });
+        resetModal();
         onAuthSuccess();
       } else {
         toast({
-          title: 'خطا در ورود',
-          description: data.message || 'ایمیل یا رمز عبور اشتباه است',
+          title: 'Login Failed',
+          description: data.message || 'Invalid email or password',
           variant: 'destructive'
         });
       }
     } catch (error) {
       console.error('Login error:', error);
       toast({
-        title: 'خطا در ورود',
-        description: 'خطا در ارتباط با سرور',
+        title: 'Login Error',
+        description: 'Connection error. Please try again.',
         variant: 'destructive'
       });
     } finally {
@@ -87,8 +112,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     
     if (registerData.password !== registerData.confirmPassword) {
       toast({
-        title: 'خطا',
-        description: 'رمز عبور و تکرار آن یکسان نیستند',
+        title: 'Error',
+        description: 'Passwords do not match',
         variant: 'destructive'
       });
       return;
@@ -96,8 +121,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
     if (registerData.password.length < 6) {
       toast({
-        title: 'خطا',
-        description: 'رمز عبور باید حداقل ۶ کاراکتر باشد',
+        title: 'Error',
+        description: 'Password must be at least 6 characters',
         variant: 'destructive'
       });
       return;
@@ -105,8 +130,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
     if (!registerData.phone || !registerData.country || !registerData.city || !registerData.address) {
       toast({
-        title: 'خطا',
-        description: 'لطفاً تمام فیلدهای ضروری را پر کنید',
+        title: 'Error',
+        description: 'Please fill in all required fields',
         variant: 'destructive'
       });
       return;
@@ -142,22 +167,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
       if (data.success) {
         toast({
-          title: 'ثبت نام موفق',
-          description: 'حساب کاربری شما ایجاد شد و وارد شدید'
+          title: 'Registration Successful',
+          description: 'Account created and logged in successfully'
         });
+        resetModal();
         onAuthSuccess();
       } else {
         toast({
-          title: 'خطا در ثبت نام',
-          description: data.message || 'خطا در ایجاد حساب کاربری',
+          title: 'Registration Failed',
+          description: data.message || 'Failed to create account',
           variant: 'destructive'
         });
       }
     } catch (error) {
       console.error('Register error:', error);
       toast({
-        title: 'خطا در ثبت نام',
-        description: 'خطا در ارتباط با سرور',
+        title: 'Registration Error',
+        description: 'Connection error. Please try again.',
         variant: 'destructive'
       });
     } finally {
@@ -166,41 +192,66 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>ورود یا ثبت نام</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {currentView !== 'choice' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCurrentView('choice')}
+                className="h-8 w-8 p-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            {currentView === 'choice' && 'Authentication Required'}
+            {currentView === 'login' && 'Login to Your Account'}
+            {currentView === 'register' && 'Create New Account'}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="grid w-full grid-cols-2 gap-4 mb-6">
-          <Button
-            variant={activeTab === 'login' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('login')}
-            className="w-full"
-          >
-            ورود
-          </Button>
-          <Button
-            variant={activeTab === 'register' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('register')}
-            className="w-full"
-          >
-            ثبت نام
-          </Button>
-        </div>
+        {currentView === 'choice' && (
+          <div className="space-y-4 py-4">
+            <p className="text-muted-foreground text-center">
+              Please login or create an account to complete your purchase
+            </p>
+            
+            <div className="space-y-3">
+              <Button
+                onClick={() => setCurrentView('login')}
+                className="w-full h-12 text-base"
+                variant="default"
+              >
+                <LogIn className="mr-2 h-5 w-5" />
+                Login to Existing Account
+              </Button>
+              
+              <Button
+                onClick={() => setCurrentView('register')}
+                className="w-full h-12 text-base"
+                variant="outline"
+              >
+                <UserPlus className="mr-2 h-5 w-5" />
+                Create New Account
+              </Button>
+            </div>
+          </div>
+        )}
 
-        {activeTab === 'login' && (
+        {currentView === 'login' && (
           <Card>
             <CardHeader>
-              <CardTitle>ورود به حساب کاربری</CardTitle>
+              <CardTitle>Welcome Back</CardTitle>
               <CardDescription>
-                برای ادامه خرید، وارد حساب کاربری خود شوید
+                Enter your credentials to continue with your purchase
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <Label htmlFor="login-email">ایمیل</Label>
+                  <Label htmlFor="login-email">Email Address</Label>
                   <Input
                     id="login-email"
                     type="email"
@@ -212,7 +263,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <Label htmlFor="login-password">رمز عبور</Label>
+                  <Label htmlFor="login-password">Password</Label>
                   <div className="relative">
                     <Input
                       id="login-password"
@@ -220,7 +271,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                       value={loginData.password}
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       required
-                      placeholder="رمز عبور خود را وارد کنید"
+                      placeholder="Enter your password"
                     />
                     <Button
                       type="button"
@@ -235,48 +286,48 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'در حال ورود...' : 'ورود'}
+                  {isLoading ? 'Logging in...' : 'Login'}
                 </Button>
               </form>
             </CardContent>
           </Card>
         )}
 
-        {activeTab === 'register' && (
+        {currentView === 'register' && (
           <Card>
             <CardHeader>
-              <CardTitle>ایجاد حساب کاربری جدید</CardTitle>
+              <CardTitle>Create Your Account</CardTitle>
               <CardDescription>
-                برای خرید، حساب کاربری جدید ایجاد کنید
+                Fill in your information to create a new account
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="register-firstName">نام *</Label>
+                    <Label htmlFor="register-firstName">First Name *</Label>
                     <Input
                       id="register-firstName"
                       value={registerData.firstName}
                       onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
                       required
-                      placeholder="نام"
+                      placeholder="John"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="register-lastName">نام خانوادگی *</Label>
+                    <Label htmlFor="register-lastName">Last Name *</Label>
                     <Input
                       id="register-lastName"
                       value={registerData.lastName}
                       onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
                       required
-                      placeholder="نام خانوادگی"
+                      placeholder="Doe"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="register-email">ایمیل *</Label>
+                  <Label htmlFor="register-email">Email Address *</Label>
                   <Input
                     id="register-email"
                     type="email"
@@ -288,62 +339,62 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <Label htmlFor="register-phone">شماره تلفن *</Label>
+                  <Label htmlFor="register-phone">Phone Number *</Label>
                   <Input
                     id="register-phone"
                     value={registerData.phone}
                     onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
                     required
-                    placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                    placeholder="+1234567890"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="register-company">شرکت (اختیاری)</Label>
+                  <Label htmlFor="register-company">Company (Optional)</Label>
                   <Input
                     id="register-company"
                     value={registerData.company}
                     onChange={(e) => setRegisterData({ ...registerData, company: e.target.value })}
-                    placeholder="نام شرکت"
+                    placeholder="Company Name"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="register-country">کشور *</Label>
+                    <Label htmlFor="register-country">Country *</Label>
                     <Input
                       id="register-country"
                       value={registerData.country}
                       onChange={(e) => setRegisterData({ ...registerData, country: e.target.value })}
                       required
-                      placeholder="ایران"
+                      placeholder="Iran"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="register-city">شهر *</Label>
+                    <Label htmlFor="register-city">City *</Label>
                     <Input
                       id="register-city"
                       value={registerData.city}
                       onChange={(e) => setRegisterData({ ...registerData, city: e.target.value })}
                       required
-                      placeholder="تهران"
+                      placeholder="Tehran"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="register-address">آدرس *</Label>
+                  <Label htmlFor="register-address">Address *</Label>
                   <Input
                     id="register-address"
                     value={registerData.address}
                     onChange={(e) => setRegisterData({ ...registerData, address: e.target.value })}
                     required
-                    placeholder="آدرس کامل"
+                    placeholder="Complete address"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="register-password">رمز عبور *</Label>
+                  <Label htmlFor="register-password">Password *</Label>
                   <div className="relative">
                     <Input
                       id="register-password"
@@ -351,7 +402,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                       value={registerData.password}
                       onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                       required
-                      placeholder="حداقل ۶ کاراکتر"
+                      placeholder="At least 6 characters"
                       minLength={6}
                     />
                     <Button
@@ -367,20 +418,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <Label htmlFor="register-confirmPassword">تکرار رمز عبور *</Label>
+                  <Label htmlFor="register-confirmPassword">Confirm Password *</Label>
                   <Input
                     id="register-confirmPassword"
                     type="password"
                     value={registerData.confirmPassword}
                     onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
                     required
-                    placeholder="تکرار رمز عبور"
+                    placeholder="Confirm your password"
                     minLength={6}
                   />
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'در حال ثبت نام...' : 'ثبت نام و ورود'}
+                  {isLoading ? 'Creating Account...' : 'Create Account & Login'}
                 </Button>
               </form>
             </CardContent>
