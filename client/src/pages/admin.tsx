@@ -404,8 +404,8 @@ export default function AdminPage() {
               </p>
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">Product Management</h2>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">Manage products across four categories</p>
+              <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">Admin Dashboard</h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Manage all aspects of your platform</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -427,187 +427,436 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Search Section */}
-        <div className="mb-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search by name, barcode, or SKU..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                onClick={() => setSearchQuery("")}
-              >
-                <X className="w-3 h-3" />
-              </Button>
-            )}
-          </div>
-        </div>
+        {/* Admin Navigation Tabs */}
+        <Tabs defaultValue="products" className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="products" className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Products
+            </TabsTrigger>
+            <TabsTrigger value="management" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Management
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <Factory className="w-4 h-4" />
+              Orders
+            </TabsTrigger>
+            <TabsTrigger value="tools" className="flex items-center gap-2">
+              <QrCode className="w-4 h-4" />
+              Tools
+            </TabsTrigger>
+            <TabsTrigger value="system" className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              System
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Management Actions Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 h-12 text-sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Product
-          </Button>
-          
-          <Button 
-            onClick={() => syncProductsMutation.mutate()}
-            disabled={syncProductsMutation.isPending}
-            variant="outline"
-            className="border-green-300 text-green-600 hover:bg-green-50 h-12 text-sm"
-          >
-            <Package className="w-4 h-4 mr-2" />
-            {syncProductsMutation.isPending ? 'Syncing...' : 'Sync Shop'}
-          </Button>
-          
+          {/* Products Tab */}
+          <TabsContent value="products" className="mt-6">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold">Product Management</h3>
+                  <p className="text-gray-600">Add, edit, and manage all products</p>
+                </div>
+              </div>
 
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/inquiries")}
-            className="border-orange-300 text-orange-600 hover:bg-orange-50 h-12 text-sm"
-          >
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Inquiries
-          </Button>
+              {/* Search Section */}
+              <div className="mb-6">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search by name, barcode, or SKU..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 py-2"
+                  />
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/order-management")}
-            className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
-          >
-            <Package className="w-4 h-4 mr-2" />
-            Order Management
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/barcode-inventory")}
-            className="border-cyan-300 text-cyan-600 hover:bg-cyan-50 h-12 text-sm"
-          >
-            <QrCode className="w-4 h-4 mr-2" />
-            Barcode
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/advanced-email-settings")}
-            className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 h-12 text-sm"
-          >
-            <Mail className="w-4 h-4 mr-2" />
-            Advanced Email Settings
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/database-management")}
-            className="border-slate-300 text-slate-600 hover:bg-slate-50 h-12 text-sm"
-          >
-            <Database className="w-4 h-4 mr-2" />
-            Database Backup
-          </Button>
+              {/* Product Actions */}
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Product
+                </Button>
+                
+                <Button 
+                  onClick={() => syncProductsMutation.mutate()}
+                  disabled={syncProductsMutation.isPending}
+                  variant="outline"
+                  className="border-green-300 text-green-600 hover:bg-green-50"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  {syncProductsMutation.isPending ? 'Syncing...' : 'Sync Shop'}
+                </Button>
+              </div>
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/factory-management")}
-            className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
-          >
-            <Factory className="w-4 h-4 mr-2" />
-            Factory Management
-          </Button>
+              {/* Category Filter */}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={selectedCategory === "all" ? "default" : "outline"}
+                  onClick={() => setSelectedCategory("all")}
+                  size="sm"
+                >
+                  All Categories
+                </Button>
+                {categoriesData.map((category: any) => (
+                  <Button
+                    key={category.slug}
+                    variant={selectedCategory === category.slug ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category.slug)}
+                    size="sm"
+                  >
+                    {category.name}
+                  </Button>
+                ))}
+              </div>
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/procedures-management")}
-            className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            Procedures & Methods
-          </Button>
+              {/* Products Grid */}
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardContent className="p-4">
+                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded mb-4 w-3/4"></div>
+                        <div className="h-32 bg-gray-200 rounded"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : filteredProducts.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+                    <p className="text-gray-600 mb-4">
+                      {searchQuery ? "No products match your search criteria." : "Get started by adding your first product."}
+                    </p>
+                    <Button onClick={openCreateDialog}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Product
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProducts.map((product) => (
+                    <ProductCard 
+                      key={product.id} 
+                      product={product} 
+                      onEdit={openEditDialog}
+                      onDelete={(id) => deleteProductMutation.mutate(id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/user-management")}
-            className="border-red-300 text-red-600 hover:bg-red-50 h-12 text-sm"
-          >
-            <User className="w-4 h-4 mr-2" />
-            User Management
-          </Button>
+          {/* Management Tab */}
+          <TabsContent value="management" className="mt-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold">Management Tools</h3>
+                <p className="text-gray-600">Customer and inquiry management</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/inquiries")}
+                  className="border-orange-300 text-orange-600 hover:bg-orange-50 h-12 text-sm"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Customer Inquiries
+                </Button>
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/smtp-test")}
-            className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
-          >
-            <Mail className="w-4 h-4 mr-2" />
-            SMTP Test
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/seo-management")}
-            className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
-          >
-            <Search className="w-4 h-4 mr-2" />
-            Multilingual SEO
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/shop-admin")}
-            className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
-          >
-            <DollarSign className="w-4 h-4 mr-2" />
-            Shop
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/crm")}
-            className="border-pink-300 text-pink-600 hover:bg-pink-50 h-12 text-sm"
-          >
-            <User className="w-4 h-4 mr-2" />
-            CRM
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/category-management")}
-            className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
-          >
-            <Package className="w-4 h-4 mr-2" />
-            Category Management
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/sms-management")}
-            className="border-orange-300 text-orange-600 hover:bg-orange-50 h-12 text-sm"
-          >
-            <Mail className="w-4 h-4 mr-2" />
-            SMS Management
-          </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/customers")}
+                  className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Customer Management
+                </Button>
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/super-admin/settings")}
-            className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
-          >
-            <User className="w-4 h-4 mr-2" />
-            Super Admin Settings
-          </Button>
-        </div>
-      </div>
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/crm")}
+                  className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
+                >
+                  <Database className="w-4 h-4 mr-2" />
+                  CRM System
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
 
-      {/* Inventory Dashboard Summary */}
-      {products && products.length > 0 && (
+          {/* Orders Tab */}
+          <TabsContent value="orders" className="mt-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold">Order Management</h3>
+                <p className="text-gray-600">Manage orders and fulfillment</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/order-management")}
+                  className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  Order Management
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/financial-department")}
+                  className="border-green-300 text-green-600 hover:bg-green-50 h-12 text-sm"
+                >
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Financial Department
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/warehouse-department")}
+                  className="border-amber-300 text-amber-600 hover:bg-amber-50 h-12 text-sm"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  Warehouse Department
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/logistics-department")}
+                  className="border-blue-300 text-blue-600 hover:bg-blue-50 h-12 text-sm"
+                >
+                  <Factory className="w-4 h-4 mr-2" />
+                  Logistics Department
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Tools Tab */}
+          <TabsContent value="tools" className="mt-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold">Tools & Utilities</h3>
+                <p className="text-gray-600">Barcode, email, and other tools</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/barcode-inventory")}
+                  className="border-cyan-300 text-cyan-600 hover:bg-cyan-50 h-12 text-sm"
+                >
+                  <QrCode className="w-4 h-4 mr-2" />
+                  Barcode Management
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/advanced-email-settings")}
+                  className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 h-12 text-sm"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Email Settings
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* System Tab */}
+          <TabsContent value="system" className="mt-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold">System Administration</h3>
+                <p className="text-gray-600">Database, users, and system settings</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/database-management")}
+                  className="border-slate-300 text-slate-600 hover:bg-slate-50 h-12 text-sm"
+                >
+                  <Database className="w-4 h-4 mr-2" />
+                  Database Management
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/factory-management")}
+                  className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
+                >
+                  <Factory className="w-4 h-4 mr-2" />
+                  Factory Management
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/procedures-management")}
+                  className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Procedures & Methods
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/user-management")}
+                  className="border-red-300 text-red-600 hover:bg-red-50 h-12 text-sm"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  User Management
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/smtp-test")}
+                  className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  SMTP Test
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/seo-management")}
+                  className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  SEO Management
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/admin/sms-management")}
+                  className="border-orange-300 text-orange-600 hover:bg-orange-50 h-12 text-sm"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  SMS Management
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation("/super-admin-settings")}
+                  className="border-red-300 text-red-600 hover:bg-red-50 h-12 text-sm"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Super Admin Settings
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+      {/* Product Creation/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? "Edit Product" : "Add New Product"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingProduct ? "Update product information and inventory details" : "Create a new chemical product for your catalog"}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Product Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((category: CategoryOption) => (
+                            <SelectItem key={category.value} value={category.value}>
+                              {category.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={3} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createProductMutation.isPending || updateProductMutation.isPending}
+                >
+                  {editingProduct ? "Update" : "Create"} Product
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
             <CardContent className="p-4">
