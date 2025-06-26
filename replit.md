@@ -131,6 +131,10 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED comprehensive administrative centralization - moved ALL remaining functions to Site Management
+- June 26, 2025: Added Procedures & Methods as 14th Quick Action button with amber styling and BookOpen icon for document management
+- June 26, 2025: Added SMTP Test as 15th Quick Action button with sky styling and TestTube icon for email testing functionality
+- June 26, 2025: Removed Procedures & Methods and SMTP Test buttons from main admin dashboard to achieve complete centralization
 - June 26, 2025: COMPLETED shop functionality migration to Site Management - moved e-commerce administration from admin dashboard to centralized management interface
 - June 26, 2025: Added shop as thirteenth Quick Action button in Site Management with proper purple styling and DollarSign icon
 - June 26, 2025: Removed shop button from main admin dashboard to continue administrative centralization

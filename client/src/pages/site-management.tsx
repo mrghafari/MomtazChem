@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -222,6 +222,24 @@ export default function SiteManagement() {
                   >
                     <DollarSign className="h-6 w-6 mb-2" />
                     <span className="text-sm">Shop</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-amber-300 text-amber-600 hover:bg-amber-50"
+                    onClick={() => setLocation("/admin/procedures-management")}
+                  >
+                    <BookOpen className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Procedures</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-sky-300 text-sky-600 hover:bg-sky-50"
+                    onClick={() => setLocation("/admin/smtp-test")}
+                  >
+                    <TestTube className="h-6 w-6 mb-2" />
+                    <span className="text-sm">SMTP Test</span>
                   </Button>
                 </div>
               </CardContent>

@@ -469,25 +469,7 @@ export default function AdminPage() {
 
 
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/procedures-management")}
-            className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            Procedures & Methods
-          </Button>
 
-
-
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/smtp-test")}
-            className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
-          >
-            <Mail className="w-4 h-4 mr-2" />
-            SMTP Test
-          </Button>
           
 
           
