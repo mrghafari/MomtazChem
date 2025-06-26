@@ -137,7 +137,9 @@ Changelog:
 - June 26, 2025: Created super admin settings interface accessible from main admin dashboard
 - June 26, 2025: Added verification token system with expiration and usage tracking
 - June 26, 2025: Enhanced user schema with phone numbers and verification status fields
-- June 26, 2025: FIXED admin login issue for info@momtazchem.com - password reset to "password"
+- June 26, 2025: FIXED admin login authentication to handle email-based login properly  
+- June 26, 2025: Updated getUserByUsername method to support both username and email authentication
+- June 26, 2025: Confirmed admin credentials: info@momtazchem.com / password working correctly
 - June 26, 2025: COMPLETED comprehensive 3-department order management system (Financial, Warehouse, Logistics)
 - June 26, 2025: Implemented sequential workflow where each department can only see orders approved by previous department
 - June 26, 2025: Added automatic delivery code generation and SMS notification system for final delivery
