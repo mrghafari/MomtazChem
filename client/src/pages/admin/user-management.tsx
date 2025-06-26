@@ -4,7 +4,6 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -16,21 +15,125 @@ import {
   Users, 
   UserPlus, 
   Edit, 
-  Trash2, 
   Shield, 
   Key,
-  Settings,
   ArrowLeft,
-  Eye,
-  EyeOff,
   Crown,
-  User
+  Globe
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
+// Translations
+const translations = {
+  en: {
+    title: "User and Access Management",
+    subtitle: "Manage user accounts and access permissions",
+    superAdminOnly: "Super Admin Only",
+    backToDashboard: "Back to Dashboard",
+    adminUsers: "Admin Users",
+    roles: "Roles",
+    permissions: "Permissions",
+    addUser: "Add User",
+    editUser: "Edit User",
+    addNewUser: "Add New User",
+    username: "Username",
+    email: "Email",
+    password: "Password",
+    newPasswordOptional: "New Password (Optional)",
+    role: "Role",
+    selectRole: "Select role",
+    cancel: "Cancel",
+    create: "Create",
+    update: "Update",
+    user: "User",
+    status: "Status",
+    lastLogin: "Last Login",
+    actions: "Actions",
+    active: "Active",
+    inactive: "Inactive",
+    never: "Never",
+    noRole: "No Role",
+    loading: "Loading...",
+    userCreated: "User Created",
+    userCreatedSuccess: "New user created successfully",
+    userUpdated: "User Updated",
+    userUpdatedSuccess: "Changes saved successfully",
+    createUserError: "Error Creating User",
+    createUserErrorMessage: "There was a problem creating the user",
+    updateUserError: "Error Updating",
+    updateUserErrorMessage: "There was a problem updating the user",
+    adminRoles: "Admin Roles",
+    roleName: "Role Name",
+    description: "Description",
+    permissionCount: "Permission Count",
+    adminPermissions: "Admin Permissions",
+    permission: "Permission",
+    module: "Module",
+    users: "users",
+    products: "products",
+    crm: "crm",
+    shop: "shop",
+    analytics: "analytics",
+    content: "content",
+    system: "system"
+  },
+  ar: {
+    title: "إدارة المستخدمين والصلاحيات",
+    subtitle: "إدارة حسابات المستخدمين وصلاحيات الوصول",
+    superAdminOnly: "للمدير العام فقط",
+    backToDashboard: "العودة إلى لوحة التحكم",
+    adminUsers: "مستخدمو الإدارة",
+    roles: "الأدوار",
+    permissions: "الصلاحيات",
+    addUser: "إضافة مستخدم",
+    editUser: "تعديل المستخدم",
+    addNewUser: "إضافة مستخدم جديد",
+    username: "اسم المستخدم",
+    email: "البريد الإلكتروني",
+    password: "كلمة المرور",
+    newPasswordOptional: "كلمة المرور الجديدة (اختياري)",
+    role: "الدور",
+    selectRole: "اختر الدور",
+    cancel: "إلغاء",
+    create: "إنشاء",
+    update: "تحديث",
+    user: "المستخدم",
+    status: "الحالة",
+    lastLogin: "آخر تسجيل دخول",
+    actions: "الإجراءات",
+    active: "نشط",
+    inactive: "غير نشط",
+    never: "أبداً",
+    noRole: "بدون دور",
+    loading: "جارٍ التحميل...",
+    userCreated: "تم إنشاء المستخدم",
+    userCreatedSuccess: "تم إنشاء المستخدم الجديد بنجاح",
+    userUpdated: "تم تحديث المستخدم",
+    userUpdatedSuccess: "تم حفظ التغييرات بنجاح",
+    createUserError: "خطأ في إنشاء المستخدم",
+    createUserErrorMessage: "حدثت مشكلة في إنشاء المستخدم",
+    updateUserError: "خطأ في التحديث",
+    updateUserErrorMessage: "حدثت مشكلة في تحديث المستخدم",
+    adminRoles: "أدوار الإدارة",
+    roleName: "اسم الدور",
+    description: "الوصف",
+    permissionCount: "عدد الصلاحيات",
+    adminPermissions: "صلاحيات الإدارة",
+    permission: "الصلاحية",
+    module: "الوحدة",
+    users: "المستخدمون",
+    products: "المنتجات",
+    crm: "إدارة العملاء",
+    shop: "المتجر",
+    analytics: "التحليلات",
+    content: "المحتوى",
+    system: "النظام"
+  }
+};
 
 interface AdminRole {
   id: number;
@@ -54,29 +157,37 @@ interface AdminUser {
   id: number;
   username: string;
   email: string;
-  roleId: number | null;
+  isActive: boolean;
+  roleId?: number;
   roleName?: string;
   roleDisplayName?: string;
-  isActive: boolean;
-  lastLoginAt: string | null;
-  createdAt: string;
+  lastLoginAt?: string;
 }
 
 const createUserSchema = z.object({
-  username: z.string().min(3, "نام کاربری باید حداقل 3 کاراکتر باشد"),
-  email: z.string().email("ایمیل معتبر وارد کنید"),
-  password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
-  roleId: z.string().min(1, "نقش را انتخاب کنید"),
+  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Valid email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  roleId: z.string().min(1, "Role is required"),
 });
 
 type CreateUserForm = z.infer<typeof createUserSchema>;
 
-export default function UserManagement() {
+function UserManagement() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [selectedTab, setSelectedTab] = useState("users");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+
+  // Get current translations
+  const t = translations[language];
+
+  // Toggle language function
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'ar' : 'en');
+  };
 
   const form = useForm<CreateUserForm>({
     resolver: zodResolver(createUserSchema),
@@ -110,8 +221,8 @@ export default function UserManagement() {
     mutationFn: (data: CreateUserForm) => apiRequest("/api/admin/users", "POST", data),
     onSuccess: () => {
       toast({
-        title: "کاربر ایجاد شد",
-        description: "کاربر جدید با موفقیت ایجاد شد",
+        title: t.userCreated,
+        description: t.userCreatedSuccess,
       });
       refetchUsers();
       setDialogOpen(false);
@@ -120,8 +231,8 @@ export default function UserManagement() {
     onError: () => {
       toast({
         variant: "destructive",
-        title: "خطا در ایجاد کاربر",
-        description: "مشکلی در ایجاد کاربر رخ داده است",
+        title: t.createUserError,
+        description: t.createUserErrorMessage,
       });
     },
   });
@@ -132,8 +243,8 @@ export default function UserManagement() {
       apiRequest(`/api/admin/users/${id}`, "PUT", data),
     onSuccess: () => {
       toast({
-        title: "کاربر بروزرسانی شد",
-        description: "تغییرات با موفقیت ذخیره شد",
+        title: t.userUpdated,
+        description: t.userUpdatedSuccess,
       });
       refetchUsers();
       setEditingUser(null);
@@ -141,8 +252,8 @@ export default function UserManagement() {
     onError: () => {
       toast({
         variant: "destructive",
-        title: "خطا در بروزرسانی",
-        description: "مشکلی در بروزرسانی کاربر رخ داده است",
+        title: t.updateUserError,
+        description: t.updateUserErrorMessage,
       });
     },
   });
@@ -226,29 +337,47 @@ export default function UserManagement() {
     }
   };
 
+  const getModuleTranslation = (module: string) => {
+    return t[module as keyof typeof t] || module;
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
+    <div className={`space-y-6 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLocation('/admin')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t.backToDashboard}
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">{t.title}</h1>
+            <p className="text-gray-600 mt-1">{t.subtitle}</p>
+          </div>
+          <Badge variant="destructive" className="flex items-center gap-1">
+            <Crown className="h-3 w-3" />
+            {t.superAdminOnly}
+          </Badge>
+        </div>
         <Button
+          onClick={toggleLanguage}
           variant="outline"
           size="sm"
-          onClick={() => setLocation('/admin')}
+          className="flex items-center gap-2"
         >
-          <ArrowLeft className="h-4 w-4 ml-2" />
-          بازگشت به داشبورد
+          <Globe className="h-4 w-4" />
+          {language === 'en' ? 'عربي' : 'English'}
         </Button>
-        <h1 className="text-2xl font-bold">مدیریت کاربران و دسترسی‌ها</h1>
-        <Badge variant="destructive" className="flex items-center gap-1">
-          <Crown className="h-3 w-3" />
-          فقط سوپر ادمین
-        </Badge>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="users">کاربران ادمین</TabsTrigger>
-          <TabsTrigger value="roles">نقش‌ها</TabsTrigger>
-          <TabsTrigger value="permissions">مجوزها</TabsTrigger>
+          <TabsTrigger value="users">{t.adminUsers}</TabsTrigger>
+          <TabsTrigger value="roles">{t.roles}</TabsTrigger>
+          <TabsTrigger value="permissions">{t.permissions}</TabsTrigger>
         </TabsList>
 
         {/* Users Tab */}
@@ -258,19 +387,19 @@ export default function UserManagement() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  کاربران ادمین
+                  {t.adminUsers}
                 </CardTitle>
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
                     <Button onClick={openCreateDialog}>
                       <UserPlus className="h-4 w-4 mr-2" />
-                      افزودن کاربر
+                      {t.addUser}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle>
-                        {editingUser ? 'ویرایش کاربر' : 'افزودن کاربر جدید'}
+                        {editingUser ? t.editUser : t.addNewUser}
                       </DialogTitle>
                     </DialogHeader>
                     <Form {...form}>
@@ -280,7 +409,7 @@ export default function UserManagement() {
                           name="username"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>نام کاربری</FormLabel>
+                              <FormLabel>{t.username}</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -293,7 +422,7 @@ export default function UserManagement() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>ایمیل</FormLabel>
+                              <FormLabel>{t.email}</FormLabel>
                               <FormControl>
                                 <Input type="email" {...field} />
                               </FormControl>
@@ -307,7 +436,7 @@ export default function UserManagement() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                {editingUser ? 'رمز عبور جدید (اختیاری)' : 'رمز عبور'}
+                                {editingUser ? t.newPasswordOptional : t.password}
                               </FormLabel>
                               <FormControl>
                                 <Input type="password" {...field} />
@@ -321,11 +450,11 @@ export default function UserManagement() {
                           name="roleId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>نقش</FormLabel>
+                              <FormLabel>{t.role}</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="نقش را انتخاب کنید" />
+                                    <SelectValue placeholder={t.selectRole} />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -342,13 +471,13 @@ export default function UserManagement() {
                         />
                         <div className="flex justify-end gap-2">
                           <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                            انصراف
+                            {t.cancel}
                           </Button>
                           <Button 
                             type="submit" 
                             disabled={createUserMutation.isPending || updateUserMutation.isPending}
                           >
-                            {editingUser ? 'بروزرسانی' : 'ایجاد'}
+                            {editingUser ? t.update : t.create}
                           </Button>
                         </div>
                       </form>
@@ -359,16 +488,16 @@ export default function UserManagement() {
             </CardHeader>
             <CardContent>
               {usersLoading ? (
-                <div className="text-center py-8">در حال بارگذاری...</div>
+                <div className="text-center py-8">{t.loading}</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>کاربر</TableHead>
-                      <TableHead>نقش</TableHead>
-                      <TableHead>وضعیت</TableHead>
-                      <TableHead>آخرین ورود</TableHead>
-                      <TableHead>عملیات</TableHead>
+                      <TableHead>{t.user}</TableHead>
+                      <TableHead>{t.role}</TableHead>
+                      <TableHead>{t.status}</TableHead>
+                      <TableHead>{t.lastLogin}</TableHead>
+                      <TableHead>{t.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -386,7 +515,7 @@ export default function UserManagement() {
                               {user.roleDisplayName}
                             </Badge>
                           ) : (
-                            <Badge variant="outline">بدون نقش</Badge>
+                            <Badge variant="outline">{t.noRole}</Badge>
                           )}
                         </TableCell>
                         <TableCell>
@@ -401,14 +530,14 @@ export default function UserManagement() {
                               }
                             />
                             <span className="text-sm">
-                              {user.isActive ? 'فعال' : 'غیرفعال'}
+                              {user.isActive ? t.active : t.inactive}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell>
                           {user.lastLoginAt 
-                            ? new Date(user.lastLoginAt).toLocaleDateString('fa-IR')
-                            : 'هرگز'
+                            ? new Date(user.lastLoginAt).toLocaleDateString(language === 'en' ? 'en-US' : 'ar-SA')
+                            : t.never
                           }
                         </TableCell>
                         <TableCell>
@@ -437,40 +566,47 @@ export default function UserManagement() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                نقش‌های ادمین
+                {t.adminRoles}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {rolesLoading ? (
-                <div className="text-center py-8">در حال بارگذاری...</div>
+                <div className="text-center py-8">{t.loading}</div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {roles?.map((role) => (
-                    <Card key={role.id} className="border-2">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t.roleName}</TableHead>
+                      <TableHead>{t.description}</TableHead>
+                      <TableHead>{t.permissionCount}</TableHead>
+                      <TableHead>{t.status}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {roles.map((role) => (
+                      <TableRow key={role.id}>
+                        <TableCell>
                           <Badge className={getRoleBadgeColor(role.name)}>
                             {role.displayName}
                           </Badge>
-                          <Badge variant="outline">
-                            {role.permissionCount || 0} مجوز
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground mb-3">
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
                           {role.description}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Switch checked={role.isActive} disabled />
-                          <span className="text-sm">
-                            {role.isActive ? 'فعال' : 'غیرفعال'}
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {role.permissionCount || 0}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={role.isActive ? "default" : "secondary"}>
+                            {role.isActive ? t.active : t.inactive}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>
@@ -482,53 +618,45 @@ export default function UserManagement() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Key className="h-5 w-5" />
-                مجوزهای سیستم
+                {t.adminPermissions}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {permissionsLoading ? (
-                <div className="text-center py-8">در حال بارگذاری...</div>
+                <div className="text-center py-8">{t.loading}</div>
               ) : (
-                <div className="space-y-6">
-                  {['users', 'products', 'crm', 'shop', 'analytics', 'content', 'system'].map((module) => {
-                    const modulePermissions = permissions?.filter(p => p.module === module) || [];
-                    if (modulePermissions.length === 0) return null;
-
-                    return (
-                      <div key={module} className="space-y-3">
-                        <h3 className="text-lg font-semibold">
-                          ماژول {module === 'users' ? 'کاربران' : 
-                                 module === 'products' ? 'محصولات' :
-                                 module === 'crm' ? 'CRM' :
-                                 module === 'shop' ? 'فروشگاه' :
-                                 module === 'analytics' ? 'گزارش‌گیری' :
-                                 module === 'content' ? 'محتوا' :
-                                 module === 'system' ? 'سیستم' : module}
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {modulePermissions.map((permission) => (
-                            <Card key={permission.id} className="border">
-                              <CardContent className="p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <Badge className={getPermissionModuleColor(permission.module)}>
-                                    {permission.module}
-                                  </Badge>
-                                  <Switch checked={permission.isActive} disabled />
-                                </div>
-                                <h4 className="font-medium text-sm mb-1">
-                                  {permission.displayName}
-                                </h4>
-                                <p className="text-xs text-muted-foreground">
-                                  {permission.description}
-                                </p>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t.permission}</TableHead>
+                      <TableHead>{t.module}</TableHead>
+                      <TableHead>{t.description}</TableHead>
+                      <TableHead>{t.status}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {permissions.map((permission) => (
+                      <TableRow key={permission.id}>
+                        <TableCell className="font-medium">
+                          {permission.displayName}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getPermissionModuleColor(permission.module)}>
+                            {getModuleTranslation(permission.module)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {permission.description}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={permission.isActive ? "default" : "secondary"}>
+                            {permission.isActive ? t.active : t.inactive}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>
@@ -537,3 +665,5 @@ export default function UserManagement() {
     </div>
   );
 }
+
+export default UserManagement;
