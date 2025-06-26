@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
   const [currentView, setCurrentView] = useState<'choice' | 'login' | 'register'>(initialMode || 'choice');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update currentView when initialMode changes
+  useEffect(() => {
+    if (initialMode) {
+      setCurrentView(initialMode);
+    }
+  }, [initialMode]);
   
   const [loginData, setLoginData] = useState({
     email: '',
