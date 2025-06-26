@@ -131,6 +131,12 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED shop functionality migration to Site Management - moved e-commerce administration from admin dashboard to centralized management interface
+- June 26, 2025: Added shop as thirteenth Quick Action button in Site Management with proper purple styling and DollarSign icon
+- June 26, 2025: Removed shop button from main admin dashboard to continue administrative centralization
+- June 26, 2025: COMPLETED user management functionality migration to Site Management - moved admin user and role management from admin dashboard to centralized management interface
+- June 26, 2025: Added user management as twelfth Quick Action button in Site Management with proper red styling and Users2 icon
+- June 26, 2025: Removed user management button from main admin dashboard to continue administrative centralization
 - June 26, 2025: COMPLETED super admin settings functionality migration to Site Management - moved admin account management and verification system from admin dashboard to centralized management interface
 - June 26, 2025: Added super admin settings as eleventh Quick Action button in Site Management with proper indigo styling and UserCog icon
 - June 26, 2025: Removed super admin settings button from main admin dashboard to continue administrative centralization

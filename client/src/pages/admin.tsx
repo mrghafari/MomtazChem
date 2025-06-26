@@ -478,14 +478,7 @@ export default function AdminPage() {
             Procedures & Methods
           </Button>
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/user-management")}
-            className="border-red-300 text-red-600 hover:bg-red-50 h-12 text-sm"
-          >
-            <User className="w-4 h-4 mr-2" />
-            User Management
-          </Button>
+
 
           <Button 
             variant="outline"
@@ -498,14 +491,7 @@ export default function AdminPage() {
           
 
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/shop-admin")}
-            className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
-          >
-            <DollarSign className="w-4 h-4 mr-2" />
-            Shop
-          </Button>
+
           
 
           
