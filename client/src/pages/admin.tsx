@@ -594,6 +594,15 @@ export default function AdminPage() {
             <Mail className="w-4 h-4 mr-2" />
             SMS Management
           </Button>
+
+          <Button 
+            variant="outline"
+            onClick={() => setLocation("/super-admin/settings")}
+            className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-12 text-sm"
+          >
+            <User className="w-4 h-4 mr-2" />
+            Super Admin Settings
+          </Button>
         </div>
       </div>
 
