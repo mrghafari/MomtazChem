@@ -781,33 +781,18 @@ const Shop = () => {
         </div>
       </div>
 
-      {/* Checkout Dialog */}
-      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Checkout</DialogTitle>
-          </DialogHeader>
-          {customer ? (
-            <Checkout 
-              cart={cart}
-              products={currentProducts}
-              onOrderComplete={() => {
-                setCart({});
-                setShowCheckout(false);
-              }}
-            />
-          ) : (
-            <Checkout 
-              onOrderComplete={() => {
-                setCart({});
-                setShowCheckout(false);
-              }}
-              cart={cart}
-              products={currentProducts}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Bilingual Purchase Form */}
+      {showCheckout && (
+        <BilingualPurchaseForm
+          cart={cart}
+          products={currentProducts}
+          onOrderComplete={() => {
+            setCart({});
+            setShowCheckout(false);
+          }}
+          onClose={() => setShowCheckout(false)}
+        />
+      )}
 
       {/* Auth Dialog */}
       <CustomerAuth 

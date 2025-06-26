@@ -56,7 +56,7 @@ const translations = {
     orderError: "Failed to submit order",
     
     // Language switcher
-    switchToArabic: "العربية",
+    switchLanguage: "العربية",
     language: "Language"
   },
   ar: {
@@ -96,7 +96,7 @@ const translations = {
     orderError: "فشل في إرسال الطلب",
     
     // Language switcher
-    switchToEnglish: "English",
+    switchLanguage: "English",
     language: "اللغة"
   }
 };
@@ -195,8 +195,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     try {
       const location = await getCurrentLocation();
       setLocationData(location);
-      form.setValue('gpsLatitude', location.latitude);
-      form.setValue('gpsLongitude', location.longitude);
+      form.setValue('gpsLatitude', location.latitude as any);
+      form.setValue('gpsLongitude', location.longitude as any);
       
       toast({
         title: t.locationFound,
@@ -266,7 +266,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               className="flex items-center gap-1"
             >
               <Globe className="w-4 h-4" />
-              {language === 'en' ? t.switchToArabic : t.switchToEnglish}
+              {t.switchLanguage}
             </Button>
             <Button
               variant="ghost"
