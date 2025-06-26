@@ -70,7 +70,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [, setLocation] = useLocation();
 
   // Get customer information if logged in
-  const { data: customerData } = useQuery<any>({
+  const { data: customerData, refetch: refetchCustomer } = useQuery<any>({
     queryKey: ["/api/customers/me"],
     retry: false,
   });
@@ -623,10 +623,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       <AuthModal 
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        onAuthSuccess={() => {
+        onAuthSuccess={async () => {
           setAuthModalOpen(false);
-          // Refresh customer data after successful auth
-          window.location.reload();
+          // Refetch customer data to update authentication status
+          await refetchCustomer();
+          setIsLoggedIn(true);
         }}
         initialMode={authMode}
       />
