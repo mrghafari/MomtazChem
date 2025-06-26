@@ -156,6 +156,16 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date(),
     };
 
+    // Handle SKU field - set to null if empty to avoid unique constraint issues
+    if (productUpdate.sku !== undefined) {
+      updateData.sku = productUpdate.sku && productUpdate.sku.trim() ? productUpdate.sku.trim() : null;
+    }
+
+    // Handle barcode field - set to null if empty
+    if (productUpdate.barcode !== undefined) {
+      updateData.barcode = productUpdate.barcode && productUpdate.barcode.trim() ? productUpdate.barcode.trim() : null;
+    }
+
     // Handle JSON fields properly - use null for empty arrays/objects
     if (productUpdate.specifications !== undefined) {
       updateData.specifications = productUpdate.specifications && typeof productUpdate.specifications === 'object' && !Array.isArray(productUpdate.specifications) && Object.keys(productUpdate.specifications).length > 0 ? productUpdate.specifications : null;
