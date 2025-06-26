@@ -8112,8 +8112,98 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           createdAt: new Date()
         });
 
-      // Mock sending reset email
-      console.log(`Password reset code for ${email}: ${resetCode}`);
+      // Send actual reset email
+      try {
+        const categorySettings = await emailStorage.getCategoryWithSettings('admin');
+        
+        if (categorySettings?.smtp) {
+          const smtp = categorySettings.smtp;
+          
+          // Create transporter
+          const transporter = nodemailer.createTransport({
+            host: smtp.host,
+            port: smtp.port,
+            secure: smtp.port === 465,
+            auth: {
+              user: smtp.username,
+              pass: smtp.password,
+            },
+          });
+
+          // Send password reset email
+          await transporter.sendMail({
+            from: `${smtp.fromName} <${smtp.fromEmail}>`,
+            to: email,
+            subject: "کد بازیابی رمز عبور - مومتاز کمیکال",
+            html: `
+              <div style="direction: rtl; text-align: right; font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">بازیابی رمز عبور</h2>
+                <p>سلام ${admin.username}،</p>
+                
+                <p>درخواست بازیابی رمز عبور برای حساب کاربری شما دریافت شد.</p>
+                
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                  <p style="margin: 0;"><strong>کد بازیابی شما:</strong></p>
+                  <div style="font-size: 24px; font-weight: bold; color: #2563eb; 
+                              padding: 15px; background: white; border-radius: 6px; 
+                              margin: 10px 0; letter-spacing: 3px;">
+                    ${resetCode}
+                  </div>
+                  <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+                    این کد تا 30 دقیقه معتبر است.
+                  </p>
+                </div>
+                
+                <p style="color: #666; font-size: 14px;">
+                  اگر شما این درخواست را نداده‌اید، این ایمیل را نادیده بگیرید.
+                </p>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+                <p style="font-size: 12px; color: #999;">
+                  با تشکر،<br>
+                  تیم فنی مومتاز کمیکال<br>
+                  momtazchem.com
+                </p>
+              </div>
+            `,
+            text: `
+سلام ${admin.username},
+
+درخواست بازیابی رمز عبور برای حساب کاربری شما دریافت شد.
+
+کد بازیابی شما: ${resetCode}
+
+این کد تا 30 دقیقه معتبر است.
+
+اگر شما این درخواست را نداده‌اید، این ایمیل را نادیده بگیرید.
+
+با تشکر،
+تیم فنی مومتاز کمیکال
+momtazchem.com
+            `
+          });
+
+          console.log(`Password reset email sent to: ${email}`);
+
+          // Log the email
+          await emailStorage.logEmail({
+            categoryId: categorySettings.category.id,
+            toEmail: email,
+            fromEmail: smtp.fromEmail,
+            subject: "کد بازیابی رمز عبور - مومتاز کمیکال",
+            status: 'sent',
+            sentAt: new Date(),
+          });
+
+        } else {
+          // Fallback to console if no SMTP configured
+          console.log(`Password reset code for ${email}: ${resetCode}`);
+        }
+      } catch (emailError) {
+        console.error('Error sending password reset email:', emailError);
+        // Still log the code to console as fallback
+        console.log(`Password reset code for ${email}: ${resetCode}`);
+      }
 
       res.json({ 
         success: true, 
