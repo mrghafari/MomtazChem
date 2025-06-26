@@ -284,21 +284,39 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Checkout Form */}
           <div className="lg:col-span-2">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {/* Customer Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="w-5 h-5" />
-                      Customer Information
-                      {isLoggedIn && (
-                        <Badge variant="secondary" className="ml-2">
-                          Auto-filled from account
-                        </Badge>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
+            {!isUserLoggedIn ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Authentication Required</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center py-8">
+                  <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Please Login or Sign Up</h3>
+                  <p className="text-gray-500 mb-6">You need to be logged in to complete your purchase.</p>
+                  <Button 
+                    onClick={() => setAuthModalOpen(true)}
+                    className="w-full max-w-sm"
+                  >
+                    Login or Sign Up to Continue
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  {/* Customer Information */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="w-5 h-5" />
+                        Customer Information
+                        {isLoggedIn && (
+                          <Badge variant="secondary" className="ml-2">
+                            Auto-filled from account
+                          </Badge>
+                        )}
+                      </CardTitle>
+                    </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
@@ -517,15 +535,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   </CardContent>
                 </Card>
 
-                {!isUserLoggedIn ? (
-                  <Button 
-                    type="button"
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setAuthModalOpen(true)}
-                  >
-                    Login or Sign Up to Continue
-                  </Button>
-                ) : (
                   <Button 
                     type="submit" 
                     className="w-full"
@@ -533,9 +542,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   >
                     {createOrderMutation.isPending ? "Processing Order..." : "Place Order"}
                   </Button>
-                )}
-              </form>
-            </Form>
+                </form>
+              </Form>
+            )}
           </div>
 
           {/* Order Summary */}
