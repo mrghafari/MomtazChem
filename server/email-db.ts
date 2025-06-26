@@ -11,5 +11,16 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const emailPool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const emailPool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  max: 1, // Limit concurrent connections
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000
+});
+
+// Handle pool errors to prevent unhandled rejections
+emailPool.on('error', (err) => {
+  console.error('Email database pool error:', err);
+});
+
 export const emailDb = drizzle({ client: emailPool, schema: emailSchema });

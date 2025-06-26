@@ -5,6 +5,15 @@ import { registerRoutes } from "./routes";
 import InventoryAlertService from "./inventory-alerts";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Global error handlers to prevent server crashes
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -103,12 +112,14 @@ app.use((req, res, next) => {
     }, () => {
       log(`serving on port ${port}`);
       
-      // Start inventory monitoring service
-      try {
-        InventoryAlertService.startInventoryMonitoring();
-      } catch (monitoringError) {
-        console.error("Error starting inventory monitoring:", monitoringError);
-      }
+      // Start inventory monitoring service with delayed initialization
+      setTimeout(() => {
+        try {
+          InventoryAlertService.startInventoryMonitoring();
+        } catch (monitoringError) {
+          console.error("Error starting inventory monitoring:", monitoringError);
+        }
+      }, 5000); // Delay 5 seconds to ensure database connections are stable
     });
   } catch (error) {
     console.error("Failed to start server:", error);
