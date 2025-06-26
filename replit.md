@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: FIXED super admin list display issue - updated user department settings so both super admins appear in the management interface
+- June 26, 2025: ENHANCED admin password reset email functionality to actually send emails via SMTP instead of only logging to console
+- June 26, 2025: UPDATED email system to use super admin's email for all administrative communications
 - June 26, 2025: FIXED super admin form initialization - moved eye icons to right side and ensured form fields are completely empty on component mount
 - June 26, 2025: Enhanced super admin settings with proper form clearing functionality and improved password field positioning
 - June 26, 2025: Modified password fields layout to be vertically stacked (password and confirm password now appear one below the other)
