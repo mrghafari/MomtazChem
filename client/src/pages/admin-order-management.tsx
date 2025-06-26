@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -112,13 +112,30 @@ export default function AdminOrderManagement() {
   const [newStatus, setNewStatus] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Auto-refresh data every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [queryClient]);
+
   // Fetch orders for selected department
   const { data: orders, isLoading } = useQuery({
     queryKey: ['orders', selectedDepartment],
     queryFn: async () => {
-      const response = await apiRequest(`/api/order-management/${selectedDepartment}`);
-      return response.orders as OrderManagement[];
-    }
+      const response = await fetch(`/api/order-management/${selectedDepartment}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+      const data = await response.json();
+      return data.orders as OrderManagement[];
+    },
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchIntervalInBackground: true
   });
 
   // Fetch order history
@@ -126,8 +143,14 @@ export default function AdminOrderManagement() {
     queryKey: ['order-history', selectedOrder?.id],
     queryFn: async () => {
       if (!selectedOrder) return [];
-      const response = await apiRequest(`/api/order-management/${selectedOrder.id}/history`);
-      return response.history as StatusHistoryItem[];
+      const response = await fetch(`/api/order-management/${selectedOrder.id}/history`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch order history');
+      }
+      const data = await response.json();
+      return data.history as StatusHistoryItem[];
     },
     enabled: !!selectedOrder
   });
@@ -135,14 +158,25 @@ export default function AdminOrderManagement() {
   // Update order status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, newStatus, notes }: { orderId: number; newStatus: string; notes: string }) => {
-      return apiRequest(`/api/order-management/${orderId}/status`, {
+      const response = await fetch(`/api/order-management/${orderId}/status`, {
         method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify({
           newStatus,
           department: selectedDepartment,
           notes
         })
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'خطا در بروزرسانی وضعیت سفارش');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({

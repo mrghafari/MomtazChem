@@ -49,6 +49,7 @@ import CategoryManagement from "@/pages/category-management";
 import SeoManagement from "@/pages/seo-management";
 import AdminSmsManagement from "@/pages/admin-sms-management";
 import WidgetRecommendations from "@/pages/widget-recommendations";
+import AdminOrderManagement from "@/pages/admin-order-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -92,6 +93,7 @@ function Router() {
           <Route path="/admin/sms-management" component={AdminSmsManagement} />
           <Route path="/admin/sms" component={AdminSmsManagement} />
           <Route path="/admin/widgets" component={WidgetRecommendations} />
+          <Route path="/admin/order-management" component={AdminOrderManagement} />
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />

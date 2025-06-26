@@ -136,9 +136,11 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       updateData.logisticsProcessedAt = new Date();
       if (notes) updateData.logisticsNotes = notes;
       
-      // Generate delivery code when order is dispatched
+      // Generate delivery code when order is dispatched and send SMS
       if (newStatus === orderStatuses.LOGISTICS_DISPATCHED) {
-        await this.generateDeliveryCode(id);
+        const deliveryCode = await this.generateDeliveryCode(id);
+        // TODO: Send SMS to customer with delivery code
+        console.log(`SMS delivery code ${deliveryCode.code} should be sent for order ${id}`);
       }
     }
     
