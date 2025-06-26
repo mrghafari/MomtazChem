@@ -150,10 +150,22 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   roleId: integer("role_id").references(() => adminRoles.id),
+  department: text("department"), // 'financial', 'warehouse', 'logistics', 'super_admin'
   isActive: boolean("is_active").default(true),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Department managers table - تعیین مدیر هر بخش توسط سوپر ادمین
+export const departmentManagers = pgTable("department_managers", {
+  id: serial("id").primaryKey(),
+  department: text("department").notNull(), // 'financial', 'warehouse', 'logistics'
+  managerId: integer("manager_id").notNull().references(() => users.id),
+  assignedBy: integer("assigned_by").notNull().references(() => users.id), // سوپر ادمین که تعیین کرده
+  isActive: boolean("is_active").default(true),
+  assignedAt: timestamp("assigned_at").notNull().defaultNow(),
+  deactivatedAt: timestamp("deactivated_at"),
 });
 
 // Password reset tokens table
@@ -195,9 +207,16 @@ export const insertPasswordResetSchema = createInsertSchema(passwordResets).omit
   createdAt: true,
 });
 
+export const insertDepartmentManagerSchema = createInsertSchema(departmentManagers).omit({
+  id: true,
+  assignedAt: true,
+});
+
 // Export types
 export type InsertAdminRole = z.infer<typeof insertAdminRoleSchema>;
 export type AdminRole = typeof adminRoles.$inferSelect;
+export type InsertDepartmentManager = z.infer<typeof insertDepartmentManagerSchema>;
+export type DepartmentManager = typeof departmentManagers.$inferSelect;
 export type InsertAdminPermission = z.infer<typeof insertAdminPermissionSchema>;
 export type AdminPermission = typeof adminPermissions.$inferSelect;
 export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
