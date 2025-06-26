@@ -131,6 +131,11 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: FIXED admin dashboard 404 errors and authentication issues
+- June 26, 2025: Added missing /api/admin/me endpoint for proper admin authentication flow
+- June 26, 2025: Restructured admin dashboard with complete tabbed interface (Overview, Products, Management)
+- June 26, 2025: Fixed JSX compilation errors and completed centralized product management functionality
+- June 26, 2025: Verified admin credentials working: info@momtazchem.com / password
 - June 26, 2025: COMPLETED comprehensive English localization of super admin settings interface
 - June 26, 2025: Converted all Persian text to English including forms, labels, validation messages, navigation elements, buttons, status badges, and verification components
 - June 26, 2025: Updated date formatting from Persian (fa-IR) to English (en-US) locale throughout admin interface
