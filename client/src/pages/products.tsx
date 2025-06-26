@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
+import { z } from "zod";
 import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -214,10 +215,19 @@ export default function ProductsPage() {
   });
 
   const onSubmit = (data: InsertShowcaseProduct) => {
+    // Convert unitPrice from string to number for API
+    const processedData = {
+      ...data,
+      unitPrice: parseFloat(data.unitPrice as string) || 0,
+      stockQuantity: Number(data.stockQuantity) || 0,
+      minStockLevel: Number(data.minStockLevel) || 0,
+      maxStockLevel: Number(data.maxStockLevel) || 0,
+    };
+    
     if (editingProduct) {
-      updateProduct({ id: editingProduct.id, data });
+      updateProduct({ id: editingProduct.id, data: processedData });
     } else {
-      createProduct(data);
+      createProduct(processedData);
     }
   };
 

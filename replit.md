@@ -134,6 +134,7 @@ Changelog:
 - June 26, 2025: FIXED unit price persistence issue - added unitPrice and currency fields to showcase schema with proper database column creation
 - June 26, 2025: Enhanced product form to properly handle unit price and currency data with correct form initialization and data conversion
 - June 26, 2025: Verified database connection and confirmed unit price updates are being stored correctly in PostgreSQL
+- June 26, 2025: RESOLVED unit price validation error - implemented proper data type conversion in form submission handler
 - June 26, 2025: COMPLETED comprehensive currency standardization - replaced Iranian Rial (IRR) with Iraqi Dinar (IQD) throughout entire application
 - June 26, 2025: Updated all currency selection forms to use only USD, EUR, and IQD as valid currencies
 - June 26, 2025: Enhanced formatCurrency functions across all components to support multiple currencies with validation
