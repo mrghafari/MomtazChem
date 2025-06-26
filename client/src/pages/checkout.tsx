@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import AddressSelector from "@/components/checkout/address-selector";
+import AuthModal from "@/components/checkout/auth-modal";
 
 // Dynamic checkout form validation schema - required fields only if not logged in
 const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
@@ -63,6 +64,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [orderNumber, setOrderNumber] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -516,9 +518,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 </Card>
 
                 <Button 
-                  type="submit" 
+                  type={isUserLoggedIn ? "submit" : "button"}
                   className="w-full"
                   disabled={createOrderMutation.isPending}
+                  onClick={!isUserLoggedIn ? () => setAuthModalOpen(true) : undefined}
                 >
                   {createOrderMutation.isPending ? "Processing Order..." : "Place Order"}
                 </Button>
@@ -579,6 +582,17 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onAuthSuccess={() => {
+          setAuthModalOpen(false);
+          // Refresh customer data after successful auth
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }
