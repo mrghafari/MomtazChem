@@ -371,7 +371,7 @@ export default function SuperAdminSettings() {
                   disabled={createAdminMutation.isPending || !newAdminData.username || !newAdminData.email || !newAdminData.password}
                   className="w-full"
                 >
-                  {createAdminMutation.isPending ? "در حال ایجاد..." : "ایجاد سوپر ادمین"}
+                  {createAdminMutation.isPending ? "Creating..." : "Create Super Admin"}
                 </Button>
               </CardContent>
             </Card>
@@ -381,11 +381,11 @@ export default function SuperAdminSettings() {
           <TabsContent value="manage">
             <Card>
               <CardHeader>
-                <CardTitle>لیست سوپر ادمین‌ها</CardTitle>
+                <CardTitle>Super Admin List</CardTitle>
               </CardHeader>
               <CardContent>
                 {loadingAdmins ? (
-                  <div className="text-center py-8">در حال بارگذاری...</div>
+                  <div className="text-center py-8">Loading...</div>
                 ) : (
                   <div className="space-y-4">
                     {superAdmins.map((admin: SuperAdmin) => (
@@ -394,18 +394,18 @@ export default function SuperAdminSettings() {
                           <div className="flex items-center gap-3">
                             <h3 className="font-semibold">{admin.username}</h3>
                             <Badge variant={admin.isActive ? "default" : "secondary"}>
-                              {admin.isActive ? "فعال" : "غیرفعال"}
+                              {admin.isActive ? "Active" : "Inactive"}
                             </Badge>
                             {admin.emailVerified && (
                               <Badge variant="outline" className="text-green-600">
                                 <Mail className="h-3 w-3 mr-1" />
-                                ایمیل تایید شده
+                                Email Verified
                               </Badge>
                             )}
                             {admin.phoneVerified && (
                               <Badge variant="outline" className="text-blue-600">
                                 <Phone className="h-3 w-3 mr-1" />
-                                تلفن تایید شده
+                                Phone Verified
                               </Badge>
                             )}
                           </div>
@@ -415,7 +415,7 @@ export default function SuperAdminSettings() {
                           )}
                           {admin.lastLoginAt && (
                             <p className="text-xs text-slate-500 mt-1">
-                              آخرین ورود: {new Date(admin.lastLoginAt).toLocaleDateString('fa-IR')}
+                              Last login: {new Date(admin.lastLoginAt).toLocaleDateString('en-US')}
                             </p>
                           )}
                         </div>
@@ -427,7 +427,7 @@ export default function SuperAdminSettings() {
                               onClick={() => sendVerificationMutation.mutate({ adminId: admin.id, type: 'email' })}
                             >
                               <Mail className="h-4 w-4 mr-1" />
-                              تایید ایمیل
+                              Verify Email
                             </Button>
                           )}
                           {admin.phone && !admin.phoneVerified && (
@@ -437,7 +437,7 @@ export default function SuperAdminSettings() {
                               onClick={() => sendVerificationMutation.mutate({ adminId: admin.id, type: 'sms' })}
                             >
                               <Phone className="h-4 w-4 mr-1" />
-                              تایید تلفن
+                              Verify Phone
                             </Button>
                           )}
                           <Button
@@ -461,18 +461,18 @@ export default function SuperAdminSettings() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>تایید حساب کاربری</CardTitle>
+                  <CardTitle>Account Verification</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="adminSelect">انتخاب ادمین</Label>
+                    <Label htmlFor="adminSelect">Select Admin</Label>
                     <select
                       id="adminSelect"
                       className="w-full p-2 border rounded-md"
                       value={verificationData.adminId}
                       onChange={(e) => setVerificationData(prev => ({ ...prev, adminId: parseInt(e.target.value) }))}
                     >
-                      <option value={0}>انتخاب کنید</option>
+                      <option value={0}>Select an admin</option>
                       {superAdmins.filter((admin: SuperAdmin) => !admin.emailVerified || (admin.phone && !admin.phoneVerified)).map((admin: SuperAdmin) => (
                         <option key={admin.id} value={admin.id}>
                           {admin.username} - {admin.email}
@@ -481,24 +481,24 @@ export default function SuperAdminSettings() {
                     </select>
                   </div>
                   <div>
-                    <Label htmlFor="verificationType">نوع تایید</Label>
+                    <Label htmlFor="verificationType">Verification Type</Label>
                     <select
                       id="verificationType"
                       className="w-full p-2 border rounded-md"
                       value={verificationData.type}
                       onChange={(e) => setVerificationData(prev => ({ ...prev, type: e.target.value as 'email' | 'sms' }))}
                     >
-                      <option value="email">ایمیل</option>
-                      <option value="sms">پیامک</option>
+                      <option value="email">Email</option>
+                      <option value="sms">SMS</option>
                     </select>
                   </div>
                   <div>
-                    <Label htmlFor="verificationCode">کد تایید</Label>
+                    <Label htmlFor="verificationCode">Verification Code</Label>
                     <Input
                       id="verificationCode"
                       value={verificationData.code}
                       onChange={(e) => setVerificationData(prev => ({ ...prev, code: e.target.value }))}
-                      placeholder="کد 6 رقمی را وارد کنید"
+                      placeholder="Enter 6-digit code"
                       maxLength={6}
                     />
                   </div>
@@ -507,18 +507,18 @@ export default function SuperAdminSettings() {
                     disabled={verifyCodeMutation.isPending || !verificationData.adminId || !verificationData.code}
                     className="w-full"
                   >
-                    {verifyCodeMutation.isPending ? "در حال تایید..." : "تایید کد"}
+                    {verifyCodeMutation.isPending ? "Verifying..." : "Verify Code"}
                   </Button>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>کدهای تایید در انتظار</CardTitle>
+                  <CardTitle>Pending Verification Codes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loadingVerifications ? (
-                    <div className="text-center py-4">در حال بارگذاری...</div>
+                    <div className="text-center py-4">Loading...</div>
                   ) : (
                     <div className="space-y-3">
                       {pendingVerifications.map((verification: PendingVerification) => (
@@ -527,15 +527,15 @@ export default function SuperAdminSettings() {
                             <div>
                               <p className="font-medium">{verification.email}</p>
                               <p className="text-sm text-slate-600">
-                                {verification.type === 'email' ? 'ایمیل' : 'پیامک'} - 
-                                کد: {verification.verificationCode}
+                                {verification.type === 'email' ? 'Email' : 'SMS'} - 
+                                Code: {verification.verificationCode}
                               </p>
                               <p className="text-xs text-slate-500">
-                                انقضا: {new Date(verification.expiresAt).toLocaleString('fa-IR')}
+                                Expires: {new Date(verification.expiresAt).toLocaleString('en-US')}
                               </p>
                             </div>
                             <Badge variant={new Date(verification.expiresAt) > new Date() ? "default" : "destructive"}>
-                              {new Date(verification.expiresAt) > new Date() ? "فعال" : "منقضی"}
+                              {new Date(verification.expiresAt) > new Date() ? "Active" : "Expired"}
                             </Badge>
                           </div>
                         </div>
