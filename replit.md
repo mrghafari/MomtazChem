@@ -133,6 +133,7 @@ The database is organized into multiple schema files:
 Changelog:
 - June 26, 2025: FIXED super admin form initialization - moved eye icons to right side and ensured form fields are completely empty on component mount
 - June 26, 2025: Enhanced super admin settings with proper form clearing functionality and improved password field positioning
+- June 26, 2025: Modified password fields layout to be vertically stacked (password and confirm password now appear one below the other)
 - June 26, 2025: COMPLETED bilingual conversion of user-management page to English/Arabic with English as default language and RTL/LTR support
 - June 26, 2025: SET Iraqi Dinar (IQD) as default currency across all forms and formatCurrency functions throughout the application
 - June 26, 2025: Updated default currency in product forms, sales analytics, sales reports, CRM, and unified customer profile components
