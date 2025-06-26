@@ -131,6 +131,10 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED comprehensive currency standardization - replaced Iranian Rial (IRR) with Iraqi Dinar (IQD) throughout entire application
+- June 26, 2025: Updated all currency selection forms to use only USD, EUR, and IQD as valid currencies
+- June 26, 2025: Enhanced formatCurrency functions across all components to support multiple currencies with validation
+- June 26, 2025: Standardized product management, CRM, sales analytics, and customer interfaces to new currency system
 - June 26, 2025: COMPLETED final administrative centralization - removed Products button from admin dashboard as it's fully integrated into Site Management
 - June 26, 2025: Admin dashboard now contains only Site Management button providing access to all 17 administrative functions including product management
 - June 26, 2025: Updated admin dashboard welcome message to reflect complete centralization of all administrative tools

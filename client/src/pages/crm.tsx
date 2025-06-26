@@ -336,11 +336,14 @@ export default function CRM() {
     }
   };
 
-  const formatCurrency = (amount: string | number) => {
+  const formatCurrency = (amount: string | number, currency: string = 'USD') => {
+    const validCurrencies = ['USD', 'EUR', 'IQD'];
+    const currencyCode = validCurrencies.includes(currency) ? currency : 'USD';
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currencyCode,
       minimumFractionDigits: 2
     }).format(num);
   };
