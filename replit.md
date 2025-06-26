@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED SEO functionality migration to Site Management - moved multilingual SEO management from admin dashboard to centralized management interface
+- June 26, 2025: Added SEO as seventh Quick Action button in Site Management with proper purple styling and Globe icon
+- June 26, 2025: Removed SEO button from main admin dashboard to continue centralizing administrative operations
 - June 26, 2025: COMPLETED CRM functionality migration to Site Management - moved customer relationship management from admin dashboard to centralized management interface
 - June 26, 2025: Added CRM as sixth Quick Action button in Site Management with proper pink styling and Users icon
 - June 26, 2025: Removed CRM button from main admin dashboard to continue centralizing administrative operations

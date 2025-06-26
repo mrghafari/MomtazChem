@@ -503,14 +503,7 @@ export default function AdminPage() {
             SMTP Test
           </Button>
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/seo-management")}
-            className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
-          >
-            <Search className="w-4 h-4 mr-2" />
-            Multilingual SEO
-          </Button>
+
           
           <Button 
             variant="outline"

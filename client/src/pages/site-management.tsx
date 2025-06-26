@@ -160,6 +160,15 @@ export default function SiteManagement() {
                     <Users className="h-6 w-6 mb-2" />
                     <span className="text-sm">CRM</span>
                   </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-purple-300 text-purple-600 hover:bg-purple-50"
+                    onClick={() => setLocation("/seo-management")}
+                  >
+                    <Globe className="h-6 w-6 mb-2" />
+                    <span className="text-sm">SEO</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
