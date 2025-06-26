@@ -50,6 +50,12 @@ import SeoManagement from "@/pages/seo-management";
 import AdminSmsManagement from "@/pages/admin-sms-management";
 import WidgetRecommendations from "@/pages/widget-recommendations";
 import AdminOrderManagement from "@/pages/admin-order-management";
+import FinancialDepartment from "@/pages/financial-department";
+import WarehouseDepartment from "@/pages/warehouse-department";
+import LogisticsDepartment from "@/pages/logistics-department";
+import FinancialLogin from "@/pages/financial-login";
+import WarehouseLogin from "@/pages/warehouse-login";
+import LogisticsLogin from "@/pages/logistics-login";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -94,6 +100,15 @@ function Router() {
           <Route path="/admin/sms" component={AdminSmsManagement} />
           <Route path="/admin/widgets" component={WidgetRecommendations} />
           <Route path="/admin/order-management" component={AdminOrderManagement} />
+          
+          {/* Department-specific routes */}
+          <Route path="/financial" component={FinancialDepartment} />
+          <Route path="/financial/login" component={FinancialLogin} />
+          <Route path="/warehouse" component={WarehouseDepartment} />
+          <Route path="/warehouse/login" component={WarehouseLogin} />
+          <Route path="/logistics" component={LogisticsDepartment} />
+          <Route path="/logistics/login" component={LogisticsLogin} />
+          
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
           <Route path="/products/fuel-additives" component={FuelAdditives} />

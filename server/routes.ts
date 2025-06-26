@@ -26,6 +26,7 @@ import { db } from "./db";
 import { sql, eq, and } from "drizzle-orm";
 import { z } from "zod";
 import * as schema from "@shared/schema";
+import { orderManagement } from "@shared/order-management-schema";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -33,6 +34,11 @@ declare module "express-session" {
     adminId?: number;
     customerId?: number;
     isAuthenticated?: boolean;
+    departmentUser?: {
+      id: number;
+      username: string;
+      department: string;
+    };
   }
 }
 
@@ -7376,6 +7382,392 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error fetching orders overview:', error);
       res.status(500).json({ success: false, message: 'خطا در دریافت نمای کلی سفارشات' });
+    }
+  });
+
+  // ============================================================================
+  // DEPARTMENT-SPECIFIC AUTHENTICATION & ROUTES
+  // ============================================================================
+
+  // Department authentication middleware
+  function requireDepartmentAuth(department: string) {
+    return (req: any, res: any, next: any) => {
+      if (!req.session?.departmentUser || req.session.departmentUser.department !== department) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+      next();
+    };
+  }
+
+  // ============================================================================
+  // FINANCIAL DEPARTMENT ROUTES
+  // ============================================================================
+
+  // Financial login
+  app.post('/api/financial/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Check if user exists and has financial department access
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.username, username),
+          eq(users.department, 'financial'),
+          eq(users.isActive, true)
+        ));
+
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "نام کاربری یا رمز عبور اشتباه است" 
+        });
+      }
+
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "نام کاربری یا رمز عبور اشتباه است" 
+        });
+      }
+
+      // Update last login
+      await db
+        .update(users)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(users.id, user.id));
+
+      // Set session
+      req.session.departmentUser = {
+        id: user.id,
+        username: user.username,
+        department: user.department
+      };
+
+      res.json({ 
+        success: true, 
+        message: "ورود موفق", 
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          department: user.department 
+        } 
+      });
+    } catch (error) {
+      console.error('Financial login error:', error);
+      res.status(500).json({ success: false, message: "خطا در ورود" });
+    }
+  });
+
+  // Financial logout
+  app.post('/api/financial/logout', (req, res) => {
+    req.session.departmentUser = null;
+    res.json({ success: true, message: "خروج موفق" });
+  });
+
+  // Financial auth check
+  app.get('/api/financial/auth/me', requireDepartmentAuth('financial'), (req: any, res) => {
+    res.json({ 
+      success: true, 
+      user: req.session.departmentUser 
+    });
+  });
+
+  // Get financial pending orders
+  app.get('/api/financial/orders', requireDepartmentAuth('financial'), async (req, res) => {
+    try {
+      const orders = await orderManagementStorage.getFinancialPendingOrders();
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error('Error fetching financial orders:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
+    }
+  });
+
+  // Process financial order
+  app.post('/api/financial/orders/:id/process', requireDepartmentAuth('financial'), async (req: any, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { action, notes, reviewerId } = req.body;
+      
+      if (action === 'approve') {
+        await orderManagementStorage.updateOrderStatus(
+          orderId,
+          'financial_approved',
+          reviewerId,
+          'financial',
+          notes || 'تایید شده توسط بخش مالی'
+        );
+      } else {
+        await orderManagementStorage.updateOrderStatus(
+          orderId,
+          'financial_rejected',
+          reviewerId,
+          'financial',
+          notes || 'رد شده توسط بخش مالی'
+        );
+      }
+
+      res.json({ success: true, message: "سفارش با موفقیت پردازش شد" });
+    } catch (error) {
+      console.error('Error processing financial order:', error);
+      res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
+    }
+  });
+
+  // ============================================================================
+  // WAREHOUSE DEPARTMENT ROUTES
+  // ============================================================================
+
+  // Warehouse login
+  app.post('/api/warehouse/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.username, username),
+          eq(users.department, 'warehouse'),
+          eq(users.isActive, true)
+        ));
+
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "نام کاربری یا رمز عبور اشتباه است" 
+        });
+      }
+
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "نام کاربری یا رمز عبور اشتباه است" 
+        });
+      }
+
+      await db
+        .update(users)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(users.id, user.id));
+
+      req.session.departmentUser = {
+        id: user.id,
+        username: user.username,
+        department: user.department
+      };
+
+      res.json({ 
+        success: true, 
+        message: "ورود موفق", 
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          department: user.department 
+        } 
+      });
+    } catch (error) {
+      console.error('Warehouse login error:', error);
+      res.status(500).json({ success: false, message: "خطا در ورود" });
+    }
+  });
+
+  // Warehouse logout
+  app.post('/api/warehouse/logout', (req, res) => {
+    req.session.departmentUser = null;
+    res.json({ success: true, message: "خروج موفق" });
+  });
+
+  // Warehouse auth check
+  app.get('/api/warehouse/auth/me', requireDepartmentAuth('warehouse'), (req: any, res) => {
+    res.json({ 
+      success: true, 
+      user: req.session.departmentUser 
+    });
+  });
+
+  // Get warehouse pending orders
+  app.get('/api/warehouse/orders', requireDepartmentAuth('warehouse'), async (req, res) => {
+    try {
+      const orders = await orderManagementStorage.getWarehousePendingOrders();
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error('Error fetching warehouse orders:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
+    }
+  });
+
+  // Process warehouse order
+  app.post('/api/warehouse/orders/:id/process', requireDepartmentAuth('warehouse'), async (req: any, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { action, notes, assigneeId } = req.body;
+      
+      if (action === 'approve') {
+        await orderManagementStorage.updateOrderStatus(
+          orderId,
+          'warehouse_approved',
+          assigneeId,
+          'warehouse',
+          notes || 'آماده شده از انبار'
+        );
+      } else {
+        await orderManagementStorage.updateOrderStatus(
+          orderId,
+          'warehouse_rejected',
+          assigneeId,
+          'warehouse',
+          notes || 'عدم موجودی در انبار'
+        );
+      }
+
+      res.json({ success: true, message: "سفارش با موفقیت پردازش شد" });
+    } catch (error) {
+      console.error('Error processing warehouse order:', error);
+      res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
+    }
+  });
+
+  // ============================================================================
+  // LOGISTICS DEPARTMENT ROUTES
+  // ============================================================================
+
+  // Logistics login
+  app.post('/api/logistics/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.username, username),
+          eq(users.department, 'logistics'),
+          eq(users.isActive, true)
+        ));
+
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "نام کاربری یا رمز عبور اشتباه است" 
+        });
+      }
+
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "نام کاربری یا رمز عبور اشتباه است" 
+        });
+      }
+
+      await db
+        .update(users)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(users.id, user.id));
+
+      req.session.departmentUser = {
+        id: user.id,
+        username: user.username,
+        department: user.department
+      };
+
+      res.json({ 
+        success: true, 
+        message: "ورود موفق", 
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          department: user.department 
+        } 
+      });
+    } catch (error) {
+      console.error('Logistics login error:', error);
+      res.status(500).json({ success: false, message: "خطا در ورود" });
+    }
+  });
+
+  // Logistics logout
+  app.post('/api/logistics/logout', (req, res) => {
+    req.session.departmentUser = null;
+    res.json({ success: true, message: "خروج موفق" });
+  });
+
+  // Logistics auth check
+  app.get('/api/logistics/auth/me', requireDepartmentAuth('logistics'), (req: any, res) => {
+    res.json({ 
+      success: true, 
+      user: req.session.departmentUser 
+    });
+  });
+
+  // Get logistics pending orders
+  app.get('/api/logistics/orders', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const orders = await orderManagementStorage.getLogisticsPendingOrders();
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error('Error fetching logistics orders:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
+    }
+  });
+
+  // Process logistics order
+  app.post('/api/logistics/orders/:id/process', requireDepartmentAuth('logistics'), async (req: any, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { action, trackingNumber, estimatedDeliveryDate, deliveryPersonName, deliveryPersonPhone, notes, assigneeId } = req.body;
+      
+      let status = '';
+      let message = '';
+      
+      if (action === 'assign') {
+        status = 'logistics_assigned';
+        message = 'پیک تخصیص داده شد';
+      } else if (action === 'dispatch') {
+        status = 'logistics_dispatched';
+        message = 'کالا ارسال شد';
+      } else if (action === 'deliver') {
+        status = 'delivered';
+        message = 'تحویل نهایی انجام شد';
+        
+        // Generate delivery code for final delivery
+        const deliveryCode = Math.random().toString().substr(2, 6);
+        await orderManagementStorage.generateDeliveryCode(orderId, deliveryCode);
+      }
+      
+      // Update order with logistics info
+      await db
+        .update(orderManagement)
+        .set({
+          logisticsAssigneeId: assigneeId,
+          logisticsProcessedAt: new Date(),
+          logisticsNotes: notes,
+          trackingNumber,
+          estimatedDeliveryDate: estimatedDeliveryDate ? new Date(estimatedDeliveryDate) : null,
+          deliveryPersonName,
+          deliveryPersonPhone,
+          currentStatus: status
+        })
+        .where(eq(orderManagement.id, orderId));
+
+      // Log status change
+      await orderManagementStorage.updateOrderStatus(
+        orderId,
+        status as any,
+        assigneeId,
+        'logistics',
+        notes || message
+      );
+
+      res.json({ success: true, message: "سفارش با موفقیت پردازش شد" });
+    } catch (error) {
+      console.error('Error processing logistics order:', error);
+      res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
     }
   });
 
