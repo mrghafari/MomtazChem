@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED inquiries functionality migration to Site Management - moved inquiries from admin dashboard to centralized management interface
+- June 26, 2025: Added inquiries as second Quick Action button in Site Management with proper orange styling and BarChart3 icon
+- June 26, 2025: Removed inquiries button from main admin dashboard to further reduce clutter and centralize administrative operations
 - June 26, 2025: COMPLETED Site Management centralization - moved sync shop functionality from admin dashboard to organized Site Management interface
 - June 26, 2025: Created comprehensive Site Management page with 6 tabbed sections (Overview, Content, Users, Security, Performance, Settings)
 - June 26, 2025: Integrated sync shop as primary function in Site Management with enhanced UI including loading animations and proper error handling

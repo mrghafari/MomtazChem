@@ -450,14 +450,7 @@ export default function AdminPage() {
           </Button>
           
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/inquiries")}
-            className="border-orange-300 text-orange-600 hover:bg-orange-50 h-12 text-sm"
-          >
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Inquiries
-          </Button>
+
 
           <Button 
             variant="outline"

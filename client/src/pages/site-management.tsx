@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -116,9 +116,13 @@ export default function SiteManagement() {
                     <span className="text-sm">{syncProductsMutation.isPending ? 'Syncing...' : 'Sync Shop'}</span>
                   </Button>
                   
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-                    <Database className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Function 2</span>
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-orange-300 text-orange-600 hover:bg-orange-50"
+                    onClick={() => setLocation("/admin/inquiries")}
+                  >
+                    <BarChart3 className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Inquiries</span>
                   </Button>
                   
                   <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
