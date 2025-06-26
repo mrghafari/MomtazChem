@@ -111,7 +111,7 @@ export default function SuperAdminSettings() {
   // Send verification code
   const sendVerificationMutation = useMutation({
     mutationFn: async ({ adminId, type }: { adminId: number, type: 'email' | 'sms' }) => {
-      return await apiRequest('/api/super-admin/send-verification', { adminId, type });
+      return await apiRequest('/api/super-admin/send-verification', 'POST', { adminId, type });
     },
     onSuccess: (response) => {
       toast({
@@ -131,7 +131,7 @@ export default function SuperAdminSettings() {
   // Verify code
   const verifyCodeMutation = useMutation({
     mutationFn: async (data: typeof verificationData) => {
-      return await apiRequest('/api/super-admin/verify', data);
+      return await apiRequest('/api/super-admin/verify', 'POST', data);
     },
     onSuccess: (response) => {
       toast({
@@ -154,7 +154,7 @@ export default function SuperAdminSettings() {
   // Password reset request
   const passwordResetMutation = useMutation({
     mutationFn: async (email: string) => {
-      return await apiRequest('/api/super-admin/forgot-password', { email });
+      return await apiRequest('/api/super-admin/forgot-password', 'POST', { email });
     },
     onSuccess: (response) => {
       toast({
@@ -174,7 +174,7 @@ export default function SuperAdminSettings() {
   // Reset password with code
   const resetPasswordMutation = useMutation({
     mutationFn: async (data: typeof resetEmailData) => {
-      return await apiRequest('/api/super-admin/reset-password', data);
+      return await apiRequest('/api/super-admin/reset-password', 'POST', data);
     },
     onSuccess: (response) => {
       toast({
@@ -200,7 +200,7 @@ export default function SuperAdminSettings() {
   // Delete super admin
   const deleteAdminMutation = useMutation({
     mutationFn: async (adminId: number) => {
-      return await apiRequest(`/api/super-admin/admins/${adminId}`);
+      return await apiRequest(`/api/super-admin/admins/${adminId}`, 'DELETE');
     },
     onSuccess: (response) => {
       toast({
