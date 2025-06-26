@@ -319,7 +319,10 @@ export default function AdminPage() {
                 <User className="w-4 h-4 mr-2" />
                 View Site
               </Button>
-              <Button variant="outline" onClick={() => navigate("/admin-login")}>
+              <Button variant="outline" onClick={() => {
+                localStorage.removeItem('admin-session');
+                navigate("/admin-login");
+              }}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
