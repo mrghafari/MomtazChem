@@ -131,6 +131,7 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: FIXED admin login issue for info@momtazchem.com - password reset to "password"
 - June 26, 2025: COMPLETED comprehensive 3-department order management system (Financial, Warehouse, Logistics)
 - June 26, 2025: Implemented sequential workflow where each department can only see orders approved by previous department
 - June 26, 2025: Added automatic delivery code generation and SMS notification system for final delivery
