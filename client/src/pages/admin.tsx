@@ -467,14 +467,7 @@ export default function AdminPage() {
           
 
 
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/factory-management")}
-            className="border-purple-300 text-purple-600 hover:bg-purple-50 h-12 text-sm"
-          >
-            <Factory className="w-4 h-4 mr-2" />
-            Factory Management
-          </Button>
+
 
           <Button 
             variant="outline"

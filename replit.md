@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED factory management functionality migration to Site Management - moved production line and manufacturing operations from admin dashboard to centralized management interface
+- June 26, 2025: Added factory management as tenth Quick Action button in Site Management with proper purple styling and Factory icon
+- June 26, 2025: Removed factory management button from main admin dashboard to continue administrative centralization
 - June 26, 2025: COMPLETED SMS management functionality migration to Site Management - moved SMS customer communication settings from admin dashboard to centralized management interface
 - June 26, 2025: Added SMS management as ninth Quick Action button in Site Management with proper green styling and MessageSquare icon
 - June 26, 2025: Removed SMS management button from main admin dashboard to complete centralization of administrative operations
