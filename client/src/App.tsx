@@ -103,6 +103,7 @@ function Router() {
           <Route path="/admin/sms" component={AdminSmsManagement} />
           <Route path="/admin/widgets" component={WidgetRecommendations} />
           <Route path="/admin/order-management" component={AdminOrderManagement} />
+          <Route path="/admin/site-management" component={SiteManagement} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
