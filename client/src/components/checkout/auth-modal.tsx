@@ -1,4 +1,5 @@
 import { useState } from 'react';
+// Force rebuild - updated auth modal with login/register buttons
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

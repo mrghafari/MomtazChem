@@ -517,14 +517,23 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   </CardContent>
                 </Card>
 
-                <Button 
-                  type={isUserLoggedIn ? "submit" : "button"}
-                  className="w-full"
-                  disabled={createOrderMutation.isPending}
-                  onClick={!isUserLoggedIn ? () => setAuthModalOpen(true) : undefined}
-                >
-                  {createOrderMutation.isPending ? "Processing Order..." : "Place Order"}
-                </Button>
+                {!isUserLoggedIn ? (
+                  <Button 
+                    type="button"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={() => setAuthModalOpen(true)}
+                  >
+                    ورود یا ثبت نام برای ادامه خرید
+                  </Button>
+                ) : (
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={createOrderMutation.isPending}
+                  >
+                    {createOrderMutation.isPending ? "Processing Order..." : "Place Order"}
+                  </Button>
+                )}
               </form>
             </Form>
           </div>
