@@ -151,11 +151,31 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   roleId: integer("role_id").references(() => adminRoles.id),
   department: text("department"), // 'financial', 'warehouse', 'logistics', 'super_admin'
+  phone: text("phone"),
   isActive: boolean("is_active").default(true),
+  emailVerified: boolean("email_verified").default(false),
+  phoneVerified: boolean("phone_verified").default(false),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+// Super Admin Verification Codes table
+export const superAdminVerifications = pgTable("super_admin_verifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  verificationCode: text("verification_code").notNull(),
+  type: text("type").notNull(), // 'email', 'sms', 'password_reset'
+  isUsed: boolean("is_used").default(false),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// TypeScript types for super admin verification
+export type SuperAdminVerification = typeof superAdminVerifications.$inferSelect;
+export type InsertSuperAdminVerification = typeof superAdminVerifications.$inferInsert;
 
 // Department managers table - تعیین مدیر هر بخش توسط سوپر ادمین
 export const departmentManagers = pgTable("department_managers", {

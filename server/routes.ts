@@ -23,7 +23,7 @@ import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
 import { db } from "./db";
-import { sql, eq, and } from "drizzle-orm";
+import { sql, eq, and, or, isNull, desc } from "drizzle-orm";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 import { orderManagement } from "@shared/order-management-schema";
@@ -7768,6 +7768,458 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error processing logistics order:', error);
       res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
+    }
+  });
+
+  // ============================================================================
+  // SUPER ADMIN VERIFICATION SYSTEM
+  // ============================================================================
+
+  // Get all super admins
+  app.get('/api/super-admin/admins', requireAuth, async (req, res) => {
+    try {
+      const admins = await db
+        .select({
+          id: schema.users.id,
+          username: schema.users.username,
+          email: schema.users.email,
+          phone: schema.users.phone,
+          isActive: schema.users.isActive,
+          emailVerified: schema.users.emailVerified,
+          phoneVerified: schema.users.phoneVerified,
+          lastLoginAt: schema.users.lastLoginAt,
+          createdAt: schema.users.createdAt
+        })
+        .from(schema.users)
+        .where(or(
+          eq(schema.users.department, 'super_admin'),
+          isNull(schema.users.department)
+        ));
+
+      res.json(admins);
+    } catch (error) {
+      console.error('Error fetching super admins:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت سوپر ادمین‌ها" });
+    }
+  });
+
+  // Create new super admin
+  app.post('/api/super-admin/create', requireAuth, async (req, res) => {
+    try {
+      const { username, email, phone, password } = req.body;
+      
+      if (!username || !email || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "نام کاربری، ایمیل و رمز عبور الزامی است" 
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await db
+        .select()
+        .from(schema.users)
+        .where(or(
+          eq(schema.users.username, username),
+          eq(schema.users.email, email)
+        ));
+
+      if (existingUser.length > 0) {
+        return res.status(409).json({ 
+          success: false, 
+          message: "نام کاربری یا ایمیل قبلاً استفاده شده است" 
+        });
+      }
+
+      // Hash password
+      const passwordHash = await bcrypt.hash(password, 10);
+      
+      // Create super admin
+      const [newAdmin] = await db
+        .insert(schema.users)
+        .values({
+          username,
+          email,
+          phone: phone || null,
+          passwordHash,
+          department: 'super_admin',
+          isActive: true,
+          emailVerified: false,
+          phoneVerified: false,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      // Generate email verification code
+      const emailCode = Math.random().toString().substr(2, 6);
+      const emailExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+      await db
+        .insert(schema.superAdminVerifications)
+        .values({
+          userId: newAdmin.id,
+          email: newAdmin.email,
+          phone: newAdmin.phone,
+          verificationCode: emailCode,
+          type: 'email',
+          isUsed: false,
+          expiresAt: emailExpiry,
+          createdAt: new Date()
+        });
+
+      // Send verification email (mock for now)
+      console.log(`Email verification code for ${email}: ${emailCode}`);
+
+      res.json({ 
+        success: true, 
+        message: "سوپر ادمین ایجاد شد. کد تایید ایمیل ارسال شد.",
+        user: {
+          id: newAdmin.id,
+          username: newAdmin.username,
+          email: newAdmin.email,
+          phone: newAdmin.phone
+        }
+      });
+    } catch (error) {
+      console.error('Error creating super admin:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد سوپر ادمین" });
+    }
+  });
+
+  // Send verification code
+  app.post('/api/super-admin/send-verification', requireAuth, async (req, res) => {
+    try {
+      const { adminId, type } = req.body;
+
+      if (!adminId || !type || !['email', 'sms'].includes(type)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه ادمین و نوع تایید الزامی است" 
+        });
+      }
+
+      const [admin] = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.id, adminId));
+
+      if (!admin) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "سوپر ادمین یافت نشد" 
+        });
+      }
+
+      if (type === 'sms' && !admin.phone) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شماره تلفن برای این ادمین ثبت نشده است" 
+        });
+      }
+
+      // Generate verification code
+      const verificationCode = Math.random().toString().substr(2, 6);
+      const expiryTime = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+      // Delete old verification codes for this user and type
+      await db
+        .delete(schema.superAdminVerifications)
+        .where(and(
+          eq(schema.superAdminVerifications.userId, adminId),
+          eq(schema.superAdminVerifications.type, type),
+          eq(schema.superAdminVerifications.isUsed, false)
+        ));
+
+      // Insert new verification code
+      await db
+        .insert(schema.superAdminVerifications)
+        .values({
+          userId: adminId,
+          email: admin.email,
+          phone: admin.phone,
+          verificationCode,
+          type,
+          isUsed: false,
+          expiresAt: expiryTime,
+          createdAt: new Date()
+        });
+
+      // Mock sending verification (replace with actual email/SMS service)
+      if (type === 'email') {
+        console.log(`Email verification code for ${admin.email}: ${verificationCode}`);
+      } else {
+        console.log(`SMS verification code for ${admin.phone}: ${verificationCode}`);
+      }
+
+      res.json({ 
+        success: true, 
+        message: type === 'email' ? "کد تایید به ایمیل ارسال شد" : "کد تایید به شماره تلفن ارسال شد"
+      });
+    } catch (error) {
+      console.error('Error sending verification code:', error);
+      res.status(500).json({ success: false, message: "خطا در ارسال کد تایید" });
+    }
+  });
+
+  // Verify code
+  app.post('/api/super-admin/verify', requireAuth, async (req, res) => {
+    try {
+      const { adminId, type, code } = req.body;
+
+      if (!adminId || !type || !code) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "تمام فیلدها الزامی است" 
+        });
+      }
+
+      const [verification] = await db
+        .select()
+        .from(schema.superAdminVerifications)
+        .where(and(
+          eq(schema.superAdminVerifications.userId, adminId),
+          eq(schema.superAdminVerifications.type, type),
+          eq(schema.superAdminVerifications.verificationCode, code),
+          eq(schema.superAdminVerifications.isUsed, false)
+        ));
+
+      if (!verification) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "کد تایید نامعتبر است" 
+        });
+      }
+
+      if (new Date() > verification.expiresAt) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "کد تایید منقضی شده است" 
+        });
+      }
+
+      // Mark verification as used
+      await db
+        .update(schema.superAdminVerifications)
+        .set({ isUsed: true })
+        .where(eq(schema.superAdminVerifications.id, verification.id));
+
+      // Update user verification status
+      const updateData: any = {};
+      if (type === 'email') {
+        updateData.emailVerified = true;
+      } else if (type === 'sms') {
+        updateData.phoneVerified = true;
+      }
+
+      await db
+        .update(schema.users)
+        .set(updateData)
+        .where(eq(schema.users.id, adminId));
+
+      res.json({ 
+        success: true, 
+        message: type === 'email' ? "ایمیل با موفقیت تایید شد" : "شماره تلفن با موفقیت تایید شد"
+      });
+    } catch (error) {
+      console.error('Error verifying code:', error);
+      res.status(500).json({ success: false, message: "خطا در تایید کد" });
+    }
+  });
+
+  // Forgot password
+  app.post('/api/super-admin/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "ایمیل الزامی است" 
+        });
+      }
+
+      const [admin] = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.email, email));
+
+      if (!admin) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "ایمیل یافت نشد" 
+        });
+      }
+
+      // Generate reset code
+      const resetCode = Math.random().toString().substr(2, 6);
+      const expiryTime = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+      // Delete old reset codes
+      await db
+        .delete(schema.superAdminVerifications)
+        .where(and(
+          eq(schema.superAdminVerifications.userId, admin.id),
+          eq(schema.superAdminVerifications.type, 'password_reset'),
+          eq(schema.superAdminVerifications.isUsed, false)
+        ));
+
+      // Insert new reset code
+      await db
+        .insert(schema.superAdminVerifications)
+        .values({
+          userId: admin.id,
+          email: admin.email,
+          phone: admin.phone,
+          verificationCode: resetCode,
+          type: 'password_reset',
+          isUsed: false,
+          expiresAt: expiryTime,
+          createdAt: new Date()
+        });
+
+      // Mock sending reset email
+      console.log(`Password reset code for ${email}: ${resetCode}`);
+
+      res.json({ 
+        success: true, 
+        message: "کد بازیابی رمز عبور به ایمیل شما ارسال شد"
+      });
+    } catch (error) {
+      console.error('Error sending password reset:', error);
+      res.status(500).json({ success: false, message: "خطا در ارسال کد بازیابی" });
+    }
+  });
+
+  // Reset password with code
+  app.post('/api/super-admin/reset-password', async (req, res) => {
+    try {
+      const { email, verificationCode, newPassword } = req.body;
+
+      if (!email || !verificationCode || !newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "تمام فیلدها الزامی است" 
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "رمز عبور باید حداقل 6 کاراکتر باشد" 
+        });
+      }
+
+      const [admin] = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.email, email));
+
+      if (!admin) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "ایمیل یافت نشد" 
+        });
+      }
+
+      const [verification] = await db
+        .select()
+        .from(schema.superAdminVerifications)
+        .where(and(
+          eq(schema.superAdminVerifications.userId, admin.id),
+          eq(schema.superAdminVerifications.type, 'password_reset'),
+          eq(schema.superAdminVerifications.verificationCode, verificationCode),
+          eq(schema.superAdminVerifications.isUsed, false)
+        ));
+
+      if (!verification) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "کد بازیابی نامعتبر است" 
+        });
+      }
+
+      if (new Date() > verification.expiresAt) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "کد بازیابی منقضی شده است" 
+        });
+      }
+
+      // Hash new password
+      const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await db
+        .update(schema.users)
+        .set({ 
+          passwordHash: newPasswordHash,
+          updatedAt: new Date()
+        })
+        .where(eq(schema.users.id, admin.id));
+
+      // Mark verification as used
+      await db
+        .update(schema.superAdminVerifications)
+        .set({ isUsed: true })
+        .where(eq(schema.superAdminVerifications.id, verification.id));
+
+      res.json({ 
+        success: true, 
+        message: "رمز عبور با موفقیت تغییر کرد"
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      res.status(500).json({ success: false, message: "خطا در تغییر رمز عبور" });
+    }
+  });
+
+  // Get pending verifications
+  app.get('/api/super-admin/pending-verifications', requireAuth, async (req, res) => {
+    try {
+      const verifications = await db
+        .select()
+        .from(schema.superAdminVerifications)
+        .where(eq(schema.superAdminVerifications.isUsed, false))
+        .orderBy(desc(schema.superAdminVerifications.createdAt));
+
+      res.json(verifications);
+    } catch (error) {
+      console.error('Error fetching pending verifications:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تاییدات در انتظار" });
+    }
+  });
+
+  // Delete super admin
+  app.delete('/api/super-admin/admins/:id', requireAuth, async (req, res) => {
+    try {
+      const adminId = parseInt(req.params.id);
+
+      // Prevent self-deletion
+      if (req.session.adminId === adminId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "نمی‌توانید حساب خودتان را حذف کنید" 
+        });
+      }
+
+      // Delete related verifications first
+      await db
+        .delete(schema.superAdminVerifications)
+        .where(eq(schema.superAdminVerifications.userId, adminId));
+
+      // Delete admin
+      await db
+        .delete(schema.users)
+        .where(eq(schema.users.id, adminId));
+
+      res.json({ 
+        success: true, 
+        message: "سوپر ادمین حذف شد"
+      });
+    } catch (error) {
+      console.error('Error deleting super admin:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف سوپر ادمین" });
     }
   });
 
