@@ -7411,11 +7411,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Check if user exists and has financial department access
       const [user] = await db
         .select()
-        .from(users)
+        .from(schema.users)
         .where(and(
-          eq(users.username, username),
-          eq(users.department, 'financial'),
-          eq(users.isActive, true)
+          eq(schema.users.username, username),
+          eq(schema.users.department, 'financial'),
+          eq(schema.users.isActive, true)
         ));
 
       if (!user) {
@@ -7435,15 +7435,15 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
       // Update last login
       await db
-        .update(users)
+        .update(schema.users)
         .set({ lastLoginAt: new Date() })
-        .where(eq(users.id, user.id));
+        .where(eq(schema.users.id, user.id));
 
       // Set session
       req.session.departmentUser = {
         id: user.id,
         username: user.username,
-        department: user.department
+        department: user.department || 'financial'
       };
 
       res.json({ 
@@ -7463,7 +7463,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Financial logout
   app.post('/api/financial/logout', (req, res) => {
-    req.session.departmentUser = null;
+    req.session.departmentUser = undefined;
     res.json({ success: true, message: "خروج موفق" });
   });
 
@@ -7528,11 +7528,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       const [user] = await db
         .select()
-        .from(users)
+        .from(schema.users)
         .where(and(
-          eq(users.username, username),
-          eq(users.department, 'warehouse'),
-          eq(users.isActive, true)
+          eq(schema.users.username, username),
+          eq(schema.users.department, 'warehouse'),
+          eq(schema.users.isActive, true)
         ));
 
       if (!user) {
