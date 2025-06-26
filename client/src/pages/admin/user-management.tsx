@@ -298,47 +298,110 @@ function UserManagement() {
   };
 
   const getRoleBadgeColor = (roleName: string) => {
-    switch (roleName) {
-      case 'super_admin':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'products_admin':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'crm_admin':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'shop_admin':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'analytics_admin':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'content_admin':
-        return 'bg-teal-100 text-teal-800 border-teal-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+    const colors = {
+      'super_admin': 'bg-red-100 text-red-800 border-red-200',
+      'site_manager': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      'security_admin': 'bg-slate-100 text-slate-800 border-slate-200',
+      'products_admin': 'bg-blue-100 text-blue-800 border-blue-200',
+      'crm_admin': 'bg-green-100 text-green-800 border-green-200',
+      'shop_admin': 'bg-purple-100 text-purple-800 border-purple-200',
+      'analytics_admin': 'bg-orange-100 text-orange-800 border-orange-200',
+      'content_admin': 'bg-cyan-100 text-cyan-800 border-cyan-200',
+      'email_manager': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      'seo_manager': 'bg-violet-100 text-violet-800 border-violet-200',
+      'inventory_manager': 'bg-amber-100 text-amber-800 border-amber-200',
+      'order_manager': 'bg-rose-100 text-rose-800 border-rose-200',
+      'customer_support': 'bg-teal-100 text-teal-800 border-teal-200',
+      'factory_manager': 'bg-gray-100 text-gray-800 border-gray-200',
+      'financial_admin': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'warehouse_admin': 'bg-lime-100 text-lime-800 border-lime-200',
+      'logistics_admin': 'bg-sky-100 text-sky-800 border-sky-200',
+      'department_manager': 'bg-pink-100 text-pink-800 border-pink-200',
+      'readonly_analyst': 'bg-neutral-100 text-neutral-800 border-neutral-200',
+      'regional_manager': 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
+      'quality_controller': 'bg-stone-100 text-stone-800 border-stone-200',
+    };
+    return colors[roleName] || 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  const getRoleCategory = (roleName: string) => {
+    if (['super_admin', 'site_manager', 'security_admin'].includes(roleName)) {
+      return 'Core Admin';
     }
+    if (['financial_admin', 'warehouse_admin', 'logistics_admin', 'department_manager'].includes(roleName)) {
+      return 'Department';
+    }
+    if (['email_manager', 'seo_manager', 'inventory_manager', 'customer_support', 'factory_manager', 'quality_controller'].includes(roleName)) {
+      return 'Specialized';
+    }
+    if (['products_admin', 'crm_admin', 'shop_admin', 'analytics_admin', 'content_admin'].includes(roleName)) {
+      return 'Module Admin';
+    }
+    if (['readonly_analyst', 'regional_manager'].includes(roleName)) {
+      return 'Limited Access';
+    }
+    return 'Standard';
+  };
+
+  const getRoleCategoryColor = (roleName: string) => {
+    const category = getRoleCategory(roleName);
+    const colors = {
+      'Core Admin': 'border-red-300 text-red-700',
+      'Department': 'border-green-300 text-green-700',
+      'Specialized': 'border-purple-300 text-purple-700',
+      'Module Admin': 'border-blue-300 text-blue-700',
+      'Limited Access': 'border-gray-300 text-gray-700',
+      'Standard': 'border-orange-300 text-orange-700',
+    };
+    return colors[category] || 'border-gray-300 text-gray-700';
   };
 
   const getPermissionModuleColor = (module: string) => {
-    switch (module) {
-      case 'users':
-        return 'bg-red-50 text-red-700 border-red-200';
-      case 'products':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'crm':
-        return 'bg-green-50 text-green-700 border-green-200';
-      case 'shop':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
-      case 'analytics':
-        return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'content':
-        return 'bg-teal-50 text-teal-700 border-teal-200';
-      case 'system':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
+    const colors = {
+      'users': 'bg-red-50 text-red-700 border-red-200',
+      'products': 'bg-blue-50 text-blue-700 border-blue-200',
+      'crm': 'bg-green-50 text-green-700 border-green-200',
+      'shop': 'bg-purple-50 text-purple-700 border-purple-200',
+      'analytics': 'bg-orange-50 text-orange-700 border-orange-200',
+      'content': 'bg-teal-50 text-teal-700 border-teal-200',
+      'system': 'bg-gray-50 text-gray-700 border-gray-200',
+      'email': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      'seo': 'bg-violet-50 text-violet-700 border-violet-200',
+      'inventory': 'bg-amber-50 text-amber-700 border-amber-200',
+      'orders': 'bg-rose-50 text-rose-700 border-rose-200',
+      'support': 'bg-cyan-50 text-cyan-700 border-cyan-200',
+      'site': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+      'factory': 'bg-slate-50 text-slate-700 border-slate-200',
+      'security': 'bg-zinc-50 text-zinc-700 border-zinc-200',
+      'departments': 'bg-pink-50 text-pink-700 border-pink-200',
+      'regional': 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
+      'quality': 'bg-stone-50 text-stone-700 border-stone-200',
+    };
+    return colors[module] || 'bg-gray-50 text-gray-700 border-gray-200';
   };
 
   const getModuleTranslation = (module: string) => {
-    return t[module as keyof typeof t] || module;
+    const translations = {
+      'users': 'Users',
+      'products': 'Products',
+      'crm': 'CRM',
+      'shop': 'Shop',
+      'analytics': 'Analytics',
+      'content': 'Content',
+      'system': 'System',
+      'email': 'Email',
+      'seo': 'SEO',
+      'inventory': 'Inventory',
+      'orders': 'Orders',
+      'support': 'Support',
+      'site': 'Site Management',
+      'factory': 'Factory',
+      'security': 'Security',
+      'departments': 'Departments',
+      'regional': 'Regional',
+      'quality': 'Quality Control',
+    };
+    return translations[module] || module;
   };
 
   return (
@@ -457,10 +520,89 @@ function UserManagement() {
                                     <SelectValue placeholder={t.selectRole} />
                                   </SelectTrigger>
                                 </FormControl>
-                                <SelectContent>
-                                  {roles?.map((role) => (
+                                <SelectContent className="max-h-96">
+                                  {/* Core Administrative Roles */}
+                                  <div className="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-50">
+                                    Core Administrative Roles
+                                  </div>
+                                  {roles?.filter(role => ['super_admin', 'site_manager', 'security_admin'].includes(role.name)).map((role) => (
                                     <SelectItem key={role.id} value={role.id.toString()}>
-                                      {role.displayName}
+                                      <div className="flex items-center gap-2">
+                                        <Badge className={getRoleBadgeColor(role.name)} variant="outline">
+                                          {role.displayName}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          ({role.permissionCount || 0} permissions)
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                  
+                                  {/* Department Roles */}
+                                  <div className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-50 mt-2">
+                                    Department Management
+                                  </div>
+                                  {roles?.filter(role => ['financial_admin', 'warehouse_admin', 'logistics_admin', 'department_manager'].includes(role.name)).map((role) => (
+                                    <SelectItem key={role.id} value={role.id.toString()}>
+                                      <div className="flex items-center gap-2">
+                                        <Badge className={getRoleBadgeColor(role.name)} variant="outline">
+                                          {role.displayName}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          ({role.permissionCount || 0} permissions)
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                  
+                                  {/* Specialized Roles */}
+                                  <div className="px-2 py-1 text-xs font-semibold text-purple-700 bg-purple-50 mt-2">
+                                    Specialized Roles
+                                  </div>
+                                  {roles?.filter(role => ['email_manager', 'seo_manager', 'inventory_manager', 'customer_support', 'factory_manager', 'quality_controller'].includes(role.name)).map((role) => (
+                                    <SelectItem key={role.id} value={role.id.toString()}>
+                                      <div className="flex items-center gap-2">
+                                        <Badge className={getRoleBadgeColor(role.name)} variant="outline">
+                                          {role.displayName}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          ({role.permissionCount || 0} permissions)
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                  
+                                  {/* Module Admin Roles */}
+                                  <div className="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-50 mt-2">
+                                    Module Administration
+                                  </div>
+                                  {roles?.filter(role => ['products_admin', 'crm_admin', 'shop_admin', 'analytics_admin', 'content_admin'].includes(role.name)).map((role) => (
+                                    <SelectItem key={role.id} value={role.id.toString()}>
+                                      <div className="flex items-center gap-2">
+                                        <Badge className={getRoleBadgeColor(role.name)} variant="outline">
+                                          {role.displayName}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          ({role.permissionCount || 0} permissions)
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                  
+                                  {/* Limited Access Roles */}
+                                  <div className="px-2 py-1 text-xs font-semibold text-gray-700 bg-gray-50 mt-2">
+                                    Limited Access
+                                  </div>
+                                  {roles?.filter(role => ['readonly_analyst', 'regional_manager', 'order_manager'].includes(role.name)).map((role) => (
+                                    <SelectItem key={role.id} value={role.id.toString()}>
+                                      <div className="flex items-center gap-2">
+                                        <Badge className={getRoleBadgeColor(role.name)} variant="outline">
+                                          {role.displayName}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          ({role.permissionCount || 0} permissions)
+                                        </span>
+                                      </div>
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -562,11 +704,57 @@ function UserManagement() {
 
         {/* Roles Tab */}
         <TabsContent value="roles" className="space-y-4">
+          {/* Role Categories */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="border-blue-200 bg-blue-50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-blue-700">Core Administrative Roles</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {roles?.filter(role => ['super_admin', 'site_manager', 'security_admin'].includes(role.name)).map(role => (
+                  <div key={role.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                    <span className="text-sm font-medium">{role.displayName}</span>
+                    <Badge variant="outline" className="text-xs">{role.permissionCount || 0}</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-200 bg-green-50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-green-700">Department Management</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {roles?.filter(role => ['financial_admin', 'warehouse_admin', 'logistics_admin', 'department_manager'].includes(role.name)).map(role => (
+                  <div key={role.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                    <span className="text-sm font-medium">{role.displayName}</span>
+                    <Badge variant="outline" className="text-xs">{role.permissionCount || 0}</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-purple-200 bg-purple-50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-purple-700">Specialized Roles</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {roles?.filter(role => ['email_manager', 'seo_manager', 'inventory_manager', 'customer_support'].includes(role.name)).map(role => (
+                  <div key={role.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                    <span className="text-sm font-medium">{role.displayName}</span>
+                    <Badge variant="outline" className="text-xs">{role.permissionCount || 0}</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Complete Roles Table */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                {t.adminRoles}
+                {t.adminRoles} - Complete List
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -578,6 +766,7 @@ function UserManagement() {
                     <TableRow>
                       <TableHead>{t.roleName}</TableHead>
                       <TableHead>{t.description}</TableHead>
+                      <TableHead>Category</TableHead>
                       <TableHead>{t.permissionCount}</TableHead>
                       <TableHead>{t.status}</TableHead>
                     </TableRow>
@@ -590,8 +779,13 @@ function UserManagement() {
                             {role.displayName}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
+                        <TableCell className="text-sm text-muted-foreground max-w-xs">
                           {role.description}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getRoleCategoryColor(role.name)}>
+                            {getRoleCategory(role.name)}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">
