@@ -283,7 +283,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
+  app.get("/api/admin/me", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUserById(req.session.adminId!);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
 
   // Authentication check endpoint
   app.get("/api/admin/check-auth", async (req, res) => {
@@ -310,44 +330,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
       });
     } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: "Internal server error" 
-      });
-    }
-  });
-
-  // Get current admin user info
-  app.get("/api/admin/me", requireAuth, async (req, res) => {
-    try {
-      if (!req.session.adminId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Admin ID not found in session" 
-        });
-      }
-      
-      const user = await storage.getUserById(req.session.adminId);
-      if (!user || !user.isActive) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "User not found or inactive" 
-        });
-      }
-      
-      res.json({ 
-        success: true,
-        user: {
-          id: user.id, 
-          username: user.username, 
-          email: user.email, 
-          roleId: user.roleId,
-          isActive: user.isActive,
-          createdAt: user.createdAt
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching admin user:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 

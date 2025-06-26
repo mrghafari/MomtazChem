@@ -75,7 +75,6 @@ function Router() {
           <Route path="/shop-admin" component={ShopAdmin} />
           <Route path="/admin" component={AdminPage} />
           <Route path="/admin/login" component={AdminLogin} />
-          <Route path="/admin-login" component={AdminLogin} />
           <Route path="/admin/users" component={AdminUsers} />
 
           <Route path="/admin/barcode-inventory" component={BarcodeInventory} />
