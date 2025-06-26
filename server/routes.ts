@@ -7578,7 +7578,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Warehouse logout
   app.post('/api/warehouse/logout', (req, res) => {
-    req.session.departmentUser = null;
+    req.session.departmentUser = undefined;
     res.json({ success: true, message: "خروج موفق" });
   });
 
@@ -7643,11 +7643,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       const [user] = await db
         .select()
-        .from(users)
+        .from(schema.users)
         .where(and(
-          eq(users.username, username),
-          eq(users.department, 'logistics'),
-          eq(users.isActive, true)
+          eq(schema.users.username, username),
+          eq(schema.users.department, 'logistics'),
+          eq(schema.users.isActive, true)
         ));
 
       if (!user) {
@@ -7693,7 +7693,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Logistics logout
   app.post('/api/logistics/logout', (req, res) => {
-    req.session.departmentUser = null;
+    req.session.departmentUser = undefined;
     res.json({ success: true, message: "خروج موفق" });
   });
 
@@ -7737,7 +7737,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         
         // Generate delivery code for final delivery
         const deliveryCode = Math.random().toString().substr(2, 6);
-        await orderManagementStorage.generateDeliveryCode(orderId, deliveryCode);
+        await orderManagementStorage.generateDeliveryCode(orderId);
       }
       
       // Update order with logistics info
@@ -7768,6 +7768,148 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error processing logistics order:', error);
       res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
+    }
+  });
+
+  // ============================================================================
+  // SUPER ADMIN ENDPOINTS FOR DEPARTMENT MANAGEMENT
+  // ============================================================================
+
+  // Get all department users
+  app.get('/api/super-admin/department-users', requireAuth, async (req, res) => {
+    try {
+      const users = await db
+        .select({
+          id: schema.users.id,
+          username: schema.users.username,
+          email: schema.users.email,
+          department: schema.users.department,
+          isActive: schema.users.isActive,
+          lastLoginAt: schema.users.lastLoginAt,
+          createdAt: schema.users.createdAt
+        })
+        .from(schema.users)
+        .where(sql`${schema.users.department} IN ('financial', 'warehouse', 'logistics')`);
+
+      res.json({ success: true, users });
+    } catch (error) {
+      console.error('Error fetching department users:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت کاربران" });
+    }
+  });
+
+  // Create new department user
+  app.post('/api/super-admin/department-users', requireAuth, async (req, res) => {
+    try {
+      const { username, email, password, department } = req.body;
+      
+      // Hash password
+      const passwordHash = await bcrypt.hash(password, 10);
+      
+      const [newUser] = await db
+        .insert(schema.users)
+        .values({
+          username,
+          email,
+          passwordHash,
+          department,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning({
+          id: schema.users.id,
+          username: schema.users.username,
+          email: schema.users.email,
+          department: schema.users.department,
+          isActive: schema.users.isActive,
+          createdAt: schema.users.createdAt
+        });
+
+      res.json({ success: true, user: newUser, message: "کاربر جدید ایجاد شد" });
+    } catch (error) {
+      console.error('Error creating department user:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد کاربر" });
+    }
+  });
+
+  // Update department user
+  app.put('/api/super-admin/department-users/:id', requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { username, email, password, department } = req.body;
+      
+      const updateData: any = {
+        username,
+        email,
+        department,
+        updatedAt: new Date()
+      };
+      
+      if (password) {
+        updateData.passwordHash = await bcrypt.hash(password, 10);
+      }
+      
+      const [updatedUser] = await db
+        .update(schema.users)
+        .set(updateData)
+        .where(eq(schema.users.id, userId))
+        .returning({
+          id: schema.users.id,
+          username: schema.users.username,
+          email: schema.users.email,
+          department: schema.users.department,
+          isActive: schema.users.isActive,
+          updatedAt: schema.users.updatedAt
+        });
+
+      res.json({ success: true, user: updatedUser, message: "کاربر بروزرسانی شد" });
+    } catch (error) {
+      console.error('Error updating department user:', error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی کاربر" });
+    }
+  });
+
+  // Delete department user
+  app.delete('/api/super-admin/department-users/:id', requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      await db
+        .delete(schema.users)
+        .where(eq(schema.users.id, userId));
+
+      res.json({ success: true, message: "کاربر حذف شد" });
+    } catch (error) {
+      console.error('Error deleting department user:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف کاربر" });
+    }
+  });
+
+  // Toggle user status
+  app.post('/api/super-admin/department-users/:id/toggle-status', requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { isActive } = req.body;
+      
+      const [updatedUser] = await db
+        .update(schema.users)
+        .set({ isActive, updatedAt: new Date() })
+        .where(eq(schema.users.id, userId))
+        .returning({
+          id: schema.users.id,
+          username: schema.users.username,
+          isActive: schema.users.isActive
+        });
+
+      res.json({ 
+        success: true, 
+        user: updatedUser, 
+        message: isActive ? "کاربر فعال شد" : "کاربر غیرفعال شد" 
+      });
+    } catch (error) {
+      console.error('Error toggling user status:', error);
+      res.status(500).json({ success: false, message: "خطا در تغییر وضعیت کاربر" });
     }
   });
 

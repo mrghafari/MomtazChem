@@ -56,6 +56,7 @@ import LogisticsDepartment from "@/pages/logistics-department";
 import FinancialLogin from "@/pages/financial-login";
 import WarehouseLogin from "@/pages/warehouse-login";
 import LogisticsLogin from "@/pages/logistics-login";
+import SuperAdminDepartmentManagement from "@/pages/super-admin-department-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -108,6 +109,7 @@ function Router() {
           <Route path="/warehouse/login" component={WarehouseLogin} />
           <Route path="/logistics" component={LogisticsDepartment} />
           <Route path="/logistics/login" component={LogisticsLogin} />
+          <Route path="/super-admin/departments" component={SuperAdminDepartmentManagement} />
           
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
