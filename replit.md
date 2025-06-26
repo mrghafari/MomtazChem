@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED barcode functionality migration to Site Management - moved barcode inventory from admin dashboard to centralized management interface
+- June 26, 2025: Added barcode as third Quick Action button in Site Management with proper cyan styling and QrCode icon
+- June 26, 2025: Removed barcode button from main admin dashboard to continue centralizing administrative operations
 - June 26, 2025: COMPLETED inquiries functionality migration to Site Management - moved inquiries from admin dashboard to centralized management interface
 - June 26, 2025: Added inquiries as second Quick Action button in Site Management with proper orange styling and BarChart3 icon
 - June 26, 2025: Removed inquiries button from main admin dashboard to further reduce clutter and centralize administrative operations

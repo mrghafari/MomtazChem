@@ -461,14 +461,7 @@ export default function AdminPage() {
             Order Management
           </Button>
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/barcode-inventory")}
-            className="border-cyan-300 text-cyan-600 hover:bg-cyan-50 h-12 text-sm"
-          >
-            <QrCode className="w-4 h-4 mr-2" />
-            Barcode
-          </Button>
+
           
           <Button 
             variant="outline"
