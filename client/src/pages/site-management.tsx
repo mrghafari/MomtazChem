@@ -142,6 +142,15 @@ export default function SiteManagement() {
                     <Mail className="h-6 w-6 mb-2" />
                     <span className="text-sm">Email Settings</span>
                   </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-slate-300 text-slate-600 hover:bg-slate-50"
+                    onClick={() => setLocation("/admin/database-management")}
+                  >
+                    <Database className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Database Backup</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

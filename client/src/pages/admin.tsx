@@ -465,14 +465,7 @@ export default function AdminPage() {
           
 
           
-          <Button 
-            variant="outline"
-            onClick={() => setLocation("/admin/database-management")}
-            className="border-slate-300 text-slate-600 hover:bg-slate-50 h-12 text-sm"
-          >
-            <Database className="w-4 h-4 mr-2" />
-            Database Backup
-          </Button>
+
 
           <Button 
             variant="outline"

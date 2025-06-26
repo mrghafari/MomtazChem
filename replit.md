@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED database backup functionality migration to Site Management - moved database management from admin dashboard to centralized management interface
+- June 26, 2025: Added database backup as fifth Quick Action button in Site Management with proper slate styling and Database icon
+- June 26, 2025: Removed database backup button from main admin dashboard to continue centralizing administrative operations
 - June 26, 2025: COMPLETED advanced email settings migration to Site Management - moved email configuration from admin dashboard to centralized management interface
 - June 26, 2025: Added email settings as fourth Quick Action button in Site Management with proper emerald styling and Mail icon
 - June 26, 2025: Removed advanced email settings button from main admin dashboard to continue centralizing administrative operations
