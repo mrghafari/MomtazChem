@@ -88,10 +88,7 @@ export default function SuperAdminSettings() {
   // Create new super admin
   const createAdminMutation = useMutation({
     mutationFn: async (data: typeof newAdminData) => {
-      return await apiRequest('/api/super-admin/create', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
+      return await apiRequest('/api/super-admin/create', 'POST', data);
     },
     onSuccess: (response) => {
       toast({
@@ -114,10 +111,7 @@ export default function SuperAdminSettings() {
   // Send verification code
   const sendVerificationMutation = useMutation({
     mutationFn: async ({ adminId, type }: { adminId: number, type: 'email' | 'sms' }) => {
-      return await apiRequest('/api/super-admin/send-verification', {
-        method: 'POST',
-        body: JSON.stringify({ adminId, type })
-      });
+      return await apiRequest('/api/super-admin/send-verification', { adminId, type });
     },
     onSuccess: (response) => {
       toast({
@@ -137,10 +131,7 @@ export default function SuperAdminSettings() {
   // Verify code
   const verifyCodeMutation = useMutation({
     mutationFn: async (data: typeof verificationData) => {
-      return await apiRequest('/api/super-admin/verify', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
+      return await apiRequest('/api/super-admin/verify', data);
     },
     onSuccess: (response) => {
       toast({
@@ -163,10 +154,7 @@ export default function SuperAdminSettings() {
   // Password reset request
   const passwordResetMutation = useMutation({
     mutationFn: async (email: string) => {
-      return await apiRequest('/api/super-admin/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify({ email })
-      });
+      return await apiRequest('/api/super-admin/forgot-password', { email });
     },
     onSuccess: (response) => {
       toast({
@@ -186,10 +174,7 @@ export default function SuperAdminSettings() {
   // Reset password with code
   const resetPasswordMutation = useMutation({
     mutationFn: async (data: typeof resetEmailData) => {
-      return await apiRequest('/api/super-admin/reset-password', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
+      return await apiRequest('/api/super-admin/reset-password', data);
     },
     onSuccess: (response) => {
       toast({
@@ -215,9 +200,7 @@ export default function SuperAdminSettings() {
   // Delete super admin
   const deleteAdminMutation = useMutation({
     mutationFn: async (adminId: number) => {
-      return await apiRequest(`/api/super-admin/admins/${adminId}`, {
-        method: 'DELETE'
-      });
+      return await apiRequest(`/api/super-admin/admins/${adminId}`);
     },
     onSuccess: (response) => {
       toast({
