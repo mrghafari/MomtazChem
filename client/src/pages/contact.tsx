@@ -205,6 +205,7 @@ const Contact = () => {
                             <SelectItem value="water-treatment">Water Treatment</SelectItem>
                             <SelectItem value="paint-thinner">Paint & Thinner</SelectItem>
                             <SelectItem value="agricultural-fertilizers">Agricultural Fertilizers</SelectItem>
+                            <SelectItem value="other">سایر محصولات</SelectItem>
                             <SelectItem value="custom-solutions">Custom Solutions</SelectItem>
                           </SelectContent>
                         </Select>

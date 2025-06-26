@@ -71,6 +71,16 @@ export default function Header() {
       hoverBg: "hover:bg-green-50 dark:hover:bg-green-900/20",
       iconColor: "text-green-600 dark:text-green-400",
       titleHover: "group-hover:text-green-600 dark:group-hover:text-green-400"
+    },
+    {
+      title: "سایر محصولات",
+      href: "/products/other",
+      description: "Other miscellaneous chemical products and solutions",
+      icon: <Package className="h-6 w-6" />,
+      color: "purple",
+      hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-900/20",
+      iconColor: "text-purple-600 dark:text-purple-400",
+      titleHover: "group-hover:text-purple-600 dark:group-hover:text-purple-400"
     }
   ];
 
@@ -142,7 +152,7 @@ export default function Header() {
                     {t.products}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="!left-auto !right-0 !origin-top-right">
-                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    <div className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 lg:w-[750px] lg:grid-cols-3">
                       {productCategories.map((category) => (
                         <Link key={category.href} href={category.href}>
                           <NavigationMenuLink asChild>
