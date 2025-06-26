@@ -15,13 +15,143 @@ import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit, Trash2, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, ArrowLeft, Eye, EyeOff, Globe } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 
+// Bilingual translations
+const translations = {
+  en: {
+    // Page titles and navigation
+    categoryManagement: "Category Management",
+    backToAdmin: "Back to Admin",
+    createCategory: "Create Category",
+    editCategory: "Edit Category",
+    deleteCategory: "Delete Category",
+    
+    // Form fields
+    categoryName: "Category Name",
+    slug: "Slug",
+    description: "Description",
+    imageUrl: "Image URL",
+    parentCategory: "Parent Category",
+    noParent: "No Parent",
+    status: "Status",
+    active: "Active",
+    inactive: "Inactive",
+    displayOrder: "Display Order",
+    metaTitle: "Meta Title",
+    metaDescription: "Meta Description",
+    
+    // Actions
+    create: "Create",
+    update: "Update",
+    cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
+    save: "Save",
+    
+    // Validation messages
+    nameRequired: "Category name must be at least 2 characters",
+    slugRequired: "Slug must be at least 2 characters",
+    
+    // Placeholders
+    namePlaceholder: "Enter category name",
+    slugPlaceholder: "enter-category-slug",
+    descriptionPlaceholder: "Enter category description",
+    imageUrlPlaceholder: "https://example.com/image.jpg",
+    metaTitlePlaceholder: "SEO title for this category",
+    metaDescriptionPlaceholder: "SEO description for this category",
+    
+    // Table headers
+    name: "Name",
+    parent: "Parent",
+    order: "Order",
+    actions: "Actions",
+    
+    // Status messages
+    createSuccess: "Category created successfully",
+    updateSuccess: "Category updated successfully",
+    deleteSuccess: "Category deleted successfully",
+    createError: "Failed to create category",
+    updateError: "Failed to update category",
+    deleteError: "Failed to delete category",
+    
+    // Confirmation
+    deleteConfirm: "Are you sure you want to delete this category?",
+    
+    // Language switcher
+    switchLanguage: "العربية",
+    language: "Language"
+  },
+  ar: {
+    // Page titles and navigation
+    categoryManagement: "إدارة الفئات",
+    backToAdmin: "العودة إلى الإدارة",
+    createCategory: "إنشاء فئة",
+    editCategory: "تعديل الفئة",
+    deleteCategory: "حذف الفئة",
+    
+    // Form fields
+    categoryName: "اسم الفئة",
+    slug: "الرابط المختصر",
+    description: "الوصف",
+    imageUrl: "رابط الصورة",
+    parentCategory: "الفئة الأساسية",
+    noParent: "بدون فئة أساسية",
+    status: "الحالة",
+    active: "نشط",
+    inactive: "غير نشط",
+    displayOrder: "ترتيب العرض",
+    metaTitle: "عنوان السيو",
+    metaDescription: "وصف السيو",
+    
+    // Actions
+    create: "إنشاء",
+    update: "تحديث",
+    cancel: "إلغاء",
+    edit: "تعديل",
+    delete: "حذف",
+    save: "حفظ",
+    
+    // Validation messages
+    nameRequired: "اسم الفئة يجب أن يكون على الأقل حرفين",
+    slugRequired: "الرابط المختصر يجب أن يكون على الأقل حرفين",
+    
+    // Placeholders
+    namePlaceholder: "أدخل اسم الفئة",
+    slugPlaceholder: "ادخل-رابط-الفئة",
+    descriptionPlaceholder: "أدخل وصف الفئة",
+    imageUrlPlaceholder: "https://example.com/image.jpg",
+    metaTitlePlaceholder: "عنوان السيو لهذه الفئة",
+    metaDescriptionPlaceholder: "وصف السيو لهذه الفئة",
+    
+    // Table headers
+    name: "الاسم",
+    parent: "الفئة الأساسية",
+    order: "الترتيب",
+    actions: "الإجراءات",
+    
+    // Status messages
+    createSuccess: "تم إنشاء الفئة بنجاح",
+    updateSuccess: "تم تحديث الفئة بنجاح",
+    deleteSuccess: "تم حذف الفئة بنجاح",
+    createError: "فشل في إنشاء الفئة",
+    updateError: "فشل في تحديث الفئة",
+    deleteError: "فشل في حذف الفئة",
+    
+    // Confirmation
+    deleteConfirm: "هل أنت متأكد من حذف هذه الفئة؟",
+    
+    // Language switcher
+    switchLanguage: "English",
+    language: "اللغة"
+  }
+};
+
 const categoryFormSchema = z.object({
-  name: z.string().min(2, "نام دسته‌بندی باید حداقل ۲ کاراکتر باشد"),
-  slug: z.string().min(2, "نامک باید حداقل ۲ کاراکتر باشد"),
+  name: z.string().min(2, "Category name must be at least 2 characters"),
+  slug: z.string().min(2, "Slug must be at least 2 characters"),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
   parentId: z.number().optional(),
@@ -54,6 +184,15 @@ export default function CategoryManagement() {
   const queryClient = useQueryClient();
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+
+  // Get current translations
+  const t = translations[language];
+
+  // Toggle language function
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'ar' : 'en');
+  };
 
   // Fetch categories
   const { data: categories = [], isLoading, error } = useQuery({
@@ -87,16 +226,16 @@ export default function CategoryManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/categories"] });
       toast({
-        title: "موفقیت",
-        description: "دسته‌بندی با موفقیت ایجاد شد",
+        title: t.createSuccess,
+        description: t.createSuccess,
       });
       setIsDialogOpen(false);
       form.reset();
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در ایجاد دسته‌بندی",
+        title: t.createError,
+        description: error.message || t.createError,
         variant: "destructive",
       });
     },
@@ -114,8 +253,8 @@ export default function CategoryManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/categories"] });
       toast({
-        title: "موفقیت",
-        description: "دسته‌بندی با موفقیت بروزرسانی شد",
+        title: t.updateSuccess,
+        description: t.updateSuccess,
       });
       setIsDialogOpen(false);
       setEditingCategory(null);
@@ -123,8 +262,8 @@ export default function CategoryManagement() {
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در بروزرسانی دسته‌بندی",
+        title: t.updateError,
+        description: error.message || t.updateError,
         variant: "destructive",
       });
     },
@@ -140,14 +279,14 @@ export default function CategoryManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/categories"] });
       toast({
-        title: "موفقیت",
-        description: "دسته‌بندی با موفقیت حذف شد",
+        title: t.deleteSuccess,
+        description: t.deleteSuccess,
       });
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در حذف دسته‌بندی",
+        title: t.deleteError,
+        description: error.message || t.deleteError,
         variant: "destructive",
       });
     },
@@ -178,7 +317,7 @@ export default function CategoryManagement() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("آیا مطمئن هستید که می‌خواهید این دسته‌بندی را حذف کنید؟")) {
+    if (confirm(t.deleteConfirm)) {
       deleteCategoryMutation.mutate(id);
     }
   };
