@@ -15,6 +15,7 @@ import { emailStorage } from "./email-storage";
 import { crmStorage } from "./crm-storage";
 import { smsStorage } from "./sms-storage";
 import { widgetRecommendationStorage } from "./widget-recommendation-storage";
+import { orderManagementStorage } from "./order-management-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
@@ -7211,6 +7212,170 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error("Error fetching user activity:", error);
       res.status(500).json({ success: false, message: "خطا در دریافت فعالیت کاربر" });
+    }
+  });
+
+  // =============================================================================
+  // ORDER MANAGEMENT API ROUTES (3-Department System)
+  // =============================================================================
+
+  // Get orders for specific department (respects workflow sequence)
+  app.get('/api/order-management/:department', requireAuth, async (req, res) => {
+    try {
+      const department = req.params.department as 'financial' | 'warehouse' | 'logistics';
+      
+      if (!['financial', 'warehouse', 'logistics'].includes(department)) {
+        return res.status(400).json({ success: false, message: 'بخش نامعتبر است' });
+      }
+
+      const orders = await orderManagementStorage.getOrdersByDepartment(department);
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error(`Error fetching ${req.params.department} orders:`, error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات' });
+    }
+  });
+
+  // Update order status (department-specific)
+  app.put('/api/order-management/:id/status', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { newStatus, department, notes } = req.body;
+      const adminId = req.session.adminId!;
+
+      // Validate that admin can perform this action
+      const canView = await orderManagementStorage.canDepartmentViewOrder(orderId, department);
+      if (!canView) {
+        return res.status(403).json({ success: false, message: 'دسترسی به این سفارش مجاز نیست' });
+      }
+
+      const updatedOrder = await orderManagementStorage.updateOrderStatus(
+        orderId, 
+        newStatus, 
+        adminId, 
+        department, 
+        notes
+      );
+
+      res.json({ success: true, order: updatedOrder });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      res.status(500).json({ success: false, message: 'خطا در بروزرسانی وضعیت سفارش' });
+    }
+  });
+
+  // Get order status history
+  app.get('/api/order-management/:id/history', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const history = await orderManagementStorage.getOrderStatusHistory(orderId);
+      res.json({ success: true, history });
+    } catch (error) {
+      console.error('Error fetching order history:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت تاریخچه سفارش' });
+    }
+  });
+
+  // Upload payment receipt (customer action)
+  app.post('/api/order-management/:customerOrderId/payment-receipt', upload.single('receipt'), async (req, res) => {
+    try {
+      const customerOrderId = parseInt(req.params.customerOrderId);
+      const customerId = req.session.customerId;
+
+      if (!customerId) {
+        return res.status(401).json({ success: false, message: 'احراز هویت نشده' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: 'فایل رسید الزامی است' });
+      }
+
+      // Save payment receipt
+      const receipt = await orderManagementStorage.uploadPaymentReceipt({
+        customerOrderId,
+        customerId,
+        receiptUrl: `/uploads/documents/${req.file.filename}`,
+        originalFileName: req.file.originalname,
+        fileSize: req.file.size,
+        mimeType: req.file.mimetype,
+        notes: req.body.notes || ''
+      });
+
+      // Update order status to PAYMENT_UPLOADED
+      const orderMgmt = await orderManagementStorage.getOrderManagementByCustomerOrderId(customerOrderId);
+      if (orderMgmt) {
+        await orderManagementStorage.updateOrderStatus(
+          orderMgmt.id,
+          'payment_uploaded' as any,
+          customerId,
+          'financial' as any,
+          'رسید پرداخت توسط مشتری آپلود شد'
+        );
+      }
+
+      res.json({ success: true, receipt });
+    } catch (error) {
+      console.error('Error uploading payment receipt:', error);
+      res.status(500).json({ success: false, message: 'خطا در آپلود رسید پرداخت' });
+    }
+  });
+
+  // Verify delivery code (logistics department)
+  app.post('/api/order-management/verify-delivery', requireAuth, async (req, res) => {
+    try {
+      const { code, verifiedBy } = req.body;
+      const verified = await orderManagementStorage.verifyDeliveryCode(code, verifiedBy);
+      
+      if (verified) {
+        res.json({ success: true, message: 'کد تحویل با موفقیت تایید شد' });
+      } else {
+        res.status(400).json({ success: false, message: 'کد تحویل نامعتبر یا منقضی شده' });
+      }
+    } catch (error) {
+      console.error('Error verifying delivery code:', error);
+      res.status(500).json({ success: false, message: 'خطا در تایید کد تحویل' });
+    }
+  });
+
+  // Assign user to department
+  app.post('/api/order-management/assign-department', requireAuth, async (req, res) => {
+    try {
+      const { adminUserId, department } = req.body;
+      const assignedBy = req.session.adminId!;
+
+      const assignment = await orderManagementStorage.assignUserToDepartment({
+        adminUserId,
+        department,
+        assignedBy
+      });
+
+      res.json({ success: true, assignment });
+    } catch (error) {
+      console.error('Error assigning user to department:', error);
+      res.status(500).json({ success: false, message: 'خطا در تخصیص کاربر به بخش' });
+    }
+  });
+
+  // Get department stats
+  app.get('/api/order-management/stats/:department', requireAuth, async (req, res) => {
+    try {
+      const department = req.params.department as 'financial' | 'warehouse' | 'logistics';
+      const stats = await orderManagementStorage.getDepartmentStats(department);
+      res.json({ success: true, stats });
+    } catch (error) {
+      console.error('Error fetching department stats:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت آمار بخش' });
+    }
+  });
+
+  // Get orders overview (admin dashboard)
+  app.get('/api/order-management/overview', requireAuth, async (req, res) => {
+    try {
+      const overview = await orderManagementStorage.getOrdersOverview();
+      res.json({ success: true, overview });
+    } catch (error) {
+      console.error('Error fetching orders overview:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت نمای کلی سفارشات' });
     }
   });
 
