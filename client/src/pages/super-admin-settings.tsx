@@ -77,8 +77,8 @@ export default function SuperAdminSettings() {
     },
     onSuccess: (response) => {
       toast({
-        title: "ایجاد سوپر ادمین",
-        description: response.message || "سوپر ادمین جدید ایجاد شد. کد تایید ایمیل ارسال شد.",
+        title: "Super Admin Created",
+        description: response.message || "New super admin created successfully. Email verification code sent.",
       });
       setNewAdminData({
         username: '',
@@ -92,8 +92,8 @@ export default function SuperAdminSettings() {
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در ایجاد سوپر ادمین",
+        title: "Error",
+        description: error.message || "Error creating super admin",
         variant: "destructive"
       });
     }
@@ -109,14 +109,14 @@ export default function SuperAdminSettings() {
     },
     onSuccess: (response) => {
       toast({
-        title: "ارسال کد تایید",
-        description: response.message || "کد تایید ارسال شد",
+        title: "Verification Code Sent",
+        description: response.message || "Verification code sent successfully",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در ارسال کد تایید",
+        title: "Error",
+        description: error.message || "Error sending verification code",
         variant: "destructive"
       });
     }
@@ -132,8 +132,8 @@ export default function SuperAdminSettings() {
     },
     onSuccess: (response) => {
       toast({
-        title: "تایید موفق",
-        description: response.message || "حساب کاربری با موفقیت تایید شد",
+        title: "Verification Successful",
+        description: response.message || "Account verified successfully",
       });
       setVerificationData({ adminId: 0, type: 'email', code: '' });
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/admins'] });
@@ -141,8 +141,8 @@ export default function SuperAdminSettings() {
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "کد تایید نامعتبر است",
+        title: "Error",
+        description: error.message || "Invalid verification code",
         variant: "destructive"
       });
     }
@@ -158,14 +158,14 @@ export default function SuperAdminSettings() {
     },
     onSuccess: (response) => {
       toast({
-        title: "ارسال کد بازیابی",
-        description: response.message || "کد بازیابی رمز عبور به ایمیل شما ارسال شد",
+        title: "Recovery Code Sent",
+        description: response.message || "Password recovery code sent to your email",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در ارسال کد بازیابی",
+        title: "Error",
+        description: error.message || "Error sending recovery code",
         variant: "destructive"
       });
     }
@@ -181,8 +181,8 @@ export default function SuperAdminSettings() {
     },
     onSuccess: (response) => {
       toast({
-        title: "تغییر رمز عبور",
-        description: response.message || "رمز عبور با موفقیت تغییر کرد",
+        title: "Password Changed",
+        description: response.message || "Password changed successfully",
       });
       setResetEmailData({
         email: '',
@@ -193,8 +193,8 @@ export default function SuperAdminSettings() {
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در تغییر رمز عبور",
+        title: "Error",
+        description: error.message || "Error changing password",
         variant: "destructive"
       });
     }
