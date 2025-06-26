@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +57,24 @@ export default function SuperAdminSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Clear form function
+  const clearForm = () => {
+    setNewAdminData({
+      username: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  // Ensure form is clear on component mount
+  useEffect(() => {
+    clearForm();
+  }, []);
+
   // Fetch super admins
   const { data: superAdmins = [], isLoading: loadingAdmins } = useQuery({
     queryKey: ['/api/super-admin/admins'],
@@ -80,13 +98,7 @@ export default function SuperAdminSettings() {
         title: "Super Admin Created",
         description: response.message || "New super admin created successfully. Email verification code sent.",
       });
-      setNewAdminData({
-        username: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: ''
-      });
+      clearForm();
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/admins'] });
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/pending-verifications'] });
     },
