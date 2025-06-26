@@ -218,6 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       });
     } catch (error) {
+      console.error("Admin login error:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
