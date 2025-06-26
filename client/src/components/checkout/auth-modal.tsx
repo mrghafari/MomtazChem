@@ -167,11 +167,24 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
           <DialogTitle>ورود یا ثبت نام</DialogTitle>
         </DialogHeader>
 
+        <div className="grid w-full grid-cols-2 gap-4 mb-6">
+          <Button
+            variant={activeTab === 'login' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('login')}
+            className="w-full"
+          >
+            ورود
+          </Button>
+          <Button
+            variant={activeTab === 'register' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('register')}
+            className="w-full"
+          >
+            ثبت نام
+          </Button>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">ورود</TabsTrigger>
-            <TabsTrigger value="register">ثبت نام</TabsTrigger>
-          </TabsList>
 
           <TabsContent value="login">
             <Card>
