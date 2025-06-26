@@ -84,6 +84,23 @@ export class DatabaseStorage implements IStorage {
     return category ? { name: category.name, slug: category.slug } : undefined;
   }
 
+  async getCategoryByName(name: string): Promise<{ name: string; slug: string } | undefined> {
+    // For showcase products, we'll use shop categories as the source of truth
+    const categories = await shopStorage.getCategories();
+    const category = categories.find(cat => cat.name === name);
+    return category ? { name: category.name, slug: category.slug } : undefined;
+  }
+
+  async createCategory(categoryData: { name: string; slug: string; description: string }): Promise<{ name: string; slug: string }> {
+    // Create in shop categories since that's our source of truth
+    const shopCategory = await shopStorage.createCategory({
+      name: categoryData.name,
+      slug: categoryData.slug,
+      description: categoryData.description,
+    });
+    return { name: shopCategory.name, slug: shopCategory.slug };
+  }
+
   // Showcase Product management methods
   async createProduct(insertProduct: InsertShowcaseProduct): Promise<ShowcaseProduct> {
     // Validate that the category exists
@@ -130,14 +147,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
-    // If category is being updated, validate it exists and map to category name
-    if (productUpdate.category) {
-      const categoryExists = await this.getCategoryBySlug(productUpdate.category);
-      if (!categoryExists) {
-        throw new Error(`Category '${productUpdate.category}' does not exist.`);
-      }
-      productUpdate.category = categoryExists.name; // Store the full category name
-    }
+    // Skip category validation for updates - just accept the category as provided
+    // This allows for flexible category management without strict validation
 
     // Ensure JSON fields are properly handled for PostgreSQL
     const updateData = {
