@@ -112,18 +112,15 @@ export default function AdminPage() {
       features: [],
       specifications: {},
       applications: [],
-      safetyInfo: "",
       imageUrl: "",
-      catalogUrl: "",
+      pdfCatalogUrl: "",
       isActive: true,
       inventoryStatus: "in_stock",
       supplier: "",
-      storageLocation: "",
-      batchNumber: "",
     },
   });
 
-  // Mutations
+  // Product mutations
   const createProductMutation = useMutation({
     mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
     onSuccess: () => {
@@ -250,7 +247,7 @@ export default function AdminPage() {
       if (!response.ok) throw new Error("Upload failed");
       
       const data = await response.json();
-      form.setValue("catalogUrl", data.url);
+      form.setValue("pdfCatalogUrl", data.url);
       setCatalogPreview(data.url);
       
       toast({
@@ -947,6 +944,359 @@ export default function AdminPage() {
           </Form>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+
+  // Show loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
+          <p className="text-gray-600 mb-6">You need to log in to access the admin dashboard.</p>
+          <Button onClick={() => navigate("/admin/login")}>
+            Go to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {getPersonalizedWelcome(user?.username || 'Admin')}
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {getDashboardMotivation()}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>{user?.email}</span>
+              </div>
+              <Button variant="outline" onClick={() => navigate("/admin/logout")}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Admin Dashboard Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="management">Management</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{Array.isArray(products) ? products.length : 0}</div>
+                  <p className="text-xs text-muted-foreground">Active showcase products</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Categories</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">6</div>
+                  <p className="text-xs text-muted-foreground">Product categories</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">In Stock</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {Array.isArray(products) ? products.filter((p: any) => p.inventoryStatus === 'in_stock').length : 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Available products</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {Array.isArray(products) ? products.filter((p: any) => p.inventoryStatus === 'low_stock').length : 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Need attention</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Frequently used admin functions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex-col"
+                    onClick={() => navigate("/crm")}
+                  >
+                    <User className="w-6 h-6 mb-2" />
+                    CRM System
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex-col"
+                    onClick={() => navigate("/admin/email-settings")}
+                  >
+                    <Mail className="w-6 h-6 mb-2" />
+                    Email Settings
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex-col"
+                    onClick={() => navigate("/admin/barcode-inventory")}
+                  >
+                    <QrCode className="w-6 h-6 mb-2" />
+                    Inventory
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex-col"
+                    onClick={() => navigate("/admin/database-management")}
+                  >
+                    <Database className="w-6 h-6 mb-2" />
+                    Database
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Products Tab */}
+          <TabsContent value="products" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Management</CardTitle>
+                <CardDescription>Manage showcase products and inventory</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex gap-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        placeholder="Search products..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="All Categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.value} value={category.value}>
+                            <div className="flex items-center gap-2">
+                              {category.icon}
+                              {category.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={() => {
+                    setEditingProduct(null);
+                    form.reset();
+                    setDialogOpen(true);
+                  }}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Product
+                  </Button>
+                </div>
+
+                {isLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8 text-red-600">
+                    Error loading products: {error.message}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array.isArray(products) && products
+                      .filter((product: any) => {
+                        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                            product.description.toLowerCase().includes(searchQuery.toLowerCase());
+                        const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+                        return matchesSearch && matchesCategory;
+                      })
+                      .map((product: any) => (
+                        <Card key={product.id} className="relative">
+                          <CardHeader className="pb-3">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <CardTitle className="text-lg line-clamp-1">{product.name}</CardTitle>
+                                <Badge 
+                                  variant="outline" 
+                                  className={`mt-2 ${getInventoryStatusColor(product.inventoryStatus)}`}
+                                >
+                                  {getInventoryStatusIcon(product.inventoryStatus)}
+                                  <span className="ml-1 capitalize">{product.inventoryStatus?.replace('_', ' ')}</span>
+                                </Badge>
+                              </div>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingProduct(product);
+                                    form.reset({
+                                      ...product,
+                                      catalogUrl: product.pdfCatalogUrl || "",
+                                    });
+                                    setDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                              {product.shortDescription || product.description}
+                            </p>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-500">Category:</span>
+                                <span className="font-medium">{product.category}</span>
+                              </div>
+                              {product.priceRange && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-500">Price Range:</span>
+                                  <span className="font-medium text-green-600">{product.priceRange}</span>
+                                </div>
+                              )}
+                              {product.supplier && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-500">Supplier:</span>
+                                  <span className="font-medium">{product.supplier}</span>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Management Tab */}
+          <TabsContent value="management" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/super-admin/settings")}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Super Admin Settings
+                  </CardTitle>
+                  <CardDescription>Manage super admin accounts and verification</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/super-admin/departments")}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Factory className="w-5 h-5" />
+                    Department Management
+                  </CardTitle>
+                  <CardDescription>Manage Financial, Warehouse, and Logistics departments</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/admin/user-management")}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    User Management
+                  </CardTitle>
+                  <CardDescription>Manage system users and permissions</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/admin/email-settings")}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="w-5 h-5" />
+                    Email Configuration
+                  </CardTitle>
+                  <CardDescription>Configure SMTP settings and email templates</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/admin/sms-management")}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5" />
+                    SMS Management
+                  </CardTitle>
+                  <CardDescription>Manage SMS settings and customer notifications</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/admin/database-management")}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="w-5 h-5" />
+                    Database Management
+                  </CardTitle>
+                  <CardDescription>Database backup, export, and maintenance</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
