@@ -1,13 +1,28 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 
 export default function SiteManagement() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  const syncProductsMutation = useMutation({
+    mutationFn: () => apiRequest("/api/sync-products", "POST"),
+    onSuccess: () => {
+      toast({ title: "Success", description: "All products synchronized with shop successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to sync products", variant: "destructive" });
+    },
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -91,9 +106,14 @@ export default function SiteManagement() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-                    <Settings className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Function 1</span>
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-green-300 text-green-600 hover:bg-green-50"
+                    onClick={() => syncProductsMutation.mutate()}
+                    disabled={syncProductsMutation.isPending}
+                  >
+                    <RefreshCw className={`h-6 w-6 mb-2 ${syncProductsMutation.isPending ? 'animate-spin' : ''}`} />
+                    <span className="text-sm">{syncProductsMutation.isPending ? 'Syncing...' : 'Sync Shop'}</span>
                   </Button>
                   
                   <Button variant="outline" className="h-20 flex flex-col items-center justify-center">

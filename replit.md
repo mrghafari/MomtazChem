@@ -131,6 +131,11 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED Site Management centralization - moved sync shop functionality from admin dashboard to organized Site Management interface
+- June 26, 2025: Created comprehensive Site Management page with 6 tabbed sections (Overview, Content, Users, Security, Performance, Settings)
+- June 26, 2025: Integrated sync shop as primary function in Site Management with enhanced UI including loading animations and proper error handling
+- June 26, 2025: Removed sync shop button from main admin dashboard to reduce clutter and centralize management functions
+- June 26, 2025: Added Site Management navigation button in admin dashboard for easy access to centralized management tools
 - June 26, 2025: COMPLETED comprehensive English localization of super admin settings interface
 - June 26, 2025: Converted all Persian text to English including forms, labels, validation messages, navigation elements, buttons, status badges, and verification components
 - June 26, 2025: Updated date formatting from Persian (fa-IR) to English (en-US) locale throughout admin interface
