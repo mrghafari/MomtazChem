@@ -131,6 +131,10 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 26, 2025: COMPLETED comprehensive English localization of super admin settings interface
+- June 26, 2025: Converted all Persian text to English including forms, labels, validation messages, navigation elements, buttons, status badges, and verification components
+- June 26, 2025: Updated date formatting from Persian (fa-IR) to English (en-US) locale throughout admin interface
+- June 26, 2025: Maintained full functionality while providing complete English language support for international users
 - June 26, 2025: COMPLETED secure super admin verification system with email/SMS authentication
 - June 26, 2025: Added comprehensive super admin management with password recovery functionality
 - June 26, 2025: Implemented email and SMS verification codes for enhanced security

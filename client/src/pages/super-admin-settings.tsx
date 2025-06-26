@@ -552,17 +552,17 @@ export default function SuperAdminSettings() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>درخواست بازیابی رمز عبور</CardTitle>
+                  <CardTitle>Password Recovery Request</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="resetEmail">ایمیل سوپر ادمین</Label>
+                    <Label htmlFor="resetEmail">Super Admin Email</Label>
                     <Input
                       id="resetEmail"
                       type="email"
                       value={resetEmailData.email}
                       onChange={(e) => setResetEmailData(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="آدرس ایمیل را وارد کنید"
+                      placeholder="Enter email address"
                     />
                   </div>
                   <Button
@@ -570,44 +570,44 @@ export default function SuperAdminSettings() {
                     disabled={passwordResetMutation.isPending || !resetEmailData.email}
                     className="w-full"
                   >
-                    {passwordResetMutation.isPending ? "در حال ارسال..." : "ارسال کد بازیابی"}
+                    {passwordResetMutation.isPending ? "Sending..." : "Send Recovery Code"}
                   </Button>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>تغییر رمز عبور با کد</CardTitle>
+                  <CardTitle>Change Password with Code</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="resetCode">کد بازیابی</Label>
+                    <Label htmlFor="resetCode">Recovery Code</Label>
                     <Input
                       id="resetCode"
                       value={resetEmailData.verificationCode}
                       onChange={(e) => setResetEmailData(prev => ({ ...prev, verificationCode: e.target.value }))}
-                      placeholder="کد 6 رقمی دریافتی از ایمیل"
+                      placeholder="6-digit code from email"
                       maxLength={6}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="newPassword">رمز عبور جدید</Label>
+                    <Label htmlFor="newPassword">New Password</Label>
                     <Input
                       id="newPassword"
                       type="password"
                       value={resetEmailData.newPassword}
                       onChange={(e) => setResetEmailData(prev => ({ ...prev, newPassword: e.target.value }))}
-                      placeholder="رمز عبور جدید را وارد کنید"
+                      placeholder="Enter new password"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="confirmNewPassword">تایید رمز عبور جدید</Label>
+                    <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
                     <Input
                       id="confirmNewPassword"
                       type="password"
                       value={resetEmailData.confirmNewPassword}
                       onChange={(e) => setResetEmailData(prev => ({ ...prev, confirmNewPassword: e.target.value }))}
-                      placeholder="رمز عبور جدید را مجدداً وارد کنید"
+                      placeholder="Re-enter new password"
                     />
                   </div>
                   <Button
@@ -615,7 +615,7 @@ export default function SuperAdminSettings() {
                     disabled={resetPasswordMutation.isPending || !resetEmailData.verificationCode || !resetEmailData.newPassword}
                     className="w-full"
                   >
-                    {resetPasswordMutation.isPending ? "در حال تغییر..." : "تغییر رمز عبور"}
+                    {resetPasswordMutation.isPending ? "Changing..." : "Change Password"}
                   </Button>
                 </CardContent>
               </Card>
