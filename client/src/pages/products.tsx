@@ -207,6 +207,8 @@ export default function ProductsPage() {
       stockQuantity: 0,
       minStockLevel: 0,
       maxStockLevel: 0,
+      unitPrice: 0,
+      currency: "USD",
       isActive: true,
     },
   });
@@ -307,7 +309,9 @@ export default function ProductsPage() {
       name: product.name,
       description: product.description || "",
       category: product.category,
+      shortDescription: product.shortDescription || "",
       features: Array.isArray(product.features) ? product.features.join('\n') : (product.features || ""),
+      applications: Array.isArray(product.applications) ? product.applications.join('\n') : (product.applications || ""),
       specifications: typeof product.specifications === 'object' ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
@@ -315,9 +319,12 @@ export default function ProductsPage() {
       stockQuantity: product.stockQuantity || 0,
       minStockLevel: product.minStockLevel || 0,
       maxStockLevel: product.maxStockLevel || 0,
+      unitPrice: product.unitPrice || 0,
+      currency: product.currency || "USD",
       priceRange: product.priceRange || "",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
+      isActive: product.isActive !== false,
     });
     setDialogOpen(true);
   };
