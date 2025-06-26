@@ -7551,14 +7551,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       }
 
       await db
-        .update(users)
+        .update(schema.users)
         .set({ lastLoginAt: new Date() })
-        .where(eq(users.id, user.id));
+        .where(eq(schema.users.id, user.id));
 
       req.session.departmentUser = {
         id: user.id,
         username: user.username,
-        department: user.department
+        department: user.department || 'warehouse'
       };
 
       res.json({ 
