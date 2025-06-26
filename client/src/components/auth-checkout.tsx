@@ -11,35 +11,125 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, ShoppingCart, User, Lock, UserPlus, AlertCircle } from "lucide-react";
+import { CheckCircle, ShoppingCart, User, Lock, UserPlus, AlertCircle, MapPin, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Authentication schemas
-const loginSchema = z.object({
-  email: z.string().email("آدرس ایمیل معتبر وارد کنید"),
-  password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
+// Translation system
+type Language = 'en' | 'ar';
+
+const translations = {
+  en: {
+    // Form titles and navigation
+    purchaseOrder: "Purchase Order",
+    enterDetails: "Enter your details",
+    customerName: "Customer Name",
+    deliveryPhone: "Delivery Phone Number",
+    deliveryAddress: "Delivery Address",
+    city: "City",
+    postalCode: "Postal Code (Optional)",
+    gpsLocation: "GPS Location",
+    findLocation: "Find My Location",
+    orderNotes: "Order Notes",
+    submitOrder: "Submit Order",
+    cancel: "Cancel",
+    loading: "Loading...",
+    
+    // Validation messages
+    emailRequired: "Please enter a valid email address",
+    passwordMin: "Password must be at least 6 characters",
+    firstNameMin: "First name must be at least 2 characters",
+    lastNameMin: "Last name must be at least 2 characters",
+    phoneRequired: "Please enter a valid phone number",
+    passwordMatch: "Password confirmation does not match",
+    addressRequired: "Please enter complete address",
+    cityRequired: "Please enter city",
+    postalCodeRequired: "Please enter postal code",
+    
+    // Placeholders
+    namePlaceholder: "e.g. Ahmad Ali",
+    phonePlaceholder: "Enter phone number",
+    addressPlaceholder: "Enter complete address for delivery",
+    cityPlaceholder: "Enter city name",
+    postalCodePlaceholder: "Optional",
+    notesPlaceholder: "Additional notes for the order",
+    
+    // Status messages
+    locationFound: "Location found successfully",
+    locationError: "Could not get location. Please enter manually.",
+    orderSubmitted: "Order submitted successfully",
+    orderError: "Failed to submit order"
+  },
+  ar: {
+    // Form titles and navigation
+    purchaseOrder: "طلب شراء",
+    enterDetails: "أدخل تفاصيلك",
+    customerName: "اسم العميل",
+    deliveryPhone: "رقم هاتف التوصيل",
+    deliveryAddress: "عنوان التوصيل",
+    city: "المدينة",
+    postalCode: "الرمز البريدي (اختياري)",
+    gpsLocation: "الموقع الجغرافي",
+    findLocation: "العثور على موقعي",
+    orderNotes: "ملاحظات الطلب",
+    submitOrder: "إرسال الطلب",
+    cancel: "إلغاء",
+    loading: "جارٍ التحميل...",
+    
+    // Validation messages
+    emailRequired: "يرجى إدخال عنوان بريد إلكتروني صحيح",
+    passwordMin: "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    firstNameMin: "الاسم الأول يجب أن يكون حرفين على الأقل",
+    lastNameMin: "اسم العائلة يجب أن يكون حرفين على الأقل",
+    phoneRequired: "يرجى إدخال رقم هاتف صحيح",
+    passwordMatch: "تأكيد كلمة المرور غير متطابق",
+    addressRequired: "يرجى إدخال العنوان الكامل",
+    cityRequired: "يرجى إدخال المدينة",
+    postalCodeRequired: "يرجى إدخال الرمز البريدي",
+    
+    // Placeholders
+    namePlaceholder: "مثل: أحمد علي",
+    phonePlaceholder: "أدخل رقم الهاتف",
+    addressPlaceholder: "أدخل العنوان الكامل للتوصيل",
+    cityPlaceholder: "أدخل اسم المدينة",
+    postalCodePlaceholder: "اختياري",
+    notesPlaceholder: "ملاحظات إضافية للطلب",
+    
+    // Status messages
+    locationFound: "تم العثور على الموقع بنجاح",
+    locationError: "لا يمكن الحصول على الموقع. يرجى الإدخال يدوياً.",
+    orderSubmitted: "تم إرسال الطلب بنجاح",
+    orderError: "فشل في إرسال الطلب"
+  }
+};
+
+// Dynamic schemas based on language
+const createLoginSchema = (lang: Language) => z.object({
+  email: z.string().email(translations[lang].emailRequired),
+  password: z.string().min(6, translations[lang].passwordMin),
 });
 
-const registerSchema = z.object({
-  email: z.string().email("آدرس ایمیل معتبر وارد کنید"),
-  password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
+const createRegisterSchema = (lang: Language) => z.object({
+  email: z.string().email(translations[lang].emailRequired),
+  password: z.string().min(6, translations[lang].passwordMin),
   confirmPassword: z.string(),
-  firstName: z.string().min(2, "نام باید حداقل 2 کاراکتر باشد"),
-  lastName: z.string().min(2, "نام خانوادگی باید حداقل 2 کاراکتر باشد"),
-  phone: z.string().min(10, "شماره تلفن معتبر وارد کنید"),
+  firstName: z.string().min(2, translations[lang].firstNameMin),
+  lastName: z.string().min(2, translations[lang].lastNameMin),
+  phone: z.string().min(10, translations[lang].phoneRequired),
   company: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "تکرار رمز عبور مطابقت ندارد",
+  message: translations[lang].passwordMatch,
   path: ["confirmPassword"],
 });
 
-// Checkout form schema
-const checkoutSchema = z.object({
-  address: z.string().min(10, "آدرس کامل وارد کنید"),
-  city: z.string().min(2, "شهر وارد کنید"),
-  postalCode: z.string().min(5, "کد پستی وارد کنید"),
+const createCheckoutSchema = (lang: Language) => z.object({
+  address: z.string().min(10, translations[lang].addressRequired),
+  city: z.string().min(2, translations[lang].cityRequired),
+  postalCode: z.string().optional(),
   notes: z.string().optional(),
+  gpsLatitude: z.number().optional(),
+  gpsLongitude: z.number().optional(),
 });
 
 interface AuthCheckoutProps {
@@ -48,6 +138,33 @@ interface AuthCheckoutProps {
   onOrderComplete: () => void;
   onClose: () => void;
 }
+
+// GPS location functionality
+const getCurrentLocation = (): Promise<{latitude: number, longitude: number}> => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation is not supported'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+      },
+      (error) => {
+        reject(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 600000
+      }
+    );
+  });
+};
 
 export default function AuthCheckout({ cart, products, onOrderComplete, onClose }: AuthCheckoutProps) {
   const [currentStep, setCurrentStep] = useState<"auth" | "checkout" | "complete">("auth");

@@ -70,6 +70,11 @@ export const insertShowcaseProductSchema = createInsertSchema(showcaseProducts).
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  unitPrice: z.union([z.string(), z.number()]).transform((val) => {
+    if (typeof val === 'number') return val.toString();
+    return val;
+  }),
 });
 
 export type InsertShowcaseProduct = z.infer<typeof insertShowcaseProductSchema>;
