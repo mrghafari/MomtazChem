@@ -1,0 +1,523 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote } from "lucide-react";
+
+interface WalletSummary {
+  wallet?: {
+    id: number;
+    balance: string;
+    currency: string;
+    status: string;
+    creditLimit: string;
+    lastActivityDate?: string;
+  };
+  recentTransactions: Array<{
+    id: number;
+    transactionType: string;
+    amount: string;
+    currency: string;
+    description: string;
+    status: string;
+    createdAt: string;
+  }>;
+  pendingRecharges: Array<{
+    id: number;
+    requestNumber: string;
+    amount: string;
+    currency: string;
+    paymentMethod: string;
+    status: string;
+    createdAt: string;
+  }>;
+  totalSpent: number;
+  totalRecharged: number;
+}
+
+interface RechargeRequest {
+  id: number;
+  requestNumber: string;
+  amount: string;
+  currency: string;
+  paymentMethod: string;
+  paymentReference?: string;
+  status: string;
+  customerNotes?: string;
+  adminNotes?: string;
+  createdAt: string;
+}
+
+export default function CustomerWallet() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isRechargeDialogOpen, setIsRechargeDialogOpen] = useState(false);
+  const [rechargeForm, setRechargeForm] = useState({
+    amount: "",
+    currency: "IQD",
+    paymentMethod: "",
+    paymentReference: "",
+    customerNotes: ""
+  });
+
+  // Fetch wallet summary
+  const { data: walletData, isLoading } = useQuery<{ success: boolean; data: WalletSummary }>({
+    queryKey: ['/api/customer/wallet'],
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  // Fetch all recharge requests
+  const { data: rechargeRequestsData } = useQuery<{ success: boolean; data: RechargeRequest[] }>({
+    queryKey: ['/api/customer/wallet/recharge-requests'],
+    refetchInterval: 30000
+  });
+
+  // Fetch all transactions
+  const { data: transactionsData } = useQuery<{ success: boolean; data: any[] }>({
+    queryKey: ['/api/customer/wallet/transactions'],
+    refetchInterval: 30000
+  });
+
+  // Create recharge request mutation
+  const createRechargeMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/customer/wallet/recharge', data),
+    onSuccess: () => {
+      toast({
+        title: "طلب شارژ ایجاد شد",
+        description: "درخواست شارژ کیف پول شما با موفقیت ثبت شد و در انتظار تأیید می‌باشد.",
+      });
+      setIsRechargeDialogOpen(false);
+      setRechargeForm({
+        amount: "",
+        currency: "IQD",
+        paymentMethod: "",
+        paymentReference: "",
+        customerNotes: ""
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet/recharge-requests'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در ایجاد درخواست",
+        description: error.message || "خطا در ایجاد درخواست شارژ کیف پول",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleRechargeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!rechargeForm.amount || parseFloat(rechargeForm.amount) <= 0) {
+      toast({
+        title: "خطا در ورودی",
+        description: "لطفاً مبلغ معتبری وارد کنید",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!rechargeForm.paymentMethod) {
+      toast({
+        title: "خطا در ورودی",
+        description: "لطفاً روش پرداخت را انتخاب کنید",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createRechargeMutation.mutate(rechargeForm);
+  };
+
+  const formatCurrency = (amount: string | number, currency: string = "IQD") => {
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('fa-IR', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(numAmount);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; variant: any }> = {
+      'pending': { label: 'در انتظار', variant: 'secondary' },
+      'approved': { label: 'تأیید شده', variant: 'default' },
+      'completed': { label: 'تکمیل شده', variant: 'default' },
+      'rejected': { label: 'رد شده', variant: 'destructive' },
+      'active': { label: 'فعال', variant: 'default' },
+      'frozen': { label: 'مسدود', variant: 'destructive' }
+    };
+    
+    const config = statusConfig[status] || { label: status, variant: 'secondary' };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'credit':
+        return <ArrowUpCircle className="h-4 w-4 text-green-600" />;
+      case 'debit':
+        return <ArrowDownCircle className="h-4 w-4 text-red-600" />;
+      default:
+        return <DollarSign className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>در حال بارگذاری کیف پول...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const wallet = walletData?.data?.wallet;
+  const recentTransactions = walletData?.data?.recentTransactions || [];
+  const pendingRecharges = walletData?.data?.pendingRecharges || [];
+  const allRechargeRequests = rechargeRequestsData?.data || [];
+  const allTransactions = transactionsData?.data || [];
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Wallet className="h-8 w-8 text-blue-600" />
+            کیف پول من
+          </h1>
+          <p className="text-gray-600 mt-2">مدیریت موجودی و تراکنش‌های کیف پول</p>
+        </div>
+
+        {/* Wallet Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">موجودی فعلی</CardTitle>
+              <Wallet className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {wallet ? formatCurrency(wallet.balance, wallet.currency) : formatCurrency(0)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                وضعیت: {wallet ? getStatusBadge(wallet.status) : getStatusBadge('active')}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">کل خرید</CardTitle>
+              <ArrowDownCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {formatCurrency(walletData?.data?.totalSpent || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                مجموع برداشت‌ها
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">کل شارژ</CardTitle>
+              <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {formatCurrency(walletData?.data?.totalRecharged || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                مجموع واریزها
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>عملیات سریع</CardTitle>
+              <CardDescription>مدیریت کیف پول خود</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4">
+                <Dialog open={isRechargeDialogOpen} onOpenChange={setIsRechargeDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      شارژ کیف پول
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>درخواست شارژ کیف پول</DialogTitle>
+                      <DialogDescription>
+                        برای شارژ کیف پول، اطلاعات زیر را تکمیل کنید
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleRechargeSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="amount">مبلغ *</Label>
+                        <Input
+                          id="amount"
+                          type="number"
+                          step="0.01"
+                          value={rechargeForm.amount}
+                          onChange={(e) => setRechargeForm({...rechargeForm, amount: e.target.value})}
+                          placeholder="مبلغ مورد نظر را وارد کنید"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="currency">ارز</Label>
+                        <Select 
+                          value={rechargeForm.currency} 
+                          onValueChange={(value) => setRechargeForm({...rechargeForm, currency: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="IQD">دینار عراقی (IQD)</SelectItem>
+                            <SelectItem value="USD">دلار آمریکا (USD)</SelectItem>
+                            <SelectItem value="EUR">یورو (EUR)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="paymentMethod">روش پرداخت *</Label>
+                        <Select 
+                          value={rechargeForm.paymentMethod} 
+                          onValueChange={(value) => setRechargeForm({...rechargeForm, paymentMethod: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="bank_transfer">انتقال بانکی</SelectItem>
+                            <SelectItem value="credit_card">کارت اعتباری</SelectItem>
+                            <SelectItem value="cash_deposit">واریز نقدی</SelectItem>
+                            <SelectItem value="digital_wallet">کیف پول دیجیتال</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="paymentReference">مرجع پرداخت</Label>
+                        <Input
+                          id="paymentReference"
+                          value={rechargeForm.paymentReference}
+                          onChange={(e) => setRechargeForm({...rechargeForm, paymentReference: e.target.value})}
+                          placeholder="شماره مرجع، شماره کارت یا شناسه تراکنش"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="customerNotes">توضیحات</Label>
+                        <Textarea
+                          id="customerNotes"
+                          value={rechargeForm.customerNotes}
+                          onChange={(e) => setRechargeForm({...rechargeForm, customerNotes: e.target.value})}
+                          placeholder="توضیحات اضافی (اختیاری)"
+                          rows={3}
+                        />
+                      </div>
+
+                      <div className="flex justify-end space-x-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => setIsRechargeDialogOpen(false)}
+                        >
+                          انصراف
+                        </Button>
+                        <Button 
+                          type="submit" 
+                          disabled={createRechargeMutation.isPending}
+                        >
+                          {createRechargeMutation.isPending ? "در حال ارسال..." : "ثبت درخواست"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                {pendingRecharges.length > 0 && (
+                  <Badge variant="secondary" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    {pendingRecharges.length} درخواست در انتظار
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs for different sections */}
+        <Tabs defaultValue="transactions" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="transactions">تراکنش‌های اخیر</TabsTrigger>
+            <TabsTrigger value="recharge-requests">درخواست‌های شارژ</TabsTrigger>
+            <TabsTrigger value="all-transactions">همه تراکنش‌ها</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="transactions">
+            <Card>
+              <CardHeader>
+                <CardTitle>تراکنش‌های اخیر</CardTitle>
+                <CardDescription>10 تراکنش آخر کیف پول</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {recentTransactions.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">هیچ تراکنشی یافت نشد</p>
+                ) : (
+                  <div className="space-y-4">
+                    {recentTransactions.map((transaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          {getTransactionIcon(transaction.transactionType)}
+                          <div>
+                            <p className="font-medium">{transaction.description}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(transaction.createdAt).toLocaleDateString('fa-IR')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-left">
+                          <p className={`font-bold ${
+                            transaction.transactionType === 'credit' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {transaction.transactionType === 'credit' ? '+' : '-'}
+                            {formatCurrency(transaction.amount, transaction.currency)}
+                          </p>
+                          {getStatusBadge(transaction.status)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="recharge-requests">
+            <Card>
+              <CardHeader>
+                <CardTitle>درخواست‌های شارژ</CardTitle>
+                <CardDescription>تاریخچه درخواست‌های شارژ کیف پول</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {allRechargeRequests.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">هیچ درخواست شارژی یافت نشد</p>
+                ) : (
+                  <div className="space-y-4">
+                    {allRechargeRequests.map((request) => (
+                      <div key={request.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <p className="font-medium">درخواست #{request.requestNumber}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(request.createdAt).toLocaleDateString('fa-IR')}
+                            </p>
+                          </div>
+                          <div className="text-left">
+                            <p className="font-bold text-blue-600">
+                              {formatCurrency(request.amount, request.currency)}
+                            </p>
+                            {getStatusBadge(request.status)}
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <p>روش پرداخت: {request.paymentMethod}</p>
+                          {request.paymentReference && (
+                            <p>مرجع: {request.paymentReference}</p>
+                          )}
+                          {request.customerNotes && (
+                            <p>توضیحات: {request.customerNotes}</p>
+                          )}
+                          {request.adminNotes && (
+                            <p className="text-orange-600">نظر ادمین: {request.adminNotes}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="all-transactions">
+            <Card>
+              <CardHeader>
+                <CardTitle>همه تراکنش‌ها</CardTitle>
+                <CardDescription>تاریخچه کامل تراکنش‌های کیف پول</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {allTransactions.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">هیچ تراکنشی یافت نشد</p>
+                ) : (
+                  <div className="space-y-4">
+                    {allTransactions.map((transaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          {getTransactionIcon(transaction.transactionType)}
+                          <div>
+                            <p className="font-medium">{transaction.description}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(transaction.createdAt).toLocaleDateString('fa-IR')} - {transaction.id}
+                            </p>
+                            {transaction.referenceType && (
+                              <p className="text-xs text-gray-400">
+                                نوع: {transaction.referenceType}
+                                {transaction.referenceId && ` - شناسه: ${transaction.referenceId}`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-left">
+                          <p className={`font-bold ${
+                            transaction.transactionType === 'credit' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {transaction.transactionType === 'credit' ? '+' : '-'}
+                            {formatCurrency(transaction.amount, transaction.currency)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            موجودی: {formatCurrency(transaction.balanceAfter, transaction.currency)}
+                          </p>
+                          {getStatusBadge(transaction.status)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

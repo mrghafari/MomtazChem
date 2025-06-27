@@ -13,14 +13,7 @@ if (!process.env.DATABASE_URL) {
 
 export const customerPool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 1, // Limit concurrent connections
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000
-});
-
-// Handle pool errors to prevent unhandled rejections
-customerPool.on('error', (err) => {
-  console.error('Customer database pool error:', err);
+  ssl: true
 });
 
 export const customerDb = drizzle({ client: customerPool, schema: customerSchema });

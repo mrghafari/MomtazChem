@@ -9839,6 +9839,243 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // CUSTOMER WALLET SYSTEM ENDPOINTS
+  // =============================================================================
+
+  // Customer wallet endpoints
+  app.get('/api/customer/wallet', async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer authentication required" });
+      }
+
+      const summary = await walletStorage.getCustomerWalletSummary(req.session.customerId);
+      res.json({ success: true, data: summary });
+    } catch (error) {
+      console.error('Error fetching wallet summary:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch wallet information' });
+    }
+  });
+
+  // Create wallet recharge request
+  app.post('/api/customer/wallet/recharge', async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer authentication required" });
+      }
+
+      const { amount, currency, paymentMethod, paymentReference, customerNotes } = req.body;
+
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ success: false, message: "Valid amount is required" });
+      }
+
+      // Get or create wallet
+      let wallet = await walletStorage.getWalletByCustomerId(req.session.customerId);
+      if (!wallet) {
+        wallet = await walletStorage.createWallet({
+          customerId: req.session.customerId,
+          balance: "0",
+          currency: currency || "IQD",
+          status: "active"
+        });
+      }
+
+      const rechargeRequest = await walletStorage.createRechargeRequest({
+        customerId: req.session.customerId,
+        walletId: wallet.id,
+        amount: amount.toString(),
+        currency: currency || "IQD",
+        paymentMethod,
+        paymentReference,
+        customerNotes
+      });
+
+      res.json({ success: true, data: rechargeRequest });
+    } catch (error) {
+      console.error('Error creating recharge request:', error);
+      res.status(500).json({ success: false, message: 'Failed to create recharge request' });
+    }
+  });
+
+  // Get customer's recharge requests
+  app.get('/api/customer/wallet/recharge-requests', async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer authentication required" });
+      }
+
+      const requests = await walletStorage.getRechargeRequestsByCustomer(req.session.customerId);
+      res.json({ success: true, data: requests });
+    } catch (error) {
+      console.error('Error fetching recharge requests:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch recharge requests' });
+    }
+  });
+
+  // Get customer wallet transactions
+  app.get('/api/customer/wallet/transactions', async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer authentication required" });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 50;
+      const transactions = await walletStorage.getTransactionsByCustomer(req.session.customerId, limit);
+      res.json({ success: true, data: transactions });
+    } catch (error) {
+      console.error('Error fetching wallet transactions:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch wallet transactions' });
+    }
+  });
+
+  // Admin wallet endpoints
+  app.get('/api/admin/wallet/statistics', requireAuth, async (req, res) => {
+    try {
+      const statistics = await walletStorage.getWalletStatistics();
+      res.json({ success: true, data: statistics });
+    } catch (error) {
+      console.error('Error fetching wallet statistics:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch wallet statistics' });
+    }
+  });
+
+  // Get all pending recharge requests (admin)
+  app.get('/api/admin/wallet/recharge-requests', requireAuth, async (req, res) => {
+    try {
+      const requests = await walletStorage.getAllPendingRechargeRequests();
+      
+      // Get customer details for each request
+      const requestsWithCustomers = await Promise.all(
+        requests.map(async (request) => {
+          const customer = await crmStorage.getCrmCustomerById(request.customerId);
+          return { ...request, customer };
+        })
+      );
+
+      res.json({ success: true, data: requestsWithCustomers });
+    } catch (error) {
+      console.error('Error fetching recharge requests:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch recharge requests' });
+    }
+  });
+
+  // Process recharge request (approve/reject)
+  app.post('/api/admin/wallet/recharge-requests/:id/process', requireAuth, async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const { action, adminNotes } = req.body; // action: 'approve' or 'reject'
+      const adminId = req.session.adminId;
+
+      if (!adminId) {
+        return res.status(401).json({ success: false, message: "Admin authentication required" });
+      }
+
+      if (action === 'approve') {
+        const result = await walletStorage.processRechargeRequest(requestId, adminId);
+        res.json({ 
+          success: true, 
+          message: "Recharge request approved and processed successfully",
+          data: result 
+        });
+      } else if (action === 'reject') {
+        const updatedRequest = await walletStorage.updateRechargeRequestStatus(
+          requestId, 
+          'rejected', 
+          adminNotes, 
+          adminId
+        );
+        res.json({ 
+          success: true, 
+          message: "Recharge request rejected",
+          data: updatedRequest 
+        });
+      } else {
+        res.status(400).json({ success: false, message: "Invalid action. Use 'approve' or 'reject'" });
+      }
+    } catch (error) {
+      console.error('Error processing recharge request:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Failed to process recharge request' 
+      });
+    }
+  });
+
+  // Manual wallet adjustment (admin only)
+  app.post('/api/admin/wallet/adjust', requireAuth, async (req, res) => {
+    try {
+      const { customerId, amount, description, type } = req.body; // type: 'credit' or 'debit'
+      const adminId = req.session.adminId;
+
+      if (!adminId) {
+        return res.status(401).json({ success: false, message: "Admin authentication required" });
+      }
+
+      if (!customerId || !amount || !description || !type) {
+        return res.status(400).json({ success: false, message: "All fields are required" });
+      }
+
+      let transaction;
+      if (type === 'credit') {
+        transaction = await walletStorage.creditWallet(
+          customerId,
+          parseFloat(amount),
+          description,
+          'manual_adjustment',
+          undefined,
+          adminId
+        );
+      } else if (type === 'debit') {
+        transaction = await walletStorage.debitWallet(
+          customerId,
+          parseFloat(amount),
+          description,
+          'manual_adjustment',
+          undefined,
+          adminId
+        );
+      } else {
+        return res.status(400).json({ success: false, message: "Invalid type. Use 'credit' or 'debit'" });
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Wallet ${type} adjustment completed successfully`,
+        data: transaction 
+      });
+    } catch (error) {
+      console.error('Error adjusting wallet:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Failed to adjust wallet' 
+      });
+    }
+  });
+
+  // Get customer wallet details (admin)
+  app.get('/api/admin/wallet/customer/:customerId', requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      const summary = await walletStorage.getCustomerWalletSummary(customerId);
+      
+      // Get customer details
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      
+      res.json({ 
+        success: true, 
+        data: { 
+          ...summary, 
+          customer 
+        } 
+      });
+    } catch (error) {
+      console.error('Error fetching customer wallet details:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch customer wallet details' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
