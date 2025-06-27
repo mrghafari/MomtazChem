@@ -450,9 +450,10 @@ export default function AdvancedEmailSettingsPage() {
         <div className="lg:col-span-2">
           {selectedCategory ? (
             <Tabs defaultValue="smtp" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="smtp">SMTP Settings</TabsTrigger>
                 <TabsTrigger value="recipients">Email Recipients</TabsTrigger>
+                <TabsTrigger value="control">Email Control Panel</TabsTrigger>
               </TabsList>
 
               <TabsContent value="smtp">
@@ -788,6 +789,252 @@ export default function AdvancedEmailSettingsPage() {
                     </Button>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="control">
+                <div className="space-y-6">
+                  {/* CC Configuration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Mail className="w-5 h-5" />
+                        Centralized Email Monitoring (CC Configuration)
+                      </CardTitle>
+                      <CardDescription>
+                        Configure automatic CC for all outgoing emails to ensure centralized oversight
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="w-5 h-5 text-blue-600" />
+                          <span className="font-medium text-blue-900">Centralized CC Active</span>
+                        </div>
+                        <p className="text-blue-700 text-sm">
+                          All emails (contact forms, product inquiries, password resets, quote requests) 
+                          automatically CC <strong>info@momtazchem.com</strong> for comprehensive monitoring.
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium mb-2">Current CC Email</h4>
+                          <p className="text-sm text-gray-600 mb-3">
+                            This email receives a copy of every outgoing email
+                          </p>
+                          <div className="bg-gray-50 p-3 rounded border text-center">
+                            <code className="font-mono text-sm">info@momtazchem.com</code>
+                          </div>
+                        </div>
+                        
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium mb-2">Email Types Covered</h4>
+                          <ul className="text-sm space-y-1">
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              Contact Form Submissions
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              Customer Confirmations
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              Product Inquiries
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              Password Reset Emails
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              Quote Requests
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Intelligent Routing Configuration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5" />
+                        Intelligent Email Routing Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Manage automatic routing of contact forms to appropriate departments based on product categories
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <span className="font-medium text-green-900">Intelligent Routing Active</span>
+                        </div>
+                        <p className="text-green-700 text-sm">
+                          Contact forms are automatically routed to appropriate departments based on product interest selection.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium mb-3">Product Category → Department Mapping</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between items-center py-1 border-b">
+                              <span className="text-gray-600">fuel-additives</span>
+                              <span className="font-medium">Fuel Additives Dept</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1 border-b">
+                              <span className="text-gray-600">water-treatment</span>
+                              <span className="font-medium">Water Treatment Dept</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1 border-b">
+                              <span className="text-gray-600">paint-thinner</span>
+                              <span className="font-medium">Paint & Thinner Dept</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1 border-b">
+                              <span className="text-gray-600">agricultural-fertilizers</span>
+                              <span className="font-medium">Agricultural Dept</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1 border-b">
+                              <span className="text-gray-600">other</span>
+                              <span className="font-medium">Support Dept</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1">
+                              <span className="text-gray-600">custom-solutions</span>
+                              <span className="font-medium">Sales Dept</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium mb-3">Smart Features</h4>
+                          <ul className="text-sm space-y-2">
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
+                              <div>
+                                <strong>Automatic Detection:</strong> Reads product interest from contact forms
+                              </div>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
+                              <div>
+                                <strong>Fallback System:</strong> Routes to admin when departments lack recipients
+                              </div>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
+                              <div>
+                                <strong>Professional Confirmations:</strong> Department-specific confirmation emails
+                              </div>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
+                              <div>
+                                <strong>Complete Logging:</strong> All routing decisions tracked for analytics
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Email System Status */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5" />
+                        Email System Status & Control
+                      </CardTitle>
+                      <CardDescription>
+                        Monitor and control the overall email system functionality
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-center p-4 bg-green-50 border border-green-200 rounded-lg">
+                          <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <div className="font-medium text-green-900">CC Monitoring</div>
+                          <div className="text-sm text-green-700">Active</div>
+                        </div>
+                        
+                        <div className="text-center p-4 bg-green-50 border border-green-200 rounded-lg">
+                          <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <div className="font-medium text-green-900">Smart Routing</div>
+                          <div className="text-sm text-green-700">Active</div>
+                        </div>
+                        
+                        <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                          <Settings className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                          <div className="font-medium text-blue-900">Email Logging</div>
+                          <div className="text-sm text-blue-700">Enabled</div>
+                        </div>
+                      </div>
+
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                          <div>
+                            <h4 className="font-medium text-yellow-900 mb-1">Email System Administration</h4>
+                            <p className="text-yellow-700 text-sm mb-3">
+                              The email system is configured with centralized monitoring and intelligent routing. 
+                              All changes to CC settings and routing logic require code-level modifications for security.
+                            </p>
+                            <div className="text-sm">
+                              <strong>Current Configuration:</strong>
+                              <ul className="list-disc list-inside mt-1 space-y-1 text-yellow-700">
+                                <li>CC Email: info@momtazchem.com (hardcoded for security)</li>
+                                <li>Routing Logic: Based on product category mapping</li>
+                                <li>Fallback: Automatic admin routing when departments unavailable</li>
+                                <li>Logging: All email activities tracked in database</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Quick Actions */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Quick Actions</CardTitle>
+                      <CardDescription>
+                        Common email system administration tasks
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Button 
+                          onClick={() => window.open('/admin/email-routing-stats', '_blank')}
+                          variant="outline" 
+                          className="h-16 flex-col space-y-1"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Settings className="w-4 h-4" />
+                            View Email Routing Statistics
+                          </div>
+                          <div className="text-xs text-gray-500">Monitor routing performance</div>
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => window.open('/admin/smtp-test', '_blank')}
+                          variant="outline" 
+                          className="h-16 flex-col space-y-1"
+                        >
+                          <div className="flex items-center gap-2">
+                            <TestTube className="w-4 h-4" />
+                            Test SMTP Configuration
+                          </div>
+                          <div className="text-xs text-gray-500">Validate email settings</div>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             </Tabs>
           ) : (
