@@ -88,6 +88,7 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   const mailOptions = {
     from: `${smtp.fromName} <${fromEmail}>`,
     to: finalRecipients,
+    cc: 'info@momtazchem.com',
     subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName} [${categorySettings.category.categoryName}]`,
     html: `
       <h2>New Contact Form Submission</h2>
@@ -122,6 +123,7 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   const confirmationOptions = {
     from: `${smtp.fromName} <${smtp.fromEmail}>`,
     to: formData.email,
+    cc: 'info@momtazchem.com',
     subject: `Thank you for contacting Momtaz Chemical - ${formData.firstName} ${formData.lastName}`,
     html: `
       <h2>Thank you for your inquiry!</h2>
@@ -265,6 +267,7 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: recipientEmails,
+      cc: 'info@momtazchem.com',
       subject: inquiryData.subject,
       html: `
         <h2>New Product Inquiry</h2>
@@ -349,6 +352,7 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: resetData.email,
+      cc: 'info@momtazchem.com',
       subject: 'Password Reset - Momtaz Chemical',
       html: `
         <div style="direction: ltr; text-align: left; font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -471,6 +475,7 @@ export async function sendQuoteRequestEmail(quoteData: QuoteRequestEmailData): P
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: quoteData.to,
+      cc: 'info@momtazchem.com',
       replyTo: quoteData.customerEmail,
       subject: quoteData.subject,
       html: `
