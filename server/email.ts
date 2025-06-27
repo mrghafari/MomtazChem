@@ -65,10 +65,127 @@ function mapProductInterestToCategory(productInterest: string): string {
   return mapping[productInterest] || 'admin'; // Default to admin if no match
 }
 
+// Helper function to send email with specific settings
+async function sendWithSettings(formData: ContactFormData, categorySettings: any, transporter: any, originalCategoryKey: string): Promise<void> {
+  const smtp = categorySettings.smtp;
+  const recipients = categorySettings.recipients.filter((r: any) => r.isActive);
+  
+  if (recipients.length === 0) {
+    throw new Error('No active recipients found for email category');
+  }
+
+  const recipientEmails = recipients.map((r: any) => r.email).join(', ');
+  
+  // Filter out sender email from recipients to avoid "Invalid Recipients" error
+  const filteredRecipients = recipients
+    .filter((r: any) => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
+    .map((r: any) => r.email);
+  
+  // If no recipients remain after filtering, use the original list but change the from email
+  const finalRecipients = filteredRecipients.length > 0 ? filteredRecipients.join(', ') : recipientEmails;
+  const fromEmail = filteredRecipients.length > 0 ? smtp.fromEmail : `noreply@momtazchem.com`;
+  
+  const mailOptions = {
+    from: `${smtp.fromName} <${fromEmail}>`,
+    to: finalRecipients,
+    subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName} [${categorySettings.category.categoryName}]`,
+    html: `
+      <h2>New Contact Form Submission</h2>
+      <p><strong>Category:</strong> ${categorySettings.category.categoryName}</p>
+      <p><strong>Name:</strong> ${formData.firstName} ${formData.lastName}</p>
+      <p><strong>Email:</strong> ${formData.email}</p>
+      <p><strong>Company:</strong> ${formData.company}</p>
+      <p><strong>Product Interest:</strong> ${formData.productInterest}</p>
+      <p><strong>Message:</strong></p>
+      <p>${formData.message}</p>
+    `,
+    text: `
+      New Contact Form Submission
+      
+      Category: ${categorySettings.category.categoryName}
+      Name: ${formData.firstName} ${formData.lastName}
+      Email: ${formData.email}
+      Company: ${formData.company}
+      Product Interest: ${formData.productInterest}
+      
+      Message:
+      ${formData.message}
+    `
+  };
+
+  // Send main email to category-specific recipients
+  console.log(`Sending email to ${categorySettings.category.categoryName}:`, recipientEmails);
+  await transporter.sendMail(mailOptions);
+  console.log(`Email sent successfully to ${categorySettings.category.categoryName}`);
+
+  // Send confirmation email to sender
+  const confirmationOptions = {
+    from: `${smtp.fromName} <${smtp.fromEmail}>`,
+    to: formData.email,
+    subject: `Thank you for contacting Momtaz Chemical - ${formData.firstName} ${formData.lastName}`,
+    html: `
+      <h2>Thank you for your inquiry!</h2>
+      <p>Dear ${formData.firstName} ${formData.lastName},</p>
+      <p>We have received your message regarding <strong>${formData.productInterest}</strong> and it has been forwarded to our <strong>${categorySettings.category.categoryName}</strong>.</p>
+      <p>We will get back to you within 24 hours.</p>
+      
+      <h3>Your Message Details:</h3>
+      <p><strong>Company:</strong> ${formData.company}</p>
+      <p><strong>Product Interest:</strong> ${formData.productInterest}</p>
+      <p><strong>Message:</strong></p>
+      <p>${formData.message}</p>
+      
+      <p>Best regards,<br>Momtaz Chemical Team</p>
+    `,
+    text: `
+      Thank you for your inquiry!
+      
+      Dear ${formData.firstName} ${formData.lastName},
+      
+      We have received your message regarding ${formData.productInterest} and it has been forwarded to our ${categorySettings.category.categoryName}.
+      We will get back to you within 24 hours.
+      
+      Your Message Details:
+      Company: ${formData.company}
+      Product Interest: ${formData.productInterest}
+      
+      Message:
+      ${formData.message}
+      
+      Best regards,
+      Momtaz Chemical Team
+    `
+  };
+
+  console.log('Sending confirmation email to:', formData.email);
+  await transporter.sendMail(confirmationOptions);
+  console.log('Confirmation email sent successfully');
+  
+  // Log both emails
+  await emailStorage.logEmail({
+    categoryId: categorySettings.category.id,
+    toEmail: recipientEmails,
+    fromEmail: smtp.fromEmail,
+    subject: mailOptions.subject,
+    status: 'sent',
+    sentAt: new Date(),
+  });
+
+  await emailStorage.logEmail({
+    categoryId: categorySettings.category.id,
+    toEmail: formData.email,
+    fromEmail: smtp.fromEmail,
+    subject: confirmationOptions.subject,
+    status: 'sent',
+    sentAt: new Date(),
+  });
+}
+
 export async function sendContactEmail(formData: ContactFormData): Promise<void> {
   try {
     // Determine the appropriate email category based on product interest
     const categoryKey = mapProductInterestToCategory(formData.productInterest);
+    console.log(`Contact form for '${formData.productInterest}' routed to category: ${categoryKey}`);
     
     const transporter = await createTransporter(categoryKey);
     const categorySettings = await emailStorage.getCategoryWithSettings(categoryKey);
@@ -87,114 +204,8 @@ export async function sendContactEmail(formData: ContactFormData): Promise<void>
       return await sendWithSettings(formData, fallbackSettings, fallbackTransporter, categoryKey);
     }
 
-    const smtp = categorySettings.smtp;
-    const recipients = categorySettings.recipients.filter(r => r.isActive);
-    
-    if (recipients.length === 0) {
-      throw new Error('No active recipients found for contact form');
-    }
-
-    const recipientEmails = recipients.map(r => r.email).join(', ');
-    
-    // Filter out sender email from recipients to avoid "Invalid Recipients" error
-    const filteredRecipients = recipients
-      .filter(r => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
-      .map(r => r.email);
-    
-    // If no recipients remain after filtering, use the original list but change the from email
-    const finalRecipients = filteredRecipients.length > 0 ? filteredRecipients.join(', ') : recipientEmails;
-    const fromEmail = filteredRecipients.length > 0 ? smtp.fromEmail : `noreply@momtazchem.com`;
-    
-    const mailOptions = {
-      from: `${smtp.fromName} <${fromEmail}>`,
-      to: finalRecipients,
-      subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName}`,
-      html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${formData.firstName} ${formData.lastName}</p>
-        <p><strong>Email:</strong> ${formData.email}</p>
-        <p><strong>Company:</strong> ${formData.company}</p>
-        <p><strong>Product Interest:</strong> ${formData.productInterest}</p>
-        <p><strong>Message:</strong></p>
-        <p>${formData.message}</p>
-      `,
-      text: `
-        New Contact Form Submission
-        
-        Name: ${formData.firstName} ${formData.lastName}
-        Email: ${formData.email}
-        Company: ${formData.company}
-        Product Interest: ${formData.productInterest}
-        
-        Message:
-        ${formData.message}
-      `
-    };
-
-    // Send main email to admin
-    console.log('Sending email to admin:', recipientEmails);
-    const emailResult = await transporter.sendMail(mailOptions);
-    console.log('Admin email sent successfully');
-
-    // Send confirmation email to sender
-    const confirmationOptions = {
-      from: `${smtp.fromName} <${smtp.fromEmail}>`,
-      to: formData.email,
-      subject: `Thank you for contacting Momtaz Chemical - ${formData.firstName} ${formData.lastName}`,
-      html: `
-        <h2>Thank you for your inquiry!</h2>
-        <p>Dear ${formData.firstName} ${formData.lastName},</p>
-        <p>We have received your message and will get back to you within 24 hours.</p>
-        
-        <h3>Your Message Details:</h3>
-        <p><strong>Company:</strong> ${formData.company}</p>
-        <p><strong>Product Interest:</strong> ${formData.productInterest}</p>
-        <p><strong>Message:</strong></p>
-        <p>${formData.message}</p>
-        
-        <p>Best regards,<br>Momtaz Chemical Team</p>
-      `,
-      text: `
-        Thank you for your inquiry!
-        
-        Dear ${formData.firstName} ${formData.lastName},
-        
-        We have received your message and will get back to you within 24 hours.
-        
-        Your Message Details:
-        Company: ${formData.company}
-        Product Interest: ${formData.productInterest}
-        
-        Message:
-        ${formData.message}
-        
-        Best regards,
-        Momtaz Chemical Team
-      `
-    };
-
-    console.log('Sending confirmation email to:', formData.email);
-    await transporter.sendMail(confirmationOptions);
-    console.log('Confirmation email sent successfully');
-    
-    // Log both emails
-    await emailStorage.logEmail({
-      categoryId: categorySettings.category.id,
-      toEmail: recipientEmails,
-      fromEmail: smtp.fromEmail,
-      subject: mailOptions.subject,
-      status: 'sent',
-      sentAt: new Date(),
-    });
-
-    await emailStorage.logEmail({
-      categoryId: categorySettings.category.id,
-      toEmail: formData.email,
-      fromEmail: smtp.fromEmail,
-      subject: confirmationOptions.subject,
-      status: 'sent',
-      sentAt: new Date(),
-    });
+    // Use the configured category settings
+    return await sendWithSettings(formData, categorySettings, transporter, categoryKey);
     
   } catch (error) {
     console.error('Contact email error:', error);
