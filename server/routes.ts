@@ -9074,6 +9074,166 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // INVOICE ROUTES
+  // =============================================================================
+
+  // Import invoice storage
+  const { invoiceStorage } = await import('./invoice-storage.js');
+
+  // Get all invoices (admin only)
+  app.get('/api/invoices', requireAuth, async (req, res) => {
+    try {
+      const invoices = await invoiceStorage.getAllInvoices();
+      res.json({ success: true, data: invoices });
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch invoices' });
+    }
+  });
+
+  // Get customer invoices
+  app.get('/api/invoices/customer/:customerId', async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      const invoices = await invoiceStorage.getInvoicesByCustomer(customerId);
+      res.json({ success: true, data: invoices });
+    } catch (error) {
+      console.error('Error fetching customer invoices:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch customer invoices' });
+    }
+  });
+
+  // Get invoice by ID
+  app.get('/api/invoices/:id', async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const invoice = await invoiceStorage.getInvoiceById(invoiceId);
+      
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: 'Invoice not found' });
+      }
+
+      const items = await invoiceStorage.getInvoiceItems(invoiceId);
+      res.json({ success: true, data: { ...invoice, items } });
+    } catch (error) {
+      console.error('Error fetching invoice:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch invoice' });
+    }
+  });
+
+  // Generate invoice from order
+  app.post('/api/invoices/generate/:orderId', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      // Check if invoice already exists for this order
+      const existingInvoices = await invoiceStorage.getInvoicesByOrder(orderId);
+      if (existingInvoices.length > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Invoice already exists for this order',
+          data: existingInvoices[0]
+        });
+      }
+
+      const invoice = await invoiceStorage.generateInvoiceFromOrder(orderId);
+      res.json({ success: true, data: invoice });
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate invoice' });
+    }
+  });
+
+  // Request official invoice
+  app.post('/api/invoices/:id/request-official', async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const invoice = await invoiceStorage.requestOfficialInvoice(invoiceId);
+      
+      // Send notification to admin about official invoice request
+      // This can be implemented with the email system
+      
+      res.json({ 
+        success: true, 
+        message: 'Official invoice request submitted',
+        data: invoice 
+      });
+    } catch (error) {
+      console.error('Error requesting official invoice:', error);
+      res.status(500).json({ success: false, message: 'Failed to request official invoice' });
+    }
+  });
+
+  // Process official invoice (admin only)
+  app.post('/api/invoices/:id/process-official', requireAuth, async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const { companyInfo, taxInfo } = req.body;
+      
+      const invoice = await invoiceStorage.processOfficialInvoice(invoiceId, companyInfo, taxInfo);
+      res.json({ success: true, data: invoice });
+    } catch (error) {
+      console.error('Error processing official invoice:', error);
+      res.status(500).json({ success: false, message: 'Failed to process official invoice' });
+    }
+  });
+
+  // Mark invoice as paid
+  app.post('/api/invoices/:id/mark-paid', requireAuth, async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const { paymentDate } = req.body;
+      
+      const invoice = await invoiceStorage.markInvoiceAsPaid(
+        invoiceId, 
+        paymentDate ? new Date(paymentDate) : undefined
+      );
+      res.json({ success: true, data: invoice });
+    } catch (error) {
+      console.error('Error marking invoice as paid:', error);
+      res.status(500).json({ success: false, message: 'Failed to mark invoice as paid' });
+    }
+  });
+
+  // Get invoice statistics
+  app.get('/api/invoices/stats', requireAuth, async (req, res) => {
+    try {
+      const stats = await invoiceStorage.getInvoiceStats();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error('Error fetching invoice stats:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch invoice stats' });
+    }
+  });
+
+  // Auto-generate invoice when order payment is completed
+  app.post('/api/orders/:id/complete-payment', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      
+      // Update order payment status
+      const order = await shopStorage.updateOrder(orderId, {
+        paymentStatus: 'paid'
+      });
+
+      // Generate invoice automatically
+      const invoice = await invoiceStorage.generateInvoiceFromOrder(orderId);
+      
+      // Send invoice email to customer
+      await invoiceStorage.sendInvoiceEmail(invoice.id);
+
+      res.json({ 
+        success: true, 
+        message: 'Payment completed and invoice generated',
+        data: { order, invoice }
+      });
+    } catch (error) {
+      console.error('Error completing payment:', error);
+      res.status(500).json({ success: false, message: 'Failed to complete payment' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
