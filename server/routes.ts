@@ -2439,6 +2439,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update customer profile
+  app.patch("/api/customers/:id", async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const updateData = req.body;
+      
+      // Get session customer ID
+      const sessionCustomerId = (req.session as any)?.customerId;
+      const sessionCrmId = (req.session as any)?.crmCustomerId;
+      
+      // Ensure customer can only update their own profile
+      if (customerId !== sessionCustomerId && customerId !== sessionCrmId) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "دسترسی مجاز نیست" 
+        });
+      }
+
+      // Update customer in CRM (primary source)
+      if (sessionCrmId) {
+        const updatedCustomer = await crmStorage.updateCrmCustomer(sessionCrmId, updateData);
+        res.json({
+          success: true,
+          message: "پروفایل با موفقیت بروزرسانی شد",
+          customer: updatedCustomer
+        });
+      } else {
+        // Fallback to portal customer update
+        const updatedCustomer = await customerStorage.updateCustomer(customerId, updateData);
+        res.json({
+          success: true,
+          message: "پروفایل با موفقیت بروزرسانی شد",
+          customer: updatedCustomer
+        });
+      }
+    } catch (error) {
+      console.error("Error updating customer:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در بروزرسانی پروفایل" 
+      });
+    }
+  });
+
   app.get("/api/customers/me", async (req, res) => {
     try {
       const customerId = (req.session as any)?.customerId;

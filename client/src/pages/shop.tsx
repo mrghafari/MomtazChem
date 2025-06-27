@@ -887,6 +887,7 @@ const Shop = () => {
         onOpenChange={setShowAuth}
         onLoginSuccess={handleAuthSuccess}
         initialMode={authMode}
+        existingCustomer={authMode === 'register' ? customer : undefined}
       />
     </div>
   );

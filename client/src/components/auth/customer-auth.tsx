@@ -65,6 +65,30 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initi
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const loginForm = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const registerForm = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phone: "",
+      company: "",
+      country: "",
+      city: "",
+      address: "",
+    },
+  });
+
   // Update activeTab when initialMode changes
   useEffect(() => {
     setActiveTab(initialMode);
@@ -94,31 +118,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initi
         marketingConsent: existingCustomer.marketingConsent || false,
       });
     }
-  }, [existingCustomer, activeTab, registerForm]);
-
-  const loginForm = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const registerForm = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      phone: "",
-      company: "",
-      country: "",
-      city: "",
-      address: "",
-    },
-  });
+  }, [existingCustomer, activeTab]);
 
   const onLogin = async (data: LoginForm) => {
     setIsLoading(true);
