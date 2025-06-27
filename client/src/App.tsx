@@ -28,6 +28,7 @@ import SMTPTestPage from "@/pages/admin/smtp-test";
 import EmailSettingsPage from "@/pages/admin/email-settings";
 import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
 import EmailProgressPage from "@/pages/admin/email-progress";
+import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import CustomerForgotPassword from "@/pages/customer-forgot-password";
@@ -89,6 +90,7 @@ function Router() {
           <Route path="/admin/email-settings" component={EmailSettingsPage} />
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />
           <Route path="/admin/email-progress" component={EmailProgressPage} />
+          <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
           <Route path="/admin/inquiries" component={Dashboard} />
           <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />
