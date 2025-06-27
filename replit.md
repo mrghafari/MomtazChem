@@ -131,6 +131,8 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 27, 2025: FIXED SMTP validation consistency - unified Test Connection button in Advanced Email Settings to use the same reliable validation system as SMTP Test tool, eliminating false positive results and ensuring proper authentication testing
+- June 27, 2025: UPDATED email category name from "Order Processing" to "Sales department" in database to better reflect actual functionality
 - June 27, 2025: COMPLETED "Other Products" category implementation - changed from Persian to English, created comprehensive product page with 6 fake chemical products including industrial degreasers, corrosion inhibitors, laboratory reagents, specialty solvents, concrete additives, and textile processing chemicals
 - June 27, 2025: ENHANCED product categorization system - added "Other Products" as 5th category across contact form dropdown, header navigation menu, and products page tabs with proper English labeling
 - June 26, 2025: FIXED super admin list display issue - updated user department settings so both super admins appear in the management interface
