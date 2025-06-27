@@ -86,14 +86,17 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
     .filter((r: any) => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
     .map((r: any) => r.email);
   
-  // If no recipients remain after filtering, use the original list but keep the authenticated from email
-  const finalRecipients = filteredRecipients.length > 0 ? filteredRecipients.join(', ') : recipientEmails;
+  // If no recipients remain after filtering, skip sending email to avoid sender=recipient error
+  if (filteredRecipients.length === 0) {
+    console.log('Skipping email - all recipients are same as sender email');
+    return; // Don't send email when sender and all recipients are the same
+  }
+  
+  const finalRecipients = filteredRecipients.join(', ');
   const fromEmail = smtp.fromEmail; // Always use authenticated SMTP email to avoid relay issues
   
-  // Prevent CC duplicate with recipient - check all recipients, not just final ones
-  const ccEmail = 'info@momtazchem.com';
-  const recipientsList = recipients.map((r: any) => r.email.toLowerCase());
-  const ccList = recipientsList.includes(ccEmail.toLowerCase()) ? undefined : ccEmail;
+  // Skip CC completely to avoid SMTP duplicate recipient errors
+  const ccList = undefined; // Temporarily disable CC to resolve SMTP issues
   
   const mailOptions = {
     from: `${smtp.fromName} <${fromEmail}>`,
@@ -131,14 +134,16 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   await transporter.sendMail(mailOptions);
   console.log(`Email sent successfully to ${categorySettings.category.categoryName}`);
 
-  // Send confirmation email to sender
-  const confirmationCcEmail = 'info@momtazchem.com';
-  const confirmationCcList = formData.email.toLowerCase() === confirmationCcEmail.toLowerCase() ? undefined : confirmationCcEmail;
+  // Send confirmation email to sender - NO CC to avoid duplicate recipient errors
+  // Skip confirmation email if sender email is same as from email
+  if (formData.email.toLowerCase() === smtp.fromEmail.toLowerCase()) {
+    console.log('Skipping confirmation email - sender is same as from email');
+    return;
+  }
   
   const confirmationOptions = {
     from: `${smtp.fromName} <${smtp.fromEmail}>`,
     to: formData.email,
-    cc: confirmationCcList,
     subject: `Thank you for contacting Momtaz Chemical - ${formData.firstName} ${formData.lastName}`,
     encoding: 'utf-8',
     charset: 'utf-8',
@@ -282,13 +287,17 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
 
     // Filter out sender email from recipients to avoid duplicate issue
     const filteredRecipients = recipients.filter(r => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase());
-    const recipientEmails = filteredRecipients.length > 0 
-      ? filteredRecipients.map(r => r.email).join(', ')
-      : recipients.map(r => r.email).join(', ');
     
-    // Prevent CC duplicate with recipient
-    const ccEmail = 'info@momtazchem.com';
-    const ccList = recipients.some(r => r.email.toLowerCase() === ccEmail.toLowerCase()) ? undefined : ccEmail;
+    // If no recipients remain after filtering, skip sending email
+    if (filteredRecipients.length === 0) {
+      console.log('Skipping product inquiry email - all recipients are same as sender email');
+      return;
+    }
+    
+    const recipientEmails = filteredRecipients.map(r => r.email).join(', ');
+    
+    // Skip CC to avoid duplicate recipient errors
+    const ccList = undefined;
 
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
@@ -377,14 +386,15 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
     const resetUrl = `${baseUrl}/customer-reset-password?token=${resetData.token}`;
     
-    // Prevent sender/recipient duplicate issue
-    const ccEmail = 'info@momtazchem.com';
-    const ccList = resetData.email.toLowerCase() === ccEmail.toLowerCase() ? undefined : ccEmail;
+    // Skip password reset email if sender and recipient are the same
+    if (resetData.email.toLowerCase() === smtp.fromEmail.toLowerCase()) {
+      console.log('Skipping password reset email - sender is same as recipient');
+      return;
+    }
     
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: resetData.email,
-      cc: ccList,
       subject: 'Password Reset - Momtaz Chemical',
       encoding: 'utf-8',
       charset: 'utf-8',
