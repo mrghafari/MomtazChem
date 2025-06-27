@@ -753,11 +753,28 @@ const Shop = () => {
                 </Button>
                 
                 <div className="flex gap-1">
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    const pageNum = Math.max(0, Math.min(currentPage - 2 + i, totalPages - 1));
+                  {Array.from({ length: totalPages }, (_, i) => {
+                    // Show first page, last page, current page and 2 pages around current
+                    const pageNum = i;
+                    const shouldShow = 
+                      pageNum === 0 || // First page
+                      pageNum === totalPages - 1 || // Last page
+                      Math.abs(pageNum - currentPage) <= 1; // Current page +/- 1
+                    
+                    if (!shouldShow && totalPages > 7) {
+                      // Show ellipsis for gaps
+                      if (pageNum === 1 && currentPage > 3) {
+                        return <span key={`ellipsis-start`} className="px-2 py-1 text-gray-500">...</span>;
+                      }
+                      if (pageNum === totalPages - 2 && currentPage < totalPages - 4) {
+                        return <span key={`ellipsis-end`} className="px-2 py-1 text-gray-500">...</span>;
+                      }
+                      return null;
+                    }
+                    
                     return (
                       <Button
-                        key={`pagination-page-${pageNum}-${i}`}
+                        key={`pagination-page-${pageNum}`}
                         variant={currentPage === pageNum ? "default" : "outline"}
                         size="sm"
                         onClick={() => setCurrentPage(pageNum)}
@@ -765,7 +782,7 @@ const Shop = () => {
                         {pageNum + 1}
                       </Button>
                     );
-                  })}
+                  }).filter(Boolean)}
                 </div>
                 
                 <Button
