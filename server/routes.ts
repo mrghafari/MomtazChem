@@ -18,7 +18,7 @@ import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients } from "@shared/email-schema";
-import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
+import { insertShopProductSchema, insertShopCategorySchema, paymentGateways } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
@@ -9502,7 +9502,7 @@ momtazchem.com
   // Get all payment gateways
   app.get('/api/payment/gateways', requireAuth, async (req, res) => {
     try {
-      const gateways = await db.select().from(shopStorage.schema.paymentGateways).orderBy(desc(shopStorage.schema.paymentGateways.createdAt));
+      const gateways = await db.select().from(paymentGateways).orderBy(desc(paymentGateways.createdAt));
       res.json(gateways);
     } catch (error) {
       console.error('Error fetching payment gateways:', error);
@@ -9514,7 +9514,7 @@ momtazchem.com
   app.get('/api/payment/gateways/:id', requireAuth, async (req, res) => {
     try {
       const gatewayId = parseInt(req.params.id);
-      const [gateway] = await db.select().from(shopStorage.schema.paymentGateways).where(eq(shopStorage.schema.paymentGateways.id, gatewayId));
+      const [gateway] = await db.select().from(paymentGateways).where(eq(paymentGateways.id, gatewayId));
       
       if (!gateway) {
         return res.status(404).json({ success: false, message: 'Payment gateway not found' });
@@ -9537,7 +9537,7 @@ momtazchem.com
         return res.status(400).json({ success: false, message: 'Missing required fields' });
       }
 
-      const [gateway] = await db.insert(shopStorage.schema.paymentGateways).values({
+      const [gateway] = await db.insert(paymentGateways).values({
         name,
         type,
         enabled: enabled ?? true,
@@ -9558,7 +9558,7 @@ momtazchem.com
       const gatewayId = parseInt(req.params.id);
       const { name, type, enabled, config, testMode } = req.body;
       
-      const [gateway] = await db.update(shopStorage.schema.paymentGateways)
+      const [gateway] = await db.update(paymentGateways)
         .set({
           name,
           type,
@@ -9567,7 +9567,7 @@ momtazchem.com
           testMode,
           updatedAt: new Date(),
         })
-        .where(eq(shopStorage.schema.paymentGateways.id, gatewayId))
+        .where(eq(paymentGateways.id, gatewayId))
         .returning();
       
       if (!gateway) {
@@ -9586,8 +9586,8 @@ momtazchem.com
     try {
       const gatewayId = parseInt(req.params.id);
       
-      const result = await db.delete(shopStorage.schema.paymentGateways)
-        .where(eq(shopStorage.schema.paymentGateways.id, gatewayId))
+      const result = await db.delete(paymentGateways)
+        .where(eq(paymentGateways.id, gatewayId))
         .returning();
       
       if (result.length === 0) {
@@ -9606,18 +9606,18 @@ momtazchem.com
     try {
       const gatewayId = parseInt(req.params.id);
       
-      const [currentGateway] = await db.select().from(shopStorage.schema.paymentGateways).where(eq(shopStorage.schema.paymentGateways.id, gatewayId));
+      const [currentGateway] = await db.select().from(paymentGateways).where(eq(paymentGateways.id, gatewayId));
       
       if (!currentGateway) {
         return res.status(404).json({ success: false, message: 'Payment gateway not found' });
       }
       
-      const [gateway] = await db.update(shopStorage.schema.paymentGateways)
+      const [gateway] = await db.update(paymentGateways)
         .set({
           enabled: !currentGateway.enabled,
           updatedAt: new Date(),
         })
-        .where(eq(shopStorage.schema.paymentGateways.id, gatewayId))
+        .where(eq(paymentGateways.id, gatewayId))
         .returning();
       
       res.json({ success: true, data: gateway });
