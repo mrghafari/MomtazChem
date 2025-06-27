@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
 import BilingualPurchaseForm from "@/components/bilingual-purchase-form";
+import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
 
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -29,7 +30,9 @@ const Shop = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [cart, setCart] = useState<{[key: number]: number}>({});
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [customer, setCustomer] = useState<any>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
 
@@ -292,6 +295,46 @@ const Shop = () => {
     }, 0);
   };
 
+  // Pre-checkout handlers
+  const handleCartClick = () => {
+    if (getTotalItems() === 0) return;
+    
+    // If customer is already logged in, go directly to checkout
+    if (customer) {
+      setShowCheckout(true);
+    } else {
+      // Show pre-checkout modal to ask login/register/guest
+      setShowPreCheckout(true);
+    }
+  };
+
+  const handleLoginChoice = () => {
+    setShowPreCheckout(false);
+    setAuthMode('login');
+    setShowAuth(true);
+  };
+
+  const handleRegisterChoice = () => {
+    setShowPreCheckout(false);
+    setAuthMode('register');
+    setShowAuth(true);
+  };
+
+  const handleGuestCheckout = () => {
+    setShowPreCheckout(false);
+    setShowCheckout(true);
+  };
+
+  const handleAuthSuccess = (customerData: any) => {
+    setCustomer(customerData);
+    setShowAuth(false);
+    setShowCheckout(true);
+    toast({
+      title: direction === 'rtl' ? "ورود موفق" : "Login Successful",
+      description: direction === 'rtl' ? "خوش آمدید!" : "Welcome back!",
+    });
+  };
+
   if (productsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-8">
@@ -358,7 +401,7 @@ const Shop = () => {
                 <Button 
                   variant="outline" 
                   className="flex items-center gap-2"
-                  onClick={() => setShowCheckout(true)}
+                  onClick={handleCartClick}
                   disabled={getTotalItems() === 0}
                 >
                   <ShoppingCart className="w-5 h-5" />
@@ -811,11 +854,22 @@ const Shop = () => {
         />
       )}
 
+      {/* Pre-checkout Modal */}
+      <PreCheckoutModal
+        isOpen={showPreCheckout}
+        onClose={() => setShowPreCheckout(false)}
+        onLoginChoice={handleLoginChoice}
+        onRegisterChoice={handleRegisterChoice}
+        onGuestCheckout={handleGuestCheckout}
+        cartItemsCount={getTotalItems()}
+      />
+
       {/* Auth Dialog */}
       <CustomerAuth 
         open={showAuth}
         onOpenChange={setShowAuth}
-        onLoginSuccess={handleLoginSuccess}
+        onLoginSuccess={handleAuthSuccess}
+        initialMode={authMode}
       />
     </div>
   );
