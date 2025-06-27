@@ -85,9 +85,10 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   const finalRecipients = filteredRecipients.length > 0 ? filteredRecipients.join(', ') : recipientEmails;
   const fromEmail = smtp.fromEmail; // Always use authenticated SMTP email to avoid relay issues
   
-  // Prevent CC duplicate with recipient
+  // Prevent CC duplicate with recipient - check all recipients, not just final ones
   const ccEmail = 'info@momtazchem.com';
-  const ccList = finalRecipients.toLowerCase().includes(ccEmail.toLowerCase()) ? undefined : ccEmail;
+  const recipientsList = recipients.map((r: any) => r.email.toLowerCase());
+  const ccList = recipientsList.includes(ccEmail.toLowerCase()) ? undefined : ccEmail;
   
   const mailOptions = {
     from: `${smtp.fromName} <${fromEmail}>`,
