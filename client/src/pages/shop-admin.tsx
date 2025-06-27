@@ -271,9 +271,11 @@ const ShopAdmin = () => {
   // Update discount mutation
   const updateDiscountMutation = useMutation({
     mutationFn: async ({ discountId, updates }: { discountId: number; updates: any }) => {
+      console.log("Frontend: Updating discount", discountId, "with updates:", updates);
       return apiRequest(`/api/shop/discounts/${discountId}`, "PATCH", updates);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Frontend: Discount update successful:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
       setIsDiscountDialogOpen(false);
       setEditingDiscount(null);
@@ -282,10 +284,11 @@ const ShopAdmin = () => {
         description: "Discount settings have been updated successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Frontend: Discount update failed:", error);
       toast({
         title: "Update Failed",
-        description: "Failed to update discount settings.",
+        description: `Failed to update discount settings: ${error?.message || 'Unknown error'}`,
         variant: "destructive",
       });
     },

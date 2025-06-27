@@ -4341,11 +4341,20 @@ ${procedure.content}
       }
       
       const updates = req.body;
+      console.log("Updating discount", discountId, "with updates:", updates);
+      
       const discount = await shopStorage.updateDiscountSetting(discountId, updates);
+      console.log("Discount updated successfully:", discount);
+      
       res.json(discount);
     } catch (error) {
       console.error("Error updating discount:", error);
-      res.status(500).json({ success: false, message: "Failed to update discount" });
+      console.error("Error details:", error instanceof Error ? error.message : error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update discount",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
