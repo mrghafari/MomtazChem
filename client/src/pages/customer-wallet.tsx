@@ -185,7 +185,7 @@ export default function CustomerWallet() {
 
   // Create recharge request mutation
   const createRechargeMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/customer/wallet/recharge', data),
+    mutationFn: (data: any) => apiRequest('/api/customer/wallet/recharge', 'POST', data),
     onSuccess: () => {
       toast({
         title: t.rechargeSuccess,
