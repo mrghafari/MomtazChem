@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -258,6 +258,15 @@ export default function SiteManagement() {
                   >
                     <Box className="h-6 w-6 mb-2" />
                     <span className="text-sm">Products</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                    onClick={() => setLocation("/admin/payment-settings")}
+                  >
+                    <CreditCard className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Payment Settings</span>
                   </Button>
                 </div>
               </CardContent>
