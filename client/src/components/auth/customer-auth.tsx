@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -51,17 +51,23 @@ interface CustomerAuthProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onLoginSuccess: (customer: any) => void;
+  initialMode?: 'login' | 'register';
 }
 
-export default function CustomerAuth({ open, onOpenChange, onLoginSuccess }: CustomerAuthProps) {
+export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initialMode = 'login' }: CustomerAuthProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("login");
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialMode);
   const [emailExists, setEmailExists] = useState(false);
   const [duplicateEmail, setDuplicateEmail] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Update activeTab when initialMode changes
+  useEffect(() => {
+    setActiveTab(initialMode);
+  }, [initialMode]);
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
