@@ -2742,10 +2742,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 productId: parseInt(productId as string),
                 productName: product.name,
                 productSku: product.sku || `SKU-${productId}`,
-                quantity: (quantity as number),
+                quantity: (quantity as number).toString(),
                 unitPrice: product.price || "0",
                 totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
-                productSnapshot: JSON.stringify(product),
               });
 
               // Update product stock
