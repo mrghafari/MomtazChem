@@ -713,10 +713,100 @@ export default function AdvancedEmailSettingsPage() {
                       Manage who receives emails for this category
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-6">
+                    {/* Quick Add CC/BCC Section */}
+                    <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                      <h4 className="font-medium mb-3 text-blue-800">Quick Add CC/BCC Recipients</h4>
+                      <p className="text-sm text-blue-600 mb-3">
+                        Add independent email addresses for carbon copy (CC) or blind carbon copy (BCC) notifications
+                      </p>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <Label htmlFor="quickCCEmail">CC Email</Label>
+                          <Input
+                            id="quickCCEmail"
+                            placeholder="cc@company.com"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && e.currentTarget.value) {
+                                setRecipients([...recipients, {
+                                  email: e.currentTarget.value,
+                                  name: '',
+                                  isPrimary: false,
+                                  isActive: true,
+                                  receiveTypes: [],
+                                  recipientType: 'cc'
+                                }]);
+                                e.currentTarget.value = '';
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="quickBCCEmail">BCC Email</Label>
+                          <Input
+                            id="quickBCCEmail"
+                            placeholder="bcc@company.com"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && e.currentTarget.value) {
+                                setRecipients([...recipients, {
+                                  email: e.currentTarget.value,
+                                  name: '',
+                                  isPrimary: false,
+                                  isActive: true,
+                                  receiveTypes: [],
+                                  recipientType: 'bcc'
+                                }]);
+                                e.currentTarget.value = '';
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-end">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              const ccInput = document.getElementById('quickCCEmail') as HTMLInputElement;
+                              const bccInput = document.getElementById('quickBCCEmail') as HTMLInputElement;
+                              
+                              if (ccInput.value) {
+                                setRecipients([...recipients, {
+                                  email: ccInput.value,
+                                  name: '',
+                                  isPrimary: false,
+                                  isActive: true,
+                                  receiveTypes: [],
+                                  recipientType: 'cc'
+                                }]);
+                                ccInput.value = '';
+                              }
+                              
+                              if (bccInput.value) {
+                                setRecipients([...recipients, {
+                                  email: bccInput.value,
+                                  name: '',
+                                  isPrimary: false,
+                                  isActive: true,
+                                  receiveTypes: [],
+                                  recipientType: 'bcc'
+                                }]);
+                                bccInput.value = '';
+                              }
+                            }}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Add Both
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-blue-500 mt-2">
+                        Press Enter in the field or click "Add Both" to quickly add recipients
+                      </p>
+                    </div>
+
                     {/* Add New Recipient */}
                     <div className="border rounded-lg p-4 bg-gray-50">
-                      <h4 className="font-medium mb-3">Add New Recipient</h4>
+                      <h4 className="font-medium mb-3">Add New Recipient (Advanced)</h4>
                       <div className="grid grid-cols-2 gap-4 mb-3">
                         <div>
                           <Label htmlFor="newEmail">Email</Label>
@@ -768,6 +858,54 @@ export default function AdvancedEmailSettingsPage() {
                         Add Recipient
                       </Button>
                     </div>
+
+                    {/* Recipient Distribution Summary */}
+                    {recipients.length > 0 && (
+                      <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+                        <h4 className="font-medium mb-3 text-green-800">Current Email Distribution</h4>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <h5 className="font-medium text-green-700 mb-1">TO Recipients ({recipients.filter(r => !r.recipientType || r.recipientType === 'to').length})</h5>
+                            <div className="space-y-1">
+                              {recipients
+                                .filter(r => !r.recipientType || r.recipientType === 'to')
+                                .map((r, i) => (
+                                  <div key={i} className="text-green-600">{r.email}</div>
+                                ))}
+                            </div>
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-blue-700 mb-1">CC Recipients ({recipients.filter(r => r.recipientType === 'cc').length})</h5>
+                            <div className="space-y-1">
+                              {recipients
+                                .filter(r => r.recipientType === 'cc')
+                                .map((r, i) => (
+                                  <div key={i} className="text-blue-600">{r.email}</div>
+                                ))}
+                              {recipients.filter(r => r.recipientType === 'cc').length === 0 && (
+                                <div className="text-gray-500 italic">+ info@momtazchem.com (auto)</div>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-purple-700 mb-1">BCC Recipients ({recipients.filter(r => r.recipientType === 'bcc').length})</h5>
+                            <div className="space-y-1">
+                              {recipients
+                                .filter(r => r.recipientType === 'bcc')
+                                .map((r, i) => (
+                                  <div key={i} className="text-purple-600">{r.email}</div>
+                                ))}
+                              {recipients.filter(r => r.recipientType === 'bcc').length === 0 && (
+                                <div className="text-gray-500 italic">None</div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-green-600 mt-2">
+                          ✓ Smart CC: info@momtazchem.com is automatically added as CC for monitoring unless already present as TO, CC, or BCC
+                        </p>
+                      </div>
+                    )}
 
                     {/* Recipients List */}
                     <div className="space-y-3">
