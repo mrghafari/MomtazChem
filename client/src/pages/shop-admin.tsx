@@ -24,7 +24,10 @@ import {
   BarChart3,
   CreditCard,
   FileText,
-  User
+  User,
+  Receipt,
+  Building,
+  Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +43,383 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
 import SalesReport from "@/pages/sales-report";
+
+// Invoice Management Component
+const InvoiceManagementTab = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [showOfficialForm, setShowOfficialForm] = useState(false);
+  const [officialData, setOfficialData] = useState({
+    companyInfo: '',
+    taxInfo: ''
+  });
+
+  // Fetch all invoices
+  const { data: invoicesData, isLoading: invoicesLoading } = useQuery({
+    queryKey: ['/api/invoices'],
+  });
+
+  // Fetch invoice statistics
+  const { data: statsData } = useQuery({
+    queryKey: ['/api/invoices/stats'],
+  });
+
+  // Process official invoice mutation
+  const processOfficialMutation = useMutation({
+    mutationFn: async ({ invoiceId, companyInfo, taxInfo }: { invoiceId: number; companyInfo: any; taxInfo: any }) => {
+      return apiRequest(`/api/invoices/${invoiceId}/process-official`, {
+        method: 'POST',
+        body: JSON.stringify({ companyInfo, taxInfo }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Official invoice processed",
+        description: "Official invoice has been processed successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/invoices'] });
+      setShowOfficialForm(false);
+      setSelectedInvoice(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error processing official invoice",
+        description: "Failed to process official invoice",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mark invoice as paid mutation
+  const markPaidMutation = useMutation({
+    mutationFn: async (invoiceId: number) => {
+      return apiRequest(`/api/invoices/${invoiceId}/mark-paid`, {
+        method: 'POST',
+        body: JSON.stringify({ paymentDate: new Date().toISOString() }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invoice marked as paid",
+        description: "Invoice status updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/invoices'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error updating invoice",
+        description: "Failed to mark invoice as paid",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Download invoice PDF function
+  const handleDownloadInvoice = async (invoice: any) => {
+    try {
+      toast({
+        title: "Generating PDF",
+        description: "Please wait...",
+      });
+
+      const response = await fetch(`/api/invoices/${invoice.id}/download`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to download invoice');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${invoice.invoiceNumber || invoice.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download successful",
+        description: "Invoice PDF downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast({
+        title: "Download failed",
+        description: "Could not download invoice PDF",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleProcessOfficial = () => {
+    if (!selectedInvoice) return;
+    
+    try {
+      const companyInfo = JSON.parse(officialData.companyInfo || '{}');
+      const taxInfo = JSON.parse(officialData.taxInfo || '{}');
+      
+      processOfficialMutation.mutate({
+        invoiceId: selectedInvoice.id,
+        companyInfo,
+        taxInfo
+      });
+    } catch (error) {
+      toast({
+        title: "Invalid JSON",
+        description: "Please check your company info and tax info format",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const invoices = invoicesData?.data || [];
+  const stats = statsData?.data || {
+    totalInvoices: 0,
+    paidInvoices: 0,
+    overdueInvoices: 0,
+    officialInvoices: 0,
+    totalAmount: 0,
+    paidAmount: 0,
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid': return 'default';
+      case 'pending': return 'secondary';
+      case 'overdue': return 'destructive';
+      default: return 'outline';
+    }
+  };
+
+  if (invoicesLoading) {
+    return (
+      <Card>
+        <CardContent className="text-center p-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading invoices...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Invoice Stats */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Invoices</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalInvoices}</p>
+              </div>
+              <Receipt className="w-8 h-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Paid Invoices</p>
+                <p className="text-2xl font-bold text-green-600">{stats.paidInvoices}</p>
+              </div>
+              <DollarSign className="w-8 h-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Official Invoices</p>
+                <p className="text-2xl font-bold text-purple-600">{stats.officialInvoices}</p>
+              </div>
+              <Building className="w-8 h-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Amount</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(stats.totalAmount)}
+                </p>
+              </div>
+              <CreditCard className="w-8 h-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Invoices Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>All Invoices</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-3 font-semibold">Invoice #</th>
+                  <th className="text-left p-3 font-semibold">Order ID</th>
+                  <th className="text-left p-3 font-semibold">Customer ID</th>
+                  <th className="text-left p-3 font-semibold">Amount</th>
+                  <th className="text-left p-3 font-semibold">Status</th>
+                  <th className="text-left p-3 font-semibold">Type</th>
+                  <th className="text-left p-3 font-semibold">Created</th>
+                  <th className="text-left p-3 font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoices.map((invoice: any) => (
+                  <tr key={invoice.id} className="border-b hover:bg-gray-50">
+                    <td className="p-3 font-medium">{invoice.invoiceNumber}</td>
+                    <td className="p-3">{invoice.orderId}</td>
+                    <td className="p-3">{invoice.customerId}</td>
+                    <td className="p-3 font-semibold text-green-600">
+                      {formatCurrency(invoice.totalAmount)}
+                    </td>
+                    <td className="p-3">
+                      <Badge variant={getStatusColor(invoice.status)}>
+                        {invoice.status}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={invoice.isOfficial ? 'default' : 'outline'}>
+                          {invoice.isOfficial ? 'Official' : 'Standard'}
+                        </Badge>
+                        {invoice.officialRequestedAt && !invoice.isOfficial && (
+                          <Clock className="w-4 h-4 text-orange-500" />
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-3 text-sm text-gray-600">
+                      {new Date(invoice.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-3">
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDownloadInvoice(invoice)}
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        {invoice.status !== 'paid' && (
+                          <Button 
+                            size="sm" 
+                            onClick={() => markPaidMutation.mutate(invoice.id)}
+                            disabled={markPaidMutation.isPending}
+                          >
+                            Mark Paid
+                          </Button>
+                        )}
+                        {invoice.officialRequestedAt && !invoice.isOfficial && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedInvoice(invoice);
+                              setShowOfficialForm(true);
+                            }}
+                          >
+                            <Building className="w-4 h-4 mr-1" />
+                            Process Official
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Official Invoice Processing Modal */}
+      {showOfficialForm && selectedInvoice && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-lg mx-4">
+            <CardHeader>
+              <CardTitle>Process Official Invoice</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="companyInfo">Company Information (JSON)</Label>
+                <textarea
+                  id="companyInfo"
+                  className="w-full h-32 p-3 border rounded-md"
+                  placeholder='{"name": "Company Name", "address": "Address", "taxId": "123456"}'
+                  value={officialData.companyInfo}
+                  onChange={(e) => setOfficialData(prev => ({ ...prev, companyInfo: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="taxInfo">Tax Information (JSON)</Label>
+                <textarea
+                  id="taxInfo"
+                  className="w-full h-32 p-3 border rounded-md"
+                  placeholder='{"rate": 0.1, "type": "VAT"}'
+                  value={officialData.taxInfo}
+                  onChange={(e) => setOfficialData(prev => ({ ...prev, taxInfo: e.target.value }))}
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  onClick={handleProcessOfficial}
+                  disabled={processOfficialMutation.isPending}
+                  className="flex-1"
+                >
+                  {processOfficialMutation.isPending ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <Building className="w-4 h-4 mr-2" />
+                  )}
+                  Process Official Invoice
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setShowOfficialForm(false);
+                    setSelectedInvoice(null);
+                    setOfficialData({ companyInfo: '', taxInfo: '' });
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Discount Form Component
 const DiscountForm = ({ discount, products, onSave, onCancel }: {
@@ -561,6 +941,7 @@ ${data.data.map((item: any) =>
             <TabsTrigger value="orders">Orders Management</TabsTrigger>
             <TabsTrigger value="inventory">Inventory Management</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
+            <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
             <TabsTrigger value="accounting">Accounting</TabsTrigger>
             <TabsTrigger value="reports">Sales Reports</TabsTrigger>
           </TabsList>
@@ -1024,6 +1405,11 @@ ${data.data.map((item: any) =>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Invoice Management */}
+          <TabsContent value="invoices">
+            <InvoiceManagementTab />
           </TabsContent>
 
           {/* Sales Reports */}
