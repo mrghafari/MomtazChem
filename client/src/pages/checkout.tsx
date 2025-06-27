@@ -155,12 +155,25 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       return apiRequest("/api/shop/orders", "POST", orderData);
     },
     onSuccess: (data: any) => {
-      setOrderNumber(data.order.id);
-      setIsOrderComplete(true);
-      onOrderComplete();
+      const orderId = data.order.id;
+      const paymentMethod = data.order.paymentMethod;
+      
+      // Check if payment processing is required
+      const requiresPayment = ['iraqi_bank', 'credit_card', 'bank_transfer', 'digital_wallet'].includes(paymentMethod);
+      
+      if (requiresPayment) {
+        // Redirect to payment page for processing
+        setLocation(`/payment/${orderId}`);
+      } else {
+        // For cash on delivery and company credit, go directly to success
+        setOrderNumber(orderId);
+        setIsOrderComplete(true);
+        onOrderComplete();
+      }
+      
       toast({
         title: "Order Placed Successfully!",
-        description: `Your order #${data.order.id} has been received and saved to CRM.`,
+        description: `Your order #${orderId} has been created.`,
       });
     },
     onError: () => {
@@ -522,8 +535,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <SelectValue placeholder="Select payment method" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                                <SelectItem value="cash_on_delivery">Cash on Delivery</SelectItem>
+                                <SelectItem value="iraqi_bank">Iraqi Bank Transfer (محول بانکی عراقی)</SelectItem>
+                                <SelectItem value="credit_card">Credit/Debit Card (کارت ائتمانی/نقدی)</SelectItem>
+                                <SelectItem value="bank_transfer">International Bank Transfer</SelectItem>
+                                <SelectItem value="digital_wallet">Digital Wallet (PayPal, etc.)</SelectItem>
+                                <SelectItem value="cash_on_delivery">Cash on Delivery (پرداخت نقدی هنگام تحویل)</SelectItem>
                                 <SelectItem value="company_credit">Company Credit Account</SelectItem>
                               </SelectContent>
                             </Select>
