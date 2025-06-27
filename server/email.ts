@@ -88,11 +88,21 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   
   // If no recipients remain after filtering, skip sending email to avoid sender=recipient error
   if (filteredRecipients.length === 0) {
-    console.log('Skipping email - all recipients are same as sender email');
+    console.log(`Skipping email for ${categorySettings.category.categoryName} - all recipients are same as sender email (${smtp.fromEmail})`);
     return; // Don't send email when sender and all recipients are the same
   }
   
-  const finalRecipients = filteredRecipients.join(', ');
+  // Additional check: if sender email is in the filtered recipients list, remove it again
+  const finalFilteredRecipients = filteredRecipients.filter(email => 
+    email.toLowerCase() !== smtp.fromEmail.toLowerCase()
+  );
+  
+  if (finalFilteredRecipients.length === 0) {
+    console.log(`Skipping email for ${categorySettings.category.categoryName} - final check detected sender=recipient conflict`);
+    return;
+  }
+  
+  const finalRecipients = finalFilteredRecipients.join(', ');
   const fromEmail = smtp.fromEmail; // Always use authenticated SMTP email to avoid relay issues
   
   // Skip CC completely to avoid SMTP duplicate recipient errors
