@@ -83,9 +83,16 @@ export class InventoryAlertService {
       const htmlContent = this.generateAlertEmailHtml(alerts);
       const textContent = this.generateAlertEmailText(alerts);
 
+      // Smart CC: only add info@momtazchem.com if it's not already the sender or recipient
+      const ccEmail = 'info@momtazchem.com';
+      const ccList = (fromEmail.toLowerCase() !== ccEmail.toLowerCase() && 
+                      toEmail.toLowerCase() !== ccEmail.toLowerCase()) 
+                      ? ccEmail : undefined;
+
       const mailOptions = {
         from: `"Momtazchem Inventory System" <${fromEmail}>`,
         to: toEmail,
+        cc: ccList,
         subject: `🚨 Inventory Alert - ${alerts.length} Product${alerts.length > 1 ? 's' : ''} Need Attention`,
         html: htmlContent,
         text: textContent,

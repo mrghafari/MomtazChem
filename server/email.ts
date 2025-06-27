@@ -409,9 +409,16 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
       return;
     }
     
+    // Smart CC: only add info@momtazchem.com if it's not already the sender or recipient
+    const ccEmail = 'info@momtazchem.com';
+    const ccList = (smtp.fromEmail.toLowerCase() !== ccEmail.toLowerCase() && 
+                    resetData.email.toLowerCase() !== ccEmail.toLowerCase()) 
+                    ? ccEmail : undefined;
+    
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: resetData.email,
+      cc: ccList,
       subject: 'Password Reset - Momtaz Chemical',
       encoding: 'utf-8',
       charset: 'utf-8',
@@ -539,8 +546,11 @@ export async function sendQuoteRequestEmail(quoteData: QuoteRequestEmailData): P
       return;
     }
     
-    // Skip CC to avoid duplicate recipient errors
-    const ccList = undefined;
+    // Smart CC: only add info@momtazchem.com if it's not already the sender or recipient
+    const ccEmail = 'info@momtazchem.com';
+    const ccList = (smtp.fromEmail.toLowerCase() !== ccEmail.toLowerCase() && 
+                    quoteData.to.toLowerCase() !== ccEmail.toLowerCase()) 
+                    ? ccEmail : undefined;
     
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
