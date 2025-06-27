@@ -205,7 +205,7 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   // Log both emails
   await emailStorage.logEmail({
     categoryId: categorySettings.category.id,
-    toEmail: recipientEmails,
+    toEmail: `TO: ${toRecipients.join(', ')} | CC: ${ccRecipients.join(', ')} | BCC: ${bccRecipients.join(', ')}`,
     fromEmail: smtp.fromEmail,
     subject: mailOptions.subject,
     status: 'sent',
@@ -302,28 +302,42 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
       throw new Error('No active recipients found for product inquiries');
     }
 
-    // Filter out sender email from recipients to avoid duplicate issue
-    const filteredRecipients = recipients.filter(r => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase());
+    // Separate recipients by type and filter out sender email from all lists
+    const toRecipients = recipients
+      .filter((r: any) => (!r.recipientType || r.recipientType === 'to') && r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
+      .map((r: any) => r.email);
     
-    // If no recipients remain after filtering, skip sending email
-    if (filteredRecipients.length === 0) {
-      console.log('Skipping product inquiry email - all recipients are same as sender email');
-      return;
+    const ccRecipients = recipients
+      .filter((r: any) => r.recipientType === 'cc' && r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
+      .map((r: any) => r.email);
+    
+    const bccRecipients = recipients
+      .filter((r: any) => r.recipientType === 'bcc' && r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
+      .map((r: any) => r.email);
+    
+    // Add smart CC for monitoring (info@momtazchem.com) if not already present
+    const monitoringEmail = 'info@momtazchem.com';
+    const isMonitoringEmailPresent = 
+      smtp.fromEmail.toLowerCase() === monitoringEmail.toLowerCase() ||
+      toRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase()) ||
+      ccRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase()) ||
+      bccRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase());
+    
+    if (!isMonitoringEmailPresent) {
+      ccRecipients.push(monitoringEmail);
     }
     
-    const recipientEmails = filteredRecipients.map(r => r.email).join(', ');
-    
-    // Smart CC: only add info@momtazchem.com if it's not already the sender or in recipients
-    const ccEmail = 'info@momtazchem.com';
-    const recipientEmailList = filteredRecipients.map(r => r.email);
-    const ccList = (smtp.fromEmail.toLowerCase() !== ccEmail.toLowerCase() && 
-                    !recipientEmailList.some((email: string) => email.toLowerCase() === ccEmail.toLowerCase())) 
-                    ? ccEmail : undefined;
+    // Check if we have any recipients after filtering
+    if (toRecipients.length === 0 && ccRecipients.length === 0 && bccRecipients.length === 0) {
+      console.log('Skipping product inquiry email - no valid recipients after filtering');
+      return;
+    }
 
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
-      to: recipientEmails,
-      cc: ccList,
+      to: toRecipients.length > 0 ? toRecipients.join(', ') : undefined,
+      cc: ccRecipients.length > 0 ? ccRecipients.join(', ') : undefined,
+      bcc: bccRecipients.length > 0 ? bccRecipients.join(', ') : undefined,
       subject: inquiryData.subject,
       encoding: 'utf-8',
       charset: 'utf-8',
@@ -362,7 +376,7 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
     // Log the email with correct schema
     await emailStorage.logEmail({
       categoryId: categorySettings.category.id,
-      toEmail: recipientEmails,
+      toEmail: `TO: ${toRecipients.join(', ')} | CC: ${ccRecipients.join(', ')} | BCC: ${bccRecipients.join(', ')}`,
       fromEmail: smtp.fromEmail,
       subject: mailOptions.subject,
       status: 'sent',
