@@ -45,6 +45,7 @@ import CustomerRegister from "@/pages/customer-register";
 import CustomerWallet from "@/pages/customer-wallet";
 import WalletManagement from "@/pages/admin/wallet-management";
 import SalesAnalytics from "@/pages/sales-analytics";
+import ThemeDemoPage from "@/pages/theme-demo";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import FuelAdditives from "@/pages/products/fuel-additives";
