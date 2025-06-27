@@ -107,9 +107,13 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   
   // Smart CC: only add info@momtazchem.com if it's not already the sender or in recipients
   const ccEmail = 'info@momtazchem.com';
-  const ccList = (smtp.fromEmail.toLowerCase() !== ccEmail.toLowerCase() && 
-                  !finalFilteredRecipients.some((email: string) => email.toLowerCase() === ccEmail.toLowerCase())) 
-                  ? ccEmail : undefined;
+  const isSenderCC = smtp.fromEmail.toLowerCase() === ccEmail.toLowerCase();
+  const isRecipientCC = finalFilteredRecipients.some((email: string) => email.toLowerCase() === ccEmail.toLowerCase());
+  const ccList = (!isSenderCC && !isRecipientCC) ? ccEmail : undefined;
+  
+  console.log(`CC Logic: sender=${smtp.fromEmail}, recipient=${finalRecipients}, cc=${ccList || 'none (already covered)'}`);
+  if (isSenderCC) console.log('CC skipped: info@momtazchem.com is sender');
+  if (isRecipientCC) console.log('CC skipped: info@momtazchem.com is already recipient');
   
   const mailOptions = {
     from: `${smtp.fromName} <${fromEmail}>`,
@@ -144,6 +148,9 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
 
   // Send main email to category-specific recipients
   console.log(`Sending email to ${categorySettings.category.categoryName}:`, recipientEmails);
+  if (ccList) {
+    console.log(`CC: ${ccList}`);
+  }
   await transporter.sendMail(mailOptions);
   console.log(`Email sent successfully to ${categorySettings.category.categoryName}`);
 
