@@ -8539,6 +8539,231 @@ momtazchem.com
     }
   });
 
+  // Import Other Products to Shop Database
+  app.post('/api/shop/import-other-products', requireAuth, async (req, res) => {
+    try {
+      const otherProducts = [
+        {
+          name: "Industrial Degreasers",
+          category: "other",
+          description: "High-performance industrial degreasers for heavy-duty cleaning applications in manufacturing environments.",
+          shortDescription: "Professional grade degreasers for industrial cleaning",
+          price: "35.00",
+          priceUnit: "per liter",
+          inStock: true,
+          stockQuantity: 150,
+          lowStockThreshold: 20,
+          sku: "IND-DEG-001",
+          barcode: "8901234567890",
+          weight: "1.0",
+          weightUnit: "kg",
+          specifications: {
+            "pH Level": "8.5 - 9.2",
+            "Density": "0.95 g/ml", 
+            "Flash Point": ">100°C",
+            "Biodegradability": "98% in 28 days"
+          },
+          features: ["Biodegradable formula", "Non-toxic", "Fast-acting", "Multi-surface compatible"],
+          applications: ["Metal fabrication", "Automotive industry", "Heavy machinery maintenance", "Industrial equipment cleaning"],
+          tags: ["degreaser", "industrial", "cleaning", "biodegradable"],
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 500,
+          leadTime: "2-3 business days",
+          shippingClass: "standard",
+          isActive: true,
+          isFeatured: false,
+          metaTitle: "Industrial Degreasers - Professional Cleaning Solutions",
+          metaDescription: "High-performance industrial degreasers for heavy-duty cleaning applications"
+        },
+        {
+          name: "Corrosion Inhibitors", 
+          category: "other",
+          description: "Advanced corrosion inhibitors designed to protect metal surfaces from oxidation and environmental damage.",
+          shortDescription: "Protective coatings for metal surfaces",
+          price: "45.00",
+          priceUnit: "per liter",
+          inStock: true,
+          stockQuantity: 85,
+          lowStockThreshold: 15,
+          sku: "COR-INH-002",
+          barcode: "8901234567891",
+          weight: "1.2",
+          weightUnit: "kg",
+          specifications: {
+            "Active Content": "25-30%",
+            "Operating Temperature": "-20°C to +80°C",
+            "Coverage": "8-12 m²/L",
+            "Drying Time": "2-4 hours"
+          },
+          features: ["Long-lasting protection", "Temperature resistant", "Water-based formula", "Easy application"],
+          applications: ["Pipeline protection", "Marine equipment", "Storage tanks", "Infrastructure maintenance"],
+          tags: ["corrosion", "protection", "coating", "metal"],
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 200,
+          leadTime: "3-5 business days",
+          shippingClass: "standard",
+          isActive: true,
+          isFeatured: true,
+          metaTitle: "Corrosion Inhibitors - Metal Protection Solutions",
+          metaDescription: "Advanced corrosion inhibitors for metal surface protection"
+        },
+        {
+          name: "Laboratory Reagents",
+          category: "other", 
+          description: "High-purity laboratory reagents for analytical testing, research, and quality control applications.",
+          shortDescription: "Analytical grade reagents for laboratory use",
+          price: "75.00",
+          priceUnit: "per kg",
+          inStock: true,
+          stockQuantity: 45,
+          lowStockThreshold: 10,
+          sku: "LAB-REA-003",
+          barcode: "8901234567892",
+          weight: "0.5",
+          weightUnit: "kg",
+          specifications: {
+            "Purity": "≥99.5%",
+            "Water Content": "<0.1%",
+            "Heavy Metals": "<10 ppm",
+            "Shelf Life": "2-3 years"
+          },
+          features: ["Analytical grade purity", "Certified quality", "Consistent results", "Long shelf life"],
+          applications: ["Chemical analysis", "Research laboratories", "Quality control testing", "Educational institutions"],
+          tags: ["reagent", "laboratory", "analytical", "research"],
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 50,
+          leadTime: "1-2 business days",
+          shippingClass: "hazardous",
+          isActive: true,
+          isFeatured: false,
+          metaTitle: "Laboratory Reagents - Analytical Grade Chemicals",
+          metaDescription: "High-purity laboratory reagents for analytical testing and research"
+        },
+        {
+          name: "Specialty Solvents",
+          category: "other",
+          description: "Premium specialty solvents for specific industrial applications requiring high performance and purity.",
+          shortDescription: "Ultra-pure solvents for precision applications", 
+          price: "120.00",
+          priceUnit: "per liter",
+          inStock: true,
+          stockQuantity: 65,
+          lowStockThreshold: 12,
+          sku: "SOL-SPE-004",
+          barcode: "8901234567893",
+          weight: "0.8",
+          weightUnit: "kg",
+          specifications: {
+            "Purity": "≥99.8%",
+            "Boiling Point": "78-82°C",
+            "Vapor Pressure": "5.95 kPa at 20°C",
+            "Resistivity": ">18 MΩ·cm"
+          },
+          features: ["Ultra-high purity", "Low residue", "Fast evaporation", "Non-conductive"],
+          applications: ["Electronics manufacturing", "Pharmaceutical production", "Precision cleaning", "Chemical synthesis"],
+          tags: ["solvent", "specialty", "electronics", "pharmaceutical"],
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 100,
+          leadTime: "5-7 business days",
+          shippingClass: "hazardous",
+          isActive: true,
+          isFeatured: true,
+          metaTitle: "Specialty Solvents - High Purity Industrial Solvents",
+          metaDescription: "Premium specialty solvents for precision industrial applications"
+        },
+        {
+          name: "Concrete Additives",
+          category: "other",
+          description: "Specialized concrete additives to enhance performance, durability, and workability of concrete mixtures.",
+          shortDescription: "Performance enhancers for concrete applications",
+          price: "18.00",
+          priceUnit: "per liter",
+          inStock: true,
+          stockQuantity: 200,
+          lowStockThreshold: 30,
+          sku: "CON-ADD-005",
+          barcode: "8901234567894",
+          weight: "1.1",
+          weightUnit: "kg",
+          specifications: {
+            "Solid Content": "40-45%",
+            "Chloride Content": "<0.1%",
+            "Setting Time": "Adjustable 30min-6hrs",
+            "Compressive Strength": "+15-25%"
+          },
+          features: ["Improved workability", "Enhanced strength", "Reduced water content", "Accelerated curing"],
+          applications: ["Commercial construction", "Infrastructure projects", "Precast concrete", "Ready-mix concrete"],
+          tags: ["concrete", "additive", "construction", "building"],
+          minimumOrderQuantity: 5,
+          maximumOrderQuantity: 1000,
+          leadTime: "1-3 business days",
+          shippingClass: "standard",
+          isActive: true,
+          isFeatured: false,
+          metaTitle: "Concrete Additives - Construction Chemical Solutions",
+          metaDescription: "Specialized concrete additives for enhanced performance and durability"
+        },
+        {
+          name: "Textile Processing Chemicals",
+          category: "other",
+          description: "Comprehensive range of chemicals for textile processing, dyeing, and finishing operations.",
+          shortDescription: "Complete chemical solutions for textile industry",
+          price: "28.00",
+          priceUnit: "per liter",
+          inStock: true,
+          stockQuantity: 120,
+          lowStockThreshold: 25,
+          sku: "TEX-PRO-006",
+          barcode: "8901234567895",
+          weight: "1.0",
+          weightUnit: "kg",
+          specifications: {
+            "pH Range": "6.0-8.0",
+            "Concentration": "10-50%",
+            "Temperature Stability": "Up to 120°C",
+            "Biodegradability": "Readily biodegradable"
+          },
+          features: ["Color fastness", "Eco-friendly options", "Process efficiency", "Quality enhancement"],
+          applications: ["Fabric dyeing", "Textile finishing", "Fiber treatment", "Garment processing"],
+          tags: ["textile", "dyeing", "finishing", "fabric"],
+          minimumOrderQuantity: 2,
+          maximumOrderQuantity: 500,
+          leadTime: "2-4 business days",
+          shippingClass: "standard",
+          isActive: true,
+          isFeatured: false,
+          metaTitle: "Textile Processing Chemicals - Dyeing & Finishing Solutions",
+          metaDescription: "Comprehensive chemicals for textile processing and finishing operations"
+        }
+      ];
+
+      const createdProducts = [];
+      
+      for (const productData of otherProducts) {
+        try {
+          const product = await shopStorage.createShopProduct(productData);
+          createdProducts.push(product);
+        } catch (error) {
+          console.error(`Error creating product ${productData.name}:`, error);
+          // Continue with other products if one fails
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Successfully imported ${createdProducts.length} products to shop`,
+        products: createdProducts
+      });
+
+    } catch (error) {
+      console.error('Error importing other products:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to import products to shop database' 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
