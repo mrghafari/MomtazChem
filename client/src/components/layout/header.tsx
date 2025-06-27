@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useCustomer } from '@/hooks/useCustomer';
-import MoodSelector from '@/components/mood/MoodSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -199,11 +198,6 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-4">
-            {/* Mood Theme Selector - Desktop */}
-            <div className="hidden md:block">
-              <MoodSelector />
-            </div>
-            
             {/* Language Switcher - Desktop */}
             <div className="hidden md:block">
               <LanguageSwitcher />
@@ -394,25 +388,12 @@ export default function Header() {
                   </motion.div>
                 )}
 
-                {/* Mood Theme Selector - Mobile */}
+                {/* Language Switcher - Mobile */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: (navigation.length + productCategories.length + 2) * 0.1 }}
                   className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
-                >
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-                    Mood Theme
-                  </div>
-                  <MoodSelector />
-                </motion.div>
-
-                {/* Language Switcher - Mobile */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (navigation.length + productCategories.length + 3) * 0.1 }}
-                  className="px-4 py-2 border-t border-gray-200 dark:border-gray-700"
                 >
                   <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                     Language

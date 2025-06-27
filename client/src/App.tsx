@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import ShopSearch from "./components/ShopSearch";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { MoodThemeProvider } from "@/contexts/MoodThemeContext";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import Home from "@/pages/home";
@@ -45,7 +44,6 @@ import CustomerRegister from "@/pages/customer-register";
 import CustomerWallet from "@/pages/customer-wallet";
 import WalletManagement from "@/pages/admin/wallet-management";
 import SalesAnalytics from "@/pages/sales-analytics";
-import ThemeDemoPage from "@/pages/theme-demo";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import FuelAdditives from "@/pages/products/fuel-additives";
@@ -143,7 +141,6 @@ function Router() {
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/products/other" component={OtherProducts} />
           <Route path="/quote" component={QuotePage} />
-          <Route path="/theme-demo" component={ThemeDemoPage} />
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -156,12 +153,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <MoodThemeProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </MoodThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );
