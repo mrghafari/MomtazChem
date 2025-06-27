@@ -28,11 +28,7 @@ export default function Payment() {
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {
-      return apiRequest(`/api/shop/orders/${orderId}/payment`, {
-        method: 'POST',
-        body: JSON.stringify(paymentData),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return apiRequest(`/api/shop/orders/${orderId}/payment`, 'POST', paymentData);
     },
     onSuccess: () => {
       toast({
@@ -56,14 +52,10 @@ export default function Payment() {
   // Generate invoice mutation
   const generateInvoiceMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/invoices', {
-        method: 'POST',
-        body: JSON.stringify({
-          orderId: orderId,
-          customerId: orderData?.data?.customerId,
-          language: 'ar' // Default to Arabic, can be made configurable
-        }),
-        headers: { 'Content-Type': 'application/json' }
+      return apiRequest('/api/invoices', 'POST', {
+        orderId: orderId,
+        customerId: orderData?.customerId,
+        language: 'ar' // Default to Arabic, can be made configurable
       });
     },
     onSuccess: () => {
@@ -127,7 +119,7 @@ export default function Payment() {
     );
   }
 
-  if (!orderData?.data) {
+  if (!orderData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -144,7 +136,7 @@ export default function Payment() {
     );
   }
 
-  const order = orderData.data;
+  const order = orderData;
 
   // Skip payment for cash on delivery and company credit
   if (order.paymentMethod === 'cash_on_delivery' || order.paymentMethod === 'company_credit') {

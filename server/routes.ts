@@ -4198,6 +4198,51 @@ ${procedure.content}
     }
   });
 
+  // Payment processing endpoints
+  app.post("/api/shop/orders/:id/payment", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: "Invalid order ID" });
+      }
+
+      const { paymentStatus, paymentMethod, transactionId, paymentData } = req.body;
+      
+      // Get the order from customer_orders table
+      const order = await customerStorage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: "Order not found" });
+      }
+
+      // Update order with payment information
+      const updatedOrder = await customerStorage.updateOrder(orderId, {
+        status: paymentStatus === 'paid' ? 'payment_confirmed' : order.status,
+        notes: order.notes ? `${order.notes}\n\nPayment processed: ${paymentMethod}${transactionId ? ` (ID: ${transactionId})` : ''}` 
+               : `Payment processed: ${paymentMethod}${transactionId ? ` (ID: ${transactionId})` : ''}`
+      });
+
+      // Log the payment activity in CRM if customer exists
+      if (order.customerId) {
+        try {
+          await crmStorage.logCustomerActivity({
+            customerId: order.customerId,
+            activityType: 'payment_processed',
+            description: `Payment of ${order.totalAmount} processed via ${paymentMethod}${transactionId ? ` (Transaction: ${transactionId})` : ''}`,
+            performedBy: 'System',
+            relatedOrderId: orderId
+          });
+        } catch (crmError) {
+          console.warn("Failed to log payment activity to CRM:", crmError);
+        }
+      }
+
+      res.json({ success: true, order: updatedOrder });
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      res.status(500).json({ success: false, message: "Failed to update payment status" });
+    }
+  });
+
   // Sales Reports API
   app.get("/api/reports/sales", requireAuth, async (req, res) => {
     try {
