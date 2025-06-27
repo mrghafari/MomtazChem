@@ -73,9 +73,9 @@ export default function Header() {
       titleHover: "group-hover:text-green-600 dark:group-hover:text-green-400"
     },
     {
-      title: "سایر محصولات",
+      title: "Other Products",
       href: "/products/other",
-      description: "Other miscellaneous chemical products and solutions",
+      description: "Miscellaneous chemical products and specialty solutions",
       icon: <Package className="h-6 w-6" />,
       color: "purple",
       hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-900/20",

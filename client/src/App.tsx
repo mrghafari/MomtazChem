@@ -43,6 +43,7 @@ import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
 import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
+import OtherProducts from "@/pages/products/other";
 import QuotePage from "@/pages/quote";
 import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
@@ -123,6 +124,7 @@ function Router() {
           <Route path="/products/water-treatment" component={WaterTreatment} />
           <Route path="/products/paint-thinner" component={PaintThinner} />
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
+          <Route path="/products/other" component={OtherProducts} />
           <Route path="/quote" component={QuotePage} />
           <Route component={NotFound} />
         </Switch>
