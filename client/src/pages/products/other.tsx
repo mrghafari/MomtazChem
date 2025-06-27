@@ -1,11 +1,82 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Download, FileText, Package, Beaker, Shield, Star, CheckCircle } from "lucide-react";
+import { ArrowRight, Download, FileText, Package, Beaker, Shield, Star, CheckCircle, X } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+// Form schema for price request
+const priceRequestSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  company: z.string().min(1, "Company name is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  productInterest: z.string().min(1, "Please select a product"),
+  message: z.string().min(10, "Please provide more details about your requirements")
+});
+
+type PriceRequestFormData = z.infer<typeof priceRequestSchema>;
 
 export function OtherProducts() {
+  const [showPriceRequest, setShowPriceRequest] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<PriceRequestFormData>({
+    resolver: zodResolver(priceRequestSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      company: "",
+      phone: "",
+      productInterest: "",
+      message: ""
+    }
+  });
+
+  const onSubmitPriceRequest = async (data: PriceRequestFormData) => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          productInterest: "other", // Set to "other" for Other Products category
+          message: `Price Request for ${data.productInterest}\n\nPhone: ${data.phone}\n\nMessage: ${data.message}`
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Price Request Submitted",
+          description: "We'll get back to you with pricing information within 24 hours.",
+        });
+        form.reset();
+        setShowPriceRequest(false);
+      } else {
+        throw new Error('Failed to submit request');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit price request. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
   const products = [
     {
       id: 1,
@@ -296,20 +367,19 @@ export function OtherProducts() {
               Contact us to discuss your unique application needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact">
-                <Button 
-                  size="lg" 
-                  variant="secondary"
-                  className="bg-white text-purple-600 hover:bg-gray-100"
-                >
-                  Request Quote
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
+              <Button 
+                size="lg" 
+                variant="secondary"
+                className="bg-white text-purple-600 hover:bg-gray-100"
+                onClick={() => setShowPriceRequest(true)}
+              >
+                Request Quote
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
               <Button 
                 size="lg" 
                 variant="outline"
-                className="border-white text-white hover:bg-white/10"
+                className="border-white text-white hover:bg-white/10 bg-[#d5c4f9]"
               >
                 <Download className="h-5 w-5 mr-2" />
                 Product Catalog
