@@ -85,10 +85,14 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   const finalRecipients = filteredRecipients.length > 0 ? filteredRecipients.join(', ') : recipientEmails;
   const fromEmail = smtp.fromEmail; // Always use authenticated SMTP email to avoid relay issues
   
+  // Prevent CC duplicate with recipient
+  const ccEmail = 'info@momtazchem.com';
+  const ccList = finalRecipients.toLowerCase().includes(ccEmail.toLowerCase()) ? undefined : ccEmail;
+  
   const mailOptions = {
     from: `${smtp.fromName} <${fromEmail}>`,
     to: finalRecipients,
-    cc: 'info@momtazchem.com',
+    cc: ccList,
     subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName} [${categorySettings.category.categoryName}]`,
     html: `
       <h2>New Contact Form Submission</h2>
@@ -120,10 +124,13 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   console.log(`Email sent successfully to ${categorySettings.category.categoryName}`);
 
   // Send confirmation email to sender
+  const confirmationCcEmail = 'info@momtazchem.com';
+  const confirmationCcList = formData.email.toLowerCase() === confirmationCcEmail.toLowerCase() ? undefined : confirmationCcEmail;
+  
   const confirmationOptions = {
     from: `${smtp.fromName} <${smtp.fromEmail}>`,
     to: formData.email,
-    cc: 'info@momtazchem.com',
+    cc: confirmationCcList,
     subject: `Thank you for contacting Momtaz Chemical - ${formData.firstName} ${formData.lastName}`,
     html: `
       <h2>Thank you for your inquiry!</h2>
@@ -263,11 +270,20 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
       throw new Error('No active recipients found for product inquiries');
     }
 
-    const recipientEmails = recipients.map(r => r.email).join(', ');
+    // Filter out sender email from recipients to avoid duplicate issue
+    const filteredRecipients = recipients.filter(r => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase());
+    const recipientEmails = filteredRecipients.length > 0 
+      ? filteredRecipients.map(r => r.email).join(', ')
+      : recipients.map(r => r.email).join(', ');
+    
+    // Prevent CC duplicate with recipient
+    const ccEmail = 'info@momtazchem.com';
+    const ccList = recipients.some(r => r.email.toLowerCase() === ccEmail.toLowerCase()) ? undefined : ccEmail;
+
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: recipientEmails,
-      cc: 'info@momtazchem.com',
+      cc: ccList,
       subject: inquiryData.subject,
       html: `
         <h2>New Product Inquiry</h2>
@@ -349,10 +365,14 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
     const resetUrl = `${baseUrl}/customer-reset-password?token=${resetData.token}`;
     
+    // Prevent sender/recipient duplicate issue
+    const ccEmail = 'info@momtazchem.com';
+    const ccList = resetData.email.toLowerCase() === ccEmail.toLowerCase() ? undefined : ccEmail;
+    
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: resetData.email,
-      cc: 'info@momtazchem.com',
+      cc: ccList,
       subject: 'Password Reset - Momtaz Chemical',
       html: `
         <div style="direction: ltr; text-align: left; font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -472,10 +492,14 @@ export async function sendQuoteRequestEmail(quoteData: QuoteRequestEmailData): P
 
     const smtp = categorySettings.smtp;
     
+    // Prevent sender/recipient duplicate issue
+    const ccEmail = 'info@momtazchem.com';
+    const ccList = quoteData.to.toLowerCase() === ccEmail.toLowerCase() ? undefined : ccEmail;
+    
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
       to: quoteData.to,
-      cc: 'info@momtazchem.com',
+      cc: ccList,
       replyTo: quoteData.customerEmail,
       subject: quoteData.subject,
       html: `
