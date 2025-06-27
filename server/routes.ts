@@ -9495,6 +9495,138 @@ momtazchem.com
     }
   });
 
+  // ============================================================================
+  // PAYMENT GATEWAY MANAGEMENT API
+  // ============================================================================
+
+  // Get all payment gateways
+  app.get('/api/payment/gateways', requireAuth, async (req, res) => {
+    try {
+      const gateways = await db.select().from(shopStorage.schema.paymentGateways).orderBy(desc(shopStorage.schema.paymentGateways.createdAt));
+      res.json(gateways);
+    } catch (error) {
+      console.error('Error fetching payment gateways:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch payment gateways' });
+    }
+  });
+
+  // Get payment gateway by ID
+  app.get('/api/payment/gateways/:id', requireAuth, async (req, res) => {
+    try {
+      const gatewayId = parseInt(req.params.id);
+      const [gateway] = await db.select().from(shopStorage.schema.paymentGateways).where(eq(shopStorage.schema.paymentGateways.id, gatewayId));
+      
+      if (!gateway) {
+        return res.status(404).json({ success: false, message: 'Payment gateway not found' });
+      }
+      
+      res.json(gateway);
+    } catch (error) {
+      console.error('Error fetching payment gateway:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch payment gateway' });
+    }
+  });
+
+  // Create new payment gateway
+  app.post('/api/payment/gateways', requireAuth, async (req, res) => {
+    try {
+      const { name, type, enabled, config, testMode } = req.body;
+      
+      // Validate required fields
+      if (!name || !type || !config) {
+        return res.status(400).json({ success: false, message: 'Missing required fields' });
+      }
+
+      const [gateway] = await db.insert(shopStorage.schema.paymentGateways).values({
+        name,
+        type,
+        enabled: enabled ?? true,
+        config,
+        testMode: testMode ?? false,
+      }).returning();
+      
+      res.json({ success: true, data: gateway });
+    } catch (error) {
+      console.error('Error creating payment gateway:', error);
+      res.status(500).json({ success: false, message: 'Failed to create payment gateway' });
+    }
+  });
+
+  // Update payment gateway
+  app.patch('/api/payment/gateways/:id', requireAuth, async (req, res) => {
+    try {
+      const gatewayId = parseInt(req.params.id);
+      const { name, type, enabled, config, testMode } = req.body;
+      
+      const [gateway] = await db.update(shopStorage.schema.paymentGateways)
+        .set({
+          name,
+          type,
+          enabled,
+          config,
+          testMode,
+          updatedAt: new Date(),
+        })
+        .where(eq(shopStorage.schema.paymentGateways.id, gatewayId))
+        .returning();
+      
+      if (!gateway) {
+        return res.status(404).json({ success: false, message: 'Payment gateway not found' });
+      }
+      
+      res.json({ success: true, data: gateway });
+    } catch (error) {
+      console.error('Error updating payment gateway:', error);
+      res.status(500).json({ success: false, message: 'Failed to update payment gateway' });
+    }
+  });
+
+  // Delete payment gateway
+  app.delete('/api/payment/gateways/:id', requireAuth, async (req, res) => {
+    try {
+      const gatewayId = parseInt(req.params.id);
+      
+      const result = await db.delete(shopStorage.schema.paymentGateways)
+        .where(eq(shopStorage.schema.paymentGateways.id, gatewayId))
+        .returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({ success: false, message: 'Payment gateway not found' });
+      }
+      
+      res.json({ success: true, message: 'Payment gateway deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting payment gateway:', error);
+      res.status(500).json({ success: false, message: 'Failed to delete payment gateway' });
+    }
+  });
+
+  // Toggle payment gateway status
+  app.post('/api/payment/gateways/:id/toggle', requireAuth, async (req, res) => {
+    try {
+      const gatewayId = parseInt(req.params.id);
+      
+      const [currentGateway] = await db.select().from(shopStorage.schema.paymentGateways).where(eq(shopStorage.schema.paymentGateways.id, gatewayId));
+      
+      if (!currentGateway) {
+        return res.status(404).json({ success: false, message: 'Payment gateway not found' });
+      }
+      
+      const [gateway] = await db.update(shopStorage.schema.paymentGateways)
+        .set({
+          enabled: !currentGateway.enabled,
+          updatedAt: new Date(),
+        })
+        .where(eq(shopStorage.schema.paymentGateways.id, gatewayId))
+        .returning();
+      
+      res.json({ success: true, data: gateway });
+    } catch (error) {
+      console.error('Error toggling payment gateway:', error);
+      res.status(500).json({ success: false, message: 'Failed to toggle payment gateway' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

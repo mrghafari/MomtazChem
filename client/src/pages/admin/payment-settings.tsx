@@ -1,0 +1,654 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Building2, CreditCard, Wallet, Settings, Plus, Edit, Trash2, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+
+interface PaymentGateway {
+  id: number;
+  name: string;
+  type: 'iraqi_bank' | 'credit_card' | 'digital_wallet' | 'bank_transfer';
+  enabled: boolean;
+  config: {
+    apiKey?: string;
+    secretKey?: string;
+    merchantId?: string;
+    bankName?: string;
+    accountNumber?: string;
+    swiftCode?: string;
+    walletProvider?: string;
+    webhookUrl?: string;
+    testMode?: boolean;
+    [key: string]: any;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+const PaymentSettings = () => {
+  const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [showSecrets, setShowSecrets] = useState<{[key: string]: boolean}>({});
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch payment gateways
+  const { data: gateways = [], isLoading } = useQuery<PaymentGateway[]>({
+    queryKey: ['/api/payment/gateways'],
+  });
+
+  // Create/Update gateway mutation
+  const saveGatewayMutation = useMutation({
+    mutationFn: async (gatewayData: Partial<PaymentGateway>) => {
+      const url = gatewayData.id ? `/api/payment/gateways/${gatewayData.id}` : '/api/payment/gateways';
+      const method = gatewayData.id ? 'PATCH' : 'POST';
+      return apiRequest(url, method, gatewayData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment Gateway Saved",
+        description: "Payment gateway configuration has been saved successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
+      setIsEditDialogOpen(false);
+      setSelectedGateway(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to save payment gateway configuration.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete gateway mutation
+  const deleteGatewayMutation = useMutation({
+    mutationFn: async (gatewayId: number) => {
+      return apiRequest(`/api/payment/gateways/${gatewayId}`, 'DELETE');
+    },
+    onSuccess: () => {
+      toast({
+        title: "Gateway Deleted",
+        description: "Payment gateway has been deleted successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete payment gateway.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleSecretVisibility = (field: string) => {
+    setShowSecrets(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
+  const getGatewayIcon = (type: string) => {
+    switch (type) {
+      case 'iraqi_bank':
+        return <Building2 className="w-5 h-5" />;
+      case 'credit_card':
+        return <CreditCard className="w-5 h-5" />;
+      case 'digital_wallet':
+        return <Wallet className="w-5 h-5" />;
+      default:
+        return <Settings className="w-5 h-5" />;
+    }
+  };
+
+  const getGatewayTypeLabel = (type: string) => {
+    switch (type) {
+      case 'iraqi_bank':
+        return 'Iraqi Bank Transfer';
+      case 'credit_card':
+        return 'Credit/Debit Cards';
+      case 'digital_wallet':
+        return 'Digital Wallets';
+      case 'bank_transfer':
+        return 'International Bank Transfer';
+      default:
+        return type;
+    }
+  };
+
+  const renderGatewayForm = () => {
+    if (!selectedGateway) return null;
+
+    const updateGateway = (field: string, value: any) => {
+      setSelectedGateway(prev => prev ? {
+        ...prev,
+        [field]: value
+      } : null);
+    };
+
+    const updateConfig = (field: string, value: any) => {
+      setSelectedGateway(prev => prev ? {
+        ...prev,
+        config: {
+          ...prev.config,
+          [field]: value
+        }
+      } : null);
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Gateway Name</Label>
+            <Input
+              value={selectedGateway.name}
+              onChange={(e) => updateGateway('name', e.target.value)}
+              placeholder="Enter gateway name"
+            />
+          </div>
+          <div>
+            <Label>Gateway Type</Label>
+            <Select
+              value={selectedGateway.type}
+              onValueChange={(value) => updateGateway('type', value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="iraqi_bank">Iraqi Bank Transfer</SelectItem>
+                <SelectItem value="credit_card">Credit/Debit Cards</SelectItem>
+                <SelectItem value="digital_wallet">Digital Wallets</SelectItem>
+                <SelectItem value="bank_transfer">International Bank Transfer</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={selectedGateway.enabled}
+            onCheckedChange={(checked) => updateGateway('enabled', checked)}
+          />
+          <Label>Enable this payment gateway</Label>
+        </div>
+
+        <Separator />
+
+        {/* Iraqi Bank Configuration */}
+        {selectedGateway.type === 'iraqi_bank' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Iraqi Bank Settings</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Bank Name</Label>
+                <Input
+                  value={selectedGateway.config.bankName || ''}
+                  onChange={(e) => updateConfig('bankName', e.target.value)}
+                  placeholder="e.g., Rasheed Bank"
+                />
+              </div>
+              <div>
+                <Label>Account Number</Label>
+                <Input
+                  value={selectedGateway.config.accountNumber || ''}
+                  onChange={(e) => updateConfig('accountNumber', e.target.value)}
+                  placeholder="Bank account number"
+                />
+              </div>
+              <div>
+                <Label>SWIFT Code</Label>
+                <Input
+                  value={selectedGateway.config.swiftCode || ''}
+                  onChange={(e) => updateConfig('swiftCode', e.target.value)}
+                  placeholder="e.g., RSHDIQBA"
+                />
+              </div>
+              <div>
+                <Label>Account Holder Name</Label>
+                <Input
+                  value={selectedGateway.config.accountHolder || ''}
+                  onChange={(e) => updateConfig('accountHolder', e.target.value)}
+                  placeholder="Account holder name"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Bank Address</Label>
+              <Textarea
+                value={selectedGateway.config.bankAddress || ''}
+                onChange={(e) => updateConfig('bankAddress', e.target.value)}
+                placeholder="Complete bank address"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Credit Card Configuration */}
+        {selectedGateway.type === 'credit_card' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Credit Card Gateway Settings</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>API Key</Label>
+                <div className="relative">
+                  <Input
+                    type={showSecrets['apiKey'] ? 'text' : 'password'}
+                    value={selectedGateway.config.apiKey || ''}
+                    onChange={(e) => updateConfig('apiKey', e.target.value)}
+                    placeholder="Payment gateway API key"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                    onClick={() => toggleSecretVisibility('apiKey')}
+                  >
+                    {showSecrets['apiKey'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Label>Secret Key</Label>
+                <div className="relative">
+                  <Input
+                    type={showSecrets['secretKey'] ? 'text' : 'password'}
+                    value={selectedGateway.config.secretKey || ''}
+                    onChange={(e) => updateConfig('secretKey', e.target.value)}
+                    placeholder="Payment gateway secret key"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                    onClick={() => toggleSecretVisibility('secretKey')}
+                  >
+                    {showSecrets['secretKey'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Label>Merchant ID</Label>
+                <Input
+                  value={selectedGateway.config.merchantId || ''}
+                  onChange={(e) => updateConfig('merchantId', e.target.value)}
+                  placeholder="Merchant identifier"
+                />
+              </div>
+              <div>
+                <Label>Gateway Provider</Label>
+                <Select
+                  value={selectedGateway.config.provider || ''}
+                  onValueChange={(value) => updateConfig('provider', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="stripe">Stripe</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                    <SelectItem value="square">Square</SelectItem>
+                    <SelectItem value="iraq_payment">Iraq Payment Gateway</SelectItem>
+                    <SelectItem value="visa_iraq">Visa Iraq</SelectItem>
+                    <SelectItem value="mastercard_iraq">Mastercard Iraq</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Webhook URL</Label>
+              <Input
+                value={selectedGateway.config.webhookUrl || ''}
+                onChange={(e) => updateConfig('webhookUrl', e.target.value)}
+                placeholder="Webhook URL for payment notifications"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Digital Wallet Configuration */}
+        {selectedGateway.type === 'digital_wallet' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Digital Wallet Settings</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Wallet Provider</Label>
+                <Select
+                  value={selectedGateway.config.walletProvider || ''}
+                  onValueChange={(value) => updateConfig('walletProvider', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select wallet provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="zain_cash">Zain Cash</SelectItem>
+                    <SelectItem value="asia_pay">Asia Pay</SelectItem>
+                    <SelectItem value="fastpay">FastPay Iraq</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                    <SelectItem value="apple_pay">Apple Pay</SelectItem>
+                    <SelectItem value="google_pay">Google Pay</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>API Key</Label>
+                <div className="relative">
+                  <Input
+                    type={showSecrets['walletApiKey'] ? 'text' : 'password'}
+                    value={selectedGateway.config.apiKey || ''}
+                    onChange={(e) => updateConfig('apiKey', e.target.value)}
+                    placeholder="Wallet API key"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                    onClick={() => toggleSecretVisibility('walletApiKey')}
+                  >
+                    {showSecrets['walletApiKey'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Label>Merchant ID</Label>
+                <Input
+                  value={selectedGateway.config.merchantId || ''}
+                  onChange={(e) => updateConfig('merchantId', e.target.value)}
+                  placeholder="Wallet merchant ID"
+                />
+              </div>
+              <div>
+                <Label>App ID</Label>
+                <Input
+                  value={selectedGateway.config.appId || ''}
+                  onChange={(e) => updateConfig('appId', e.target.value)}
+                  placeholder="Application ID"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Test Mode */}
+        <div className="space-y-4">
+          <Separator />
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-base">Test Mode</Label>
+              <p className="text-sm text-gray-500">Enable test mode for development and testing</p>
+            </div>
+            <Switch
+              checked={selectedGateway.config.testMode || false}
+              onCheckedChange={(checked) => updateConfig('testMode', checked)}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setIsEditDialogOpen(false);
+              setSelectedGateway(null);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => saveGatewayMutation.mutate(selectedGateway)}
+            disabled={saveGatewayMutation.isPending}
+          >
+            {saveGatewayMutation.isPending ? "Saving..." : "Save Gateway"}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading payment settings...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Gateway Settings</h1>
+          <p className="text-gray-600">Configure payment methods and gateway settings for your e-commerce platform</p>
+        </div>
+
+        <Tabs defaultValue="gateways" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="gateways">Payment Gateways</TabsTrigger>
+            <TabsTrigger value="general">General Settings</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="gateways" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Payment Gateways</h2>
+              <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    onClick={() => {
+                      setSelectedGateway({
+                        id: 0,
+                        name: '',
+                        type: 'iraqi_bank',
+                        enabled: true,
+                        config: {},
+                        createdAt: '',
+                        updatedAt: ''
+                      });
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Gateway
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {selectedGateway?.id ? 'Edit Payment Gateway' : 'Add Payment Gateway'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  {renderGatewayForm()}
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {gateways.map((gateway) => (
+                <Card key={gateway.id} className="relative">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {getGatewayIcon(gateway.type)}
+                        <CardTitle className="text-lg">{gateway.name}</CardTitle>
+                      </div>
+                      <Badge variant={gateway.enabled ? "default" : "secondary"}>
+                        {gateway.enabled ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Type</p>
+                      <p className="font-medium">{getGatewayTypeLabel(gateway.type)}</p>
+                    </div>
+                    
+                    {gateway.config.testMode && (
+                      <Badge variant="outline" className="text-amber-600 border-amber-600">
+                        Test Mode
+                      </Badge>
+                    )}
+
+                    <div className="flex items-center justify-between pt-4">
+                      <div className="flex items-center space-x-1">
+                        {gateway.enabled ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-gray-400" />
+                        )}
+                        <span className="text-sm text-gray-600">
+                          {gateway.enabled ? "Operational" : "Disabled"}
+                        </span>
+                      </div>
+                      
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedGateway(gateway);
+                            setIsEditDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this gateway?')) {
+                              deleteGatewayMutation.mutate(gateway.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {gateways.length === 0 && (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Settings className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No Payment Gateways</h3>
+                  <p className="text-gray-500 mb-6">Get started by adding your first payment gateway</p>
+                  <Button
+                    onClick={() => {
+                      setSelectedGateway({
+                        id: 0,
+                        name: '',
+                        type: 'iraqi_bank',
+                        enabled: true,
+                        config: {},
+                        createdAt: '',
+                        updatedAt: ''
+                      });
+                      setIsEditDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Your First Gateway
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="general" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>General Payment Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Default Currency</Label>
+                    <Select defaultValue="USD">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="USD">US Dollar (USD)</SelectItem>
+                        <SelectItem value="IQD">Iraqi Dinar (IQD)</SelectItem>
+                        <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Payment Timeout (minutes)</Label>
+                    <Input type="number" defaultValue="30" min="5" max="120" />
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch defaultChecked />
+                  <Label>Require email confirmation for payments</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch defaultChecked />
+                  <Label>Send payment receipts automatically</Label>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Notifications</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Email notifications for successful payments</Label>
+                      <p className="text-sm text-gray-500">Send email to customer when payment is completed</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>SMS notifications for failed payments</Label>
+                      <p className="text-sm text-gray-500">Send SMS alert when payment fails</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Admin notifications for refunds</Label>
+                      <p className="text-sm text-gray-500">Notify admin when refund is requested</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentSettings;

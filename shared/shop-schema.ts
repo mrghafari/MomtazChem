@@ -44,6 +44,18 @@ export const shopProducts = pgTable("shop_products", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Payment gateways configuration table
+export const paymentGateways = pgTable("payment_gateways", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // e.g., "Rasheed Bank", "Visa Iraq"
+  type: text("type").notNull(), // 'iraqi_bank' | 'credit_card' | 'digital_wallet' | 'bank_transfer'
+  enabled: boolean("enabled").default(true),
+  config: json("config").notNull(), // Payment gateway specific configuration
+  testMode: boolean("test_mode").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Discount settings table for admin management
 export const discountSettings = pgTable("discount_settings", {
   id: serial("id").primaryKey(),
@@ -350,3 +362,13 @@ export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).omit({
 
 export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
+
+// Payment Gateway types
+export const insertPaymentGatewaySchema = createInsertSchema(paymentGateways).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
+export type PaymentGateway = typeof paymentGateways.$inferSelect;
