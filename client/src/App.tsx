@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import ShopSearch from "./components/ShopSearch";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { MoodThemeProvider } from "@/contexts/MoodThemeContext";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import Home from "@/pages/home";
@@ -153,10 +154,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <MoodThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </MoodThemeProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );

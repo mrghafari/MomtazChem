@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useCustomer } from '@/hooks/useCustomer';
+import MoodSelector from '@/components/mood/MoodSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
