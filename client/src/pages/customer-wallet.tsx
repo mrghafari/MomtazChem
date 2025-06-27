@@ -12,7 +12,91 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote } from "lucide-react";
+import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote, Globe } from "lucide-react";
+
+// Bilingual translations (English/Arabic)
+const translations = {
+  en: {
+    title: "Customer Wallet",
+    subtitle: "Manage your account balance and transactions",
+    balance: "Current Balance",
+    creditLimit: "Credit Limit",
+    status: "Status",
+    lastActivity: "Last Activity",
+    recharge: "Add Funds",
+    transactions: "Transactions",
+    rechargeRequests: "Recharge Requests",
+    amount: "Amount",
+    currency: "Currency",
+    paymentMethod: "Payment Method",
+    paymentReference: "Payment Reference",
+    notes: "Notes",
+    submit: "Submit Request",
+    cancel: "Cancel",
+    pending: "Pending",
+    completed: "Completed",
+    rejected: "Rejected",
+    active: "Active",
+    inactive: "Inactive",
+    credit: "Credit",
+    debit: "Debit",
+    type: "Type",
+    description: "Description",
+    date: "Date",
+    requestNumber: "Request #",
+    totalSpent: "Total Spent",
+    totalRecharged: "Total Recharged",
+    loading: "Loading wallet...",
+    noTransactions: "No transactions found",
+    noRechargeRequests: "No recharge requests found",
+    rechargeSuccess: "Recharge request submitted successfully",
+    optional: "Optional",
+    bankTransfer: "Bank Transfer",
+    onlinePayment: "Online Payment",
+    cash: "Cash Payment",
+    mobileWallet: "Mobile Wallet"
+  },
+  ar: {
+    title: "محفظة العميل",
+    subtitle: "إدارة رصيد حسابك والمعاملات",
+    balance: "الرصيد الحالي",
+    creditLimit: "حد الائتمان",
+    status: "الحالة",
+    lastActivity: "آخر نشاط",
+    recharge: "إضافة أموال",
+    transactions: "المعاملات",
+    rechargeRequests: "طلبات الشحن",
+    amount: "المبلغ",
+    currency: "العملة",
+    paymentMethod: "طريقة الدفع",
+    paymentReference: "مرجع الدفع",
+    notes: "ملاحظات",
+    submit: "إرسال الطلب",
+    cancel: "إلغاء",
+    pending: "معلق",
+    completed: "مكتمل",
+    rejected: "مرفوض",
+    active: "نشط",
+    inactive: "غير نشط",
+    credit: "إيداع",
+    debit: "سحب",
+    type: "النوع",
+    description: "الوصف",
+    date: "التاريخ",
+    requestNumber: "الطلب رقم",
+    totalSpent: "إجمالي المنفق",
+    totalRecharged: "إجمالي المشحون",
+    loading: "جارٍ تحميل المحفظة...",
+    noTransactions: "لا توجد معاملات",
+    noRechargeRequests: "لا توجد طلبات شحن",
+    rechargeSuccess: "تم إرسال طلب الشحن بنجاح",
+    optional: "اختياري",
+    bankTransfer: "تحويل بنكي",
+    onlinePayment: "دفع إلكتروني",
+    cash: "دفع نقدي",
+    mobileWallet: "محفظة جوال"
+  }
+};
 
 interface WalletSummary {
   wallet?: {
@@ -62,6 +146,7 @@ export default function CustomerWallet() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isRechargeDialogOpen, setIsRechargeDialogOpen] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ar'>('en');
   const [rechargeForm, setRechargeForm] = useState({
     amount: "",
     currency: "IQD",
@@ -69,6 +154,10 @@ export default function CustomerWallet() {
     paymentReference: "",
     customerNotes: ""
   });
+
+  // Get current translations
+  const t = translations[currentLanguage];
+  const isRTL = currentLanguage === 'ar';
 
   // Fetch wallet summary
   const { data: walletData, isLoading } = useQuery<{ success: boolean; data: WalletSummary }>({
@@ -93,8 +182,10 @@ export default function CustomerWallet() {
     mutationFn: (data: any) => apiRequest('POST', '/api/customer/wallet/recharge', data),
     onSuccess: () => {
       toast({
-        title: "طلب شارژ ایجاد شد",
-        description: "درخواست شارژ کیف پول شما با موفقیت ثبت شد و در انتظار تأیید می‌باشد.",
+        title: t.rechargeSuccess,
+        description: currentLanguage === 'en' 
+          ? "Your wallet recharge request has been submitted successfully and is pending approval."
+          : "تم إرسال طلب شحن محفظتك بنجاح وهو في انتظار الموافقة.",
       });
       setIsRechargeDialogOpen(false);
       setRechargeForm({
@@ -109,8 +200,8 @@ export default function CustomerWallet() {
     },
     onError: (error: any) => {
       toast({
-        title: "خطا در ایجاد درخواست",
-        description: error.message || "خطا در ایجاد درخواست شارژ کیف پول",
+        title: currentLanguage === 'en' ? "Request Error" : "خطأ في الطلب",
+        description: error.message || (currentLanguage === 'en' ? "Error creating wallet recharge request" : "خطأ في إنشاء طلب شحن المحفظة"),
         variant: "destructive",
       });
     }
@@ -121,8 +212,8 @@ export default function CustomerWallet() {
     
     if (!rechargeForm.amount || parseFloat(rechargeForm.amount) <= 0) {
       toast({
-        title: "خطا در ورودی",
-        description: "لطفاً مبلغ معتبری وارد کنید",
+        title: currentLanguage === 'en' ? "Input Error" : "خطأ في الإدخال",
+        description: currentLanguage === 'en' ? "Please enter a valid amount" : "يرجى إدخال مبلغ صحيح",
         variant: "destructive",
       });
       return;
@@ -130,8 +221,8 @@ export default function CustomerWallet() {
 
     if (!rechargeForm.paymentMethod) {
       toast({
-        title: "خطا در ورودی",
-        description: "لطفاً روش پرداخت را انتخاب کنید",
+        title: currentLanguage === 'en' ? "Input Error" : "خطأ في الإدخال",
+        description: currentLanguage === 'en' ? "Please select a payment method" : "يرجى اختيار طريقة الدفع",
         variant: "destructive",
       });
       return;
@@ -142,7 +233,8 @@ export default function CustomerWallet() {
 
   const formatCurrency = (amount: string | number, currency: string = "IQD") => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat('fa-IR', {
+    const locale = currentLanguage === 'en' ? 'en-US' : 'ar-IQ';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
@@ -151,17 +243,18 @@ export default function CustomerWallet() {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; variant: any }> = {
-      'pending': { label: 'در انتظار', variant: 'secondary' },
-      'approved': { label: 'تأیید شده', variant: 'default' },
-      'completed': { label: 'تکمیل شده', variant: 'default' },
-      'rejected': { label: 'رد شده', variant: 'destructive' },
-      'active': { label: 'فعال', variant: 'default' },
-      'frozen': { label: 'مسدود', variant: 'destructive' }
+    const statusConfig: Record<string, { labelEn: string; labelAr: string; variant: any }> = {
+      'pending': { labelEn: 'Pending', labelAr: 'معلق', variant: 'secondary' },
+      'approved': { labelEn: 'Approved', labelAr: 'موافق عليه', variant: 'default' },
+      'completed': { labelEn: 'Completed', labelAr: 'مكتمل', variant: 'default' },
+      'rejected': { labelEn: 'Rejected', labelAr: 'مرفوض', variant: 'destructive' },
+      'active': { labelEn: 'Active', labelAr: 'نشط', variant: 'default' },
+      'frozen': { labelEn: 'Frozen', labelAr: 'مجمد', variant: 'destructive' }
     };
     
-    const config = statusConfig[status] || { label: status, variant: 'secondary' };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    const config = statusConfig[status] || { labelEn: status, labelAr: status, variant: 'secondary' };
+    const label = currentLanguage === 'en' ? config.labelEn : config.labelAr;
+    return <Badge variant={config.variant}>{label}</Badge>;
   };
 
   const getTransactionIcon = (type: string) => {
@@ -193,15 +286,39 @@ export default function CustomerWallet() {
   const allTransactions = transactionsData?.data || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className={`min-h-screen bg-gray-50 p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto">
+        {/* Language Toggle */}
+        <div className={`mb-4 flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
+          <div className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm">
+            <Button
+              size="sm"
+              variant={currentLanguage === 'en' ? 'default' : 'ghost'}
+              onClick={() => setCurrentLanguage('en')}
+              className="text-xs"
+            >
+              <Globe className="h-3 w-3 mr-1" />
+              English
+            </Button>
+            <Button
+              size="sm"
+              variant={currentLanguage === 'ar' ? 'default' : 'ghost'}
+              onClick={() => setCurrentLanguage('ar')}
+              className="text-xs"
+            >
+              <Globe className="h-3 w-3 mr-1" />
+              العربية
+            </Button>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <h1 className={`text-3xl font-bold text-gray-900 flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Wallet className="h-8 w-8 text-blue-600" />
-            کیف پول من
+            {t.title}
           </h1>
-          <p className="text-gray-600 mt-2">مدیریت موجودی و تراکنش‌های کیف پول</p>
+          <p className="text-gray-600 mt-2">{t.subtitle}</p>
         </div>
 
         {/* Wallet Overview */}
