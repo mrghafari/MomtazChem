@@ -131,6 +131,7 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 27, 2025: FIXED sender/recipient duplicate email issue - implemented comprehensive protection across all email functions (contact forms, password resets, quote requests, product inquiries) to prevent SMTP errors when sender and recipient are the same email address
 - June 27, 2025: FIXED SMTP relay issue - resolved "553 Relaying disallowed as noreply@momtazchem.com" error by updating email system to use only authenticated sender addresses from existing Zoho Mail configuration, ensuring all emails send successfully
 - June 27, 2025: COMPLETED comprehensive Email Control Panel in Advanced Email Settings - added dedicated admin interface with full oversight of CC monitoring, intelligent routing configuration, system status, and quick action buttons for email management
 - June 27, 2025: IMPLEMENTED centralized email monitoring - ALL emails now automatically CC info@momtazchem.com for comprehensive oversight (contact forms, product inquiries, password resets, quote requests)
