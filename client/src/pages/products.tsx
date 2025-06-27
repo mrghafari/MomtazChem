@@ -127,7 +127,7 @@ export default function ProductsPage() {
     { value: "laboratory", label: "Laboratory", icon: <Beaker className="w-4 h-4" /> },
     { value: "pharmaceutical", label: "Pharmaceutical", icon: <Package className="w-4 h-4" /> },
     { value: "specialty", label: "Specialty", icon: <Droplet className="w-4 h-4" /> },
-    { value: "other", label: "سایر محصولات", icon: <Package className="w-4 h-4" /> },
+    { value: "other", label: "Other Products", icon: <Package className="w-4 h-4" /> },
   ];
 
   const { data: products, isLoading } = useQuery({
