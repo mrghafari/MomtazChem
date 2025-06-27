@@ -562,7 +562,7 @@ export default function AdvancedEmailSettingsPage() {
                           id="fromEmail"
                           value={smtpForm.fromEmail}
                           onChange={(e) => setSmtpForm({ ...smtpForm, fromEmail: e.target.value })}
-                          placeholder="noreply@momtazchem.com"
+                          placeholder="info@momtazchem.com"
                         />
                       </div>
                     </div>

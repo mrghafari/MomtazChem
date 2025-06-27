@@ -81,9 +81,9 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
     .filter((r: any) => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
     .map((r: any) => r.email);
   
-  // If no recipients remain after filtering, use the original list but change the from email
+  // If no recipients remain after filtering, use the original list but keep the authenticated from email
   const finalRecipients = filteredRecipients.length > 0 ? filteredRecipients.join(', ') : recipientEmails;
-  const fromEmail = filteredRecipients.length > 0 ? smtp.fromEmail : `noreply@momtazchem.com`;
+  const fromEmail = smtp.fromEmail; // Always use authenticated SMTP email to avoid relay issues
   
   const mailOptions = {
     from: `${smtp.fromName} <${fromEmail}>`,
