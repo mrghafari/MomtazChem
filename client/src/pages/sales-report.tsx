@@ -159,8 +159,8 @@ export default function SalesReport() {
 
         {reportData && (
           <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 print:mb-4 print:gap-4">
+            {/* Summary Cards - Hidden in print */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 print:hidden">
               <Card>
                 <CardContent className="p-6 print:p-4">
                   <div className="flex items-center">
@@ -218,7 +218,8 @@ export default function SalesReport() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 print:mb-4 print:gap-4">
+            {/* Charts - Hidden in print */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 print:hidden print:mb-4 print:gap-4">
               {/* Product Sales Pie Chart */}
               <Card>
                 <CardHeader>
@@ -277,37 +278,53 @@ export default function SalesReport() {
               </Card>
             </div>
 
+            {/* Print-Only Summary Section */}
+            <div className="hidden print:block print:mb-4">
+              <div className="print:summary-box">
+                <div>
+                  <strong>Total Sales:</strong> {formatCurrency(reportData.totalSales)}
+                </div>
+                <div>
+                  <strong>Total Orders:</strong> {reportData.totalOrders}
+                </div>
+                <div>
+                  <strong>Period:</strong> {formatDate(startDate)} to {formatDate(endDate)}
+                </div>
+              </div>
+            </div>
+
             {/* Detailed Product Sales Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Product Sales Details</CardTitle>
+            <Card className="print:no-shadow">
+              <CardHeader className="print:p-2">
+                <CardTitle className="print:text-lg print:mb-2">Product Sales Details</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="print:p-2">
                 <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+                  <table className="w-full border-collapse print:compact-table">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left p-3 font-semibold text-gray-900">Product Name</th>
-                        <th className="text-right p-3 font-semibold text-gray-900">Quantity Sold</th>
-                        <th className="text-right p-3 font-semibold text-gray-900">Total Sales</th>
-                        <th className="text-right p-3 font-semibold text-gray-900">Orders</th>
-                        <th className="text-right p-3 font-semibold text-gray-900">Avg per Order</th>
+                        <th className="text-left p-3 font-semibold text-gray-900 print:text-sm">Product Name</th>
+                        <th className="text-right p-3 font-semibold text-gray-900 print:text-sm">Qty Sold</th>
+                        <th className="text-right p-3 font-semibold text-gray-900 print:text-sm">Total Sales</th>
+                        <th className="text-right p-3 font-semibold text-gray-900 print:text-sm">Orders</th>
+                        <th className="text-right p-3 font-semibold text-gray-900 print:text-sm">Avg/Order</th>
                       </tr>
                     </thead>
                     <tbody>
                       {reportData.productSales.map((product, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="p-3">
+                          <td className="p-3 print:text-sm">
                             <div className="font-medium text-gray-900">{product.productName}</div>
                           </td>
-                          <td className="p-3 text-right">
-                            <Badge variant="secondary">{formatQuantity(product.quantity)} units</Badge>
+                          <td className="p-3 text-right print:text-sm">
+                            <Badge variant="secondary" className="print:hidden">{formatQuantity(product.quantity)} units</Badge>
+                            <span className="hidden print:inline">{formatQuantity(product.quantity)}</span>
                           </td>
-                          <td className="p-3 text-right font-semibold text-green-600">
+                          <td className="p-3 text-right font-semibold text-green-600 print:text-sm">
                             {formatCurrency(product.totalAmount)}
                           </td>
-                          <td className="p-3 text-right">{product.orders}</td>
-                          <td className="p-3 text-right text-gray-600">
+                          <td className="p-3 text-right print:text-sm">{product.orders}</td>
+                          <td className="p-3 text-right text-gray-600 print:text-sm">
                             {formatCurrency(product.orders > 0 ? product.totalAmount / product.orders : 0)}
                           </td>
                         </tr>
@@ -315,15 +332,16 @@ export default function SalesReport() {
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2 bg-gray-50">
-                        <td className="p-3 font-bold text-gray-900">TOTAL</td>
-                        <td className="p-3 text-right font-bold">
-                          <Badge variant="default">{formatQuantity(reportData.totalQuantity)} units</Badge>
+                        <td className="p-3 font-bold text-gray-900 print:text-sm">TOTAL</td>
+                        <td className="p-3 text-right font-bold print:text-sm">
+                          <Badge variant="default" className="print:hidden">{formatQuantity(reportData.totalQuantity)} units</Badge>
+                          <span className="hidden print:inline font-bold">{formatQuantity(reportData.totalQuantity)}</span>
                         </td>
-                        <td className="p-3 text-right font-bold text-green-600">
+                        <td className="p-3 text-right font-bold text-green-600 print:text-sm">
                           {formatCurrency(reportData.totalSales)}
                         </td>
-                        <td className="p-3 text-right font-bold">{reportData.totalOrders}</td>
-                        <td className="p-3 text-right font-bold text-gray-600">
+                        <td className="p-3 text-right font-bold print:text-sm">{reportData.totalOrders}</td>
+                        <td className="p-3 text-right font-bold text-gray-600 print:text-sm">
                           {formatCurrency(reportData.totalOrders > 0 ? reportData.totalSales / reportData.totalOrders : 0)}
                         </td>
                       </tr>
@@ -361,57 +379,118 @@ export default function SalesReport() {
       <style>{`
         @media print {
           @page {
-            margin: 1in;
+            margin: 0.5in;
             size: A4;
           }
           
-          .print\\:hidden {
+          /* Hide all interactive elements and decorative content */
+          .print\\:hidden,
+          button,
+          .lucide,
+          .print\\:hide-charts {
             display: none !important;
           }
           
+          /* Hide chart containers completely */
+          .print\\:hide-charts {
+            display: none !important;
+          }
+          
+          /* Show only essential elements */
           .print\\:block {
             display: block !important;
           }
           
-          .print\\:bg-white {
+          .print\\:table {
+            display: table !important;
+          }
+          
+          /* Clean white background */
+          .print\\:bg-white,
+          body,
+          * {
             background-color: white !important;
+            background-image: none !important;
           }
           
-          .print\\:p-4 {
-            padding: 1rem !important;
-          }
-          
-          .print\\:mb-4 {
-            margin-bottom: 1rem !important;
+          /* Compact spacing */
+          .print\\:p-2 {
+            padding: 0.5rem !important;
           }
           
           .print\\:mb-2 {
             margin-bottom: 0.5rem !important;
           }
           
-          .print\\:text-2xl {
-            font-size: 1.5rem !important;
+          .print\\:mb-4 {
+            margin-bottom: 1rem !important;
           }
           
-          .print\\:text-xl {
-            font-size: 1.25rem !important;
+          /* Typography optimization */
+          .print\\:text-lg {
+            font-size: 1.125rem !important;
+            font-weight: bold !important;
+          }
+          
+          .print\\:text-base {
+            font-size: 1rem !important;
           }
           
           .print\\:text-sm {
             font-size: 0.875rem !important;
           }
           
-          .print\\:gap-4 {
-            gap: 1rem !important;
+          /* Remove shadows and borders */
+          .print\\:no-shadow {
+            box-shadow: none !important;
+            border: 1px solid #e5e5e5 !important;
           }
           
-          .print\\:h-60 {
-            height: 15rem !important;
+          /* Table optimization */
+          .print\\:compact-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
           }
           
+          .print\\:compact-table th,
+          .print\\:compact-table td {
+            padding: 0.25rem 0.5rem !important;
+            border: 1px solid #ddd !important;
+            font-size: 0.875rem !important;
+          }
+          
+          .print\\:compact-table th {
+            background-color: #f8f9fa !important;
+            font-weight: bold !important;
+          }
+          
+          /* Hide unnecessary decorative elements */
+          .print\\:essential-only .grid:not(.print\\:keep) {
+            display: none !important;
+          }
+          
+          /* Essential summary box */
+          .print\\:summary-box {
+            display: flex !important;
+            justify-content: space-between !important;
+            padding: 1rem !important;
+            border: 2px solid #000 !important;
+            margin-bottom: 1rem !important;
+            background-color: #f8f9fa !important;
+          }
+          
+          /* Remove color styling for print */
           * {
+            color: black !important;
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
+          }
+          
+          .text-green-600,
+          .text-blue-600,
+          .text-orange-600 {
+            color: black !important;
+            font-weight: bold !important;
           }
         }
       `}</style>
