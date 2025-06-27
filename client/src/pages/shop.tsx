@@ -376,40 +376,26 @@ const Shop = () => {
             {/* User Account & Cart */}
             <div className="flex items-center gap-4">
               {/* User Account */}
-              {!isLoadingCustomer && (
+              {!isLoadingCustomer && customer && (
                 <div className="flex items-center gap-2">
-                  {customer ? (
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => window.location.href = "/customer/profile"}
-                        className="flex items-center gap-1"
-                      >
-                        <User className="w-4 h-4" />
-                        {customer.firstName}
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={handleLogout}
-                        className="flex items-center gap-1"
-                      >
-                        <LogOut className="w-4 h-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.location.href = "/customer/profile"}
+                    className="flex items-center gap-1"
+                  >
+                    <User className="w-4 h-4" />
+                    {customer.firstName}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleLogout}
+                    className="flex items-center gap-1"
+                  >
+                    <LogOut className="w-4 h-4" />
 {t.logout}
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setShowAuth(true)}
-                      className="flex items-center gap-2"
-                    >
-                      <User className="w-4 h-4" />
-{t.login} / {t.register}
-                    </Button>
-                  )}
+                  </Button>
                 </div>
               )}
 
