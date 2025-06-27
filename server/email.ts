@@ -28,6 +28,11 @@ const createTransporter = async (categoryKey: string) => {
     greetingTimeout: 10000,
     socketTimeout: 20000,
     debug: process.env.NODE_ENV === 'development',
+    // Force UTF-8 encoding to prevent character corruption
+    defaults: {
+      encoding: 'utf-8',
+      charset: 'utf-8'
+    },
     logger: process.env.NODE_ENV === 'development',
     tls: {
       rejectUnauthorized: false
@@ -95,6 +100,8 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
     to: finalRecipients,
     cc: ccList,
     subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName} [${categorySettings.category.categoryName}]`,
+    encoding: 'utf-8',
+    charset: 'utf-8',
     html: `
       <h2>New Contact Form Submission</h2>
       <p><strong>Category:</strong> ${categorySettings.category.categoryName}</p>
@@ -133,6 +140,8 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
     to: formData.email,
     cc: confirmationCcList,
     subject: `Thank you for contacting Momtaz Chemical - ${formData.firstName} ${formData.lastName}`,
+    encoding: 'utf-8',
+    charset: 'utf-8',
     html: `
       <h2>Thank you for your inquiry!</h2>
       <p>Dear ${formData.firstName} ${formData.lastName},</p>
@@ -286,6 +295,8 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
       to: recipientEmails,
       cc: ccList,
       subject: inquiryData.subject,
+      encoding: 'utf-8',
+      charset: 'utf-8',
       html: `
         <h2>New Product Inquiry</h2>
         <p><strong>Inquiry Number:</strong> ${inquiryData.inquiryNumber}</p>
@@ -375,6 +386,8 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
       to: resetData.email,
       cc: ccList,
       subject: 'Password Reset - Momtaz Chemical',
+      encoding: 'utf-8',
+      charset: 'utf-8',
       html: `
         <div style="direction: ltr; text-align: left; font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">Password Reset</h2>
