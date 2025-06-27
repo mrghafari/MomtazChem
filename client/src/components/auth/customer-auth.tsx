@@ -52,9 +52,10 @@ interface CustomerAuthProps {
   onOpenChange: (open: boolean) => void;
   onLoginSuccess: (customer: any) => void;
   initialMode?: 'login' | 'register';
+  existingCustomer?: any; // For pre-filling data during profile completion
 }
 
-export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initialMode = 'login' }: CustomerAuthProps) {
+export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initialMode = 'login', existingCustomer }: CustomerAuthProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialMode);
@@ -68,6 +69,32 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initi
   useEffect(() => {
     setActiveTab(initialMode);
   }, [initialMode]);
+
+  // Pre-fill registration form with existing customer data
+  useEffect(() => {
+    if (existingCustomer && activeTab === 'register') {
+      registerForm.reset({
+        firstName: existingCustomer.firstName || "",
+        lastName: existingCustomer.lastName || "",
+        email: existingCustomer.email || "",
+        password: "", // Don't pre-fill password
+        confirmPassword: "",
+        phone: existingCustomer.phone || "",
+        company: existingCustomer.company || "",
+        country: existingCustomer.country || "",
+        city: existingCustomer.city || "",
+        address: existingCustomer.address || "",
+        postalCode: existingCustomer.postalCode || "",
+        alternatePhone: existingCustomer.alternatePhone || "",
+        industry: existingCustomer.industry || "",
+        businessType: existingCustomer.businessType || 'retailer',
+        companySize: existingCustomer.companySize || 'small',
+        communicationPreference: existingCustomer.communicationPreference || 'email',
+        preferredLanguage: existingCustomer.preferredLanguage || 'en',
+        marketingConsent: existingCustomer.marketingConsent || false,
+      });
+    }
+  }, [existingCustomer, activeTab, registerForm]);
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -137,7 +164,42 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initi
     try {
       const { confirmPassword, ...registerData } = data;
       
-      // Include all CRM fields in registration request
+      // Check if this is profile completion mode for existing customer
+      if (existingCustomer) {
+        // This is profile completion, update existing customer
+        const updateResponse = await fetch(`/api/customers/${existingCustomer.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            ...registerData,
+            // Only include password if it's being changed
+            ...(registerData.password ? { password: registerData.password } : {}),
+          }),
+        });
+
+        const updateResult = await updateResponse.json();
+        
+        if (updateResult.success) {
+          toast({
+            title: "Profile Updated",
+            description: "Your profile has been updated successfully",
+          });
+          onLoginSuccess({ ...existingCustomer, ...registerData });
+          onOpenChange(false);
+          registerForm.reset();
+          return;
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Update Error",
+            description: updateResult.message || "Failed to update profile",
+          });
+          return;
+        }
+      }
+      
+      // Regular registration for new customer
       const fullRegistrationData = {
         ...registerData,
         customerType: 'retail',
