@@ -93,7 +93,7 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   }
   
   // Additional check: if sender email is in the filtered recipients list, remove it again
-  const finalFilteredRecipients = filteredRecipients.filter(email => 
+  const finalFilteredRecipients = filteredRecipients.filter((email: string) => 
     email.toLowerCase() !== smtp.fromEmail.toLowerCase()
   );
   
@@ -105,8 +105,11 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   const finalRecipients = finalFilteredRecipients.join(', ');
   const fromEmail = smtp.fromEmail; // Always use authenticated SMTP email to avoid relay issues
   
-  // Skip CC completely to avoid SMTP duplicate recipient errors
-  const ccList = undefined; // Temporarily disable CC to resolve SMTP issues
+  // Smart CC: only add info@momtazchem.com if it's not already the sender or in recipients
+  const ccEmail = 'info@momtazchem.com';
+  const ccList = (smtp.fromEmail.toLowerCase() !== ccEmail.toLowerCase() && 
+                  !finalFilteredRecipients.some((email: string) => email.toLowerCase() === ccEmail.toLowerCase())) 
+                  ? ccEmail : undefined;
   
   const mailOptions = {
     from: `${smtp.fromName} <${fromEmail}>`,
@@ -306,8 +309,12 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
     
     const recipientEmails = filteredRecipients.map(r => r.email).join(', ');
     
-    // Skip CC to avoid duplicate recipient errors
-    const ccList = undefined;
+    // Smart CC: only add info@momtazchem.com if it's not already the sender or in recipients
+    const ccEmail = 'info@momtazchem.com';
+    const recipientEmailList = filteredRecipients.map(r => r.email);
+    const ccList = (smtp.fromEmail.toLowerCase() !== ccEmail.toLowerCase() && 
+                    !recipientEmailList.some((email: string) => email.toLowerCase() === ccEmail.toLowerCase())) 
+                    ? ccEmail : undefined;
 
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
