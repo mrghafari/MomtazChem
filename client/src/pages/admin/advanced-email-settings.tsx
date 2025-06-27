@@ -48,6 +48,7 @@ interface EmailRecipient {
   name?: string;
   isPrimary: boolean;
   isActive: boolean;
+  recipientType?: 'to' | 'cc' | 'bcc';
   receiveTypes: string[];
 }
 
@@ -80,7 +81,8 @@ export default function AdvancedEmailSettingsPage() {
     name: "",
     isPrimary: false,
     isActive: true,
-    receiveTypes: []
+    receiveTypes: [],
+    recipientType: 'to'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -748,7 +750,7 @@ export default function AdvancedEmailSettingsPage() {
                           <Label htmlFor="recipientType">Recipient Type</Label>
                           <Select
                             value={newRecipient.recipientType || 'to'}
-                            onValueChange={(value) => setNewRecipient({ ...newRecipient, recipientType: value })}
+                            onValueChange={(value) => setNewRecipient({ ...newRecipient, recipientType: value as 'to' | 'cc' | 'bcc' })}
                           >
                             <SelectTrigger className="w-[140px]">
                               <SelectValue />

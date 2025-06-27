@@ -79,46 +79,46 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
     throw new Error('No active recipients found for email category');
   }
 
-  const recipientEmails = recipients.map((r: any) => r.email).join(', ');
-  
-  // Filter out sender email from recipients to avoid "Invalid Recipients" error
-  const filteredRecipients = recipients
-    .filter((r: any) => r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
+  // Separate recipients by type and filter out sender email from all lists
+  const toRecipients = recipients
+    .filter((r: any) => (!r.recipientType || r.recipientType === 'to') && r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
     .map((r: any) => r.email);
   
-  // If no recipients remain after filtering, skip sending email to avoid sender=recipient error
-  if (filteredRecipients.length === 0) {
-    console.log(`Skipping email for ${categorySettings.category.categoryName} - all recipients are same as sender email (${smtp.fromEmail})`);
-    return; // Don't send email when sender and all recipients are the same
+  const ccRecipients = recipients
+    .filter((r: any) => r.recipientType === 'cc' && r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
+    .map((r: any) => r.email);
+  
+  const bccRecipients = recipients
+    .filter((r: any) => r.recipientType === 'bcc' && r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
+    .map((r: any) => r.email);
+  
+  // Add smart CC for monitoring (info@momtazchem.com) if not already present
+  const monitoringEmail = 'info@momtazchem.com';
+  const isMonitoringEmailPresent = 
+    smtp.fromEmail.toLowerCase() === monitoringEmail.toLowerCase() ||
+    toRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase()) ||
+    ccRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase()) ||
+    bccRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase());
+  
+  if (!isMonitoringEmailPresent) {
+    ccRecipients.push(monitoringEmail);
   }
   
-  // Additional check: if sender email is in the filtered recipients list, remove it again
-  const finalFilteredRecipients = filteredRecipients.filter((email: string) => 
-    email.toLowerCase() !== smtp.fromEmail.toLowerCase()
-  );
-  
-  if (finalFilteredRecipients.length === 0) {
-    console.log(`Skipping email for ${categorySettings.category.categoryName} - final check detected sender=recipient conflict`);
+  // Check if we have any recipients after filtering
+  if (toRecipients.length === 0 && ccRecipients.length === 0 && bccRecipients.length === 0) {
+    console.log(`Skipping email for ${categorySettings.category.categoryName} - no valid recipients after filtering`);
     return;
   }
   
-  const finalRecipients = finalFilteredRecipients.join(', ');
-  const fromEmail = smtp.fromEmail; // Always use authenticated SMTP email to avoid relay issues
+  const fromEmail = smtp.fromEmail;
   
-  // Smart CC: only add info@momtazchem.com if it's not already the sender or in recipients
-  const ccEmail = 'info@momtazchem.com';
-  const isSenderCC = smtp.fromEmail.toLowerCase() === ccEmail.toLowerCase();
-  const isRecipientCC = finalFilteredRecipients.some((email: string) => email.toLowerCase() === ccEmail.toLowerCase());
-  const ccList = (!isSenderCC && !isRecipientCC) ? ccEmail : undefined;
-  
-  console.log(`CC Logic: sender=${smtp.fromEmail}, recipient=${finalRecipients}, cc=${ccList || 'none (already covered)'}`);
-  if (isSenderCC) console.log('CC skipped: info@momtazchem.com is sender');
-  if (isRecipientCC) console.log('CC skipped: info@momtazchem.com is already recipient');
+  console.log(`Email distribution - TO: ${toRecipients.join(', ')}, CC: ${ccRecipients.join(', ')}, BCC: ${bccRecipients.join(', ')}`);
   
   const mailOptions = {
     from: `${smtp.fromName} <${fromEmail}>`,
-    to: finalRecipients,
-    cc: ccList,
+    to: toRecipients.length > 0 ? toRecipients.join(', ') : undefined,
+    cc: ccRecipients.length > 0 ? ccRecipients.join(', ') : undefined,
+    bcc: bccRecipients.length > 0 ? bccRecipients.join(', ') : undefined,
     subject: `New Contact Form Submission from ${formData.firstName} ${formData.lastName} [${categorySettings.category.categoryName}]`,
     encoding: 'utf-8',
     charset: 'utf-8',
@@ -147,10 +147,7 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   };
 
   // Send main email to category-specific recipients
-  console.log(`Sending email to ${categorySettings.category.categoryName}:`, recipientEmails);
-  if (ccList) {
-    console.log(`CC: ${ccList}`);
-  }
+  console.log(`Sending email to ${categorySettings.category.categoryName}`);
   await transporter.sendMail(mailOptions);
   console.log(`Email sent successfully to ${categorySettings.category.categoryName}`);
 
