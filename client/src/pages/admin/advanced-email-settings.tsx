@@ -187,18 +187,51 @@ export default function AdvancedEmailSettingsPage() {
     }
   };
 
-  // Test SMTP connection
-  const testSmtpMutation = useMutation({
-    mutationFn: (categoryId: number) => 
-      fetch(`/api/admin/email/test-smtp/${categoryId}`, { method: "POST" }).then(res => res.json()),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
-      toast({ 
-        title: data.success ? "SMTP test successful" : "SMTP test failed",
-        variant: data.success ? "default" : "destructive"
-      });
+  // Test SMTP connection (using proper validation)
+  const testSmtpConnection = async () => {
+    if (!smtpForm.username || !smtpForm.password) {
+      toast({ title: "Please enter email and password for testing", variant: "destructive" });
+      return;
     }
-  });
+
+    setIsValidating(true);
+    
+    try {
+      const response = await fetch('/api/admin/validate-smtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: smtpForm.username,
+          password: smtpForm.password,
+          customHost: smtpForm.host || undefined,
+          customPort: smtpForm.port || undefined,
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.isValid) {
+        toast({ 
+          title: "SMTP Connection Successful!", 
+          description: "Your email settings are working correctly." 
+        });
+      } else {
+        toast({ 
+          title: "SMTP Connection Failed", 
+          description: result.errors?.[0] || "Connection test failed",
+          variant: "destructive" 
+        });
+      }
+    } catch (error: any) {
+      toast({ 
+        title: "Connection Test Failed", 
+        description: `Error: ${error.message}`,
+        variant: "destructive" 
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   // Save recipients
   const saveRecipientsMutation = useMutation({
@@ -267,8 +300,7 @@ export default function AdvancedEmailSettingsPage() {
   };
 
   const handleTestSmtp = () => {
-    if (!selectedCategory) return;
-    testSmtpMutation.mutate(selectedCategory.id);
+    testSmtpConnection();
   };
 
   const handleSaveRecipients = () => {
@@ -569,10 +601,19 @@ export default function AdvancedEmailSettingsPage() {
                         <Button
                           variant="outline"
                           onClick={handleTestSmtp}
-                          disabled={testSmtpMutation.isPending}
+                          disabled={isValidating}
                         >
-                          <TestTube className="w-4 h-4 mr-2" />
-                          Test Connection
+                          {isValidating ? (
+                            <>
+                              <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-gray-600 border-t-transparent" />
+                              Testing...
+                            </>
+                          ) : (
+                            <>
+                              <TestTube className="w-4 h-4 mr-2" />
+                              Test Connection
+                            </>
+                          )}
                         </Button>
                       </div>
 
