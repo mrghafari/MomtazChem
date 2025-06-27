@@ -9181,6 +9181,220 @@ momtazchem.com
     }
   });
 
+  // Download invoice PDF
+  app.get('/api/invoices/:id/download', async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const invoice = await invoiceStorage.getInvoiceById(invoiceId);
+      
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: 'Invoice not found' });
+      }
+
+      // Get invoice items
+      const items = await invoiceStorage.getInvoiceItems(invoiceId);
+      
+      // Get customer and order information
+      const order = await shopStorage.getOrderById(invoice.orderId);
+      const customer = await crmStorage.getCrmCustomerById(invoice.customerId);
+      
+      if (!order || !customer) {
+        return res.status(404).json({ success: false, message: 'Order or customer not found' });
+      }
+
+      // Generate PDF content based on language
+      const isArabic = invoice.language === 'ar';
+      const direction = isArabic ? 'rtl' : 'ltr';
+      const font = isArabic ? 'Arial' : 'Arial';
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html dir="${direction}" lang="${invoice.language}">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body { 
+                    font-family: ${font}, sans-serif; 
+                    line-height: 1.6; 
+                    margin: 0; 
+                    padding: 20px;
+                    direction: ${direction};
+                }
+                .header { 
+                    text-align: center; 
+                    border-bottom: 2px solid #333; 
+                    padding-bottom: 20px; 
+                    margin-bottom: 30px; 
+                }
+                .company-info { 
+                    text-align: center; 
+                    margin-bottom: 20px; 
+                }
+                .invoice-details { 
+                    display: flex; 
+                    justify-content: space-between; 
+                    margin-bottom: 30px; 
+                }
+                .invoice-info, .customer-info { 
+                    width: 48%; 
+                }
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    margin-bottom: 20px; 
+                }
+                th, td { 
+                    border: 1px solid #ddd; 
+                    padding: 12px; 
+                    text-align: ${isArabic ? 'right' : 'left'}; 
+                }
+                th { 
+                    background-color: #f5f5f5; 
+                    font-weight: bold; 
+                }
+                .total-section { 
+                    text-align: ${isArabic ? 'right' : 'left'}; 
+                    margin-top: 20px; 
+                }
+                .total-row { 
+                    font-size: 18px; 
+                    font-weight: bold; 
+                    background-color: #f0f0f0; 
+                }
+                .footer { 
+                    margin-top: 40px; 
+                    text-align: center; 
+                    font-size: 12px; 
+                    color: #666; 
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="company-info">
+                    <h1>${isArabic ? 'شركة مُمتاز للمواد الكيميائية' : 'Momtaz Chemical Solutions'}</h1>
+                    <p>${isArabic ? 'العراق - بغداد' : 'Iraq - Baghdad'}</p>
+                    <p>${isArabic ? 'الهاتف' : 'Phone'}: +964 XXX XXX XXXX</p>
+                    <p>${isArabic ? 'البريد الإلكتروني' : 'Email'}: info@momtazchem.com</p>
+                </div>
+                <h2>${isArabic ? 'فاتورة' : 'INVOICE'} ${invoice.isOfficial ? (isArabic ? '(رسمية)' : '(Official)') : ''}</h2>
+            </div>
+
+            <div class="invoice-details">
+                <div class="invoice-info">
+                    <h3>${isArabic ? 'معلومات الفاتورة' : 'Invoice Information'}</h3>
+                    <p><strong>${isArabic ? 'رقم الفاتورة' : 'Invoice Number'}:</strong> ${invoice.invoiceNumber}</p>
+                    <p><strong>${isArabic ? 'تاريخ الإصدار' : 'Issue Date'}:</strong> ${new Date(invoice.createdAt).toLocaleDateString(isArabic ? 'ar-IQ' : 'en-US')}</p>
+                    <p><strong>${isArabic ? 'حالة الدفع' : 'Payment Status'}:</strong> ${invoice.status === 'paid' ? (isArabic ? 'مدفوعة' : 'Paid') : (isArabic ? 'مستحقة' : 'Due')}</p>
+                    <p><strong>${isArabic ? 'رقم الطلب' : 'Order Number'}:</strong> ${order.orderNumber}</p>
+                </div>
+                <div class="customer-info">
+                    <h3>${isArabic ? 'معلومات العميل' : 'Customer Information'}</h3>
+                    <p><strong>${isArabic ? 'الاسم' : 'Name'}:</strong> ${customer.firstName} ${customer.lastName}</p>
+                    <p><strong>${isArabic ? 'البريد الإلكتروني' : 'Email'}:</strong> ${customer.email}</p>
+                    <p><strong>${isArabic ? 'الهاتف' : 'Phone'}:</strong> ${customer.phone}</p>
+                    <p><strong>${isArabic ? 'العنوان' : 'Address'}:</strong> ${customer.address}, ${customer.city}, ${customer.country}</p>
+                    ${customer.company ? `<p><strong>${isArabic ? 'الشركة' : 'Company'}:</strong> ${customer.company}</p>` : ''}
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>${isArabic ? 'المنتج' : 'Product'}</th>
+                        <th>${isArabic ? 'الكمية' : 'Quantity'}</th>
+                        <th>${isArabic ? 'السعر' : 'Unit Price'}</th>
+                        <th>${isArabic ? 'الإجمالي' : 'Total'}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${items.map(item => `
+                        <tr>
+                            <td>${item.productName}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.unitPrice} ${invoice.currency}</td>
+                            <td>${item.totalPrice} ${invoice.currency}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+
+            <div class="total-section">
+                <table style="width: 300px; margin-left: auto;">
+                    <tr>
+                        <td><strong>${isArabic ? 'المجموع الفرعي' : 'Subtotal'}:</strong></td>
+                        <td><strong>${invoice.subtotal} ${invoice.currency}</strong></td>
+                    </tr>
+                    ${invoice.discountAmount && parseFloat(invoice.discountAmount) > 0 ? `
+                    <tr>
+                        <td><strong>${isArabic ? 'الخصم' : 'Discount'}:</strong></td>
+                        <td><strong>-${invoice.discountAmount} ${invoice.currency}</strong></td>
+                    </tr>
+                    ` : ''}
+                    ${invoice.taxAmount && parseFloat(invoice.taxAmount) > 0 ? `
+                    <tr>
+                        <td><strong>${isArabic ? 'الضريبة' : 'Tax'}:</strong></td>
+                        <td><strong>${invoice.taxAmount} ${invoice.currency}</strong></td>
+                    </tr>
+                    ` : ''}
+                    <tr class="total-row">
+                        <td><strong>${isArabic ? 'الإجمالي النهائي' : 'Total Amount'}:</strong></td>
+                        <td><strong>${invoice.totalAmount} ${invoice.currency}</strong></td>
+                    </tr>
+                </table>
+            </div>
+
+            ${invoice.notes ? `
+            <div style="margin-top: 30px;">
+                <h3>${isArabic ? 'ملاحظات' : 'Notes'}</h3>
+                <p>${invoice.notes}</p>
+            </div>
+            ` : ''}
+
+            <div class="footer">
+                <p>${isArabic ? 'شكراً لاختيارك شركة مُمتاز للمواد الكيميائية' : 'Thank you for choosing Momtaz Chemical Solutions'}</p>
+                <p>${isArabic ? 'موقعنا الإلكتروني' : 'Website'}: momtazchem.com</p>
+            </div>
+        </body>
+        </html>
+      `;
+
+      // Use the simple PDF generator
+      const puppeteer = require('puppeteer');
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '20mm',
+          right: '15mm',
+          bottom: '20mm',
+          left: '15mm'
+        }
+      });
+      
+      await browser.close();
+
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      res.send(pdfBuffer);
+      
+    } catch (error) {
+      console.error('Error generating invoice PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate invoice PDF' });
+    }
+  });
+
   // Mark invoice as paid
   app.post('/api/invoices/:id/mark-paid', requireAuth, async (req, res) => {
     try {

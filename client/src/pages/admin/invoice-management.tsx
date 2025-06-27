@@ -121,6 +121,49 @@ export default function InvoiceManagement() {
     },
   });
 
+  // Download invoice PDF function
+  const handleDownloadInvoice = async (invoice: any) => {
+    try {
+      toast({
+        title: "Generating PDF",
+        description: "Please wait...",
+      });
+
+      const response = await fetch(`/api/invoices/${invoice.id}/download`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to download invoice');
+      }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${invoice.invoiceNumber || invoice.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download successful",
+        description: "Invoice PDF downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast({
+        title: "Download failed",
+        description: "Could not download invoice PDF",
+        variant: "destructive"
+      });
+    }
+  };
+
   const invoices: Invoice[] = invoicesData?.data || [];
   const stats: InvoiceStats = statsData?.data || {
     totalInvoices: 0,
@@ -297,7 +340,11 @@ export default function InvoiceManagement() {
                         <Button size="sm" variant="outline">
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDownloadInvoice(invoice)}
+                        >
                           <Download className="w-4 h-4" />
                         </Button>
                         {invoice.status !== 'paid' && (

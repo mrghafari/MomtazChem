@@ -132,12 +132,56 @@ export default function CheckoutSuccess() {
     }
   };
 
-  const handleDownloadInvoice = () => {
-    // This will be implemented when PDF generation is ready
-    toast({
-      title: "دانلود فاکتور",
-      description: "فاکتور در حال آماده سازی است",
-    });
+  const handleDownloadInvoice = async () => {
+    if (!invoiceData?.id) {
+      toast({
+        title: "خطا",
+        description: "اطلاعات فاکتور یافت نشد",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Show loading toast
+      toast({
+        title: "درحال تولید فاکتور",
+        description: "لطفاً صبر کنید...",
+      });
+
+      const response = await fetch(`/api/invoices/${invoiceData.id}/download`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to download invoice');
+      }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${invoiceData.invoiceNumber || invoiceData.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "دانلود موفق",
+        description: "فاکتور با موفقیت دانلود شد",
+      });
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast({
+        title: "خطا در دانلود",
+        description: "امکان دانلود فاکتور وجود ندارد",
+        variant: "destructive"
+      });
+    }
   };
 
   if (!orderId) {
