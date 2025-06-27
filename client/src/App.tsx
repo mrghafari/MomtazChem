@@ -16,6 +16,7 @@ import Shop from "@/pages/shop";
 import Checkout from "@/pages/checkout";
 import CheckoutSuccess from "@/pages/checkout-success";
 import ShopAdmin from "@/pages/shop-admin";
+import InvoiceManagement from "@/pages/admin/invoice-management";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
@@ -94,6 +95,7 @@ function Router() {
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />
           <Route path="/admin/email-progress" component={EmailProgressPage} />
           <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
+          <Route path="/admin/invoice-management" component={InvoiceManagement} />
           <Route path="/admin/inquiries" component={Dashboard} />
           <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />

@@ -131,6 +131,7 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 27, 2025: IMPLEMENTED multi-language invoice system - added language selection (Arabic/English) for official invoices during checkout process, customers can now choose their preferred invoice language when requesting official invoices, enhanced invoice database schema with language field (defaults to Arabic), updated checkout success page with bilingual language selection modal, modified invoice storage and API routes to handle language parameter properly
 - June 27, 2025: OPTIMIZED shop print reports for essential content only - removed unnecessary sections including charts, decorative elements, interactive buttons, and summary cards from print output, implemented compact table styling with smaller fonts and spacing, added print-only summary box showing key metrics, enhanced print styles to focus on core sales data and product details for cleaner professional reports
 - June 27, 2025: IMPLEMENTED automatic discount description synchronization - when admin updates discount percentage, the description field automatically updates to reflect the new percentage value in Persian format, ensuring consistency between discount settings and displayed descriptions across the system
 - June 27, 2025: COMPLETED discount system real-time synchronization - modified shop products API to include live discount data from discount_settings table, enhanced search API with discount information, added frontend cache invalidation to ensure discount changes immediately appear on product cards
