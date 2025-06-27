@@ -5238,8 +5238,17 @@ ${procedure.content}
       const { categoryId } = req.params;
       const { recipients } = req.body;
       
+      // Validate categoryId
+      const categoryIdNum = parseInt(categoryId);
+      if (isNaN(categoryIdNum)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category ID"
+        });
+      }
+      
       // Delete existing recipients for this category
-      const existingRecipients = await emailStorage.getRecipientsByCategory(parseInt(categoryId));
+      const existingRecipients = await emailStorage.getRecipientsByCategory(categoryIdNum);
       for (const recipient of existingRecipients) {
         await emailStorage.deleteRecipient(recipient.id);
       }
@@ -5247,10 +5256,17 @@ ${procedure.content}
       // Add new recipients
       const createdRecipients = [];
       for (const recipientData of recipients) {
-        const recipient = await emailStorage.createRecipient({
-          ...recipientData,
-          categoryId: parseInt(categoryId)
-        });
+        // Clean the recipient data to remove any invalid fields
+        const cleanedData = {
+          email: recipientData.email,
+          name: recipientData.name || null,
+          isPrimary: Boolean(recipientData.isPrimary),
+          isActive: Boolean(recipientData.isActive !== false), // default to true
+          receiveTypes: Array.isArray(recipientData.receiveTypes) ? recipientData.receiveTypes : [],
+          categoryId: categoryIdNum
+        };
+        
+        const recipient = await emailStorage.createRecipient(cleanedData);
         createdRecipients.push(recipient);
       }
 
@@ -5263,7 +5279,8 @@ ${procedure.content}
       console.error("Error updating recipients:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to update recipients"
+        message: "Failed to update recipients",
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });

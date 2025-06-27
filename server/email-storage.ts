@@ -217,9 +217,19 @@ export class EmailStorage implements IEmailStorage {
   
   // Email Recipients
   async createRecipient(recipientData: InsertEmailRecipient): Promise<EmailRecipient> {
+    // Clean the recipient data to prevent type conversion issues
+    const cleanedData = {
+      categoryId: recipientData.categoryId,
+      email: recipientData.email,
+      name: recipientData.name || null,
+      isPrimary: Boolean(recipientData.isPrimary),
+      isActive: Boolean(recipientData.isActive !== false),
+      receiveTypes: Array.isArray(recipientData.receiveTypes) ? recipientData.receiveTypes : []
+    };
+    
     const [recipient] = await emailDb
       .insert(emailRecipients)
-      .values(recipientData)
+      .values(cleanedData)
       .returning();
     return recipient;
   }
@@ -243,9 +253,24 @@ export class EmailStorage implements IEmailStorage {
   }
   
   async updateRecipient(id: number, recipientUpdate: Partial<InsertEmailRecipient>): Promise<EmailRecipient> {
+    // Clean the update data to prevent timestamp conversion issues
+    const cleanedUpdate = {
+      email: recipientUpdate.email,
+      name: recipientUpdate.name,
+      isPrimary: recipientUpdate.isPrimary,
+      isActive: recipientUpdate.isActive,
+      receiveTypes: recipientUpdate.receiveTypes,
+      updatedAt: new Date()
+    };
+    
+    // Remove undefined values
+    const updateData = Object.fromEntries(
+      Object.entries(cleanedUpdate).filter(([_, value]) => value !== undefined)
+    );
+    
     const [recipient] = await emailDb
       .update(emailRecipients)
-      .set({ ...recipientUpdate, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(emailRecipients.id, id))
       .returning();
     return recipient;
