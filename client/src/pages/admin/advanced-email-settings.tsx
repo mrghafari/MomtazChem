@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Mail, Settings, TestTube, Save, Plus, Trash2, Edit, Check, X, AlertCircle, CheckCircle, Clock, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Mail, Settings, TestTube, Save, Plus, Trash2, Edit, Check, X, AlertCircle, CheckCircle, Clock, Eye, EyeOff, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import EmailSetupProgress from "@/components/ui/email-setup-progress";
@@ -83,6 +83,8 @@ export default function AdvancedEmailSettingsPage() {
     receiveTypes: []
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<any>(null);
 
   // Check authentication
   useEffect(() => {
@@ -131,6 +133,59 @@ export default function AdvancedEmailSettingsPage() {
       toast({ title: "Failed to save SMTP settings", variant: "destructive" });
     }
   });
+
+  // Validate SMTP settings (before saving)
+  const validateSmtp = async () => {
+    if (!smtpForm.username || !smtpForm.password) {
+      toast({ title: "Please enter email and password for validation", variant: "destructive" });
+      return;
+    }
+
+    setIsValidating(true);
+    setValidationResult(null);
+    
+    try {
+      const response = await fetch('/api/admin/validate-smtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: smtpForm.username,
+          password: smtpForm.password,
+          customHost: smtpForm.host || undefined,
+          customPort: smtpForm.port || undefined,
+        })
+      });
+      
+      const result = await response.json();
+      setValidationResult(result);
+      
+      if (result.isValid) {
+        toast({ title: "SMTP validation successful! You can now save the settings." });
+      } else {
+        toast({ 
+          title: "SMTP validation failed", 
+          description: result.errors?.[0] || "Unknown error",
+          variant: "destructive" 
+        });
+      }
+    } catch (error: any) {
+      setValidationResult({
+        isValid: false,
+        errors: [`Validation failed: ${error.message}`],
+        warnings: [],
+        suggestions: [],
+        configurationStatus: {
+          hostReachable: false,
+          portOpen: false,
+          tlsSupported: false,
+          authenticationWorking: false,
+        },
+      });
+      toast({ title: "Validation failed", variant: "destructive" });
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   // Test SMTP connection
   const testSmtpMutation = useMutation({
@@ -481,23 +536,111 @@ export default function AdvancedEmailSettingsPage() {
 
                     <Separator />
 
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={handleSaveSmtp}
-                        disabled={saveSmtpMutation.isPending}
-                      >
-                        <Save className="w-4 h-4 mr-2" />
-                        Save SMTP Settings
-                      </Button>
-                      
-                      <Button
-                        variant="outline"
-                        onClick={handleTestSmtp}
-                        disabled={testSmtpMutation.isPending}
-                      >
-                        <TestTube className="w-4 h-4 mr-2" />
-                        Test Connection
-                      </Button>
+                    {/* Validation Section */}
+                    <div className="space-y-4">
+                      <div className="flex gap-3">
+                        <Button
+                          variant="secondary"
+                          onClick={validateSmtp}
+                          disabled={isValidating || !smtpForm.username || !smtpForm.password}
+                          className="bg-blue-50 hover:bg-blue-100 text-blue-700"
+                        >
+                          {isValidating ? (
+                            <>
+                              <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-blue-700 border-t-transparent" />
+                              Validating...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Validate SMTP
+                            </>
+                          )}
+                        </Button>
+                        
+                        <Button
+                          onClick={handleSaveSmtp}
+                          disabled={saveSmtpMutation.isPending || (validationResult && !validationResult.isValid)}
+                        >
+                          <Save className="w-4 h-4 mr-2" />
+                          Save SMTP Settings
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          onClick={handleTestSmtp}
+                          disabled={testSmtpMutation.isPending}
+                        >
+                          <TestTube className="w-4 h-4 mr-2" />
+                          Test Connection
+                        </Button>
+                      </div>
+
+                      {/* Validation Results */}
+                      {validationResult && (
+                        <div className={`p-4 rounded-lg border ${
+                          validationResult.isValid 
+                            ? 'bg-green-50 border-green-200' 
+                            : 'bg-red-50 border-red-200'
+                        }`}>
+                          <div className="flex items-center gap-2 mb-2">
+                            {validationResult.isValid ? (
+                              <>
+                                <CheckCircle className="w-5 h-5 text-green-600" />
+                                <span className="font-medium text-green-800">SMTP Validation Successful</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle className="w-5 h-5 text-red-600" />
+                                <span className="font-medium text-red-800">SMTP Validation Failed</span>
+                              </>
+                            )}
+                          </div>
+                          
+                          {validationResult.errors && validationResult.errors.length > 0 && (
+                            <div className="mb-2">
+                              <div className="text-sm font-medium text-red-700 mb-1">Errors:</div>
+                              <ul className="text-sm text-red-600 list-disc list-inside">
+                                {validationResult.errors.map((error: string, idx: number) => (
+                                  <li key={idx}>{error}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {validationResult.suggestions && validationResult.suggestions.length > 0 && (
+                            <div className="mb-2">
+                              <div className="text-sm font-medium text-orange-700 mb-1">Suggestions:</div>
+                              <ul className="text-sm text-orange-600 list-disc list-inside">
+                                {validationResult.suggestions.map((suggestion: string, idx: number) => (
+                                  <li key={idx}>{suggestion}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {validationResult.configurationStatus && (
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex items-center gap-1">
+                                {validationResult.configurationStatus.hostReachable ? (
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                ) : (
+                                  <XCircle className="w-4 h-4 text-red-500" />
+                                )}
+                                <span>Host Reachable</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {validationResult.configurationStatus.authenticationWorking ? (
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                ) : (
+                                  <XCircle className="w-4 h-4 text-red-500" />
+                                )}
+                                <span>Authentication</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {selectedCategory.smtp && (
