@@ -691,6 +691,51 @@ const Shop = () => {
                             </Badge>
                           </div>
 
+                          {/* Quantity Discounts Display */}
+                          {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
+                            <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                              <h4 className="text-xs font-semibold text-blue-800 mb-1">📦 Bulk Discounts</h4>
+                              <div className="space-y-1">
+                                {product.quantityDiscounts.map((discount: any, index: number) => (
+                                  <div key={index} className="flex justify-between items-center text-xs">
+                                    <span className="text-blue-700">
+                                      {discount.minQty}+ items:
+                                    </span>
+                                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs py-0 px-1">
+                                      {(discount.discount * 100).toFixed(0)}% OFF
+                                    </Badge>
+                                  </div>
+                                ))}
+                              </div>
+                              {cart[product.id] && cart[product.id] > 0 && (
+                                <div className="text-xs text-blue-600 font-semibold mt-1">
+                                  {(() => {
+                                    const currentQty = cart[product.id];
+                                    const applicableDiscount = product.quantityDiscounts
+                                      .filter((d: any) => currentQty >= d.minQty)
+                                      .sort((a: any, b: any) => b.minQty - a.minQty)[0];
+                                    
+                                    if (applicableDiscount) {
+                                      const savings = parseFloat(product.price) * applicableDiscount.discount * currentQty;
+                                      return `💰 You're saving $${savings.toFixed(2)}!`;
+                                    }
+                                    
+                                    const nextDiscount = product.quantityDiscounts
+                                      .filter((d: any) => currentQty < d.minQty)
+                                      .sort((a: any, b: any) => a.minQty - b.minQty)[0];
+                                    
+                                    if (nextDiscount) {
+                                      const needed = nextDiscount.minQty - currentQty;
+                                      return `Add ${needed} more for ${(nextDiscount.discount * 100).toFixed(0)}% discount`;
+                                    }
+                                    
+                                    return "";
+                                  })()}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                           {product.inStock && (
                             <div className="flex items-center gap-2">
                               {cart[product.id] && cart[product.id] > 0 ? (
