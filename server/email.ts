@@ -51,13 +51,40 @@ export interface PasswordResetData {
   token: string;
 }
 
+// Map product interest to email category
+function mapProductInterestToCategory(productInterest: string): string {
+  const mapping: Record<string, string> = {
+    'fuel-additives': 'fuel-additives',
+    'water-treatment': 'water-treatment', 
+    'paint-thinner': 'paint-thinner',
+    'agricultural-fertilizers': 'agricultural-fertilizers',
+    'other': 'notifications', // Other products go to Support
+    'custom-solutions': 'orders', // Custom solutions go to Sales department
+  };
+  
+  return mapping[productInterest] || 'admin'; // Default to admin if no match
+}
+
 export async function sendContactEmail(formData: ContactFormData): Promise<void> {
   try {
-    const transporter = await createTransporter('admin');
-    const categorySettings = await emailStorage.getCategoryWithSettings('admin');
+    // Determine the appropriate email category based on product interest
+    const categoryKey = mapProductInterestToCategory(formData.productInterest);
+    
+    const transporter = await createTransporter(categoryKey);
+    const categorySettings = await emailStorage.getCategoryWithSettings(categoryKey);
     
     if (!categorySettings?.smtp || !categorySettings.recipients?.length) {
-      throw new Error('No email configuration found for contact form');
+      // Fallback to admin category if specific category is not configured
+      console.log(`Category '${categoryKey}' not configured, falling back to admin`);
+      const fallbackTransporter = await createTransporter('admin');
+      const fallbackSettings = await emailStorage.getCategoryWithSettings('admin');
+      
+      if (!fallbackSettings?.smtp || !fallbackSettings.recipients?.length) {
+        throw new Error('No email configuration found for contact form and admin fallback');
+      }
+      
+      // Use fallback settings
+      return await sendWithSettings(formData, fallbackSettings, fallbackTransporter, categoryKey);
     }
 
     const smtp = categorySettings.smtp;
