@@ -17,7 +17,8 @@ import { smsStorage } from "./sms-storage";
 import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { walletStorage } from "./wallet-storage";
-import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema } from "@shared/customer-schema";
+import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests } from "@shared/customer-schema";
+import { customerDb } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
@@ -10019,6 +10020,81 @@ momtazchem.com
       res.status(500).json({ 
         success: false, 
         message: error instanceof Error ? error.message : 'Failed to process recharge request' 
+      });
+    }
+  });
+
+  // Approve recharge request (admin)
+  app.post('/api/admin/wallet/recharge-requests/:id/approve', requireAuth, async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const { adminNotes } = req.body;
+      const adminId = req.session.adminId;
+
+      if (!adminId) {
+        return res.status(401).json({ success: false, message: "Admin authentication required" });
+      }
+
+      const result = await walletStorage.processRechargeRequest(requestId, adminId);
+      
+      // Update with admin notes if provided
+      if (adminNotes) {
+        await walletStorage.updateRechargeRequestStatus(requestId, 'approved', adminNotes, adminId);
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Recharge request approved and processed successfully",
+        data: result 
+      });
+    } catch (error) {
+      console.error('Error approving recharge request:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Failed to approve recharge request' 
+      });
+    }
+  });
+
+  // Reject recharge request (admin)
+  app.post('/api/admin/wallet/recharge-requests/:id/reject', requireAuth, async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const { rejectionReason, adminNotes } = req.body;
+      const adminId = req.session.adminId;
+
+      if (!adminId) {
+        return res.status(401).json({ success: false, message: "Admin authentication required" });
+      }
+
+      if (!rejectionReason) {
+        return res.status(400).json({ success: false, message: "Rejection reason is required" });
+      }
+
+      // Update request status with rejection reason
+      const updatedRequest = await walletStorage.updateRechargeRequestStatus(
+        requestId, 
+        'rejected', 
+        adminNotes, 
+        adminId
+      );
+
+      // Add rejection reason
+      await customerDb
+        .update(walletRechargeRequests)
+        .set({ rejectionReason })
+        .where(eq(walletRechargeRequests.id, requestId));
+
+      res.json({ 
+        success: true, 
+        message: "Recharge request rejected",
+        data: updatedRequest 
+      });
+    } catch (error) {
+      console.error('Error rejecting recharge request:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Failed to reject recharge request' 
       });
     }
   });

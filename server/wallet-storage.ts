@@ -34,6 +34,7 @@ export interface IWalletStorage {
   getRechargeRequestById(requestId: number): Promise<WalletRechargeRequest | undefined>;
   getRechargeRequestsByCustomer(customerId: number): Promise<WalletRechargeRequest[]>;
   getAllPendingRechargeRequests(): Promise<WalletRechargeRequest[]>;
+  getAllRechargeRequests(): Promise<WalletRechargeRequest[]>;
   updateRechargeRequestStatus(requestId: number, status: string, adminNotes?: string, approvedBy?: number): Promise<WalletRechargeRequest>;
   processRechargeRequest(requestId: number, approvedBy: number): Promise<{ request: WalletRechargeRequest; transaction: WalletTransaction }>;
   
@@ -252,6 +253,13 @@ export class WalletStorage implements IWalletStorage {
       .select()
       .from(walletRechargeRequests)
       .where(eq(walletRechargeRequests.status, "pending"))
+      .orderBy(desc(walletRechargeRequests.createdAt));
+  }
+
+  async getAllRechargeRequests(): Promise<WalletRechargeRequest[]> {
+    return await customerDb
+      .select()
+      .from(walletRechargeRequests)
       .orderBy(desc(walletRechargeRequests.createdAt));
   }
 

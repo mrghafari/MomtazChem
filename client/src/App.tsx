@@ -42,6 +42,7 @@ import CustomerProfile from "@/pages/customer-profile";
 import CustomerProfileEdit from "@/pages/customer-profile-edit";
 import CustomerRegister from "@/pages/customer-register";
 import CustomerWallet from "@/pages/customer-wallet";
+import WalletManagement from "@/pages/admin/wallet-management";
 import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
@@ -101,6 +102,7 @@ function Router() {
           <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
           <Route path="/admin/invoice-management" component={InvoiceManagement} />
           <Route path="/admin/payment-settings" component={PaymentSettings} />
+          <Route path="/admin/wallet-management" component={WalletManagement} />
           <Route path="/admin/inquiries" component={Dashboard} />
           <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />
