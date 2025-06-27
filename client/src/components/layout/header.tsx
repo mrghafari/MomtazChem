@@ -388,7 +388,7 @@ export default function Header() {
                         }}
                       >
                         <LogOut className="h-4 w-4" />
-                        <span>خروج</span>
+                        <span>{t.logout}</span>
                       </motion.div>
                     </div>
                   </motion.div>
