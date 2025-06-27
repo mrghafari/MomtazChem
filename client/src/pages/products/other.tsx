@@ -248,13 +248,8 @@ export function OtherProducts() {
                       </div>
                     </div>
 
-                    {/* Price and Actions */}
+                    {/* Actions */}
                     <div className="border-t pt-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Price Range</span>
-                        <span className="font-bold text-lg text-purple-600">{product.price}</span>
-                      </div>
-                      
                       <div className="flex gap-2">
                         <Button 
                           variant="outline" 
