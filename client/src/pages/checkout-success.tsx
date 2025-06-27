@@ -91,9 +91,11 @@ export default function CheckoutSuccess() {
 
   // Request official invoice mutation
   const requestOfficialMutation = useMutation({
-    mutationFn: async (invoiceId: number) => {
+    mutationFn: async ({ invoiceId, language }: { invoiceId: number; language: 'ar' | 'en' }) => {
       return apiRequest(`/api/invoices/${invoiceId}/request-official`, {
         method: 'POST',
+        body: JSON.stringify({ language }),
+        headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: () => {
@@ -121,8 +123,12 @@ export default function CheckoutSuccess() {
   }, [orderId, orderData, invoiceData]);
 
   const handleRequestOfficial = () => {
+    if (!selectedLanguage) {
+      setShowLanguagePrompt(true);
+      return;
+    }
     if (invoiceData?.id) {
-      requestOfficialMutation.mutate(invoiceData.id);
+      requestOfficialMutation.mutate({ invoiceId: invoiceData.id, language: selectedLanguage });
     }
   };
 
@@ -352,6 +358,61 @@ export default function CheckoutSuccess() {
           مشاهده سفارشات
         </Button>
       </div>
+
+      {/* Language Selection Modal */}
+      {showLanguagePrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle className="text-center">Select Invoice Language</CardTitle>
+              <p className="text-sm text-gray-600 text-center">
+                اختر لغة الفاتورة / Choose the invoice language
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => {
+                    setSelectedLanguage('ar');
+                    setShowLanguagePrompt(false);
+                    if (invoiceData?.id) {
+                      requestOfficialMutation.mutate({ invoiceId: invoiceData.id, language: 'ar' });
+                    }
+                  }}
+                  variant={selectedLanguage === 'ar' ? 'default' : 'outline'}
+                  className="h-16 flex flex-col items-center justify-center"
+                >
+                  <span className="text-lg">العربية</span>
+                  <span className="text-sm text-gray-600">Arabic</span>
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSelectedLanguage('en');
+                    setShowLanguagePrompt(false);
+                    if (invoiceData?.id) {
+                      requestOfficialMutation.mutate({ invoiceId: invoiceData.id, language: 'en' });
+                    }
+                  }}
+                  variant={selectedLanguage === 'en' ? 'default' : 'outline'}
+                  className="h-16 flex flex-col items-center justify-center"
+                >
+                  <span className="text-lg">English</span>
+                  <span className="text-sm text-gray-600">الإنجليزية</span>
+                </Button>
+              </div>
+              <div className="text-center">
+                <Button 
+                  variant="ghost"
+                  onClick={() => setShowLanguagePrompt(false)}
+                  className="text-sm"
+                >
+                  إلغاء / Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

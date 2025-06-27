@@ -180,9 +180,10 @@ export class InvoiceStorage implements IInvoiceStorage {
     return invoice;
   }
 
-  async requestOfficialInvoice(invoiceId: number): Promise<Invoice> {
+  async requestOfficialInvoice(invoiceId: number, language: 'ar' | 'en' = 'ar'): Promise<Invoice> {
     return await this.updateInvoice(invoiceId, {
       officialRequestedAt: new Date(),
+      language: language,
     });
   }
 

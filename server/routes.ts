@@ -9149,7 +9149,9 @@ momtazchem.com
   app.post('/api/invoices/:id/request-official', async (req, res) => {
     try {
       const invoiceId = parseInt(req.params.id);
-      const invoice = await invoiceStorage.requestOfficialInvoice(invoiceId);
+      const { language = 'ar' } = req.body; // Default to Arabic if not specified
+      
+      const invoice = await invoiceStorage.requestOfficialInvoice(invoiceId, language);
       
       // Send notification to admin about official invoice request
       // This can be implemented with the email system
