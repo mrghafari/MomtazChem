@@ -220,13 +220,13 @@ export default function Header() {
                     <DropdownMenuItem asChild>
                       <Link href="/customer/profile" className="flex items-center gap-2 w-full">
                         <User className="h-4 w-4" />
-                        <span>پروفایل من</span>
+                        <span>{t.profile}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/customer/wallet" className="flex items-center gap-2 w-full">
                         <Wallet className="h-4 w-4" />
-                        <span>کیف پول</span>
+                        <span>{t.wallet}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -235,7 +235,7 @@ export default function Header() {
                       className="flex items-center gap-2 text-red-600 hover:text-red-700"
                     >
                       <LogOut className="h-4 w-4" />
-                      <span>خروج</span>
+                      <span>{t.logout}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -366,7 +366,7 @@ export default function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <User className="h-4 w-4" />
-                          <span>پروفایل من</span>
+                          <span>{t.profile}</span>
                         </motion.div>
                       </Link>
                       <Link href="/customer/wallet">
@@ -376,7 +376,7 @@ export default function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <Wallet className="h-4 w-4" />
-                          <span>کیف پول</span>
+                          <span>{t.wallet}</span>
                         </motion.div>
                       </Link>
                       <motion.div

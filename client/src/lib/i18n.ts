@@ -43,6 +43,7 @@ export interface Translation {
   myAccount: string;
   myOrders: string;
   profile: string;
+  wallet: string;
   orderHistory: string;
   
   // Forms
@@ -119,6 +120,7 @@ export const translations: Record<Language, Translation> = {
     myAccount: 'My Account',
     myOrders: 'My Orders',
     profile: 'Profile',
+    wallet: 'Wallet',
     orderHistory: 'Order History',
     
     // Forms
@@ -193,6 +195,7 @@ export const translations: Record<Language, Translation> = {
     myAccount: 'حسابي',
     myOrders: 'طلباتي',
     profile: 'الملف الشخصي',
+    wallet: 'المحفظة',
     orderHistory: 'تاريخ الطلبات',
     
     // Forms
