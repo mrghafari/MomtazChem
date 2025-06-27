@@ -142,6 +142,17 @@ export class SMTPValidator {
     };
 
     try {
+      // Test 1: Basic input validation
+      if (!email || !email.includes('@') || !email.includes('.')) {
+        result.errors.push('Invalid email address format');
+        return result;
+      }
+
+      if (!password || password.length < 3) {
+        result.errors.push('Password is required and must be at least 3 characters');
+        return result;
+      }
+
       // Detect provider
       const provider = this.detectProvider(email);
       if (provider) {
@@ -152,7 +163,7 @@ export class SMTPValidator {
       const host = customHost || provider?.smtp.host || 'smtp.gmail.com';
       const port = customPort || provider?.smtp.port || 587;
 
-      // Test 1: Basic connection test
+      // Test 2: Basic connection test
       try {
         const transporter = nodemailer.createTransport({
           host,
@@ -167,31 +178,85 @@ export class SMTPValidator {
           socketTimeout: 10000,
         });
 
-        // Test connection
+        // Test connection with strict verification
         await transporter.verify();
         
-        result.configurationStatus.hostReachable = true;
-        result.configurationStatus.portOpen = true;
-        result.configurationStatus.tlsSupported = true;
-        result.configurationStatus.authenticationWorking = true;
-        result.isValid = true;
+        // Additional verification: test if we can actually authenticate
+        const testConnection = await new Promise((resolve, reject) => {
+          const transport = nodemailer.createTransport({
+            host,
+            port,
+            secure: port === 465,
+            auth: {
+              user: email,
+              pass: password,
+            },
+            connectionTimeout: 5000,
+            greetingTimeout: 3000,
+          });
+
+          transport.verify((error, success) => {
+            transport.close();
+            if (error) {
+              reject(error);
+            } else {
+              resolve(success);
+            }
+          });
+        });
+
+        if (testConnection) {
+          result.configurationStatus.hostReachable = true;
+          result.configurationStatus.portOpen = true;
+          result.configurationStatus.tlsSupported = true;
+          result.configurationStatus.authenticationWorking = true;
+          result.isValid = true;
+        } else {
+          result.errors.push('SMTP verification failed - authentication unsuccessful');
+        }
 
       } catch (error: any) {
-        // Analyze specific error types
-        if (error.code === 'EAUTH') {
-          result.errors.push('Authentication failed - check username and password');
+        // Log detailed error for debugging
+        console.error('SMTP Validation Error:', {
+          code: error.code,
+          message: error.message,
+          command: error.command,
+          response: error.response,
+          email: email.split('@')[1], // Only domain for privacy
+        });
+
+        // Mark all status as failed
+        result.configurationStatus.hostReachable = false;
+        result.configurationStatus.portOpen = false;
+        result.configurationStatus.tlsSupported = false;
+        result.configurationStatus.authenticationWorking = false;
+
+        // Analyze specific error types with more details
+        if (error.code === 'EAUTH' || error.responseCode === 535) {
+          result.errors.push('Authentication failed - Invalid credentials or app password required');
           if (provider?.appPasswordRequired) {
-            result.suggestions.push(`Use an App Password instead of your regular password for ${provider.name}`);
+            result.suggestions.push(`${provider.name} requires an App Password instead of your regular password`);
             result.suggestions.push(...provider.instructions);
+          } else {
+            result.suggestions.push('Verify your email address and password are correct');
+            result.suggestions.push('Many providers require app-specific passwords for third-party applications');
           }
-        } else if (error.code === 'ECONNECTION') {
-          result.errors.push('Connection failed - check host and port settings');
+        } else if (error.code === 'ECONNECTION' || error.code === 'ENOTFOUND') {
+          result.errors.push('Connection failed - Cannot reach SMTP server');
+          result.suggestions.push('Check your host and port settings');
           result.suggestions.push('Verify your internet connection and firewall settings');
-        } else if (error.code === 'ETIMEDOUT') {
-          result.errors.push('Connection timeout - server may be unreachable');
+        } else if (error.code === 'ETIMEDOUT' || error.code === 'ESOCKET') {
+          result.errors.push('Connection timeout - SMTP server is unreachable');
           result.suggestions.push('Try a different port (465 for SSL, 587 for TLS)');
+          result.suggestions.push('Check if your network blocks SMTP connections');
+        } else if (error.responseCode === 550) {
+          result.errors.push('SMTP server rejected the request');
+          result.suggestions.push('Email provider may have additional security requirements');
         } else {
-          result.errors.push(`SMTP Error: ${error.message}`);
+          result.errors.push(`SMTP Configuration Error: ${error.message || 'Unknown error'}`);
+          if (error.responseCode) {
+            result.errors.push(`Server Response Code: ${error.responseCode}`);
+          }
         }
       }
 
