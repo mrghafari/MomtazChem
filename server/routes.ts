@@ -4364,6 +4364,46 @@ ${procedure.content}
     }
   });
 
+  // Sync centralized discount settings to all products
+  app.post("/api/shop/discounts/sync-to-products", requireAuth, async (req, res) => {
+    try {
+      // Get active discount settings
+      const activeDiscounts = await shopStorage.getActiveDiscountSettings();
+      
+      // Convert to product quantityDiscounts format
+      const quantityDiscounts = activeDiscounts.map((discount: any) => ({
+        minQty: discount.minQuantity,
+        discount: parseFloat(discount.discountPercentage) / 100
+      })).sort((a: any, b: any) => a.minQty - b.minQty);
+
+      // Get all products without quantity discounts
+      const products = await shopStorage.getShopProducts();
+      const productsToUpdate = products.filter((product: any) => 
+        !product.quantityDiscounts || product.quantityDiscounts === null
+      );
+
+      // Update each product with the centralized discounts
+      let updatedCount = 0;
+      for (const product of productsToUpdate) {
+        await shopStorage.updateShopProduct(product.id, {
+          quantityDiscounts: JSON.stringify(quantityDiscounts)
+        });
+        updatedCount++;
+      }
+
+      res.json({
+        success: true,
+        message: `Applied centralized discounts to ${updatedCount} products`,
+        discountsApplied: quantityDiscounts,
+        productsUpdated: updatedCount,
+        totalProducts: products.length
+      });
+    } catch (error) {
+      console.error("Error syncing discounts to products:", error);
+      res.status(500).json({ success: false, message: "Failed to sync discounts to products" });
+    }
+  });
+
   // Financial transactions endpoints for accounting
   app.get("/api/shop/financial-transactions", async (req, res) => {
     try {
