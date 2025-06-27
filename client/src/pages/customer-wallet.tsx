@@ -99,7 +99,8 @@ const translations = {
     cash: "دفع نقدي",
     mobileWallet: "محفظة جوال",
     processing: "جارٍ المعالجة...",
-    allTransactions: "جميع المعاملات"
+    allTransactions: "جميع المعاملات",
+    recentTransactions: "المعاملات الأخيرة"
   }
 };
 
@@ -275,10 +276,10 @@ export default function CustomerWallet() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${isRTL ? 'rtl' : 'ltr'}`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>در حال بارگذاری کیف پول...</p>
+          <p>{t.loading}</p>
         </div>
       </div>
     );
