@@ -54,7 +54,10 @@ const translations = {
     bankTransfer: "Bank Transfer",
     onlinePayment: "Online Payment",
     cash: "Cash Payment",
-    mobileWallet: "Mobile Wallet"
+    mobileWallet: "Mobile Wallet",
+    processing: "Processing...",
+    allTransactions: "All Transactions",
+    recentTransactions: "Recent Transactions"
   },
   ar: {
     title: "محفظة العميل",
@@ -94,7 +97,9 @@ const translations = {
     bankTransfer: "تحويل بنكي",
     onlinePayment: "دفع إلكتروني",
     cash: "دفع نقدي",
-    mobileWallet: "محفظة جوال"
+    mobileWallet: "محفظة جوال",
+    processing: "جارٍ المعالجة...",
+    allTransactions: "جميع المعاملات"
   }
 };
 
@@ -324,8 +329,8 @@ export default function CustomerWallet() {
         {/* Wallet Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">موجودی فعلی</CardTitle>
+            <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <CardTitle className="text-sm font-medium">{t.balance}</CardTitle>
               <Wallet className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -333,14 +338,14 @@ export default function CustomerWallet() {
                 {wallet ? formatCurrency(wallet.balance, wallet.currency) : formatCurrency(0)}
               </div>
               <p className="text-xs text-muted-foreground">
-                وضعیت: {wallet ? getStatusBadge(wallet.status) : getStatusBadge('active')}
+                {t.status}: {wallet ? getStatusBadge(wallet.status) : getStatusBadge('active')}
               </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">کل خرید</CardTitle>
+            <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <CardTitle className="text-sm font-medium">{t.totalSpent}</CardTitle>
               <ArrowDownCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -348,14 +353,14 @@ export default function CustomerWallet() {
                 {formatCurrency(walletData?.data?.totalSpent || 0)}
               </div>
               <p className="text-xs text-muted-foreground">
-                مجموع برداشت‌ها
+                {currentLanguage === 'en' ? 'Total withdrawals' : 'إجمالي السحوبات'}
               </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">کل شارژ</CardTitle>
+            <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <CardTitle className="text-sm font-medium">{t.totalRecharged}</CardTitle>
               <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -363,7 +368,7 @@ export default function CustomerWallet() {
                 {formatCurrency(walletData?.data?.totalRecharged || 0)}
               </div>
               <p className="text-xs text-muted-foreground">
-                مجموع واریزها
+                {currentLanguage === 'en' ? 'Total deposits' : 'إجمالي الإيداعات'}
               </p>
             </CardContent>
           </Card>
@@ -373,41 +378,44 @@ export default function CustomerWallet() {
         <div className="mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>عملیات سریع</CardTitle>
-              <CardDescription>مدیریت کیف پول خود</CardDescription>
+              <CardTitle>{currentLanguage === 'en' ? 'Quick Actions' : 'الإجراءات السريعة'}</CardTitle>
+              <CardDescription>{currentLanguage === 'en' ? 'Manage your wallet' : 'إدارة محفظتك'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-4">
                 <Dialog open={isRechargeDialogOpen} onOpenChange={setIsRechargeDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="flex items-center gap-2">
+                    <Button className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <Plus className="h-4 w-4" />
-                      شارژ کیف پول
+                      {t.recharge}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className={isRTL ? 'rtl' : 'ltr'}>
                     <DialogHeader>
-                      <DialogTitle>درخواست شارژ کیف پول</DialogTitle>
+                      <DialogTitle>{currentLanguage === 'en' ? 'Wallet Recharge Request' : 'طلب شحن المحفظة'}</DialogTitle>
                       <DialogDescription>
-                        برای شارژ کیف پول، اطلاعات زیر را تکمیل کنید
+                        {currentLanguage === 'en' 
+                          ? 'Fill in the details below to request a wallet recharge'
+                          : 'املأ التفاصيل أدناه لطلب شحن المحفظة'
+                        }
                       </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleRechargeSubmit} className="space-y-4">
                       <div>
-                        <Label htmlFor="amount">مبلغ *</Label>
+                        <Label htmlFor="amount">{t.amount} *</Label>
                         <Input
                           id="amount"
                           type="number"
                           step="0.01"
                           value={rechargeForm.amount}
                           onChange={(e) => setRechargeForm({...rechargeForm, amount: e.target.value})}
-                          placeholder="مبلغ مورد نظر را وارد کنید"
+                          placeholder={currentLanguage === 'en' ? 'Enter amount' : 'أدخل المبلغ'}
                           required
                         />
                       </div>
 
                       <div>
-                        <Label htmlFor="currency">ارز</Label>
+                        <Label htmlFor="currency">{t.currency}</Label>
                         <Select 
                           value={rechargeForm.currency} 
                           onValueChange={(value) => setRechargeForm({...rechargeForm, currency: value})}
@@ -416,65 +424,71 @@ export default function CustomerWallet() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="IQD">دینار عراقی (IQD)</SelectItem>
-                            <SelectItem value="USD">دلار آمریکا (USD)</SelectItem>
-                            <SelectItem value="EUR">یورو (EUR)</SelectItem>
+                            <SelectItem value="IQD">
+                              {currentLanguage === 'en' ? 'Iraqi Dinar (IQD)' : 'الدينار العراقي (IQD)'}
+                            </SelectItem>
+                            <SelectItem value="USD">
+                              {currentLanguage === 'en' ? 'US Dollar (USD)' : 'الدولار الأمريكي (USD)'}
+                            </SelectItem>
+                            <SelectItem value="EUR">
+                              {currentLanguage === 'en' ? 'Euro (EUR)' : 'اليورو (EUR)'}
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
-                        <Label htmlFor="paymentMethod">روش پرداخت *</Label>
+                        <Label htmlFor="paymentMethod">{t.paymentMethod} *</Label>
                         <Select 
                           value={rechargeForm.paymentMethod} 
                           onValueChange={(value) => setRechargeForm({...rechargeForm, paymentMethod: value})}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
+                            <SelectValue placeholder={currentLanguage === 'en' ? 'Select payment method' : 'اختر طريقة الدفع'} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="bank_transfer">انتقال بانکی</SelectItem>
-                            <SelectItem value="credit_card">کارت اعتباری</SelectItem>
-                            <SelectItem value="cash_deposit">واریز نقدی</SelectItem>
-                            <SelectItem value="digital_wallet">کیف پول دیجیتال</SelectItem>
+                            <SelectItem value="bank_transfer">{t.bankTransfer}</SelectItem>
+                            <SelectItem value="online_payment">{t.onlinePayment}</SelectItem>
+                            <SelectItem value="cash">{t.cash}</SelectItem>
+                            <SelectItem value="mobile_wallet">{t.mobileWallet}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
-                        <Label htmlFor="paymentReference">مرجع پرداخت</Label>
+                        <Label htmlFor="paymentReference">{t.paymentReference} ({t.optional})</Label>
                         <Input
                           id="paymentReference"
                           value={rechargeForm.paymentReference}
                           onChange={(e) => setRechargeForm({...rechargeForm, paymentReference: e.target.value})}
-                          placeholder="شماره مرجع، شماره کارت یا شناسه تراکنش"
+                          placeholder={currentLanguage === 'en' ? 'Reference number, card number or transaction ID' : 'رقم المرجع أو رقم البطاقة أو معرف المعاملة'}
                         />
                       </div>
 
                       <div>
-                        <Label htmlFor="customerNotes">توضیحات</Label>
+                        <Label htmlFor="customerNotes">{t.notes}</Label>
                         <Textarea
                           id="customerNotes"
                           value={rechargeForm.customerNotes}
                           onChange={(e) => setRechargeForm({...rechargeForm, customerNotes: e.target.value})}
-                          placeholder="توضیحات اضافی (اختیاری)"
+                          placeholder={currentLanguage === 'en' ? 'Additional notes (optional)' : 'ملاحظات إضافية (اختيارية)'}
                           rows={3}
                         />
                       </div>
 
-                      <div className="flex justify-end space-x-2">
+                      <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} ${isRTL ? 'space-x-reverse' : ''} space-x-2 justify-end`}>
                         <Button 
                           type="button" 
                           variant="outline" 
                           onClick={() => setIsRechargeDialogOpen(false)}
                         >
-                          انصراف
+                          {t.cancel}
                         </Button>
                         <Button 
                           type="submit" 
                           disabled={createRechargeMutation.isPending}
                         >
-                          {createRechargeMutation.isPending ? "در حال ارسال..." : "ثبت درخواست"}
+                          {createRechargeMutation.isPending ? t.processing : t.submit}
                         </Button>
                       </div>
                     </form>
@@ -482,9 +496,9 @@ export default function CustomerWallet() {
                 </Dialog>
 
                 {pendingRecharges.length > 0 && (
-                  <Badge variant="secondary" className="flex items-center gap-2">
+                  <Badge variant="secondary" className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <Clock className="h-4 w-4" />
-                    {pendingRecharges.length} درخواست در انتظار
+                    {pendingRecharges.length} {currentLanguage === 'en' ? 'pending requests' : 'طلبات معلقة'}
                   </Badge>
                 )}
               </div>
@@ -494,21 +508,21 @@ export default function CustomerWallet() {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="transactions" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="transactions">تراکنش‌های اخیر</TabsTrigger>
-            <TabsTrigger value="recharge-requests">درخواست‌های شارژ</TabsTrigger>
-            <TabsTrigger value="all-transactions">همه تراکنش‌ها</TabsTrigger>
+          <TabsList className={isRTL ? 'flex-row-reverse' : ''}>
+            <TabsTrigger value="transactions">{t.recentTransactions}</TabsTrigger>
+            <TabsTrigger value="recharge-requests">{t.rechargeRequests}</TabsTrigger>
+            <TabsTrigger value="all-transactions">{t.allTransactions}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="transactions">
             <Card>
               <CardHeader>
-                <CardTitle>تراکنش‌های اخیر</CardTitle>
-                <CardDescription>10 تراکنش آخر کیف پول</CardDescription>
+                <CardTitle>{t.recentTransactions}</CardTitle>
+                <CardDescription>{currentLanguage === 'en' ? 'Last 10 wallet transactions' : 'آخر 10 معاملات في المحفظة'}</CardDescription>
               </CardHeader>
               <CardContent>
                 {recentTransactions.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">هیچ تراکنشی یافت نشد</p>
+                  <p className="text-center text-gray-500 py-8">{t.noTransactions}</p>
                 ) : (
                   <div className="space-y-4">
                     {recentTransactions.map((transaction) => (
