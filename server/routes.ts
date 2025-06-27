@@ -16,6 +16,7 @@ import { crmStorage } from "./crm-storage";
 import { smsStorage } from "./sms-storage";
 import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
+import { walletStorage } from "./wallet-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders } from "@shared/shop-schema";

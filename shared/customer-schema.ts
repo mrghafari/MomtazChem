@@ -345,3 +345,95 @@ export const insertQuoteRequestSchema = createInsertSchema(quoteRequests).omit({
 
 export type InsertQuoteRequest = z.infer<typeof insertQuoteRequestSchema>;
 export type QuoteRequest = typeof quoteRequests.$inferSelect;
+
+// =============================================================================
+// CUSTOMER WALLET SYSTEM
+// =============================================================================
+
+// Customer wallets table - stores customer credit balance
+export const customerWallets = pgTable("customer_wallets", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().unique().references(() => customers.id),
+  balance: decimal("balance", { precision: 12, scale: 2 }).notNull().default("0"),
+  currency: text("currency").notNull().default("IQD"), // IQD, USD, EUR
+  status: text("status").notNull().default("active"), // active, frozen, suspended
+  creditLimit: decimal("credit_limit", { precision: 12, scale: 2 }).default("0"),
+  lastActivityDate: timestamp("last_activity_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Wallet transactions table - all wallet transaction history
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: serial("id").primaryKey(),
+  walletId: integer("wallet_id").notNull().references(() => customerWallets.id),
+  customerId: integer("customer_id").notNull().references(() => customers.id),
+  transactionType: text("transaction_type").notNull(), // credit, debit, refund, adjustment, payment
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("IQD"),
+  balanceBefore: decimal("balance_before", { precision: 12, scale: 2 }).notNull(),
+  balanceAfter: decimal("balance_after", { precision: 12, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  referenceType: text("reference_type"), // order, refund, manual_adjustment, deposit
+  referenceId: integer("reference_id"), // Related order ID, refund ID, etc.
+  paymentMethod: text("payment_method"), // bank_transfer, credit_card, cash, admin_adjustment
+  status: text("status").notNull().default("completed"), // pending, completed, failed, cancelled
+  processedBy: integer("processed_by"), // Admin user ID who processed the transaction
+  notes: text("notes"), // Internal notes
+  metadata: json("metadata"), // Additional transaction data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Wallet recharge requests table - customer requests to add money to wallet
+export const walletRechargeRequests = pgTable("wallet_recharge_requests", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => customers.id),
+  walletId: integer("wallet_id").notNull().references(() => customerWallets.id),
+  requestNumber: text("request_number").notNull().unique(), // Auto-generated unique number
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("IQD"),
+  paymentMethod: text("payment_method").notNull(), // bank_transfer, credit_card, cash_deposit
+  paymentReference: text("payment_reference"), // Bank transaction reference, receipt number
+  paymentGatewayId: integer("payment_gateway_id"), // If paid through gateway
+  status: text("status").notNull().default("pending"), // pending, approved, rejected, processing, completed
+  customerNotes: text("customer_notes"), // Customer's notes/remarks
+  adminNotes: text("admin_notes"), // Admin internal notes
+  rejectionReason: text("rejection_reason"), // Reason if rejected
+  approvedBy: integer("approved_by"), // Admin user ID who approved
+  approvedAt: timestamp("approved_at"),
+  processedAt: timestamp("processed_at"),
+  attachmentUrl: text("attachment_url"), // Payment receipt/proof upload
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Create insert schemas
+export const insertCustomerWalletSchema = createInsertSchema(customerWallets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWalletRechargeRequestSchema = createInsertSchema(walletRechargeRequests).omit({
+  id: true,
+  requestNumber: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types
+export type InsertCustomerWallet = z.infer<typeof insertCustomerWalletSchema>;
+export type CustomerWallet = typeof customerWallets.$inferSelect;
+
+export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+
+export type InsertWalletRechargeRequest = z.infer<typeof insertWalletRechargeRequestSchema>;
+export type WalletRechargeRequest = typeof walletRechargeRequests.$inferSelect;
