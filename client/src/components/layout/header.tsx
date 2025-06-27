@@ -30,6 +30,7 @@ export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, direction } = useLanguage();
+  const { customer, isAuthenticated, logout } = useCustomer();
 
   const navigation = [
     { href: '/', label: t.home },
@@ -201,6 +202,45 @@ export default function Header() {
             <div className="hidden md:block">
               <LanguageSwitcher />
             </div>
+
+            {/* Customer Menu - Desktop */}
+            {isAuthenticated && customer && (
+              <div className="hidden md:block">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
+                      <User className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        {customer.firstName} {customer.lastName}
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link href="/customer/profile" className="flex items-center gap-2 w-full">
+                        <User className="h-4 w-4" />
+                        <span>پروفایل من</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/customer/wallet" className="flex items-center gap-2 w-full">
+                        <Wallet className="h-4 w-4" />
+                        <span>کیف پول</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => logout()}
+                      className="flex items-center gap-2 text-red-600 hover:text-red-700"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>خروج</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
             
             {/* Mobile menu button */}
             <Button
@@ -307,11 +347,58 @@ export default function Header() {
                   </div>
                 </motion.div>
 
+                {/* Customer Menu - Mobile */}
+                {isAuthenticated && customer && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
+                    className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
+                  >
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                      {customer.firstName} {customer.lastName}
+                    </div>
+                    <div className="space-y-1 ml-2">
+                      <Link href="/customer/profile">
+                        <motion.div
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <User className="h-4 w-4" />
+                          <span>پروفایل من</span>
+                        </motion.div>
+                      </Link>
+                      <Link href="/customer/wallet">
+                        <motion.div
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Wallet className="h-4 w-4" />
+                          <span>کیف پول</span>
+                        </motion.div>
+                      </Link>
+                      <motion.div
+                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors cursor-pointer"
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          logout();
+                          setIsMobileMenuOpen(false);
+                        }}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>خروج</span>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Language Switcher - Mobile */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
+                  transition={{ delay: (navigation.length + productCategories.length + 2) * 0.1 }}
                   className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
                 >
                   <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
