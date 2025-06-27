@@ -813,9 +813,28 @@ export class ShopStorage implements IShopStorage {
   }
 
   async updateDiscountSetting(id: number, discountUpdate: Partial<InsertDiscountSetting>): Promise<DiscountSetting> {
+    // If discount percentage is being updated, automatically update the description
+    if (discountUpdate.discountPercentage) {
+      // Get existing discount to get the current minQuantity if not provided
+      const [existingDiscount] = await shopDb
+        .select()
+        .from(discountSettings)
+        .where(eq(discountSettings.id, id));
+      
+      if (existingDiscount) {
+        const percentage = parseFloat(discountUpdate.discountPercentage);
+        const minQty = discountUpdate.minQuantity || existingDiscount.minQuantity || 10;
+        
+        // Generate Persian description (since the system primarily uses Persian)
+        const persianDescription = `خرید عمده - ${percentage}% تخفیف برای ${minQty} عدد یا بیشتر`;
+        
+        discountUpdate.description = persianDescription;
+      }
+    }
+
     const [discount] = await shopDb
       .update(discountSettings)
-      .set(discountUpdate)
+      .set({ ...discountUpdate, updatedAt: new Date() })
       .where(eq(discountSettings.id, id))
       .returning();
     return discount;
