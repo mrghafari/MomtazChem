@@ -302,6 +302,7 @@ export const invoices = pgTable("invoices", {
   discountAmount: decimal("discount_amount", { precision: 12, scale: 2 }).default("0"),
   totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).notNull(),
   currency: text("currency").default("IQD"),
+  language: text("language").default("ar"), // ar for Arabic, en for English
   notes: text("notes"),
   terms: text("terms"), // Payment terms and conditions
   billingAddress: json("billing_address"),

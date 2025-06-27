@@ -14,6 +14,7 @@ import Services from "@/pages/services";
 import Contact from "@/pages/contact";
 import Shop from "@/pages/shop";
 import Checkout from "@/pages/checkout";
+import CheckoutSuccess from "@/pages/checkout-success";
 import ShopAdmin from "@/pages/shop-admin";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
@@ -75,6 +76,8 @@ function Router() {
           <Route path="/services" component={Services} />
           <Route path="/contact" component={Contact} />
           <Route path="/shop" component={Shop} />
+          <Route path="/checkout" component={Checkout} />
+          <Route path="/checkout/success/:orderId" component={CheckoutSuccess} />
           <Route path="/shop-search" component={ShopSearch} />
           <Route path="/shop-admin" component={ShopAdmin} />
           <Route path="/admin" component={AdminPage} />
