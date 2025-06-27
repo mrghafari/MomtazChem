@@ -228,6 +228,8 @@ export const orders = pgTable("orders", {
   customerId: integer("customer_id").notNull(),
   status: text("status").notNull().default("pending"), // pending, confirmed, processing, shipped, delivered, cancelled
   paymentStatus: text("payment_status").notNull().default("pending"), // pending, paid, failed, refunded
+  paymentMethod: text("payment_method"), // e.g., "Bank Transfer - Rasheed Bank"
+  paymentGatewayId: integer("payment_gateway_id"), // Reference to payment_gateways table
   subtotal: decimal("subtotal", { precision: 12, scale: 2 }).notNull(),
   taxAmount: decimal("tax_amount", { precision: 12, scale: 2 }).default("0"),
   shippingAmount: decimal("shipping_amount", { precision: 12, scale: 2 }).default("0"),

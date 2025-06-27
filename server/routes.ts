@@ -18,7 +18,7 @@ import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema } from "@shared/customer-schema";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients } from "@shared/email-schema";
-import { insertShopProductSchema, insertShopCategorySchema, paymentGateways } from "@shared/shop-schema";
+import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
@@ -9624,6 +9624,217 @@ momtazchem.com
     } catch (error) {
       console.error('Error toggling payment gateway:', error);
       res.status(500).json({ success: false, message: 'Failed to toggle payment gateway' });
+    }
+  });
+
+  // ============================================================================
+  // IRAQI BANKING PAYMENT API
+  // ============================================================================
+
+  // Get enabled payment gateways for customer use
+  app.get('/api/payment/available-gateways', async (req, res) => {
+    try {
+      const gateways = await db.select().from(paymentGateways).where(eq(paymentGateways.enabled, true));
+      res.json({ success: true, data: gateways });
+    } catch (error) {
+      console.error('Error fetching available payment gateways:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch available payment gateways' });
+    }
+  });
+
+  // Process Iraqi bank transfer payment
+  app.post('/api/payment/iraqi-bank-transfer', async (req, res) => {
+    try {
+      const { orderId, gatewayId, bankTransferDetails } = req.body;
+      
+      if (!orderId || !gatewayId || !bankTransferDetails) {
+        return res.status(400).json({ success: false, message: 'Missing required payment details' });
+      }
+
+      // Get payment gateway configuration
+      const [gateway] = await db.select().from(paymentGateways).where(eq(paymentGateways.id, gatewayId));
+      
+      if (!gateway || !gateway.enabled) {
+        return res.status(400).json({ success: false, message: 'Invalid or disabled payment gateway' });
+      }
+
+      // Verify order exists
+      const order = await shopStorage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+
+      // For Iraqi bank transfers, we'll mark as pending and require manual verification
+      const updatedOrder = await shopStorage.updateOrder(orderId, {
+        paymentStatus: 'pending',
+        paymentMethod: `Bank Transfer - ${gateway.name}`,
+        paymentGatewayId: gatewayId
+      });
+
+      // Log the payment attempt
+      console.log(`Iraqi bank transfer initiated for order ${orderId}:`, {
+        gateway: gateway.name,
+        bankDetails: bankTransferDetails,
+        amount: order.totalAmount
+      });
+
+      // Create financial transaction record
+      await shopStorage.createFinancialTransaction({
+        type: 'payment_pending',
+        orderId: order.id,
+        amount: order.totalAmount,
+        description: `Iraqi bank transfer pending verification - ${gateway.name}`,
+        referenceNumber: bankTransferDetails.referenceNumber || order.orderNumber,
+        status: 'pending',
+        processingDate: new Date(),
+        metadata: { 
+          gatewayId,
+          gatewayName: gateway.name,
+          bankTransferDetails,
+          paymentMethod: 'iraqi_bank_transfer'
+        }
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Bank transfer payment initiated. Awaiting verification.',
+        data: { 
+          order: updatedOrder,
+          paymentStatus: 'pending',
+          verificationRequired: true,
+          bankInfo: gateway.config
+        }
+      });
+    } catch (error) {
+      console.error('Error processing Iraqi bank transfer:', error);
+      res.status(500).json({ success: false, message: 'Failed to process bank transfer payment' });
+    }
+  });
+
+  // Verify Iraqi bank transfer payment (admin only)
+  app.post('/api/payment/verify-bank-transfer/:orderId', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { verified, notes } = req.body;
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: 'Invalid order ID' });
+      }
+
+      const order = await shopStorage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+
+      if (verified) {
+        // Mark order as paid
+        const updatedOrder = await shopStorage.updateOrder(orderId, {
+          paymentStatus: 'paid'
+        });
+
+        // Generate invoice automatically
+        const invoice = await invoiceStorage.generateInvoiceFromOrder(orderId);
+        
+        // Send invoice email to customer
+        await invoiceStorage.sendInvoiceEmail(invoice.id);
+
+        // Update financial transaction
+        await shopStorage.createFinancialTransaction({
+          type: 'sale',
+          orderId: order.id,
+          amount: order.totalAmount,
+          description: `Bank transfer verified and completed - ${order.paymentMethod}`,
+          referenceNumber: order.orderNumber,
+          status: 'completed',
+          processingDate: new Date(),
+          metadata: { 
+            verifiedBy: req.session?.adminId,
+            verificationNotes: notes,
+            originalPaymentMethod: 'iraqi_bank_transfer'
+          }
+        });
+
+        res.json({ 
+          success: true, 
+          message: 'Bank transfer verified and order completed',
+          data: { order: updatedOrder, invoice }
+        });
+      } else {
+        // Mark payment as failed
+        const updatedOrder = await shopStorage.updateOrder(orderId, {
+          paymentStatus: 'failed'
+        });
+
+        res.json({ 
+          success: true, 
+          message: 'Bank transfer verification failed',
+          data: { order: updatedOrder }
+        });
+      }
+    } catch (error) {
+      console.error('Error verifying bank transfer:', error);
+      res.status(500).json({ success: false, message: 'Failed to verify bank transfer' });
+    }
+  });
+
+  // Get payment methods configuration for checkout
+  app.get('/api/payment/methods', async (req, res) => {
+    try {
+      const gateways = await db.select().from(paymentGateways).where(eq(paymentGateways.enabled, true));
+      
+      const paymentMethods = gateways.map(gateway => ({
+        id: gateway.id,
+        name: gateway.name,
+        type: gateway.type,
+        config: {
+          // Only return safe config data (not secrets)
+          bankName: gateway.config?.bankName,
+          accountNumber: gateway.config?.accountNumber,
+          swiftCode: gateway.config?.swiftCode,
+          instructions: gateway.config?.instructions
+        },
+        testMode: gateway.testMode
+      }));
+
+      res.json({ success: true, data: paymentMethods });
+    } catch (error) {
+      console.error('Error fetching payment methods:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch payment methods' });
+    }
+  });
+
+  // Get pending payments for admin review
+  app.get('/api/admin/pending-payments', requireAuth, async (req, res) => {
+    try {
+      // Get orders with pending payment status
+      const pendingOrders = await db.select({
+        orderId: orders.id,
+        orderNumber: orders.orderNumber,
+        customerId: orders.customerId,
+        totalAmount: orders.totalAmount,
+        paymentMethod: orders.paymentMethod,
+        paymentGatewayId: orders.paymentGatewayId,
+        createdAt: orders.createdAt
+      })
+      .from(orders)
+      .where(eq(orders.paymentStatus, 'pending'))
+      .orderBy(desc(orders.createdAt));
+
+      // Get customer details for each order
+      const ordersWithCustomers = await Promise.all(
+        pendingOrders.map(async (order) => {
+          let customer = null;
+          if (order.customerId) {
+            customer = await crmStorage.getCrmCustomerById(order.customerId);
+          }
+          return { ...order, customer };
+        })
+      );
+
+      res.json({ success: true, data: ordersWithCustomers });
+    } catch (error) {
+      console.error('Error fetching pending payments:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch pending payments' });
     }
   });
 
