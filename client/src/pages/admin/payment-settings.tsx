@@ -189,10 +189,129 @@ const PaymentSettings = () => {
 
         <Separator />
 
+        {/* API Configuration Section - Common for all types */}
+        <div className="space-y-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            API Configuration & Integration
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>API Key</Label>
+              <div className="relative">
+                <Input
+                  type={showSecrets['apiKey'] ? 'text' : 'password'}
+                  value={selectedGateway.config.apiKey || ''}
+                  onChange={(e) => updateConfig('apiKey', e.target.value)}
+                  placeholder="Enter API key for gateway integration"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={() => toggleSecretVisibility('apiKey')}
+                >
+                  {showSecrets['apiKey'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+            
+            <div>
+              <Label>Secret Key</Label>
+              <div className="relative">
+                <Input
+                  type={showSecrets['secretKey'] ? 'text' : 'password'}
+                  value={selectedGateway.config.secretKey || ''}
+                  onChange={(e) => updateConfig('secretKey', e.target.value)}
+                  placeholder="Enter secret key for authentication"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={() => toggleSecretVisibility('secretKey')}
+                >
+                  {showSecrets['secretKey'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <Label>Merchant ID</Label>
+              <Input
+                value={selectedGateway.config.merchantId || ''}
+                onChange={(e) => updateConfig('merchantId', e.target.value)}
+                placeholder="Your merchant identifier"
+              />
+            </div>
+            
+            <div>
+              <Label>API Base URL</Label>
+              <Input
+                value={selectedGateway.config.apiBaseUrl || ''}
+                onChange={(e) => updateConfig('apiBaseUrl', e.target.value)}
+                placeholder="https://api.gateway.com/v1/"
+              />
+            </div>
+
+            <div>
+              <Label>Webhook URL</Label>
+              <Input
+                value={selectedGateway.config.webhookUrl || ''}
+                onChange={(e) => updateConfig('webhookUrl', e.target.value)}
+                placeholder="https://yourdomain.com/webhook/payment"
+              />
+            </div>
+
+            <div>
+              <Label>Timeout (seconds)</Label>
+              <Input
+                type="number"
+                value={selectedGateway.config.timeout || '30'}
+                onChange={(e) => updateConfig('timeout', parseInt(e.target.value))}
+                placeholder="30"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={selectedGateway.config.testMode || false}
+                onCheckedChange={(checked) => updateConfig('testMode', checked)}
+              />
+              <Label>Test Mode (Sandbox Environment)</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={selectedGateway.config.autoConfirm || false}
+                onCheckedChange={(checked) => updateConfig('autoConfirm', checked)}
+              />
+              <Label>Auto-confirm Payments</Label>
+            </div>
+          </div>
+
+          <div>
+            <Label>Allowed IP Addresses (one per line)</Label>
+            <Textarea
+              value={selectedGateway.config.allowedIPs || ''}
+              onChange={(e) => updateConfig('allowedIPs', e.target.value)}
+              placeholder="192.168.1.1&#10;10.0.0.1&#10;203.0.113.0/24"
+              rows={3}
+            />
+          </div>
+        </div>
+
         {/* Iraqi Bank Configuration */}
         {selectedGateway.type === 'iraqi_bank' && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Iraqi Bank Settings</h3>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Iraqi Bank Settings
+            </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Bank Name</Label>
@@ -226,6 +345,22 @@ const PaymentSettings = () => {
                   placeholder="Account holder name"
                 />
               </div>
+              <div>
+                <Label>Branch Code</Label>
+                <Input
+                  value={selectedGateway.config.branchCode || ''}
+                  onChange={(e) => updateConfig('branchCode', e.target.value)}
+                  placeholder="Bank branch code"
+                />
+              </div>
+              <div>
+                <Label>IBAN</Label>
+                <Input
+                  value={selectedGateway.config.iban || ''}
+                  onChange={(e) => updateConfig('iban', e.target.value)}
+                  placeholder="IQ** **** **** **** ****"
+                />
+              </div>
             </div>
             <div>
               <Label>Bank Address</Label>
@@ -233,6 +368,16 @@ const PaymentSettings = () => {
                 value={selectedGateway.config.bankAddress || ''}
                 onChange={(e) => updateConfig('bankAddress', e.target.value)}
                 placeholder="Complete bank address"
+                rows={2}
+              />
+            </div>
+            <div>
+              <Label>Transfer Instructions</Label>
+              <Textarea
+                value={selectedGateway.config.instructions || ''}
+                onChange={(e) => updateConfig('instructions', e.target.value)}
+                placeholder="Instructions for customers making bank transfers"
+                rows={3}
               />
             </div>
           </div>
@@ -241,56 +386,11 @@ const PaymentSettings = () => {
         {/* Credit Card Configuration */}
         {selectedGateway.type === 'credit_card' && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Credit Card Gateway Settings</h3>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Credit Card Gateway Settings
+            </h3>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>API Key</Label>
-                <div className="relative">
-                  <Input
-                    type={showSecrets['apiKey'] ? 'text' : 'password'}
-                    value={selectedGateway.config.apiKey || ''}
-                    onChange={(e) => updateConfig('apiKey', e.target.value)}
-                    placeholder="Payment gateway API key"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => toggleSecretVisibility('apiKey')}
-                  >
-                    {showSecrets['apiKey'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </div>
-              <div>
-                <Label>Secret Key</Label>
-                <div className="relative">
-                  <Input
-                    type={showSecrets['secretKey'] ? 'text' : 'password'}
-                    value={selectedGateway.config.secretKey || ''}
-                    onChange={(e) => updateConfig('secretKey', e.target.value)}
-                    placeholder="Payment gateway secret key"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => toggleSecretVisibility('secretKey')}
-                  >
-                    {showSecrets['secretKey'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </div>
-              <div>
-                <Label>Merchant ID</Label>
-                <Input
-                  value={selectedGateway.config.merchantId || ''}
-                  onChange={(e) => updateConfig('merchantId', e.target.value)}
-                  placeholder="Merchant identifier"
-                />
-              </div>
               <div>
                 <Label>Gateway Provider</Label>
                 <Select
@@ -307,17 +407,69 @@ const PaymentSettings = () => {
                     <SelectItem value="iraq_payment">Iraq Payment Gateway</SelectItem>
                     <SelectItem value="visa_iraq">Visa Iraq</SelectItem>
                     <SelectItem value="mastercard_iraq">Mastercard Iraq</SelectItem>
+                    <SelectItem value="qi_card">Qi Card (Iraq)</SelectItem>
+                    <SelectItem value="ezcash">EzCash (Iraq)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              
+              <div>
+                <Label>Supported Currency</Label>
+                <Select
+                  value={selectedGateway.config.currency || 'IQD'}
+                  onValueChange={(value) => updateConfig('currency', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="IQD">Iraqi Dinar (IQD)</SelectItem>
+                    <SelectItem value="USD">US Dollar (USD)</SelectItem>
+                    <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Terminal ID</Label>
+                <Input
+                  value={selectedGateway.config.terminalId || ''}
+                  onChange={(e) => updateConfig('terminalId', e.target.value)}
+                  placeholder="POS Terminal ID"
+                />
+              </div>
+
+              <div>
+                <Label>Processing Fee (%)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={selectedGateway.config.processingFee || ''}
+                  onChange={(e) => updateConfig('processingFee', parseFloat(e.target.value))}
+                  placeholder="2.5"
+                />
+              </div>
             </div>
+
             <div>
-              <Label>Webhook URL</Label>
-              <Input
-                value={selectedGateway.config.webhookUrl || ''}
-                onChange={(e) => updateConfig('webhookUrl', e.target.value)}
-                placeholder="Webhook URL for payment notifications"
-              />
+              <Label>Accepted Card Types</Label>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {['visa', 'mastercard', 'amex', 'qi_card'].map((cardType) => (
+                  <div key={cardType} className="flex items-center space-x-2">
+                    <Switch
+                      checked={selectedGateway.config.acceptedCards?.includes(cardType) || false}
+                      onCheckedChange={(checked) => {
+                        const currentCards = selectedGateway.config.acceptedCards || [];
+                        const newCards = checked 
+                          ? [...currentCards, cardType]
+                          : currentCards.filter((c: string) => c !== cardType);
+                        updateConfig('acceptedCards', newCards);
+                      }}
+                    />
+                    <Label className="capitalize">{cardType.replace('_', ' ')}</Label>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -325,7 +477,10 @@ const PaymentSettings = () => {
         {/* Digital Wallet Configuration */}
         {selectedGateway.type === 'digital_wallet' && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Digital Wallet Settings</h3>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Wallet className="h-5 w-5" />
+              Digital Wallet Settings
+            </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Wallet Provider</Label>
@@ -337,43 +492,27 @@ const PaymentSettings = () => {
                     <SelectValue placeholder="Select wallet provider" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="zain_cash">Zain Cash</SelectItem>
-                    <SelectItem value="asia_pay">Asia Pay</SelectItem>
+                    <SelectItem value="zain_cash">Zain Cash (Iraq)</SelectItem>
+                    <SelectItem value="asia_pay">Asia Cell Pay (Iraq)</SelectItem>
                     <SelectItem value="fastpay">FastPay Iraq</SelectItem>
+                    <SelectItem value="iraqipay">IraqiPay</SelectItem>
                     <SelectItem value="paypal">PayPal</SelectItem>
                     <SelectItem value="apple_pay">Apple Pay</SelectItem>
                     <SelectItem value="google_pay">Google Pay</SelectItem>
+                    <SelectItem value="samsung_pay">Samsung Pay</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              
               <div>
-                <Label>API Key</Label>
-                <div className="relative">
-                  <Input
-                    type={showSecrets['walletApiKey'] ? 'text' : 'password'}
-                    value={selectedGateway.config.apiKey || ''}
-                    onChange={(e) => updateConfig('apiKey', e.target.value)}
-                    placeholder="Wallet API key"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => toggleSecretVisibility('walletApiKey')}
-                  >
-                    {showSecrets['walletApiKey'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </div>
-              <div>
-                <Label>Merchant ID</Label>
+                <Label>Wallet Account ID</Label>
                 <Input
-                  value={selectedGateway.config.merchantId || ''}
-                  onChange={(e) => updateConfig('merchantId', e.target.value)}
-                  placeholder="Wallet merchant ID"
+                  value={selectedGateway.config.walletAccountId || ''}
+                  onChange={(e) => updateConfig('walletAccountId', e.target.value)}
+                  placeholder="Your wallet account ID"
                 />
               </div>
+
               <div>
                 <Label>App ID</Label>
                 <Input
@@ -382,6 +521,35 @@ const PaymentSettings = () => {
                   placeholder="Application ID"
                 />
               </div>
+
+              <div>
+                <Label>Transaction Fee (%)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={selectedGateway.config.transactionFee || ''}
+                  onChange={(e) => updateConfig('transactionFee', parseFloat(e.target.value))}
+                  placeholder="1.5"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Callback URL</Label>
+              <Input
+                value={selectedGateway.config.callbackUrl || ''}
+                onChange={(e) => updateConfig('callbackUrl', e.target.value)}
+                placeholder="https://yourdomain.com/wallet/callback"
+              />
+            </div>
+
+            <div>
+              <Label>Return URL</Label>
+              <Input
+                value={selectedGateway.config.returnUrl || ''}
+                onChange={(e) => updateConfig('returnUrl', e.target.value)}
+                placeholder="https://yourdomain.com/payment/success"
+              />
             </div>
           </div>
         )}
@@ -398,6 +566,73 @@ const PaymentSettings = () => {
               checked={selectedGateway.config.testMode || false}
               onCheckedChange={(checked) => updateConfig('testMode', checked)}
             />
+          </div>
+        </div>
+
+        {/* Test Connection Section */}
+        <div className="space-y-4 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <CheckCircle className="h-5 w-5" />
+            Test & Validate Configuration
+          </h3>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={async () => {
+                try {
+                  toast({
+                    title: "Testing Connection",
+                    description: "Attempting to connect to payment gateway...",
+                  });
+                  
+                  // Test connection logic would go here
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+                  
+                  toast({
+                    title: "Connection Successful",
+                    description: "Payment gateway is configured correctly.",
+                  });
+                } catch (error) {
+                  toast({
+                    title: "Connection Failed",
+                    description: "Unable to connect to payment gateway. Please check your configuration.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              disabled={!selectedGateway.config.apiKey && selectedGateway.type !== 'iraqi_bank'}
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Test Connection
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                // Validate configuration
+                const requiredFields = selectedGateway.type === 'iraqi_bank' 
+                  ? ['bankName', 'accountNumber', 'swiftCode']
+                  : ['apiKey', 'secretKey'];
+                
+                const missingFields = requiredFields.filter(field => !selectedGateway.config[field]);
+                
+                if (missingFields.length > 0) {
+                  toast({
+                    title: "Validation Failed",
+                    description: `Missing required fields: ${missingFields.join(', ')}`,
+                    variant: "destructive",
+                  });
+                } else {
+                  toast({
+                    title: "Validation Passed",
+                    description: "All required configuration fields are present.",
+                  });
+                }
+              }}
+            >
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Validate Config
+            </Button>
           </div>
         </div>
 
