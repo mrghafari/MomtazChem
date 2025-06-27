@@ -143,6 +143,7 @@ function Router() {
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/products/other" component={OtherProducts} />
           <Route path="/quote" component={QuotePage} />
+          <Route path="/theme-demo" component={ThemeDemoPage} />
           <Route component={NotFound} />
         </Switch>
       </main>
