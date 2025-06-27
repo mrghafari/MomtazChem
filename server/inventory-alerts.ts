@@ -71,15 +71,26 @@ export class InventoryAlertService {
    */
   private static async sendInventoryAlert(alerts: InventoryAlert[]): Promise<void> {
     try {
+      const fromEmail = process.env.SMTP_USER || '';
+      const toEmail = 'info@momtazchem.com';
+      
+      // Skip sending email if sender and recipient are the same to avoid duplicate issue
+      if (fromEmail.toLowerCase() === toEmail.toLowerCase()) {
+        console.log('Skipping inventory alert email - sender is same as recipient');
+        return;
+      }
+
       const htmlContent = this.generateAlertEmailHtml(alerts);
       const textContent = this.generateAlertEmailText(alerts);
 
       const mailOptions = {
-        from: `"Momtazchem Inventory System" <${process.env.SMTP_USER}>`,
-        to: 'info@momtazchem.com',
+        from: `"Momtazchem Inventory System" <${fromEmail}>`,
+        to: toEmail,
         subject: `🚨 Inventory Alert - ${alerts.length} Product${alerts.length > 1 ? 's' : ''} Need Attention`,
         html: htmlContent,
         text: textContent,
+        encoding: 'utf-8',
+        charset: 'utf-8'
       };
 
       if (process.env.SMTP_USER && process.env.SMTP_PASS) {

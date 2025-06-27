@@ -516,9 +516,14 @@ export async function sendQuoteRequestEmail(quoteData: QuoteRequestEmailData): P
 
     const smtp = categorySettings.smtp;
     
-    // Prevent sender/recipient duplicate issue
-    const ccEmail = 'info@momtazchem.com';
-    const ccList = quoteData.to.toLowerCase() === ccEmail.toLowerCase() ? undefined : ccEmail;
+    // Skip quote request email if sender and recipient are the same
+    if (quoteData.to.toLowerCase() === smtp.fromEmail.toLowerCase()) {
+      console.log('Skipping quote request email - sender is same as recipient');
+      return;
+    }
+    
+    // Skip CC to avoid duplicate recipient errors
+    const ccList = undefined;
     
     const mailOptions = {
       from: `${smtp.fromName} <${smtp.fromEmail}>`,
