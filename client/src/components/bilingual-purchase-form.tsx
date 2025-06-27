@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -153,6 +153,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
 
+  // Fetch current customer data
+  const { data: customerData, isLoading: isLoadingCustomer } = useQuery({
+    queryKey: ['/api/customers/me'],
+    queryFn: async () => {
+      try {
+        return await apiRequest('/api/customers/me', 'GET');
+      } catch (error) {
+        // User not logged in, continue with empty form
+        return null;
+      }
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   // Dynamic form based on current language
   const form = useForm({
     resolver: zodResolver(createPurchaseSchema(language)),
@@ -167,6 +182,25 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       gpsLongitude: undefined,
     },
   });
+
+  // Pre-populate form with customer data when available
+  useEffect(() => {
+    if (customerData?.success && customerData.customer) {
+      const customer = customerData.customer;
+      const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
+      
+      form.reset({
+        customerName: fullName || customer.name || "",
+        phone: customer.phone || "",
+        address: customer.address || "",
+        city: customer.city || "",
+        postalCode: customer.postalCode || "",
+        notes: "",
+        gpsLatitude: undefined,
+        gpsLongitude: undefined,
+      });
+    }
+  }, [customerData, form]);
 
   // Get current translations
   const t = translations[language];
@@ -299,9 +333,26 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             </div>
           </div>
 
+          {/* Customer Data Status */}
+          {customerData?.success && customerData.customer && (
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mb-4">
+              <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                ✓ Customer information loaded from your account
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-300 mt-1">
+                You can modify any details below if needed
+              </p>
+            </div>
+          )}
+
           {/* Purchase Form */}
           <div>
-            <p className="text-sm text-muted-foreground mb-4">{t.enterDetails}</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              {customerData?.success && customerData.customer 
+                ? "Review and modify your details if needed" 
+                : t.enterDetails
+              }
+            </p>
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
