@@ -232,11 +232,48 @@ export class ShopStorage implements IShopStorage {
 
   // Shop Products
   async getShopProducts(): Promise<ShopProduct[]> {
-    return await shopDb
+    const products = await shopDb
       .select()
       .from(shopProducts)
       .where(eq(shopProducts.isActive, true))
       .orderBy(shopProducts.name);
+
+    // Get active discount settings
+    const activeDiscounts = await shopDb
+      .select()
+      .from(discountSettings)
+      .where(eq(discountSettings.isActive, true));
+
+    // Add discount information to each product
+    return products.map(product => {
+      const applicableDiscounts = activeDiscounts.filter(discount => {
+        // Check if discount applies to all products or specific products
+        if (discount.applyToAllProducts) {
+          return true;
+        }
+        
+        // Check if discount applies to this specific product
+        if (discount.applicableProducts && Array.isArray(discount.applicableProducts)) {
+          return discount.applicableProducts.includes(product.id);
+        }
+        
+        return false;
+      });
+
+      // Convert discount settings to quantityDiscounts format for frontend compatibility
+      const quantityDiscounts = applicableDiscounts
+        .filter(discount => discount.type === 'quantity' && discount.minQuantity)
+        .map(discount => ({
+          minQty: discount.minQuantity!,
+          discount: parseFloat(discount.discountPercentage) / 100
+        }))
+        .sort((a, b) => a.minQty - b.minQty);
+
+      return {
+        ...product,
+        quantityDiscounts
+      };
+    });
   }
 
   async getShopProductsByCategory(category: string): Promise<ShopProduct[]> {
@@ -441,8 +478,45 @@ export class ShopStorage implements IShopStorage {
         .filter(tag => typeof tag === 'string' && tag.trim())
     )];
 
+    // Get active discount settings
+    const activeDiscounts = await shopDb
+      .select()
+      .from(discountSettings)
+      .where(eq(discountSettings.isActive, true));
+
+    // Add discount information to each product
+    const productsWithDiscounts = products.map(product => {
+      const applicableDiscounts = activeDiscounts.filter(discount => {
+        // Check if discount applies to all products or specific products
+        if (discount.applyToAllProducts) {
+          return true;
+        }
+        
+        // Check if discount applies to this specific product
+        if (discount.applicableProducts && Array.isArray(discount.applicableProducts)) {
+          return discount.applicableProducts.includes(product.id);
+        }
+        
+        return false;
+      });
+
+      // Convert discount settings to quantityDiscounts format for frontend compatibility
+      const quantityDiscounts = applicableDiscounts
+        .filter(discount => discount.type === 'quantity' && discount.minQuantity)
+        .map(discount => ({
+          minQty: discount.minQuantity!,
+          discount: parseFloat(discount.discountPercentage) / 100
+        }))
+        .sort((a, b) => a.minQty - b.minQty);
+
+      return {
+        ...product,
+        quantityDiscounts
+      };
+    });
+
     return {
-      products,
+      products: productsWithDiscounts,
       total: totalResult.count,
       filters: {
         categories: categoriesResult.map(cat => ({

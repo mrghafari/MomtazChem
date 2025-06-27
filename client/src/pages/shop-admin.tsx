@@ -277,6 +277,9 @@ const ShopAdmin = () => {
     onSuccess: (data) => {
       console.log("Frontend: Discount update successful:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      // Also invalidate shop products to refresh discount information on product cards
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ["shopSearch"] });
       setIsDiscountDialogOpen(false);
       setEditingDiscount(null);
       toast({
@@ -301,6 +304,9 @@ const ShopAdmin = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      // Also invalidate shop products to refresh discount information on product cards
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ["shopSearch"] });
       setIsDiscountDialogOpen(false);
       toast({
         title: "Discount Created",
