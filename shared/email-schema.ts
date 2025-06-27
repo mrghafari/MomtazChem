@@ -40,6 +40,7 @@ export const emailRecipients = pgTable("email_recipients", {
   isPrimary: boolean("is_primary").default(false),
   isActive: boolean("is_active").default(true),
   receiveTypes: text("receive_types").array(), // ["inquiries", "orders", "notifications"]
+  recipientType: text("recipient_type").default("to"), // "to", "cc", "bcc"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -224,7 +224,8 @@ export class EmailStorage implements IEmailStorage {
       name: recipientData.name || null,
       isPrimary: Boolean(recipientData.isPrimary),
       isActive: Boolean(recipientData.isActive !== false),
-      receiveTypes: Array.isArray(recipientData.receiveTypes) ? recipientData.receiveTypes : []
+      receiveTypes: Array.isArray(recipientData.receiveTypes) ? recipientData.receiveTypes : [],
+      recipientType: recipientData.recipientType || 'to'
     };
     
     const [recipient] = await emailDb
@@ -260,6 +261,7 @@ export class EmailStorage implements IEmailStorage {
       isPrimary: recipientUpdate.isPrimary,
       isActive: recipientUpdate.isActive,
       receiveTypes: recipientUpdate.receiveTypes,
+      recipientType: recipientUpdate.recipientType,
       updatedAt: new Date()
     };
     

@@ -5263,6 +5263,7 @@ ${procedure.content}
           isPrimary: Boolean(recipientData.isPrimary),
           isActive: Boolean(recipientData.isActive !== false), // default to true
           receiveTypes: Array.isArray(recipientData.receiveTypes) ? recipientData.receiveTypes : [],
+          recipientType: recipientData.recipientType || 'to', // 'to', 'cc', 'bcc'
           categoryId: categoryIdNum
         };
         

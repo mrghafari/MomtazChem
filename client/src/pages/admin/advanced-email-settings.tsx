@@ -744,6 +744,22 @@ export default function AdvancedEmailSettingsPage() {
                           />
                           <Label htmlFor="newPrimary">Primary recipient</Label>
                         </div>
+                        <div>
+                          <Label htmlFor="recipientType">Recipient Type</Label>
+                          <Select
+                            value={newRecipient.recipientType || 'to'}
+                            onValueChange={(value) => setNewRecipient({ ...newRecipient, recipientType: value })}
+                          >
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="to">To (Direct)</SelectItem>
+                              <SelectItem value="cc">CC (Copy)</SelectItem>
+                              <SelectItem value="bcc">BCC (Blind Copy)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                       <Button onClick={addRecipient} disabled={!newRecipient.email}>
                         <Plus className="w-4 h-4 mr-2" />
@@ -762,6 +778,13 @@ export default function AdvancedEmailSettingsPage() {
                                 {recipient.isPrimary && (
                                   <Badge variant="default">Primary</Badge>
                                 )}
+                                <Badge variant={
+                                  recipient.recipientType === 'cc' ? 'secondary' : 
+                                  recipient.recipientType === 'bcc' ? 'outline' : 'default'
+                                }>
+                                  {recipient.recipientType === 'cc' ? 'CC' : 
+                                   recipient.recipientType === 'bcc' ? 'BCC' : 'TO'}
+                                </Badge>
                               </div>
                               {recipient.name && (
                                 <p className="text-sm text-gray-600">{recipient.name}</p>
