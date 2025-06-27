@@ -9931,7 +9931,7 @@ momtazchem.com
   });
 
   // Admin wallet endpoints
-  app.get('/api/admin/wallet/statistics', requireAuth, async (req, res) => {
+  app.get('/api/admin/wallet/stats', requireAuth, async (req, res) => {
     try {
       const statistics = await walletStorage.getWalletStatistics();
       res.json({ success: true, data: statistics });
@@ -9941,8 +9941,8 @@ momtazchem.com
     }
   });
 
-  // Get all pending recharge requests (admin)
-  app.get('/api/admin/wallet/recharge-requests', requireAuth, async (req, res) => {
+  // Get pending recharge requests (admin)
+  app.get('/api/admin/wallet/recharge-requests/pending', requireAuth, async (req, res) => {
     try {
       const requests = await walletStorage.getAllPendingRechargeRequests();
       
@@ -9956,8 +9956,28 @@ momtazchem.com
 
       res.json({ success: true, data: requestsWithCustomers });
     } catch (error) {
-      console.error('Error fetching recharge requests:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch recharge requests' });
+      console.error('Error fetching pending recharge requests:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch pending recharge requests' });
+    }
+  });
+
+  // Get all recharge requests (admin)
+  app.get('/api/admin/wallet/recharge-requests', requireAuth, async (req, res) => {
+    try {
+      const requests = await walletStorage.getAllRechargeRequests();
+      
+      // Get customer details for each request
+      const requestsWithCustomers = await Promise.all(
+        requests.map(async (request) => {
+          const customer = await crmStorage.getCrmCustomerById(request.customerId);
+          return { ...request, customer };
+        })
+      );
+
+      res.json({ success: true, data: requestsWithCustomers });
+    } catch (error) {
+      console.error('Error fetching all recharge requests:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch all recharge requests' });
     }
   });
 
