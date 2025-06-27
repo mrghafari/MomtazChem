@@ -2663,6 +2663,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create customer order (from BilingualPurchaseForm)
+  app.post("/api/customers/orders", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      const crmCustomerId = (req.session as any)?.crmCustomerId;
+      const orderData = req.body;
+
+      // Extract customer information from form data
+      const customerInfo = {
+        name: orderData.customerName,
+        phone: orderData.phone,
+        address: orderData.address,
+        city: orderData.city,
+        postalCode: orderData.postalCode || '',
+      };
+
+      // Generate unique order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      
+      // Calculate order totals
+      const subtotal = orderData.totalAmount || 0;
+      const taxAmount = subtotal * 0.1; // 10% tax
+      const shippingAmount = 50; // Fixed shipping amount
+      const totalAmount = subtotal + taxAmount + shippingAmount;
+
+      // Create order with proper customer linking
+      let finalCustomerId = customerId;
+      if (!customerId && crmCustomerId) {
+        // Link to CRM customer if available
+        finalCustomerId = crmCustomerId;
+      }
+
+      if (!finalCustomerId) {
+        return res.status(401).json({
+          success: false,
+          message: "User must be logged in to place order"
+        });
+      }
+
+      const order = await customerStorage.createOrder({
+        customerId: finalCustomerId,
+        orderNumber,
+        status: "pending",
+        paymentStatus: "pending",
+        totalAmount: totalAmount.toString(),
+        currency: orderData.currency || "IQD",
+        notes: orderData.notes || "",
+        billingAddress: JSON.stringify({
+          name: customerInfo.name,
+          phone: customerInfo.phone,
+          address: customerInfo.address,
+          city: customerInfo.city,
+          postalCode: customerInfo.postalCode,
+        }),
+        shippingAddress: JSON.stringify({
+          name: customerInfo.name,
+          phone: customerInfo.phone,
+          address: customerInfo.address,
+          city: customerInfo.city,
+          postalCode: customerInfo.postalCode,
+          gpsLatitude: orderData.gpsLatitude,
+          gpsLongitude: orderData.gpsLongitude,
+        }),
+        trackingNumber: null,
+        carrier: null,
+        paymentMethod: "cash_on_delivery",
+      });
+
+      // Create order items from cart
+      if (orderData.cart) {
+        for (const [productId, quantity] of Object.entries(orderData.cart)) {
+          try {
+            const product = await shopStorage.getShopProductById(parseInt(productId as string));
+            if (product) {
+              await customerStorage.createOrderItem({
+                orderId: order.id,
+                productId: parseInt(productId as string),
+                productName: product.name,
+                productSku: product.sku || `SKU-${productId}`,
+                quantity: (quantity as number),
+                unitPrice: product.price || "0",
+                totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
+                productSnapshot: JSON.stringify(product),
+              });
+
+              // Update product stock
+              if (product.stockQuantity !== null && product.stockQuantity !== undefined) {
+                const newQuantity = Math.max(0, product.stockQuantity - (quantity as number));
+                await shopStorage.updateProductStock(
+                  parseInt(productId as string),
+                  newQuantity,
+                  `Order ${orderNumber} - Sold ${quantity} units`
+                );
+              }
+            }
+          } catch (productError) {
+            console.error(`Error processing product ${productId}:`, productError);
+            // Continue with other products even if one fails
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        message: "Order created successfully",
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+      });
+    } catch (error) {
+      console.error("Error creating customer order:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create order"
+      });
+    }
+  });
+
   // Get customer order history
   app.get("/api/customers/orders", async (req, res) => {
     try {
