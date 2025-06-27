@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useCustomer } from "@/hooks/useCustomer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -161,25 +162,31 @@ export default function CustomerWallet() {
     customerNotes: ""
   });
 
+  // Authentication
+  const { customer, isAuthenticated, isLoading: authLoading } = useCustomer();
+
   // Get current translations
   const t = translations[currentLanguage];
   const isRTL = currentLanguage === 'ar';
 
-  // Fetch wallet summary
+  // Fetch wallet summary - only when authenticated
   const { data: walletData, isLoading } = useQuery<{ success: boolean; data: WalletSummary }>({
     queryKey: ['/api/customer/wallet'],
+    enabled: isAuthenticated, // Only fetch when authenticated
     refetchInterval: 30000 // Refresh every 30 seconds
   });
 
-  // Fetch all recharge requests
+  // Fetch all recharge requests - only when authenticated
   const { data: rechargeRequestsData } = useQuery<{ success: boolean; data: RechargeRequest[] }>({
     queryKey: ['/api/customer/wallet/recharge-requests'],
+    enabled: isAuthenticated, // Only fetch when authenticated
     refetchInterval: 30000
   });
 
-  // Fetch all transactions
+  // Fetch all transactions - only when authenticated
   const { data: transactionsData } = useQuery<{ success: boolean; data: any[] }>({
     queryKey: ['/api/customer/wallet/transactions'],
+    enabled: isAuthenticated, // Only fetch when authenticated
     refetchInterval: 30000
   });
 
@@ -273,6 +280,44 @@ export default function CustomerWallet() {
         return <DollarSign className="h-4 w-4 text-gray-600" />;
     }
   };
+
+  // Show loading during authentication check
+  if (authLoading) {
+    return (
+      <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${isRTL ? 'rtl' : 'ltr'}`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>{t.loading}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${isRTL ? 'rtl' : 'ltr'}`}>
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2">
+              <Wallet className="h-6 w-6" />
+              {t.title}
+            </CardTitle>
+            <CardDescription>
+              {currentLanguage === 'en' 
+                ? "Please log in to access your wallet" 
+                : "يرجى تسجيل الدخول للوصول إلى محفظتك"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <Button onClick={() => window.location.href = '/shop'} className="w-full">
+              {currentLanguage === 'en' ? "Go to Login" : "الذهاب إلى تسجيل الدخول"}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
