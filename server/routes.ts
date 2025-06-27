@@ -17,7 +17,7 @@ import { smsStorage } from "./sms-storage";
 import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema } from "@shared/customer-schema";
-import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema } from "@shared/email-schema";
+import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
@@ -7967,6 +7967,89 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error creating super admin:', error);
       res.status(500).json({ success: false, message: "خطا در ایجاد سوپر ادمین" });
+    }
+  });
+
+  // Email routing statistics API
+  app.get('/api/admin/email/routing-stats', requireAuth, async (req, res) => {
+    try {
+      // Get all categories with their stats
+      const categories = await emailStorage.getCategories();
+      
+      const stats = await Promise.all(categories.map(async (category) => {
+        // Get email logs for this category
+        const logs = await db
+          .select()
+          .from(emailLogs)
+          .where(eq(emailLogs.categoryId, category.id))
+          .orderBy(desc(emailLogs.sentAt))
+          .limit(50);
+          
+        const totalEmails = logs.length;
+        const successfulEmails = logs.filter(log => log.status === 'sent').length;
+        const failedEmails = logs.filter(log => log.status === 'failed').length;
+        const lastEmailSent = logs.length > 0 ? logs[0].sentAt : null;
+        
+        // Check if category has SMTP config and recipients
+        const smtpConfig = await db
+          .select()
+          .from(smtpSettings)
+          .where(eq(smtpSettings.categoryId, category.id))
+          .limit(1);
+          
+        const recipients = await db
+          .select()
+          .from(emailRecipients)
+          .where(eq(emailRecipients.categoryId, category.id))
+          .where(eq(emailRecipients.isActive, true));
+        
+        return {
+          categoryKey: category.categoryKey,
+          categoryName: category.categoryName,
+          totalEmails,
+          successfulEmails,
+          failedEmails,
+          lastEmailSent,
+          hasSmtpConfig: smtpConfig.length > 0,
+          hasRecipients: recipients.length > 0,
+          recentEmails: logs.slice(0, 10).map(log => ({
+            id: log.id,
+            toEmail: log.toEmail,
+            subject: log.subject,
+            status: log.status,
+            sentAt: log.sentAt,
+            errorMessage: log.errorMessage
+          }))
+        };
+      }));
+      
+      // Get recent emails across all categories  
+      const recentEmails = await db
+        .select({
+          id: emailLogs.id,
+          toEmail: emailLogs.toEmail,
+          subject: emailLogs.subject,
+          status: emailLogs.status,
+          sentAt: emailLogs.sentAt,
+          errorMessage: emailLogs.errorMessage,
+          categoryName: emailCategories.categoryName
+        })
+        .from(emailLogs)
+        .leftJoin(emailCategories, eq(emailLogs.categoryId, emailCategories.id))
+        .orderBy(desc(emailLogs.sentAt))
+        .limit(20);
+      
+      res.json({
+        success: true,
+        stats,
+        recentEmails
+      });
+    } catch (error) {
+      console.error('Error fetching email routing stats:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error fetching email routing statistics' 
+      });
     }
   });
 

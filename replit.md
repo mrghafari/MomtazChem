@@ -131,6 +131,9 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- June 27, 2025: COMPLETED intelligent email routing system - contact forms now automatically route to appropriate departments based on product category selection (fuel-additives→Fuel Dept, water-treatment→Water Dept, paint-thinner→Paint Dept, agricultural-fertilizers→Agricultural Dept, other→Support, custom-solutions→Sales)
+- June 27, 2025: ENHANCED email system with professional confirmation emails, automatic fallback to admin category when department not configured, and comprehensive email logging with routing statistics
+- June 27, 2025: ADDED Email Routing Statistics dashboard showing routing map, category performance metrics, success rates, and recent email activity with real-time monitoring
 - June 27, 2025: FIXED SMTP validation consistency - unified Test Connection button in Advanced Email Settings to use the same reliable validation system as SMTP Test tool, eliminating false positive results and ensuring proper authentication testing
 - June 27, 2025: UPDATED email category names - changed "Order Processing" to "Sales department" and "System Notifications" to "Support" in database to better reflect actual functionality
 - June 27, 2025: COMPLETED "Other Products" category implementation - changed from Persian to English, created comprehensive product page with 6 fake chemical products including industrial degreasers, corrosion inhibitors, laboratory reagents, specialty solvents, concrete additives, and textile processing chemicals
