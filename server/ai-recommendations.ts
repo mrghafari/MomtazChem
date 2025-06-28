@@ -37,14 +37,15 @@ export interface RecommendationResponse {
 export async function getAIProductRecommendations(
   request: RecommendationRequest
 ): Promise<RecommendationResponse> {
+  // Get all available products from database first (outside try block)
+  const availableProducts = await db.select().from(shopProducts);
+  
+  // Check if OpenAI API is available - if not, use intelligent fallback
+  if (!process.env.OPENAI_API_KEY) {
+    return generateIntelligentFallback(request, availableProducts);
+  }
+  
   try {
-    // Get all available products from database
-    const availableProducts = await db.select().from(shopProducts);
-    
-    // Check if OpenAI API is available - if not, use intelligent fallback
-    if (!process.env.OPENAI_API_KEY) {
-      return generateIntelligentFallback(request, availableProducts);
-    }
     
     // Create a detailed product catalog for AI analysis
     const productCatalog = availableProducts.map(product => ({
@@ -149,7 +150,8 @@ Format your response as valid JSON with this structure:
 
   } catch (error) {
     console.error('AI Recommendation Error:', error);
-    throw new Error('Failed to generate AI recommendations. Please try again.');
+    // Fallback to intelligent matching if AI fails
+    return generateIntelligentFallback(request, availableProducts);
   }
 }
 
@@ -211,4 +213,204 @@ Please provide updated recommendations considering the new information. Focus on
     console.error('Follow-up Recommendation Error:', error);
     throw new Error('Failed to generate follow-up recommendations. Please try again.');
   }
+}
+
+// Intelligent fallback system when AI is unavailable
+function generateIntelligentFallback(
+  request: RecommendationRequest,
+  products: any[]
+): RecommendationResponse {
+  
+  // Keyword matching system for different industries and applications
+  const keywordMappings = {
+    // Industry mappings
+    manufacturing: ['degreaser', 'cleaner', 'solvent', 'industrial'],
+    'oil & gas': ['fuel', 'additive', 'corrosion', 'inhibitor'],
+    'water treatment': ['water', 'treatment', 'purification', 'chemical'],
+    agriculture: ['fertilizer', 'agricultural', 'growth', 'nutrient'],
+    'food processing': ['sanitizer', 'cleaner', 'food', 'grade'],
+    pharmaceuticals: ['pharmaceutical', 'reagent', 'laboratory', 'pure'],
+    textiles: ['textile', 'dye', 'fabric', 'treatment'],
+    automotive: ['automotive', 'engine', 'fuel', 'motor'],
+    construction: ['concrete', 'cement', 'construction', 'additive'],
+    mining: ['mining', 'extraction', 'processing', 'chemical'],
+    
+    // Application mappings
+    'cleaning & degreasing': ['degreaser', 'cleaner', 'solvent', 'cleaning'],
+    'water purification': ['water', 'purification', 'treatment', 'filtration'],
+    'fuel enhancement': ['fuel', 'additive', 'enhancement', 'performance'],
+    'corrosion protection': ['corrosion', 'inhibitor', 'protection', 'anti-rust'],
+    'paint & coating': ['paint', 'coating', 'thinner', 'solvent'],
+    fertilization: ['fertilizer', 'nutrient', 'growth', 'agricultural'],
+    'ph adjustment': ['ph', 'acid', 'alkaline', 'buffer'],
+    disinfection: ['disinfectant', 'sanitizer', 'antimicrobial', 'biocide'],
+    'scale prevention': ['scale', 'prevention', 'anti-scale', 'descaler'],
+    catalysis: ['catalyst', 'catalytic', 'reaction', 'accelerator'],
+    'solvent applications': ['solvent', 'dissolving', 'extraction', 'purification'],
+    'laboratory use': ['laboratory', 'reagent', 'analytical', 'research']
+  };
+
+  // Get relevant keywords
+  const industryKeywords = keywordMappings[request.industry.toLowerCase() as keyof typeof keywordMappings] || [];
+  const applicationKeywords = keywordMappings[request.application.toLowerCase() as keyof typeof keywordMappings] || [];
+  const allKeywords = [...industryKeywords, ...applicationKeywords];
+
+  // Score products based on relevance
+  const scoredProducts = products.map(product => {
+    let score = 0;
+    const searchText = `${product.name} ${product.description} ${product.category} ${product.applications || ''} ${product.tags || ''}`.toLowerCase();
+    
+    // Keyword matching
+    allKeywords.forEach(keyword => {
+      if (searchText.includes(keyword.toLowerCase())) {
+        score += 20;
+      }
+    });
+
+    // Category matching
+    if (product.category && allKeywords.some(k => product.category.toLowerCase().includes(k.toLowerCase()))) {
+      score += 15;
+    }
+
+    // Requirements text matching
+    const requirementWords = request.requirements.toLowerCase().split(' ');
+    requirementWords.forEach(word => {
+      if (word.length > 3 && searchText.includes(word)) {
+        score += 5;
+      }
+    });
+
+    // Stock availability bonus
+    if ((product.stockQuantity || 0) > 0) {
+      score += 10;
+    }
+
+    return {
+      ...product,
+      matchScore: Math.min(95, score) // Cap at 95% for fallback system
+    };
+  }).filter(p => p.matchScore > 0)
+    .sort((a, b) => b.matchScore - a.matchScore)
+    .slice(0, 5);
+
+  // Generate recommendations
+  const recommendations: ProductRecommendation[] = scoredProducts.map(product => ({
+    productId: product.id,
+    name: product.name,
+    category: product.category,
+    price: product.price,
+    description: product.description,
+    matchScore: product.matchScore,
+    reasonForRecommendation: generateReasonForRecommendation(product, request),
+    alternativeUses: generateAlternativeUses(product),
+    compatibilityNotes: generateCompatibilityNotes(product, request)
+  }));
+
+  return {
+    recommendations,
+    summary: generateSummary(request, recommendations),
+    additionalAdvice: generateAdditionalAdvice(request),
+    followUpQuestions: generateFollowUpQuestions(request)
+  };
+}
+
+function generateReasonForRecommendation(product: any, request: RecommendationRequest): string {
+  const reasons = [];
+  
+  if (product.category && request.industry) {
+    reasons.push(`Well-suited for ${request.industry.toLowerCase()} applications`);
+  }
+  
+  if (request.application) {
+    reasons.push(`Designed specifically for ${request.application.toLowerCase()}`);
+  }
+  
+  if ((product.stockQuantity || 0) > 0) {
+    reasons.push('Currently in stock and available for immediate delivery');
+  }
+  
+  if (product.specifications) {
+    reasons.push('Meets technical specifications for your requirements');
+  }
+
+  return reasons.length > 0 ? reasons.join('. ') + '.' : 'This product matches your specified requirements and industry needs.';
+}
+
+function generateAlternativeUses(product: any): string[] {
+  const uses = [];
+  
+  if (product.category === 'Cleaning Products') {
+    uses.push('Equipment maintenance', 'Surface preparation', 'Parts washing');
+  } else if (product.category === 'Water Treatment') {
+    uses.push('Industrial cooling systems', 'Wastewater treatment', 'Boiler water treatment');
+  } else if (product.category === 'Fuel Additives') {
+    uses.push('Engine performance optimization', 'Fuel system cleaning', 'Storage stabilization');
+  } else if (product.category === 'Laboratory Chemicals') {
+    uses.push('Quality testing', 'Research applications', 'Analytical procedures');
+  }
+  
+  return uses.slice(0, 3);
+}
+
+function generateCompatibilityNotes(product: any, request: RecommendationRequest): string {
+  const notes = [];
+  
+  if (request.environmentalConcerns) {
+    notes.push('Please verify environmental compliance with local regulations');
+  }
+  
+  if (request.application.toLowerCase().includes('food')) {
+    notes.push('Ensure food-grade certification if required for your application');
+  }
+  
+  if (request.industry.toLowerCase().includes('pharmaceutical')) {
+    notes.push('Verify pharmaceutical-grade standards and documentation requirements');
+  }
+
+  return notes.length > 0 ? notes.join('. ') + '.' : '';
+}
+
+function generateSummary(request: RecommendationRequest, recommendations: ProductRecommendation[]): string {
+  return `Based on your ${request.industry} industry requirements for ${request.application}, we've identified ${recommendations.length} suitable products. These recommendations are ranked by compatibility with your specifications and current availability.`;
+}
+
+function generateAdditionalAdvice(request: RecommendationRequest): string {
+  const advice = [];
+  
+  if (request.budget) {
+    advice.push('Contact our sales team for volume pricing and bulk order discounts');
+  }
+  
+  if (request.urgency?.includes('Immediate')) {
+    advice.push('For urgent orders, consider our express shipping options');
+  }
+  
+  if (request.environmentalConcerns) {
+    advice.push('Our technical team can provide detailed environmental impact assessments');
+  }
+
+  advice.push('All recommended products come with technical support and documentation');
+  
+  return advice.join('. ') + '.';
+}
+
+function generateFollowUpQuestions(request: RecommendationRequest): string[] {
+  const questions = [];
+  
+  if (!request.quantity) {
+    questions.push('What volume or quantity do you need for your application?');
+  }
+  
+  if (!request.budget) {
+    questions.push('Do you have a specific budget range for this purchase?');
+  }
+  
+  if (!request.urgency) {
+    questions.push('What is your required delivery timeline?');
+  }
+  
+  questions.push('Would you like samples for testing before placing a full order?');
+  questions.push('Do you need any specific certifications or documentation?');
+  
+  return questions.slice(0, 3);
 }
