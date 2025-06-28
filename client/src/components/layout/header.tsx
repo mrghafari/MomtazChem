@@ -257,7 +257,7 @@ export default function Header() {
                 >
                   <Link href="/shop">
                     <LogIn className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium">ورود / کیف پول</span>
+                    <span className="text-sm font-medium">Register/Login</span>
                   </Link>
                 </Button>
               )}
@@ -446,7 +446,7 @@ export default function Header() {
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <LogIn className="h-5 w-5" />
-                        <span className="text-sm font-medium">ورود / کیف پول</span>
+                        <span className="text-sm font-medium">Register/Login</span>
                       </motion.div>
                     </Link>
                   </motion.div>
