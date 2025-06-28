@@ -41,6 +41,11 @@ export async function getAIProductRecommendations(
     // Get all available products from database
     const availableProducts = await db.select().from(shopProducts);
     
+    // Check if OpenAI API is available - if not, use intelligent fallback
+    if (!process.env.OPENAI_API_KEY) {
+      return generateIntelligentFallback(request, availableProducts);
+    }
+    
     // Create a detailed product catalog for AI analysis
     const productCatalog = availableProducts.map(product => ({
       id: product.id,

@@ -46,6 +46,7 @@ import WalletManagement from "@/pages/admin/wallet-management";
 import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
+import ProductRecommendations from "@/pages/product-recommendations";
 import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
@@ -81,6 +82,7 @@ function Router() {
           <Route path="/services" component={Services} />
           <Route path="/contact" component={Contact} />
           <Route path="/shop" component={Shop} />
+          <Route path="/product-recommendations" component={ProductRecommendations} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/payment/:orderId" component={Payment} />
           <Route path="/checkout/success/:orderId" component={CheckoutSuccess} />

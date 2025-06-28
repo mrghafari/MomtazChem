@@ -146,13 +146,10 @@ export default function ProductRecommendationWizard() {
 
     setIsLoading(true);
     try {
-      const response = await apiRequest("/api/recommendations/follow-up", {
-        method: "POST",
-        body: JSON.stringify({
-          originalRequest: request,
-          previousRecommendations: recommendations.recommendations,
-          newInformation: followUpQuestion
-        })
+      const response = await apiRequest("/api/recommendations/follow-up", "POST", {
+        originalRequest: request,
+        previousRecommendations: recommendations.recommendations,
+        newInformation: followUpQuestion
       });
 
       if (response.success) {
