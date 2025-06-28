@@ -377,12 +377,20 @@ export default function Header() {
                     className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
                   >
                     <div className="space-y-3">
-                      {/* Customer Name Display */}
-                      <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <User className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
-                          {customer.firstName} {customer.lastName}
-                        </span>
+                      {/* Customer Name & Wallet Display */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <User className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                            {customer.firstName} {customer.lastName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <Wallet className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                            موجودی: {walletBalance?.toLocaleString() || '0'} IQD
+                          </span>
+                        </div>
                       </div>
                       
                       {/* Customer Menu Items */}
@@ -420,6 +428,27 @@ export default function Header() {
                         </motion.div>
                       </div>
                     </div>
+                  </motion.div>
+                )}
+
+                {/* Login Button for Non-authenticated Users - Mobile */}
+                {!isAuthenticated && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
+                    className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
+                  >
+                    <Link href="/shop">
+                      <motion.div
+                        className="flex items-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <LogIn className="h-5 w-5" />
+                        <span className="text-sm font-medium">ورود / کیف پول</span>
+                      </motion.div>
+                    </Link>
                   </motion.div>
                 )}
 
