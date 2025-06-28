@@ -46,15 +46,15 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">{t.ourStory}</h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                Founded in 1999, Momtazchem began as a small chemical manufacturing company with a vision to provide high-quality chemical solutions to industries worldwide. Over the past 25 years, we have grown into a leading manufacturer serving four key market segments.
+                {t.storyParagraph1}
               </p>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                Our journey has been marked by continuous innovation, strategic expansion, and an unwavering commitment to quality. Today, we operate state-of-the-art manufacturing facilities and serve customers in over 40 countries across the globe.
+                {t.storyParagraph2}
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
-                As we look to the future, we remain dedicated to advancing chemical science, supporting our customers' success, and contributing to a more sustainable world.
+                {t.storyParagraph3}
               </p>
             </div>
             <div>
@@ -73,25 +73,25 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12">
             <div className="bg-white p-8 rounded-xl shadow-lg">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-primary-blue rounded-lg flex items-center justify-center mr-4">
+              <div className={`flex items-center mb-6 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                <div className={`w-12 h-12 bg-primary-blue rounded-lg flex items-center justify-center ${direction === 'rtl' ? 'ml-4' : 'mr-4'}`}>
                   <Target className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Our Mission</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{t.ourMission}</h3>
               </div>
               <p className="text-gray-600 leading-relaxed">
-                To develop and manufacture innovative chemical solutions that enhance industrial processes, improve product performance, and contribute to sustainable development while maintaining the highest standards of quality and safety.
+                {t.missionText}
               </p>
             </div>
             <div className="bg-white p-8 rounded-xl shadow-lg">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-primary-green rounded-lg flex items-center justify-center mr-4">
+              <div className={`flex items-center mb-6 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                <div className={`w-12 h-12 bg-primary-green rounded-lg flex items-center justify-center ${direction === 'rtl' ? 'ml-4' : 'mr-4'}`}>
                   <Eye className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Our Vision</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{t.ourVision}</h3>
               </div>
               <p className="text-gray-600 leading-relaxed">
-                To be the world's most trusted partner in chemical solutions, recognized for our innovation, sustainability, and commitment to advancing industries while protecting the environment for future generations.
+                {t.visionText}
               </p>
             </div>
           </div>
@@ -102,9 +102,9 @@ const About = () => {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Core Values</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t.ourCoreValues}</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              The principles that guide our decisions and shape our culture every day.
+              {t.valuesSubtitle}
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -128,26 +128,26 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Team & Expertise</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">{t.ourTeamExpertise}</h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                Our success is built on the expertise and dedication of our team. We employ over 500 professionals, including chemical engineers, research scientists, quality specialists, and industry experts.
+                {t.teamText}
               </p>
               <div className="grid grid-cols-2 gap-6 mb-8">
                 <div className="text-center">
                   <div className="text-3xl font-bold primary-blue mb-2">500+</div>
-                  <div className="text-gray-600">Employees</div>
+                  <div className="text-gray-600">{t.employees}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold primary-green mb-2">50+</div>
-                  <div className="text-gray-600">R&D Scientists</div>
+                  <div className="text-gray-600">{t.rdScientists}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold accent-orange mb-2">15+</div>
-                  <div className="text-gray-600">Manufacturing Sites</div>
+                  <div className="text-gray-600">{t.manufacturingSites}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold primary-blue mb-2">99.8%</div>
-                  <div className="text-gray-600">Quality Rate</div>
+                  <div className="text-gray-600">{t.qualityRate}</div>
                 </div>
               </div>
             </div>
@@ -166,9 +166,9 @@ const About = () => {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Certifications & Compliance</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t.certificationsCompliance}</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We maintain the highest industry standards and certifications to ensure quality, safety, and environmental responsibility.
+              {t.certificationsSubtitle}
             </p>
           </div>
           <div className="grid md:grid-cols-4 gap-8">
