@@ -203,13 +203,18 @@ export default function Header() {
               <LanguageSwitcher />
             </div>
 
-            {/* Customer Menu - Desktop */}
+            {/* Customer Info - Desktop */}
             {isAuthenticated && customer && (
-              <div className="hidden md:block">
+              <div className="hidden md:flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <User className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {customer.firstName} {customer.lastName}
+                  </span>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
-                      <User className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -352,38 +357,49 @@ export default function Header() {
                     transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
                     className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
                   >
-                    <div className="space-y-1">
-                      <Link href="/customer/profile">
+                    <div className="space-y-3">
+                      {/* Customer Name Display */}
+                      <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <User className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                          {customer.firstName} {customer.lastName}
+                        </span>
+                      </div>
+                      
+                      {/* Customer Menu Items */}
+                      <div className="space-y-1">
+                        <Link href="/customer/profile">
+                          <motion.div
+                            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            <User className="h-4 w-4" />
+                            <span>{t.profile}</span>
+                          </motion.div>
+                        </Link>
+                        <Link href="/customer/wallet">
+                          <motion.div
+                            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            <Wallet className="h-4 w-4" />
+                            <span>{t.wallet}</span>
+                          </motion.div>
+                        </Link>
                         <motion.div
-                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors cursor-pointer"
                           whileTap={{ scale: 0.98 }}
-                          onClick={() => setIsMobileMenuOpen(false)}
+                          onClick={() => {
+                            logout();
+                            setIsMobileMenuOpen(false);
+                          }}
                         >
-                          <User className="h-4 w-4" />
-                          <span>{t.profile}</span>
+                          <LogOut className="h-4 w-4" />
+                          <span>{t.logout}</span>
                         </motion.div>
-                      </Link>
-                      <Link href="/customer/wallet">
-                        <motion.div
-                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <Wallet className="h-4 w-4" />
-                          <span>{t.wallet}</span>
-                        </motion.div>
-                      </Link>
-                      <motion.div
-                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors cursor-pointer"
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          logout();
-                          setIsMobileMenuOpen(false);
-                        }}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span>{t.logout}</span>
-                      </motion.div>
+                      </div>
                     </div>
                   </motion.div>
                 )}
