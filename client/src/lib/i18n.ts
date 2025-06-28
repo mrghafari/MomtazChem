@@ -1,4 +1,4 @@
-export type Language = 'en' | 'ar';
+export type Language = 'en' | 'ar' | 'ku';
 
 export interface Translation {
   // Navigation
@@ -408,6 +408,142 @@ export const translations: Record<Language, Translation> = {
     contactInfo: 'معلومات الاتصال',
     followUs: 'تابعونا',
     allRightsReserved: 'جميع الحقوق محفوظة',
+  },
+
+  ku: {
+    // Navigation
+    home: 'ماڵەوە',
+    about: 'دەربارەمان',
+    services: 'خزمەتگوزاریەکان',
+    products: 'بەرهەمەکان',
+    contact: 'پەیوەندی',
+    shop: 'فرۆشگا',
+    
+    // Common actions
+    login: 'چوونەژوورەوە',
+    logout: 'چوونەدەرەوە',
+    register: 'تۆمارکردن',
+    submit: 'ناردن',
+    cancel: 'هەڵوەشاندنەوە',
+    save: 'پاشکەوتکردن',
+    edit: 'دەستکاریکردن',
+    delete: 'سڕینەوە',
+    search: 'گەڕان',
+    loading: 'باربوون...',
+    
+    // Product related
+    addToCart: 'زیادکردن بۆ سەبەتە',
+    viewDetails: 'بینینی وردەکاریەکان',
+    price: 'نرخ',
+    quantity: 'ڕێژە',
+    category: 'بەش',
+    inStock: 'لە کۆگادا هەیە',
+    outOfStock: 'لە کۆگادا نییە',
+    
+    // Cart and checkout
+    cart: 'سەبەتە',
+    checkout: 'پارەدان',
+    total: 'کۆی گشتی',
+    subtotal: 'کۆی بەشی',
+    shipping: 'گەیاندن',
+    orderSummary: 'پوختەی داواکاری',
+    placeOrder: 'جێبەجێکردنی داواکاری',
+    
+    // User account
+    myAccount: 'هەژمارەکەم',
+    myOrders: 'داواکاریەکانم',
+    profile: 'پرۆفایل',
+    wallet: 'جزدان',
+    orderHistory: 'مێژووی داواکاریەکان',
+    
+    // Wallet specific
+    walletTitle: 'جزدانی کڕیار',
+    walletSubtitle: 'بەڕێوەبردنی باڵانسی هەژمارەکەت و مامەڵەکان',
+    currentBalance: 'باڵانسی ئێستا',
+    creditLimit: 'سنووری قەرز',
+    status: 'دۆخ',
+    lastActivity: 'دوایین چالاکی',
+    addFunds: 'زیادکردنی پارە',
+    transactions: 'مامەڵەکان',
+    rechargeRequests: 'داواکاریەکانی پڕکردنەوە',
+    amount: 'بڕ',
+    currency: 'دراو',
+    paymentMethod: 'شێوازی پارەدان',
+    paymentReference: 'ژمارەی پارەدان',
+    notes: 'تێبینیەکان',
+    pending: 'چاوەڕێ',
+    completed: 'تەواوبوو',
+    rejected: 'ڕەتکراوە',
+    active: 'چالاک',
+    inactive: 'ناچالاک',
+    credit: 'خستنەژوورەوە',
+    debit: 'دەرهێنان',
+    type: 'جۆر',
+    description: 'وەسف',
+    date: 'بەروار',
+    requestNumber: 'ژمارەی داواکاری',
+    totalSpent: 'کۆی خەرجکراو',
+    totalRecharged: 'کۆی پڕکراوەتەوە',
+    noTransactions: 'هیچ مامەڵەیەک نەدۆزرایەوە',
+    noRechargeRequests: 'هیچ داواکاریەکی پڕکردنەوە نەدۆزرایەوە',
+    rechargeSuccess: 'داواکاریەکەی پڕکردنەوە بە سەرکەوتووی نێردرا',
+    optional: 'ئارەزووی',
+    bankTransfer: 'گواستنەوەی بانکی',
+    onlinePayment: 'پارەدانی ئۆنلاین',
+    cashPayment: 'پارەدانی نەقدی',
+    mobileWallet: 'جزدانی مۆبایل',
+    processing: 'پرۆسەکردن...',
+    allTransactions: 'هەموو مامەڵەکان',
+    recentTransactions: 'مامەڵە نوێکان',
+    quickActions: 'کردارە خێراکان',
+    manageWallet: 'بەڕێوەبردنی جزدانەکەت',
+    walletRechargeRequest: 'داواکاریەکەی پڕکردنەوەی جزدان',
+    fillRechargeDetails: 'وردەکاریەکان پڕ بکەرەوە بۆ داواکردنی پڕکردنەوەی جزدان',
+    enterAmount: 'بڕەکە بنووسە',
+    selectPaymentMethod: 'شێوازی پارەدان هەڵبژێرە',
+    iraqiDinar: 'دیناری عێراقی (IQD)',
+    usDollar: 'دۆلاری ئەمریکی (USD)',
+    euro: 'یۆرۆ (EUR)',
+    enterPaymentReference: 'ژمارەی پارەدان بنووسە (ئارەزووی)',
+    enterNotes: 'تێبینیەکان بنووسە (ئارەزووی)',
+    inputError: 'هەڵەی نووسین',
+    validAmount: 'تکایە بڕێکی درووست بنووسە',
+    requestError: 'هەڵەی داواکاری',
+    errorCreatingRequest: 'هەڵە لە دروستکردنی داواکاریەکەی پڕکردنەوەی جزدان',
+    loginToAccessWallet: 'تکایە بچۆ ژوورەوە بۆ دەستپێگەیشتن بە جزدانەکەت',
+    goToLogin: 'بڕۆ بۆ چوونە ژوورەوە',
+    totalWithdrawals: 'کۆی دەرهێنراوەکان',
+    totalDeposits: 'کۆی خراوەتە ژوورەوەکان',
+    requestSubmitted: 'داواکاریەکەی پڕکردنەوەی جزدانەکەت بە سەرکەوتووی نێردرا و چاوەڕێی پەسەندکردنە.',
+    requestPendingApproval: 'داواکاری چاوەڕێی پەسەندکردنە',
+    
+    // Forms
+    firstName: 'ناوی یەکەم',
+    lastName: 'ناوی دواین',
+    email: 'ئیمەیل',
+    phone: 'تەلەفۆن',
+    address: 'ناونیشان',
+    city: 'شار',
+    country: 'وڵات',
+    company: 'کۆمپانیا',
+    
+    // Messages
+    welcomeMessage: 'بەخێربێن بۆ مەجمەعی ممتاز الکیمیائی',
+    thankYou: 'سوپاستان',
+    orderConfirmed: 'داواکاریەکەتان پەسەندکرا',
+    contactSuccess: 'پەیامەکەتان بە سەرکەوتووی نێردرا',
+    
+    // Product categories
+    waterTreatment: 'چارەسەری ئاو',
+    fuelAdditives: 'زیادکەرەکانی سووتەمەنی',
+    paintThinner: 'بۆیە و تیننەر',
+    agriculturalFertilizers: 'پەینی کشتوکاڵی',
+    
+    // Footer
+    aboutCompany: 'دەربارەی کۆمپانیا',
+    contactInfo: 'زانیاریەکانی پەیوەندی',
+    followUs: 'شوێنمان بکەون',
+    allRightsReserved: 'هەموو مافەکان پارێزراون',
   },
 };
 
