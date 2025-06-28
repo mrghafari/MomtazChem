@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage, type Language } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu, 
@@ -198,8 +199,9 @@ export function LanguageSwitcherCompact() {
   const currentLanguage = languages.find(lang => lang.code === language) || languages[0];
 
   const toggleLanguage = () => {
-    const nextLanguage = language === 'en' ? 'fa' : 'en';
-    setLanguage(nextLanguage);
+    const currentIndex = languages.findIndex(lang => lang.code === language);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    setLanguage(languages[nextIndex].code);
   };
 
   return (
