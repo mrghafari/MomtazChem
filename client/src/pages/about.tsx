@@ -1,38 +1,41 @@
 import { Award, Leaf, Users, Globe, Target, Eye } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const About = () => {
+  const { t, direction } = useLanguage();
+  
   const values = [
     {
       icon: <Award className="h-8 w-8 text-white" />,
-      title: "Quality Excellence",
-      description: "We maintain the highest standards in all our products and processes, with ISO certifications ensuring consistent quality.",
+      title: t.qualityExcellence,
+      description: t.qualityExcellenceDesc,
     },
     {
       icon: <Leaf className="h-8 w-8 text-white" />,
-      title: "Environmental Responsibility",
-      description: "Committed to sustainable manufacturing practices and developing eco-friendly chemical solutions.",
+      title: t.environmentalResponsibility,
+      description: t.environmentalResponsibilityDesc,
     },
     {
       icon: <Users className="h-8 w-8 text-white" />,
-      title: "Customer Focus",
-      description: "Our customers' success is our priority. We provide tailored solutions and exceptional service.",
+      title: t.customerFocus,
+      description: t.customerFocusDesc,
     },
     {
       icon: <Globe className="h-8 w-8 text-white" />,
-      title: "Global Reach",
-      description: "Serving customers in over 40 countries with reliable supply chains and local support.",
+      title: t.globalReach,
+      description: t.globalReachDesc,
     },
   ];
 
   return (
-    <div className="pt-20">
+    <div className={`pt-20 ${direction === 'rtl' ? 'rtl' : 'ltr'}`} dir={direction}>
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-r from-primary to-secondary text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">About Momtazchem</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{t.aboutTitle}</h1>
             <p className="text-xl max-w-3xl mx-auto">
-              Leading the chemical industry with innovation, quality, and sustainability for over 25 years.
+              {t.aboutSubtitle}
             </p>
           </div>
         </div>

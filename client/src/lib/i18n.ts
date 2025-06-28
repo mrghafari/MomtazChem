@@ -134,6 +134,42 @@ export interface Translation {
   contactInfo: string;
   followUs: string;
   allRightsReserved: string;
+  
+  // About page
+  aboutTitle: string;
+  aboutSubtitle: string;
+  ourStory: string;
+  ourMission: string;
+  ourVision: string;
+  ourCoreValues: string;
+  valuesSubtitle: string;
+  ourTeamExpertise: string;
+  certificationsCompliance: string;
+  certificationsSubtitle: string;
+  
+  // About content
+  storyParagraph1: string;
+  storyParagraph2: string;
+  storyParagraph3: string;
+  missionText: string;
+  visionText: string;
+  teamText: string;
+  
+  // Values
+  qualityExcellence: string;
+  qualityExcellenceDesc: string;
+  environmentalResponsibility: string;
+  environmentalResponsibilityDesc: string;
+  customerFocus: string;
+  customerFocusDesc: string;
+  globalReach: string;
+  globalReachDesc: string;
+  
+  // Stats
+  employees: string;
+  rdScientists: string;
+  manufacturingSites: string;
+  qualityRate: string;
 }
 
 export const translations: Record<Language, Translation> = {
@@ -272,6 +308,42 @@ export const translations: Record<Language, Translation> = {
     contactInfo: 'Contact Information',
     followUs: 'Follow Us',
     allRightsReserved: 'All Rights Reserved',
+    
+    // About page
+    aboutTitle: 'About Momtazchem',
+    aboutSubtitle: 'Leading the chemical industry with innovation, quality, and sustainability for over 25 years.',
+    ourStory: 'Our Story',
+    ourMission: 'Our Mission',
+    ourVision: 'Our Vision',
+    ourCoreValues: 'Our Core Values',
+    valuesSubtitle: 'The principles that guide our decisions and shape our culture every day.',
+    ourTeamExpertise: 'Our Team & Expertise',
+    certificationsCompliance: 'Certifications & Compliance',
+    certificationsSubtitle: 'We maintain the highest industry standards and certifications to ensure quality, safety, and environmental responsibility.',
+    
+    // About content
+    storyParagraph1: 'Founded in 1999, Momtazchem began as a small chemical manufacturing company with a vision to provide high-quality chemical solutions to industries worldwide. Over the past 25 years, we have grown into a leading manufacturer serving four key market segments.',
+    storyParagraph2: 'Our journey has been marked by continuous innovation, strategic expansion, and an unwavering commitment to quality. Today, we operate state-of-the-art manufacturing facilities and serve customers in over 40 countries across the globe.',
+    storyParagraph3: 'As we look to the future, we remain dedicated to advancing chemical science, supporting our customers\' success, and contributing to a more sustainable world.',
+    missionText: 'To develop and manufacture innovative chemical solutions that enhance industrial processes, improve product performance, and contribute to sustainable development while maintaining the highest standards of quality and safety.',
+    visionText: 'To be the world\'s most trusted partner in chemical solutions, recognized for our innovation, sustainability, and commitment to advancing industries while protecting the environment for future generations.',
+    teamText: 'Our success is built on the expertise and dedication of our team. We employ over 500 professionals, including chemical engineers, research scientists, quality specialists, and industry experts.',
+    
+    // Values
+    qualityExcellence: 'Quality Excellence',
+    qualityExcellenceDesc: 'We maintain the highest standards in all our products and processes, with ISO certifications ensuring consistent quality.',
+    environmentalResponsibility: 'Environmental Responsibility',
+    environmentalResponsibilityDesc: 'Committed to sustainable manufacturing practices and developing eco-friendly chemical solutions.',
+    customerFocus: 'Customer Focus',
+    customerFocusDesc: 'Our customers\' success is our priority. We provide tailored solutions and exceptional service.',
+    globalReach: 'Global Reach',
+    globalReachDesc: 'Serving customers in over 40 countries with reliable supply chains and local support.',
+    
+    // Stats
+    employees: 'Employees',
+    rdScientists: 'R&D Scientists',
+    manufacturingSites: 'Manufacturing Sites',
+    qualityRate: 'Quality Rate',
   },
   
   ar: {
@@ -408,6 +480,42 @@ export const translations: Record<Language, Translation> = {
     contactInfo: 'معلومات الاتصال',
     followUs: 'تابعونا',
     allRightsReserved: 'جميع الحقوق محفوظة',
+    
+    // About page
+    aboutTitle: 'حول مجمع ممتاز الكيميائي',
+    aboutSubtitle: 'نقود صناعة الكيماويات بالابتكار والجودة والاستدامة لأكثر من 25 عاماً.',
+    ourStory: 'قصتنا',
+    ourMission: 'مهمتنا',
+    ourVision: 'رؤيتنا',
+    ourCoreValues: 'قيمنا الأساسية',
+    valuesSubtitle: 'المبادئ التي توجه قراراتنا وتشكل ثقافتنا كل يوم.',
+    ourTeamExpertise: 'فريقنا وخبرتنا',
+    certificationsCompliance: 'الشهادات والامتثال',
+    certificationsSubtitle: 'نحافظ على أعلى معايير الصناعة والشهادات لضمان الجودة والسلامة والمسؤولية البيئية.',
+    
+    // About content
+    storyParagraph1: 'تأسس مجمع ممتاز الكيميائي في عام 1999 كشركة صغيرة لتصنيع المواد الكيميائية برؤية لتوفير حلول كيميائية عالية الجودة للصناعات في جميع أنحاء العالم. خلال السنوات الـ 25 الماضية، نمونا لنصبح شركة رائدة في التصنيع تخدم أربعة قطاعات سوقية رئيسية.',
+    storyParagraph2: 'تميزت رحلتنا بالابتكار المستمر والتوسع الاستراتيجي والالتزام الثابت بالجودة. اليوم، نشغل مرافق تصنيع متطورة ونخدم العملاء في أكثر من 40 دولة حول العالم.',
+    storyParagraph3: 'ونحن نتطلع إلى المستقبل، نبقى ملتزمين بتطوير علوم الكيمياء ودعم نجاح عملائنا والمساهمة في عالم أكثر استدامة.',
+    missionText: 'تطوير وتصنيع حلول كيميائية مبتكرة تعزز العمليات الصناعية وتحسن أداء المنتجات وتساهم في التنمية المستدامة مع الحفاظ على أعلى معايير الجودة والسلامة.',
+    visionText: 'أن نكون الشريك الأكثر ثقة في العالم في الحلول الكيميائية، معترف بنا لابتكارنا واستدامتنا والتزامنا بتطوير الصناعات مع حماية البيئة للأجيال القادمة.',
+    teamText: 'يُبنى نجاحنا على خبرة فريقنا وتفانيه. نوظف أكثر من 500 محترف، بما في ذلك مهندسي الكيمياء وعلماء البحوث ومتخصصي الجودة وخبراء الصناعة.',
+    
+    // Values
+    qualityExcellence: 'التميز في الجودة',
+    qualityExcellenceDesc: 'نحافظ على أعلى المعايير في جميع منتجاتنا وعملياتنا، مع شهادات ISO التي تضمن الجودة المتسقة.',
+    environmentalResponsibility: 'المسؤولية البيئية',
+    environmentalResponsibilityDesc: 'ملتزمون بممارسات التصنيع المستدامة وتطوير الحلول الكيميائية الصديقة للبيئة.',
+    customerFocus: 'التركيز على العملاء',
+    customerFocusDesc: 'نجاح عملائنا هو أولويتنا. نقدم حلولاً مخصصة وخدمة استثنائية.',
+    globalReach: 'الوصول العالمي',
+    globalReachDesc: 'خدمة العملاء في أكثر من 40 دولة مع سلاسل إمداد موثوقة ودعم محلي.',
+    
+    // Stats
+    employees: 'موظف',
+    rdScientists: 'علماء البحث والتطوير',
+    manufacturingSites: 'مواقع التصنيع',
+    qualityRate: 'معدل الجودة',
   },
 
   ku: {
@@ -544,6 +652,42 @@ export const translations: Record<Language, Translation> = {
     contactInfo: 'زانیاریەکانی پەیوەندی',
     followUs: 'شوێنمان بکەون',
     allRightsReserved: 'هەموو مافەکان پارێزراون',
+    
+    // About page
+    aboutTitle: 'دەربارەی مەجمەعی ممتاز الکیمیائی',
+    aboutSubtitle: 'بۆ زیاتر لە 25 ساڵ پێشەنگی پیشەسازی کیمیاوی دەکەین بە نوێکاری و کوالیتی و بەردەوامی.',
+    ourStory: 'چیرۆکی ئێمە',
+    ourMission: 'ئەرکی ئێمە',
+    ourVision: 'بینینی ئێمە',
+    ourCoreValues: 'بەهاە بنەڕەتیەکانی ئێمە',
+    valuesSubtitle: 'ئەو بنەماانەی کە بڕیارەکانمان ڕێنمایی دەکەن و کەلتوورمان شێوە دەدەن هەموو ڕۆژێک.',
+    ourTeamExpertise: 'تیمی ئێمە و شارەزایی',
+    certificationsCompliance: 'بڕوانامە و گونجاندن',
+    certificationsSubtitle: 'ئێمە بەرزترین ستانداردە پیشەسازیەکان و بڕوانامەکان هەڵدەگرین بۆ دڵنیابوون لە کوالیتی و سەلامەتی و بەرپرسیارێتی ژینگەیی.',
+    
+    // About content
+    storyParagraph1: 'مەجمەعی ممتاز الکیمیائی لە ساڵی 1999دا دامەزرا وەک کۆمپانیایەکی بچووکی بەرهەمهێنانی کیمیاوی بە بینینێک بۆ دابینکردنی چارەسەرە کیمیاویە بەرزە کوالیتیەکان بۆ پیشەسازیەکان لە هەموو جیهاندا. لە ماوەی 25 ساڵی ڕابردوودا، گەشەمان کردووە بۆ ئەوەی ببینە بەرهەمهێنەرێکی پێشەنگ کە چوار بەشی سەرەکی بازاڕ خزمەت دەکات.',
+    storyParagraph2: 'گەشتی ئێمە بە نوێکاری بەردەوام و فراوانکردنی ستراتیژی و پابەندبوونی نەهێشتووی بە کوالیتی تایبەتمەند بووە. ئەمڕۆ، ئێمە شوێنە بەرهەمهێنانە پێشکەوتووەکان بەڕێوە دەبەین و کڕیارانمان لە زیاتر لە 40 وڵات لە هەموو جیهاندا خزمەت دەکەین.',
+    storyParagraph3: 'لەگەڵ ئەوەی چاومان لە داهاتووە، بەردەوام پابەندین بە پێشخستنی زانستی کیمیا و پاڵپشتیکردنی سەرکەوتنی کڕیارانمان و بەشدارکردن لە جیهانێکی زیاتر بەردەوام.',
+    missionText: 'پەرەپێدان و بەرهەمهێنانی چارەسەرە کیمیاویە نوێکارەکان کە پرۆسە پیشەسازیەکان بەهێز دەکەن و کارایی بەرهەمەکان باشتر دەکەن و بەشداری لە گەشەسەندنی بەردەوام دەکەن لەگەڵ پاراستنی بەرزترین ستانداردەکانی کوالیتی و سەلامەتی.',
+    visionText: 'بوون بە هاوبەشی بەتوانایی ترین جیهان لە چارەسەرە کیمیاویەکاندا، ناسراو بۆ نوێکاری و بەردەوامی و پابەندبوونمان بە پێشخستنی پیشەسازیەکان لەگەڵ پاراستنی ژینگە بۆ نەوەکانی داهاتوو.',
+    teamText: 'سەرکەوتنی ئێمە لەسەر شارەزایی و دەستخۆشی تیمەکەمان بنیاد نراوە. ئێمە زیاتر لە 500 پیشەیی دامەزراندووە، لەوانە ئەندازیارانی کیمیا و زانایانی لێکۆڵینەوە و پسپۆڕانی کوالیتی و پسپۆڕانی پیشەسازی.',
+    
+    // Values
+    qualityExcellence: 'تایبەتمەندی کوالیتی',
+    qualityExcellenceDesc: 'ئێمە بەرزترین ستانداردەکان لە هەموو بەرهەم و پرۆسەکانماندا ڕادەگرین، لەگەڵ بڕوانامەکانی ISO کە کوالیتی یەکگرتوو دڵنیا دەکات.',
+    environmentalResponsibility: 'بەرپرسیارێتی ژینگەیی',
+    environmentalResponsibilityDesc: 'پابەندین بە شێوازە بەرهەمهێنانە بەردەوامەکان و پەرەپێدانی چارەسەرە کیمیاویە دۆستی ژینگەکان.',
+    customerFocus: 'سەرنج لە کڕیارەکان',
+    customerFocusDesc: 'سەرکەوتنی کڕیارانمان لە پێشینەی ئێمەدایە. ئێمە چارەسەرە تایبەتەکان و خزمەتگوزاریە نایابەکان دابین دەکەین.',
+    globalReach: 'گەیشتنی جیهانی',
+    globalReachDesc: 'خزمەتکردنی کڕیارەکان لە زیاتر لە 40 وڵات لەگەڵ زنجیرەی دابینکردنی متمانەپێکراو و پاڵپشتی خۆجێیی.',
+    
+    // Stats
+    employees: 'کارمەندان',
+    rdScientists: 'زانایانی لێکۆڵینەوە و پەرەپێدان',
+    manufacturingSites: 'شوێنە بەرهەمهێنانەکان',
+    qualityRate: 'ڕێژەی کوالیتی',
   },
 };
 
