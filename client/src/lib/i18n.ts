@@ -46,6 +46,67 @@ export interface Translation {
   wallet: string;
   orderHistory: string;
   
+  // Wallet specific
+  walletTitle: string;
+  walletSubtitle: string;
+  currentBalance: string;
+  creditLimit: string;
+  status: string;
+  lastActivity: string;
+  addFunds: string;
+  transactions: string;
+  rechargeRequests: string;
+  amount: string;
+  currency: string;
+  paymentMethod: string;
+  paymentReference: string;
+  notes: string;
+  pending: string;
+  completed: string;
+  rejected: string;
+  active: string;
+  inactive: string;
+  credit: string;
+  debit: string;
+  type: string;
+  description: string;
+  date: string;
+  requestNumber: string;
+  totalSpent: string;
+  totalRecharged: string;
+  noTransactions: string;
+  noRechargeRequests: string;
+  rechargeSuccess: string;
+  optional: string;
+  bankTransfer: string;
+  onlinePayment: string;
+  cashPayment: string;
+  mobileWallet: string;
+  processing: string;
+  allTransactions: string;
+  recentTransactions: string;
+  quickActions: string;
+  manageWallet: string;
+  walletRechargeRequest: string;
+  fillRechargeDetails: string;
+  enterAmount: string;
+  selectPaymentMethod: string;
+  iraqiDinar: string;
+  usDollar: string;
+  euro: string;
+  enterPaymentReference: string;
+  enterNotes: string;
+  inputError: string;
+  validAmount: string;
+  requestError: string;
+  errorCreatingRequest: string;
+  loginToAccessWallet: string;
+  goToLogin: string;
+  totalWithdrawals: string;
+  totalDeposits: string;
+  requestSubmitted: string;
+  requestPendingApproval: string;
+  
   // Forms
   firstName: string;
   lastName: string;
@@ -123,6 +184,67 @@ export const translations: Record<Language, Translation> = {
     wallet: 'Wallet',
     orderHistory: 'Order History',
     
+    // Wallet specific
+    walletTitle: 'Customer Wallet',
+    walletSubtitle: 'Manage your account balance and transactions',
+    currentBalance: 'Current Balance',
+    creditLimit: 'Credit Limit',
+    status: 'Status',
+    lastActivity: 'Last Activity',
+    addFunds: 'Add Funds',
+    transactions: 'Transactions',
+    rechargeRequests: 'Recharge Requests',
+    amount: 'Amount',
+    currency: 'Currency',
+    paymentMethod: 'Payment Method',
+    paymentReference: 'Payment Reference',
+    notes: 'Notes',
+    pending: 'Pending',
+    completed: 'Completed',
+    rejected: 'Rejected',
+    active: 'Active',
+    inactive: 'Inactive',
+    credit: 'Credit',
+    debit: 'Debit',
+    type: 'Type',
+    description: 'Description',
+    date: 'Date',
+    requestNumber: 'Request #',
+    totalSpent: 'Total Spent',
+    totalRecharged: 'Total Recharged',
+    noTransactions: 'No transactions found',
+    noRechargeRequests: 'No recharge requests found',
+    rechargeSuccess: 'Recharge request submitted successfully',
+    optional: 'Optional',
+    bankTransfer: 'Bank Transfer',
+    onlinePayment: 'Online Payment',
+    cashPayment: 'Cash Payment',
+    mobileWallet: 'Mobile Wallet',
+    processing: 'Processing...',
+    allTransactions: 'All Transactions',
+    recentTransactions: 'Recent Transactions',
+    quickActions: 'Quick Actions',
+    manageWallet: 'Manage your wallet',
+    walletRechargeRequest: 'Wallet Recharge Request',
+    fillRechargeDetails: 'Fill in the details below to request a wallet recharge',
+    enterAmount: 'Enter amount',
+    selectPaymentMethod: 'Select payment method',
+    iraqiDinar: 'Iraqi Dinar (IQD)',
+    usDollar: 'US Dollar (USD)',
+    euro: 'Euro (EUR)',
+    enterPaymentReference: 'Enter payment reference (optional)',
+    enterNotes: 'Enter notes (optional)',
+    inputError: 'Input Error',
+    validAmount: 'Please enter a valid amount',
+    requestError: 'Request Error',
+    errorCreatingRequest: 'Error creating wallet recharge request',
+    loginToAccessWallet: 'Please log in to access your wallet',
+    goToLogin: 'Go to Login',
+    totalWithdrawals: 'Total withdrawals',
+    totalDeposits: 'Total deposits',
+    requestSubmitted: 'Your wallet recharge request has been submitted successfully and is pending approval.',
+    requestPendingApproval: 'Request pending approval',
+    
     // Forms
     firstName: 'First Name',
     lastName: 'Last Name',
@@ -197,6 +319,67 @@ export const translations: Record<Language, Translation> = {
     profile: 'الملف الشخصي',
     wallet: 'المحفظة',
     orderHistory: 'تاريخ الطلبات',
+    
+    // Wallet specific
+    walletTitle: 'محفظة العميل',
+    walletSubtitle: 'إدارة رصيد حسابك والمعاملات',
+    currentBalance: 'الرصيد الحالي',
+    creditLimit: 'الحد الائتماني',
+    status: 'الحالة',
+    lastActivity: 'آخر نشاط',
+    addFunds: 'إضافة أموال',
+    transactions: 'المعاملات',
+    rechargeRequests: 'طلبات الشحن',
+    amount: 'المبلغ',
+    currency: 'العملة',
+    paymentMethod: 'طريقة الدفع',
+    paymentReference: 'مرجع الدفع',
+    notes: 'ملاحظات',
+    pending: 'معلق',
+    completed: 'مكتمل',
+    rejected: 'مرفوض',
+    active: 'نشط',
+    inactive: 'غير نشط',
+    credit: 'إيداع',
+    debit: 'سحب',
+    type: 'النوع',
+    description: 'الوصف',
+    date: 'التاريخ',
+    requestNumber: 'رقم الطلب',
+    totalSpent: 'إجمالي الإنفاق',
+    totalRecharged: 'إجمالي الشحن',
+    noTransactions: 'لا توجد معاملات',
+    noRechargeRequests: 'لا توجد طلبات شحن',
+    rechargeSuccess: 'تم إرسال طلب الشحن بنجاح',
+    optional: 'اختياري',
+    bankTransfer: 'تحويل بنكي',
+    onlinePayment: 'دفع إلكتروني',
+    cashPayment: 'دفع نقدي',
+    mobileWallet: 'محفظة الهاتف',
+    processing: 'جاري المعالجة...',
+    allTransactions: 'جميع المعاملات',
+    recentTransactions: 'المعاملات الأخيرة',
+    quickActions: 'الإجراءات السريعة',
+    manageWallet: 'إدارة محفظتك',
+    walletRechargeRequest: 'طلب شحن المحفظة',
+    fillRechargeDetails: 'املأ التفاصيل أدناه لطلب شحن المحفظة',
+    enterAmount: 'أدخل المبلغ',
+    selectPaymentMethod: 'اختر طريقة الدفع',
+    iraqiDinar: 'الدينار العراقي (IQD)',
+    usDollar: 'الدولار الأمريكي (USD)',
+    euro: 'اليورو (EUR)',
+    enterPaymentReference: 'أدخل مرجع الدفع (اختياري)',
+    enterNotes: 'أدخل ملاحظات (اختياري)',
+    inputError: 'خطأ في الإدخال',
+    validAmount: 'يرجى إدخال مبلغ صحيح',
+    requestError: 'خطأ في الطلب',
+    errorCreatingRequest: 'خطأ في إنشاء طلب شحن المحفظة',
+    loginToAccessWallet: 'يرجى تسجيل الدخول للوصول إلى محفظتك',
+    goToLogin: 'الذهاب إلى تسجيل الدخول',
+    totalWithdrawals: 'إجمالي السحوبات',
+    totalDeposits: 'إجمالي الإيداعات',
+    requestSubmitted: 'تم إرسال طلب شحن محفظتك بنجاح وهو في انتظار الموافقة.',
+    requestPendingApproval: 'الطلب في انتظار الموافقة',
     
     // Forms
     firstName: 'الاسم الأول',

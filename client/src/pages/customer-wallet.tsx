@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useCustomer } from "@/hooks/useCustomer";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,97 +14,10 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote, Globe } from "lucide-react";
+import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote } from "lucide-react";
 
-// Bilingual translations (English/Arabic)
-const translations = {
-  en: {
-    title: "Customer Wallet",
-    subtitle: "Manage your account balance and transactions",
-    balance: "Current Balance",
-    creditLimit: "Credit Limit",
-    status: "Status",
-    lastActivity: "Last Activity",
-    recharge: "Add Funds",
-    transactions: "Transactions",
-    rechargeRequests: "Recharge Requests",
-    amount: "Amount",
-    currency: "Currency",
-    paymentMethod: "Payment Method",
-    paymentReference: "Payment Reference",
-    notes: "Notes",
-    submit: "Submit Request",
-    cancel: "Cancel",
-    pending: "Pending",
-    completed: "Completed",
-    rejected: "Rejected",
-    active: "Active",
-    inactive: "Inactive",
-    credit: "Credit",
-    debit: "Debit",
-    type: "Type",
-    description: "Description",
-    date: "Date",
-    requestNumber: "Request #",
-    totalSpent: "Total Spent",
-    totalRecharged: "Total Recharged",
-    loading: "Loading wallet...",
-    noTransactions: "No transactions found",
-    noRechargeRequests: "No recharge requests found",
-    rechargeSuccess: "Recharge request submitted successfully",
-    optional: "Optional",
-    bankTransfer: "Bank Transfer",
-    onlinePayment: "Online Payment",
-    cash: "Cash Payment",
-    mobileWallet: "Mobile Wallet",
-    processing: "Processing...",
-    allTransactions: "All Transactions",
-    recentTransactions: "Recent Transactions"
-  },
-  ar: {
-    title: "محفظة العميل",
-    subtitle: "إدارة رصيد حسابك والمعاملات",
-    balance: "الرصيد الحالي",
-    creditLimit: "حد الائتمان",
-    status: "الحالة",
-    lastActivity: "آخر نشاط",
-    recharge: "إضافة أموال",
-    transactions: "المعاملات",
-    rechargeRequests: "طلبات الشحن",
-    amount: "المبلغ",
-    currency: "العملة",
-    paymentMethod: "طريقة الدفع",
-    paymentReference: "مرجع الدفع",
-    notes: "ملاحظات",
-    submit: "إرسال الطلب",
-    cancel: "إلغاء",
-    pending: "معلق",
-    completed: "مكتمل",
-    rejected: "مرفوض",
-    active: "نشط",
-    inactive: "غير نشط",
-    credit: "إيداع",
-    debit: "سحب",
-    type: "النوع",
-    description: "الوصف",
-    date: "التاريخ",
-    requestNumber: "الطلب رقم",
-    totalSpent: "إجمالي المنفق",
-    totalRecharged: "إجمالي المشحون",
-    loading: "جارٍ تحميل المحفظة...",
-    noTransactions: "لا توجد معاملات",
-    noRechargeRequests: "لا توجد طلبات شحن",
-    rechargeSuccess: "تم إرسال طلب الشحن بنجاح",
-    optional: "اختياري",
-    bankTransfer: "تحويل بنكي",
-    onlinePayment: "دفع إلكتروني",
-    cash: "دفع نقدي",
-    mobileWallet: "محفظة جوال",
-    processing: "جارٍ المعالجة...",
-    allTransactions: "جميع المعاملات",
-    recentTransactions: "المعاملات الأخيرة"
-  }
-};
+
+
 
 interface WalletSummary {
   wallet?: {
