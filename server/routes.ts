@@ -172,6 +172,73 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
+
+  // =============================================================================
+  // AI PRODUCT RECOMMENDATIONS API
+  // =============================================================================
+  
+  // Generate AI-powered product recommendations
+  app.post('/api/recommendations/analyze', async (req, res) => {
+    try {
+      const { getAIProductRecommendations } = await import('./ai-recommendations.ts');
+      
+      const recommendationRequest = req.body;
+      
+      // Validate required fields
+      if (!recommendationRequest.industry || !recommendationRequest.application || !recommendationRequest.requirements) {
+        return res.status(400).json({
+          success: false,
+          message: 'Industry, application, and requirements are required fields'
+        });
+      }
+
+      const recommendations = await getAIProductRecommendations(recommendationRequest);
+      
+      res.json({
+        success: true,
+        data: recommendations
+      });
+    } catch (error) {
+      console.error('Recommendation API Error:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to generate recommendations'
+      });
+    }
+  });
+
+  // Generate follow-up recommendations based on additional information
+  app.post('/api/recommendations/follow-up', async (req, res) => {
+    try {
+      const { generateFollowUpRecommendations } = await import('./ai-recommendations.ts');
+      
+      const { originalRequest, previousRecommendations, newInformation } = req.body;
+      
+      if (!originalRequest || !previousRecommendations || !newInformation) {
+        return res.status(400).json({
+          success: false,
+          message: 'Original request, previous recommendations, and new information are required'
+        });
+      }
+
+      const updatedRecommendations = await generateFollowUpRecommendations(
+        originalRequest,
+        previousRecommendations,
+        newInformation
+      );
+      
+      res.json({
+        success: true,
+        data: updatedRecommendations
+      });
+    } catch (error) {
+      console.error('Follow-up Recommendation API Error:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to generate follow-up recommendations'
+      });
+    }
+  });
   // Admin authentication routes
   app.post("/api/admin/login", async (req, res) => {
     try {
