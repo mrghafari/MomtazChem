@@ -554,7 +554,8 @@ export const getDirection = (language: Language): 'ltr' | 'rtl' => {
 export const getLanguageName = (language: Language): string => {
   const names = {
     en: 'English',
-    ar: 'العربية'
+    ar: 'العربية',
+    ku: 'کوردی'
   };
   return names[language];
 };

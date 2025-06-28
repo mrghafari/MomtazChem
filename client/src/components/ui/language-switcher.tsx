@@ -22,14 +22,21 @@ const UKFlag = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const IranFlag = ({ className }: { className?: string }) => (
+const ArabFlag = ({ className }: { className?: string }) => (
   <svg className={cn("w-5 h-4", className)} viewBox="0 0 60 40" fill="none">
-    <rect width="60" height="13.33" fill="#239F40"/>
+    <rect width="60" height="13.33" fill="#000"/>
     <rect y="13.33" width="60" height="13.33" fill="#fff"/>
     <rect y="26.67" width="60" height="13.33" fill="#DA0000"/>
-    <g fill="#DA0000" fontSize="2">
-      <text x="30" y="22" textAnchor="middle" fontFamily="serif">الله اکبر</text>
-    </g>
+    <polygon points="0,0 20,20 0,40" fill="#239F40"/>
+  </svg>
+);
+
+const KurdishFlag = ({ className }: { className?: string }) => (
+  <svg className={cn("w-5 h-4", className)} viewBox="0 0 60 40" fill="none">
+    <rect width="60" height="13.33" fill="#DA0000"/>
+    <rect y="13.33" width="60" height="13.33" fill="#fff"/>
+    <rect y="26.67" width="60" height="13.33" fill="#239F40"/>
+    <circle cx="30" cy="20" r="8" fill="#FFD700" stroke="#DA0000" strokeWidth="1"/>
   </svg>
 );
 
@@ -48,10 +55,16 @@ const languages: LanguageOption[] = [
     flag: UKFlag,
   },
   {
-    code: 'fa',
-    name: 'Persian',
-    nativeName: 'فارسی',
-    flag: IranFlag,
+    code: 'ar',
+    name: 'Arabic',
+    nativeName: 'العربية',
+    flag: ArabFlag,
+  },
+  {
+    code: 'ku',
+    name: 'Kurdish',
+    nativeName: 'کوردی',
+    flag: KurdishFlag,
   },
 ];
 

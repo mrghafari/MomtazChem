@@ -13,7 +13,11 @@
 
 /* Language-specific fonts */
 .lang-ar {
-  font-family: "Segoe UI", "Tahoma", "Arabic UI Text", "Traditional Arabic", Arial, sans-serif;
+  font-family: "Noto Sans Arabic", "Amiri", "Scheherazade New", "Arabic UI Text", "Traditional Arabic", "Segoe UI", "Tahoma", Arial, sans-serif;
+}
+
+.lang-ku {
+  font-family: "Noto Sans Kurdish", "Amiri", "Scheherazade New", "Arabic UI Text", "Traditional Arabic", "Segoe UI", "Tahoma", Arial, sans-serif;
 }
 
 .lang-en {
@@ -40,10 +44,29 @@
   flex-direction: row;
 }
 
-/* Better Arabic font rendering */
-.lang-ar {
-  font-feature-settings: "liga" 1, "kern" 1;
+/* Better Arabic and Kurdish font rendering */
+.lang-ar, .lang-ku {
+  font-feature-settings: "liga" 1, "kern" 1, "calt" 1;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* Improved typography for RTL languages */
+.lang-ar h1, .lang-ar h2, .lang-ar h3, .lang-ar h4, .lang-ar h5, .lang-ar h6,
+.lang-ku h1, .lang-ku h2, .lang-ku h3, .lang-ku h4, .lang-ku h5, .lang-ku h6 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.lang-ar p, .lang-ku p {
+  line-height: 1.7;
+}
+
+/* Beautiful text shadows for Kurdish */
+.lang-ku {
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 /* RTL spacing utilities */
