@@ -31,6 +31,9 @@ export function LanguageSwitcher() {
         <DropdownMenuItem onClick={() => handleLanguageChange('ar')}>
           العربية
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleLanguageChange('ku')}>
+          کوردی
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
