@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, LogIn } from 'lucide-react';
+import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -30,7 +30,7 @@ export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, direction } = useLanguage();
-  const { customer, isAuthenticated, walletBalance, logout } = useCustomer();
+  const { customer, isAuthenticated, logout } = useCustomer();
 
   const navigation = [
     { href: '/', label: t.home },
@@ -204,26 +204,19 @@ export default function Header() {
               <LanguageSwitcher />
             </div>
 
-            {/* Account & Wallet Button - Desktop */}
-            <div className="hidden md:block">
-              {isAuthenticated && customer ? (
+            {/* Customer Info - Desktop */}
+            {isAuthenticated && customer && (
+              <div className="hidden md:flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <User className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {customer.firstName} {customer.lastName}
+                  </span>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-3 h-10 px-4 border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
-                    >
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          {customer.firstName} {customer.lastName}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded text-xs font-semibold text-green-700 dark:text-green-300">
-                        <Wallet className="h-3 w-3" />
-                        <span>{walletBalance?.toLocaleString() || '0'} IQD</span>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
@@ -249,19 +242,8 @@ export default function Header() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
-                <Button 
-                  asChild
-                  variant="outline" 
-                  className="flex items-center gap-2 h-10 px-4 border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
-                >
-                  <Link href="/shop">
-                    <LogIn className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium">Register/Login</span>
-                  </Link>
-                </Button>
-              )}
-            </div>
+              </div>
+            )}
             
             {/* Mobile menu button */}
             <Button
@@ -377,20 +359,12 @@ export default function Header() {
                     className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
                   >
                     <div className="space-y-3">
-                      {/* Customer Name & Wallet Display */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                          <User className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
-                            {customer.firstName} {customer.lastName}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <Wallet className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                            موجودی: {walletBalance?.toLocaleString() || '0'} IQD
-                          </span>
-                        </div>
+                      {/* Customer Name Display */}
+                      <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <User className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                          {customer.firstName} {customer.lastName}
+                        </span>
                       </div>
                       
                       {/* Customer Menu Items */}
@@ -428,27 +402,6 @@ export default function Header() {
                         </motion.div>
                       </div>
                     </div>
-                  </motion.div>
-                )}
-
-                {/* Login Button for Non-authenticated Users - Mobile */}
-                {!isAuthenticated && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
-                    className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
-                  >
-                    <Link href="/shop">
-                      <motion.div
-                        className="flex items-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <LogIn className="h-5 w-5" />
-                        <span className="text-sm font-medium">Register/Login</span>
-                      </motion.div>
-                    </Link>
                   </motion.div>
                 )}
 
