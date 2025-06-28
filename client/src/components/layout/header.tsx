@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut } from 'lucide-react';
+import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -30,7 +30,7 @@ export default function Header() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, direction } = useLanguage();
-  const { customer, isAuthenticated, logout } = useCustomer();
+  const { customer, isAuthenticated, walletBalance, logout } = useCustomer();
 
   const navigation = [
     { href: '/', label: t.home },
@@ -204,19 +204,26 @@ export default function Header() {
               <LanguageSwitcher />
             </div>
 
-            {/* Customer Info - Desktop */}
-            {isAuthenticated && customer && (
-              <div className="hidden md:flex items-center gap-4">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <User className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {customer.firstName} {customer.lastName}
-                  </span>
-                </div>
+            {/* Account & Wallet Button - Desktop */}
+            <div className="hidden md:block">
+              {isAuthenticated && customer ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <ChevronDown className="h-4 w-4" />
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-3 h-10 px-4 border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
+                    >
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {customer.firstName} {customer.lastName}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded text-xs font-semibold text-green-700 dark:text-green-300">
+                        <Wallet className="h-3 w-3" />
+                        <span>{walletBalance?.toLocaleString() || '0'} IQD</span>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
@@ -242,8 +249,19 @@ export default function Header() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
-            )}
+              ) : (
+                <Button 
+                  asChild
+                  variant="outline" 
+                  className="flex items-center gap-2 h-10 px-4 border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
+                >
+                  <Link href="/shop">
+                    <LogIn className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-sm font-medium">ورود / کیف پول</span>
+                  </Link>
+                </Button>
+              )}
+            </div>
             
             {/* Mobile menu button */}
             <Button
