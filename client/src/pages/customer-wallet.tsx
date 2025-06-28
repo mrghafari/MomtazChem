@@ -16,9 +16,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote } from "lucide-react";
 
-
-
-
 interface WalletSummary {
   wallet?: {
     id: number;
@@ -67,7 +64,6 @@ export default function CustomerWallet() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isRechargeDialogOpen, setIsRechargeDialogOpen] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ar'>('en');
   const [rechargeForm, setRechargeForm] = useState({
     amount: "",
     currency: "IQD",
@@ -79,9 +75,9 @@ export default function CustomerWallet() {
   // Authentication
   const { customer, isAuthenticated, isLoading: authLoading } = useCustomer();
 
-  // Get current translations
-  const t = translations[currentLanguage];
-  const isRTL = currentLanguage === 'ar';
+  // Get language from centralized system
+  const { language, t, direction } = useLanguage();
+  const isRTL = direction === 'rtl';
 
   // Fetch wallet summary - only when authenticated
   const { data: walletData, isLoading } = useQuery<{ success: boolean; data: WalletSummary }>({
@@ -110,9 +106,7 @@ export default function CustomerWallet() {
     onSuccess: () => {
       toast({
         title: t.rechargeSuccess,
-        description: currentLanguage === 'en' 
-          ? "Your wallet recharge request has been submitted successfully and is pending approval."
-          : "تم إرسال طلب شحن محفظتك بنجاح وهو في انتظار الموافقة.",
+        description: t.requestSubmitted,
       });
       setIsRechargeDialogOpen(false);
       setRechargeForm({
@@ -127,8 +121,8 @@ export default function CustomerWallet() {
     },
     onError: (error: any) => {
       toast({
-        title: currentLanguage === 'en' ? "Request Error" : "خطأ في الطلب",
-        description: error.message || (currentLanguage === 'en' ? "Error creating wallet recharge request" : "خطأ في إنشاء طلب شحن المحفظة"),
+        title: t.requestError,
+        description: error.message || t.errorCreatingRequest,
         variant: "destructive",
       });
     }
@@ -139,8 +133,8 @@ export default function CustomerWallet() {
     
     if (!rechargeForm.amount || parseFloat(rechargeForm.amount) <= 0) {
       toast({
-        title: currentLanguage === 'en' ? "Input Error" : "خطأ في الإدخال",
-        description: currentLanguage === 'en' ? "Please enter a valid amount" : "يرجى إدخال مبلغ صحيح",
+        title: t.inputError,
+        description: t.validAmount,
         variant: "destructive",
       });
       return;
@@ -148,8 +142,8 @@ export default function CustomerWallet() {
 
     if (!rechargeForm.paymentMethod) {
       toast({
-        title: currentLanguage === 'en' ? "Input Error" : "خطأ في الإدخال",
-        description: currentLanguage === 'en' ? "Please select a payment method" : "يرجى اختيار طريقة الدفع",
+        title: t.inputError,
+        description: t.selectPaymentMethod,
         variant: "destructive",
       });
       return;
@@ -160,7 +154,7 @@ export default function CustomerWallet() {
 
   const formatCurrency = (amount: string | number, currency: string = "IQD") => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    const locale = currentLanguage === 'en' ? 'en-US' : 'ar-IQ';
+    const locale = language === 'en' ? 'en-US' : 'ar-IQ';
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
@@ -180,7 +174,7 @@ export default function CustomerWallet() {
     };
     
     const config = statusConfig[status] || { labelEn: status, labelAr: status, variant: 'secondary' };
-    const label = currentLanguage === 'en' ? config.labelEn : config.labelAr;
+    const label = language === 'en' ? config.labelEn : config.labelAr;
     return <Badge variant={config.variant}>{label}</Badge>;
   };
 
@@ -215,17 +209,15 @@ export default function CustomerWallet() {
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-2">
               <Wallet className="h-6 w-6" />
-              {t.title}
+              {t.walletTitle}
             </CardTitle>
             <CardDescription>
-              {currentLanguage === 'en' 
-                ? "Please log in to access your wallet" 
-                : "يرجى تسجيل الدخول للوصول إلى محفظتك"}
+              {t.loginToAccessWallet}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <Button onClick={() => window.location.href = '/shop'} className="w-full">
-              {currentLanguage === 'en' ? "Go to Login" : "الذهاب إلى تسجيل الدخول"}
+              {t.goToLogin}
             </Button>
           </CardContent>
         </Card>
@@ -251,46 +243,22 @@ export default function CustomerWallet() {
   const allTransactions = transactionsData?.data || [];
 
   return (
-    <div className={`min-h-screen bg-gray-50 p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen bg-gray-50 p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={direction}>
       <div className="max-w-7xl mx-auto">
-        {/* Language Toggle */}
-        <div className={`mb-4 flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
-          <div className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm">
-            <Button
-              size="sm"
-              variant={currentLanguage === 'en' ? 'default' : 'ghost'}
-              onClick={() => setCurrentLanguage('en')}
-              className="text-xs"
-            >
-              <Globe className="h-3 w-3 mr-1" />
-              English
-            </Button>
-            <Button
-              size="sm"
-              variant={currentLanguage === 'ar' ? 'default' : 'ghost'}
-              onClick={() => setCurrentLanguage('ar')}
-              className="text-xs"
-            >
-              <Globe className="h-3 w-3 mr-1" />
-              العربية
-            </Button>
-          </div>
-        </div>
-
         {/* Header */}
         <div className="mb-8">
           <h1 className={`text-3xl font-bold text-gray-900 flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Wallet className="h-8 w-8 text-blue-600" />
-            {t.title}
+            {t.walletTitle}
           </h1>
-          <p className="text-gray-600 mt-2">{t.subtitle}</p>
+          <p className="text-gray-600 mt-2">{t.walletSubtitle}</p>
         </div>
 
         {/* Wallet Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <CardTitle className="text-sm font-medium">{t.balance}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t.currentBalance}</CardTitle>
               <Wallet className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -313,7 +281,7 @@ export default function CustomerWallet() {
                 {formatCurrency(walletData?.data?.totalSpent || 0)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {currentLanguage === 'en' ? 'Total withdrawals' : 'إجمالي السحوبات'}
+                {t.totalWithdrawals}
               </p>
             </CardContent>
           </Card>
@@ -328,7 +296,7 @@ export default function CustomerWallet() {
                 {formatCurrency(walletData?.data?.totalRecharged || 0)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {currentLanguage === 'en' ? 'Total deposits' : 'إجمالي الإيداعات'}
+                {t.totalDeposits}
               </p>
             </CardContent>
           </Card>
@@ -338,8 +306,8 @@ export default function CustomerWallet() {
         <div className="mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>{currentLanguage === 'en' ? 'Quick Actions' : 'الإجراءات السريعة'}</CardTitle>
-              <CardDescription>{currentLanguage === 'en' ? 'Manage your wallet' : 'إدارة محفظتك'}</CardDescription>
+              <CardTitle>{t.quickActions}</CardTitle>
+              <CardDescription>{t.manageWallet}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-4">
@@ -347,17 +315,14 @@ export default function CustomerWallet() {
                   <DialogTrigger asChild>
                     <Button className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <Plus className="h-4 w-4" />
-                      {t.recharge}
+                      {t.addFunds}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className={isRTL ? 'rtl' : 'ltr'}>
+                  <DialogContent className={isRTL ? 'rtl' : 'ltr'} dir={direction}>
                     <DialogHeader>
-                      <DialogTitle>{currentLanguage === 'en' ? 'Wallet Recharge Request' : 'طلب شحن المحفظة'}</DialogTitle>
+                      <DialogTitle>{t.walletRechargeRequest}</DialogTitle>
                       <DialogDescription>
-                        {currentLanguage === 'en' 
-                          ? 'Fill in the details below to request a wallet recharge'
-                          : 'املأ التفاصيل أدناه لطلب شحن المحفظة'
-                        }
+                        {t.fillRechargeDetails}
                       </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleRechargeSubmit} className="space-y-4">
@@ -369,7 +334,7 @@ export default function CustomerWallet() {
                           step="0.01"
                           value={rechargeForm.amount}
                           onChange={(e) => setRechargeForm({...rechargeForm, amount: e.target.value})}
-                          placeholder={currentLanguage === 'en' ? 'Enter amount' : 'أدخل المبلغ'}
+                          placeholder={t.enterAmount}
                           required
                         />
                       </div>
@@ -385,13 +350,13 @@ export default function CustomerWallet() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="IQD">
-                              {currentLanguage === 'en' ? 'Iraqi Dinar (IQD)' : 'الدينار العراقي (IQD)'}
+                              {t.iraqiDinar}
                             </SelectItem>
                             <SelectItem value="USD">
-                              {currentLanguage === 'en' ? 'US Dollar (USD)' : 'الدولار الأمريكي (USD)'}
+                              {t.usDollar}
                             </SelectItem>
                             <SelectItem value="EUR">
-                              {currentLanguage === 'en' ? 'Euro (EUR)' : 'اليورو (EUR)'}
+                              {t.euro}
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -404,13 +369,21 @@ export default function CustomerWallet() {
                           onValueChange={(value) => setRechargeForm({...rechargeForm, paymentMethod: value})}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder={currentLanguage === 'en' ? 'Select payment method' : 'اختر طريقة الدفع'} />
+                            <SelectValue placeholder={t.selectPaymentMethod} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="bank_transfer">{t.bankTransfer}</SelectItem>
-                            <SelectItem value="online_payment">{t.onlinePayment}</SelectItem>
-                            <SelectItem value="cash">{t.cash}</SelectItem>
-                            <SelectItem value="mobile_wallet">{t.mobileWallet}</SelectItem>
+                            <SelectItem value="bank_transfer">
+                              {t.bankTransfer}
+                            </SelectItem>
+                            <SelectItem value="online_payment">
+                              {t.onlinePayment}
+                            </SelectItem>
+                            <SelectItem value="cash">
+                              {t.cashPayment}
+                            </SelectItem>
+                            <SelectItem value="mobile_wallet">
+                              {t.mobileWallet}
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -421,188 +394,118 @@ export default function CustomerWallet() {
                           id="paymentReference"
                           value={rechargeForm.paymentReference}
                           onChange={(e) => setRechargeForm({...rechargeForm, paymentReference: e.target.value})}
-                          placeholder={currentLanguage === 'en' ? 'Reference number, card number or transaction ID' : 'رقم المرجع أو رقم البطاقة أو معرف المعاملة'}
+                          placeholder={t.enterPaymentReference}
                         />
                       </div>
 
                       <div>
-                        <Label htmlFor="customerNotes">{t.notes}</Label>
+                        <Label htmlFor="customerNotes">{t.notes} ({t.optional})</Label>
                         <Textarea
                           id="customerNotes"
                           value={rechargeForm.customerNotes}
                           onChange={(e) => setRechargeForm({...rechargeForm, customerNotes: e.target.value})}
-                          placeholder={currentLanguage === 'en' ? 'Additional notes (optional)' : 'ملاحظات إضافية (اختيارية)'}
+                          placeholder={t.enterNotes}
                           rows={3}
                         />
                       </div>
 
-                      <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} ${isRTL ? 'space-x-reverse' : ''} space-x-2 justify-end`}>
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => setIsRechargeDialogOpen(false)}
-                        >
+                      <div className="flex justify-end space-x-2">
+                        <Button type="button" variant="outline" onClick={() => setIsRechargeDialogOpen(false)}>
                           {t.cancel}
                         </Button>
-                        <Button 
-                          type="submit" 
-                          disabled={createRechargeMutation.isPending}
-                        >
+                        <Button type="submit" disabled={createRechargeMutation.isPending}>
                           {createRechargeMutation.isPending ? t.processing : t.submit}
                         </Button>
                       </div>
                     </form>
                   </DialogContent>
                 </Dialog>
-
-                {pendingRecharges.length > 0 && (
-                  <Badge variant="secondary" className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <Clock className="h-4 w-4" />
-                    {pendingRecharges.length} {currentLanguage === 'en' ? 'pending requests' : 'طلبات معلقة'}
-                  </Badge>
-                )}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs for different sections */}
+        {/* Tabs for Transactions and Recharge Requests */}
         <Tabs defaultValue="transactions" className="space-y-4">
-          <TabsList className={isRTL ? 'flex-row-reverse' : ''}>
-            <TabsTrigger value="transactions">{t.recentTransactions}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="transactions">{t.allTransactions}</TabsTrigger>
             <TabsTrigger value="recharge-requests">{t.rechargeRequests}</TabsTrigger>
-            <TabsTrigger value="all-transactions">{t.allTransactions}</TabsTrigger>
           </TabsList>
 
+          {/* All Transactions Tab */}
           <TabsContent value="transactions">
             <Card>
               <CardHeader>
-                <CardTitle>{t.recentTransactions}</CardTitle>
-                <CardDescription>{currentLanguage === 'en' ? 'Last 10 wallet transactions' : 'آخر 10 معاملات في المحفظة'}</CardDescription>
+                <CardTitle>{t.allTransactions}</CardTitle>
+                <CardDescription>
+                  {language === 'en' ? 'View all your wallet transactions' : 'عرض جميع معاملات محفظتك'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {recentTransactions.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">{t.noTransactions}</p>
-                ) : (
+                {allTransactions.length > 0 ? (
                   <div className="space-y-4">
-                    {recentTransactions.map((transaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-4">
+                    {allTransactions.map((transaction, index) => (
+                      <div key={index} className={`flex items-center justify-between p-4 border rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                           {getTransactionIcon(transaction.transactionType)}
-                          <div>
+                          <div className={isRTL ? 'text-right' : 'text-left'}>
                             <p className="font-medium">{transaction.description}</p>
                             <p className="text-sm text-gray-500">
-                              {new Date(transaction.createdAt).toLocaleDateString('fa-IR')}
+                              {new Date(transaction.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : 'ar-SA')}
                             </p>
                           </div>
                         </div>
-                        <div className="text-left">
-                          <p className={`font-bold ${
-                            transaction.transactionType === 'credit' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {transaction.transactionType === 'credit' ? '+' : '-'}
-                            {formatCurrency(transaction.amount, transaction.currency)}
+                        <div className={`text-right ${isRTL ? 'text-left' : ''}`}>
+                          <p className={`font-medium ${transaction.transactionType === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                            {transaction.transactionType === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount, transaction.currency)}
                           </p>
                           {getStatusBadge(transaction.status)}
                         </div>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">{t.noTransactions}</p>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Recharge Requests Tab */}
           <TabsContent value="recharge-requests">
             <Card>
               <CardHeader>
-                <CardTitle>درخواست‌های شارژ</CardTitle>
-                <CardDescription>تاریخچه درخواست‌های شارژ کیف پول</CardDescription>
+                <CardTitle>{t.rechargeRequests}</CardTitle>
+                <CardDescription>
+                  {language === 'en' ? 'View all your recharge requests' : 'عرض جميع طلبات الشحن الخاصة بك'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {allRechargeRequests.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">هیچ درخواست شارژی یافت نشد</p>
-                ) : (
+                {allRechargeRequests.length > 0 ? (
                   <div className="space-y-4">
                     {allRechargeRequests.map((request) => (
-                      <div key={request.id} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <p className="font-medium">درخواست #{request.requestNumber}</p>
+                      <div key={request.id} className={`flex items-center justify-between p-4 border rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                          <CreditCard className="h-5 w-5 text-blue-600" />
+                          <div className={isRTL ? 'text-right' : 'text-left'}>
+                            <p className="font-medium">{t.requestNumber}: {request.requestNumber}</p>
+                            <p className="text-sm text-gray-500">{request.paymentMethod}</p>
                             <p className="text-sm text-gray-500">
-                              {new Date(request.createdAt).toLocaleDateString('fa-IR')}
+                              {new Date(request.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : 'ar-SA')}
                             </p>
-                          </div>
-                          <div className="text-left">
-                            <p className="font-bold text-blue-600">
-                              {formatCurrency(request.amount, request.currency)}
-                            </p>
-                            {getStatusBadge(request.status)}
                           </div>
                         </div>
-                        <div className="text-sm text-gray-600">
-                          <p>روش پرداخت: {request.paymentMethod}</p>
-                          {request.paymentReference && (
-                            <p>مرجع: {request.paymentReference}</p>
-                          )}
-                          {request.customerNotes && (
-                            <p>توضیحات: {request.customerNotes}</p>
-                          )}
-                          {request.adminNotes && (
-                            <p className="text-orange-600">نظر ادمین: {request.adminNotes}</p>
-                          )}
+                        <div className={`text-right ${isRTL ? 'text-left' : ''}`}>
+                          <p className="font-medium text-blue-600">
+                            {formatCurrency(request.amount, request.currency)}
+                          </p>
+                          {getStatusBadge(request.status)}
                         </div>
                       </div>
                     ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="all-transactions">
-            <Card>
-              <CardHeader>
-                <CardTitle>همه تراکنش‌ها</CardTitle>
-                <CardDescription>تاریخچه کامل تراکنش‌های کیف پول</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {allTransactions.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">هیچ تراکنشی یافت نشد</p>
                 ) : (
-                  <div className="space-y-4">
-                    {allTransactions.map((transaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          {getTransactionIcon(transaction.transactionType)}
-                          <div>
-                            <p className="font-medium">{transaction.description}</p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(transaction.createdAt).toLocaleDateString('fa-IR')} - {transaction.id}
-                            </p>
-                            {transaction.referenceType && (
-                              <p className="text-xs text-gray-400">
-                                نوع: {transaction.referenceType}
-                                {transaction.referenceId && ` - شناسه: ${transaction.referenceId}`}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-left">
-                          <p className={`font-bold ${
-                            transaction.transactionType === 'credit' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {transaction.transactionType === 'credit' ? '+' : '-'}
-                            {formatCurrency(transaction.amount, transaction.currency)}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            موجودی: {formatCurrency(transaction.balanceAfter, transaction.currency)}
-                          </p>
-                          {getStatusBadge(transaction.status)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-gray-500 text-center py-8">{t.noRechargeRequests}</p>
                 )}
               </CardContent>
             </Card>
