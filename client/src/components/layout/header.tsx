@@ -38,7 +38,6 @@ export default function Header() {
     { href: '/services', label: t.services },
     { href: '/contact', label: t.contact },
     { href: '/shop', label: t.shop },
-    { href: '/product-recommendations', label: 'AI Recommendations' },
   ];
 
   const productCategories = [
