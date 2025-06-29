@@ -125,6 +125,7 @@ function Router() {
           <Route path="/admin/order-management" component={AdminOrderManagement} />
           <Route path="/admin/site-management" component={SiteManagement} />
           <Route path="/admin/products" component={ProductsPage} />
+          <Route path="/admin/geographic-reports" component={GeographicReports} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
