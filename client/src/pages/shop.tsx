@@ -17,6 +17,7 @@ import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
 import BilingualPurchaseForm from "@/components/bilingual-purchase-form";
 import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
+import ProductRecommendationWizard from "@/components/product-recommendation-wizard";
 
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -443,6 +444,11 @@ const Shop = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* AI Product Recommendations at Top */}
+        <div className="mb-8">
+          <ProductRecommendationWizard />
+        </div>
+
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="w-64 flex-shrink-0">
