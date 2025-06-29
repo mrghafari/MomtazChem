@@ -69,6 +69,7 @@ import LogisticsLogin from "@/pages/logistics-login";
 import SuperAdminDepartmentManagement from "@/pages/super-admin-department-management";
 import SuperAdminSettings from "@/pages/super-admin-settings";
 import SiteManagement from "@/pages/site-management";
+import GeographicReports from "@/pages/geographic-reports";
 import NotFound from "@/pages/not-found";
 
 function Router() {

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import GeographicDistribution from "@/components/reports/geographic-distribution";
 
 export default function GeographicReportsPage() {
-  const [, navigate] = useNavigate();
+  const [, navigate] = useLocation();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
