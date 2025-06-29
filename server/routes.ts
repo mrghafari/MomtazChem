@@ -10239,6 +10239,283 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // GEOGRAPHIC DISTRIBUTION REPORTS API
+  // =============================================================================
+
+  // Geographic Distribution Reports API
+  app.get('/api/reports/geographic-distribution', async (req, res) => {
+    try {
+      // Get customer geographic distribution data
+      const countries = await crmDb.select({
+        country: crmCustomers.country,
+        count: sql`count(*)::int`.as('count'),
+        totalRevenue: sql`coalesce(sum(${crmCustomers.totalSpent}), 0)::numeric`.as('totalRevenue')
+      })
+      .from(crmCustomers)
+      .where(isNotNull(crmCustomers.country))
+      .groupBy(crmCustomers.country)
+      .orderBy(sql`count(*) desc`);
+
+      const totalCustomers = await crmDb.select({ count: sql`count(*)::int`.as('count') })
+        .from(crmCustomers)
+        .then(result => result[0]?.count || 0);
+
+      // Calculate percentages for countries
+      const countriesWithPercentage = countries.map(country => ({
+        ...country,
+        percentage: totalCustomers > 0 ? (country.count / totalCustomers) * 100 : 0,
+        totalRevenue: Number(country.totalRevenue)
+      }));
+
+      // Get cities distribution
+      const cities = await crmDb.select({
+        city: crmCustomers.city,
+        country: crmCustomers.country,
+        count: sql`count(*)::int`.as('count'),
+        totalRevenue: sql`coalesce(sum(${crmCustomers.totalSpent}), 0)::numeric`.as('totalRevenue')
+      })
+      .from(crmCustomers)
+      .where(and(isNotNull(crmCustomers.city), isNotNull(crmCustomers.country)))
+      .groupBy(crmCustomers.city, crmCustomers.country)
+      .orderBy(sql`count(*) desc`)
+      .limit(50);
+
+      const citiesWithPercentage = cities.map(city => ({
+        ...city,
+        percentage: totalCustomers > 0 ? (city.count / totalCustomers) * 100 : 0,
+        totalRevenue: Number(city.totalRevenue)
+      }));
+
+      // Get top regions summary
+      const topRegions = countriesWithPercentage.slice(0, 10).map(country => ({
+        region: country.country,
+        customers: country.count,
+        revenue: country.totalRevenue,
+        averageOrderValue: country.count > 0 ? country.totalRevenue / country.count : 0
+      }));
+
+      const geoStats = {
+        totalCustomers,
+        countries: countriesWithPercentage,
+        cities: citiesWithPercentage,
+        topRegions
+      };
+
+      res.json(geoStats);
+    } catch (error) {
+      console.error('Geographic distribution API error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch geographic distribution data' });
+    }
+  });
+
+  // Customer locations API
+  app.get('/api/reports/customer-locations', async (req, res) => {
+    try {
+      const { country } = req.query;
+      
+      let query = crmDb.select({
+        id: crmCustomers.id,
+        name: sql`concat(${crmCustomers.firstName}, ' ', ${crmCustomers.lastName})`.as('name'),
+        email: crmCustomers.email,
+        country: crmCustomers.country,
+        city: crmCustomers.city,
+        address: crmCustomers.address,
+        totalOrders: crmCustomers.totalOrders,
+        totalSpent: crmCustomers.totalSpent
+      })
+      .from(crmCustomers)
+      .where(and(
+        isNotNull(crmCustomers.address),
+        isNotNull(crmCustomers.city),
+        isNotNull(crmCustomers.country)
+      ));
+
+      if (country && country !== 'all') {
+        query = query.where(eq(crmCustomers.country, country as string));
+      }
+
+      const customerLocations = await query
+        .orderBy(desc(crmCustomers.totalSpent))
+        .limit(100);
+
+      res.json(customerLocations);
+    } catch (error) {
+      console.error('Customer locations API error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch customer locations' });
+    }
+  });
+
+  // Geographic distribution PDF export
+  app.post('/api/reports/geographic-distribution/export', async (req, res) => {
+    try {
+      const { country, metric } = req.body;
+      
+      // Get the geographic distribution data directly
+      const countries = await crmDb.select({
+        country: crmCustomers.country,
+        count: sql`count(*)::int`.as('count'),
+        totalRevenue: sql`coalesce(sum(${crmCustomers.totalSpent}), 0)::numeric`.as('totalRevenue')
+      })
+      .from(crmCustomers)
+      .where(isNotNull(crmCustomers.country))
+      .groupBy(crmCustomers.country)
+      .orderBy(sql`count(*) desc`);
+
+      const totalCustomers = await crmDb.select({ count: sql`count(*)::int`.as('count') })
+        .from(crmCustomers)
+        .then(result => result[0]?.count || 0);
+
+      const countriesWithPercentage = countries.map(country => ({
+        ...country,
+        percentage: totalCustomers > 0 ? (country.count / totalCustomers) * 100 : 0,
+        totalRevenue: Number(country.totalRevenue)
+      }));
+
+      const cities = await crmDb.select({
+        city: crmCustomers.city,
+        country: crmCustomers.country,
+        count: sql`count(*)::int`.as('count'),
+        totalRevenue: sql`coalesce(sum(${crmCustomers.totalSpent}), 0)::numeric`.as('totalRevenue')
+      })
+      .from(crmCustomers)
+      .where(and(isNotNull(crmCustomers.city), isNotNull(crmCustomers.country)))
+      .groupBy(crmCustomers.city, crmCustomers.country)
+      .orderBy(sql`count(*) desc`)
+      .limit(50);
+
+      const citiesWithPercentage = cities.map(city => ({
+        ...city,
+        percentage: totalCustomers > 0 ? (city.count / totalCustomers) * 100 : 0,
+        totalRevenue: Number(city.totalRevenue)
+      }));
+
+      const geoData = {
+        totalCustomers,
+        countries: countriesWithPercentage,
+        cities: citiesWithPercentage
+      };
+      
+      // Generate PDF report
+      const html = `
+        <!DOCTYPE html>
+        <html dir="rtl">
+        <head>
+          <meta charset="UTF-8">
+          <title>گزارش توزیع جغرافیایی مشتریان</title>
+          <style>
+            body { font-family: 'Tahoma', Arial, sans-serif; margin: 20px; direction: rtl; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .stats { display: flex; justify-content: space-around; margin: 20px 0; }
+            .stat-card { text-align: center; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+            .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .table th, .table td { border: 1px solid #ddd; padding: 12px; text-align: right; }
+            .table th { background-color: #f5f5f5; font-weight: bold; }
+            .section { margin: 30px 0; }
+            .section h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>گزارش توزیع جغرافیایی مشتریان</h1>
+            <p>تاریخ تولید گزارش: ${new Date().toLocaleDateString('fa-IR')}</p>
+          </div>
+          
+          <div class="stats">
+            <div class="stat-card">
+              <h3>کل مشتریان</h3>
+              <p style="font-size: 24px; font-weight: bold;">${geoData.totalCustomers.toLocaleString()}</p>
+            </div>
+            <div class="stat-card">
+              <h3>تعداد کشورها</h3>
+              <p style="font-size: 24px; font-weight: bold;">${geoData.countries.length}</p>
+            </div>
+            <div class="stat-card">
+              <h3>تعداد شهرها</h3>
+              <p style="font-size: 24px; font-weight: bold;">${geoData.cities.length}</p>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>توزیع مشتریان بر اساس کشور</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>رتبه</th>
+                  <th>کشور</th>
+                  <th>تعداد مشتری</th>
+                  <th>درصد</th>
+                  <th>کل فروش</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${geoData.countries.map((country: any, index: number) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${country.country}</td>
+                    <td>${country.count.toLocaleString()}</td>
+                    <td>${country.percentage.toFixed(1)}%</td>
+                    <td>$${country.totalRevenue.toLocaleString()}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section">
+            <h2>توزیع مشتریان بر اساس شهر (۲۰ شهر برتر)</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>رتبه</th>
+                  <th>شهر</th>
+                  <th>کشور</th>
+                  <th>تعداد مشتری</th>
+                  <th>کل فروش</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${geoData.cities.slice(0, 20).map((city: any, index: number) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${city.city}</td>
+                    <td>${city.country}</td>
+                    <td>${city.count.toLocaleString()}</td>
+                    <td>$${city.totalRevenue.toLocaleString()}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' }
+      });
+      
+      await browser.close();
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=geographic-distribution-${new Date().toISOString().split('T')[0]}.pdf`);
+      res.send(pdf);
+      
+    } catch (error) {
+      console.error('PDF export error:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate PDF report' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
