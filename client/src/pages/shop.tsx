@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -372,8 +372,21 @@ const Shop = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between relative">
             <h1 className="text-3xl font-bold text-gray-900">{t.shop}</h1>
+            
+            {/* AI Recommendations Button - Center */}
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg"
+                onClick={() => navigate('/product-recommendations')}
+                title="AI Product Recommendations"
+              >
+                <Sparkles className="w-5 h-5" />
+                <span className="hidden sm:inline">AI Recommendations</span>
+              </Button>
+            </div>
             
             {/* User Account & Cart */}
             <div className="flex items-center gap-4">
@@ -414,17 +427,6 @@ const Shop = () => {
                   )}
                 </div>
               )}
-
-              {/* AI Recommendations Button */}
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600"
-                onClick={() => navigate('/product-recommendations')}
-                title="AI Product Recommendations"
-              >
-                <Brain className="w-5 h-5" />
-                <span className="hidden sm:inline">AI توصیه‌ها</span>
-              </Button>
 
               {/* Cart Summary */}
               <div className="relative">
