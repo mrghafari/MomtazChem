@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -379,7 +379,7 @@ const Shop = () => {
             <div className="absolute left-1/2 transform -translate-x-1/2">
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 from-purple-500 to-pink-500 border-none hover:from-purple-600 hover:to-pink-600 shadow-lg bg-[#fcfcfc] text-[#0048c282]"
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg"
                 onClick={() => navigate('/product-recommendations')}
                 title="AI Product Recommendations"
               >
@@ -390,11 +390,41 @@ const Shop = () => {
             
             {/* User Account & Cart */}
             <div className="flex items-center gap-4">
-              {/* User Info Display */}
-              {!isLoadingCustomer && customer && (
-                <div className="flex items-center gap-2 text-gray-700">
-                  <User className="w-4 h-4" />
-                  <span className="text-sm font-medium">{customer.firstName} {customer.lastName}</span>
+              {/* User Account */}
+              {!isLoadingCustomer && (
+                <div className="flex items-center gap-2">
+                  {customer ? (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.location.href = "/customer/profile"}
+                        className="flex items-center gap-1"
+                      >
+                        <User className="w-4 h-4" />
+                        {customer.firstName}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={handleLogout}
+                        className="flex items-center gap-1"
+                      >
+                        <LogOut className="w-4 h-4" />
+{t.logout}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowAuth(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <User className="w-4 h-4" />
+{t.login} / {t.register}
+                    </Button>
+                  )}
                 </div>
               )}
 
@@ -884,58 +914,6 @@ const Shop = () => {
                   Next
                 </Button>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* User Authentication Section at Bottom */}
-      <div className="bg-white border-t shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-4">
-            {!isLoadingCustomer && (
-              <>
-                {customer ? (
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.location.href = "/customer/profile"}
-                      className="flex items-center gap-2"
-                    >
-                      <User className="w-4 h-4" />
-                      Profile
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.location.href = "/customer/wallet"}
-                      className="flex items-center gap-2"
-                    >
-                      <Wallet className="w-4 h-4" />
-                      Wallet
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleLogout}
-                      className="flex items-center gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      {t.logout}
-                    </Button>
-                  </div>
-                ) : (
-                  <Button 
-                    variant="default" 
-                    onClick={() => setShowAuth(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <User className="w-4 h-4" />
-                    {t.login} / {t.register}
-                  </Button>
-                )}
-              </>
             )}
           </div>
         </div>
