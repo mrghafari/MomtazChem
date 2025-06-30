@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ const Shop = () => {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [customer, setCustomer] = useState<any>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
 
   // Advanced search state
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -170,6 +171,8 @@ const Shop = () => {
         const result = await response.json();
         if (result.success) {
           setCustomer(result.customer);
+          // Fetch wallet balance
+          fetchWalletBalance();
         }
       }
     } catch (error) {
@@ -179,8 +182,26 @@ const Shop = () => {
     }
   };
 
+  const fetchWalletBalance = async () => {
+    try {
+      const response = await fetch('/api/customers/wallet/balance', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setWalletBalance(result.balance || 0);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+    }
+  };
+
   const handleLoginSuccess = (customerData: any) => {
     setCustomer(customerData);
+    fetchWalletBalance();
     toast({
       title: "خوش آمدید",
       description: `${customerData.firstName} ${customerData.lastName}`,
@@ -196,17 +217,18 @@ const Shop = () => {
 
       if (response.ok) {
         setCustomer(null);
+        setWalletBalance(0);
         toast({
           title: "خروج موفق",
-          description: "از حساب کاربری خود خارج شدید",
+          description: "با موفقیت از حساب کاربری خارج شدید",
         });
       }
     } catch (error) {
       console.error('Logout error:', error);
       toast({
-        variant: "destructive",
         title: "خطا",
-        description: "مشکلی در خروج رخ داده است",
+        description: "خطا در خروج از حساب کاربری",
+        variant: "destructive",
       });
     }
   };
