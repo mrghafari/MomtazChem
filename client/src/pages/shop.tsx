@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain } from "lucide-react";
+import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +18,6 @@ import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
 import BilingualPurchaseForm from "@/components/bilingual-purchase-form";
 import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
-import ProductRecommendationWizard from "@/components/product-recommendation-wizard";
 
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 const Shop = () => {
   const { toast } = useToast();
   const { t, direction } = useLanguage();
+  const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
@@ -414,6 +415,17 @@ const Shop = () => {
                 </div>
               )}
 
+              {/* AI Recommendations Button */}
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600"
+                onClick={() => navigate('/product-recommendations')}
+                title="AI Product Recommendations"
+              >
+                <Brain className="w-5 h-5" />
+                <span className="hidden sm:inline">AI توصیه‌ها</span>
+              </Button>
+
               {/* Cart Summary */}
               <div className="relative">
                 <Button 
@@ -444,10 +456,6 @@ const Shop = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* AI Product Recommendations at Top */}
-        <div className="mb-8">
-          <ProductRecommendationWizard />
-        </div>
 
         <div className="flex gap-8">
           {/* Sidebar Filters */}
