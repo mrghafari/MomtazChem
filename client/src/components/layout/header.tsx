@@ -203,46 +203,7 @@ export default function Header() {
               <LanguageSwitcher />
             </div>
 
-            {/* Customer Info - Desktop */}
-            {isAuthenticated && customer && (
-              <div className="hidden md:flex items-center gap-4">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <User className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {customer.firstName} {customer.lastName}
-                  </span>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem asChild>
-                      <Link href="/customer/profile" className="flex items-center gap-2 w-full">
-                        <User className="h-4 w-4" />
-                        <span>{t.profile}</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/customer/wallet" className="flex items-center gap-2 w-full">
-                        <Wallet className="h-4 w-4" />
-                        <span>{t.wallet}</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => logout()}
-                      className="flex items-center gap-2 text-red-600 hover:text-red-700"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>{t.logout}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+
             
             {/* Mobile menu button */}
             <Button
