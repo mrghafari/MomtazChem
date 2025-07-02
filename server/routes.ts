@@ -10609,7 +10609,7 @@ momtazchem.com
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      const query = `
+      const query = sql`
         SELECT 
           p.name,
           p.category,
@@ -10618,19 +10618,17 @@ momtazchem.com
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
         LEFT JOIN products p ON oi.product_id = p.id
-        WHERE o.created_at >= $1
-        ${product !== 'all' ? 'AND p.id = $2' : ''}
+        WHERE o.created_at >= ${startDate}
+        ${product !== 'all' ? sql` AND p.id = ${product}` : sql``}
         GROUP BY p.id, p.name, p.category
         ORDER BY revenue DESC
       `;
 
-      const result = product !== 'all' 
-        ? await db.execute(sql.raw(query, [startDate, product]))
-        : await db.execute(sql.raw(query, [startDate]));
+      const result = await db.execute(query);
 
       // Get regional breakdown for each product
       const productData = await Promise.all(result.rows.map(async (row: any) => {
-        const regionsQuery = `
+        const regionsQuery = sql`
           SELECT 
             COALESCE(c.country, 'Unknown') as region,
             SUM(oi.quantity) as quantity,
@@ -10639,12 +10637,12 @@ momtazchem.com
           LEFT JOIN crm_customers c ON o.customer_id = c.id
           LEFT JOIN order_items oi ON o.id = oi.order_id
           LEFT JOIN products p ON oi.product_id = p.id
-          WHERE o.created_at >= $1 AND p.name = $2
+          WHERE o.created_at >= ${startDate} AND p.name = ${row.name}
           GROUP BY c.country
           ORDER BY revenue DESC
         `;
 
-        const regions = await db.execute(sql.raw(regionsQuery, [startDate, row.name]));
+        const regions = await db.execute(regionsQuery);
 
         return {
           name: row.name,
@@ -10682,18 +10680,18 @@ momtazchem.com
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      const query = `
+      const query = sql`
         SELECT 
           DATE(o.created_at) as date,
           COUNT(DISTINCT o.id) as orders,
           SUM(CAST(o.total_amount AS DECIMAL)) as revenue
         FROM orders o
-        WHERE o.created_at >= $1
+        WHERE o.created_at >= ${startDate}
         GROUP BY DATE(o.created_at)
         ORDER BY date ASC
       `;
 
-      const result = await db.execute(sql.raw(query, [startDate]));
+      const result = await db.execute(query);
 
       const timeData = result.rows.map((row: any) => ({
         date: row.date,
