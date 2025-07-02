@@ -10530,8 +10530,8 @@ momtazchem.com
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      // Query orders with customer location data
-      const query = `
+      // Query orders with customer location data using raw SQL
+      const query = sql`
         SELECT 
           COALESCE(c.country, 'Unknown') as country,
           COALESCE(c.city, 'Unknown') as city,
@@ -10541,35 +10541,34 @@ momtazchem.com
           AVG(CAST(o.total_amount AS DECIMAL)) as avg_order_value
         FROM orders o
         LEFT JOIN crm_customers c ON o.customer_id = c.id
-        WHERE o.created_at >= $1
-        ${region !== 'all' ? 'AND c.country = $2' : ''}
+        WHERE o.created_at >= ${startDate}
+        ${region !== 'all' ? sql` AND c.country = ${region}` : sql``}
         GROUP BY c.country, c.city
         ORDER BY total_revenue DESC
       `;
 
-      const params = region !== 'all' ? [startDate, region] : [startDate];
-      const result = await db.execute(sql.raw(query), params);
+      const result = await db.execute(query);
 
       // Get top products for each region
-      const geoData = await Promise.all(result.map(async (row: any) => {
-        const topProductsQuery = `
+      const geoData = await Promise.all(result.rows.map(async (row: any) => {
+        const topProductsQuery = sql`
           SELECT 
             p.name,
             SUM(oi.quantity) as quantity,
-            SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
+            SUM(CAST(oi.total_price AS DECIMAL)) as revenue
           FROM orders o
           LEFT JOIN crm_customers c ON o.customer_id = c.id
           LEFT JOIN order_items oi ON o.id = oi.order_id
           LEFT JOIN products p ON oi.product_id = p.id
-          WHERE o.created_at >= $1 
-            AND c.country = $2 
-            AND c.city = $3
+          WHERE o.created_at >= ${startDate}
+            AND c.country = ${row.country}
+            AND c.city = ${row.city}
           GROUP BY p.id, p.name
           ORDER BY revenue DESC
           LIMIT 5
         `;
 
-        const topProducts = await db.execute(sql.raw(topProductsQuery), [startDate, row.country, row.city]);
+        const topProducts = await db.execute(topProductsQuery);
 
         return {
           region: `${row.city}, ${row.country}`,
@@ -10579,7 +10578,7 @@ momtazchem.com
           totalRevenue: Number(row.total_revenue) || 0,
           customerCount: Number(row.customer_count),
           avgOrderValue: Number(row.avg_order_value) || 0,
-          topProducts: topProducts.map((p: any) => ({
+          topProducts: topProducts.rows.map((p: any) => ({
             name: p.name,
             quantity: Number(p.quantity),
             revenue: Number(p.revenue) || 0
@@ -10615,7 +10614,7 @@ momtazchem.com
           p.name,
           p.category,
           SUM(oi.quantity) as total_sales,
-          SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
+          SUM(CAST(oi.total_price AS DECIMAL)) as revenue
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
         LEFT JOIN products p ON oi.product_id = p.id
@@ -10625,16 +10624,17 @@ momtazchem.com
         ORDER BY revenue DESC
       `;
 
-      const params = product !== 'all' ? [startDate, product] : [startDate];
-      const result = await db.execute(sql.raw(query), params);
+      const result = product !== 'all' 
+        ? await db.execute(sql.raw(query, [startDate, product]))
+        : await db.execute(sql.raw(query, [startDate]));
 
       // Get regional breakdown for each product
-      const productData = await Promise.all(result.map(async (row: any) => {
+      const productData = await Promise.all(result.rows.map(async (row: any) => {
         const regionsQuery = `
           SELECT 
             COALESCE(c.country, 'Unknown') as region,
             SUM(oi.quantity) as quantity,
-            SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
+            SUM(CAST(oi.total_price AS DECIMAL)) as revenue
           FROM orders o
           LEFT JOIN crm_customers c ON o.customer_id = c.id
           LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -10644,14 +10644,14 @@ momtazchem.com
           ORDER BY revenue DESC
         `;
 
-        const regions = await db.execute(sql.raw(regionsQuery), [startDate, row.name]);
+        const regions = await db.execute(sql.raw(regionsQuery, [startDate, row.name]));
 
         return {
           name: row.name,
           category: row.category,
           totalSales: Number(row.total_sales),
           revenue: Number(row.revenue) || 0,
-          regions: regions.map((r: any) => ({
+          regions: regions.rows.map((r: any) => ({
             region: r.region,
             quantity: Number(r.quantity),
             revenue: Number(r.revenue) || 0
@@ -10693,9 +10693,9 @@ momtazchem.com
         ORDER BY date ASC
       `;
 
-      const result = await db.execute(sql.raw(query), [startDate]);
+      const result = await db.execute(sql.raw(query, [startDate]));
 
-      const timeData = result.map((row: any) => ({
+      const timeData = result.rows.map((row: any) => ({
         date: row.date,
         orders: Number(row.orders),
         revenue: Number(row.revenue) || 0,
