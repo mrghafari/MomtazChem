@@ -410,54 +410,8 @@ const Shop = () => {
               </Button>
             </div>
             
-            {/* User & Cart Section */}
+            {/* Cart Section */}
             <div className="flex items-center gap-4">
-              {/* User Account */}
-              {!isLoadingCustomer && (
-                <div className="flex items-center gap-2">
-                  {customer ? (
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate("/customer/wallet")}
-                        className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100"
-                      >
-                        <User className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-900">
-                          {customer.firstName}
-                        </span>
-                        <div className="flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full">
-                          <Wallet className="w-3 h-3 text-green-600" />
-                          <span className="text-xs font-semibold text-green-800">
-                            ${walletBalance.toFixed(2)}
-                          </span>
-                        </div>
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={handleLogout}
-                        className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span className="text-sm">{t.logout}</span>
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setShowAuth(true)}
-                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    >
-                      <User className="w-4 h-4" />
-                      <span className="text-sm">{t.login} / {t.register}</span>
-                    </Button>
-                  )}
-                </div>
-              )}
-
               {/* Cart Summary */}
               <div className="relative">
                 <Button 
