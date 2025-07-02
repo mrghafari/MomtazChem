@@ -421,7 +421,10 @@ const Shop = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate("/customer/profile")}
+                        onClick={() => {
+                          console.log("Navigating to customer profile...");
+                          navigate("/customer/profile");
+                        }}
                         className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100"
                       >
                         <User className="w-4 h-4 text-gray-600" />
