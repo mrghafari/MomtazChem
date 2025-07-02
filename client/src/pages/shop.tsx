@@ -410,8 +410,48 @@ const Shop = () => {
               </Button>
             </div>
             
-            {/* Cart Section */}
+            {/* User & Cart Section */}
             <div className="flex items-center gap-4">
+              {/* User Account */}
+              {!isLoadingCustomer && (
+                <div className="flex items-center gap-2">
+                  {customer ? (
+                    <div className="flex items-center gap-2">
+                      {/* Customer Name - Click to Profile */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate("/customer/profile")}
+                        className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100"
+                      >
+                        <User className="w-4 h-4 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {customer.firstName}
+                        </span>
+                      </Button>
+                      
+                      {/* Wallet Balance Display */}
+                      <div className="flex items-center gap-1 px-3 py-2 bg-green-50 rounded-lg">
+                        <Wallet className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-semibold text-green-800">
+                          ${walletBalance.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowAuth(true)}
+                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      <User className="w-4 h-4" />
+                      <span className="text-sm">Login</span>
+                    </Button>
+                  )}
+                </div>
+              )}
+
               {/* Cart Summary */}
               <div className="relative">
                 <Button 
