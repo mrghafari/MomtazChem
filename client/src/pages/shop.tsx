@@ -433,13 +433,21 @@ const Shop = () => {
                         </span>
                       </Button>
                       
-                      {/* Wallet Balance Display */}
-                      <div className="flex items-center gap-1 px-3 py-2 bg-green-50 rounded-lg">
+                      {/* Wallet Balance Display - Click to Wallet */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          console.log("Navigating to customer wallet...");
+                          navigate("/customer/wallet");
+                        }}
+                        className="flex items-center gap-1 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                      >
                         <Wallet className="w-4 h-4 text-green-600" />
                         <span className="text-sm font-semibold text-green-800">
                           ${walletBalance.toFixed(2)}
                         </span>
-                      </div>
+                      </Button>
                     </div>
                   ) : (
                     <Button 
