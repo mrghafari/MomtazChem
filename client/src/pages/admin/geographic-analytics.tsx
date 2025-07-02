@@ -50,34 +50,34 @@ export default function GeographicAnalytics() {
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState("all");
 
-  // Persian translations
+  // English translations
   const t = {
-    title: "تحلیل جغرافیایی",
-    subtitle: "پیگیری عملکرد فروش بر اساس منطقه و محصول",
-    totalRevenue: "درآمد کل",
-    totalOrders: "سفارشات کل", 
-    customers: "مشتریان",
-    regions: "مناطق",
-    avgOrderValue: "میانگین ارزش سفارش",
-    export: "خروجی",
-    loading: "در حال بارگذاری اطلاعات تحلیلی...",
-    last7Days: "۷ روز گذشته",
-    last30Days: "۳۰ روز گذشته", 
-    last3Months: "۳ ماه گذشته",
-    lastYear: "سال گذشته",
-    regionalAnalysis: "تحلیل منطقه‌ای",
-    productPerformance: "عملکرد محصولات",
-    trends: "روندها",
-    revenueByRegion: "درآمد بر اساس منطقه",
-    ordersByRegion: "سفارشات بر اساس منطقه",
-    topRegions: "مناطق برتر",
-    productSales: "فروش محصولات",
-    revenueDistribution: "توزیع درآمد",
-    topProducts: "محصولات پرفروش",
-    salesTrends: "روند فروش در طول زمان",
-    orders: "سفارشات",
-    revenue: "درآمد",
-    unitsSold: "واحد فروخته شده"
+    title: "Geographic Analytics",
+    subtitle: "Track sales performance by region and product",
+    totalRevenue: "Total Revenue",
+    totalOrders: "Total Orders", 
+    customers: "Customers",
+    regions: "Regions",
+    avgOrderValue: "Average Order Value",
+    export: "Export",
+    loading: "Loading analytics data...",
+    last7Days: "Last 7 Days",
+    last30Days: "Last 30 Days", 
+    last3Months: "Last 3 Months",
+    lastYear: "Last Year",
+    regionalAnalysis: "Regional Analysis",
+    productPerformance: "Product Performance",
+    trends: "Trends",
+    revenueByRegion: "Revenue by Region",
+    ordersByRegion: "Orders by Region",
+    topRegions: "Top Regions",
+    productSales: "Product Sales",
+    revenueDistribution: "Revenue Distribution",
+    topProducts: "Top Products",
+    salesTrends: "Sales Trends Over Time",
+    orders: "Orders",
+    revenue: "Revenue",
+    unitsSold: "Units Sold"
   };
 
   // Fetch geographic sales data
@@ -163,8 +163,8 @@ export default function GeographicAnalytics() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900" dir="rtl">{t.title}</h1>
-          <p className="text-gray-600" dir="rtl">{t.subtitle}</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
+          <p className="text-gray-600">{t.subtitle}</p>
         </div>
         <div className="flex gap-4">
           <Select value={dateRange} onValueChange={setDateRange}>
@@ -190,7 +190,7 @@ export default function GeographicAnalytics() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium" dir="rtl">{t.totalRevenue}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t.totalRevenue}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
