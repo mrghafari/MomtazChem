@@ -10631,6 +10631,7 @@ momtazchem.com
         const regionsQuery = sql`
           SELECT 
             COALESCE(c.country, 'Unknown') as region,
+            COALESCE(c.city, 'Unknown') as city,
             SUM(oi.quantity) as quantity,
             SUM(CAST(oi.total_price AS DECIMAL)) as revenue
           FROM orders o
@@ -10638,7 +10639,7 @@ momtazchem.com
           LEFT JOIN order_items oi ON o.id = oi.order_id
           LEFT JOIN products p ON oi.product_id = p.id
           WHERE o.created_at >= ${startDate} AND p.name = ${row.name}
-          GROUP BY c.country
+          GROUP BY c.country, c.city
           ORDER BY revenue DESC
         `;
 
@@ -10651,6 +10652,7 @@ momtazchem.com
           revenue: Number(row.revenue) || 0,
           regions: regions.rows.map((r: any) => ({
             region: r.region,
+            city: r.city,
             quantity: Number(r.quantity),
             revenue: Number(r.revenue) || 0
           }))

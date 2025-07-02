@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { MapPin, Package, TrendingUp, Users, DollarSign, ShoppingCart, Calendar, Download, Filter } from "lucide-react";
+import { MapPin, Package, TrendingUp, Users, DollarSign, ShoppingCart, Calendar, Download, Filter, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface GeographicData {
   region: string;
@@ -31,6 +31,7 @@ interface ProductAnalytics {
   revenue: number;
   regions: Array<{
     region: string;
+    city: string;
     quantity: number;
     revenue: number;
   }>;
@@ -49,6 +50,24 @@ export default function GeographicAnalytics() {
   const [dateRange, setDateRange] = useState("30d");
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState("all");
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Sorting function
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Get sort icon
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+  };
 
   // English translations
   const t = {
@@ -144,6 +163,62 @@ export default function GeographicAnalytics() {
 
   const topRegions = geoData?.sort((a, b) => b.totalRevenue - a.totalRevenue).slice(0, 10) || [];
   const topProducts = productData?.sort((a, b) => b.revenue - a.revenue).slice(0, 10) || [];
+
+  // Create flattened and sorted product-region data for table
+  const getSortedProductRegionData = () => {
+    if (!productData) return [];
+    
+    const flatData: any[] = [];
+    productData.forEach(product => {
+      if (product.regions && product.regions.length > 0) {
+        product.regions.forEach(region => {
+          flatData.push({
+            productName: product.name,
+            category: product.category,
+            region: region.region,
+            city: region.city,
+            quantity: region.quantity,
+            revenue: region.revenue
+          });
+        });
+      } else {
+        flatData.push({
+          productName: product.name,
+          category: product.category,
+          region: null,
+          city: null,
+          quantity: 0,
+          revenue: 0
+        });
+      }
+    });
+
+    // Apply sorting
+    if (sortField) {
+      flatData.sort((a, b) => {
+        let aVal = a[sortField];
+        let bVal = b[sortField];
+        
+        // Handle null/undefined values
+        if (aVal === null || aVal === undefined) aVal = '';
+        if (bVal === null || bVal === undefined) bVal = '';
+        
+        // Convert to string for text comparisons
+        if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+        if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+        
+        if (sortDirection === 'asc') {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
+    }
+    
+    return flatData;
+  };
+
+  const sortedProductRegionData = getSortedProductRegionData();
 
   if (geoLoading || productLoading || timeLoading) {
     return (
@@ -428,52 +503,92 @@ export default function GeographicAnalytics() {
                 <table className="w-full border-collapse border border-gray-300">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-4 py-2 text-left">Product Name</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Category</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Region</th>
-                      <th className="border border-gray-300 px-4 py-2 text-right">Units Sold</th>
-                      <th className="border border-gray-300 px-4 py-2 text-right">Revenue</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        <button 
+                          className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                          onClick={() => handleSort('productName')}
+                        >
+                          Product Name
+                          {getSortIcon('productName')}
+                        </button>
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        <button 
+                          className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                          onClick={() => handleSort('category')}
+                        >
+                          Category
+                          {getSortIcon('category')}
+                        </button>
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        <button 
+                          className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                          onClick={() => handleSort('region')}
+                        >
+                          Country
+                          {getSortIcon('region')}
+                        </button>
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        <button 
+                          className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                          onClick={() => handleSort('city')}
+                        >
+                          City
+                          {getSortIcon('city')}
+                        </button>
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-right">
+                        <button 
+                          className="flex items-center gap-2 hover:text-blue-600 transition-colors ml-auto"
+                          onClick={() => handleSort('quantity')}
+                        >
+                          Units Sold
+                          {getSortIcon('quantity')}
+                        </button>
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-right">
+                        <button 
+                          className="flex items-center gap-2 hover:text-blue-600 transition-colors ml-auto"
+                          onClick={() => handleSort('revenue')}
+                        >
+                          Revenue
+                          {getSortIcon('revenue')}
+                        </button>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {topProducts.flatMap((product) => 
-                      product.regions && product.regions.length > 0 ? 
-                        product.regions.map((region: any, regionIndex: number) => (
-                          <tr key={`${product.name}-${region.region}`} className="hover:bg-gray-50">
-                            {regionIndex === 0 && (
-                              <>
-                                <td className="border border-gray-300 px-4 py-2 font-medium" rowSpan={product.regions.length}>
-                                  {product.name}
-                                </td>
-                                <td className="border border-gray-300 px-4 py-2 text-gray-600" rowSpan={product.regions.length}>
-                                  {product.category}
-                                </td>
-                              </>
-                            )}
-                            <td className="border border-gray-300 px-4 py-2">
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4 text-gray-400" />
-                                {region.region}
-                              </div>
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 text-right">
-                              {region.quantity || 0}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 text-right font-medium text-green-600">
-                              ${(region.revenue || 0).toFixed(2)}
-                            </td>
-                          </tr>
-                        )) : 
-                        [
-                          <tr key={product.name} className="hover:bg-gray-50">
-                            <td className="border border-gray-300 px-4 py-2 font-medium">{product.name}</td>
-                            <td className="border border-gray-300 px-4 py-2 text-gray-600">{product.category}</td>
-                            <td className="border border-gray-300 px-4 py-2 text-gray-500 italic">No regional data</td>
-                            <td className="border border-gray-300 px-4 py-2 text-right">-</td>
-                            <td className="border border-gray-300 px-4 py-2 text-right">-</td>
-                          </tr>
-                        ]
-                    )}
+                    {sortedProductRegionData.map((row, index) => (
+                      <tr key={`${row.productName}-${row.region}-${index}`} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2 font-medium">
+                          {row.productName}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 text-gray-600">
+                          {row.category}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {row.region ? (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-gray-400" />
+                              {row.region}
+                            </div>
+                          ) : (
+                            <span className="text-gray-500 italic">No regional data</span>
+                          )}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {row.city || (row.region ? 'Various Cities' : '-')}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 text-right">
+                          {row.quantity || 0}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 text-right font-medium text-green-600">
+                          ${(row.revenue || 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
