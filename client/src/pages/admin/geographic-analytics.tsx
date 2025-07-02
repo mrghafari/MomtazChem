@@ -240,6 +240,7 @@ export default function GeographicAnalytics() {
         <TabsList>
           <TabsTrigger value="regions">Regional Analysis</TabsTrigger>
           <TabsTrigger value="products">Product Performance</TabsTrigger>
+          <TabsTrigger value="product-regions">Products by Region</TabsTrigger>
           <TabsTrigger value="trends">Trends</TabsTrigger>
         </TabsList>
 
@@ -360,28 +361,121 @@ export default function GeographicAnalytics() {
             </Card>
           </div>
 
-          {/* Top Products Table */}
+          {/* Products with Regional Breakdown */}
           <Card>
             <CardHeader>
-              <CardTitle>Top Selling Products</CardTitle>
+              <CardTitle>Products by Region - Detailed Breakdown</CardTitle>
+              <p className="text-sm text-gray-600">Which products sold how much in which regions</p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {topProducts.map((product, index) => (
-                  <div key={product.name} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <Badge variant="secondary">#{index + 1}</Badge>
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-gray-600">{product.category}</p>
+                  <div key={product.name} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <Badge variant="secondary">#{index + 1}</Badge>
+                        <div>
+                          <p className="font-medium text-lg">{product.name}</p>
+                          <p className="text-sm text-gray-600">{product.category}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg">${product.revenue.toFixed(2)}</p>
+                        <p className="text-sm text-gray-600">{product.totalSales} units total</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">${product.revenue.toFixed(2)}</p>
-                      <p className="text-sm text-gray-600">{product.totalSales} units sold</p>
+                    
+                    {/* Regional breakdown for this product */}
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <h4 className="font-medium mb-3 text-sm">Sales by Region:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {product.regions && product.regions.length > 0 ? (
+                          product.regions.map((region: any) => (
+                            <div key={region.region} className="bg-white rounded p-3 border">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium text-sm">{region.region}</span>
+                                <MapPin className="h-4 w-4 text-gray-400" />
+                              </div>
+                              <div className="mt-2">
+                                <p className="text-sm text-green-600 font-medium">${(region.revenue || 0).toFixed(2)}</p>
+                                <p className="text-xs text-gray-500">{region.quantity || 0} units</p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="col-span-full text-center text-gray-500 text-sm">
+                            No regional data available
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Products by Region - Detailed Table */}
+        <TabsContent value="product-regions" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Sales by Region - Complete Breakdown</CardTitle>
+              <p className="text-sm text-gray-600">Detailed view of which products sold where and how much revenue was generated</p>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 px-4 py-2 text-left">Product Name</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Category</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Region</th>
+                      <th className="border border-gray-300 px-4 py-2 text-right">Units Sold</th>
+                      <th className="border border-gray-300 px-4 py-2 text-right">Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topProducts.flatMap((product) => 
+                      product.regions && product.regions.length > 0 ? 
+                        product.regions.map((region: any, regionIndex: number) => (
+                          <tr key={`${product.name}-${region.region}`} className="hover:bg-gray-50">
+                            {regionIndex === 0 && (
+                              <>
+                                <td className="border border-gray-300 px-4 py-2 font-medium" rowSpan={product.regions.length}>
+                                  {product.name}
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2 text-gray-600" rowSpan={product.regions.length}>
+                                  {product.category}
+                                </td>
+                              </>
+                            )}
+                            <td className="border border-gray-300 px-4 py-2">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-gray-400" />
+                                {region.region}
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 text-right">
+                              {region.quantity || 0}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 text-right font-medium text-green-600">
+                              ${(region.revenue || 0).toFixed(2)}
+                            </td>
+                          </tr>
+                        )) : 
+                        [
+                          <tr key={product.name} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-4 py-2 font-medium">{product.name}</td>
+                            <td className="border border-gray-300 px-4 py-2 text-gray-600">{product.category}</td>
+                            <td className="border border-gray-300 px-4 py-2 text-gray-500 italic">No regional data</td>
+                            <td className="border border-gray-300 px-4 py-2 text-right">-</td>
+                            <td className="border border-gray-300 px-4 py-2 text-right">-</td>
+                          </tr>
+                        ]
+                    )}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
