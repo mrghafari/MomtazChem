@@ -10539,7 +10539,7 @@ momtazchem.com
           COUNT(DISTINCT o.customer_id) as customer_count,
           SUM(CAST(o.total_amount AS DECIMAL)) as total_revenue,
           AVG(CAST(o.total_amount AS DECIMAL)) as avg_order_value
-        FROM shop_orders o
+        FROM orders o
         LEFT JOIN crm_customers c ON o.customer_id = c.id
         WHERE o.created_at >= $1
         ${region !== 'all' ? 'AND c.country = $2' : ''}
@@ -10557,10 +10557,10 @@ momtazchem.com
             p.name,
             SUM(oi.quantity) as quantity,
             SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
-          FROM shop_orders o
+          FROM orders o
           LEFT JOIN crm_customers c ON o.customer_id = c.id
-          LEFT JOIN shop_order_items oi ON o.id = oi.order_id
-          LEFT JOIN shop_products p ON oi.product_id = p.id
+          LEFT JOIN order_items oi ON o.id = oi.order_id
+          LEFT JOIN products p ON oi.product_id = p.id
           WHERE o.created_at >= $1 
             AND c.country = $2 
             AND c.city = $3
@@ -10616,9 +10616,9 @@ momtazchem.com
           p.category,
           SUM(oi.quantity) as total_sales,
           SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
-        FROM shop_orders o
-        LEFT JOIN shop_order_items oi ON o.id = oi.order_id
-        LEFT JOIN shop_products p ON oi.product_id = p.id
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN products p ON oi.product_id = p.id
         WHERE o.created_at >= $1
         ${product !== 'all' ? 'AND p.id = $2' : ''}
         GROUP BY p.id, p.name, p.category
@@ -10635,10 +10635,10 @@ momtazchem.com
             COALESCE(c.country, 'Unknown') as region,
             SUM(oi.quantity) as quantity,
             SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
-          FROM shop_orders o
+          FROM orders o
           LEFT JOIN crm_customers c ON o.customer_id = c.id
-          LEFT JOIN shop_order_items oi ON o.id = oi.order_id
-          LEFT JOIN shop_products p ON oi.product_id = p.id
+          LEFT JOIN order_items oi ON o.id = oi.order_id
+          LEFT JOIN products p ON oi.product_id = p.id
           WHERE o.created_at >= $1 AND p.name = $2
           GROUP BY c.country
           ORDER BY revenue DESC
@@ -10687,7 +10687,7 @@ momtazchem.com
           DATE(o.created_at) as date,
           COUNT(DISTINCT o.id) as orders,
           SUM(CAST(o.total_amount AS DECIMAL)) as revenue
-        FROM shop_orders o
+        FROM orders o
         WHERE o.created_at >= $1
         GROUP BY DATE(o.created_at)
         ORDER BY date ASC
