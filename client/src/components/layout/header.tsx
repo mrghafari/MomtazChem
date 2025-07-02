@@ -203,7 +203,63 @@ export default function Header() {
               <LanguageSwitcher />
             </div>
 
+            {/* Customer Menu - Desktop */}
+            {isAuthenticated && customer && (
+              <div className="hidden md:flex items-center gap-2">
+                {/* Wallet Icon - Direct Link */}
+                <Link href="/customer/wallet">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                  >
+                    <Wallet className="h-4 w-4 text-blue-600" />
+                  </Button>
+                </Link>
 
+                {/* Customer Name Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <User className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {customer.firstName} {customer.lastName}
+                      </span>
+                      <ChevronDown className="h-3 w-3 text-gray-500" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/customer/profile" className="flex items-center gap-2 w-full">
+                        <User className="h-4 w-4" />
+                        <span>{t.profile}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/customer/wallet" className="flex items-center gap-2 w-full">
+                        <Wallet className="h-4 w-4" />
+                        <span>{t.wallet}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="flex items-center gap-2 text-red-600 focus:text-red-600 cursor-pointer"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        logout();
+                      }}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>{t.logout}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
             
             {/* Mobile menu button */}
             <Button
@@ -319,36 +375,39 @@ export default function Header() {
                     className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
                   >
                     <div className="space-y-3">
-                      {/* Customer Name Display */}
-                      <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <User className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
-                          {customer.firstName} {customer.lastName}
-                        </span>
+                      {/* Separate Wallet Icon and Customer Name */}
+                      <div className="flex items-center gap-2">
+                        {/* Direct Wallet Link */}
+                        <Link href="/customer/wallet" className="flex-1">
+                          <motion.div
+                            className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            <Wallet className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                              {t.wallet}
+                            </span>
+                          </motion.div>
+                        </Link>
+                        
+                        {/* Direct Profile Link */}
+                        <Link href="/customer/profile" className="flex-1">
+                          <motion.div
+                            className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            <User className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {customer.firstName} {customer.lastName}
+                            </span>
+                          </motion.div>
+                        </Link>
                       </div>
                       
-                      {/* Customer Menu Items */}
-                      <div className="space-y-1">
-                        <Link href="/customer/profile">
-                          <motion.div
-                            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <User className="h-4 w-4" />
-                            <span>{t.profile}</span>
-                          </motion.div>
-                        </Link>
-                        <Link href="/customer/wallet">
-                          <motion.div
-                            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <Wallet className="h-4 w-4" />
-                            <span>{t.wallet}</span>
-                          </motion.div>
-                        </Link>
+                      {/* Logout Option */}
+                      <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
                         <motion.div
                           className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors cursor-pointer"
                           whileTap={{ scale: 0.98 }}
