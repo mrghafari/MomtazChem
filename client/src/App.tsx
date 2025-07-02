@@ -70,6 +70,7 @@ import SuperAdminDepartmentManagement from "@/pages/super-admin-department-manag
 import SuperAdminSettings from "@/pages/super-admin-settings";
 import SiteManagement from "@/pages/site-management";
 import GeographicReports from "@/pages/geographic-reports";
+import GeographicAnalytics from "@/pages/admin/geographic-analytics";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -126,6 +127,7 @@ function Router() {
           <Route path="/admin/site-management" component={SiteManagement} />
           <Route path="/admin/products" component={ProductsPage} />
           <Route path="/admin/geographic-reports" component={GeographicReports} />
+          <Route path="/admin/geographic-analytics" component={GeographicAnalytics} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />

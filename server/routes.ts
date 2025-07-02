@@ -10519,6 +10519,203 @@ momtazchem.com
     }
   });
 
+  // Geographic Analytics Endpoints
+  app.get("/api/analytics/geographic", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { period = '30d', region = 'all' } = req.query;
+      
+      // Calculate date range
+      const daysMap: { [key: string]: number } = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 };
+      const days = daysMap[period as string] || 30;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Query orders with customer location data
+      const query = `
+        SELECT 
+          COALESCE(c.country, 'Unknown') as country,
+          COALESCE(c.city, 'Unknown') as city,
+          COUNT(DISTINCT o.id) as total_orders,
+          COUNT(DISTINCT o.customer_id) as customer_count,
+          SUM(CAST(o.total_amount AS DECIMAL)) as total_revenue,
+          AVG(CAST(o.total_amount AS DECIMAL)) as avg_order_value
+        FROM shop_orders o
+        LEFT JOIN crm_customers c ON o.customer_id = c.id
+        WHERE o.created_at >= $1
+        ${region !== 'all' ? 'AND c.country = $2' : ''}
+        GROUP BY c.country, c.city
+        ORDER BY total_revenue DESC
+      `;
+
+      const params = region !== 'all' ? [startDate, region] : [startDate];
+      const result = await db.execute(sql.raw(query), params);
+
+      // Get top products for each region
+      const geoData = await Promise.all(result.map(async (row: any) => {
+        const topProductsQuery = `
+          SELECT 
+            p.name,
+            SUM(oi.quantity) as quantity,
+            SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
+          FROM shop_orders o
+          LEFT JOIN crm_customers c ON o.customer_id = c.id
+          LEFT JOIN shop_order_items oi ON o.id = oi.order_id
+          LEFT JOIN shop_products p ON oi.product_id = p.id
+          WHERE o.created_at >= $1 
+            AND c.country = $2 
+            AND c.city = $3
+          GROUP BY p.id, p.name
+          ORDER BY revenue DESC
+          LIMIT 5
+        `;
+
+        const topProducts = await db.execute(sql.raw(topProductsQuery), [startDate, row.country, row.city]);
+
+        return {
+          region: `${row.city}, ${row.country}`,
+          country: row.country,
+          city: row.city,
+          totalOrders: Number(row.total_orders),
+          totalRevenue: Number(row.total_revenue) || 0,
+          customerCount: Number(row.customer_count),
+          avgOrderValue: Number(row.avg_order_value) || 0,
+          topProducts: topProducts.map((p: any) => ({
+            name: p.name,
+            quantity: Number(p.quantity),
+            revenue: Number(p.revenue) || 0
+          }))
+        };
+      }));
+
+      res.json({
+        success: true,
+        data: geoData
+      });
+
+    } catch (error) {
+      console.error("Error fetching geographic analytics:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching geographic analytics"
+      });
+    }
+  });
+
+  app.get("/api/analytics/products", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { period = '30d', product = 'all' } = req.query;
+      
+      const daysMap: { [key: string]: number } = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 };
+      const days = daysMap[period as string] || 30;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      const query = `
+        SELECT 
+          p.name,
+          p.category,
+          SUM(oi.quantity) as total_sales,
+          SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
+        FROM shop_orders o
+        LEFT JOIN shop_order_items oi ON o.id = oi.order_id
+        LEFT JOIN shop_products p ON oi.product_id = p.id
+        WHERE o.created_at >= $1
+        ${product !== 'all' ? 'AND p.id = $2' : ''}
+        GROUP BY p.id, p.name, p.category
+        ORDER BY revenue DESC
+      `;
+
+      const params = product !== 'all' ? [startDate, product] : [startDate];
+      const result = await db.execute(sql.raw(query), params);
+
+      // Get regional breakdown for each product
+      const productData = await Promise.all(result.map(async (row: any) => {
+        const regionsQuery = `
+          SELECT 
+            COALESCE(c.country, 'Unknown') as region,
+            SUM(oi.quantity) as quantity,
+            SUM(CAST(oi.price AS DECIMAL) * oi.quantity) as revenue
+          FROM shop_orders o
+          LEFT JOIN crm_customers c ON o.customer_id = c.id
+          LEFT JOIN shop_order_items oi ON o.id = oi.order_id
+          LEFT JOIN shop_products p ON oi.product_id = p.id
+          WHERE o.created_at >= $1 AND p.name = $2
+          GROUP BY c.country
+          ORDER BY revenue DESC
+        `;
+
+        const regions = await db.execute(sql.raw(regionsQuery), [startDate, row.name]);
+
+        return {
+          name: row.name,
+          category: row.category,
+          totalSales: Number(row.total_sales),
+          revenue: Number(row.revenue) || 0,
+          regions: regions.map((r: any) => ({
+            region: r.region,
+            quantity: Number(r.quantity),
+            revenue: Number(r.revenue) || 0
+          }))
+        };
+      }));
+
+      res.json({
+        success: true,
+        data: productData
+      });
+
+    } catch (error) {
+      console.error("Error fetching product analytics:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching product analytics"
+      });
+    }
+  });
+
+  app.get("/api/analytics/timeseries", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { period = '30d' } = req.query;
+      
+      const daysMap: { [key: string]: number } = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 };
+      const days = daysMap[period as string] || 30;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      const query = `
+        SELECT 
+          DATE(o.created_at) as date,
+          COUNT(DISTINCT o.id) as orders,
+          SUM(CAST(o.total_amount AS DECIMAL)) as revenue
+        FROM shop_orders o
+        WHERE o.created_at >= $1
+        GROUP BY DATE(o.created_at)
+        ORDER BY date ASC
+      `;
+
+      const result = await db.execute(sql.raw(query), [startDate]);
+
+      const timeData = result.map((row: any) => ({
+        date: row.date,
+        orders: Number(row.orders),
+        revenue: Number(row.revenue) || 0,
+        regions: {} // Can be expanded to include regional breakdown per day
+      }));
+
+      res.json({
+        success: true,
+        data: timeData
+      });
+
+    } catch (error) {
+      console.error("Error fetching time series analytics:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching time series analytics"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
