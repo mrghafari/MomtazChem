@@ -62,6 +62,11 @@ export const showcaseProducts = pgTable("showcase_products", {
   sku: text("sku").unique(), // Stock Keeping Unit
   isActive: boolean("is_active").default(true),
   displayOrder: integer("display_order").default(0), // For ordering on website
+  // Product Variant Fields
+  isVariant: boolean("is_variant").default(false), // Whether this is a variant of another product
+  parentProductId: integer("parent_product_id"), // Reference to parent product if this is a variant
+  variantType: text("variant_type"), // packaging, size, concentration, quantity, weight, volume
+  variantValue: text("variant_value"), // 1kg, 5L, 25kg bag, 80% concentration, etc.
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

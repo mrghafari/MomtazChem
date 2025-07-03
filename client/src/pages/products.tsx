@@ -24,6 +24,11 @@ const formSchema = insertShowcaseProductSchema.extend({
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
+  // Variant fields
+  isVariant: z.boolean().default(false),
+  parentProductId: z.number().optional(),
+  variantType: z.string().optional(),
+  variantValue: z.string().optional(),
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -220,6 +225,11 @@ export default function ProductsPage() {
       unitPrice: "0",
       currency: "IQD",
       isActive: true,
+      // Variant fields
+      isVariant: false,
+      parentProductId: undefined,
+      variantType: undefined,
+      variantValue: undefined,
     },
   });
 
@@ -593,6 +603,11 @@ export default function ProductsPage() {
                           <span className="text-sm text-gray-600 dark:text-gray-400">
                             {categories.find((c: CategoryOption) => c.value === product.category)?.label}
                           </span>
+                          {product.isVariant && (
+                            <Badge variant="secondary" className="text-xs">
+                              Variant: {product.variantValue}
+                            </Badge>
+                          )}
                         </div>
                       </div>
 
@@ -698,6 +713,31 @@ export default function ProductsPage() {
                               {tag.trim()}
                             </Badge>
                           ))}
+                        </div>
+                      )}
+
+                      {/* Product Variants Section */}
+                      {products && Array.isArray(products) && 
+                        products.filter((p: any) => p.parentProductId === product.id).length > 0 && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                          <h4 className="font-semibold text-sm text-blue-800 mb-2">
+                            Variants ({products.filter((p: any) => p.parentProductId === product.id).length})
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {products
+                              .filter((p: any) => p.parentProductId === product.id)
+                              .map((variant: any) => (
+                                <div key={variant.id} className="flex items-center gap-1 bg-white rounded-md px-2 py-1 border text-xs">
+                                  <span className="text-gray-600">{variant.variantType}:</span>
+                                  <span className="font-medium">{variant.variantValue}</span>
+                                  {variant.unitPrice && (
+                                    <Badge variant="outline" className="text-xs ml-1">
+                                      {variant.unitPrice} {variant.currency || 'IQD'}
+                                    </Badge>
+                                  )}
+                                </div>
+                              ))}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -952,6 +992,109 @@ export default function ProductsPage() {
                     </FormItem>
                   )}
                 />
+              </div>
+
+              {/* Product Variants Section */}
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-lg font-semibold">Product Variants</h3>
+                
+                <FormField
+                  control={form.control}
+                  name="isVariant"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          Is Product Variant
+                        </FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          This product is a variant of another product (different packaging/quantity)
+                        </div>
+                      </div>
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="w-4 h-4"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("isVariant") && (
+                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                    <FormField
+                      control={form.control}
+                      name="parentProductId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Parent Product</FormLabel>
+                          <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select parent product" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {products && Array.isArray(products) && products
+                                .filter((p: any) => !p.isVariant && p.id !== editingProduct?.id)
+                                .map((p: any) => (
+                                  <SelectItem key={p.id} value={p.id.toString()}>
+                                    {p.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="variantType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Variant Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select variant type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="packaging">Packaging</SelectItem>
+                                <SelectItem value="size">Size</SelectItem>
+                                <SelectItem value="concentration">Concentration</SelectItem>
+                                <SelectItem value="quantity">Quantity</SelectItem>
+                                <SelectItem value="weight">Weight</SelectItem>
+                                <SelectItem value="volume">Volume</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="variantValue"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Variant Value</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., 1kg, 5L, 25kg bag" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Additional Information */}
