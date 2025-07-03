@@ -33,7 +33,7 @@ const formSchema = insertShowcaseProductSchema.extend({
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
-import { generateEAN13Barcode } from "@shared/barcode-utils";
+import { generateEAN13Barcode, validateEAN13 } from "@shared/barcode-utils";
 
 // Categories will be fetched from API
 
@@ -400,10 +400,22 @@ export default function ProductsPage() {
     const timer = setTimeout(() => {
       if (currentBarcode && currentBarcode.length === 13 && barcodeCanvasRef.current) {
         try {
+          // Validate barcode first
+          const isValid = validateEAN13(currentBarcode);
+          if (!isValid) {
+            console.error('Invalid EAN-13 barcode:', currentBarcode);
+            return;
+          }
+          
           console.log('Attempting to generate barcode:', currentBarcode);
           
-          // Set canvas dimensions first
+          // Clear canvas first and set dimensions
           const canvas = barcodeCanvasRef.current;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+          
           canvas.width = 200;
           canvas.height = 100;
           
@@ -430,7 +442,7 @@ export default function ProductsPage() {
           ctx.clearRect(0, 0, barcodeCanvasRef.current.width, barcodeCanvasRef.current.height);
         }
       }
-    }, 50);
+    }, 100); // Increased timeout for better DOM readiness
     
     return () => clearTimeout(timer);
   }, [form.watch("barcode")]);
