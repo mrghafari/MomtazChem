@@ -1145,45 +1145,54 @@ export default function ProductsPage() {
                         <span className="text-amber-600 font-medium">Note: Existing barcodes are protected from overwriting.</span>
                       </div>
                       
-                      {/* Barcode Display */}
-                      {form.watch("barcode") && (
-                        <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                          <div className="text-sm font-medium text-gray-700 mb-2">Barcode Preview:</div>
-                          <div 
-                            className="flex flex-col items-center cursor-pointer hover:bg-gray-100 transition-colors rounded p-2"
-                            onClick={() => {
-                              const barcode = form.watch("barcode");
-                              if (barcode) {
-                                navigator.clipboard.writeText(barcode).then(() => {
-                                  toast({
-                                    title: "کپی شد!",
-                                    description: "بارکد در کلیپ‌بورد کپی شد",
-                                    variant: "default"
+                      {/* Barcode Display - Canvas always rendered for stable ref */}
+                      <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div className="text-sm font-medium text-gray-700 mb-2">Barcode Preview:</div>
+                        <div className="flex flex-col items-center">
+                          {/* Canvas is always rendered for stable ref */}
+                          <canvas 
+                            ref={barcodeCanvasRef} 
+                            className="border border-gray-300 rounded mb-2"
+                            width="200"
+                            height="100"
+                            style={{ display: form.watch("barcode") ? 'block' : 'none' }}
+                          />
+                          {form.watch("barcode") && (
+                            <div 
+                              className="cursor-pointer hover:bg-gray-100 transition-colors rounded p-2"
+                              onClick={() => {
+                                const barcode = form.watch("barcode");
+                                if (barcode) {
+                                  navigator.clipboard.writeText(barcode).then(() => {
+                                    toast({
+                                      title: "کپی شد!",
+                                      description: "بارکد در کلیپ‌بورد کپی شد",
+                                      variant: "default"
+                                    });
+                                  }).catch(() => {
+                                    toast({
+                                      title: "خطا در کپی",
+                                      description: "امکان کپی بارکد وجود ندارد",
+                                      variant: "destructive"
+                                    });
                                   });
-                                }).catch(() => {
-                                  toast({
-                                    title: "خطا در کپی",
-                                    description: "امکان کپی بارکد وجود ندارد",
-                                    variant: "destructive"
-                                  });
-                                });
-                              }
-                            }}
-                            title="برای کپی کردن کلیک کنید"
-                          >
-                            <canvas 
-                              ref={barcodeCanvasRef} 
-                              className="border border-gray-300 rounded mb-2"
-                              width="200"
-                              height="100"
-                            />
-                            <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
-                              {form.watch("barcode")}
-                            </code>
-                            <div className="text-xs text-gray-500 mt-1">برای کپی کردن کلیک کنید</div>
-                          </div>
+                                }
+                              }}
+                              title="برای کپی کردن کلیک کنید"
+                            >
+                              <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
+                                {form.watch("barcode")}
+                              </code>
+                              <div className="text-xs text-gray-500 mt-1">برای کپی کردن کلیک کنید</div>
+                            </div>
+                          )}
+                          {!form.watch("barcode") && (
+                            <div className="text-sm text-gray-500 italic py-4">
+                              No barcode generated yet - click "Generate" to create one
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                       
                       <FormMessage />
                     </FormItem>
