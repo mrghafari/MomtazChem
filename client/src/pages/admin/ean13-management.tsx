@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Search, Package, Plus, Edit, Download, Barcode, CheckCircle, AlertTriangle, ArrowLeft, FileSpreadsheet } from 'lucide-react';
 import { useLocation } from 'wouter';
 import EAN13Generator from '@/components/ui/ean13-generator';
+import VisualBarcode from '@/components/ui/visual-barcode';
 
 interface Product {
   id: number;
@@ -343,6 +344,7 @@ export default function EAN13Management() {
                     <TableHead>Product</TableHead>
                     <TableHead>SKU</TableHead>
                     <TableHead>Current Barcode</TableHead>
+                    <TableHead>Visual Barcode</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -372,6 +374,21 @@ export default function EAN13Management() {
                             </code>
                           ) : (
                             <span className="text-gray-400">None</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {product.barcode && product.barcode.length === 13 ? (
+                            <div className="flex items-center justify-center">
+                              <VisualBarcode 
+                                value={product.barcode}
+                                width={1.5}
+                                height={40}
+                                fontSize={10}
+                                className="bg-white p-1 border rounded"
+                              />
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">No valid barcode</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -424,6 +441,7 @@ export default function EAN13Management() {
                   <TableRow>
                     <TableHead>Product</TableHead>
                     <TableHead>EAN-13</TableHead>
+                    <TableHead>Visual Barcode</TableHead>
                     <TableHead>Country</TableHead>
                     <TableHead>Company</TableHead>
                     <TableHead>Product Code</TableHead>
@@ -438,6 +456,17 @@ export default function EAN13Management() {
                         <code className="text-xs bg-gray-100 px-2 py-1 rounded">
                           {product.barcode}
                         </code>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-center">
+                          <VisualBarcode 
+                            value={product.barcode!}
+                            width={1.2}
+                            height={35}
+                            fontSize={8}
+                            className="bg-white p-1 border rounded"
+                          />
+                        </div>
                       </TableCell>
                       <TableCell>{product.barcode?.substring(0, 3)}</TableCell>
                       <TableCell>{product.barcode?.substring(3, 8)}</TableCell>

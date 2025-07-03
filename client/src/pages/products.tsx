@@ -18,6 +18,7 @@ import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseP
 import { z } from "zod";
 import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft } from "lucide-react";
 import JsBarcode from "jsbarcode";
+import VisualBarcode from "@/components/ui/visual-barcode";
 
 // Custom form schema that handles string inputs for numeric fields
 const formSchema = insertShowcaseProductSchema.extend({
@@ -772,10 +773,23 @@ export default function ProductsPage() {
                           </span>
                         )}
                         {product.barcode && (
-                          <span className="flex items-center gap-1">
-                            <QrCode className="w-3 h-3" />
-                            {product.barcode}
-                          </span>
+                          <div className="space-y-2">
+                            <span className="flex items-center gap-1">
+                              <QrCode className="w-3 h-3" />
+                              {product.barcode}
+                            </span>
+                            {product.barcode.length === 13 && (
+                              <div className="flex justify-center">
+                                <VisualBarcode 
+                                  value={product.barcode}
+                                  width={1.2}
+                                  height={35}
+                                  fontSize={8}
+                                  className="bg-white p-1 border rounded"
+                                />
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
 

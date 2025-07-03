@@ -21,6 +21,7 @@ import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
 
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useToast } from "@/hooks/use-toast";
+import VisualBarcode from "@/components/ui/visual-barcode";
 
 const Shop = () => {
   const { toast } = useToast();
@@ -784,6 +785,25 @@ const Shop = () => {
                                   })()}
                                 </div>
                               )}
+                            </div>
+                          )}
+
+                          {/* Barcode Display */}
+                          {product.barcode && product.barcode.length === 13 && (
+                            <div className="mb-3 p-2 bg-gray-50 rounded-lg border">
+                              <div className="text-xs text-gray-600 mb-1">Product Barcode:</div>
+                              <div className="flex items-center justify-between">
+                                <code className="text-xs bg-white px-2 py-1 rounded border">
+                                  {product.barcode}
+                                </code>
+                                <VisualBarcode 
+                                  value={product.barcode}
+                                  width={1}
+                                  height={25}
+                                  fontSize={8}
+                                  className="bg-white"
+                                />
+                              </div>
                             </div>
                           )}
 
