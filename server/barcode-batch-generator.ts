@@ -1,16 +1,17 @@
 // Batch Barcode Generator for Existing Products
 import { generateEAN13Barcode } from "@shared/barcode-utils";
 import { storage } from "./storage";
+import { showcaseStorage } from "./showcase-storage";
 
 export async function generateBarcodesForExistingProducts() {
   try {
     console.log('Starting batch barcode generation for existing products...');
     
-    // Get all products without barcodes
-    const products = await storage.getShowcaseProducts();
-    const productsWithoutBarcodes = products.filter(p => !p.barcode || p.barcode.trim() === '');
+    // Get all showcase products without barcodes
+    const allProducts = await showcaseStorage.getAllShowcaseProducts();
+    const productsWithoutBarcodes = allProducts.filter(p => !p.barcode || p.barcode.trim() === '');
     
-    console.log(`Found ${productsWithoutBarcodes.length} products without barcodes`);
+    console.log(`Found ${productsWithoutBarcodes.length} products without barcodes out of ${allProducts.length} total`);
     
     const results = [];
     
@@ -20,7 +21,7 @@ export async function generateBarcodesForExistingProducts() {
         const generatedBarcode = generateEAN13Barcode(product.name, product.category);
         
         // Update product with barcode
-        await storage.updateShowcaseProduct(product.id, {
+        await showcaseStorage.updateShowcaseProduct(product.id, {
           barcode: generatedBarcode
         });
         
@@ -61,7 +62,7 @@ export async function regenerateAllBarcodes() {
   try {
     console.log('Starting regeneration of ALL product barcodes...');
     
-    const products = await storage.getShowcaseProducts();
+    const products = await showcaseStorage.getAllShowcaseProducts();
     console.log(`Found ${products.length} products for barcode regeneration`);
     
     const results = [];
@@ -72,7 +73,7 @@ export async function regenerateAllBarcodes() {
         const generatedBarcode = generateEAN13Barcode(product.name, product.category);
         
         // Update product with new barcode
-        await storage.updateShowcaseProduct(product.id, {
+        await showcaseStorage.updateShowcaseProduct(product.id, {
           barcode: generatedBarcode
         });
         

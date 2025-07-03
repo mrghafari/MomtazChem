@@ -21,6 +21,7 @@ import { eq, desc } from "drizzle-orm";
 export interface IShowcaseStorage {
   // Showcase products for website display
   getShowcaseProducts(): Promise<ShowcaseProduct[]>;
+  getAllShowcaseProducts(): Promise<ShowcaseProduct[]>; // Get all products including inactive ones
   getShowcaseProductsByCategory(category: string): Promise<ShowcaseProduct[]>;
   getShowcaseProductById(id: number): Promise<ShowcaseProduct | undefined>;
   createShowcaseProduct(product: InsertShowcaseProduct): Promise<ShowcaseProduct>;
@@ -60,6 +61,14 @@ export class ShowcaseStorage implements IShowcaseStorage {
       .select()
       .from(showcaseProducts)
       .where(eq(showcaseProducts.isActive, true))
+      .orderBy(showcaseProducts.displayOrder, showcaseProducts.name);
+  }
+
+  // Get ALL showcase products (including inactive ones) for admin operations
+  async getAllShowcaseProducts(): Promise<ShowcaseProduct[]> {
+    return await showcaseDb
+      .select()
+      .from(showcaseProducts)
       .orderBy(showcaseProducts.displayOrder, showcaseProducts.name);
   }
 
