@@ -287,6 +287,14 @@ export default function SiteManagement() {
                     <span className="text-sm">Geography Analytics</span>
                   </Button>
                   
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-purple-300 text-purple-600 hover:bg-purple-50"
+                    onClick={() => setLocation("/admin/ai-settings")}
+                  >
+                    <Zap className="h-6 w-6 mb-2" />
+                    <span className="text-sm">AI Settings</span>
+                  </Button>
 
 
                 </div>

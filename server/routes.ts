@@ -11510,6 +11510,37 @@ momtazchem.com
     }
   });
 
+  // AI Test Connection endpoint
+  app.post("/api/ai/test-connection", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log("Testing OpenAI API connection...");
+      
+      // Simple test request to OpenAI
+      const testResult = await generateSmartSKU({
+        name: "Test Product",
+        category: "commercial",
+        description: "This is a test product for API validation"
+      });
+
+      console.log("OpenAI API test successful");
+      
+      res.json({
+        success: true,
+        model: "gpt-4o",
+        status: "connected",
+        testResult: testResult.sku
+      });
+      
+    } catch (error) {
+      console.error("OpenAI API test failed:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to connect to OpenAI API",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

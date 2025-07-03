@@ -72,6 +72,7 @@ import SuperAdminSettings from "@/pages/super-admin-settings";
 import SiteManagement from "@/pages/site-management";
 import GeographicReports from "@/pages/geographic-reports";
 import GeographicAnalytics from "@/pages/admin/geographic-analytics";
+import AISettings from "@/pages/admin/ai-settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -130,6 +131,7 @@ function Router() {
           <Route path="/admin/product-variants" component={ProductVariants} />
           <Route path="/admin/geographic-reports" component={GeographicReports} />
           <Route path="/admin/geographic-analytics" component={GeographicAnalytics} />
+          <Route path="/admin/ai-settings" component={AISettings} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
