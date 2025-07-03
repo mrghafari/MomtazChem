@@ -287,14 +287,7 @@ export default function SiteManagement() {
                     <span className="text-sm">Geography Analytics</span>
                   </Button>
                   
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-blue-300 text-blue-600 hover:bg-blue-50"
-                    onClick={() => setLocation("/admin/ean13-management")}
-                  >
-                    <Barcode className="h-6 w-6 mb-2" />
-                    <span className="text-sm">EAN-13 Barcodes</span>
-                  </Button>
+
                 </div>
               </CardContent>
             </Card>

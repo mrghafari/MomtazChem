@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BarcodeScanner from "@/components/ui/barcode-scanner";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
+import EAN13Generator from "@/components/ui/ean13-generator";
 import { 
   Package, 
   Scan, 
@@ -25,7 +26,8 @@ import {
   CheckCircle,
   ArrowLeft,
   Download,
-  Upload
+  Upload,
+  Barcode
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -179,6 +181,70 @@ const BarcodeInventory = () => {
     generateBarcodeMutation.mutate(data);
   };
 
+  // EAN-13 bulk generation function
+  const generateBulkEAN13 = async () => {
+    try {
+      const productsWithoutEAN13 = products?.filter(p => !p.barcode || p.barcode.length !== 13) || [];
+      if (productsWithoutEAN13.length === 0) {
+        toast({
+          title: "No Products",
+          description: "All products already have EAN-13 barcodes",
+        });
+        return;
+      }
+
+      const response = await fetch('/api/ean13/bulk-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productIds: productsWithoutEAN13.map(p => p.id) })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: "Bulk Generation Complete",
+          description: `Generated ${result.generated} EAN-13 barcodes`,
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      } else {
+        throw new Error('Bulk generation failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Generation Error",
+        description: "Failed to generate bulk EAN-13 barcodes",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // EAN-13 CSV export function
+  const exportEAN13Data = async () => {
+    try {
+      const response = await fetch('/api/ean13/export');
+      if (!response.ok) throw new Error('Export failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `EAN13_Export_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Export Complete",
+        description: "EAN-13 data exported successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export EAN-13 data",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStockStatusColor = (product: Product) => {
     if (product.stockQuantity <= 0) return 'bg-red-100 text-red-800';
     if (product.stockQuantity <= product.minStockLevel) return 'bg-yellow-100 text-yellow-800';
@@ -261,11 +327,12 @@ const BarcodeInventory = () => {
       </div>
 
       <Tabs defaultValue="scanner" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="scanner">Scanner</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="generator">Barcode Generator</TabsTrigger>
+          <TabsTrigger value="ean13">EAN-13 Retail</TabsTrigger>
         </TabsList>
 
         {/* Scanner Tab */}
@@ -497,6 +564,153 @@ const BarcodeInventory = () => {
             sku={selectedProduct?.sku}
             onBarcodeGenerated={handleBarcodeGenerated}
           />
+        </TabsContent>
+
+        {/* EAN-13 Retail Tab */}
+        <TabsContent value="ean13" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* EAN-13 Generator */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Barcode className="h-5 w-5" />
+                  EAN-13 Generator
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Generate GS1-compliant EAN-13 barcodes for retail distribution
+                </p>
+              </CardHeader>
+              <CardContent>
+                <EAN13Generator onBarcodeGenerated={(barcode) => handleBarcodeGenerated(barcode, 'EAN13')} />
+              </CardContent>
+            </Card>
+
+            {/* EAN-13 Status Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle>EAN-13 Status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-green-800">With EAN-13</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {products?.filter(p => p.barcode?.length === 13).length || 0}
+                        </p>
+                      </div>
+                      <CheckCircle className="h-8 w-8 text-green-600" />
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-orange-50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-orange-800">Without EAN-13</p>
+                        <p className="text-2xl font-bold text-orange-600">
+                          {products?.filter(p => !p.barcode || p.barcode.length !== 13).length || 0}
+                        </p>
+                      </div>
+                      <AlertTriangle className="h-8 w-8 text-orange-600" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h4 className="font-medium mb-2">Bulk Operations</h4>
+                  <div className="space-y-2">
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => generateBulkEAN13()}
+                    >
+                      Generate EAN-13 for All Products
+                    </Button>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => exportEAN13Data()}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Export EAN-13 CSV
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Products List with EAN-13 Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Products EAN-13 Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2">Product</th>
+                      <th className="text-left p-2">Category</th>
+                      <th className="text-left p-2">Current Barcode</th>
+                      <th className="text-left p-2">EAN-13 Status</th>
+                      <th className="text-left p-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products?.map((product) => (
+                      <tr key={product.id} className="border-b hover:bg-gray-50">
+                        <td className="p-2">
+                          <div>
+                            <p className="font-medium">{product.name}</p>
+                            <p className="text-sm text-gray-500">SKU: {product.sku || 'N/A'}</p>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <Badge variant="outline">{product.category}</Badge>
+                        </td>
+                        <td className="p-2">
+                          {product.barcode ? (
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                              {product.barcode}
+                            </code>
+                          ) : (
+                            <span className="text-gray-400">No barcode</span>
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {product.barcode?.length === 13 ? (
+                            <Badge className="bg-green-100 text-green-800">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Valid EAN-13
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Needs EAN-13
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="p-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setShowGenerator(true);
+                            }}
+                          >
+                            {product.barcode?.length === 13 ? 'Update' : 'Generate'} EAN-13
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
