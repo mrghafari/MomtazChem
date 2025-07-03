@@ -399,7 +399,7 @@ export default function ProductsPage() {
     
     // Wait for next tick to ensure DOM is updated
     const timer = setTimeout(() => {
-      if (currentBarcode && currentBarcode.length >= 12 && barcodeCanvasRef.current) {
+      if (currentBarcode && currentBarcode.length === 13 && barcodeCanvasRef.current) {
         try {
           console.log('Attempting to generate barcode:', currentBarcode);
           
@@ -413,7 +413,7 @@ export default function ProductsPage() {
           canvas.width = 200;
           canvas.height = 100;
           
-          // Try to generate barcode - relaxed length requirement
+          // Only generate EAN-13 format barcodes
           JsBarcode(canvas, currentBarcode, {
             format: "EAN13",
             width: 2,
@@ -426,27 +426,9 @@ export default function ProductsPage() {
             marginLeft: 5,
             marginRight: 5,
           });
-          console.log('Barcode generated successfully');
+          console.log('EAN-13 barcode generated successfully');
         } catch (error) {
-          console.error('Barcode generation error:', error);
-          // Try with CODE128 format as fallback
-          try {
-            JsBarcode(barcodeCanvasRef.current, currentBarcode, {
-              format: "CODE128",
-              width: 2,
-              height: 80,
-              displayValue: false,
-              fontSize: 12,
-              textMargin: 5,
-              marginTop: 5,
-              marginBottom: 5,
-              marginLeft: 5,
-              marginRight: 5,
-            });
-            console.log('Barcode generated with CODE128 fallback');
-          } catch (fallbackError) {
-            console.error('Fallback barcode generation also failed:', fallbackError);
-          }
+          console.error('EAN-13 barcode generation error:', error);
         }
       } else if (barcodeCanvasRef.current) {
         // Clear canvas if no valid barcode
