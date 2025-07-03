@@ -632,6 +632,39 @@ const BarcodeInventory = () => {
                     <Button 
                       className="w-full" 
                       variant="outline"
+                      onClick={async () => {
+                        try {
+                          const response = await fetch('/api/barcode/batch-generate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include'
+                          });
+                          
+                          if (response.ok) {
+                            const result = await response.json();
+                            toast({
+                              title: "تولید بارکد انبوه کامل شد",
+                              description: `${result.summary.successful} بارکد ایجاد شد از مجموع ${result.summary.total} محصول`
+                            });
+                            queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+                          } else {
+                            throw new Error('Batch generation failed');
+                          }
+                        } catch (error) {
+                          toast({
+                            title: "خطا در تولید بارکد",
+                            description: "امکان تولید بارکدها وجود ندارد",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                    >
+                      <Barcode className="h-4 w-4 mr-2" />
+                      تولید بارکد برای محصولات موجود
+                    </Button>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
                       onClick={() => generateBulkEAN13()}
                     >
                       Generate EAN-13 for All Products

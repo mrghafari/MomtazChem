@@ -11177,6 +11177,56 @@ momtazchem.com
     }
   });
 
+  // Batch generate barcodes for existing products
+  app.post("/api/barcode/batch-generate", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { generateBarcodesForExistingProducts } = await import('./barcode-batch-generator');
+      const results = await generateBarcodesForExistingProducts();
+      
+      res.json({ 
+        success: true, 
+        results,
+        summary: {
+          total: results.length,
+          successful: results.filter(r => r.success).length,
+          failed: results.filter(r => !r.success).length
+        }
+      });
+    } catch (error) {
+      console.error('Batch barcode generation error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to generate barcodes',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Regenerate all barcodes (admin only)
+  app.post("/api/barcode/regenerate-all", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { regenerateAllBarcodes } = await import('./barcode-batch-generator');
+      const results = await regenerateAllBarcodes();
+      
+      res.json({ 
+        success: true, 
+        results,
+        summary: {
+          total: results.length,
+          successful: results.filter(r => r.success).length,
+          failed: results.filter(r => !r.success).length
+        }
+      });
+    } catch (error) {
+      console.error('Barcode regeneration error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to regenerate barcodes',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
