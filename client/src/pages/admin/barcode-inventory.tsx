@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode } from "@shared/barcode-utils";
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import BarcodeScanner from "@/components/ui/barcode-scanner";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
 import EAN13Generator from "@/components/ui/ean13-generator";
+import VisualBarcode from "@/components/ui/visual-barcode";
 import { 
   Package, 
   Scan, 
@@ -696,6 +697,7 @@ const BarcodeInventory = () => {
                       <th className="text-left p-2">Product</th>
                       <th className="text-left p-2">Category</th>
                       <th className="text-left p-2">Current Barcode</th>
+                      <th className="text-left p-2">بارکد نموداری</th>
                       <th className="text-left p-2">EAN-13 Status</th>
                       <th className="text-left p-2">Actions</th>
                     </tr>
@@ -714,11 +716,36 @@ const BarcodeInventory = () => {
                         </td>
                         <td className="p-2">
                           {product.barcode ? (
-                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                              {product.barcode}
-                            </code>
+                            <div className="space-y-1">
+                              <code className="text-xs bg-gray-100 px-2 py-1 rounded block cursor-pointer hover:bg-gray-200 transition-colors"
+                                    title="کلیک کنید تا کپی شود"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(product.barcode!);
+                                      toast({
+                                        title: "بارکد کپی شد",
+                                        description: `${product.barcode} کپی شد`
+                                      });
+                                    }}>
+                                {product.barcode}
+                              </code>
+                            </div>
                           ) : (
                             <span className="text-gray-400">No barcode</span>
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {product.barcode && product.barcode.length === 13 ? (
+                            <div className="flex items-center justify-center">
+                              <VisualBarcode 
+                                value={product.barcode}
+                                width={1.5}
+                                height={40}
+                                fontSize={10}
+                                className="bg-white p-1 border rounded"
+                              />
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">بارکد معتبر ندارد</span>
                           )}
                         </td>
                         <td className="p-2">
