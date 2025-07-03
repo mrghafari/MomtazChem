@@ -33,6 +33,7 @@ import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
 import { orderManagement } from "@shared/order-management-schema";
 import nodemailer from "nodemailer";
+import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -10958,6 +10959,220 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "Error fetching product trends"
+      });
+    }
+  });
+
+  // =============================================================================
+  // CENTRALIZED BARCODE MANAGEMENT API ENDPOINTS
+  // =============================================================================
+  
+  // Generate EAN-13 barcode for product
+  app.post("/api/barcode/generate", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { productName, category } = req.body;
+      
+      if (!productName || !category) {
+        return res.status(400).json({
+          success: false,
+          message: "Product name and category are required"
+        });
+      }
+      
+      const barcode = generateEAN13Barcode(productName, category);
+      const parsed = parseEAN13Barcode(barcode);
+      
+      res.json({
+        success: true,
+        data: {
+          barcode,
+          details: parsed,
+          productName,
+          category
+        }
+      });
+    } catch (error) {
+      console.error("Error generating barcode:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error generating barcode"
+      });
+    }
+  });
+  
+  // Validate EAN-13 barcode
+  app.post("/api/barcode/validate", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { barcode } = req.body;
+      
+      if (!barcode) {
+        return res.status(400).json({
+          success: false,
+          message: "Barcode is required"
+        });
+      }
+      
+      const isValid = validateEAN13(barcode);
+      const parsed = parseEAN13Barcode(barcode);
+      const isMomtazchemProduct = isMomtazchemBarcode(barcode);
+      
+      res.json({
+        success: true,
+        data: {
+          barcode,
+          isValid,
+          isMomtazchemProduct,
+          details: parsed
+        }
+      });
+    } catch (error) {
+      console.error("Error validating barcode:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error validating barcode"
+      });
+    }
+  });
+  
+  // Get product barcode (check if product already has barcode, if not generate one)
+  app.get("/api/barcode/product/:productId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.params;
+      
+      // Try to get from showcase_products first
+      const showcaseProduct = await storage.getShowcaseProductById(parseInt(productId));
+      if (showcaseProduct) {
+        let barcode = showcaseProduct.barcode;
+        
+        // If no barcode exists, generate one
+        if (!barcode) {
+          barcode = generateEAN13Barcode(showcaseProduct.name, showcaseProduct.category);
+          
+          // Update product with generated barcode
+          await storage.updateShowcaseProduct(showcaseProduct.id, { barcode });
+        }
+        
+        const parsed = parseEAN13Barcode(barcode);
+        
+        return res.json({
+          success: true,
+          data: {
+            productId: showcaseProduct.id,
+            productName: showcaseProduct.name,
+            category: showcaseProduct.category,
+            barcode,
+            details: parsed,
+            source: 'showcase'
+          }
+        });
+      }
+      
+      // Try to get from shop_products if not found in showcase
+      try {
+        const shopProduct = await shopStorage.getShopProductById(parseInt(productId));
+        if (shopProduct) {
+          let barcode = shopProduct.barcode;
+          
+          // If no barcode exists, generate one
+          if (!barcode) {
+            barcode = generateEAN13Barcode(shopProduct.name, shopProduct.category);
+            
+            // Update product with generated barcode
+            await shopStorage.updateShopProduct(shopProduct.id, { barcode });
+          }
+          
+          const parsed = parseEAN13Barcode(barcode);
+          
+          return res.json({
+            success: true,
+            data: {
+              productId: shopProduct.id,
+              productName: shopProduct.name,
+              category: shopProduct.category,
+              barcode,
+              details: parsed,
+              source: 'shop'
+            }
+          });
+        }
+      } catch (error) {
+        // Shop product not found, continue
+      }
+      
+      res.status(404).json({
+        success: false,
+        message: "Product not found"
+      });
+      
+    } catch (error) {
+      console.error("Error getting product barcode:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error getting product barcode"
+      });
+    }
+  });
+  
+  // Search products by barcode
+  app.get("/api/barcode/search/:barcode", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { barcode } = req.params;
+      
+      if (!validateEAN13(barcode)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid EAN-13 barcode format"
+        });
+      }
+      
+      const results = [];
+      
+      // Search in showcase_products
+      try {
+        const showcaseProducts = await storage.getShowcaseProducts();
+        const showcaseMatch = showcaseProducts.find((p: any) => p.barcode === barcode);
+        if (showcaseMatch) {
+          results.push({
+            ...showcaseMatch,
+            source: 'showcase'
+          });
+        }
+      } catch (error) {
+        console.error("Error searching showcase products:", error);
+      }
+      
+      // Search in shop_products
+      try {
+        const shopProducts = await shopStorage.getShopProducts();
+        const shopMatch = shopProducts.find((p: any) => p.barcode === barcode);
+        if (shopMatch) {
+          results.push({
+            ...shopMatch,
+            source: 'shop'
+          });
+        }
+      } catch (error) {
+        console.error("Error searching shop products:", error);
+      }
+      
+      const parsed = parseEAN13Barcode(barcode);
+      const isMomtazchemProduct = isMomtazchemBarcode(barcode);
+      
+      res.json({
+        success: true,
+        data: {
+          barcode,
+          details: parsed,
+          isMomtazchemProduct,
+          products: results
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error searching by barcode:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error searching by barcode"
       });
     }
   });

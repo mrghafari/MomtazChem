@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Copy, Download, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import JsBarcode from 'jsbarcode';
+import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, getCategoryCode } from '@shared/barcode-utils';
 
 interface EAN13GeneratorProps {
   productId?: number;

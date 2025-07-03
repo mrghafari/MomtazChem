@@ -32,68 +32,7 @@ const formSchema = insertShowcaseProductSchema.extend({
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
-
-// EAN-13 Auto-generation Helper Functions
-const calculateCheckDigit = (barcode12: string): string => {
-  let oddSum = 0;
-  let evenSum = 0;
-  
-  for (let i = 0; i < 12; i++) {
-    const digit = parseInt(barcode12[i]);
-    if (i % 2 === 0) {
-      oddSum += digit;
-    } else {
-      evenSum += digit;
-    }
-  }
-  
-  const total = oddSum + (evenSum * 3);
-  const checkDigit = (10 - (total % 10)) % 10;
-  return checkDigit.toString();
-};
-
-const generateEAN13Barcode = (productName: string, category: string): string => {
-  // Iraq GS1 country code
-  const countryCode = '864';
-  
-  // Default company prefix for Momtazchem (can be customized)
-  const companyPrefix = '0001';
-  
-  // Generate product code based on category
-  let categoryCode = '000';
-  switch (category) {
-    case 'water-treatment': categoryCode = '100'; break;
-    case 'fuel-additives': categoryCode = '200'; break;
-    case 'paint-thinner': categoryCode = '300'; break;
-    case 'agricultural-fertilizers': categoryCode = '400'; break;
-    case 'other-products': categoryCode = '500'; break;
-    default: categoryCode = '000'; break;
-  }
-  
-  // Generate consistent product identifier based on product name hash
-  const generateProductId = (name: string): string => {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      const char = name.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    // Convert to positive number and get 2 digits
-    const positiveHash = Math.abs(hash);
-    return (positiveHash % 100).toString().padStart(2, '0');
-  };
-  
-  const productId = generateProductId(productName.toLowerCase().trim());
-  
-  // Build 12-digit code
-  const barcode12 = countryCode + companyPrefix + categoryCode + productId;
-  
-  // Calculate and append check digit
-  const checkDigit = calculateCheckDigit(barcode12);
-  const fullBarcode = barcode12 + checkDigit;
-  
-  return fullBarcode;
-};
+import { generateEAN13Barcode } from "@shared/barcode-utils";
 
 // Categories will be fetched from API
 
