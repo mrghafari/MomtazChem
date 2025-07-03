@@ -375,30 +375,45 @@ export default function ProductsPage() {
   // Generate barcode image when barcode value changes
   useEffect(() => {
     const currentBarcode = form.watch("barcode");
-    if (currentBarcode && currentBarcode.length === 13 && barcodeCanvasRef.current) {
-      try {
-        JsBarcode(barcodeCanvasRef.current, currentBarcode, {
-          format: "EAN13",
-          width: 2,
-          height: 80,
-          displayValue: true,
-          fontSize: 12,
-          textMargin: 5,
-          marginTop: 5,
-          marginBottom: 5,
-          marginLeft: 5,
-          marginRight: 5,
-        });
-      } catch (error) {
-        console.error('Barcode generation error:', error);
+    console.log('Barcode effect triggered:', currentBarcode, 'Canvas ref:', barcodeCanvasRef.current);
+    
+    // Wait for next tick to ensure DOM is updated
+    const timer = setTimeout(() => {
+      if (currentBarcode && currentBarcode.length === 13 && barcodeCanvasRef.current) {
+        try {
+          console.log('Attempting to generate barcode:', currentBarcode);
+          
+          // Set canvas dimensions first
+          const canvas = barcodeCanvasRef.current;
+          canvas.width = 200;
+          canvas.height = 100;
+          
+          JsBarcode(canvas, currentBarcode, {
+            format: "EAN13",
+            width: 2,
+            height: 80,
+            displayValue: false, // We'll show the number separately
+            fontSize: 12,
+            textMargin: 5,
+            marginTop: 5,
+            marginBottom: 5,
+            marginLeft: 5,
+            marginRight: 5,
+          });
+          console.log('Barcode generated successfully');
+        } catch (error) {
+          console.error('Barcode generation error:', error);
+        }
+      } else if (barcodeCanvasRef.current) {
+        // Clear canvas if no valid barcode
+        const ctx = barcodeCanvasRef.current.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, barcodeCanvasRef.current.width, barcodeCanvasRef.current.height);
+        }
       }
-    } else if (barcodeCanvasRef.current) {
-      // Clear canvas if no valid barcode
-      const ctx = barcodeCanvasRef.current.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, barcodeCanvasRef.current.width, barcodeCanvasRef.current.height);
-      }
-    }
+    }, 50);
+    
+    return () => clearTimeout(timer);
   }, [form.watch("barcode")]);
 
   // Redirect if not authenticated
@@ -1057,11 +1072,18 @@ export default function ProductsPage() {
                             setTimeout(() => {
                               if (barcodeCanvasRef.current) {
                                 try {
-                                  JsBarcode(barcodeCanvasRef.current, generatedBarcode, {
+                                  console.log('Generating barcode in button click:', generatedBarcode);
+                                  
+                                  // Set canvas dimensions first
+                                  const canvas = barcodeCanvasRef.current;
+                                  canvas.width = 200;
+                                  canvas.height = 100;
+                                  
+                                  JsBarcode(canvas, generatedBarcode, {
                                     format: "EAN13",
                                     width: 2,
                                     height: 80,
-                                    displayValue: true,
+                                    displayValue: false, // We'll show the number separately
                                     fontSize: 12,
                                     textMargin: 5,
                                     marginTop: 5,
