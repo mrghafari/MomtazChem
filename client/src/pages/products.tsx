@@ -207,6 +207,53 @@ export default function ProductsPage() {
     },
   });
 
+  // AI SKU Generation Mutation
+  const generateSKUMutation = useMutation({
+    mutationFn: (productData: any) => apiRequest("/api/products/generate-sku", "POST", productData),
+    onSuccess: (result) => {
+      form.setValue("sku", result.data.sku);
+      toast({
+        title: "SKU تولید شد",
+        description: `SKU هوشمند تولید شد: ${result.data.sku}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در تولید SKU",
+        description: error.message || "امکان تولید SKU هوشمند وجود ندارد",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const generateSmartSKU = () => {
+    const formValues = form.getValues();
+    const productData = {
+      name: formValues.name,
+      category: formValues.category,
+      description: formValues.description,
+      specifications: formValues.specifications,
+      features: formValues.features,
+      applications: formValues.applications,
+      unitPrice: formValues.unitPrice,
+      stockUnit: formValues.stockUnit,
+      supplier: formValues.supplier,
+      variantType: formValues.variantType,
+      variantValue: formValues.variantValue
+    };
+
+    if (!productData.name || !productData.category) {
+      toast({
+        title: "اطلاعات ناکافی",
+        description: "لطفاً نام و دسته‌بندی محصول را وارد کنید",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    generateSKUMutation.mutate(productData);
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -1057,9 +1104,25 @@ export default function ProductsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>SKU</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter SKU" {...field} />
-                      </FormControl>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input placeholder="Enter SKU" {...field} />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={generateSmartSKU}
+                          disabled={generateSKUMutation.isPending}
+                          className="whitespace-nowrap"
+                        >
+                          {generateSKUMutation.isPending ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          ) : (
+                            "🤖 AI SKU"
+                          )}
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

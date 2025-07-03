@@ -34,6 +34,7 @@ const { crmCustomers } = schema;
 import { orderManagement } from "@shared/order-management-schema";
 import nodemailer from "nodemailer";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
+import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -11461,6 +11462,50 @@ momtazchem.com
         success: false,
         message: "Error generating Iraq format barcodes",
         error: error.message
+      });
+    }
+  });
+
+  // AI-powered SKU generation endpoint
+  app.post("/api/products/generate-sku", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const productData = req.body;
+      
+      if (!productData.name || !productData.category) {
+        return res.status(400).json({
+          success: false,
+          message: "Product name and category are required"
+        });
+      }
+
+      console.log("Generating smart SKU for product:", productData.name);
+      
+      const skuResult = await generateSmartSKU(productData);
+      
+      // Check if SKU is unique in both showcase and shop products
+      const existingShowcase = await db.select().from(showcaseProducts).where(eq(showcaseProducts.sku, skuResult.sku));
+      const existingShop = await db.select().from(shopProducts).where(eq(shopProducts.sku, skuResult.sku));
+      
+      if (existingShowcase.length > 0 || existingShop.length > 0) {
+        // If SKU exists, append a unique suffix
+        const timestamp = Date.now().toString().slice(-4);
+        skuResult.sku = `${skuResult.sku}-${timestamp}`;
+        skuResult.reasoning += ` (Added unique suffix ${timestamp} to ensure uniqueness)`;
+      }
+
+      console.log("Generated SKU:", skuResult.sku);
+      
+      res.json({
+        success: true,
+        data: skuResult
+      });
+      
+    } catch (error) {
+      console.error("Error generating SKU:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to generate SKU",
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
