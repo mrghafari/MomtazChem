@@ -17,7 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
 import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft } from "lucide-react";
-import * as JsBarcode from "jsbarcode";
+import JsBarcode from "jsbarcode";
 
 // Custom form schema that handles string inputs for numeric fields
 const formSchema = insertShowcaseProductSchema.extend({
@@ -377,7 +377,7 @@ export default function ProductsPage() {
     const currentBarcode = form.watch("barcode");
     if (currentBarcode && currentBarcode.length === 13 && barcodeCanvasRef.current) {
       try {
-        JsBarcode.default(barcodeCanvasRef.current, currentBarcode, {
+        JsBarcode(barcodeCanvasRef.current, currentBarcode, {
           format: "EAN13",
           width: 2,
           height: 80,
@@ -1057,7 +1057,7 @@ export default function ProductsPage() {
                             setTimeout(() => {
                               if (barcodeCanvasRef.current) {
                                 try {
-                                  JsBarcode.default(barcodeCanvasRef.current, generatedBarcode, {
+                                  JsBarcode(barcodeCanvasRef.current, generatedBarcode, {
                                     format: "EAN13",
                                     width: 2,
                                     height: 80,
@@ -1096,35 +1096,33 @@ export default function ProductsPage() {
                       {form.watch("barcode") && (
                         <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                           <div className="text-sm font-medium text-gray-700 mb-2">Barcode Preview:</div>
-                          <div className="flex justify-center mb-2">
+                          <div 
+                            className="flex flex-col items-center cursor-pointer hover:bg-gray-100 transition-colors rounded p-2"
+                            onClick={() => {
+                              const barcode = form.watch("barcode");
+                              if (barcode) {
+                                navigator.clipboard.writeText(barcode).then(() => {
+                                  toast({
+                                    title: "Copied!",
+                                    description: "Barcode copied to clipboard",
+                                    variant: "default"
+                                  });
+                                }).catch(() => {
+                                  toast({
+                                    title: "Copy Failed",
+                                    description: "Could not copy barcode to clipboard",
+                                    variant: "destructive"
+                                  });
+                                });
+                              }
+                            }}
+                            title="Click to copy barcode"
+                          >
                             <canvas 
                               ref={barcodeCanvasRef} 
-                              className="border border-gray-300 rounded"
+                              className="border border-gray-300 rounded mb-2"
                             />
-                          </div>
-                          <div className="text-center">
-                            <code 
-                              className="text-sm font-mono bg-white px-3 py-2 rounded border cursor-pointer hover:bg-gray-50 transition-colors select-all"
-                              onClick={() => {
-                                const barcode = form.watch("barcode");
-                                if (barcode) {
-                                  navigator.clipboard.writeText(barcode).then(() => {
-                                    toast({
-                                      title: "Copied!",
-                                      description: "Barcode copied to clipboard",
-                                      variant: "default"
-                                    });
-                                  }).catch(() => {
-                                    toast({
-                                      title: "Copy Failed",
-                                      description: "Could not copy barcode to clipboard",
-                                      variant: "destructive"
-                                    });
-                                  });
-                                }
-                              }}
-                              title="Click to copy barcode"
-                            >
+                            <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
                               {form.watch("barcode")}
                             </code>
                             <div className="text-xs text-gray-500 mt-1">Click to copy</div>
