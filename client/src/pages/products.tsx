@@ -377,7 +377,7 @@ export default function ProductsPage() {
     const currentBarcode = form.watch("barcode");
     if (currentBarcode && currentBarcode.length === 13 && barcodeCanvasRef.current) {
       try {
-        JsBarcode(barcodeCanvasRef.current, currentBarcode, {
+        JsBarcode.default(barcodeCanvasRef.current, currentBarcode, {
           format: "EAN13",
           width: 2,
           height: 80,
@@ -1057,7 +1057,7 @@ export default function ProductsPage() {
                             setTimeout(() => {
                               if (barcodeCanvasRef.current) {
                                 try {
-                                  JsBarcode(barcodeCanvasRef.current, generatedBarcode, {
+                                  JsBarcode.default(barcodeCanvasRef.current, generatedBarcode, {
                                     format: "EAN13",
                                     width: 2,
                                     height: 80,
@@ -1103,9 +1103,37 @@ export default function ProductsPage() {
                             />
                           </div>
                           <div className="text-center">
-                            <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
-                              {form.watch("barcode")}
-                            </code>
+                            <div className="flex items-center justify-center gap-2">
+                              <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
+                                {form.watch("barcode")}
+                              </code>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const barcode = form.watch("barcode");
+                                  if (barcode) {
+                                    navigator.clipboard.writeText(barcode).then(() => {
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Barcode copied to clipboard",
+                                        variant: "default"
+                                      });
+                                    }).catch(() => {
+                                      toast({
+                                        title: "Copy Failed",
+                                        description: "Could not copy barcode to clipboard",
+                                        variant: "destructive"
+                                      });
+                                    });
+                                  }
+                                }}
+                                className="h-7 px-2"
+                              >
+                                Copy
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}
