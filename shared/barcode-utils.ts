@@ -103,14 +103,14 @@ export const generateUniqueEAN13Barcode = async (productName: string, category: 
   return await generateEAN13Barcode(productName + timestamp, category);
 };
 
-// Generate random 5-digit product code that is unique
+// Generate random 4-digit product code that is unique
 const generateUniqueProductCode = async (): Promise<string> => {
   let attempts = 0;
   const maxAttempts = 100;
   
   while (attempts < maxAttempts) {
-    // Generate random 5-digit code
-    const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
+    // Generate random 4-digit code (1000-9999)
+    const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
     
     // Check if this code is already used
     const uniquenessCheck = await checkProductCodeUniqueness(randomCode);
@@ -121,7 +121,7 @@ const generateUniqueProductCode = async (): Promise<string> => {
   }
   
   // If all random attempts failed, use timestamp-based code
-  const timestamp = Date.now().toString().slice(-5);
+  const timestamp = Date.now().toString().slice(-4);
   return timestamp;
 };
 
@@ -145,7 +145,7 @@ const checkProductCodeUniqueness = async (productCode: string): Promise<{isUniqu
   }
 };
 
-// Generate EAN-13 barcode with new format: 864-96771-XXXXX-C
+// Generate EAN-13 barcode with new format: 864-96771-XXXX-C
 export const generateEAN13BarcodeWithIncrement = async (productName: string, category: string, increment: number = 0): Promise<string> => {
   // Iraq GS1 country code
   const countryCode = '864';
@@ -153,10 +153,10 @@ export const generateEAN13BarcodeWithIncrement = async (productName: string, cat
   // Momtazchem company code
   const companyCode = '96771';
   
-  // Generate unique 5-digit product code
+  // Generate unique 4-digit product code
   const productCode = await generateUniqueProductCode();
   
-  // Build 12-digit code: 864 + 96771 + XXXXX
+  // Build 12-digit code: 864 + 96771 + XXXX
   const barcode12 = countryCode + companyCode + productCode;
   
   // Calculate and append check digit
@@ -174,10 +174,10 @@ export const generateEAN13Barcode = async (productName: string, category: string
   // Momtazchem company code
   const companyCode = '96771';
   
-  // Generate unique 5-digit product code
+  // Generate unique 4-digit product code
   const productCode = await generateUniqueProductCode();
   
-  // Build 12-digit code: 864 + 96771 + XXXXX
+  // Build 12-digit code: 864 + 96771 + XXXX
   const barcode12 = countryCode + companyCode + productCode;
   
   // Calculate and append check digit
