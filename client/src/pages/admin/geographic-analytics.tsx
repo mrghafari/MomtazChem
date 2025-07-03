@@ -138,6 +138,19 @@ export default function GeographicAnalytics() {
     }
   });
 
+  // Fetch product trends data
+  const { data: productTrendsData, isLoading: trendsLoading } = useQuery({
+    queryKey: ['/api/analytics/product-trends', dateRange, selectedProduct],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/product-trends?period=${dateRange}&product=${selectedProduct}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch product trends');
+      const result = await response.json();
+      return result.data || [];
+    }
+  });
+
   // Calculate summary statistics
   const summaryStats = geoData ? {
     totalRevenue: geoData.reduce((sum, region) => sum + region.totalRevenue, 0),
@@ -220,7 +233,7 @@ export default function GeographicAnalytics() {
 
   const sortedProductRegionData = getSortedProductRegionData();
 
-  if (geoLoading || productLoading || timeLoading) {
+  if (geoLoading || productLoading || timeLoading || trendsLoading) {
     return (
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
@@ -435,6 +448,139 @@ export default function GeographicAnalytics() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Product Sales Trends Over Time */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Sales Trends Over Time</CardTitle>
+              <p className="text-sm text-gray-600">Track how much each product sold during the selected period</p>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart
+                  data={timeData}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: any, name: string) => [
+                      name === 'orders' ? `${value} orders` : `$${value.toFixed(2)}`,
+                      name === 'orders' ? 'Orders' : 'Revenue'
+                    ]}
+                  />
+                  <Line type="monotone" dataKey="orders" stroke="#8884d8" strokeWidth={2} name="orders" />
+                  <Line type="monotone" dataKey="revenue" stroke="#82ca9d" strokeWidth={2} name="revenue" />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Detailed Product Sales Trends */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Sales Trends - Daily Performance</CardTitle>
+              <p className="text-sm text-gray-600">Track each product's daily sales performance over the selected period</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {productTrendsData && productTrendsData.length > 0 ? (
+                  productTrendsData.slice(0, 5).map((product: any, index: number) => (
+                    <div key={product.name} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-lg font-semibold">{product.name}</h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <Badge variant="outline">{product.category}</Badge>
+                            <span>Total Sales: {product.totalSales} units</span>
+                            <span>Total Revenue: ${product.totalRevenue.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={product.dailyData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip 
+                            formatter={(value: any, name: string) => [
+                              name === 'sales' ? `${value} units sold` : `$${value.toFixed(2)} revenue`,
+                              name === 'sales' ? 'Daily Sales' : 'Daily Revenue'
+                            ]}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="sales" 
+                            stroke={COLORS[index % COLORS.length]} 
+                            strokeWidth={2} 
+                            name="sales"
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="revenue" 
+                            stroke={COLORS[(index + 1) % COLORS.length]} 
+                            strokeWidth={2} 
+                            strokeDasharray="5 5"
+                            name="revenue"
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No product trends data available for the selected period
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Product Performance Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Performance Summary</CardTitle>
+              <p className="text-sm text-gray-600">Overall sales comparison across all products</p>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart
+                  data={productChartData.slice(0, 10)}
+                  margin={{
+                    top: 20,
+                    right: 30,
+                    left: 20,
+                    bottom: 80,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={100}
+                    interval={0}
+                  />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: any, name: string) => [
+                      name === 'sales' ? `${value} units` : `$${value.toFixed(2)}`,
+                      name === 'sales' ? 'Units Sold' : 'Revenue'
+                    ]}
+                  />
+                  <Bar dataKey="sales" fill="#0088FE" name="sales" />
+                  <Bar dataKey="revenue" fill="#00C49F" name="revenue" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
           {/* Products with Regional Breakdown */}
           <Card>

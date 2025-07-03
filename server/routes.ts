@@ -10716,6 +10716,96 @@ momtazchem.com
     }
   });
 
+  // Product Sales Trends Over Time API
+  app.get("/api/analytics/product-trends", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { period = '30d', product = 'all' } = req.query;
+      
+      let dateCondition = '';
+      const now = new Date();
+      let startDate: Date;
+      
+      switch (period) {
+        case '7d':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case '30d':
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case '3m':
+          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          break;
+        case '1y':
+          startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      }
+
+      const query = sql`
+        SELECT 
+          p.name as product_name,
+          p.category,
+          DATE(o.created_at) as date,
+          SUM(oi.quantity) as daily_sales,
+          SUM(CAST(oi.total_price AS DECIMAL)) as daily_revenue,
+          COUNT(DISTINCT o.id) as daily_orders
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE o.created_at >= ${startDate}
+        ${product !== 'all' ? sql`AND p.name = ${product}` : sql``}
+        GROUP BY p.name, p.category, DATE(o.created_at)
+        ORDER BY date ASC, daily_sales DESC
+      `;
+
+      const result = await db.execute(query);
+      
+      // Group data by product
+      const productTrends: { [key: string]: any } = {};
+      
+      result.rows.forEach((row: any) => {
+        const productName = row.product_name;
+        if (!productTrends[productName]) {
+          productTrends[productName] = {
+            name: productName,
+            category: row.category,
+            dailyData: [],
+            totalSales: 0,
+            totalRevenue: 0,
+            totalOrders: 0
+          };
+        }
+        
+        const dailyData = {
+          date: row.date,
+          sales: Number(row.daily_sales),
+          revenue: Number(row.daily_revenue) || 0,
+          orders: Number(row.daily_orders)
+        };
+        
+        productTrends[productName].dailyData.push(dailyData);
+        productTrends[productName].totalSales += dailyData.sales;
+        productTrends[productName].totalRevenue += dailyData.revenue;
+        productTrends[productName].totalOrders += dailyData.orders;
+      });
+
+      const responseData = Object.values(productTrends);
+
+      res.json({
+        success: true,
+        data: responseData
+      });
+
+    } catch (error) {
+      console.error("Error fetching product trends:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching product trends"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
