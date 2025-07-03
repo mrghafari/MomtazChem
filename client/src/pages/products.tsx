@@ -403,8 +403,8 @@ export default function ProductsPage() {
           // Validate barcode first
           const isValid = validateEAN13(currentBarcode);
           if (!isValid) {
-            console.error('Invalid EAN-13 barcode:', currentBarcode);
-            return;
+            console.error('Invalid EAN-13 barcode:', currentBarcode, 'but will try to render anyway');
+            // Don't return - try to render even if validation fails
           }
           
           console.log('Attempting to generate barcode:', currentBarcode);
@@ -1097,6 +1097,12 @@ export default function ProductsPage() {
                             }
                             
                             const generatedBarcode = generateEAN13Barcode(productName, category);
+                            console.log('Generated barcode details:', {
+                              productName,
+                              category,
+                              generated: generatedBarcode,
+                              isValid: validateEAN13(generatedBarcode)
+                            });
                             form.setValue("barcode", generatedBarcode);
                             
                             // Generate barcode image immediately

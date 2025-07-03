@@ -69,6 +69,20 @@ export const generateEAN13Barcode = (productName: string, category: string): str
   const checkDigit = calculateEAN13CheckDigit(barcode12);
   const fullBarcode = barcode12 + checkDigit;
   
+  // Debug log
+  console.log('Barcode generation details:', {
+    productName,
+    category,
+    countryCode,
+    companyPrefix,
+    categoryCode,
+    productId,
+    barcode12,
+    checkDigit,
+    fullBarcode,
+    isValid: validateEAN13(fullBarcode)
+  });
+  
   return fullBarcode;
 };
 
