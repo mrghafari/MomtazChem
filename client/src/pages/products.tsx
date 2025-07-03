@@ -59,7 +59,7 @@ const generateEAN13Barcode = (productName: string, category: string): string => 
   // Default company prefix for Momtazchem (can be customized)
   const companyPrefix = '0001';
   
-  // Generate product code based on category and timestamp
+  // Generate product code based on category
   let categoryCode = '000';
   switch (category) {
     case 'water-treatment': categoryCode = '100'; break;
@@ -70,9 +70,20 @@ const generateEAN13Barcode = (productName: string, category: string): string => 
     default: categoryCode = '000'; break;
   }
   
-  // Generate unique product identifier based on timestamp
-  const timestamp = Date.now().toString();
-  const productId = timestamp.slice(-2); // Last 2 digits of timestamp
+  // Generate consistent product identifier based on product name hash
+  const generateProductId = (name: string): string => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      const char = name.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    // Convert to positive number and get 2 digits
+    const positiveHash = Math.abs(hash);
+    return (positiveHash % 100).toString().padStart(2, '0');
+  };
+  
+  const productId = generateProductId(productName.toLowerCase().trim());
   
   // Build 12-digit code
   const barcode12 = countryCode + companyPrefix + categoryCode + productId;
