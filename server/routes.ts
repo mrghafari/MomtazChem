@@ -1033,6 +1033,162 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // EAN-13 BARCODE MANAGEMENT API (GS1 Standard)
+  // =============================================================================
+  
+  // Get EAN-13 records
+  app.get("/api/ean13/records", requireAuth, async (req, res) => {
+    try {
+      // For now, return empty array - will be implemented when database schema is created
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching EAN-13 records:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Bulk generate EAN-13 barcodes
+  app.post("/api/ean13/bulk-generate", requireAuth, async (req, res) => {
+    try {
+      const { productIds } = req.body;
+      
+      if (!productIds || !Array.isArray(productIds)) {
+        return res.status(400).json({
+          success: false,
+          message: "Product IDs array is required"
+        });
+      }
+
+      let generated = 0;
+      const companyPrefix = "12345"; // Should be obtained from GS1
+      const countryCode = "864"; // Iraq
+      
+      for (const productId of productIds) {
+        try {
+          const products = await storage.getProducts();
+          const product = products.find(p => p.id === productId);
+          if (!product || (product.barcode && product.barcode.length === 13)) {
+            continue; // Skip if product not found or already has EAN-13
+          }
+
+          // Generate EAN-13 barcode
+          const productCode = String(productId).padStart(3, '0');
+          const barcode12 = countryCode + companyPrefix + productCode;
+          
+          // Calculate check digit
+          let sum = 0;
+          for (let i = 0; i < 12; i++) {
+            const digit = parseInt(barcode12[i]);
+            sum += i % 2 === 0 ? digit : digit * 3;
+          }
+          const checkDigit = (10 - (sum % 10)) % 10;
+          const ean13 = barcode12 + checkDigit.toString();
+
+          // Update product with EAN-13
+          await storage.updateProduct(productId, { barcode: ean13 });
+          generated++;
+        } catch (error) {
+          console.error(`Error generating EAN-13 for product ${productId}:`, error);
+        }
+      }
+
+      res.json({
+        success: true,
+        generated,
+        message: `Generated ${generated} EAN-13 barcodes`
+      });
+    } catch (error) {
+      console.error("Error in bulk EAN-13 generation:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Export EAN-13 data as CSV
+  app.get("/api/ean13/export", requireAuth, async (req, res) => {
+    try {
+      const products = await storage.getProducts();
+      const ean13Products = products.filter(p => p.barcode && p.barcode.length === 13);
+      
+      // Generate CSV content
+      const csvHeader = "Product Name,SKU,EAN-13,Country Code,Company Prefix,Product Code,Check Digit,Category,Price\n";
+      const csvRows = ean13Products.map(product => {
+        const barcode = product.barcode!;
+        const countryCode = barcode.substring(0, 3);
+        const companyPrefix = barcode.substring(3, 8);
+        const productCode = barcode.substring(8, 12);
+        const checkDigit = barcode.substring(12, 13);
+        
+        return `"${product.name}","${product.sku}","${barcode}","${countryCode}","${companyPrefix}","${productCode}","${checkDigit}","${product.category}","${product.priceRange || 'N/A'}"`;
+      }).join('\n');
+      
+      const csvContent = csvHeader + csvRows;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="EAN13_Export_${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting EAN-13 data:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Validate EAN-13 barcode
+  app.post("/api/ean13/validate", requireAuth, async (req, res) => {
+    try {
+      const { barcode } = req.body;
+      
+      if (!barcode || typeof barcode !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: "Barcode is required"
+        });
+      }
+
+      // Validate EAN-13 format
+      if (barcode.length !== 13 || !/^\d+$/.test(barcode)) {
+        return res.json({
+          success: true,
+          valid: false,
+          message: "Invalid EAN-13 format"
+        });
+      }
+
+      // Validate check digit
+      let sum = 0;
+      for (let i = 0; i < 12; i++) {
+        const digit = parseInt(barcode[i]);
+        sum += i % 2 === 0 ? digit : digit * 3;
+      }
+      const calculatedCheckDigit = (10 - (sum % 10)) % 10;
+      const providedCheckDigit = parseInt(barcode[12]);
+      
+      const isValid = calculatedCheckDigit === providedCheckDigit;
+      
+      res.json({
+        success: true,
+        valid: isValid,
+        checkDigit: calculatedCheckDigit,
+        message: isValid ? "Valid EAN-13 barcode" : "Invalid check digit"
+      });
+    } catch (error) {
+      console.error("Error validating EAN-13:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // =============================================================================
   // DATABASE BACKUP ENDPOINTS
   // =============================================================================
 
