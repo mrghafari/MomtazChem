@@ -17,8 +17,8 @@ export async function generateBarcodesForExistingProducts() {
     
     for (const product of productsWithoutBarcodes) {
       try {
-        // Generate barcode
-        const generatedBarcode = generateEAN13Barcode(product.name, product.category);
+        // Generate barcode with new format
+        const generatedBarcode = await generateEAN13Barcode(product.name, product.category);
         
         // Update product with barcode
         await showcaseStorage.updateShowcaseProduct(product.id, {

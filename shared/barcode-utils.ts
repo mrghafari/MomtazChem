@@ -90,26 +90,64 @@ export const generateUniqueEAN13Barcode = async (productName: string, category: 
   
   // If all attempts failed, generate with timestamp suffix
   const timestamp = Date.now().toString().slice(-3);
-  return generateEAN13Barcode(productName + timestamp, category);
+  return await generateEAN13Barcode(productName + timestamp, category);
 };
 
-// Generate EAN-13 barcode with increment for uniqueness
-export const generateEAN13BarcodeWithIncrement = (productName: string, category: string, increment: number = 0): string => {
+// Generate random 5-digit product code that is unique
+const generateUniqueProductCode = async (): Promise<string> => {
+  let attempts = 0;
+  const maxAttempts = 100;
+  
+  while (attempts < maxAttempts) {
+    // Generate random 5-digit code
+    const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
+    
+    // Check if this code is already used
+    const uniquenessCheck = await checkProductCodeUniqueness(randomCode);
+    if (uniquenessCheck.isUnique) {
+      return randomCode;
+    }
+    attempts++;
+  }
+  
+  // If all random attempts failed, use timestamp-based code
+  const timestamp = Date.now().toString().slice(-5);
+  return timestamp;
+};
+
+// Check if product code is unique across all products
+const checkProductCodeUniqueness = async (productCode: string): Promise<{isUnique: boolean}> => {
+  try {
+    const url = `/api/barcode/check-product-code/${productCode}`;
+    const response = await fetch(url, {
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      return { isUnique: result.data.isUnique };
+    } else {
+      return { isUnique: true }; // Default to allowing if check fails
+    }
+  } catch (error) {
+    console.error('Error checking product code uniqueness:', error);
+    return { isUnique: true }; // Default to allowing if check fails
+  }
+};
+
+// Generate EAN-13 barcode with new format: 846-96771-XXXXX-C
+export const generateEAN13BarcodeWithIncrement = async (productName: string, category: string, increment: number = 0): Promise<string> => {
   // Iraq GS1 country code
-  const countryCode = '864';
+  const countryCode = '846';
   
-  // Momtazchem company prefix (registered with GS1 Iraq)
-  const companyPrefix = '0001';
+  // Momtazchem company code
+  const companyCode = '96771';
   
-  // Get category code
-  const categoryCode = getCategoryCode(category);
+  // Generate unique 5-digit product code
+  const productCode = await generateUniqueProductCode();
   
-  // Generate consistent product identifier with increment
-  const baseProductId = generateProductHash(productName);
-  const incrementedProductId = (parseInt(baseProductId) + increment).toString().padStart(2, '0').slice(-2);
-  
-  // Build 12-digit code
-  const barcode12 = countryCode + companyPrefix + categoryCode + incrementedProductId;
+  // Build 12-digit code: 846 + 96771 + XXXXX
+  const barcode12 = countryCode + companyCode + productCode;
   
   // Calculate and append check digit
   const checkDigit = calculateEAN13CheckDigit(barcode12);
@@ -118,35 +156,31 @@ export const generateEAN13BarcodeWithIncrement = (productName: string, category:
   return fullBarcode;
 };
 
-// Main EAN-13 Generation Function
-export const generateEAN13Barcode = (productName: string, category: string): string => {
+// Main EAN-13 Generation Function - Updated Format
+export const generateEAN13Barcode = async (productName: string, category: string): Promise<string> => {
   // Iraq GS1 country code
-  const countryCode = '864';
+  const countryCode = '846';
   
-  // Momtazchem company prefix (registered with GS1 Iraq)
-  const companyPrefix = '0001';
+  // Momtazchem company code
+  const companyCode = '96771';
   
-  // Get category code
-  const categoryCode = getCategoryCode(category);
+  // Generate unique 5-digit product code
+  const productCode = await generateUniqueProductCode();
   
-  // Generate consistent product identifier
-  const productId = generateProductHash(productName);
-  
-  // Build 12-digit code
-  const barcode12 = countryCode + companyPrefix + categoryCode + productId;
+  // Build 12-digit code: 846 + 96771 + XXXXX
+  const barcode12 = countryCode + companyCode + productCode;
   
   // Calculate and append check digit
   const checkDigit = calculateEAN13CheckDigit(barcode12);
   const fullBarcode = barcode12 + checkDigit;
   
   // Debug log
-  console.log('Barcode generation details:', {
+  console.log('New barcode generation details:', {
     productName,
     category,
     countryCode,
-    companyPrefix,
-    categoryCode,
-    productId,
+    companyCode,
+    productCode,
     barcode12,
     checkDigit,
     fullBarcode,

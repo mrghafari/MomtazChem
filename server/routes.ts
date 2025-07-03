@@ -11227,6 +11227,52 @@ momtazchem.com
     }
   });
 
+  // Check if 5-digit product code is unique
+  app.get("/api/barcode/check-product-code/:productCode", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { productCode } = req.params;
+      
+      // Search in showcase_products for product codes within barcodes
+      const showcaseProducts = await storage.getShowcaseProducts();
+      const showcaseMatch = showcaseProducts.find((p: any) => {
+        if (!p.barcode || p.barcode.length !== 13) return false;
+        // Extract 5-digit product code from position 8-12 in EAN-13: 846-96771-XXXXX-C
+        const extractedCode = p.barcode.substring(8, 13);
+        return extractedCode === productCode;
+      });
+      
+      // Search in shop_products (if exists)
+      let shopMatch = null;
+      try {
+        const shopProducts = await shopStorage.getShopProducts();
+        shopMatch = shopProducts.find((p: any) => {
+          if (!p.barcode || p.barcode.length !== 13) return false;
+          const extractedCode = p.barcode.substring(8, 13);
+          return extractedCode === productCode;
+        });
+      } catch (error) {
+        // Shop products table might not exist, ignore error
+      }
+      
+      const isDuplicate = !!(showcaseMatch || shopMatch);
+      
+      res.json({
+        success: true,
+        data: {
+          productCode,
+          isDuplicate,
+          isUnique: !isDuplicate
+        }
+      });
+    } catch (error) {
+      console.error("Error checking product code uniqueness:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error checking product code uniqueness"
+      });
+    }
+  });
+
   // Batch generate barcodes for existing products
   app.post("/api/barcode/batch-generate", requireAuth, async (req: Request, res: Response) => {
     try {
