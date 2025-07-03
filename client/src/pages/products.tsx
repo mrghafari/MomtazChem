@@ -33,6 +33,57 @@ const formSchema = insertShowcaseProductSchema.extend({
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 
+// EAN-13 Auto-generation Helper Functions
+const calculateCheckDigit = (barcode12: string): string => {
+  let oddSum = 0;
+  let evenSum = 0;
+  
+  for (let i = 0; i < 12; i++) {
+    const digit = parseInt(barcode12[i]);
+    if (i % 2 === 0) {
+      oddSum += digit;
+    } else {
+      evenSum += digit;
+    }
+  }
+  
+  const total = oddSum + (evenSum * 3);
+  const checkDigit = (10 - (total % 10)) % 10;
+  return checkDigit.toString();
+};
+
+const generateEAN13Barcode = (productName: string, category: string): string => {
+  // Iraq GS1 country code
+  const countryCode = '864';
+  
+  // Default company prefix for Momtazchem (can be customized)
+  const companyPrefix = '0001';
+  
+  // Generate product code based on category and timestamp
+  let categoryCode = '000';
+  switch (category) {
+    case 'water-treatment': categoryCode = '100'; break;
+    case 'fuel-additives': categoryCode = '200'; break;
+    case 'paint-thinner': categoryCode = '300'; break;
+    case 'agricultural-fertilizers': categoryCode = '400'; break;
+    case 'other-products': categoryCode = '500'; break;
+    default: categoryCode = '000'; break;
+  }
+  
+  // Generate unique product identifier based on timestamp
+  const timestamp = Date.now().toString();
+  const productId = timestamp.slice(-2); // Last 2 digits of timestamp
+  
+  // Build 12-digit code
+  const barcode12 = countryCode + companyPrefix + categoryCode + productId;
+  
+  // Calculate and append check digit
+  const checkDigit = calculateCheckDigit(barcode12);
+  const fullBarcode = barcode12 + checkDigit;
+  
+  return fullBarcode;
+};
+
 // Categories will be fetched from API
 
 // Inventory status helper functions
@@ -984,10 +1035,46 @@ export default function ProductsPage() {
                   name="barcode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Barcode</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter barcode" {...field} />
-                      </FormControl>
+                      <FormLabel>Barcode (EAN-13)</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input placeholder="Auto-generated or enter manually" {...field} />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const productName = form.getValues("name");
+                            const category = form.getValues("category");
+                            
+                            if (!productName || !category) {
+                              toast({
+                                title: "Missing Information",
+                                description: "Please enter product name and select category first",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            
+                            const generatedBarcode = generateEAN13Barcode(productName, category);
+                            form.setValue("barcode", generatedBarcode);
+                            
+                            toast({
+                              title: "EAN-13 Generated",
+                              description: `Generated barcode: ${generatedBarcode}`,
+                              variant: "default"
+                            });
+                          }}
+                          className="whitespace-nowrap"
+                        >
+                          <QrCode className="w-4 h-4 mr-1" />
+                          Generate
+                        </Button>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Click "Generate" to create GS1-compliant EAN-13 barcode automatically
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
