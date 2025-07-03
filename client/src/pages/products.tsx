@@ -995,6 +995,18 @@ export default function ProductsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
+                            const currentBarcode = form.getValues("barcode");
+                            
+                            // Protect existing barcodes - don't allow overwriting
+                            if (currentBarcode && currentBarcode.trim() !== "") {
+                              toast({
+                                title: "Barcode Exists",
+                                description: "This product already has a barcode. Clear the field first if you want to generate a new one.",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            
                             const productName = form.getValues("name");
                             const category = form.getValues("category");
                             
@@ -1023,7 +1035,8 @@ export default function ProductsPage() {
                         </Button>
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Click "Generate" to create GS1-compliant EAN-13 barcode automatically
+                        Click "Generate" to create GS1-compliant EAN-13 barcode automatically. 
+                        <span className="text-amber-600 font-medium">Note: Existing barcodes are protected from overwriting.</span>
                       </div>
                       <FormMessage />
                     </FormItem>
