@@ -407,7 +407,16 @@ const BarcodeInventory = () => {
                       <h3 className="font-semibold">{selectedProduct.name}</h3>
                       <p className="text-sm text-gray-600">Current Stock: {selectedProduct.stockQuantity} {selectedProduct.stockUnit}</p>
                       {selectedProduct.barcode && (
-                        <p className="text-xs font-mono">{selectedProduct.barcode}</p>
+                        <div className="mt-2">
+                          <p className="text-xs font-mono text-gray-500 mb-1">{selectedProduct.barcode}</p>
+                          <VisualBarcode 
+                            value={selectedProduct.barcode} 
+                            width={1.5}
+                            height={35}
+                            fontSize={9}
+                            className="max-w-full"
+                          />
+                        </div>
                       )}
                     </div>
 
@@ -524,7 +533,16 @@ const BarcodeInventory = () => {
                           <h3 className="font-semibold">{product.name}</h3>
                           <p className="text-sm text-gray-600">{product.category}</p>
                           {product.barcode && (
-                            <p className="text-xs font-mono text-gray-500">{product.barcode}</p>
+                            <div className="mt-2">
+                              <p className="text-xs font-mono text-gray-500 mb-1">{product.barcode}</p>
+                              <VisualBarcode 
+                                value={product.barcode} 
+                                width={1.5}
+                                height={40}
+                                fontSize={10}
+                                className="max-w-full"
+                              />
+                            </div>
                           )}
                         </div>
                         <div className="flex items-center gap-4">
