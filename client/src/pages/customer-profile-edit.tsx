@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -14,16 +15,17 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ArrowLeft, Save, Shield, Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Schema will be created dynamically based on language
+// Schema for profile editing
 const createEditProfileSchema = (t: any) => z.object({
-  firstName: z.string().min(1, t.firstName + " required"),
-  lastName: z.string().min(1, t.lastName + " required"),
-  phone: z.string().min(1, t.phone + " required"),
+  firstName: z.string().min(1, t.firstName + " is required"),
+  lastName: z.string().min(1, t.lastName + " is required"),
+  phone: z.string().min(1, t.phone + " is required"),
   company: z.string().optional(),
-  country: z.string().min(1, t.country + " required"),
-  city: z.string().min(1, t.city + " required"),
-  address: z.string().min(1, t.address + " required"),
+  country: z.string().min(1, t.country + " is required"),
+  city: z.string().min(1, t.city + " is required"),
+  address: z.string().min(1, t.address + " is required"),
   postalCode: z.string().optional(),
   businessType: z.string().optional(),
   notes: z.string().optional(),
@@ -32,8 +34,6 @@ const createEditProfileSchema = (t: any) => z.object({
 const createSmsVerificationSchema = (t: any) => z.object({
   code: z.string().min(4, "Verification code must be at least 4 digits"),
 });
-
-// Types will be inferred dynamically
 
 export default function CustomerProfileEdit() {
   const [, setLocation] = useLocation();
@@ -44,6 +44,9 @@ export default function CustomerProfileEdit() {
   
   const editProfileSchema = createEditProfileSchema(t);
   const smsVerificationSchema = createSmsVerificationSchema(t);
+  
+  type EditProfileForm = z.infer<typeof editProfileSchema>;
+  type SmsVerificationForm = z.infer<typeof smsVerificationSchema>;
 
   // Fetch customer data
   const { data: customer, isLoading } = useQuery({
@@ -74,7 +77,7 @@ export default function CustomerProfileEdit() {
   });
 
   // Update form values when customer data is loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (customer?.customer) {
       const customerData = customer.customer;
       form.reset({
@@ -100,63 +103,49 @@ export default function CustomerProfileEdit() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
-        body: JSON.stringify({ phone, purpose: "profile_update" })
+        body: JSON.stringify({ phone }),
+        credentials: 'include'
       });
+      if (!response.ok) {
+        throw new Error('Failed to send SMS');
+      }
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "کد تایید ارسال شد",
-        description: "کد تایید به شماره تلفن شما ارسال شد",
+        title: t.loading,
+        description: "SMS verification code sent successfully",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "خطا در ارسال کد",
-        description: error.message || "خطا در ارسال کد تایید",
         variant: "destructive",
+        title: t.error,
+        description: error.message || "Failed to send SMS verification",
       });
-    },
+    }
   });
 
-  // Verify SMS code and update profile
+  // Update profile with SMS verification
   const verifySmsAndUpdateMutation = useMutation({
     mutationFn: async ({ code, profileData }: { code: string; profileData: EditProfileForm }) => {
-      // First verify the SMS code
-      const verifyResponse = await fetch('/api/sms/verify-code', {
+      const response = await fetch('/api/customers/verify-and-update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          phone: profileData.phone, 
-          code, 
-          purpose: "profile_update" 
-        })
+        body: JSON.stringify({ verificationCode: code, ...profileData }),
+        credentials: 'include'
       });
-      const verifyData = await verifyResponse.json();
-
-      if (!verifyData.success) {
-        throw new Error(verifyData.message || "کد تایید اشتباه است");
+      if (!response.ok) {
+        throw new Error('Verification failed');
       }
-
-      // Then update the profile
-      const updateResponse = await fetch('/api/customers/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(profileData)
-      });
-      return updateResponse.json();
+      return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "پروفایل بروزرسانی شد",
-        description: "اطلاعات پروفایل شما با موفقیت بروزرسانی شد",
+        title: t.save,
+        description: "Profile updated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
       setShowSmsDialog(false);
@@ -165,50 +154,59 @@ export default function CustomerProfileEdit() {
     },
     onError: (error: any) => {
       toast({
-        title: "خطا در بروزرسانی",
-        description: error.message || "خطا در بروزرسانی پروفایل",
         variant: "destructive",
+        title: t.error,
+        description: error.message || "Profile update failed",
       });
-    },
+    }
   });
 
-  const onSubmit = async (data: EditProfileForm) => {
-    // Check if phone number has changed
-    const phoneChanged = data.phone !== customer?.customer?.phone;
+  // Update profile without SMS (if no phone change)
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: EditProfileForm) => {
+      const response = await fetch('/api/customers/update-profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Update failed');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: t.save,
+        description: "Profile updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
+      setLocation("/customer/profile");
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: t.error,
+        description: error.message || "Profile update failed",
+      });
+    }
+  });
+
+  const onSubmit = (data: EditProfileForm) => {
+    // Check if phone number changed
+    const currentPhone = customer?.customer?.phone;
+    const newPhone = data.phone;
     
-    if (phoneChanged) {
-      // Store pending changes and send SMS
+    if (currentPhone !== newPhone) {
+      // Phone changed, require SMS verification
       setPendingChanges(data);
-      await sendSmsCodeMutation.mutateAsync(data.phone);
+      sendSmsCodeMutation.mutate(newPhone);
       setShowSmsDialog(true);
     } else {
-      // No SMS verification needed, update directly
-      try {
-        const response = await fetch('/api/customers/profile', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-          toast({
-            title: "پروفایل بروزرسانی شد",
-            description: "اطلاعات پروفایل شما با موفقیت بروزرسانی شد",
-          });
-          queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
-          setLocation("/customer/profile");
-        }
-      } catch (error: any) {
-        toast({
-          title: "خطا در بروزرسانی",
-          description: error.message || "خطا در بروزرسانی پروفایل",
-          variant: "destructive",
-        });
-      }
+      // No phone change, update directly
+      updateProfileMutation.mutate(data);
     }
   };
 
@@ -223,9 +221,9 @@ export default function CustomerProfileEdit() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8">
+      <div className={`container mx-auto py-8 ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
         <div className="flex items-center justify-center">
-          <div className="text-lg">در حال بارگذاری...</div>
+          <div className="text-lg">{t.loading}</div>
         </div>
       </div>
     );
@@ -233,132 +231,152 @@ export default function CustomerProfileEdit() {
 
   if (!customer?.customer) {
     return (
-      <div className="container mx-auto py-8">
+      <div className={`container mx-auto py-8 ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
         <div className="flex items-center justify-center">
-          <div className="text-lg text-red-600">خطا در دریافت اطلاعات مشتری</div>
+          <div className="text-lg text-red-600">{t.error}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6" dir="rtl">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setLocation("/customer/profile")}
-        >
-          <ArrowLeft className="h-4 w-4 ml-2" />
-          بازگشت
-        </Button>
-        <h1 className="text-2xl font-bold">ویرایش پروفایل</h1>
-      </div>
+    <div className={`min-h-screen bg-gray-50 py-8 ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
+      <div className="container mx-auto px-4">
+        {/* Header */}
+        <div className="mb-6 flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLocation("/customer/profile")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className={`h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+            {t.cancel}
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {t.editProfile}
+            </h1>
+            <p className="text-gray-600">
+              {t.manageAccount}
+            </p>
+          </div>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            ویرایش اطلاعات شخصی
-          </CardTitle>
-          <CardDescription>
-            در صورت تغییر شماره تلفن، کد تایید برای شما ارسال خواهد شد
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>نام</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        {/* Edit Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              {t.accountInformation}
+            </CardTitle>
+            <CardDescription>
+              {t.manageAccount}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Name Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.firstName}</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.lastName}</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>نام خانوادگی</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Contact Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          {t.phone}
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="company"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.company}</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>شماره تلفن</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="09xxxxxxxxx" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Location Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.country}</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.city}</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="company"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>شرکت</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>کشور</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>شهر</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+                {/* Address Fields */}
                 <FormField
                   control={form.control}
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>آدرس</FormLabel>
+                      <FormLabel>{t.address}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -367,94 +385,130 @@ export default function CustomerProfileEdit() {
                   )}
                 />
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Postal Code</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="businessType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Business Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select business type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="manufacturer">Manufacturer</SelectItem>
+                            <SelectItem value="distributor">Distributor</SelectItem>
+                            <SelectItem value="retailer">Retailer</SelectItem>
+                            <SelectItem value="end_user">End User</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Notes */}
                 <FormField
                   control={form.control}
-                  name="postalCode"
+                  name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>کد پستی</FormLabel>
+                      <FormLabel>Notes</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Textarea {...field} rows={3} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                {/* Submit Button */}
+                <div className="flex justify-end gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setLocation("/customer/profile")}
+                  >
+                    {t.cancel}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={updateProfileMutation.isPending}
+                    className="flex items-center gap-2"
+                  >
+                    <Save className="h-4 w-4" />
+                    {updateProfileMutation.isPending ? t.loading : t.save}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        {/* SMS Verification Dialog */}
+        <Dialog open={showSmsDialog} onOpenChange={setShowSmsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                SMS Verification
+              </DialogTitle>
+              <DialogDescription>
+                Enter the verification code sent to your phone
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...smsForm}>
+              <form onSubmit={smsForm.handleSubmit(onSmsVerify)} className="space-y-4">
                 <FormField
-                  control={form.control}
-                  name="businessType"
+                  control={smsForm.control}
+                  name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>نوع کسب و کار</FormLabel>
+                      <FormLabel>Verification Code</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} placeholder="Enter 4-digit code" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                  <Save className="h-4 w-4 ml-2" />
-                  ذخیره تغییرات
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      {/* SMS Verification Dialog */}
-      <Dialog open={showSmsDialog} onOpenChange={setShowSmsDialog}>
-        <DialogContent className="sm:max-w-md" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5" />
-              تایید شماره تلفن
-            </DialogTitle>
-            <DialogDescription>
-              کد تایید به شماره {pendingChanges?.phone} ارسال شد
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Form {...smsForm}>
-            <form onSubmit={smsForm.handleSubmit(onSmsVerify)} className="space-y-4">
-              <FormField
-                control={smsForm.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>کد تایید</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="1234" maxLength={6} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowSmsDialog(false)}
-                >
-                  انصراف
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={verifySmsAndUpdateMutation.isPending}
-                >
-                  تایید و ذخیره
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowSmsDialog(false)}
+                  >
+                    {t.cancel}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={verifySmsAndUpdateMutation.isPending}
+                  >
+                    {verifySmsAndUpdateMutation.isPending ? t.loading : "Verify & Save"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
