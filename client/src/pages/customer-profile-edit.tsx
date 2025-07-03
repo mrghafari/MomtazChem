@@ -13,32 +13,37 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ArrowLeft, Save, Shield, Phone } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const editProfileSchema = z.object({
-  firstName: z.string().min(1, "نام الزامی است"),
-  lastName: z.string().min(1, "نام خانوادگی الزامی است"),
-  phone: z.string().min(1, "شماره تلفن الزامی است"),
+// Schema will be created dynamically based on language
+const createEditProfileSchema = (t: any) => z.object({
+  firstName: z.string().min(1, t.firstName + " required"),
+  lastName: z.string().min(1, t.lastName + " required"),
+  phone: z.string().min(1, t.phone + " required"),
   company: z.string().optional(),
-  country: z.string().min(1, "کشور الزامی است"),
-  city: z.string().min(1, "شهر الزامی است"),
-  address: z.string().min(1, "آدرس الزامی است"),
+  country: z.string().min(1, t.country + " required"),
+  city: z.string().min(1, t.city + " required"),
+  address: z.string().min(1, t.address + " required"),
   postalCode: z.string().optional(),
   businessType: z.string().optional(),
   notes: z.string().optional(),
 });
 
-const smsVerificationSchema = z.object({
-  code: z.string().min(4, "کد تایید باید حداقل 4 رقم باشد"),
+const createSmsVerificationSchema = (t: any) => z.object({
+  code: z.string().min(4, "Verification code must be at least 4 digits"),
 });
 
-type EditProfileForm = z.infer<typeof editProfileSchema>;
-type SmsVerificationForm = z.infer<typeof smsVerificationSchema>;
+// Types will be inferred dynamically
 
 export default function CustomerProfileEdit() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t, direction } = useLanguage();
   const [showSmsDialog, setShowSmsDialog] = useState(false);
-  const [pendingChanges, setPendingChanges] = useState<EditProfileForm | null>(null);
+  const [pendingChanges, setPendingChanges] = useState<any>(null);
+  
+  const editProfileSchema = createEditProfileSchema(t);
+  const smsVerificationSchema = createSmsVerificationSchema(t);
 
   // Fetch customer data
   const { data: customer, isLoading } = useQuery({

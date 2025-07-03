@@ -8,10 +8,12 @@ import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Build
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CustomerProfile = () => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t, language, direction } = useLanguage();
 
   // Get customer information
   const { data: customerData, isLoading: customerLoading } = useQuery<any>({
@@ -34,8 +36,8 @@ const CustomerProfile = () => {
 
       if (response.ok) {
         toast({
-          title: "Logout Successful",
-          description: "You have been logged out successfully",
+          title: t.logoutSuccessful,
+          description: t.logoutSuccessfulDesc,
         });
         setLocation("/shop");
       }
@@ -43,8 +45,8 @@ const CustomerProfile = () => {
       console.error('Logout error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "An error occurred during logout",
+        title: t.error,
+        description: t.logoutError,
       });
     }
   };
@@ -102,12 +104,12 @@ const CustomerProfile = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending': return 'Pending';
-      case 'confirmed': return 'Confirmed';
-      case 'processing': return 'Processing';
-      case 'shipped': return 'Shipped';
-      case 'delivered': return 'Delivered';
-      case 'cancelled': return 'Cancelled';
+      case 'pending': return t.pending;
+      case 'confirmed': return t.confirmed;
+      case 'processing': return t.processing;
+      case 'shipped': return t.shipped;
+      case 'delivered': return t.delivered;
+      case 'cancelled': return t.cancelled;
       default: return status;
     }
   };

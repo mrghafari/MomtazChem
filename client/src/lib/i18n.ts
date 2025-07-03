@@ -107,6 +107,30 @@ export interface Translation {
   requestSubmitted: string;
   requestPendingApproval: string;
   
+  // Customer Profile
+  welcomeCustomer: string;
+  customerProfile: string;
+  manageAccount: string;
+  editProfile: string;
+  continueShopping: string;
+  accountInformation: string;
+  fullName: string;
+  contactDetails: string;
+  orderNumber: string;
+  totalAmount: string;
+  noOrders: string;
+  viewOrder: string;
+  orderDate: string;
+  orderStatus: string;
+  confirmed: string;
+  shipped: string;
+  delivered: string;
+  cancelled: string;
+  logoutSuccessful: string;
+  logoutSuccessfulDesc: string;
+  logoutError: string;
+  error: string;
+  
   // Forms
   firstName: string;
   lastName: string;
@@ -281,6 +305,30 @@ export const translations: Record<Language, Translation> = {
     requestSubmitted: 'Your wallet recharge request has been submitted successfully and is pending approval.',
     requestPendingApproval: 'Request pending approval',
     
+    // Customer Profile
+    welcomeCustomer: 'Welcome',
+    customerProfile: 'Customer Profile',
+    manageAccount: 'Manage your account and view order history',
+    editProfile: 'Edit Profile',
+    continueShopping: 'Continue Shopping',
+    accountInformation: 'Account Information',
+    fullName: 'Full Name',
+    contactDetails: 'Contact Details',
+    orderNumber: 'Order Number',
+    totalAmount: 'Total Amount',
+    noOrders: 'No orders found',
+    viewOrder: 'View Order',
+    orderDate: 'Order Date',
+    orderStatus: 'Order Status',
+    confirmed: 'Confirmed',
+    shipped: 'Shipped',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
+    logoutSuccessful: 'Logout Successful',
+    logoutSuccessfulDesc: 'You have been logged out successfully',
+    logoutError: 'An error occurred during logout',
+    error: 'Error',
+    
     // Forms
     firstName: 'First Name',
     lastName: 'Last Name',
@@ -453,6 +501,30 @@ export const translations: Record<Language, Translation> = {
     requestSubmitted: 'تم إرسال طلب شحن محفظتك بنجاح وهو في انتظار الموافقة.',
     requestPendingApproval: 'الطلب في انتظار الموافقة',
     
+    // Customer Profile
+    welcomeCustomer: 'مرحباً',
+    customerProfile: 'الملف الشخصي للعميل',
+    manageAccount: 'إدارة حسابك وعرض تاريخ الطلبات',
+    editProfile: 'تحرير الملف الشخصي',
+    continueShopping: 'متابعة التسوق',
+    accountInformation: 'معلومات الحساب',
+    fullName: 'الاسم الكامل',
+    contactDetails: 'تفاصيل الاتصال',
+    orderNumber: 'رقم الطلب',
+    totalAmount: 'المبلغ الإجمالي',
+    noOrders: 'لا توجد طلبات',
+    viewOrder: 'عرض الطلب',
+    orderDate: 'تاريخ الطلب',
+    orderStatus: 'حالة الطلب',
+    confirmed: 'مؤكد',
+    shipped: 'تم الشحن',
+    delivered: 'تم التسليم',
+    cancelled: 'ملغي',
+    logoutSuccessful: 'تم تسجيل الخروج بنجاح',
+    logoutSuccessfulDesc: 'تم تسجيل خروجك بنجاح',
+    logoutError: 'حدث خطأ أثناء تسجيل الخروج',
+    error: 'خطأ',
+    
     // Forms
     firstName: 'الاسم الأول',
     lastName: 'اسم العائلة',
@@ -624,6 +696,30 @@ export const translations: Record<Language, Translation> = {
     totalDeposits: 'کۆی خراوەتە ژوورەوەکان',
     requestSubmitted: 'داواکاریەکەی پڕکردنەوەی جزدانەکەت بە سەرکەوتووی نێردرا و چاوەڕێی پەسەندکردنە.',
     requestPendingApproval: 'داواکاری چاوەڕێی پەسەندکردنە',
+    
+    // Customer Profile
+    welcomeCustomer: 'بەخێربێیت',
+    customerProfile: 'پرۆفایلی کڕیار',
+    manageAccount: 'بەڕێوەبردنی هەژمارەکەت و بینینی مێژووی داواکاریەکان',
+    editProfile: 'دەستکاریکردنی پرۆفایل',
+    continueShopping: 'بەردەوامبوونی کڕین',
+    accountInformation: 'زانیاریەکانی هەژمار',
+    fullName: 'ناوی تەواو',
+    contactDetails: 'زانیاریەکانی پەیوەندی',
+    orderNumber: 'ژمارەی داواکاری',
+    totalAmount: 'کۆی گشتی',
+    noOrders: 'هیچ داواکاریەک نییە',
+    viewOrder: 'بینینی داواکاری',
+    orderDate: 'بەرواری داواکاری',
+    orderStatus: 'دۆخی داواکاری',
+    confirmed: 'پەسەندکراو',
+    shipped: 'نێردراوە',
+    delivered: 'گەیەندراوە',
+    cancelled: 'هەڵوەشاندراوەتەوە',
+    logoutSuccessful: 'دەرچوون سەرکەوتوو بوو',
+    logoutSuccessfulDesc: 'بە سەرکەوتووی دەرچوویت',
+    logoutError: 'هەڵەیەک ڕوویدا لە کاتی دەرچوون',
+    error: 'هەڵە',
     
     // Forms
     firstName: 'ناوی یەکەم',
