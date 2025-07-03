@@ -1079,13 +1079,49 @@ export default function ProductsPage() {
                       <FormLabel>Barcode (EAN-13)</FormLabel>
                       <div className="flex gap-2">
                         <FormControl>
-                          <Input placeholder="Auto-generated or enter manually" {...field} />
+                          <Input 
+                            placeholder="Auto-generated or enter manually" 
+                            {...field}
+                            onChange={async (e) => {
+                              const newBarcode = e.target.value;
+                              field.onChange(e);
+                              
+                              // Check for duplicate barcode if barcode is entered
+                              if (newBarcode && newBarcode.length >= 8) {
+                                try {
+                                  const excludeId = editingProduct?.id;
+                                  const response = await fetch(`/api/barcode/check-duplicate/${newBarcode}${excludeId ? `?excludeProductId=${excludeId}` : ''}`, {
+                                    credentials: 'include'
+                                  });
+                                  
+                                  if (response.ok) {
+                                    const result = await response.json();
+                                    if (result.data.isDuplicate) {
+                                      toast({
+                                        title: "Duplicate Barcode!",
+                                        description: `This barcode is already used by: ${result.data.duplicateProduct.name}`,
+                                        variant: "destructive"
+                                      });
+                                      form.setError("barcode", {
+                                        type: "manual",
+                                        message: "This barcode is already in use"
+                                      });
+                                    } else {
+                                      form.clearErrors("barcode");
+                                    }
+                                  }
+                                } catch (error) {
+                                  console.error('Error checking barcode duplicate:', error);
+                                }
+                              }
+                            }}
+                          />
                         </FormControl>
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => {
+                          onClick={async () => {
                             const currentBarcode = form.getValues("barcode");
                             
                             // Protect existing barcodes - don't allow overwriting
@@ -1110,27 +1146,49 @@ export default function ProductsPage() {
                               return;
                             }
                             
-                            const generatedBarcode = generateEAN13Barcode(productName, category);
-                            console.log('Generated barcode details:', {
-                              productName,
-                              category,
-                              generated: generatedBarcode,
-                              isValid: validateEAN13(generatedBarcode)
-                            });
-                            form.setValue("barcode", generatedBarcode);
+                            // Generate unique barcode with duplicate checking
+                            try {
+                              const { generateUniqueEAN13Barcode } = await import('@shared/barcode-utils');
+                              const excludeId = editingProduct?.id;
+                              const generatedBarcode = await generateUniqueEAN13Barcode(productName, category, excludeId);
+                              
+                              console.log('Generated unique barcode:', {
+                                productName,
+                                category,
+                                generated: generatedBarcode,
+                                isValid: validateEAN13(generatedBarcode)
+                              });
+                              
+                              form.setValue("barcode", generatedBarcode);
+                              
+                              toast({
+                                title: "Barcode Generated",
+                                description: "Unique EAN-13 barcode created successfully",
+                                variant: "default"
+                              });
+                            } catch (error) {
+                              console.error('Error generating unique barcode:', error);
+                              toast({
+                                title: "Generation Failed",
+                                description: "Failed to generate unique barcode",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
                             
                             // Generate barcode image immediately
                             setTimeout(() => {
                               if (barcodeCanvasRef.current) {
                                 try {
-                                  console.log('Generating barcode in button click:', generatedBarcode);
+                                  const currentBarcode = form.getValues("barcode");
+                                  console.log('Generating barcode in button click:', currentBarcode);
                                   
                                   // Set canvas dimensions first
                                   const canvas = barcodeCanvasRef.current;
                                   canvas.width = 200;
                                   canvas.height = 100;
                                   
-                                  JsBarcode(canvas, generatedBarcode, {
+                                  JsBarcode(canvas, currentBarcode, {
                                     format: "EAN13",
                                     width: 2,
                                     height: 80,
@@ -1147,12 +1205,6 @@ export default function ProductsPage() {
                                 }
                               }
                             }, 100);
-                            
-                            toast({
-                              title: "EAN-13 Generated",
-                              description: `Generated barcode: ${generatedBarcode}`,
-                              variant: "default"
-                            });
                           }}
                           className="whitespace-nowrap"
                         >

@@ -48,6 +48,76 @@ export const getCategoryCode = (category: string): string => {
   }
 };
 
+// Check if barcode is unique across all products
+export const checkBarcodeUniqueness = async (barcode: string, excludeProductId?: number): Promise<{isUnique: boolean, duplicateProduct?: any}> => {
+  try {
+    const url = `/api/barcode/check-duplicate/${barcode}${excludeProductId ? `?excludeProductId=${excludeProductId}` : ''}`;
+    const response = await fetch(url, {
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      return {
+        isUnique: result.data.isUnique,
+        duplicateProduct: result.data.duplicateProduct
+      };
+    } else {
+      console.error('Failed to check barcode uniqueness');
+      return { isUnique: true }; // Default to allowing if check fails
+    }
+  } catch (error) {
+    console.error('Error checking barcode uniqueness:', error);
+    return { isUnique: true }; // Default to allowing if check fails
+  }
+};
+
+// Generate unique EAN-13 barcode for a product with duplicate checking
+export const generateUniqueEAN13Barcode = async (productName: string, category: string, excludeProductId?: number): Promise<string> => {
+  let attempts = 0;
+  const maxAttempts = 10;
+  
+  while (attempts < maxAttempts) {
+    const barcode = generateEAN13BarcodeWithIncrement(productName, category, attempts);
+    const uniquenessCheck = await checkBarcodeUniqueness(barcode, excludeProductId);
+    
+    if (uniquenessCheck.isUnique) {
+      return barcode;
+    }
+    
+    attempts++;
+  }
+  
+  // If all attempts failed, generate with timestamp suffix
+  const timestamp = Date.now().toString().slice(-3);
+  return generateEAN13Barcode(productName + timestamp, category);
+};
+
+// Generate EAN-13 barcode with increment for uniqueness
+export const generateEAN13BarcodeWithIncrement = (productName: string, category: string, increment: number = 0): string => {
+  // Iraq GS1 country code
+  const countryCode = '864';
+  
+  // Momtazchem company prefix (registered with GS1 Iraq)
+  const companyPrefix = '0001';
+  
+  // Get category code
+  const categoryCode = getCategoryCode(category);
+  
+  // Generate consistent product identifier with increment
+  const baseProductId = generateProductHash(productName);
+  const incrementedProductId = (parseInt(baseProductId) + increment).toString().padStart(2, '0').slice(-2);
+  
+  // Build 12-digit code
+  const barcode12 = countryCode + companyPrefix + categoryCode + incrementedProductId;
+  
+  // Calculate and append check digit
+  const checkDigit = calculateEAN13CheckDigit(barcode12);
+  const fullBarcode = barcode12 + checkDigit;
+  
+  return fullBarcode;
+};
+
 // Main EAN-13 Generation Function
 export const generateEAN13Barcode = (productName: string, category: string): string => {
   // Iraq GS1 country code

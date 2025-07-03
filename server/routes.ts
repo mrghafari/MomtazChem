@@ -11177,6 +11177,56 @@ momtazchem.com
     }
   });
 
+  // Check if barcode is unique/duplicate
+  app.get("/api/barcode/check-duplicate/:barcode", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { barcode } = req.params;
+      const { excludeProductId } = req.query;
+      
+      // Search in showcase_products
+      const showcaseProducts = await storage.getShowcaseProducts();
+      const showcaseMatch = showcaseProducts.find((p: any) => 
+        p.barcode === barcode && 
+        (excludeProductId ? p.id !== parseInt(excludeProductId as string) : true)
+      );
+      
+      // Search in shop_products (if exists)
+      let shopMatch = null;
+      try {
+        const shopProducts = await shopStorage.getShopProducts();
+        shopMatch = shopProducts.find((p: any) => 
+          p.barcode === barcode && 
+          (excludeProductId ? p.id !== parseInt(excludeProductId as string) : true)
+        );
+      } catch (error) {
+        // Shop products table might not exist, ignore error
+      }
+      
+      const isDuplicate = !!(showcaseMatch || shopMatch);
+      const duplicateProduct = showcaseMatch || shopMatch;
+      
+      res.json({
+        success: true,
+        data: {
+          barcode,
+          isDuplicate,
+          isUnique: !isDuplicate,
+          duplicateProduct: duplicateProduct ? {
+            id: duplicateProduct.id,
+            name: duplicateProduct.name,
+            source: showcaseMatch ? 'showcase' : 'shop'
+          } : null
+        }
+      });
+    } catch (error) {
+      console.error("Error checking barcode duplicate:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error checking barcode uniqueness"
+      });
+    }
+  });
+
   // Batch generate barcodes for existing products
   app.post("/api/barcode/batch-generate", requireAuth, async (req: Request, res: Response) => {
     try {
