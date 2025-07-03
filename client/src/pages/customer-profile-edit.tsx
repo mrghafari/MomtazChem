@@ -49,8 +49,9 @@ export default function CustomerProfileEdit() {
   type SmsVerificationForm = z.infer<typeof smsVerificationSchema>;
 
   // Fetch customer data
-  const { data: customer, isLoading } = useQuery({
+  const { data: customer, isLoading, error: customerError } = useQuery({
     queryKey: ["/api/customers/me"],
+    retry: 1,
   });
 
   const form = useForm<EditProfileForm>({
@@ -229,12 +230,25 @@ export default function CustomerProfileEdit() {
     );
   }
 
-  if (!customer?.customer) {
+  // Check for authentication errors or missing data
+  if (customerError || (!isLoading && (!customer || !customer.success))) {
     return (
-      <div className={`container mx-auto py-8 ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
-        <div className="flex items-center justify-center">
-          <div className="text-lg text-red-600">{t.error}</div>
-        </div>
+      <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8 text-center">
+            <Shield className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">{t.error}</h2>
+            <p className="text-gray-500 mb-6">{t.loginToAccessWallet}</p>
+            <div className="space-y-3">
+              <Button onClick={() => setLocation("/customer/login")} className="w-full">
+                {t.login}
+              </Button>
+              <Button onClick={() => setLocation("/shop")} variant="outline" className="w-full">
+                {t.continueShopping}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

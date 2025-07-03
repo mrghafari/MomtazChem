@@ -16,15 +16,16 @@ const CustomerProfile = () => {
   const { t, language, direction } = useLanguage();
 
   // Get customer information
-  const { data: customerData, isLoading: customerLoading } = useQuery<any>({
+  const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
     queryKey: ["/api/customers/me"],
-    retry: false,
+    retry: 1,
   });
 
   // Get customer order history
   const { data: orderData, isLoading: ordersLoading } = useQuery<any>({
     queryKey: ["/api/customers/orders"],
-    retry: false,
+    retry: 1,
+    enabled: !!customerData?.success, // Only fetch orders if customer data is available
   });
 
   const handleLogout = async () => {
@@ -62,17 +63,23 @@ const CustomerProfile = () => {
     );
   }
 
-  if (!customerData || !customerData.success) {
+  // Check for authentication errors or missing data
+  if (customerError || (!customerLoading && (!customerData || !customerData.success))) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Access Restricted</h2>
-            <p className="text-gray-500 mb-6">Please log in to view your profile.</p>
-            <Button onClick={() => setLocation("/shop")} className="w-full">
-              Go to Shop
-            </Button>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">{t.error}</h2>
+            <p className="text-gray-500 mb-6">{t.loginToAccessWallet}</p>
+            <div className="space-y-3">
+              <Button onClick={() => setLocation("/customer/login")} className="w-full">
+                {t.login}
+              </Button>
+              <Button onClick={() => setLocation("/shop")} variant="outline" className="w-full">
+                {t.continueShopping}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
