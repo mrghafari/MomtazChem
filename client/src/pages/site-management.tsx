@@ -287,6 +287,14 @@ export default function SiteManagement() {
                     <span className="text-sm">Geography Analytics</span>
                   </Button>
                   
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-rose-300 text-rose-600 hover:bg-rose-50"
+                    onClick={() => setLocation("/admin/product-variants")}
+                  >
+                    <Package className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Product Variants</span>
+                  </Button>
 
                 </div>
               </CardContent>

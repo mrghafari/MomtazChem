@@ -523,33 +523,41 @@ const BarcodeInventory = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {transactions?.slice(0, 20).map((transaction) => {
-                    const product = products?.find(p => p.id === transaction.productId);
-                    return (
-                      <div key={transaction.id} className="border-l-4 border-gray-200 pl-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{product?.name || `Product ${transaction.productId}`}</p>
-                            <p className="text-sm text-gray-600">
-                              {transaction.transactionType === 'in' ? '+' : transaction.transactionType === 'out' ? '-' : ''}
-                              {Math.abs(transaction.quantity)} units - {transaction.reason}
-                            </p>
-                            {transaction.reference && (
-                              <p className="text-xs text-gray-500">Ref: {transaction.reference}</p>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-mono">
-                              {transaction.previousStock} → {transaction.newStock}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {new Date(transaction.createdAt).toLocaleString()}
-                            </p>
+                  {Array.isArray(transactions) && transactions.length > 0 ? (
+                    transactions.slice(0, 20).map((transaction) => {
+                      const product = products?.find(p => p.id === transaction.productId);
+                      return (
+                        <div key={transaction.id} className="border-l-4 border-gray-200 pl-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{product?.name || `Product ${transaction.productId}`}</p>
+                              <p className="text-sm text-gray-600">
+                                {transaction.transactionType === 'in' ? '+' : transaction.transactionType === 'out' ? '-' : ''}
+                                {Math.abs(transaction.quantity)} units - {transaction.reason}
+                              </p>
+                              {transaction.reference && (
+                                <p className="text-xs text-gray-500">Ref: {transaction.reference}</p>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-mono">
+                                {transaction.previousStock} → {transaction.newStock}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(transaction.createdAt).toLocaleString()}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-12">
+                      <History className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-600 mb-2">No Transactions</h3>
+                      <p className="text-gray-500">No inventory transactions found</p>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>

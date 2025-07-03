@@ -43,6 +43,7 @@ import CustomerProfileEdit from "@/pages/customer-profile-edit";
 import CustomerRegister from "@/pages/customer-register";
 import CustomerWallet from "@/pages/customer-wallet";
 import WalletManagement from "@/pages/admin/wallet-management";
+import ProductVariants from "@/pages/admin/product-variants";
 import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
@@ -126,6 +127,7 @@ function Router() {
           <Route path="/admin/order-management" component={AdminOrderManagement} />
           <Route path="/admin/site-management" component={SiteManagement} />
           <Route path="/admin/products" component={ProductsPage} />
+          <Route path="/admin/product-variants" component={ProductVariants} />
           <Route path="/admin/geographic-reports" component={GeographicReports} />
           <Route path="/admin/geographic-analytics" component={GeographicAnalytics} />
           

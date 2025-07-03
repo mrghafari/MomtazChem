@@ -42,6 +42,38 @@ export const shopProducts = pgTable("shop_products", {
   metaDescription: text("meta_description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  
+  // Parent product relationship for variants
+  parentProductId: integer("parent_product_id"),
+  isVariant: boolean("is_variant").default(false),
+  variantType: text("variant_type"), // size, concentration, packaging, etc.
+  variantValue: text("variant_value"), // 1kg, 5kg, 25kg, 50%, 80%, etc.
+  sortOrder: integer("sort_order").default(0), // Display order for variants
+});
+
+// Product variants relationship table
+export const productVariants = pgTable("product_variants", {
+  id: serial("id").primaryKey(),
+  parentProductId: integer("parent_product_id").notNull(),
+  variantProductId: integer("variant_product_id").notNull(),
+  variantType: text("variant_type").notNull(), // size, concentration, packaging, purity
+  variantName: text("variant_name").notNull(), // 1kg Bottle, 5kg Container, 95% Purity
+  variantValue: text("variant_value").notNull(), // 1kg, 5kg, 95%
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Product variant options for different attributes
+export const productVariantOptions = pgTable("product_variant_options", {
+  id: serial("id").primaryKey(),
+  parentProductId: integer("parent_product_id").notNull(),
+  optionName: text("option_name").notNull(), // Size, Concentration, Package Type
+  optionValues: json("option_values").notNull(), // ["1kg", "5kg", "25kg"] or ["50%", "80%", "95%"]
+  isRequired: boolean("is_required").default(true),
+  displayType: text("display_type").default("dropdown"), // dropdown, radio, buttons
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Payment gateways configuration table
@@ -374,3 +406,20 @@ export const insertPaymentGatewaySchema = createInsertSchema(paymentGateways).om
 
 export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
 export type PaymentGateway = typeof paymentGateways.$inferSelect;
+
+// Product variants insert schemas and types
+export const insertProductVariantSchema = createInsertSchema(productVariants).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertProductVariant = z.infer<typeof insertProductVariantSchema>;
+export type ProductVariant = typeof productVariants.$inferSelect;
+
+export const insertProductVariantOptionSchema = createInsertSchema(productVariantOptions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertProductVariantOption = z.infer<typeof insertProductVariantOptionSchema>;
+export type ProductVariantOption = typeof productVariantOptions.$inferSelect;
