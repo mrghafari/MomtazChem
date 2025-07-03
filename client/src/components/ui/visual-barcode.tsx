@@ -1,28 +1,44 @@
 import { useEffect, useRef, useState } from "react";
 import JsBarcode from "jsbarcode";
+import { Copy, Check, Download, Printer } from 'lucide-react';
+import { Button } from './button';
+import { useToast } from '@/hooks/use-toast';
 
 interface VisualBarcodeProps {
   value: string;
+  productName?: string;
+  sku?: string;
   width?: number;
   height?: number;
   format?: string;
   displayValue?: boolean;
   fontSize?: number;
   className?: string;
+  showDownload?: boolean;
+  showPrint?: boolean;
+  showCopy?: boolean;
 }
 
 const VisualBarcode = ({
   value,
+  productName,
+  sku,
   width = 2,
   height = 60,
   format = "EAN13",
   displayValue = true,
   fontSize = 12,
-  className = ""
+  className = "",
+  showDownload = false,
+  showPrint = false,
+  showCopy = false
 }: VisualBarcodeProps) => {
   const canvasRef = useRef<SVGSVGElement>(null);
+  const printCanvasRef = useRef<SVGSVGElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isGenerated, setIsGenerated] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (canvasRef.current && value) {
@@ -58,13 +74,214 @@ const VisualBarcode = ({
             }
           }
         });
+
+        // Generate print version if needed
+        if (printCanvasRef.current && (showDownload || showPrint)) {
+          printCanvasRef.current.innerHTML = '';
+          JsBarcode(printCanvasRef.current, value, {
+            format: format,
+            width: 3,
+            height: 80,
+            displayValue: true,
+            fontSize: 14,
+            margin: 20,
+            background: "#ffffff",
+            lineColor: "#000000",
+            textMargin: 8
+          });
+        }
       } catch (error) {
         console.error("Error generating barcode:", error);
         setError(error instanceof Error ? error.message : 'Failed to generate barcode');
         setIsGenerated(false);
       }
     }
-  }, [value, width, height, format, displayValue, fontSize]);
+  }, [value, width, height, format, displayValue, fontSize, showDownload, showPrint]);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      toast({
+        title: "کپی شد",
+        description: "بارکد در کلیپ‌بورد کپی شد",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "خطا در کپی",
+        description: "امکان کپی بارکد وجود ندارد",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDownload = () => {
+    if (!printCanvasRef.current) return;
+    
+    try {
+      // Create a temporary canvas to convert SVG to image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      // Set canvas size for label printing (typically 4x6 inches at 300 DPI)
+      canvas.width = 600;  // 2 inches at 300 DPI
+      canvas.height = 400; // 1.33 inches at 300 DPI
+      
+      // Get SVG data
+      const svgData = new XMLSerializer().serializeToString(printCanvasRef.current);
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      
+      img.onload = () => {
+        if (ctx) {
+          // White background
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Center the barcode
+          const imgWidth = 400;
+          const imgHeight = 120;
+          const x = (canvas.width - imgWidth) / 2;
+          const y = 50;
+          
+          ctx.drawImage(img, x, y, imgWidth, imgHeight);
+          
+          // Add product name if provided
+          if (productName) {
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(productName, canvas.width / 2, y - 20);
+          }
+          
+          // Add SKU if provided
+          if (sku) {
+            ctx.fillStyle = '#666666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`SKU: ${sku}`, canvas.width / 2, y + imgHeight + 30);
+          }
+          
+          // Download the image
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `barcode-${value}-${sku || 'product'}.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              
+              toast({
+                title: "دانلود موفق",
+                description: "فایل بارکد دانلود شد",
+              });
+            }
+          }, 'image/png', 1.0);
+        }
+        
+        URL.revokeObjectURL(svgUrl);
+      };
+      
+      img.src = svgUrl;
+    } catch (error) {
+      toast({
+        title: "خطا در دانلود",
+        description: "امکان دانلود بارکد وجود ندارد",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePrint = () => {
+    if (!printCanvasRef.current) return;
+    
+    try {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        const svgContent = printCanvasRef.current.outerHTML;
+        
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Print Barcode - ${value}</title>
+            <style>
+              @page {
+                size: 4in 2in;
+                margin: 0.2in;
+              }
+              body {
+                margin: 0;
+                padding: 10px;
+                font-family: Arial, sans-serif;
+                text-align: center;
+                background: white;
+              }
+              .barcode-container {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+              }
+              .product-name {
+                font-size: 12px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                color: #000;
+              }
+              .sku {
+                font-size: 10px;
+                margin-top: 10px;
+                color: #666;
+              }
+              svg {
+                max-width: 100%;
+                height: auto;
+              }
+              @media print {
+                body { -webkit-print-color-adjust: exact; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="barcode-container">
+              ${productName ? `<div class="product-name">${productName}</div>` : ''}
+              ${svgContent}
+              ${sku ? `<div class="sku">SKU: ${sku}</div>` : ''}
+            </div>
+          </body>
+          </html>
+        `);
+        
+        printWindow.document.close();
+        printWindow.focus();
+        
+        // Wait for content to load then print
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+        
+        toast({
+          title: "چاپ آماده",
+          description: "پنجره چاپ باز شد",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "خطا در چاپ",
+        description: "امکان چاپ بارکد وجود ندارد",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (!value) {
     return (
@@ -78,16 +295,66 @@ const VisualBarcode = ({
     return (
       <div className={`text-red-500 text-sm p-2 border border-red-200 rounded bg-red-50 ${className}`}>
         خطا در تولید بارکد: {error}
-        <div className="text-xs mt-1">بارکد: {value}</div>
       </div>
     );
   }
 
   return (
-    <div className={`inline-block border border-gray-200 rounded p-2 bg-white ${className}`}>
-      <svg ref={canvasRef} className="max-w-full"></svg>
-      {!isGenerated && (
-        <div className="text-gray-500 text-xs mt-1">در حال تولید بارکد...</div>
+    <div className={`relative ${className}`}>
+      <div className="barcode-display bg-white border border-gray-200 rounded p-2">
+        {/* Main barcode display */}
+        <svg ref={canvasRef} className="mx-auto"></svg>
+        
+        {/* SKU display under barcode */}
+        {sku && (
+          <div className="text-center mt-2 text-xs text-gray-600 font-mono">
+            SKU: {sku}
+          </div>
+        )}
+        
+        {/* Hidden print version */}
+        <svg ref={printCanvasRef} style={{ display: 'none' }}></svg>
+      </div>
+      
+      {/* Action buttons */}
+      {(showCopy || showDownload || showPrint) && isGenerated && (
+        <div className="flex gap-2 mt-2 justify-center">
+          {showCopy && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopy}
+              className="flex items-center gap-1"
+            >
+              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copied ? 'کپی شد' : 'کپی'}
+            </Button>
+          )}
+          
+          {showDownload && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              className="flex items-center gap-1"
+            >
+              <Download className="w-3 h-3" />
+              دانلود
+            </Button>
+          )}
+          
+          {showPrint && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrint}
+              className="flex items-center gap-1"
+            >
+              <Printer className="w-3 h-3" />
+              چاپ لیبل
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

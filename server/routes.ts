@@ -11466,6 +11466,87 @@ momtazchem.com
     }
   });
 
+  // Bulk barcode download endpoint
+  app.get("/api/barcode/download-all", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { format = 'zip' } = req.query;
+      
+      // Get all products with barcodes from both tables
+      const showcaseProductsWithBarcodes = await db
+        .select({
+          id: showcaseProducts.id,
+          name: showcaseProducts.name,
+          sku: showcaseProducts.sku,
+          barcode: showcaseProducts.barcode,
+          category: showcaseProducts.category,
+          type: sql<string>`'showcase'`
+        })
+        .from(showcaseProducts)
+        .where(and(
+          isNotNull(showcaseProducts.barcode),
+          sql`LENGTH(${showcaseProducts.barcode}) = 13`
+        ));
+
+      const shopProductsWithBarcodes = await db
+        .select({
+          id: shopProducts.id,
+          name: shopProducts.name,
+          sku: shopProducts.sku,
+          barcode: shopProducts.barcode,
+          category: shopProducts.category,
+          type: sql<string>`'shop'`
+        })
+        .from(shopProducts)
+        .where(and(
+          isNotNull(shopProducts.barcode),
+          sql`LENGTH(${shopProducts.barcode}) = 13`
+        ));
+
+      const allProducts = [...showcaseProductsWithBarcodes, ...shopProductsWithBarcodes];
+      
+      if (allProducts.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No products with valid EAN-13 barcodes found"
+        });
+      }
+
+      if (format === 'csv') {
+        // CSV format for bulk import into label printers
+        const csvData = [
+          'Name,SKU,Barcode,Category,Type',
+          ...allProducts.map(p => 
+            `"${p.name}","${p.sku || ''}","${p.barcode}","${p.category}","${p.type}"`
+          )
+        ].join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="all-barcodes.csv"');
+        res.send(csvData);
+      } else {
+        // JSON format
+        res.json({
+          success: true,
+          data: {
+            totalProducts: allProducts.length,
+            showcaseCount: showcaseProductsWithBarcodes.length,
+            shopCount: shopProductsWithBarcodes.length,
+            products: allProducts
+          },
+          exportedAt: new Date().toISOString()
+        });
+      }
+
+    } catch (error) {
+      console.error("Error downloading all barcodes:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to download barcodes",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // AI-powered SKU generation endpoint
   app.post("/api/products/generate-sku", requireAuth, async (req: Request, res: Response) => {
     try {

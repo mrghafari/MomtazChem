@@ -29,7 +29,8 @@ import {
   ArrowLeft,
   Download,
   Upload,
-  Barcode
+  Barcode,
+  Printer
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -265,6 +266,33 @@ const BarcodeInventory = () => {
       toast({
         title: "Export Failed",
         description: "Failed to export EAN-13 data",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Download CSV for label printers
+  const downloadLabelPrinterCSV = async () => {
+    try {
+      const response = await fetch('/api/barcode/download-all?format=csv');
+      if (!response.ok) throw new Error('Download failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `label-printer-barcodes-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "دانلود موفق",
+        description: "فایل CSV برای لیبل پرینتر دانلود شد"
+      });
+    } catch (error) {
+      toast({
+        title: "خطا در دانلود",
+        description: "امکان دانلود فایل CSV وجود ندارد",
         variant: "destructive"
       });
     }
@@ -744,6 +772,14 @@ const BarcodeInventory = () => {
                       <Download className="h-4 w-4 mr-2" />
                       Export EAN-13 CSV
                     </Button>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => downloadLabelPrinterCSV()}
+                    >
+                      <Printer className="h-4 w-4 mr-2" />
+                      دانلود CSV برای لیبل پرینتر
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -801,12 +837,17 @@ const BarcodeInventory = () => {
                         </td>
                         <td className="p-2">
                           {product.barcode ? (
-                            <div className="flex items-center justify-center">
+                            <div className="flex flex-col items-center justify-center space-y-2">
                               <VisualBarcode 
                                 value={product.barcode}
+                                productName={product.name}
+                                sku={product.sku || undefined}
                                 width={1.5}
                                 height={40}
                                 fontSize={10}
+                                showDownload={true}
+                                showPrint={true}
+                                showCopy={true}
                                 className="bg-white p-1 border rounded"
                               />
                             </div>
