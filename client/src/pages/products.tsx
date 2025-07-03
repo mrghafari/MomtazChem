@@ -1103,37 +1103,31 @@ export default function ProductsPage() {
                             />
                           </div>
                           <div className="text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
-                                {form.watch("barcode")}
-                              </code>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const barcode = form.watch("barcode");
-                                  if (barcode) {
-                                    navigator.clipboard.writeText(barcode).then(() => {
-                                      toast({
-                                        title: "Copied!",
-                                        description: "Barcode copied to clipboard",
-                                        variant: "default"
-                                      });
-                                    }).catch(() => {
-                                      toast({
-                                        title: "Copy Failed",
-                                        description: "Could not copy barcode to clipboard",
-                                        variant: "destructive"
-                                      });
+                            <code 
+                              className="text-sm font-mono bg-white px-3 py-2 rounded border cursor-pointer hover:bg-gray-50 transition-colors select-all"
+                              onClick={() => {
+                                const barcode = form.watch("barcode");
+                                if (barcode) {
+                                  navigator.clipboard.writeText(barcode).then(() => {
+                                    toast({
+                                      title: "Copied!",
+                                      description: "Barcode copied to clipboard",
+                                      variant: "default"
                                     });
-                                  }
-                                }}
-                                className="h-7 px-2"
-                              >
-                                Copy
-                              </Button>
-                            </div>
+                                  }).catch(() => {
+                                    toast({
+                                      title: "Copy Failed",
+                                      description: "Could not copy barcode to clipboard",
+                                      variant: "destructive"
+                                    });
+                                  });
+                                }
+                              }}
+                              title="Click to copy barcode"
+                            >
+                              {form.watch("barcode")}
+                            </code>
+                            <div className="text-xs text-gray-500 mt-1">Click to copy</div>
                           </div>
                         </div>
                       )}
