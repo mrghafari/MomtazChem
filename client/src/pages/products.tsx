@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
 import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft } from "lucide-react";
+import * as JsBarcode from "jsbarcode";
 
 // Custom form schema that handles string inputs for numeric fields
 const formSchema = insertShowcaseProductSchema.extend({
@@ -108,6 +109,7 @@ export default function ProductsPage() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
+  const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Fetch categories from API
   const { data: categoriesData = [] } = useQuery({
@@ -369,6 +371,35 @@ export default function ProductsPage() {
     
     return matchesCategory && matchesSearch;
   }) || [];
+
+  // Generate barcode image when barcode value changes
+  useEffect(() => {
+    const currentBarcode = form.watch("barcode");
+    if (currentBarcode && currentBarcode.length === 13 && barcodeCanvasRef.current) {
+      try {
+        JsBarcode(barcodeCanvasRef.current, currentBarcode, {
+          format: "EAN13",
+          width: 2,
+          height: 80,
+          displayValue: true,
+          fontSize: 12,
+          textMargin: 5,
+          marginTop: 5,
+          marginBottom: 5,
+          marginLeft: 5,
+          marginRight: 5,
+        });
+      } catch (error) {
+        console.error('Barcode generation error:', error);
+      }
+    } else if (barcodeCanvasRef.current) {
+      // Clear canvas if no valid barcode
+      const ctx = barcodeCanvasRef.current.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, barcodeCanvasRef.current.width, barcodeCanvasRef.current.height);
+      }
+    }
+  }, [form.watch("barcode")]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -1022,6 +1053,28 @@ export default function ProductsPage() {
                             const generatedBarcode = generateEAN13Barcode(productName, category);
                             form.setValue("barcode", generatedBarcode);
                             
+                            // Generate barcode image immediately
+                            setTimeout(() => {
+                              if (barcodeCanvasRef.current) {
+                                try {
+                                  JsBarcode(barcodeCanvasRef.current, generatedBarcode, {
+                                    format: "EAN13",
+                                    width: 2,
+                                    height: 80,
+                                    displayValue: true,
+                                    fontSize: 12,
+                                    textMargin: 5,
+                                    marginTop: 5,
+                                    marginBottom: 5,
+                                    marginLeft: 5,
+                                    marginRight: 5,
+                                  });
+                                } catch (error) {
+                                  console.error('Immediate barcode generation error:', error);
+                                }
+                              }
+                            }, 100);
+                            
                             toast({
                               title: "EAN-13 Generated",
                               description: `Generated barcode: ${generatedBarcode}`,
@@ -1038,6 +1091,25 @@ export default function ProductsPage() {
                         Click "Generate" to create GS1-compliant EAN-13 barcode automatically. 
                         <span className="text-amber-600 font-medium">Note: Existing barcodes are protected from overwriting.</span>
                       </div>
+                      
+                      {/* Barcode Display */}
+                      {form.watch("barcode") && (
+                        <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                          <div className="text-sm font-medium text-gray-700 mb-2">Barcode Preview:</div>
+                          <div className="flex justify-center mb-2">
+                            <canvas 
+                              ref={barcodeCanvasRef} 
+                              className="border border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="text-center">
+                            <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
+                              {form.watch("barcode")}
+                            </code>
+                          </div>
+                        </div>
+                      )}
+                      
                       <FormMessage />
                     </FormItem>
                   )}
