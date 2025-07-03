@@ -3,11 +3,21 @@
 
 // EAN-13 Check Digit Calculation
 export const calculateEAN13CheckDigit = (barcode12: string): string => {
+  // Ensure barcode12 is a string and has 12 digits
+  if (typeof barcode12 !== 'string' || barcode12.length !== 12) {
+    console.error('Invalid barcode12 for check digit calculation:', barcode12);
+    return '0';
+  }
+  
   let oddSum = 0;
   let evenSum = 0;
   
   for (let i = 0; i < 12; i++) {
     const digit = parseInt(barcode12[i]);
+    if (isNaN(digit)) {
+      console.error('Invalid digit in barcode12:', barcode12[i], 'at position', i);
+      return '0';
+    }
     if (i % 2 === 0) {
       oddSum += digit;
     } else {

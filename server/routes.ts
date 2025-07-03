@@ -11323,6 +11323,148 @@ momtazchem.com
     }
   });
 
+  // Generate barcodes with new Iraq format for all products
+  app.post("/api/barcode/generate-iraq-format", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log("Starting Iraq format barcode generation...");
+      
+      // Get all showcase products
+      const showcaseProductsData = await db.select().from(showcaseProducts);
+      console.log(`Found ${showcaseProductsData.length} showcase products`);
+      
+      // Get all shop products  
+      const shopProductsData = await db.select().from(shopProducts);
+      console.log(`Found ${shopProductsData.length} shop products`);
+      
+      const results = [];
+      
+      // Process showcase products
+      for (const product of showcaseProductsData) {
+        try {
+          // Generate new barcode with Iraq format: 864-96771-XXXXX-C
+          const countryCode = '864'; // Iraq
+          const companyCode = '96771'; // Momtazchem
+          const productCode = Math.floor(10000 + Math.random() * 90000).toString(); // 5-digit random
+          const barcode12 = countryCode + companyCode + productCode;
+          
+          // Calculate check digit
+          let oddSum = 0;
+          let evenSum = 0;
+          for (let i = 0; i < 12; i++) {
+            const digit = parseInt(barcode12[i]);
+            if (i % 2 === 0) {
+              oddSum += digit;
+            } else {
+              evenSum += digit;
+            }
+          }
+          const total = oddSum + (evenSum * 3);
+          const checkDigit = (10 - (total % 10)) % 10;
+          const fullBarcode = barcode12 + checkDigit.toString();
+          
+          // Update product with new barcode
+          await db.update(showcaseProducts)
+            .set({ barcode: fullBarcode })
+            .where(eq(showcaseProducts.id, product.id));
+          
+          results.push({
+            id: product.id,
+            name: product.name,
+            type: 'showcase',
+            oldBarcode: product.barcode,
+            newBarcode: fullBarcode,
+            formatted: `${countryCode}-${companyCode}-${productCode}-${checkDigit}`,
+            success: true
+          });
+          
+          console.log(`✓ Generated Iraq barcode for showcase product ${product.name}: ${fullBarcode}`);
+        } catch (error) {
+          console.error(`✗ Failed to generate barcode for showcase product ${product.name}:`, error);
+          results.push({
+            id: product.id,
+            name: product.name,
+            type: 'showcase',
+            oldBarcode: product.barcode,
+            error: error.message,
+            success: false
+          });
+        }
+      }
+      
+      // Process shop products
+      for (const product of shopProductsData) {
+        try {
+          // Generate new barcode with Iraq format: 864-96771-XXXXX-C
+          const countryCode = '864'; // Iraq
+          const companyCode = '96771'; // Momtazchem
+          const productCode = Math.floor(10000 + Math.random() * 90000).toString(); // 5-digit random
+          const barcode12 = countryCode + companyCode + productCode;
+          
+          // Calculate check digit
+          let oddSum = 0;
+          let evenSum = 0;
+          for (let i = 0; i < 12; i++) {
+            const digit = parseInt(barcode12[i]);
+            if (i % 2 === 0) {
+              oddSum += digit;
+            } else {
+              evenSum += digit;
+            }
+          }
+          const total = oddSum + (evenSum * 3);
+          const checkDigit = (10 - (total % 10)) % 10;
+          const fullBarcode = barcode12 + checkDigit.toString();
+          
+          // Update product with new barcode
+          await db.update(shopProducts)
+            .set({ barcode: fullBarcode })
+            .where(eq(shopProducts.id, product.id));
+          
+          results.push({
+            id: product.id,
+            name: product.name,
+            type: 'shop',
+            oldBarcode: product.barcode,
+            newBarcode: fullBarcode,
+            formatted: `${countryCode}-${companyCode}-${productCode}-${checkDigit}`,
+            success: true
+          });
+          
+          console.log(`✓ Generated Iraq barcode for shop product ${product.name}: ${fullBarcode}`);
+        } catch (error) {
+          console.error(`✗ Failed to generate barcode for shop product ${product.name}:`, error);
+          results.push({
+            id: product.id,
+            name: product.name,
+            type: 'shop',
+            oldBarcode: product.barcode,
+            error: error.message,
+            success: false
+          });
+        }
+      }
+      
+      const successCount = results.filter(r => r.success).length;
+      const totalCount = results.length;
+      
+      console.log(`Iraq format barcode generation complete: ${successCount}/${totalCount} successful`);
+      
+      res.json({
+        success: true,
+        results,
+        summary: `Generated Iraq format barcodes: ${successCount}/${totalCount} successful`,
+        format: "864-96771-XXXXX-C (Iraq country code + Momtazchem company code + product code + check digit)"
+      });
+    } catch (error) {
+      console.error("Error in Iraq format barcode generation:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error generating Iraq format barcodes",
+        error: error.message
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
