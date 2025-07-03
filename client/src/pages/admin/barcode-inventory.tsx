@@ -183,6 +183,29 @@ const BarcodeInventory = () => {
     generateBarcodeMutation.mutate(data);
   };
 
+  // Iraq format barcode generation mutation
+  const iraqBarcodeGeneration = useMutation({
+    mutationFn: () => apiRequest("/api/barcode/generate-iraq-format", "POST"),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      toast({
+        title: "تولید بارکد عراق موفق",
+        description: `${result.summary}`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "خطا در تولید بارکد",
+        description: "عدم موفقیت در تولید بارکدهای عراق",
+        variant: "destructive"
+      });
+    },
+  });
+
+  const generateIraqBarcodes = () => {
+    iraqBarcodeGeneration.mutate();
+  };
+
   // EAN-13 bulk generation function
   const generateBulkEAN13 = async () => {
     try {
@@ -327,6 +350,31 @@ const BarcodeInventory = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Iraq Format Barcode Generation */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Barcode className="h-5 w-5" />
+            تولید بارکد با فرمت عراق (Iraq Format Barcodes)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600">فرمت: 864-96771-XXXXX-C (کد کشور عراق + کد شرکت + کد محصول + چک دیجیت)</p>
+              <p className="text-sm text-gray-500">Generate EAN-13 barcodes with Iraq country code (864) for all products</p>
+            </div>
+            <Button 
+              onClick={generateIraqBarcodes}
+              disabled={iraqBarcodeGeneration.isPending}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {iraqBarcodeGeneration.isPending ? 'در حال تولید...' : 'تولید بارکد عراق'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="scanner" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
