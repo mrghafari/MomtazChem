@@ -392,22 +392,15 @@ export default function ProductsPage() {
     }
   }, [form.watch("name"), form.watch("category"), editingProduct]);
 
-  // Generate barcode image when barcode value changes
+  // Generate barcode image when barcode value changes or dialog opens
   useEffect(() => {
     const currentBarcode = form.watch("barcode");
     console.log('Barcode effect triggered:', currentBarcode, 'Canvas ref:', barcodeCanvasRef.current);
     
     // Wait for next tick to ensure DOM is updated
     const timer = setTimeout(() => {
-      if (currentBarcode && currentBarcode.length === 13 && barcodeCanvasRef.current) {
+      if (currentBarcode && currentBarcode.length >= 12 && barcodeCanvasRef.current) {
         try {
-          // Validate barcode first
-          const isValid = validateEAN13(currentBarcode);
-          if (!isValid) {
-            console.error('Invalid EAN-13 barcode:', currentBarcode, 'but will try to render anyway');
-            // Don't return - try to render even if validation fails
-          }
-          
           console.log('Attempting to generate barcode:', currentBarcode);
           
           // Clear canvas first and set dimensions
@@ -420,6 +413,7 @@ export default function ProductsPage() {
           canvas.width = 200;
           canvas.height = 100;
           
+          // Try to generate barcode - relaxed length requirement
           JsBarcode(canvas, currentBarcode, {
             format: "EAN13",
             width: 2,
@@ -435,6 +429,24 @@ export default function ProductsPage() {
           console.log('Barcode generated successfully');
         } catch (error) {
           console.error('Barcode generation error:', error);
+          // Try with CODE128 format as fallback
+          try {
+            JsBarcode(barcodeCanvasRef.current, currentBarcode, {
+              format: "CODE128",
+              width: 2,
+              height: 80,
+              displayValue: false,
+              fontSize: 12,
+              textMargin: 5,
+              marginTop: 5,
+              marginBottom: 5,
+              marginLeft: 5,
+              marginRight: 5,
+            });
+            console.log('Barcode generated with CODE128 fallback');
+          } catch (fallbackError) {
+            console.error('Fallback barcode generation also failed:', fallbackError);
+          }
         }
       } else if (barcodeCanvasRef.current) {
         // Clear canvas if no valid barcode
@@ -443,10 +455,10 @@ export default function ProductsPage() {
           ctx.clearRect(0, 0, barcodeCanvasRef.current.width, barcodeCanvasRef.current.height);
         }
       }
-    }, 100); // Increased timeout for better DOM readiness
+    }, 200); // Increased timeout for better DOM readiness
     
     return () => clearTimeout(timer);
-  }, [form.watch("barcode")]);
+  }, [form.watch("barcode"), dialogOpen]); // Added dialogOpen dependency
 
   // Redirect if not authenticated
   useEffect(() => {
