@@ -372,6 +372,25 @@ export default function ProductsPage() {
     return matchesCategory && matchesSearch;
   }) || [];
 
+  // Auto-generate barcode for new products when name and category are available
+  useEffect(() => {
+    const productName = form.watch("name");
+    const category = form.watch("category");
+    const currentBarcode = form.watch("barcode");
+    
+    // Auto-generate barcode for new products (no existing barcode and not editing)
+    if (productName && category && !currentBarcode && !editingProduct) {
+      const generatedBarcode = generateEAN13Barcode(productName, category);
+      form.setValue("barcode", generatedBarcode);
+      
+      toast({
+        title: "Barcode Auto-Generated",
+        description: `Generated EAN-13: ${generatedBarcode}`,
+        variant: "default"
+      });
+    }
+  }, [form.watch("name"), form.watch("category"), editingProduct]);
+
   // Generate barcode image when barcode value changes
   useEffect(() => {
     const currentBarcode = form.watch("barcode");
@@ -1125,29 +1144,31 @@ export default function ProductsPage() {
                               if (barcode) {
                                 navigator.clipboard.writeText(barcode).then(() => {
                                   toast({
-                                    title: "Copied!",
-                                    description: "Barcode copied to clipboard",
+                                    title: "کپی شد!",
+                                    description: "بارکد در کلیپ‌بورد کپی شد",
                                     variant: "default"
                                   });
                                 }).catch(() => {
                                   toast({
-                                    title: "Copy Failed",
-                                    description: "Could not copy barcode to clipboard",
+                                    title: "خطا در کپی",
+                                    description: "امکان کپی بارکد وجود ندارد",
                                     variant: "destructive"
                                   });
                                 });
                               }
                             }}
-                            title="Click to copy barcode"
+                            title="برای کپی کردن کلیک کنید"
                           >
                             <canvas 
                               ref={barcodeCanvasRef} 
                               className="border border-gray-300 rounded mb-2"
+                              width="200"
+                              height="100"
                             />
                             <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
                               {form.watch("barcode")}
                             </code>
-                            <div className="text-xs text-gray-500 mt-1">Click to copy</div>
+                            <div className="text-xs text-gray-500 mt-1">برای کپی کردن کلیک کنید</div>
                           </div>
                         </div>
                       )}
