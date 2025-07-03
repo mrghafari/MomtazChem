@@ -778,7 +778,7 @@ export default function ProductsPage() {
                               <QrCode className="w-3 h-3" />
                               {product.barcode}
                             </span>
-                            {product.barcode.length === 13 && (
+                            {product.barcode && (
                               <div className="flex justify-center">
                                 <VisualBarcode 
                                   value={product.barcode}

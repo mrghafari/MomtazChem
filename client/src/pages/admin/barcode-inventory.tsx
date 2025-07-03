@@ -734,7 +734,7 @@ const BarcodeInventory = () => {
                           )}
                         </td>
                         <td className="p-2">
-                          {product.barcode && product.barcode.length === 13 ? (
+                          {product.barcode ? (
                             <div className="flex items-center justify-center">
                               <VisualBarcode 
                                 value={product.barcode}

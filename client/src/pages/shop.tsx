@@ -789,7 +789,7 @@ const Shop = () => {
                           )}
 
                           {/* Barcode Display */}
-                          {product.barcode && product.barcode.length === 13 && (
+                          {product.barcode && (
                             <div className="mb-3 p-2 bg-gray-50 rounded-lg border">
                               <div className="text-xs text-gray-600 mb-1">Product Barcode:</div>
                               <div className="flex items-center justify-between">
