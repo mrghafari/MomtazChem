@@ -67,12 +67,37 @@ export default function LogisticsOrders() {
     queryFn: () => fetch('/api/logistics/orders', { credentials: 'include' }).then(res => res.json())
   });
 
-  // Auto-refresh only after initial data load is successful
+  // Auto-refresh controlled by global settings
   useEffect(() => {
     if (orders && orders.length >= 0) { // Start auto-refresh after successful data load
+      const checkRefreshSettings = () => {
+        const globalSettings = localStorage.getItem('global-refresh-settings');
+        if (globalSettings) {
+          const settings = JSON.parse(globalSettings);
+          const logisticsSettings = settings.departments.logistics;
+          
+          if (logisticsSettings.autoRefresh) {
+            const refreshInterval = settings.syncEnabled 
+              ? settings.globalInterval 
+              : logisticsSettings.interval;
+            
+            return refreshInterval * 1000; // Convert seconds to milliseconds
+          }
+        }
+        return 600000; // Default 10 minutes if no settings found
+      };
+
+      const intervalMs = checkRefreshSettings();
       const interval = setInterval(() => {
-        refetch();
-      }, 10 * 60 * 1000); // 10 minutes
+        // Check if refresh is still enabled before executing
+        const currentSettings = localStorage.getItem('global-refresh-settings');
+        if (currentSettings) {
+          const settings = JSON.parse(currentSettings);
+          if (settings.departments.logistics.autoRefresh) {
+            refetch();
+          }
+        }
+      }, intervalMs);
 
       return () => clearInterval(interval);
     }
