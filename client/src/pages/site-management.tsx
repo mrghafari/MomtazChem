@@ -314,14 +314,7 @@ export default function SiteManagement() {
                     <span className="text-sm">Department Users</span>
                   </Button>
 
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-green-300 text-green-600 hover:bg-green-50"
-                    onClick={() => setLocation("/admin/delivered-orders")}
-                  >
-                    <CheckCircle className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Delivered Orders</span>
-                  </Button>
+
 
                 </div>
               </CardContent>
