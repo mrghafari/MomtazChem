@@ -187,6 +187,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
 
+  // ============================================
+  // START: Documentation PDF Generation Routes
+  // ============================================
+
+  // Generate User Documentation PDF
+  app.get("/api/documentation/user/:language", async (req: Request, res: Response) => {
+    try {
+      const { language } = req.params;
+      if (!['en', 'fa'].includes(language)) {
+        return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
+      }
+      
+      const { generateUserDocumentationPDF } = await import('./documentation-pdf');
+      const pdfBuffer = await generateUserDocumentationPDF(language as 'en' | 'fa');
+      
+      const filename = language === 'fa' ? 
+        'Momtazchem-User-Guide-Persian.pdf' : 
+        'Momtazchem-User-Guide-English.pdf';
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating user documentation PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate user documentation PDF' });
+    }
+  });
+
+  // Generate Admin Documentation PDF
+  app.get("/api/documentation/admin/:language", async (req: Request, res: Response) => {
+    try {
+      const { language } = req.params;
+      if (!['en', 'fa'].includes(language)) {
+        return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
+      }
+      
+      const { generateAdminDocumentationPDF } = await import('./documentation-pdf');
+      const pdfBuffer = await generateAdminDocumentationPDF(language as 'en' | 'fa');
+      
+      const filename = language === 'fa' ? 
+        'Momtazchem-Admin-Guide-Persian.pdf' : 
+        'Momtazchem-Admin-Guide-English.pdf';
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating admin documentation PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate admin documentation PDF' });
+    }
+  });
+
+  // Generate Technical Documentation PDF
+  app.get("/api/documentation/technical/:language", async (req: Request, res: Response) => {
+    try {
+      const { language } = req.params;
+      if (!['en', 'fa'].includes(language)) {
+        return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
+      }
+      
+      const { generateTechnicalDocumentationPDF } = await import('./documentation-pdf');
+      const pdfBuffer = await generateTechnicalDocumentationPDF(language as 'en' | 'fa');
+      
+      const filename = language === 'fa' ? 
+        'Momtazchem-Technical-Guide-Persian.pdf' : 
+        'Momtazchem-Technical-Guide-English.pdf';
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating technical documentation PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate technical documentation PDF' });
+    }
+  });
+
+  // Generate Complete Documentation PDF
+  app.get("/api/documentation/complete/:language", async (req: Request, res: Response) => {
+    try {
+      const { language } = req.params;
+      if (!['en', 'fa'].includes(language)) {
+        return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
+      }
+      
+      const { generateComprehensiveDocumentationPDF } = await import('./documentation-pdf');
+      const pdfBuffer = await generateComprehensiveDocumentationPDF(language as 'en' | 'fa');
+      
+      const filename = language === 'fa' ? 
+        'Momtazchem-Complete-Documentation-Persian.pdf' : 
+        'Momtazchem-Complete-Documentation-English.pdf';
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating complete documentation PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate complete documentation PDF' });
+    }
+  });
+
+  // Generate Project Proposal PDF
+  app.get("/api/documentation/proposal/:language", async (req: Request, res: Response) => {
+    try {
+      const { language } = req.params;
+      if (!['en', 'fa'].includes(language)) {
+        return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
+      }
+      
+      const { generateProjectProposalPDF } = await import('./documentation-pdf');
+      const pdfBuffer = await generateProjectProposalPDF(language as 'en' | 'fa');
+      
+      const filename = language === 'fa' ? 
+        'Momtazchem-Project-Proposal-Persian.pdf' : 
+        'Momtazchem-Project-Proposal-English.pdf';
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating project proposal PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate project proposal PDF' });
+    }
+  });
+
   // =============================================================================
   // AI PRODUCT RECOMMENDATIONS API
   // =============================================================================

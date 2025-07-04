@@ -78,6 +78,7 @@ import GeographicReports from "@/pages/geographic-reports";
 import GeographicAnalytics from "@/pages/admin/geographic-analytics";
 import AISettings from "@/pages/admin/ai-settings";
 import FinanceOrders from "@/pages/admin/finance-orders";
+import DocumentationPage from "@/pages/documentation";
 import WarehouseOrders from "@/pages/admin/warehouse-orders";
 import LogisticsOrders from "@/pages/admin/logistics-orders";
 import DeliveredOrders from "@/pages/admin/delivered-orders";
@@ -145,6 +146,7 @@ function Router() {
           <Route path="/admin/geographic-reports" component={GeographicReports} />
           <Route path="/admin/geographic-analytics" component={GeographicAnalytics} />
           <Route path="/admin/ai-settings" component={AISettings} />
+          <Route path="/documentation" component={DocumentationPage} />
           
           {/* New Department Order Management Pages */}
           <Route path="/admin/finance-orders" component={FinanceOrders} />

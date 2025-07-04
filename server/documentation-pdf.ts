@@ -1181,6 +1181,518 @@ export async function generateTechnicalDocumentationPDF(language: 'en' | 'fa' = 
   }
 }
 
+// Project Proposal Data
+const projectProposalEN: DocumentationData = {
+  title: "Momtazchem Chemical Solutions Platform - Project Proposal",
+  sections: [
+    {
+      title: "Executive Summary",
+      content: "Momtazchem Chemical Solutions Platform is a comprehensive, multilingual e-commerce and management system designed specifically for the chemical industry in Iraq and the Middle East. The platform combines cutting-edge technology with industry-specific requirements to deliver a complete business solution.",
+      subsections: [
+        {
+          title: "Project Overview",
+          content: "A full-stack web application featuring:\n• 25+ integrated administrative modules\n• 4-language support (English, Arabic, Kurdish, Turkish)\n• Advanced e-commerce functionality\n• Professional CRM system\n• AI-powered automation\n• Comprehensive SEO optimization\n• Real-time inventory management"
+        },
+        {
+          title: "Technology Stack",
+          content: "• Frontend: React 18 + TypeScript + Tailwind CSS\n• Backend: Node.js + Express.js + TypeScript\n• Database: PostgreSQL 16 with Drizzle ORM\n• Authentication: Session-based security\n• Email: Multi-SMTP automation system\n• AI Integration: OpenAI GPT-4\n• Payment: Iraqi banking integration"
+        }
+      ]
+    },
+    {
+      title: "Core Modules & Features",
+      content: "The platform consists of 25+ integrated administrative modules, each providing specialized functionality for different aspects of business operations.",
+      subsections: [
+        {
+          title: "1. Content Management System (CMS)",
+          content: "Dynamic multilingual content management:\n• 430+ content items across 4 languages\n• 12 content sections (Home, About, Contact, etc.)\n• Real-time content updates\n• Image asset management\n• Social media integration (6 platforms)\n• RTL/LTR text direction support"
+        },
+        {
+          title: "2. Product Management Module",
+          content: "Comprehensive product catalog system:\n• Showcase products with variants\n• E-commerce products with pricing\n• EAN-13 barcode generation (GS1 compliant)\n• Category management (9 main categories)\n• Inventory tracking and alerts\n• Multi-currency support (USD, EUR, IQD)\n• Product specifications and images"
+        },
+        {
+          title: "3. Barcode Management System",
+          content: "Professional barcode generation and management:\n• GS1-compliant EAN-13 barcodes\n• Iraq country code (864) integration\n• Company code (96771) standardization\n• Batch barcode generation\n• Barcode validation and uniqueness checking\n• Visual barcode display and printing\n• Inventory integration"
+        },
+        {
+          title: "4. Customer Relationship Management (CRM)",
+          content: "Advanced customer management system:\n• Unified customer database\n• Customer segmentation and analytics\n• Activity tracking and logging\n• Digital wallet management\n• Purchase history analysis\n• Geographic analytics\n• PDF report generation\n• Customer portal integration"
+        },
+        {
+          title: "5. Order Management System",
+          content: "Three-department workflow processing:\n• Financial Department: Payment verification\n• Warehouse: Order preparation\n• Logistics: Shipping coordination\n• Real-time status tracking\n• SMS notifications\n• GPS delivery tracking\n• Automatic workflow progression"
+        },
+        {
+          title: "6. Email Automation System",
+          content: "Multi-SMTP email management:\n• 8 email categories with dedicated SMTP\n• Intelligent routing based on product categories\n• Advanced template system\n• Variable substitution and personalization\n• Delivery tracking and analytics\n• CC/BCC management\n• Fallback configurations"
+        },
+        {
+          title: "7. Inventory Management Module",
+          content: "Real-time inventory tracking:\n• Stock level monitoring\n• Low stock alerts\n• Automated reorder points\n• Inventory analytics and reporting\n• Product movement tracking\n• Barcode integration\n• Multi-location support"
+        },
+        {
+          title: "8. SEO Management System",
+          content: "Comprehensive multilingual SEO:\n• Meta tags and descriptions (4 languages)\n• Dynamic sitemap generation (47+ entries)\n• Robots.txt management\n• hreflang implementation\n• Content optimization\n• Search engine integration\n• Performance monitoring"
+        },
+        {
+          title: "9. AI Integration Module",
+          content: "Artificial intelligence features:\n• Smart SKU generation\n• Product recommendations\n• Customer behavior analysis\n• Performance monitoring\n• Token usage tracking\n• OpenAI GPT-4 integration\n• Intelligent fallback systems"
+        },
+        {
+          title: "10. User Management System",
+          content: "Role-based access control:\n• Multi-role admin system\n• Department-based permissions\n• Super admin verification\n• Activity logging\n• Session management\n• Two-factor authentication\n• Password policies"
+        }
+      ]
+    },
+    {
+      title: "Additional Modules",
+      content: "The platform includes 15+ additional specialized modules for comprehensive business management.",
+      subsections: [
+        {
+          title: "Financial Modules",
+          content: "• Payment Gateway Management: Iraqi banking integration\n• Invoice Management: Bilingual PDF generation\n• Digital Wallet System: Customer balance management\n• Analytics Dashboard: Sales and revenue tracking"
+        },
+        {
+          title: "Communication Modules",
+          content: "• SMS Management: Customer notifications\n• Live Chat Integration: Tawk.to support\n• Inquiry Management: Contact form processing\n• Social Media Management: Multi-platform integration"
+        },
+        {
+          title: "Technical Modules",
+          content: "• Database Management: Automated backups\n• Global Refresh Control: System synchronization\n• Security Settings: Authentication and authorization\n• Performance Monitoring: System health tracking"
+        },
+        {
+          title: "Operational Modules",
+          content: "• Factory Management: Production operations\n• Category Management: Product classification\n• SMTP Testing: Email system validation\n• Procedures & Methods: Document management"
+        }
+      ]
+    },
+    {
+      title: "Technical Architecture",
+      content: "Modern, scalable architecture designed for performance and maintainability.",
+      subsections: [
+        {
+          title: "Frontend Architecture",
+          content: "• React 18 with TypeScript for type safety\n• Shadcn/ui components with Tailwind CSS\n• TanStack Query for server state management\n• Wouter for lightweight routing\n• React Hook Form with Zod validation\n• Responsive design with mobile support\n• Progressive Web App capabilities"
+        },
+        {
+          title: "Backend Architecture",
+          content: "• Node.js 20 with Express.js framework\n• TypeScript with ESM modules\n• PostgreSQL 16 with Drizzle ORM\n• Session-based authentication\n• Multer for file uploads\n• Nodemailer for email services\n• RESTful API design"
+        },
+        {
+          title: "Database Design",
+          content: "• Multiple schema organization:\n  - Main Schema: CRM, admin, SEO\n  - Showcase Schema: Public products\n  - Shop Schema: E-commerce functionality\n  - Customer Schema: Customer portal\n  - Email Schema: Communication system\n• Optimized queries with connection pooling\n• Automated backup and migration system"
+        },
+        {
+          title: "Security Implementation",
+          content: "• Session-based authentication with secure cookies\n• Role-based access control\n• SQL injection prevention\n• XSS protection with CSP\n• CSRF protection\n• Data validation with Zod schemas\n• Encrypted sensitive data storage"
+        }
+      ]
+    },
+    {
+      title: "Multilingual Support",
+      content: "Complete internationalization with support for 4 languages and proper text direction handling.",
+      subsections: [
+        {
+          title: "Language Support",
+          content: "• English (en): Primary business language\n• Arabic (ar): Regional market language\n• Kurdish (ku): Local market language\n• Turkish (tr): Extended market reach\n• Automatic language detection\n• User preference storage\n• Dynamic language switching"
+        },
+        {
+          title: "Content Localization",
+          content: "• 430+ translated content items\n• Dynamic content switching\n• RTL/LTR text direction support\n• Localized date and number formatting\n• Currency localization\n• Cultural adaptations\n• Font optimization for each language"
+        },
+        {
+          title: "SEO Internationalization",
+          content: "• Language-specific meta tags\n• hreflang implementation\n• Localized URLs\n• Multi-language sitemaps\n• Regional search optimization\n• Cultural keyword targeting"
+        }
+      ]
+    },
+    {
+      title: "E-commerce Features",
+      content: "Complete e-commerce solution tailored for the chemical industry with Iraqi market integration.",
+      subsections: [
+        {
+          title: "Product Catalog",
+          content: "• 8 main product categories\n• Detailed product specifications\n• High-quality product images\n• Variant management\n• Stock availability tracking\n• Price management\n• Discount system"
+        },
+        {
+          title: "Shopping Cart & Checkout",
+          content: "• Persistent shopping cart\n• Guest checkout options\n• Multiple payment methods\n• Iraqi banking integration\n• Invoice generation\n• Order confirmation emails\n• Tax calculations"
+        },
+        {
+          title: "Payment Integration",
+          content: "• Rasheed Bank integration\n• Al-Rafidain Bank support\n• Trade Bank of Iraq connectivity\n• Digital wallet system\n• Manual payment verification\n• Payment history tracking\n• Refund management"
+        }
+      ]
+    },
+    {
+      title: "Performance & Scalability",
+      content: "Optimized for high performance with scalable architecture for business growth.",
+      subsections: [
+        {
+          title: "Performance Optimization",
+          content: "• Database query optimization\n• Connection pooling\n• Frontend code splitting\n• Image optimization\n• Caching strategies\n• CDN integration\n• Lazy loading implementation"
+        },
+        {
+          title: "Monitoring & Analytics",
+          content: "• Real-time performance monitoring\n• Error tracking and logging\n• User behavior analytics\n• Sales performance metrics\n• System health monitoring\n• Automated alerting system\n• Performance reporting"
+        },
+        {
+          title: "Scalability Features",
+          content: "• Horizontal scaling capability\n• Load balancing support\n• Database partitioning\n• Microservices architecture readiness\n• Cloud deployment optimization\n• Auto-scaling configurations\n• Resource monitoring"
+        }
+      ]
+    },
+    {
+      title: "Deployment & Infrastructure",
+      content: "Cloud-ready deployment with modern DevOps practices and reliable infrastructure.",
+      subsections: [
+        {
+          title: "Deployment Strategy",
+          content: "• Replit platform integration\n• Docker containerization ready\n• CI/CD pipeline support\n• Environment management\n• Configuration management\n• Secret management\n• Automated testing"
+        },
+        {
+          title: "Database Infrastructure",
+          content: "• Neon PostgreSQL cloud database\n• Automated backups\n• Point-in-time recovery\n• High availability setup\n• Monitoring and alerts\n• Performance optimization\n• Security compliance"
+        },
+        {
+          title: "Third-party Integrations",
+          content: "• OpenAI API for AI features\n• Zoho Mail for email services\n• Tawk.to for live chat\n• Iraqi banking APIs\n• Google Fonts for typography\n• Puppeteer for PDF generation\n• Geographic data services"
+        }
+      ]
+    },
+    {
+      title: "Business Value & ROI",
+      content: "Comprehensive business benefits and return on investment projections.",
+      subsections: [
+        {
+          title: "Operational Efficiency",
+          content: "• 70% reduction in manual administrative tasks\n• Automated order processing workflow\n• Real-time inventory management\n• Streamlined customer communication\n• Integrated reporting and analytics\n• Reduced error rates\n• Improved response times"
+        },
+        {
+          title: "Market Expansion",
+          content: "• 4-language support for regional markets\n• Online presence in multiple countries\n• 24/7 availability for customers\n• Mobile-responsive design\n• SEO optimization for visibility\n• Social media integration\n• Professional brand image"
+        },
+        {
+          title: "Cost Savings",
+          content: "• Reduced need for manual data entry\n• Automated email communications\n• Paperless invoice generation\n• Centralized inventory management\n• Reduced customer service overhead\n• Minimized order processing errors\n• Optimized resource allocation"
+        }
+      ]
+    },
+    {
+      title: "Implementation Timeline",
+      content: "Structured development and deployment timeline with clear milestones and deliverables.",
+      subsections: [
+        {
+          title: "Phase 1: Foundation (Completed)",
+          content: "• Core architecture setup\n• Database design and implementation\n• User authentication system\n• Basic product management\n• Content management system\n• Initial deployment infrastructure"
+        },
+        {
+          title: "Phase 2: Core Features (Completed)",
+          content: "• E-commerce functionality\n• Order management system\n• Customer portal\n• Email automation\n• Barcode system\n• Basic administrative tools"
+        },
+        {
+          title: "Phase 3: Advanced Features (Completed)",
+          content: "• AI integration\n• Advanced CRM\n• SEO optimization\n• Multilingual support\n• Payment integration\n• Comprehensive admin tools"
+        },
+        {
+          title: "Phase 4: Optimization & Enhancement (Current)",
+          content: "• Performance optimization\n• Security enhancements\n• Additional integrations\n• Advanced analytics\n• Mobile app development\n• API expansion"
+        }
+      ]
+    },
+    {
+      title: "Maintenance & Support",
+      content: "Ongoing maintenance, support, and enhancement services to ensure optimal platform performance.",
+      subsections: [
+        {
+          title: "Technical Support",
+          content: "• 24/7 system monitoring\n• Regular security updates\n• Performance optimization\n• Bug fixes and patches\n• Feature enhancements\n• Database maintenance\n• Backup management"
+        },
+        {
+          title: "Training & Documentation",
+          content: "• Comprehensive user manuals\n• Video training materials\n• Admin training sessions\n• API documentation\n• Best practices guides\n• Troubleshooting resources\n• Regular training updates"
+        },
+        {
+          title: "Future Enhancements",
+          content: "• Mobile application development\n• Advanced AI features\n• Additional payment gateways\n• Enhanced analytics\n• Third-party integrations\n• Performance improvements\n• New feature development"
+        }
+      ]
+    }
+  ]
+};
+
+const projectProposalFA: DocumentationData = {
+  title: "پلتفرم راه‌حل‌های شیمیایی ممتازکم - پروپوزال پروژه",
+  sections: [
+    {
+      title: "خلاصه اجرایی",
+      content: "پلتفرم راه‌حل‌های شیمیایی ممتازکم یک سیستم جامع، چندزبانه تجارت الکترونیک و مدیریت است که به طور خاص برای صنعت شیمیایی در عراق و خاورمیانه طراحی شده است. این پلتفرم تکنولوژی پیشرفته را با نیازهای خاص صنعت ترکیب می‌کند تا راه‌حل کسب‌وکار کاملی ارائه دهد.",
+      subsections: [
+        {
+          title: "نمای کلی پروژه",
+          content: "یک اپلیکیشن وب full-stack شامل:\n• 25+ ماژول مدیریتی یکپارچه\n• پشتیبانی از 4 زبان (انگلیسی، عربی، کردی، ترکی)\n• عملکرد پیشرفته تجارت الکترونیک\n• سیستم CRM حرفه‌ای\n• خودکارسازی مبتنی بر هوش مصنوعی\n• بهینه‌سازی جامع SEO\n• مدیریت موجودی در زمان واقعی"
+        },
+        {
+          title: "پشته فناوری",
+          content: "• Frontend: React 18 + TypeScript + Tailwind CSS\n• Backend: Node.js + Express.js + TypeScript\n• Database: PostgreSQL 16 با Drizzle ORM\n• Authentication: امنیت مبتنی بر session\n• Email: سیستم خودکارسازی multi-SMTP\n• AI Integration: OpenAI GPT-4\n• Payment: یکپارچگی بانکی عراق"
+        }
+      ]
+    },
+    {
+      title: "ماژول‌ها و ویژگی‌های اصلی",
+      content: "پلتفرم شامل 25+ ماژول مدیریتی یکپارچه است که هر کدام عملکرد تخصصی برای جنبه‌های مختلف عملیات کسب‌وکار فراهم می‌کند.",
+      subsections: [
+        {
+          title: "۱. سیستم مدیریت محتوا (CMS)",
+          content: "مدیریت محتوای پویای چندزبانه:\n• 430+ آیتم محتوا در 4 زبان\n• 12 بخش محتوا (خانه، درباره، تماس، و غیره)\n• به‌روزرسانی محتوا در زمان واقعی\n• مدیریت دارایی‌های تصویری\n• یکپارچگی رسانه‌های اجتماعی (6 پلتفرم)\n• پشتیبانی از جهت متن RTL/LTR"
+        },
+        {
+          title: "۲. ماژول مدیریت محصولات",
+          content: "سیستم جامع کاتالوگ محصولات:\n• محصولات نمایشگاهی با انواع\n• محصولات تجارت الکترونیک با قیمت‌گذاری\n• تولید بارکد EAN-13 (مطابق GS1)\n• مدیریت دسته‌بندی (9 دسته اصلی)\n• ردیابی موجودی و هشدارها\n• پشتیبانی چندارزه (USD، EUR، IQD)\n• مشخصات و تصاویر محصولات"
+        },
+        {
+          title: "۳. سیستم مدیریت بارکد",
+          content: "تولید و مدیریت حرفه‌ای بارکد:\n• بارکدهای EAN-13 مطابق با GS1\n• یکپارچگی کد کشور عراق (864)\n• استانداردسازی کد شرکت (96771)\n• تولید انبوه بارکد\n• اعتبارسنجی و بررسی یکتایی بارکد\n• نمایش و چاپ بصری بارکد\n• یکپارچگی موجودی"
+        },
+        {
+          title: "۴. مدیریت روابط مشتری (CRM)",
+          content: "سیستم پیشرفته مدیریت مشتری:\n• پایگاه داده یکپارچه مشتری\n• بخش‌بندی و تجزیه و تحلیل مشتری\n• ردیابی و ثبت فعالیت\n• مدیریت کیف پول دیجیتال\n• تجزیه و تحلیل تاریخچه خرید\n• تجزیه و تحلیل جغرافیایی\n• تولید گزارش PDF\n• یکپارچگی پورتال مشتری"
+        },
+        {
+          title: "۵. سیستم مدیریت سفارشات",
+          content: "پردازش گردش کار سه بخشی:\n• بخش مالی: تأیید پرداخت\n• انبار: آماده‌سازی سفارش\n• لجستیک: هماهنگی حمل و نقل\n• ردیابی وضعیت در زمان واقعی\n• اعلان‌های پیامکی\n• ردیابی تحویل GPS\n• پیشرفت خودکار گردش کار"
+        },
+        {
+          title: "۶. سیستم خودکارسازی ایمیل",
+          content: "مدیریت ایمیل multi-SMTP:\n• 8 دسته ایمیل با SMTP اختصاصی\n• مسیریابی هوشمند بر اساس دسته‌بندی محصولات\n• سیستم قالب پیشرفته\n• جایگزینی متغیر و شخصی‌سازی\n• ردیابی تحویل و تجزیه و تحلیل\n• مدیریت CC/BCC\n• پیکربندی‌های پشتیبان"
+        },
+        {
+          title: "۷. ماژول مدیریت موجودی",
+          content: "ردیابی موجودی در زمان واقعی:\n• نظارت بر سطح موجودی\n• هشدارهای موجودی کم\n• نقاط سفارش مجدد خودکار\n• تجزیه و تحلیل و گزارش‌گیری موجودی\n• ردیابی حرکت محصول\n• یکپارچگی بارکد\n• پشتیبانی چندمکانه"
+        },
+        {
+          title: "۸. سیستم مدیریت SEO",
+          content: "SEO جامع چندزبانه:\n• تگ‌های meta و توضیحات (4 زبان)\n• تولید نقشه سایت پویا (47+ ورودی)\n• مدیریت robots.txt\n• پیاده‌سازی hreflang\n• بهینه‌سازی محتوا\n• یکپارچگی موتور جستجو\n• نظارت بر عملکرد"
+        },
+        {
+          title: "۹. ماژول یکپارچگی هوش مصنوعی",
+          content: "ویژگی‌های هوش مصنوعی:\n• تولید SKU هوشمند\n• توصیه‌های محصول\n• تجزیه و تحلیل رفتار مشتری\n• نظارت بر عملکرد\n• ردیابی استفاده از توکن\n• یکپارچگی OpenAI GPT-4\n• سیستم‌های پشتیبان هوشمند"
+        },
+        {
+          title: "۱۰. سیستم مدیریت کاربر",
+          content: "کنترل دسترسی مبتنی بر نقش:\n• سیستم مدیر چندنقشه\n• مجوزهای مبتنی بر بخش\n• تأیید سوپر مدیر\n• ثبت فعالیت\n• مدیریت جلسه\n• احراز هویت دو مرحله‌ای\n• سیاست‌های رمز عبور"
+        }
+      ]
+    },
+    {
+      title: "ماژول‌های اضافی",
+      content: "پلتفرم شامل 15+ ماژول تخصصی اضافی برای مدیریت جامع کسب‌وکار است.",
+      subsections: [
+        {
+          title: "ماژول‌های مالی",
+          content: "• مدیریت درگاه پرداخت: یکپارچگی بانکی عراق\n• مدیریت فاکتور: تولید PDF دوزبانه\n• سیستم کیف پول دیجیتال: مدیریت موجودی مشتری\n• داشبورد تجزیه و تحلیل: ردیابی فروش و درآمد"
+        },
+        {
+          title: "ماژول‌های ارتباطات",
+          content: "• مدیریت SMS: اعلان‌های مشتری\n• یکپارچگی چت زنده: پشتیبانی Tawk.to\n• مدیریت استعلام: پردازش فرم تماس\n• مدیریت رسانه‌های اجتماعی: یکپارچگی چندپلتفرمه"
+        },
+        {
+          title: "ماژول‌های فنی",
+          content: "• مدیریت پایگاه داده: پشتیبان‌گیری خودکار\n• کنترل تازه‌سازی سراسری: همگام‌سازی سیستم\n• تنظیمات امنیتی: احراز هویت و مجوز\n• نظارت بر عملکرد: ردیابی سلامت سیستم"
+        },
+        {
+          title: "ماژول‌های عملیاتی",
+          content: "• مدیریت کارخانه: عملیات تولید\n• مدیریت دسته‌بندی: طبقه‌بندی محصول\n• تست SMTP: اعتبارسنجی سیستم ایمیل\n• رویه‌ها و روش‌ها: مدیریت اسناد"
+        }
+      ]
+    },
+    {
+      title: "معماری فنی",
+      content: "معماری مدرن و مقیاس‌پذیر طراحی شده برای عملکرد و قابلیت نگهداری.",
+      subsections: [
+        {
+          title: "معماری Frontend",
+          content: "• React 18 با TypeScript برای ایمنی نوع\n• کامپوننت‌های Shadcn/ui با Tailwind CSS\n• TanStack Query برای مدیریت حالت سرور\n• Wouter برای مسیریابی سبک\n• React Hook Form با اعتبارسنجی Zod\n• طراحی واکنش‌گرا با پشتیبانی موبایل\n• قابلیت‌های Progressive Web App"
+        },
+        {
+          title: "معماری Backend",
+          content: "• Node.js 20 با فریمورک Express.js\n• TypeScript با ماژول‌های ESM\n• PostgreSQL 16 با Drizzle ORM\n• احراز هویت مبتنی بر session\n• Multer برای آپلود فایل\n• Nodemailer برای خدمات ایمیل\n• طراحی RESTful API"
+        },
+        {
+          title: "طراحی پایگاه داده",
+          content: "• سازماندهی چندین schema:\n  - Main Schema: CRM، admin، SEO\n  - Showcase Schema: محصولات عمومی\n  - Shop Schema: عملکرد تجارت الکترونیک\n  - Customer Schema: پورتال مشتری\n  - Email Schema: سیستم ارتباطات\n• کوئری‌های بهینه با connection pooling\n• سیستم پشتیبان‌گیری و migration خودکار"
+        },
+        {
+          title: "پیاده‌سازی امنیت",
+          content: "• احراز هویت مبتنی بر session با کوکی‌های امن\n• کنترل دسترسی مبتنی بر نقش\n• جلوگیری از SQL injection\n• حفاظت XSS با CSP\n• حفاظت CSRF\n• اعتبارسنجی داده با schema های Zod\n• ذخیره‌سازی داده‌های حساس رمزگذاری شده"
+        }
+      ]
+    },
+    {
+      title: "پشتیبانی چندزبانه",
+      content: "بین‌المللی‌سازی کامل با پشتیبانی از 4 زبان و مدیریت مناسب جهت متن.",
+      subsections: [
+        {
+          title: "پشتیبانی زبان",
+          content: "• انگلیسی (en): زبان اصلی کسب‌وکار\n• عربی (ar): زبان بازار منطقه‌ای\n• کردی (ku): زبان بازار محلی\n• ترکی (tr): گسترش دسترسی بازار\n• تشخیص خودکار زبان\n• ذخیره‌سازی ترجیح کاربر\n• تغییر پویای زبان"
+        },
+        {
+          title: "محلی‌سازی محتوا",
+          content: "• 430+ آیتم محتوای ترجمه شده\n• تغییر پویای محتوا\n• پشتیبانی از جهت متن RTL/LTR\n• قالب‌بندی محلی تاریخ و عدد\n• محلی‌سازی ارز\n• انطباق‌های فرهنگی\n• بهینه‌سازی فونت برای هر زبان"
+        },
+        {
+          title: "بین‌المللی‌سازی SEO",
+          content: "• تگ‌های meta خاص زبان\n• پیاده‌سازی hreflang\n• URL های محلی‌سازی شده\n• نقشه‌های سایت چندزبانه\n• بهینه‌سازی جستجوی منطقه‌ای\n• هدف‌گیری کلمات کلیدی فرهنگی"
+        }
+      ]
+    },
+    {
+      title: "ویژگی‌های تجارت الکترونیک",
+      content: "راه‌حل کامل تجارت الکترونیک متناسب با صنعت شیمیایی با یکپارچگی بازار عراق.",
+      subsections: [
+        {
+          title: "کاتالوگ محصولات",
+          content: "• 8 دسته اصلی محصول\n• مشخصات تفصیلی محصول\n• تصاویر باکیفیت محصول\n• مدیریت انواع\n• ردیابی موجودی انبار\n• مدیریت قیمت\n• سیستم تخفیف"
+        },
+        {
+          title: "سبد خرید و تسویه حساب",
+          content: "• سبد خرید پایدار\n• گزینه‌های تسویه حساب مهمان\n• روش‌های پرداخت متعدد\n• یکپارچگی بانکی عراق\n• تولید فاکتور\n• ایمیل‌های تأیید سفارش\n• محاسبات مالیاتی"
+        },
+        {
+          title: "یکپارچگی پرداخت",
+          content: "• یکپارچگی بانک رشید\n• پشتیبانی بانک الرافدین\n• اتصال بانک التجاره العراقی\n• سیستم کیف پول دیجیتال\n• تأیید دستی پرداخت\n• ردیابی تاریخچه پرداخت\n• مدیریت بازپرداخت"
+        }
+      ]
+    },
+    {
+      title: "عملکرد و مقیاس‌پذیری",
+      content: "بهینه‌سازی شده برای عملکرد بالا با معماری مقیاس‌پذیر برای رشد کسب‌وکار.",
+      subsections: [
+        {
+          title: "بهینه‌سازی عملکرد",
+          content: "• بهینه‌سازی کوئری پایگاه داده\n• Connection pooling\n• تقسیم کد frontend\n• بهینه‌سازی تصویر\n• استراتژی‌های caching\n• یکپارچگی CDN\n• پیاده‌سازی lazy loading"
+        },
+        {
+          title: "نظارت و تجزیه و تحلیل",
+          content: "• نظارت بر عملکرد در زمان واقعی\n• ردیابی و ثبت خطا\n• تجزیه و تحلیل رفتار کاربر\n• معیارهای عملکرد فروش\n• نظارت بر سلامت سیستم\n• سیستم هشدار خودکار\n• گزارش‌گیری عملکرد"
+        },
+        {
+          title: "ویژگی‌های مقیاس‌پذیری",
+          content: "• قابلیت scaling افقی\n• پشتیبانی load balancing\n• تقسیم‌بندی پایگاه داده\n• آمادگی معماری microservices\n• بهینه‌سازی استقرار cloud\n• پیکربندی‌های auto-scaling\n• نظارت بر منابع"
+        }
+      ]
+    },
+    {
+      title: "استقرار و زیرساخت",
+      content: "استقرار آماده cloud با شیوه‌های مدرن DevOps و زیرساخت قابل اعتماد.",
+      subsections: [
+        {
+          title: "استراتژی استقرار",
+          content: "• یکپارچگی پلتفرم Replit\n• آماده containerization Docker\n• پشتیبانی pipeline CI/CD\n• مدیریت محیط\n• مدیریت پیکربندی\n• مدیریت secret\n• تست خودکار"
+        },
+        {
+          title: "زیرساخت پایگاه داده",
+          content: "• پایگاه داده cloud Neon PostgreSQL\n• پشتیبان‌گیری خودکار\n• بازیابی point-in-time\n• تنظیمات دسترسی بالا\n• نظارت و هشدارها\n• بهینه‌سازی عملکرد\n• انطباق امنیتی"
+        },
+        {
+          title: "یکپارچگی‌های شخص ثالث",
+          content: "• OpenAI API برای ویژگی‌های AI\n• Zoho Mail برای خدمات ایمیل\n• Tawk.to برای چت زنده\n• API های بانکی عراق\n• Google Fonts برای typography\n• Puppeteer برای تولید PDF\n• خدمات داده جغرافیایی"
+        }
+      ]
+    },
+    {
+      title: "ارزش کسب‌وکار و بازگشت سرمایه",
+      content: "مزایای جامع کسب‌وکار و پیش‌بینی‌های بازگشت سرمایه‌گذاری.",
+      subsections: [
+        {
+          title: "کارایی عملیاتی",
+          content: "• 70% کاهش در وظایف مدیریتی دستی\n• گردش کار خودکار پردازش سفارش\n• مدیریت موجودی در زمان واقعی\n• ارتباط ساده با مشتری\n• گزارش‌گیری و تجزیه و تحلیل یکپارچه\n• کاهش نرخ خطا\n• بهبود زمان پاسخ"
+        },
+        {
+          title: "گسترش بازار",
+          content: "• پشتیبانی 4 زبانه برای بازارهای منطقه‌ای\n• حضور آنلاین در کشورهای متعدد\n• دسترسی 24/7 برای مشتریان\n• طراحی واکنش‌گرا موبایل\n• بهینه‌سازی SEO برای نمایان بودن\n• یکپارچگی رسانه‌های اجتماعی\n• تصویر برند حرفه‌ای"
+        },
+        {
+          title: "صرفه‌جویی هزینه",
+          content: "• کاهش نیاز به ورود دستی داده\n• ارتباطات ایمیل خودکار\n• تولید فاکتور بدون کاغذ\n• مدیریت موجودی متمرکز\n• کاهش overhead خدمات مشتری\n• کمینه‌سازی خطاهای پردازش سفارش\n• تخصیص بهینه منابع"
+        }
+      ]
+    },
+    {
+      title: "جدول زمانی پیاده‌سازی",
+      content: "جدول زمانی توسعه و استقرار ساختارمند با milestone ها و تحویلی‌های واضح.",
+      subsections: [
+        {
+          title: "فاز 1: پایه (تکمیل شده)",
+          content: "• راه‌اندازی معماری اصلی\n• طراحی و پیاده‌سازی پایگاه داده\n• سیستم احراز هویت کاربر\n• مدیریت محصول پایه\n• سیستم مدیریت محتوا\n• زیرساخت استقرار اولیه"
+        },
+        {
+          title: "فاز 2: ویژگی‌های اصلی (تکمیل شده)",
+          content: "• عملکرد تجارت الکترونیک\n• سیستم مدیریت سفارش\n• پورتال مشتری\n• خودکارسازی ایمیل\n• سیستم بارکد\n• ابزارهای مدیریتی پایه"
+        },
+        {
+          title: "فاز 3: ویژگی‌های پیشرفته (تکمیل شده)",
+          content: "• یکپارچگی AI\n• CRM پیشرفته\n• بهینه‌سازی SEO\n• پشتیبانی چندزبانه\n• یکپارچگی پرداخت\n• ابزارهای جامع مدیریت"
+        },
+        {
+          title: "فاز 4: بهینه‌سازی و بهبود (فعلی)",
+          content: "• بهینه‌سازی عملکرد\n• تقویت امنیت\n• یکپارچگی‌های اضافی\n• تجزیه و تحلیل پیشرفته\n• توسعه اپلیکیشن موبایل\n• گسترش API"
+        }
+      ]
+    },
+    {
+      title: "نگهداری و پشتیبانی",
+      content: "خدمات نگهداری، پشتیبانی و بهبود مداوم برای تضمین عملکرد بهینه پلتفرم.",
+      subsections: [
+        {
+          title: "پشتیبانی فنی",
+          content: "• نظارت سیستم 24/7\n• به‌روزرسانی‌های امنیتی منظم\n• بهینه‌سازی عملکرد\n• رفع باگ و patch ها\n• بهبود ویژگی‌ها\n• نگهداری پایگاه داده\n• مدیریت پشتیبان‌گیری"
+        },
+        {
+          title: "آموزش و مستندسازی",
+          content: "• راهنماهای جامع کاربر\n• مواد آموزشی ویدئویی\n• جلسات آموزش مدیر\n• مستندات API\n• راهنماهای بهترین شیوه‌ها\n• منابع عیب‌یابی\n• به‌روزرسانی‌های آموزشی منظم"
+        },
+        {
+          title: "بهبودهای آینده",
+          content: "• توسعه اپلیکیشن موبایل\n• ویژگی‌های پیشرفته AI\n• درگاه‌های پرداخت اضافی\n• تجزیه و تحلیل بهبود یافته\n• یکپارچگی‌های شخص ثالث\n• بهبود عملکرد\n• توسعه ویژگی جدید"
+        }
+      ]
+    }
+  ]
+};
+
+// Project Proposal PDF Generation Function
+export async function generateProjectProposalPDF(language: 'en' | 'fa' = 'en'): Promise<Buffer> {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  
+  try {
+    const page = await browser.newPage();
+    const data = language === 'fa' ? projectProposalFA : projectProposalEN;
+    const html = generateDocumentationHTML(data, language);
+    
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    
+    const pdf = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20mm',
+        bottom: '20mm',
+        left: '15mm',
+        right: '15mm'
+      }
+    });
+    
+    return pdf;
+  } finally {
+    await browser.close();
+  }
+}
+
 // Combined documentation generator
 export async function generateComprehensiveDocumentationPDF(language: 'en' | 'fa' = 'en'): Promise<Buffer> {
   const browser = await puppeteer.launch({
