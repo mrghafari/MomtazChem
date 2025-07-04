@@ -53,6 +53,10 @@ import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
 import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
 import OtherProducts from "@/pages/products/other";
+import PaintSolvents from "@/pages/paint-solvents";
+import IndustrialChemicals from "@/pages/industrial-chemicals";
+import CommercialGoods from "@/pages/commercial-goods";
+import TechnicalEquipment from "@/pages/technical-equipment";
 import QuotePage from "@/pages/quote";
 import Dashboard from "@/pages/dashboard";
 import InquiryDetail from "@/pages/inquiry-detail";
@@ -170,6 +174,10 @@ function Router() {
           <Route path="/products/paint-thinner" component={PaintThinner} />
           <Route path="/products/agricultural-fertilizers" component={AgriculturalFertilizers} />
           <Route path="/products/other" component={OtherProducts} />
+          <Route path="/products/paint-solvents" component={PaintSolvents} />
+          <Route path="/products/industrial-chemicals" component={IndustrialChemicals} />
+          <Route path="/products/commercial-goods" component={CommercialGoods} />
+          <Route path="/products/technical-equipment" component={TechnicalEquipment} />
           <Route path="/quote" component={QuotePage} />
           <Route component={NotFound} />
         </Switch>
