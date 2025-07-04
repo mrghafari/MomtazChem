@@ -76,6 +76,7 @@ import AISettings from "@/pages/admin/ai-settings";
 import FinanceOrders from "@/pages/admin/finance-orders";
 import WarehouseOrders from "@/pages/admin/warehouse-orders";
 import LogisticsOrders from "@/pages/admin/logistics-orders";
+import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -140,7 +141,7 @@ function Router() {
           <Route path="/admin/finance-orders" component={FinanceOrders} />
           <Route path="/admin/warehouse-orders" component={WarehouseOrders} />
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
-          <Route path="/admin/global-refresh-settings" component={lazy(() => import("./pages/admin/global-refresh-settings"))} />
+          <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
