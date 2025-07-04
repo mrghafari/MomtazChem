@@ -843,13 +843,6 @@ const BarcodeInventory = () => {
                                   className="bg-white p-1 border rounded"
                                 />
                               </div>
-                              <div className="mt-2 text-center">
-                                <p className="text-xs font-medium text-gray-700">{product.name}</p>
-                                <p className="text-xs text-gray-500">SKU: {product.sku || 'N/A'}</p>
-                                {product.category && (
-                                  <p className="text-xs text-gray-400">دسته: {product.category}</p>
-                                )}
-                              </div>
                             </div>
                           ) : (
                             <span className="text-gray-400">No barcode</span>
