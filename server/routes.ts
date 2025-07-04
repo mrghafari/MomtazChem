@@ -12103,7 +12103,9 @@ momtazchem.com
   app.get("/api/delivered/orders", requireAuth, attachUserDepartments, requireDepartment(['logistics', 'super_admin']), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
-      const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
+      const { orderManagement, orderItems } = await import("../shared/order-management-schema");
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { crmCustomers } = await import("../shared/schema");
       const { eq, inArray } = await import("drizzle-orm");
 
       // Get orders that are dispatched or delivered

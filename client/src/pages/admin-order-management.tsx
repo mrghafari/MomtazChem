@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import RefreshControl from '@/components/RefreshControl';
 
 interface OrderManagement {
   id: number;
@@ -112,14 +113,10 @@ export default function AdminOrderManagement() {
   const [newStatus, setNewStatus] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Auto-refresh data every 30 seconds for real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, [queryClient]);
+  // Refresh control for order data
+  const refreshOrderData = () => {
+    queryClient.invalidateQueries({ queryKey: ['orders'] });
+  };
 
   // Fetch orders for selected department
   const { data: orders, isLoading } = useQuery({
@@ -312,6 +309,15 @@ export default function AdminOrderManagement() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Refresh Control for all departments */}
+                <div className="mb-4">
+                  <RefreshControl 
+                    onRefresh={refreshOrderData}
+                    isLoading={isLoading}
+                    departmentName={dept === 'financial' ? 'مالی' : dept === 'warehouse' ? 'انبار' : dept === 'logistics' ? 'لجستیک' : 'تحویل شده'}
+                  />
+                </div>
+                
                 {isLoading ? (
                   <div className="text-center py-8">در حال بارگذاری...</div>
                 ) : !orders || orders.length === 0 ? (
