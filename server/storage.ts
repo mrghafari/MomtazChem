@@ -116,6 +116,7 @@ export class DatabaseStorage implements IStorage {
     const productData = {
       ...insertProduct,
       category: categoryName, // Store the full category name
+      unitPrice: String(insertProduct.unitPrice || 0), // Convert to string for decimal field
       specifications: insertProduct.specifications && typeof insertProduct.specifications === 'object' && !Array.isArray(insertProduct.specifications) && Object.keys(insertProduct.specifications).length > 0 ? insertProduct.specifications : null,
       features: Array.isArray(insertProduct.features) && insertProduct.features.length > 0 ? insertProduct.features : null,
       applications: Array.isArray(insertProduct.applications) && insertProduct.applications.length > 0 ? insertProduct.applications : null,
@@ -164,6 +165,11 @@ export class DatabaseStorage implements IStorage {
     // Handle barcode field - set to null if empty
     if (productUpdate.barcode !== undefined) {
       updateData.barcode = productUpdate.barcode && productUpdate.barcode.trim() ? productUpdate.barcode.trim() : null;
+    }
+
+    // Handle unitPrice field - convert number to string for decimal field
+    if (productUpdate.unitPrice !== undefined) {
+      updateData.unitPrice = String(productUpdate.unitPrice);
     }
 
     // Handle JSON fields properly - use null for empty arrays/objects
