@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat, Download, FileText, Image } from "lucide-react";
+import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat, Download, FileText, Image, Factory, Wrench, ShoppingBag, Beaker } from "lucide-react";
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 import waterTreatmentImg from "@assets/download_1749877891276.jpeg";
 
@@ -53,6 +53,42 @@ const Home = () => {
       iconBg: "bg-primary-green",
       category: "agricultural-fertilizers",
       imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    },
+    {
+      title: "Agricultural Products",
+      description: "Comprehensive range of agricultural solutions including crop protection chemicals, growth enhancers, and specialty farming products for modern agriculture.",
+      href: "/products/agricultural-products",
+      icon: <Leaf className="text-white text-xl" />,
+      iconBg: "bg-accent-orange",
+      category: "agricultural-products",
+      imageUrl: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    },
+    {
+      title: "Industrial Chemicals",
+      description: "High-quality industrial chemical solutions for manufacturing, processing, and production applications across diverse industrial sectors.",
+      href: "/products/industrial-chemicals",
+      icon: <Factory className="text-white text-xl" />,
+      iconBg: "bg-primary-blue",
+      category: "industrial-chemicals",
+      imageUrl: "https://images.unsplash.com/photo-1580982324413-b3c634ad8d7f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    },
+    {
+      title: "Technical Equipment",
+      description: "Precision technical equipment and instruments for laboratory, industrial, and research applications with advanced functionality and reliability.",
+      href: "/products/technical-equipment",
+      icon: <Wrench className="text-white text-xl" />,
+      iconBg: "bg-accent-orange",
+      category: "technical-equipment",
+      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    },
+    {
+      title: "Commercial Goods",
+      description: "Professional-grade commercial products and supplies for business, retail, and institutional applications with consistent quality and performance.",
+      href: "/products/commercial-goods",
+      icon: <ShoppingBag className="text-white text-xl" />,
+      iconBg: "bg-primary-green",
+      category: "commercial-goods",
+      imageUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
   ];
 
