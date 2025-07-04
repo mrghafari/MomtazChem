@@ -799,7 +799,6 @@ const BarcodeInventory = () => {
                       <th className="text-left p-2">Product</th>
                       <th className="text-left p-2">Category</th>
                       <th className="text-left p-2">Current Barcode</th>
-                      <th className="text-left p-2">بارکد نموداری</th>
                       <th className="text-left p-2">EAN-13 Status</th>
                       <th className="text-left p-2">Actions</th>
                     </tr>
@@ -818,7 +817,7 @@ const BarcodeInventory = () => {
                         </td>
                         <td className="p-2">
                           {product.barcode ? (
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               <code className="text-xs bg-gray-100 px-2 py-1 rounded block cursor-pointer hover:bg-gray-200 transition-colors"
                                     title="کلیک کنید تا کپی شود"
                                     onClick={() => {
@@ -830,29 +829,23 @@ const BarcodeInventory = () => {
                                     }}>
                                 {product.barcode}
                               </code>
+                              <div className="flex justify-center">
+                                <VisualBarcode 
+                                  value={product.barcode}
+                                  productName={product.name}
+                                  sku={product.sku || undefined}
+                                  width={1.5}
+                                  height={40}
+                                  fontSize={10}
+                                  showDownload={true}
+                                  showPrint={true}
+                                  showCopy={true}
+                                  className="bg-white p-1 border rounded"
+                                />
+                              </div>
                             </div>
                           ) : (
                             <span className="text-gray-400">No barcode</span>
-                          )}
-                        </td>
-                        <td className="p-2">
-                          {product.barcode ? (
-                            <div className="flex flex-col items-center justify-center space-y-2">
-                              <VisualBarcode 
-                                value={product.barcode}
-                                productName={product.name}
-                                sku={product.sku || undefined}
-                                width={1.5}
-                                height={40}
-                                fontSize={10}
-                                showDownload={true}
-                                showPrint={true}
-                                showCopy={true}
-                                className="bg-white p-1 border rounded"
-                              />
-                            </div>
-                          ) : (
-                            <span className="text-gray-400 text-sm">بارکد معتبر ندارد</span>
                           )}
                         </td>
                         <td className="p-2">
