@@ -57,11 +57,23 @@ The database is organized into multiple schema files:
 - **Automated Notifications**: Order confirmations, inventory alerts, customer communications
 - **Recipient Management**: Role-based email distribution
 
-#### Administrative Tools
-- **User Management**: Multi-role admin system
-- **Analytics Dashboard**: Sales reports, customer metrics, inventory analytics
-- **SEO Management**: Multi-language SEO optimization with structured data
-- **Document Management**: PDF generation, file uploads, and document storage
+#### Site Management Features
+- **24+ integrated administrative functions** centralized in unified Site Management interface
+- **Product Management**: Showcase and shop product catalogs with inventory tracking
+- **Barcode System**: EAN-13 generation, batch processing, and inventory management
+- **Order Workflow**: 3-department sequential processing (Financial → Warehouse → Logistics)
+- **CRM Integration**: Customer relationship management with lead tracking and analytics
+- **Email Automation**: Multi-SMTP configuration with intelligent routing and template system
+- **User Management**: Multi-role admin system with department-based access control
+- **AI Integration**: Smart SKU generation, product recommendations, and performance monitoring
+- **Global Refresh Control**: Centralized timing management for all department interfaces
+- **Database Management**: Backup, migration, and system maintenance tools
+- **SEO Management**: Multi-language optimization with structured data
+- **SMS Communication**: Customer notification and verification systems
+- **Factory Management**: Production line and manufacturing operations
+- **Category Management**: Hierarchical product categorization
+- **Analytics Dashboard**: Sales reports, customer metrics, and performance tracking
+- **Security Settings**: Authentication, session management, and access control
 
 ## Data Flow
 
