@@ -155,10 +155,12 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   console.log('Auth check:', {
     isAuthenticated: req.session.isAuthenticated,
     adminId: req.session.adminId,
-    sessionId: req.sessionID
+    sessionId: req.sessionID,
+    sessionData: JSON.stringify(req.session)
   });
   
-  if (req.session.isAuthenticated && req.session.adminId) {
+  // More robust authentication check
+  if (req.session && req.session.isAuthenticated === true && req.session.adminId) {
     next();
   } else {
     console.log('Authentication failed for:', req.path);

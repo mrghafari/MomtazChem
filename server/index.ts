@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import MemoryStore from "memorystore";
 import path from "path";
 import { registerRoutes } from "./routes";
 import InventoryAlertService from "./inventory-alerts";
@@ -20,15 +21,21 @@ app.use(express.urlencoded({ extended: false }));
 
 
 
-// Session configuration
+// Create memory store for session persistence
+const MemoryStoreSession = MemoryStore(session);
+
+// Session configuration with proper store
 app.use(session({
   secret: process.env.SESSION_SECRET || "momtazchem-admin-secret-key",
+  store: new MemoryStoreSession({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  }),
   resave: false,
   saveUninitialized: false,
   rolling: true, // Reset maxAge on each request
   cookie: {
     secure: false, // Set to true in production with HTTPS
-    httpOnly: true, // Secure session cookies
+    httpOnly: false, // Allow frontend access for debugging
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
   },

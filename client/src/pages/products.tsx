@@ -143,7 +143,7 @@ export default function ProductsPage() {
     { value: "commercial-goods", label: "Commercial Goods", icon: <Package className="w-4 h-4" /> },
   ];
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
     queryKey: ["/api/products"],
   });
 
@@ -414,7 +414,7 @@ export default function ProductsPage() {
   };
 
   // Filter products based on category and search
-  const filteredProducts = products?.filter((product: ShowcaseProduct) => {
+  const filteredProducts = (products || []).filter((product: ShowcaseProduct) => {
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = !searchQuery || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -422,7 +422,7 @@ export default function ProductsPage() {
       product.sku?.toLowerCase().includes(searchQuery.toLowerCase());
     
     return matchesCategory && matchesSearch;
-  }) || [];
+  });
 
   // Auto-generate barcode for new products when name and category are available
   useEffect(() => {
