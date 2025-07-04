@@ -79,6 +79,7 @@ import LogisticsOrders from "@/pages/admin/logistics-orders";
 import DeliveredOrders from "@/pages/admin/delivered-orders";
 import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
 import DepartmentUsers from "@/pages/admin/department-users";
+import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -146,6 +147,7 @@ function Router() {
           <Route path="/admin/delivered-orders" component={DeliveredOrders} />
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
           <Route path="/admin/department-users" component={DepartmentUsers} />
+          <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />

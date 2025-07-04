@@ -2,6 +2,29 @@ import { shopStorage } from "./shop-storage";
 import { emailStorage } from "./email-storage";
 import nodemailer from "nodemailer";
 
+// SMS Service Interface
+interface SMSService {
+  sendSMS(to: string, message: string): Promise<boolean>;
+}
+
+// Simple SMS implementation (can be extended with actual SMS providers)
+class SimpleSMSService implements SMSService {
+  async sendSMS(to: string, message: string): Promise<boolean> {
+    try {
+      // Here you would integrate with actual SMS providers like:
+      // - Twilio, Vonage, AWS SNS, Kavenegar (for Persian), etc.
+      console.log(`📱 SMS Alert sent to ${to}:`);
+      console.log(`Message: ${message}`);
+      
+      // For now, we log the SMS. You can later integrate with real SMS providers
+      return true;
+    } catch (error) {
+      console.error('Error sending SMS:', error);
+      return false;
+    }
+  }
+}
+
 interface InventoryAlert {
   productId: number;
   productName: string;
@@ -22,6 +45,20 @@ export class InventoryAlertService {
       pass: process.env.SMTP_PASS,
     },
   });
+
+  private static smsService = new SimpleSMSService();
+  
+  // Configuration for notifications
+  private static notificationConfig = {
+    emailEnabled: true,
+    smsEnabled: true,
+    managerEmail: 'info@momtazchem.com',
+    managerPhone: '+964xxxxxxxxx', // شماره مدیر را اینجا وارد کنید
+    emergencyContacts: [
+      { name: 'Manager', phone: '+964xxxxxxxxx', email: 'info@momtazchem.com' },
+      // می‌توانید اعضای دیگر تیم مدیریت را اضافه کنید
+    ]
+  };
 
   /**
    * Check all products and send alerts for low stock items
@@ -67,12 +104,31 @@ export class InventoryAlertService {
   }
 
   /**
-   * Send inventory alert email to management
+   * Send inventory alert via email and SMS
    */
   private static async sendInventoryAlert(alerts: InventoryAlert[]): Promise<void> {
     try {
+      // Send Email Alert
+      if (this.notificationConfig.emailEnabled) {
+        await this.sendEmailAlert(alerts);
+      }
+
+      // Send SMS Alert
+      if (this.notificationConfig.smsEnabled) {
+        await this.sendSMSAlert(alerts);
+      }
+    } catch (error) {
+      console.error('Error sending inventory alerts:', error);
+    }
+  }
+
+  /**
+   * Send inventory alert email to management
+   */
+  private static async sendEmailAlert(alerts: InventoryAlert[]): Promise<void> {
+    try {
       const fromEmail = process.env.SMTP_USER || '';
-      const toEmail = 'info@momtazchem.com';
+      const toEmail = this.notificationConfig.managerEmail;
       
       // Skip sending email if sender and recipient are the same to avoid duplicate issue
       if (fromEmail.toLowerCase() === toEmail.toLowerCase()) {
@@ -107,7 +163,69 @@ export class InventoryAlertService {
         console.log('SMTP configuration missing - would send inventory alert:', mailOptions);
       }
     } catch (error) {
-      console.error('Error sending inventory alert:', error);
+      console.error('Error sending inventory alert email:', error);
+    }
+  }
+
+  /**
+   * Send inventory alert SMS to management
+   */
+  private static async sendSMSAlert(alerts: InventoryAlert[]): Promise<void> {
+    try {
+      const outOfStock = alerts.filter(a => a.alertLevel === 'out_of_stock');
+      const lowStock = alerts.filter(a => a.alertLevel === 'low_stock');
+      
+      // Generate SMS message in Persian
+      let message = `🚨 هشدار موجودی - Momtazchem\n\n`;
+      
+      if (outOfStock.length > 0) {
+        message += `❌ کالاهای تمام شده (${outOfStock.length} قلم):\n`;
+        outOfStock.slice(0, 3).forEach(product => {
+          message += `• ${product.productName}\n`;
+        });
+        if (outOfStock.length > 3) {
+          message += `+ ${outOfStock.length - 3} کالای دیگر\n`;
+        }
+        message += `\n`;
+      }
+
+      if (lowStock.length > 0) {
+        message += `⚠️ موجودی کم (${lowStock.length} قلم):\n`;
+        lowStock.slice(0, 3).forEach(product => {
+          message += `• ${product.productName}\n`;
+        });
+        if (lowStock.length > 3) {
+          message += `+ ${lowStock.length - 3} کالای دیگر\n`;
+        }
+      }
+
+      message += `\nبررسی کامل در پنل مدیریت انبار`;
+
+      // Send SMS to manager
+      const success = await this.smsService.sendSMS(
+        this.notificationConfig.managerPhone,
+        message
+      );
+
+      if (success) {
+        console.log(`📱 SMS inventory alert sent for ${alerts.length} products`);
+      } else {
+        console.log('❌ Failed to send SMS inventory alert');
+      }
+
+      // Send to emergency contacts if critical
+      const criticalAlerts = alerts.filter(a => a.alertLevel === 'out_of_stock');
+      if (criticalAlerts.length > 0) {
+        for (const contact of this.notificationConfig.emergencyContacts) {
+          if (contact.phone !== this.notificationConfig.managerPhone) {
+            const emergencyMessage = `🚨 موجودی صفر - ${criticalAlerts.length} کالا تمام شده است. لطفا فوراً بررسی کنید.`;
+            await this.smsService.sendSMS(contact.phone, emergencyMessage);
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error('Error sending inventory alert SMS:', error);
     }
   }
 

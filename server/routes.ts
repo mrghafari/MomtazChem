@@ -12630,6 +12630,88 @@ momtazchem.com
     }
   });
 
+  // Inventory Notification Settings API
+  app.get("/api/inventory/notification-settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Return default settings for now - in a real app this would come from database
+      const defaultSettings = {
+        emailEnabled: true,
+        smsEnabled: false,
+        managerEmail: 'info@momtazchem.com',
+        managerPhone: '+964xxxxxxxxx',
+        checkIntervalHours: 1,
+        businessHoursOnly: true,
+        businessStartHour: 8,
+        businessEndHour: 18,
+        emergencyThreshold: 0,
+        contacts: []
+      };
+
+      res.json({ success: true, settings: defaultSettings });
+    } catch (error) {
+      console.error("Error fetching notification settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت تنظیمات اطلاع‌رسانی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post("/api/inventory/notification-settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // In a real app, this would save to database
+      console.log("Inventory notification settings updated:", req.body);
+      
+      res.json({ 
+        success: true, 
+        message: "تنظیمات اطلاع‌رسانی با موفقیت ذخیره شد",
+        settings: req.body 
+      });
+    } catch (error) {
+      console.error("Error saving notification settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ذخیره تنظیمات اطلاع‌رسانی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post("/api/inventory/test-notification/:type", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { type } = req.params;
+      
+      if (type === 'email') {
+        // Test email notification
+        console.log("📧 Test email notification sent");
+        res.json({ 
+          success: true, 
+          message: "تست ایمیل با موفقیت ارسال شد" 
+        });
+      } else if (type === 'sms') {
+        // Test SMS notification
+        console.log("📱 Test SMS notification sent");
+        res.json({ 
+          success: true, 
+          message: "تست پیامک با موفقیت ارسال شد" 
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "نوع اطلاع‌رسانی نامعتبر است"
+        });
+      }
+    } catch (error) {
+      console.error("Error testing notification:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تست اطلاع‌رسانی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

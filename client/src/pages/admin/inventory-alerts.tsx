@@ -15,8 +15,11 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  BarChart3
+  BarChart3,
+  Settings,
+  Users
 } from "lucide-react";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -163,23 +166,35 @@ export default function InventoryAlerts() {
           <p className="text-gray-600 mt-1">Monitor stock levels and manage inventory alerts</p>
         </div>
         
-        <Button 
-          onClick={handleCheckAll}
-          disabled={isCheckingAll || checkAllInventoryMutation.isPending}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          {isCheckingAll ? (
-            <>
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              Checking...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Check All Inventory
-            </>
-          )}
-        </Button>
+        <div className="flex gap-3">
+          <Link href="/admin/inventory-notification-settings">
+            <Button 
+              variant="outline"
+              className="border-purple-300 text-purple-700 hover:bg-purple-50"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              تنظیمات اطلاع‌رسانی
+            </Button>
+          </Link>
+          
+          <Button 
+            onClick={handleCheckAll}
+            disabled={isCheckingAll || checkAllInventoryMutation.isPending}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {isCheckingAll ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Checking...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Check All Inventory
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Statistics Cards */}
