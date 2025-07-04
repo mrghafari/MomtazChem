@@ -460,6 +460,166 @@ const adminDocumentationEN: DocumentationData = {
           content: "System performance tracking:\n• Server performance metrics\n• Database query optimization\n• Cache management\n• Error monitoring"
         }
       ]
+    },
+    {
+      title: "Customer Relationship Management (CRM)",
+      content: "Comprehensive customer relationship management system with advanced analytics and tracking capabilities.",
+      subsections: [
+        {
+          title: "Unified Customer Management",
+          content: "Single CRM system with automatic migration from legacy portal:\n• Complete customer information management\n• Customer segmentation and analytics\n• Purchase history and performance tracking\n• Metrics calculation and reporting\n• Multiple address management per customer"
+        },
+        {
+          title: "Advanced Customer Analytics",
+          content: "Comprehensive analytical tools:\n• Customer behavior analysis\n• Geographic analytics (Iraq and Turkey)\n• Sales performance tracking\n• Exportable PDF reports\n• Customer control dashboard\n• Real-time metrics calculation"
+        },
+        {
+          title: "Order Management Workflow",
+          content: "3-department sequential workflow (Financial → Warehouse → Logistics):\n• Automatic status progression\n• Automatic delivery code generation\n• SMS notifications and alerts\n• Real-time order tracking with 30-second auto-refresh\n• Complete order status history tracking\n• GPS location capture for customer addresses"
+        },
+        {
+          title: "Digital Wallet System",
+          content: "Customer balance management:\n• Recharge requests with approval workflow\n• Account balance management\n• Transaction history tracking\n• Payment system integration\n• Automated balance updates"
+        }
+      ]
+    },
+    {
+      title: "Email Automation & Communication",
+      content: "Advanced email automation system with intelligent routing and comprehensive management.",
+      subsections: [
+        {
+          title: "Multi-SMTP Configuration",
+          content: "Intelligent email routing based on categories across 8 email categories:\n• Sales department emails\n• Technical support\n• Order management\n• System notifications\n• Configurable SMTP settings\n• Performance monitoring\n• Category-based intelligent routing"
+        },
+        {
+          title: "Advanced Template System",
+          content: "Customizable templates with variable substitution:\n• Content personalization\n• Multilingual templates\n• Dynamic variable merging\n• Template preview\n• Version management\n• Professional confirmation emails"
+        },
+        {
+          title: "Routing Intelligence",
+          content: "Automatic department routing based on product categories:\n• Fuel additives → Fuel Department\n• Water treatment → Water Department\n• Paint products → Paint Department\n• Agricultural products → Agricultural Department\n• Custom solutions → Sales Department\n• Independent CC/BCC management"
+        },
+        {
+          title: "SMTP Testing Tools",
+          content: "Comprehensive connectivity testing and validation:\n• SMTP connection testing\n• Authentication validation\n• Performance monitoring\n• Debugging tools\n• Email routing statistics\n• Delivery rate tracking"
+        }
+      ]
+    },
+    {
+      title: "SEO & Internationalization",
+      content: "Comprehensive SEO management for multilingual content and international markets.",
+      subsections: [
+        {
+          title: "Multilingual SEO Management",
+          content: "SEO optimization for 4 languages (English, Arabic, Kurdish, Turkish):\n• Meta tags and descriptions for all pages\n• Keywords and content optimization\n• hreflang implementation for language variants\n• Language-specific sitemaps\n• Proper RTL/LTR text direction handling"
+        },
+        {
+          title: "Dynamic Sitemap Generation",
+          content: "Automated sitemap management:\n• 47+ sitemap entries across all languages\n• Multi-language URL structure\n• Automatic updates when content changes\n• Search engine submission ready\n• XML format compliance"
+        },
+        {
+          title: "Content Localization",
+          content: "Dynamic content management:\n• 430+ content items in 4 languages\n• 12 content sections (Home, About, Contact, Services, etc.)\n• Real-time content updates\n• Social media links management (6 platforms)\n• Automatic language switching based on user preference"
+        }
+      ]
+    },
+    {
+      title: "Payment & Financial Systems",
+      content: "Iraqi banking integration with invoice generation and gateway management.",
+      subsections: [
+        {
+          title: "Iraqi Banking Integration",
+          content: "Support for 3 major Iraqi banks:\n• Rasheed Bank\n• Al-Rafidain Bank\n• Trade Bank of Iraq\n• SWIFT codes and account details\n• Payment approval workflow\n• Secure transaction processing"
+        },
+        {
+          title: "Invoice Generation System",
+          content: "Bilingual PDF invoices with automatic download:\n• Language selection (Arabic/English)\n• Professional formatting\n• Automatic download capabilities\n• Payment system integration\n• Official invoice management\n• Invoice delivery workflow"
+        },
+        {
+          title: "Payment Gateway Management",
+          content: "Admin-configurable payment gateways:\n• Payment method configuration\n• SWIFT code settings\n• Financial approval workflow\n• Integrated invoice delivery system\n• Transaction monitoring"
+        }
+      ]
+    },
+    {
+      title: "AI Integration & Automation",
+      content: "Artificial intelligence features for enhanced productivity and smart recommendations.",
+      subsections: [
+        {
+          title: "AI-Powered SKU Generation",
+          content: "Smart product SKU creation with OpenAI integration:\n• Category-based SKU patterns\n• Automated uniqueness validation\n• Bulk SKU generation capabilities\n• Performance monitoring\n• Token usage tracking\n• AI system health monitoring"
+        },
+        {
+          title: "Product Recommendations Engine",
+          content: "Intelligent product suggestion system:\n• Industry-based recommendations\n• Customer behavior analysis\n• Cross-selling opportunities\n• Performance analytics\n• AI model configuration (gpt-4o, max tokens, temperature)\n• Follow-up recommendation generation"
+        },
+        {
+          title: "AI System Management",
+          content: "AI performance and configuration dashboard:\n• OpenAI API integration testing\n• Token usage monitoring and optimization\n• System performance metrics\n• Error monitoring and resolution\n• AI settings management interface\n• Real-time performance tracking"
+        }
+      ]
+    },
+    {
+      title: "Inventory Management System",
+      content: "Independent inventory management with alerts, automation, and real-time analytics.",
+      subsections: [
+        {
+          title: "Real-time Inventory Monitoring",
+          content: "Live inventory tracking and management:\n• Real-time inventory metrics\n• Inventory statistics dashboard\n• Activity tracking and logging\n• Quick actions interface\n• Comprehensive reporting\n• Stock level automation"
+        },
+        {
+          title: "Alert System",
+          content: "Low inventory alerts and notifications:\n• Configurable threshold settings\n• Automatic email notifications\n• Email routing to appropriate departments\n• Alert status tracking\n• Priority management\n• Custom alert templates"
+        },
+        {
+          title: "Inventory Automation",
+          content: "Automated inventory functions:\n• Automatic inventory updates\n• Order processing integration\n• System synchronization\n• Business rule configuration\n• Workflow management\n• Batch processing capabilities"
+        }
+      ]
+    },
+    {
+      title: "Advanced System Features",
+      content: "Specialized features and advanced platform tools.",
+      subsections: [
+        {
+          title: "Factory Management",
+          content: "Production line and manufacturing operations management:\n• Production line monitoring\n• Manufacturing operations tracking\n• Quality control systems\n• Resource management\n• Production reporting\n• Workflow optimization"
+        },
+        {
+          title: "SMS Communication System",
+          content: "Customer notification and verification systems:\n• Automatic SMS sending\n• Verification codes\n• Order status notifications\n• Admin-configurable settings\n• Message template management\n• Delivery tracking"
+        },
+        {
+          title: "Comprehensive Documentation System",
+          content: "Professional PDF documentation generation:\n• 5 documentation types (User Guide, Admin Guide, Technical, Proposal, Complete)\n• Bilingual support (English/Persian)\n• Reliable fallback system for all environments\n• Professional download interface\n• Project proposal generation for contractors\n• Multi-page PDF structure with detailed content"
+        },
+        {
+          title: "Procedures & Methods Management",
+          content: "Document management system for operational procedures:\n• Process documentation\n• Version management\n• Access control\n• Search tools\n• Document archiving\n• Workflow documentation"
+        },
+        {
+          title: "Centralized Site Management",
+          content: "25+ integrated administrative functions:\n• Drag-and-drop Quick Actions layout\n• Centralized refresh control system\n• Global timing management for all departments\n• Sync/individual refresh modes\n• Unified administrative interface\n• Performance optimization settings"
+        }
+      ]
+    },
+    {
+      title: "Barcode & Product Tracking",
+      content: "Professional GS1-compliant EAN-13 barcode system with comprehensive management.",
+      subsections: [
+        {
+          title: "EAN-13 Barcode System",
+          content: "GS1-compliant barcode generation:\n• Iraq country code (864) integration\n• Momtazchem company code (96771)\n• Unique 5-digit product codes\n• Automatic checksum calculation\n• Professional retail distribution ready\n• Batch barcode generation"
+        },
+        {
+          title: "Barcode Management Interface",
+          content: "Comprehensive barcode administration:\n• Product status tracking\n• Bulk generation capabilities\n• CSV export functionality\n• Visual barcode display\n• Click-to-copy functionality\n• Barcode protection system"
+        },
+        {
+          title: "Inventory Integration",
+          content: "Seamless inventory system integration:\n• Real-time stock tracking\n• Barcode-based inventory updates\n• Product identification\n• Warehouse management\n• Distribution tracking\n• Quality control integration"
+        }
+      ]
     }
   ]
 };
