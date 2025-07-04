@@ -18,6 +18,7 @@ import { smsStorage } from "./sms-storage";
 import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { walletStorage } from "./wallet-storage";
+import { requireDepartment, attachUserDepartments } from "./department-auth";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests } from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients } from "@shared/email-schema";
@@ -175,6 +176,12 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Import department auth functions
+  const { attachUserDepartments, requireDepartment } = await import("./department-auth");
+  
+  // Add department middleware to all authenticated routes
+  app.use('/api', attachUserDepartments);
+  
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
 
@@ -11627,7 +11634,7 @@ momtazchem.com
   // =============================================================================
 
   // Finance Department - Get orders pending financial review
-  app.get("/api/finance/orders", requireAuth, async (req: Request, res: Response) => {
+  app.get("/api/finance/orders", requireAuth, requireDepartment('financial'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
@@ -11684,7 +11691,7 @@ momtazchem.com
   });
 
   // Finance Department - Approve payment
-  app.post("/api/finance/orders/:orderId/approve", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/finance/orders/:orderId/approve", requireAuth, requireDepartment('financial'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
@@ -11770,7 +11777,7 @@ momtazchem.com
   });
 
   // Warehouse Department - Get orders approved by finance
-  app.get("/api/warehouse/orders", requireAuth, async (req: Request, res: Response) => {
+  app.get("/api/warehouse/orders", requireAuth, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
@@ -11827,7 +11834,7 @@ momtazchem.com
   });
 
   // Warehouse Department - Approve order (items ready)
-  app.post("/api/warehouse/orders/:orderId/approve", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/warehouse/orders/:orderId/approve", requireAuth, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
@@ -11870,7 +11877,7 @@ momtazchem.com
   });
 
   // Warehouse Department - Reject order (out of stock)
-  app.post("/api/warehouse/orders/:orderId/reject", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/warehouse/orders/:orderId/reject", requireAuth, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
@@ -11913,7 +11920,7 @@ momtazchem.com
   });
 
   // Logistics Department - Get orders approved by warehouse
-  app.get("/api/logistics/orders", requireAuth, async (req: Request, res: Response) => {
+  app.get("/api/logistics/orders", requireAuth, requireDepartment('logistics'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
@@ -11975,7 +11982,7 @@ momtazchem.com
   });
 
   // Logistics Department - Dispatch order (generate delivery code and send SMS)
-  app.post("/api/logistics/orders/:orderId/dispatch", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/logistics/orders/:orderId/dispatch", requireAuth, requireDepartment('logistics'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
@@ -12314,6 +12321,175 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "خطا در دریافت تاریخچه ردیابی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // ============================================================================
+  // DEPARTMENT ASSIGNMENT MANAGEMENT APIs
+  // ============================================================================
+  
+  // Get all department assignments
+  app.get("/api/admin/department-assignments", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { departmentAssignments, users } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+
+      const assignments = await db
+        .select({
+          id: departmentAssignments.id,
+          adminUserId: departmentAssignments.adminUserId,
+          department: departmentAssignments.department,
+          isActive: departmentAssignments.isActive,
+          assignedAt: departmentAssignments.assignedAt,
+          username: users.username,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email
+        })
+        .from(departmentAssignments)
+        .leftJoin(users, eq(departmentAssignments.adminUserId, users.id))
+        .where(eq(departmentAssignments.isActive, true));
+
+      res.json({ success: true, assignments });
+    } catch (error) {
+      console.error("Error fetching department assignments:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت تخصیص‌های بخش",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Create department assignment
+  app.post("/api/admin/department-assignments", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { adminUserId, department } = req.body;
+      
+      if (!adminUserId || !department) {
+        return res.status(400).json({
+          success: false,
+          message: "adminUserId و department الزامی هستند"
+        });
+      }
+
+      // Get admin ID from session
+      const adminId = (req as any).user?.id;
+      if (!adminId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مورد نیاز است"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { departmentAssignments } = await import("../shared/order-management-schema");
+      const { eq, and } = await import("drizzle-orm");
+
+      // Check if user is already assigned to this department
+      const existingAssignment = await db
+        .select()
+        .from(departmentAssignments)
+        .where(and(
+          eq(departmentAssignments.adminUserId, adminUserId),
+          eq(departmentAssignments.department, department),
+          eq(departmentAssignments.isActive, true)
+        ))
+        .limit(1);
+
+      if (existingAssignment.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "این کاربر قبلاً به این بخش تخصیص داده شده است"
+        });
+      }
+
+      // Create new assignment
+      const [assignment] = await db
+        .insert(departmentAssignments)
+        .values({
+          adminUserId,
+          department,
+          assignedBy: adminId,
+          isActive: true
+        })
+        .returning();
+
+      res.json({ success: true, assignment });
+    } catch (error) {
+      console.error("Error creating department assignment:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ایجاد تخصیص بخش",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Remove department assignment
+  app.delete("/api/admin/department-assignments/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const assignmentId = parseInt(req.params.id);
+      
+      if (isNaN(assignmentId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه تخصیص نامعتبر است"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { departmentAssignments } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+
+      await db
+        .update(departmentAssignments)
+        .set({ isActive: false })
+        .where(eq(departmentAssignments.id, assignmentId));
+
+      res.json({ success: true, message: "تخصیص با موفقیت لغو شد" });
+    } catch (error) {
+      console.error("Error removing department assignment:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در لغو تخصیص",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get current user's department assignments  
+  app.get("/api/admin/my-departments", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const adminId = (req as any).user?.id;
+      if (!adminId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مورد نیاز است"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { departmentAssignments } = await import("../shared/order-management-schema");
+      const { eq, and } = await import("drizzle-orm");
+
+      const departments = await db
+        .select()
+        .from(departmentAssignments)
+        .where(and(
+          eq(departmentAssignments.adminUserId, adminId),
+          eq(departmentAssignments.isActive, true)
+        ));
+
+      res.json({ success: true, departments: departments.map(d => d.department) });
+    } catch (error) {
+      console.error("Error fetching user departments:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت بخش‌های کاربر",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

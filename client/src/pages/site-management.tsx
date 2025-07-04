@@ -305,6 +305,14 @@ export default function SiteManagement() {
                     <span className="text-sm">Refresh Control</span>
                   </Button>
 
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-teal-300 text-teal-600 hover:bg-teal-50"
+                    onClick={() => setLocation("/admin/department-users")}
+                  >
+                    <Users className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Department Users</span>
+                  </Button>
 
                 </div>
               </CardContent>
