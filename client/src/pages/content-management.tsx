@@ -19,7 +19,7 @@ interface ContentItem {
   key: string;
   content: string;
   contentType: 'text' | 'html' | 'image' | 'json';
-  language: 'en' | 'ar' | 'ku';
+  language: 'en' | 'ar' | 'ku' | 'tr';
   section: string;
   isActive: boolean;
   createdAt: string;
@@ -43,7 +43,7 @@ export default function ContentManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ar' | 'ku'>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ar' | 'ku' | 'tr'>('en');
   const [selectedSection, setSelectedSection] = useState<string>('admin_dashboard');
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
 
@@ -165,13 +165,15 @@ export default function ContentManagement() {
     { value: 'footer', label: 'Footer' },
     { value: 'navigation', label: 'Navigation' },
     { value: 'hero', label: 'Hero Section' },
-    { value: 'testimonials', label: 'Testimonials' }
+    { value: 'testimonials', label: 'Testimonials' },
+    { value: 'social_media', label: 'Social Media Links' }
   ];
 
   const languages = [
     { value: 'en', label: 'English', flag: '🇺🇸' },
     { value: 'ar', label: 'Arabic', flag: '🇮🇶' },
-    { value: 'ku', label: 'Kurdish', flag: '🏳️' }
+    { value: 'ku', label: 'Kurdish', flag: '🏳️' },
+    { value: 'tr', label: 'Turkish', flag: '🇹🇷' }
   ];
 
   return (
@@ -200,7 +202,7 @@ export default function ContentManagement() {
           
           {/* Language and Section Selectors */}
           <div className="flex items-center gap-4">
-            <Select value={selectedLanguage} onValueChange={(value: 'en' | 'ar' | 'ku') => setSelectedLanguage(value)}>
+            <Select value={selectedLanguage} onValueChange={(value: 'en' | 'ar' | 'ku' | 'tr') => setSelectedLanguage(value)}>
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>

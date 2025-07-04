@@ -1,9 +1,25 @@
 import { Link } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
 import company_logo from "@assets/company-logo.png";
 
 const Footer = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Fetch social media links from content management
+  const { data: socialMediaLinks } = useQuery({
+    queryKey: ['/api/admin/content', language, 'social_media'],
+    queryFn: () => 
+      fetch(`/api/admin/content?language=${language}&section=social_media`)
+        .then(res => res.json())
+        .then(data => data.success ? data.data : [])
+  });
+
+  // Helper function to get social media URL
+  const getSocialMediaUrl = (platform: string): string => {
+    const link = socialMediaLinks?.find((item: any) => item.key === `${platform}_url`);
+    return link?.content || '#';
+  };
   
   const productLinks = [
     { name: t.fuelAdditives, href: "/products/fuel-additives" },
@@ -53,31 +69,47 @@ const Footer = () => {
             </div>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href={getSocialMediaUrl('linkedin')}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
               >
                 <i className="fab fa-linkedin"></i>
               </a>
               <a
-                href="#"
+                href={getSocialMediaUrl('twitter')}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
               >
                 <i className="fab fa-twitter"></i>
               </a>
               <a
-                href="#"
+                href={getSocialMediaUrl('facebook')}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
               >
                 <i className="fab fa-facebook"></i>
               </a>
               <a
-                href="#"
+                href={getSocialMediaUrl('instagram')}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
               >
                 <i className="fab fa-instagram"></i>
               </a>
               <a
-                href="https://wa.me/9647709996771"
+                href={getSocialMediaUrl('tiktok')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
+              >
+                <i className="fab fa-tiktok"></i>
+              </a>
+              <a
+                href={getSocialMediaUrl('whatsapp')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
