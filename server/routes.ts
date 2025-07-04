@@ -12712,6 +12712,347 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // CONTENT MANAGEMENT API ENDPOINTS
+  // =============================================================================
+
+  // Get content items by language and section
+  app.get("/api/admin/content", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { language, section } = req.query;
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq, and } = await import("drizzle-orm");
+
+      let query = db.select().from(contentItems);
+      
+      if (language) {
+        query = query.where(eq(contentItems.language, language as string));
+      }
+      
+      if (section) {
+        if (language) {
+          query = query.where(and(
+            eq(contentItems.language, language as string),
+            eq(contentItems.section, section as string)
+          ));
+        } else {
+          query = query.where(eq(contentItems.section, section as string));
+        }
+      }
+
+      const items = await query.orderBy(contentItems.updatedAt);
+
+      res.json({
+        success: true,
+        data: items
+      });
+    } catch (error) {
+      console.error("Error fetching content items:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch content items",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Update content item
+  app.put("/api/admin/content/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const contentId = parseInt(req.params.id);
+      const { content, isActive } = req.body;
+
+      if (isNaN(contentId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid content ID"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq } = await import("drizzle-orm");
+
+      const [updatedItem] = await db
+        .update(contentItems)
+        .set({
+          content,
+          isActive,
+          updatedAt: new Date()
+        })
+        .where(eq(contentItems.id, contentId))
+        .returning();
+
+      res.json({
+        success: true,
+        data: updatedItem,
+        message: "Content updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating content item:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update content item",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get image assets by section
+  app.get("/api/admin/content/images", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { section } = req.query;
+      const { db } = await import("./db");
+      const { imageAssets } = await import("../shared/content-schema");
+      const { eq } = await import("drizzle-orm");
+
+      let query = db.select().from(imageAssets);
+      
+      if (section) {
+        query = query.where(eq(imageAssets.section, section as string));
+      }
+
+      const images = await query.orderBy(imageAssets.updatedAt);
+
+      res.json({
+        success: true,
+        data: images
+      });
+    } catch (error) {
+      console.error("Error fetching image assets:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch image assets",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Upload new image asset
+  app.post("/api/admin/content/images/upload", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const multer = await import("multer");
+      const path = await import("path");
+      const fs = await import("fs");
+
+      // Configure multer for image uploads
+      const storage = multer.default.diskStorage({
+        destination: (req, file, cb) => {
+          const uploadDir = path.join(process.cwd(), 'uploads', 'content');
+          if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+          }
+          cb(null, uploadDir);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const extension = path.extname(file.originalname);
+          cb(null, `content-${uniqueSuffix}${extension}`);
+        }
+      });
+
+      const upload = multer.default({
+        storage,
+        fileFilter: (req, file, cb) => {
+          if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+          } else {
+            cb(new Error('Only image files are allowed'));
+          }
+        },
+        limits: {
+          fileSize: 5 * 1024 * 1024 // 5MB limit
+        }
+      }).single('image');
+
+      upload(req, res, async (err) => {
+        if (err) {
+          return res.status(400).json({
+            success: false,
+            message: err.message
+          });
+        }
+
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            message: "No image file uploaded"
+          });
+        }
+
+        try {
+          const { db } = await import("./db");
+          const { imageAssets } = await import("../shared/content-schema");
+
+          const { section = 'general', alt = '' } = req.body;
+          const imageUrl = `/uploads/content/${req.file.filename}`;
+
+          const [newImage] = await db
+            .insert(imageAssets)
+            .values({
+              filename: req.file.filename,
+              originalName: req.file.originalname,
+              mimeType: req.file.mimetype,
+              size: req.file.size,
+              url: imageUrl,
+              alt,
+              section,
+              isActive: true
+            })
+            .returning();
+
+          res.json({
+            success: true,
+            data: newImage,
+            message: "Image uploaded successfully"
+          });
+        } catch (dbError) {
+          console.error("Error saving image to database:", dbError);
+          res.status(500).json({
+            success: false,
+            message: "Failed to save image information",
+            error: dbError instanceof Error ? dbError.message : 'Unknown error'
+          });
+        }
+      });
+    } catch (error) {
+      console.error("Error setting up image upload:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to process image upload",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Delete image asset
+  app.delete("/api/admin/content/images/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const imageId = parseInt(req.params.id);
+
+      if (isNaN(imageId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid image ID"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { imageAssets } = await import("../shared/content-schema");
+      const { eq } = await import("drizzle-orm");
+      const path = await import("path");
+      const fs = await import("fs");
+
+      // Get image details before deletion
+      const [image] = await db
+        .select()
+        .from(imageAssets)
+        .where(eq(imageAssets.id, imageId))
+        .limit(1);
+
+      if (!image) {
+        return res.status(404).json({
+          success: false,
+          message: "Image not found"
+        });
+      }
+
+      // Delete from database
+      await db
+        .delete(imageAssets)
+        .where(eq(imageAssets.id, imageId));
+
+      // Delete physical file
+      const filePath = path.join(process.cwd(), 'uploads', 'content', image.filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      res.json({
+        success: true,
+        message: "Image deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting image asset:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete image asset",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Create or update content item
+  app.post("/api/admin/content", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { key, content, contentType, language, section } = req.body;
+
+      if (!key || !content || !language || !section) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields: key, content, language, section"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq, and } = await import("drizzle-orm");
+
+      // Check if content item already exists
+      const [existingItem] = await db
+        .select()
+        .from(contentItems)
+        .where(and(
+          eq(contentItems.key, key),
+          eq(contentItems.language, language),
+          eq(contentItems.section, section)
+        ))
+        .limit(1);
+
+      let result;
+      
+      if (existingItem) {
+        // Update existing item
+        [result] = await db
+          .update(contentItems)
+          .set({
+            content,
+            contentType: contentType || 'text',
+            updatedAt: new Date()
+          })
+          .where(eq(contentItems.id, existingItem.id))
+          .returning();
+      } else {
+        // Create new item
+        [result] = await db
+          .insert(contentItems)
+          .values({
+            key,
+            content,
+            contentType: contentType || 'text',
+            language,
+            section,
+            isActive: true
+          })
+          .returning();
+      }
+
+      res.json({
+        success: true,
+        data: result,
+        message: existingItem ? "Content updated successfully" : "Content created successfully"
+      });
+    } catch (error) {
+      console.error("Error creating/updating content item:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create/update content item",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

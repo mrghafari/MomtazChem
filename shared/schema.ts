@@ -10,6 +10,7 @@ import { customers, insertCustomerSchema, type InsertCustomer, type Customer } f
 // Import showcase and shop schemas
 export * from "./showcase-schema";
 export * from "./shop-schema";
+export * from "./content-schema";
 
 // =============================================================================
 // SEO MANAGEMENT SCHEMA
