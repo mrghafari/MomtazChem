@@ -6,13 +6,15 @@ import company_logo from "@assets/company-logo.png";
 const Footer = () => {
   const { t, language } = useLanguage();
 
-  // Fetch social media links from content management
+  // Fetch social media links from content management (public endpoint)
   const { data: socialMediaLinks } = useQuery({
-    queryKey: ['/api/admin/content', language, 'social_media'],
+    queryKey: ['/api/content', language, 'social_media'],
     queryFn: () => 
-      fetch(`/api/admin/content?language=${language}&section=social_media`)
+      fetch(`/api/content?language=${language}&section=social_media`)
         .then(res => res.json())
-        .then(data => data.success ? data.data : [])
+        .then(data => data.success ? data.data : []),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    cacheTime: 1000 * 60 * 10, // 10 minutes
   });
 
   // Helper function to get social media URL

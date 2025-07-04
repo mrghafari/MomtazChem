@@ -12716,7 +12716,55 @@ momtazchem.com
   // CONTENT MANAGEMENT API ENDPOINTS
   // =============================================================================
 
-  // Get content items by language and section
+  // Public endpoint for content items (for footer and public pages)
+  app.get("/api/content", async (req: Request, res: Response) => {
+    try {
+      const { language, section } = req.query;
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq, and } = await import("drizzle-orm");
+
+      let query = db.select().from(contentItems).where(eq(contentItems.isActive, true));
+      
+      if (language) {
+        query = query.where(and(
+          eq(contentItems.isActive, true),
+          eq(contentItems.language, language as string)
+        ));
+      }
+      
+      if (section) {
+        if (language) {
+          query = query.where(and(
+            eq(contentItems.isActive, true),
+            eq(contentItems.language, language as string),
+            eq(contentItems.section, section as string)
+          ));
+        } else {
+          query = query.where(and(
+            eq(contentItems.isActive, true),
+            eq(contentItems.section, section as string)
+          ));
+        }
+      }
+
+      const items = await query.orderBy(contentItems.updatedAt);
+
+      res.json({
+        success: true,
+        data: items
+      });
+    } catch (error) {
+      console.error("Error fetching public content items:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch content items",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get content items by language and section (Admin only)
   app.get("/api/admin/content", requireAuth, async (req: Request, res: Response) => {
     try {
       const { language, section } = req.query;
