@@ -646,10 +646,10 @@ export default function ProductsPage() {
       )}
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="all">All Products</TabsTrigger>
+        <TabsList className="flex flex-wrap w-full gap-1 h-auto p-1">
+          <TabsTrigger value="all" className="flex-shrink-0">All Products</TabsTrigger>
           {categories.map((category: CategoryOption) => (
-            <TabsTrigger key={category.value} value={category.value}>
+            <TabsTrigger key={category.value} value={category.value} className="flex-shrink-0">
               <span className="flex items-center gap-2">
                 {category.icon}
                 {category.label}
