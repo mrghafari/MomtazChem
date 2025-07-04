@@ -76,10 +76,7 @@ export const insertShowcaseProductSchema = createInsertSchema(showcaseProducts).
   createdAt: true,
   updatedAt: true,
 }).extend({
-  unitPrice: z.union([z.string(), z.number()]).transform((val) => {
-    if (typeof val === 'string') return parseFloat(val);
-    return val;
-  }),
+  unitPrice: z.coerce.number().min(0),
 });
 
 export type InsertShowcaseProduct = z.infer<typeof insertShowcaseProductSchema>;
