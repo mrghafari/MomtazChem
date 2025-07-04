@@ -295,6 +295,15 @@ export default function SiteManagement() {
                     <Zap className="h-6 w-6 mb-2" />
                     <span className="text-sm">AI Settings</span>
                   </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                    onClick={() => setLocation("/admin/global-refresh-settings")}
+                  >
+                    <RefreshCw className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Refresh Control</span>
+                  </Button>
 
 
                 </div>
