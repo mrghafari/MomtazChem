@@ -16,8 +16,70 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Security headers middleware
+app.use((req, res, next) => {
+  // Prevent clickjacking attacks
+  res.setHeader('X-Frame-Options', 'DENY');
+  
+  // Prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  
+  // XSS Protection
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  
+  // Hide server information
+  res.removeHeader('X-Powered-By');
+  
+  // Strict Transport Security (enable when using HTTPS)
+  // res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  
+  // Content Security Policy
+  res.setHeader('Content-Security-Policy', 
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://va.tawk.to; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: https:; " +
+    "connect-src 'self' wss://va.tawk.to; " +
+    "frame-src https://tawk.to;"
+  );
+  
+  next();
+});
+
+// Rate limiting middleware for API endpoints
+const rateLimit = new Map();
+app.use('/api/', (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 100; // Max requests per window
+  
+  if (!rateLimit.has(ip)) {
+    rateLimit.set(ip, { count: 1, resetTime: now + windowMs });
+  } else {
+    const rateLimitInfo = rateLimit.get(ip);
+    if (now > rateLimitInfo.resetTime) {
+      rateLimitInfo.count = 1;
+      rateLimitInfo.resetTime = now + windowMs;
+    } else {
+      rateLimitInfo.count++;
+      if (rateLimitInfo.count > maxRequests) {
+        return res.status(429).json({
+          success: false,
+          message: 'تعداد درخواست‌های شما از حد مجاز تجاوز کرده است. لطفاً چند دقیقه صبر کنید.',
+          retryAfter: Math.ceil((rateLimitInfo.resetTime - now) / 1000)
+        });
+      }
+    }
+  }
+  
+  next();
+});
+
+app.use(express.json({ limit: '10mb' })); // Limit JSON payload size
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 
 
