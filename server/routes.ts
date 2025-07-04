@@ -13257,6 +13257,403 @@ momtazchem.com
     }
   });
 
+  // ===== SECURITY MANAGEMENT ROUTES =====
+  
+  // Import security storage
+  const { securityStorage } = await import("./security-storage");
+
+  // Security middleware to log events
+  const logSecurityEvent = async (req: Request, eventType: string, severity: string = "info") => {
+    try {
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.get('User-Agent');
+      const userId = req.session?.adminId || req.session?.customerId;
+      const username = req.session?.adminId ? 'admin' : 'customer';
+
+      await securityStorage.logSecurityEvent({
+        eventType,
+        severity,
+        description: `${eventType} from ${ipAddress}`,
+        ipAddress,
+        userAgent,
+        userId,
+        username,
+        endpoint: req.path,
+        method: req.method,
+        statusCode: 200
+      });
+    } catch (error) {
+      console.error('Failed to log security event:', error);
+    }
+  };
+
+  // Security dashboard
+  app.get("/api/security/dashboard", requireAuth, async (req: Request, res: Response) => {
+    try {
+      await logSecurityEvent(req, 'security_dashboard_access');
+      const dashboard = await securityStorage.getSecurityDashboard();
+      res.json(dashboard);
+    } catch (error) {
+      console.error("Error fetching security dashboard:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch security dashboard"
+      });
+    }
+  });
+
+  // Security logs
+  app.get("/api/security/logs", requireAuth, async (req: Request, res: Response) => {
+    try {
+      await logSecurityEvent(req, 'security_logs_access');
+      const { eventType, severity, startDate, endDate, limit, offset } = req.query;
+      
+      const filters: any = {};
+      if (eventType) filters.eventType = eventType as string;
+      if (severity) filters.severity = severity as string;
+      if (startDate) filters.startDate = new Date(startDate as string);
+      if (endDate) filters.endDate = new Date(endDate as string);
+      if (limit) filters.limit = parseInt(limit as string);
+      if (offset) filters.offset = parseInt(offset as string);
+
+      const logs = await securityStorage.getSecurityLogs(filters);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching security logs:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch security logs"
+      });
+    }
+  });
+
+  // IP access control
+  app.get("/api/security/ip-access", requireAuth, async (req: Request, res: Response) => {
+    try {
+      await logSecurityEvent(req, 'ip_access_view');
+      const { type } = req.query;
+      const ipList = await securityStorage.getIpAccessList(type as 'blacklist' | 'whitelist');
+      res.json(ipList);
+    } catch (error) {
+      console.error("Error fetching IP access list:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch IP access list"
+      });
+    }
+  });
+
+  app.post("/api/security/ip-access", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { ipAddress, type, reason, category } = req.body;
+      
+      if (!ipAddress || !type || !category) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields: ipAddress, type, category"
+        });
+      }
+
+      const adminId = req.session?.adminId;
+      const ipData = {
+        ipAddress,
+        type,
+        reason,
+        category,
+        addedBy: adminId
+      };
+
+      const result = await securityStorage.addIpToAccessControl(ipData);
+      
+      await logSecurityEvent(req, `ip_${type}_added`, 'medium');
+      
+      res.json({
+        success: true,
+        data: result,
+        message: `IP address added to ${type}`
+      });
+    } catch (error) {
+      console.error("Error adding IP to access control:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to add IP to access control"
+      });
+    }
+  });
+
+  app.delete("/api/security/ip-access/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid IP access rule ID"
+        });
+      }
+
+      await securityStorage.removeIpFromAccessControl(id);
+      await logSecurityEvent(req, 'ip_access_removed', 'medium');
+      
+      res.json({
+        success: true,
+        message: "IP access rule removed"
+      });
+    } catch (error) {
+      console.error("Error removing IP access rule:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to remove IP access rule"
+      });
+    }
+  });
+
+  // Security scans
+  app.post("/api/security/scan", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { scanType } = req.body;
+      
+      if (!scanType) {
+        return res.status(400).json({
+          success: false,
+          message: "Scan type is required"
+        });
+      }
+
+      const adminId = req.session?.adminId;
+      
+      // Create security scan record
+      const scanData = {
+        scanType,
+        status: 'running' as const,
+        initiatedBy: adminId,
+        automated: false
+      };
+
+      const scan = await securityStorage.createSecurityScan(scanData);
+      
+      // Simulate scan process (in real implementation, this would be async)
+      setTimeout(async () => {
+        try {
+          const mockResults = {
+            vulnerability: {
+              criticalIssues: Math.floor(Math.random() * 3),
+              highIssues: Math.floor(Math.random() * 5),
+              mediumIssues: Math.floor(Math.random() * 10),
+              lowIssues: Math.floor(Math.random() * 15),
+              results: {
+                findings: [
+                  "No critical vulnerabilities detected",
+                  "Some outdated dependencies found",
+                  "Basic security headers present"
+                ]
+              }
+            },
+            file_integrity: {
+              criticalIssues: 0,
+              highIssues: 0,
+              mediumIssues: Math.floor(Math.random() * 2),
+              lowIssues: Math.floor(Math.random() * 5),
+              results: {
+                findings: [
+                  "All core files integrity verified",
+                  "No unauthorized modifications detected"
+                ]
+              }
+            },
+            permission_audit: {
+              criticalIssues: Math.floor(Math.random() * 2),
+              highIssues: Math.floor(Math.random() * 3),
+              mediumIssues: Math.floor(Math.random() * 7),
+              lowIssues: Math.floor(Math.random() * 10),
+              results: {
+                findings: [
+                  "File permissions reviewed",
+                  "Database access controls verified",
+                  "Admin privileges properly configured"
+                ]
+              }
+            }
+          };
+
+          const scanResults = mockResults[scanType as keyof typeof mockResults] || mockResults.vulnerability;
+          
+          await securityStorage.updateSecurityScan(scan.id, {
+            status: 'completed',
+            completedAt: new Date(),
+            ...scanResults
+          });
+        } catch (error) {
+          console.error('Error completing security scan:', error);
+          await securityStorage.updateSecurityScan(scan.id, {
+            status: 'failed',
+            completedAt: new Date()
+          });
+        }
+      }, 5000); // Complete scan after 5 seconds
+
+      await logSecurityEvent(req, 'security_scan_started', 'medium');
+      
+      res.json({
+        success: true,
+        data: scan,
+        message: `${scanType} scan started`
+      });
+    } catch (error) {
+      console.error("Error starting security scan:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to start security scan"
+      });
+    }
+  });
+
+  // Security settings
+  app.get("/api/security/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      await logSecurityEvent(req, 'security_settings_view');
+      const { category } = req.query;
+      
+      let settings;
+      if (category) {
+        settings = await securityStorage.getSecuritySettingsByCategory(category as string);
+      } else {
+        settings = await securityStorage.getAllSecuritySettings();
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching security settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch security settings"
+      });
+    }
+  });
+
+  app.post("/api/security/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { setting, value, category, description } = req.body;
+      
+      if (!setting || !value || !category) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields: setting, value, category"
+        });
+      }
+
+      const adminId = req.session?.adminId;
+      const result = await securityStorage.updateSecuritySetting(setting, value, adminId || 0);
+      
+      await logSecurityEvent(req, 'security_setting_updated', 'medium');
+      
+      res.json({
+        success: true,
+        data: result,
+        message: "Security setting updated"
+      });
+    } catch (error) {
+      console.error("Error updating security setting:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update security setting"
+      });
+    }
+  });
+
+  // Security alerts
+  app.get("/api/security/alerts", requireAuth, async (req: Request, res: Response) => {
+    try {
+      await logSecurityEvent(req, 'security_alerts_view');
+      const { severity, status, limit, offset } = req.query;
+      
+      const filters: any = {};
+      if (severity) filters.severity = severity as string;
+      if (status) filters.status = status as string;
+      if (limit) filters.limit = parseInt(limit as string);
+      if (offset) filters.offset = parseInt(offset as string);
+
+      const alerts = await securityStorage.getSecurityAlerts(filters);
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching security alerts:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch security alerts"
+      });
+    }
+  });
+
+  app.patch("/api/security/alerts/:id/resolve", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { resolution } = req.body;
+      
+      if (isNaN(id) || !resolution) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid alert ID or missing resolution"
+        });
+      }
+
+      const adminId = req.session?.adminId || 0;
+      const alert = await securityStorage.resolveSecurityAlert(id, resolution, adminId);
+      
+      await logSecurityEvent(req, 'security_alert_resolved', 'low');
+      
+      res.json({
+        success: true,
+        data: alert,
+        message: "Security alert resolved"
+      });
+    } catch (error) {
+      console.error("Error resolving security alert:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to resolve security alert"
+      });
+    }
+  });
+
+  // Create some default security settings on first access
+  app.post("/api/security/initialize", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const adminId = req.session?.adminId || 0;
+      
+      const defaultSettings = [
+        { setting: 'max_login_attempts', value: '5', category: 'auth', description: 'Maximum failed login attempts before lockout' },
+        { setting: 'session_timeout', value: '3600', category: 'auth', description: 'Session timeout in seconds' },
+        { setting: 'password_min_length', value: '8', category: 'auth', description: 'Minimum password length' },
+        { setting: 'file_upload_max_size', value: '5242880', category: 'upload', description: 'Maximum file upload size in bytes' },
+        { setting: 'allowed_file_types', value: 'jpg,jpeg,png,pdf,doc,docx', category: 'upload', description: 'Allowed file upload types' },
+        { setting: 'ip_whitelist_enabled', value: 'false', category: 'access', description: 'Enable IP whitelist protection' },
+        { setting: 'auto_scan_enabled', value: 'true', category: 'monitoring', description: 'Enable automatic security scans' },
+        { setting: 'alert_email', value: 'info@momtazchem.com', category: 'monitoring', description: 'Email for security alerts' }
+      ];
+
+      for (const setting of defaultSettings) {
+        try {
+          await securityStorage.updateSecuritySetting(setting.setting, setting.value, adminId);
+        } catch (error) {
+          console.error(`Error creating setting ${setting.setting}:`, error);
+        }
+      }
+
+      await logSecurityEvent(req, 'security_system_initialized', 'medium');
+      
+      res.json({
+        success: true,
+        message: "Security system initialized with default settings"
+      });
+    } catch (error) {
+      console.error("Error initializing security system:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to initialize security system"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

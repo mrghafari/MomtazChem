@@ -198,6 +198,13 @@ export default function SiteManagement() {
       icon: Edit3,
       onClick: () => setLocation("/admin/content-management"),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+    },
+    {
+      id: "security-management",
+      label: "Security Management",
+      icon: Shield,
+      onClick: () => setLocation("/admin/security-management"),
+      className: "border-red-300 text-red-600 hover:bg-red-50"
     }
   ];
 

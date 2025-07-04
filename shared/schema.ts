@@ -11,6 +11,7 @@ import { customers, insertCustomerSchema, type InsertCustomer, type Customer } f
 export * from "./showcase-schema";
 export * from "./shop-schema";
 export * from "./content-schema";
+export * from "./security-schema";
 
 // =============================================================================
 // SEO MANAGEMENT SCHEMA
