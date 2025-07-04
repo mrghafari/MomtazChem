@@ -28,11 +28,11 @@ app.use(session({
   rolling: true, // Reset maxAge on each request
   cookie: {
     secure: false, // Set to true in production with HTTPS
-    httpOnly: false, // Allow frontend access to session
+    httpOnly: true, // Secure session cookies
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
   },
-  name: 'connect.sid'
+  name: 'momtazchem.sid'
 }));
 
 app.use((req, res, next) => {

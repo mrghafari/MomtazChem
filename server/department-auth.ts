@@ -90,7 +90,7 @@ export const getUserDepartments = async (adminId: number): Promise<string[]> => 
 export const attachUserDepartments = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     // Only process if user is authenticated
-    const adminId = (req.session as any)?.adminId;
+    const adminId = req.session?.adminId;
     if (adminId) {
       const { users } = await import("../shared/schema");
       

@@ -289,19 +289,19 @@ export default function ProductsPage() {
   });
 
   const onSubmit = (data: InsertShowcaseProduct) => {
-    // Convert unitPrice from string to number for API
+    // Convert numeric fields to strings for API compatibility
     const processedData = {
       ...data,
-      unitPrice: parseFloat(data.unitPrice as string) || 0,
+      unitPrice: data.unitPrice ? data.unitPrice.toString() : "0",
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
       maxStockLevel: Number(data.maxStockLevel) || 0,
     };
     
     if (editingProduct) {
-      updateProduct({ id: editingProduct.id, data: processedData as Partial<InsertShowcaseProduct> });
+      updateProduct({ id: editingProduct.id, data: processedData });
     } else {
-      createProduct(processedData as InsertShowcaseProduct);
+      createProduct(processedData);
     }
   };
 
