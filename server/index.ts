@@ -16,45 +16,8 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
-
-// Remove all security headers for development
-// app.use((req, res, next) => {
-//   res.removeHeader('X-Powered-By');
-//   next();
-// });
-
-// Disable rate limiting for development
-// const rateLimit = new Map();
-// app.use('/api/', (req, res, next) => {
-//   const ip = req.ip || req.connection.remoteAddress;
-//   const now = Date.now();
-//   const windowMs = 15 * 60 * 1000; // 15 minutes
-//   const maxRequests = 100; // Max requests per window
-  
-//   if (!rateLimit.has(ip)) {
-//     rateLimit.set(ip, { count: 1, resetTime: now + windowMs });
-//   } else {
-//     const rateLimitInfo = rateLimit.get(ip);
-//     if (now > rateLimitInfo.resetTime) {
-//       rateLimitInfo.count = 1;
-//       rateLimitInfo.resetTime = now + windowMs;
-//     } else {
-//       rateLimitInfo.count++;
-//       if (rateLimitInfo.count > maxRequests) {
-//         return res.status(429).json({
-//           success: false,
-//           message: 'تعداد درخواست‌های شما از حد مجاز تجاوز کرده است. لطفاً چند دقیقه صبر کنید.',
-//           retryAfter: Math.ceil((rateLimitInfo.resetTime - now) / 1000)
-//         });
-//       }
-//     }
-//   }
-  
-//   next();
-// });
-
-app.use(express.json({ limit: '10mb' })); // Limit JSON payload size
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 
 

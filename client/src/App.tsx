@@ -87,7 +87,6 @@ import DepartmentUsers from "@/pages/admin/department-users";
 import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
 import InventoryManagement from "@/pages/inventory-management";
 import ContentManagement from "@/pages/content-management";
-import SecurityMonitor from "@/pages/admin/security-monitor";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -159,7 +158,6 @@ function Router() {
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           <Route path="/admin/inventory-management" component={InventoryManagement} />
           <Route path="/admin/content-management" component={ContentManagement} />
-          <Route path="/admin/security-monitor" component={SecurityMonitor} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />

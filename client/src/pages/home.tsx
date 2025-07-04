@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat, Download, FileText, Image, Factory, Wrench, ShoppingBag, Beaker } from "lucide-react";
+import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat, Download, FileText, Image } from "lucide-react";
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 import waterTreatmentImg from "@assets/download_1749877891276.jpeg";
 
@@ -25,7 +25,7 @@ const Home = () => {
       icon: <Fuel className="text-white text-xl" />,
       iconBg: "bg-primary-blue",
       category: "fuel-additives",
-      imageUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjM0I4MkY2Ii8+CjxwYXRoIGQ9Ik01MDAgMzAwTDYwMCAyMDBMNDAwIDIwMFoiIGZpbGw9IiNGRkZGRkYiLz4KPHN2Zz4K",
+      imageUrl: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
       title: "Water Treatment",
@@ -34,7 +34,7 @@ const Home = () => {
       icon: <Droplets className="text-white text-xl" />,
       iconBg: "bg-primary-green",
       category: "water-treatment",
-      imageUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjMTBCOTgxIi8+CjxjaXJjbGUgY3g9IjUwMCIgY3k9IjMwMCIgcj0iNTAiIGZpbGw9IiNGRkZGRkYiLz4KPHN2Zz4K",
+      imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
       title: "Paint & Thinner",
@@ -43,7 +43,7 @@ const Home = () => {
       icon: <PaintBucket className="text-white text-xl" />,
       iconBg: "bg-accent-orange",
       category: "paint-thinner",
-      imageUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjRjU5RTBCIi8+CjxyZWN0IHg9IjQwMCIgeT0iMjUwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI0ZGRkZGRiIvPgo8L3N2Zz4K",
+      imageUrl: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
     {
       title: "Agricultural Fertilizers",
@@ -52,43 +52,7 @@ const Home = () => {
       icon: <Wheat className="text-white text-xl" />,
       iconBg: "bg-primary-green",
       category: "agricultural-fertilizers",
-      imageUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjOEI1Q0Y2Ii8+CjxwYXRoIGQ9Ik01MDAgMjAwTDU1MCAzMDBMNDUwIDMwMFoiIGZpbGw9IiNGRkZGRkYiLz4KPHN2Zz4K",
-    },
-    {
-      title: "Agricultural Products",
-      description: "Comprehensive range of agricultural solutions including crop protection chemicals, growth enhancers, and specialty farming products for modern agriculture.",
-      href: "/products/agricultural-products",
-      icon: <Leaf className="text-white text-xl" />,
-      iconBg: "bg-accent-orange",
-      category: "agricultural-products",
-      imageUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjRUY0NDQ0Ii8+CjxlbGxpcHNlIGN4PSI1MDAiIGN5PSIzMDAiIHJ4PSI4MCIgcnk9IjQwIiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo=",
-    },
-    {
-      title: "Industrial Chemicals",
-      description: "High-quality industrial chemical solutions for manufacturing, processing, and production applications across diverse industrial sectors.",
-      href: "/products/industrial-chemicals",
-      icon: <Factory className="text-white text-xl" />,
-      iconBg: "bg-primary-blue",
-      category: "industrial-chemicals",
-      imageUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjMzMzMzMzIi8+CjxwYXRoIGQ9Ik00MDAgMjAwSDYwMFY0MDBINDAwVjIwMFoiIGZpbGw9IiNGRkZGRkYiLz4KPHN2Zz4K",
-    },
-    {
-      title: "Technical Equipment",
-      description: "Precision technical equipment and instruments for laboratory, industrial, and research applications with advanced functionality and reliability.",
-      href: "/products/technical-equipment",
-      icon: <Wrench className="text-white text-xl" />,
-      iconBg: "bg-accent-orange",
-      category: "technical-equipment",
-      imageUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjMDU5OUY2Ii8+CjxyZWN0IHg9IjQ2MCIgeT0iMjgwIiB3aWR0aD0iODAiIGhlaWdodD0iNDAiIGZpbGw9IiNGRkZGRkYiLz4KPHN2Zz4K",
-    },
-    {
-      title: "Commercial Goods",
-      description: "Professional-grade commercial products and supplies for business, retail, and institutional applications with consistent quality and performance.",
-      href: "/products/commercial-goods",
-      icon: <ShoppingBag className="text-white text-xl" />,
-      iconBg: "bg-primary-green",
-      category: "commercial-goods",
-      imageUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjNDNBMDQ3Ii8+CjxwYXRoIGQ9Ik00MjAgMjAwSDU4MFY0MDBINDIwVjIwMFoiIGZpbGw9IiNGRkZGRkYiLz4KPHN2Zz4K",
+      imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     },
   ];
 
@@ -295,7 +259,7 @@ const Home = () => {
 
             <div className="relative">
               <img
-                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgdmlld0JveD0iMCAwIDgwMCA2MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjMTEwNzIwIi8+CjxjaXJjbGUgY3g9IjQwMCIgY3k9IjMwMCIgcj0iMTAwIiBmaWxsPSIjM0I4MkY2Ii8+CjxyZWN0IHg9IjM1MCIgeT0iMjc1IiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo="
+                src="https://images.unsplash.com/photo-1582719471384-894fbb16e074?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
                 alt="Chemical research laboratory"
                 className="rounded-2xl shadow-lg w-full h-auto"
               />
