@@ -22,6 +22,7 @@ import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useToast } from "@/hooks/use-toast";
 import VisualBarcode from "@/components/ui/visual-barcode";
+import { ZoomImage } from "@/components/ui/zoom-image";
 
 const Shop = () => {
   const { toast } = useToast();
@@ -712,10 +713,11 @@ const Shop = () => {
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
                           {product.thumbnailUrl ? (
-                            <img 
+                            <ZoomImage 
                               src={product.thumbnailUrl} 
                               alt={product.name}
                               className="w-full h-full object-cover"
+                              zoomScale={1.3}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -842,12 +844,13 @@ const Shop = () => {
                       </>
                     ) : (
                       <div className="flex">
-                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0">
+                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0 overflow-hidden">
                           {product.thumbnailUrl ? (
-                            <img 
+                            <ZoomImage 
                               src={product.thumbnailUrl} 
                               alt={product.name}
                               className="w-full h-full object-cover"
+                              zoomScale={1.2}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
