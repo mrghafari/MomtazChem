@@ -1,4 +1,4 @@
-export type Language = 'en' | 'ar' | 'ku';
+export type Language = 'en' | 'ar' | 'ku' | 'tr';
 
 export interface Translation {
   // Navigation
@@ -785,17 +785,184 @@ export const translations: Record<Language, Translation> = {
     manufacturingSites: 'شوێنە بەرهەمهێنانەکان',
     qualityRate: 'ڕێژەی کوالیتی',
   },
+  
+  tr: {
+    // Navigation
+    home: 'Ana Sayfa',
+    about: 'Hakkımızda',
+    services: 'Hizmetler',
+    products: 'Ürünler',
+    contact: 'İletişim',
+    shop: 'Mağaza',
+    
+    // Common actions
+    login: 'Giriş Yap',
+    logout: 'Çıkış Yap',
+    register: 'Kayıt Ol',
+    submit: 'Gönder',
+    cancel: 'İptal',
+    save: 'Kaydet',
+    edit: 'Düzenle',
+    delete: 'Sil',
+    search: 'Ara',
+    loading: 'Yükleniyor',
+    
+    // Product related
+    addToCart: 'Sepete Ekle',
+    viewDetails: 'Detayları Görüntüle',
+    price: 'Fiyat',
+    quantity: 'Miktar',
+    category: 'Kategori',
+    inStock: 'Stokta Var',
+    outOfStock: 'Stokta Yok',
+    
+    // Cart and checkout
+    cart: 'Sepet',
+    checkout: 'Ödeme',
+    total: 'Toplam',
+    subtotal: 'Ara Toplam',
+    shipping: 'Kargo',
+    orderSummary: 'Sipariş Özeti',
+    placeOrder: 'Siparişi Ver',
+    
+    // User account
+    myAccount: 'Hesabım',
+    myOrders: 'Siparişlerim',
+    profile: 'Profil',
+    wallet: 'Cüzdan',
+    orderHistory: 'Sipariş Geçmişi',
+    
+    // Wallet specific
+    walletTitle: 'Dijital Cüzdan',
+    currentBalance: 'Mevcut Bakiye',
+    requestRecharge: 'Yeniden Yükleme Talep Et',
+    rechargeAmount: 'Yeniden Yükleme Tutarı',
+    rechargeHistory: 'Yeniden Yükleme Geçmişi',
+    
+    // Product categories
+    waterTreatment: 'Su Arıtma',
+    fuelAdditives: 'Yakıt Katkıları',
+    paintThinner: 'Boya ve İncelticiler',
+    agriculturalFertilizers: 'Tarımsal Gübreler',
+    
+    // Footer
+    aboutCompany: 'Şirket Hakkında',
+    contactInfo: 'İletişim Bilgileri',
+    followUs: 'Bizi Takip Edin',
+    allRightsReserved: 'Tüm Hakları Saklıdır',
+    
+    // About page
+    aboutTitle: 'Momtazchem Hakkında',
+    aboutSubtitle: '25 yılı aşkın süredir inovasyon, kalite ve sürdürülebilirlik ile kimya endüstrisine liderlik ediyoruz.',
+    ourStory: 'Hikayemiz',
+    ourMission: 'Misyonumuz',
+    ourVision: 'Vizyonumuz',
+    ourCoreValues: 'Temel Değerlerimiz',
+    valuesSubtitle: 'Her gün kararlarımıza rehberlik eden ve kültürümüzü şekillendiren prensipler.',
+    ourTeamExpertise: 'Ekibimiz ve Uzmanlığımız',
+    certificationsCompliance: 'Sertifikalar ve Uyumluluk',
+    certificationsSubtitle: 'Kalite, güvenlik ve çevresel sorumluluk sağlamak için en yüksek endüstri standartlarını ve sertifikalarını sürdürüyoruz.',
+    
+    // About content
+    storyParagraph1: '1999 yılında kurulan Momtazchem, dünya çapındaki endüstrilere yüksek kaliteli kimyasal çözümler sağlama vizyonu ile küçük bir kimyasal üretim şirketi olarak başladı. Son 25 yılda, dört ana pazar segmentine hizmet veren lider bir üretici haline geldik.',
+    storyParagraph2: 'Yolculuğumuz sürekli inovasyon, stratejik genişleme ve kaliteye olan sarsılmaz bağlılığımızla şekillenmiştir. Bugün, son teknoloji üretim tesisleri işletiyoruz ve dünya çapında 40\'tan fazla ülkede müşterilere hizmet veriyoruz.',
+    storyParagraph3: 'Geleceğe bakarken, kimya bilimini ilerletme, müşterilerimizin başarısını destekleme ve daha sürdürülebilir bir dünyaya katkıda bulunma konusundaki kararlılığımızı sürdürüyoruz.',
+    missionText: 'Endüstriyel süreçleri geliştiren, ürün performansını artıran ve en yüksek kalite ve güvenlik standartlarını korurken sürdürülebilir kalkınmaya katkıda bulunan yenilikçi kimyasal çözümler geliştirmek ve üretmek.',
+    visionText: 'Kimyasal çözümlerde dünyanın en güvenilir ortağı olmak, inovasyonumuz, sürdürülebilirliğimiz ve gelecek nesiller için çevreyi korurken endüstrileri ilerletme taahhüdümüzle tanınmak.',
+    teamText: 'Başarımız ekibimizin uzmanlığı ve özverisine dayanır. Kimya mühendisleri, araştırma bilimcileri, kalite uzmanları ve endüstri uzmanları dahil 500\'den fazla profesyonel istihdam ediyoruz.',
+    
+    // Values
+    qualityExcellence: 'Kalite Mükemmelliği',
+    qualityExcellenceDesc: 'Tutarlı kaliteyi sağlayan ISO sertifikalarıyla tüm ürün ve süreçlerimizde en yüksek standartları sürdürüyoruz.',
+    environmentalResponsibility: 'Çevresel Sorumluluk',
+    environmentalResponsibilityDesc: 'Sürdürülebilir üretim uygulamalarına ve çevre dostu kimyasal çözümler geliştirmeye kararlıyız.',
+    customerFocus: 'Müşteri Odaklılık',
+    customerFocusDesc: 'Müşterilerimizin başarısı önceliğimizdir. Özel çözümler ve olağanüstü hizmet sağlıyoruz.',
+    globalReach: 'Küresel Erişim',
+    globalReachDesc: 'Güvenilir tedarik zincirleri ve yerel destekle 40\'tan fazla ülkede müşterilere hizmet veriyoruz.',
+    
+    // Stats
+    employees: 'Çalışan',
+    rdScientists: 'Ar-Ge Bilimcisi',
+    manufacturingSites: 'Üretim Tesisi',
+    qualityRate: 'Kalite Oranı',
+    
+    // Additional translations
+    firstName: 'Ad',
+    lastName: 'Soyad',
+    email: 'E-posta',
+    phone: 'Telefon',
+    address: 'Adres',
+    city: 'Şehir',
+    country: 'Ülke',
+    company: 'Şirket',
+    
+    // Messages
+    welcomeMessage: 'Momtazchem\'e Hoş Geldiniz',
+    thankYou: 'Teşekkür Ederiz',
+    orderConfirmed: 'Siparişiniz onaylandı',
+    contactSuccess: 'Mesajınız başarıyla gönderildi',
+    
+    // Customer Profile
+    welcomeCustomer: 'Hoş Geldiniz',
+    customerProfile: 'Müşteri Profili',
+    manageAccount: 'Hesabınızı yönetin ve sipariş geçmişinizi görüntüleyin',
+    editProfile: 'Profili Düzenle',
+    continueShopping: 'Alışverişe Devam Et',
+    accountInformation: 'Hesap Bilgileri',
+    fullName: 'Ad Soyad',
+    contactDetails: 'İletişim Detayları',
+    orderNumber: 'Sipariş Numarası',
+    totalAmount: 'Toplam Tutar',
+    noOrders: 'Sipariş bulunamadı',
+    viewOrder: 'Siparişi Görüntüle',
+    orderDate: 'Sipariş Tarihi',
+    orderStatus: 'Sipariş Durumu',
+    confirmed: 'Onaylandı',
+    shipped: 'Gönderildi',
+    delivered: 'Teslim Edildi',
+    cancelled: 'İptal Edildi',
+    logoutSuccessful: 'Çıkış Başarılı',
+    logoutSuccessfulDesc: 'Başarıyla çıkış yaptınız',
+    logoutError: 'Çıkış sırasında bir hata oluştu',
+    error: 'Hata',
+    
+    // Wallet
+    walletBalance: 'Cüzdan Bakiyesi',
+    requestRechargeButton: 'Yeniden Yükleme Talep Et',
+    rechargeRequests: 'Yeniden Yükleme Talepleri',
+    pendingApproval: 'Onay Bekliyor',
+    approved: 'Onaylandı',
+    rejected: 'Reddedildi',
+    requestDate: 'Talep Tarihi',
+    amount: 'Tutar',
+    status: 'Durum',
+    notes: 'Notlar',
+    noRechargeRequests: 'Yeniden yükleme talebi bulunamadı',
+    enterAmount: 'Tutarı girin',
+    minimumAmount: 'Minimum tutar',
+    invalidAmount: 'Geçersiz tutar',
+    amountRequired: 'Tutar gereklidir',
+    errorCreatingRequest: 'Cüzdan yeniden yükleme talebi oluşturulurken hata',
+    loginToAccessWallet: 'Cüzdanınıza erişmek için lütfen giriş yapın',
+    goToLogin: 'Girişe Git',
+    totalWithdrawals: 'Toplam çekimler',
+    totalDeposits: 'Toplam yatırımlar',
+    requestSubmitted: 'Cüzdan yeniden yükleme talebiniz başarıyla gönderildi ve onay bekliyor.',
+    requestPendingApproval: 'Talep onay bekliyor',
+  },
 };
 
 export const getDirection = (language: Language): 'ltr' | 'rtl' => {
-  return language === 'en' ? 'ltr' : 'rtl';
+  return language === 'en' || language === 'tr' ? 'ltr' : 'rtl';
 };
 
 export const getLanguageName = (language: Language): string => {
   const names = {
     en: 'English',
     ar: 'العربية',
-    ku: 'کوردی'
+    ku: 'کوردی',
+    tr: 'Türkçe'
   };
   return names[language];
 };
