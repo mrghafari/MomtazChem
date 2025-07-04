@@ -10,6 +10,38 @@
   min-height: 40px !important;
 }
 
+/* Drag and Drop Styles */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.drag-handle-parent:hover .drag-handle {
+  opacity: 1;
+}
+
+.drag-handle {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:hover {
+  opacity: 1 !important;
+}
+
 /* RTL and Language Support */
 [dir="rtl"] {
   direction: rtl;

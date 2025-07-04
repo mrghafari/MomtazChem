@@ -1,16 +1,239 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+
+// Define the structure for Quick Action buttons
+interface QuickActionButton {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  onClick: () => void;
+  className: string;
+}
 
 export default function SiteManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Initial button configuration
+  const getInitialButtons = (): QuickActionButton[] => [
+    {
+      id: "sync-shop",
+      label: "Sync Shop",
+      icon: RefreshCw,
+      onClick: () => syncProductsMutation.mutate(),
+      className: "border-green-300 text-green-600 hover:bg-green-50"
+    },
+    {
+      id: "inquiries",
+      label: "Inquiries",
+      icon: BarChart3,
+      onClick: () => setLocation("/admin/inquiries"),
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50"
+    },
+    {
+      id: "barcode",
+      label: "Barcode",
+      icon: QrCode,
+      onClick: () => setLocation("/admin/barcode-inventory"),
+      className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50"
+    },
+    {
+      id: "email-settings",
+      label: "Email Settings",
+      icon: Mail,
+      onClick: () => setLocation("/admin/advanced-email-settings"),
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+    },
+    {
+      id: "database-backup",
+      label: "Database Backup",
+      icon: Database,
+      onClick: () => setLocation("/admin/database-management"),
+      className: "border-slate-300 text-slate-600 hover:bg-slate-50"
+    },
+    {
+      id: "crm",
+      label: "CRM",
+      icon: Users,
+      onClick: () => setLocation("/crm"),
+      className: "border-pink-300 text-pink-600 hover:bg-pink-50"
+    },
+    {
+      id: "seo",
+      label: "SEO",
+      icon: Globe,
+      onClick: () => setLocation("/seo-management"),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+    },
+    {
+      id: "categories",
+      label: "Categories",
+      icon: Package,
+      onClick: () => setLocation("/category-management"),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
+    },
+    {
+      id: "sms",
+      label: "SMS",
+      icon: MessageSquare,
+      onClick: () => setLocation("/admin/sms-management"),
+      className: "border-green-300 text-green-600 hover:bg-green-50"
+    },
+    {
+      id: "factory",
+      label: "Factory",
+      icon: Factory,
+      onClick: () => setLocation("/admin/factory-management"),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+    },
+    {
+      id: "super-admin",
+      label: "Super Admin",
+      icon: UserCog,
+      onClick: () => setLocation("/super-admin/settings"),
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+    },
+    {
+      id: "user-management",
+      label: "User Management",
+      icon: Users2,
+      onClick: () => setLocation("/admin/user-management"),
+      className: "border-red-300 text-red-600 hover:bg-red-50"
+    },
+    {
+      id: "shop",
+      label: "Shop",
+      icon: DollarSign,
+      onClick: () => setLocation("/shop-admin"),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+    },
+    {
+      id: "procedures",
+      label: "Procedures",
+      icon: BookOpen,
+      onClick: () => setLocation("/admin/procedures-management"),
+      className: "border-amber-300 text-amber-600 hover:bg-amber-50"
+    },
+    {
+      id: "smtp-test",
+      label: "SMTP Test",
+      icon: TestTube,
+      onClick: () => setLocation("/admin/smtp-test"),
+      className: "border-sky-300 text-sky-600 hover:bg-sky-50"
+    },
+    {
+      id: "order-management",
+      label: "Order Management",
+      icon: Truck,
+      onClick: () => setLocation("/admin/order-management"),
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50"
+    },
+    {
+      id: "products",
+      label: "Products",
+      icon: Box,
+      onClick: () => setLocation("/admin/products"),
+      className: "border-violet-300 text-violet-600 hover:bg-violet-50"
+    },
+    {
+      id: "payment-settings",
+      label: "Payment Settings",
+      icon: CreditCard,
+      onClick: () => setLocation("/admin/payment-settings"),
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+    },
+    {
+      id: "wallet-management",
+      label: "Wallet Management",
+      icon: Wallet,
+      onClick: () => setLocation("/admin/wallet-management"),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
+    },
+    {
+      id: "geography-analytics",
+      label: "Geography Analytics",
+      icon: MapPin,
+      onClick: () => setLocation("/admin/geographic-analytics"),
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50"
+    },
+    {
+      id: "ai-settings",
+      label: "AI Settings",
+      icon: Zap,
+      onClick: () => setLocation("/admin/ai-settings"),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+    },
+    {
+      id: "refresh-control",
+      label: "Refresh Control",
+      icon: RefreshCw,
+      onClick: () => setLocation("/admin/global-refresh-settings"),
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+    },
+    {
+      id: "department-users",
+      label: "Department Users",
+      icon: Users,
+      onClick: () => setLocation("/admin/department-users"),
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50"
+    }
+  ];
+
+  // State for managing button order
+  const [buttons, setButtons] = useState<QuickActionButton[]>(() => {
+    const savedOrder = localStorage.getItem('site-management-button-order');
+    if (savedOrder) {
+      try {
+        const buttonIds = JSON.parse(savedOrder);
+        const initialButtons = getInitialButtons();
+        const orderedButtons = buttonIds.map((id: string) => 
+          initialButtons.find(btn => btn.id === id)
+        ).filter(Boolean);
+        
+        // Add any new buttons that might not be in saved order
+        const existingIds = new Set(buttonIds);
+        const newButtons = initialButtons.filter(btn => !existingIds.has(btn.id));
+        
+        return [...orderedButtons, ...newButtons];
+      } catch (error) {
+        console.error('Error loading button order:', error);
+        return getInitialButtons();
+      }
+    }
+    return getInitialButtons();
+  });
+
+  // Save button order to localStorage whenever it changes
+  useEffect(() => {
+    const buttonIds = buttons.map(btn => btn.id);
+    localStorage.setItem('site-management-button-order', JSON.stringify(buttonIds));
+  }, [buttons]);
+
+  // Handle drag end
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const newButtons = Array.from(buttons);
+    const [reorderedButton] = newButtons.splice(result.source.index, 1);
+    newButtons.splice(result.destination.index, 0, reorderedButton);
+
+    setButtons(newButtons);
+    
+    toast({
+      title: "ترتیب به‌روزرسانی شد",
+      description: "ترتیب بلوک‌های مدیریتی با موفقیت ذخیره شد",
+    });
+  };
 
   const syncProductsMutation = useMutation({
     mutationFn: () => apiRequest("/api/sync-products", "POST"),
@@ -99,224 +322,80 @@ export default function SiteManagement() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Quick Actions</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setButtons(getInitialButtons());
+                      toast({
+                        title: "ترتیب بازنشانی شد",
+                        description: "ترتیب بلوک‌های مدیریتی به حالت اولیه بازگشت",
+                      });
+                    }}
+                    className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" />
+                    Reset Order
+                  </Button>
+                </CardTitle>
                 <CardDescription>
-                  Common site management tasks - functions will be added based on your requirements
+                  Drag and drop administrative blocks to rearrange them as desired. Your custom order is automatically saved.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-green-300 text-green-600 hover:bg-green-50"
-                    onClick={() => syncProductsMutation.mutate()}
-                    disabled={syncProductsMutation.isPending}
-                  >
-                    <RefreshCw className={`h-6 w-6 mb-2 ${syncProductsMutation.isPending ? 'animate-spin' : ''}`} />
-                    <span className="text-sm">{syncProductsMutation.isPending ? 'Syncing...' : 'Sync Shop'}</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-orange-300 text-orange-600 hover:bg-orange-50"
-                    onClick={() => setLocation("/admin/inquiries")}
-                  >
-                    <BarChart3 className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Inquiries</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-cyan-300 text-cyan-600 hover:bg-cyan-50"
-                    onClick={() => setLocation("/admin/barcode-inventory")}
-                  >
-                    <QrCode className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Barcode</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-emerald-300 text-emerald-600 hover:bg-emerald-50"
-                    onClick={() => setLocation("/admin/advanced-email-settings")}
-                  >
-                    <Mail className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Email Settings</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-slate-300 text-slate-600 hover:bg-slate-50"
-                    onClick={() => setLocation("/admin/database-management")}
-                  >
-                    <Database className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Database Backup</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-pink-300 text-pink-600 hover:bg-pink-50"
-                    onClick={() => setLocation("/crm")}
-                  >
-                    <Users className="h-6 w-6 mb-2" />
-                    <span className="text-sm">CRM</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-purple-300 text-purple-600 hover:bg-purple-50"
-                    onClick={() => setLocation("/seo-management")}
-                  >
-                    <Globe className="h-6 w-6 mb-2" />
-                    <span className="text-sm">SEO</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-blue-300 text-blue-600 hover:bg-blue-50"
-                    onClick={() => setLocation("/category-management")}
-                  >
-                    <Package className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Categories</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-green-300 text-green-600 hover:bg-green-50"
-                    onClick={() => setLocation("/admin/sms-management")}
-                  >
-                    <MessageSquare className="h-6 w-6 mb-2" />
-                    <span className="text-sm">SMS</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-purple-300 text-purple-600 hover:bg-purple-50"
-                    onClick={() => setLocation("/admin/factory-management")}
-                  >
-                    <Factory className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Factory</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-indigo-300 text-indigo-600 hover:bg-indigo-50"
-                    onClick={() => setLocation("/super-admin/settings")}
-                  >
-                    <UserCog className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Super Admin</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-red-300 text-red-600 hover:bg-red-50"
-                    onClick={() => setLocation("/admin/user-management")}
-                  >
-                    <Users2 className="h-6 w-6 mb-2" />
-                    <span className="text-sm">User Management</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-purple-300 text-purple-600 hover:bg-purple-50"
-                    onClick={() => setLocation("/shop-admin")}
-                  >
-                    <DollarSign className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Shop</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-amber-300 text-amber-600 hover:bg-amber-50"
-                    onClick={() => setLocation("/admin/procedures-management")}
-                  >
-                    <BookOpen className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Procedures</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-sky-300 text-sky-600 hover:bg-sky-50"
-                    onClick={() => setLocation("/admin/smtp-test")}
-                  >
-                    <TestTube className="h-6 w-6 mb-2" />
-                    <span className="text-sm">SMTP Test</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-orange-300 text-orange-600 hover:bg-orange-50"
-                    onClick={() => setLocation("/admin/order-management")}
-                  >
-                    <Truck className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Order Management</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-violet-300 text-violet-600 hover:bg-violet-50"
-                    onClick={() => setLocation("/admin/products")}
-                  >
-                    <Box className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Products</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-emerald-300 text-emerald-600 hover:bg-emerald-50"
-                    onClick={() => setLocation("/admin/payment-settings")}
-                  >
-                    <CreditCard className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Payment Settings</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-blue-300 text-blue-600 hover:bg-blue-50"
-                    onClick={() => setLocation("/admin/wallet-management")}
-                  >
-                    <Wallet className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Wallet Management</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-teal-300 text-teal-600 hover:bg-teal-50"
-                    onClick={() => setLocation("/admin/geographic-analytics")}
-                  >
-                    <MapPin className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Geography Analytics</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-purple-300 text-purple-600 hover:bg-purple-50"
-                    onClick={() => setLocation("/admin/ai-settings")}
-                  >
-                    <Zap className="h-6 w-6 mb-2" />
-                    <span className="text-sm">AI Settings</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-indigo-300 text-indigo-600 hover:bg-indigo-50"
-                    onClick={() => setLocation("/admin/global-refresh-settings")}
-                  >
-                    <RefreshCw className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Refresh Control</span>
-                  </Button>
-
-                  <Button 
-                    variant="outline" 
-                    className="h-20 flex flex-col items-center justify-center border-teal-300 text-teal-600 hover:bg-teal-50"
-                    onClick={() => setLocation("/admin/department-users")}
-                  >
-                    <Users className="h-6 w-6 mb-2" />
-                    <span className="text-sm">Department Users</span>
-                  </Button>
-
-
-
-                </div>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="quick-actions" direction="horizontal">
+                    {(provided) => (
+                      <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className="quick-actions-grid"
+                      >
+                        {buttons.map((button, index) => {
+                          const IconComponent = button.icon;
+                          return (
+                            <Draggable key={button.id} draggableId={button.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className="relative drag-handle-parent group"
+                                >
+                                  <Button 
+                                    variant="outline" 
+                                    className={`h-20 w-full flex flex-col items-center justify-center ${button.className} transition-all duration-200 ${
+                                      snapshot.isDragging ? 'shadow-lg rotate-2 scale-105 bg-white dark:bg-gray-800' : 'hover:scale-102'
+                                    }`}
+                                    onClick={button.onClick}
+                                    disabled={button.id === "sync-shop" && syncProductsMutation.isPending}
+                                  >
+                                    <IconComponent className={`h-6 w-6 mb-2 ${
+                                      button.id === "sync-shop" && syncProductsMutation.isPending ? 'animate-spin' : ''
+                                    }`} />
+                                    <span className="text-sm">
+                                      {button.id === "sync-shop" && syncProductsMutation.isPending ? 'Syncing...' : button.label}
+                                    </span>
+                                  </Button>
+                                  
+                                  {/* Drag Handle */}
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="absolute top-1 right-1 p-1 rounded bg-gray-100 dark:bg-gray-700 drag-handle cursor-grab active:cursor-grabbing hover:bg-gray-200 dark:hover:bg-gray-600"
+                                  >
+                                    <GripVertical className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          );
+                        })}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
               </CardContent>
             </Card>
           </TabsContent>
