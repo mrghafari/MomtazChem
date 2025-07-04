@@ -92,31 +92,34 @@ The database is organized into multiple schema files:
 - **Automated Barcode Generation**: Bulk barcode processing for existing products
 
 #### Site Management Features
-- **25+ integrated administrative functions** centralized in unified Site Management interface with drag-and-drop Quick Actions layout
-- **Content Management**: Dynamic multilingual content editing system for all website sections (430+ content items in 4 languages)
-- **Product Management**: Showcase and shop product catalogs with inventory tracking and EAN-13 barcode system
-- **Barcode System**: Professional GS1-compliant EAN-13 generation, batch processing, and inventory management with Iraq country code
-- **Order Workflow**: 3-department sequential processing (Financial → Warehouse → Logistics) with automatic status progression
-- **CRM Integration**: Customer relationship management with lead tracking, analytics, and automated customer migration
-- **Email Automation**: Multi-SMTP configuration with intelligent category-based routing and advanced template system
-- **User Management**: Multi-role admin system with department-based access control and super admin verification
-- **AI Integration**: Smart SKU generation, product recommendations, performance monitoring, and OpenAI API testing
-- **Global Refresh Control**: Centralized timing management for all department interfaces with sync/individual modes
-- **Database Management**: Automated backup systems, migration tools, and PostgreSQL maintenance
-- **SEO Management**: Comprehensive multilingual SEO with sitemap generation, robots.txt, and 4-language support
-- **SMS Communication**: Customer notification and verification systems with admin toggles
-- **Factory Management**: Production line and manufacturing operations management
-- **Category Management**: Hierarchical product categorization with standardized shop categories
-- **Analytics Dashboard**: Sales reports, customer metrics, geographic analytics, and performance tracking
-- **Security Settings**: Authentication, session management, access control, and admin verification
-- **Social Media Management**: Dynamic social media links management through Content Management (6 platforms)
-- **Inventory Management**: Independent inventory system with alerts, automation, analytics, and real-time monitoring
-- **Payment Gateway Management**: Iraqi banking system integration with 3 major banks and invoice generation
-- **Invoice Management**: Bilingual PDF generation system with automatic download capabilities
-- **Advanced Email Settings**: Multi-category SMTP configuration with CC/BCC management and routing statistics
-- **SMTP Testing Tools**: Comprehensive email connectivity testing and validation systems
-- **Procedures & Methods**: Document management system for operational procedures
-- **Turkish Language Support**: Complete fourth language integration with LTR direction support
+- **26 integrated administrative functions** centralized in unified Site Management interface with drag-and-drop Quick Actions layout:
+
+1. **Sync Shop** - Product synchronization between showcase and shop catalogs
+2. **Inquiries** - Customer inquiry management and response tracking
+3. **Barcode** - Professional GS1-compliant EAN-13 barcode system with Iraq country code (864)
+4. **Email Settings** - Multi-SMTP configuration with intelligent category-based routing
+5. **Database Backup** - Automated backup systems, migration tools, and PostgreSQL maintenance
+6. **CRM** - Customer relationship management with analytics and automated migration
+7. **SEO** - Comprehensive multilingual SEO with sitemap generation and 4-language support
+8. **Categories** - Hierarchical product categorization with standardized shop categories
+9. **SMS** - Customer notification and verification systems with admin-configurable settings
+10. **Factory** - Production line and manufacturing operations management
+11. **Super Admin** - Admin account management and verification system with email/SMS authentication
+12. **User Management** - Multi-role admin system with department-based access control
+13. **Shop** - E-commerce administration with inventory tracking and pricing management
+14. **Procedures** - Document management system for operational procedures and methods
+15. **SMTP Test** - Comprehensive email connectivity testing and validation systems
+16. **Order Management** - 3-department sequential workflow (Financial → Warehouse → Logistics)
+17. **Products** - Showcase and shop product catalogs with variant support and specifications
+18. **Payment Settings** - Iraqi banking system integration with 3 major banks and invoice generation
+19. **Wallet Management** - Digital wallet system with recharge requests and balance management
+20. **Geography Analytics** - Regional sales tracking and performance analysis (Iraq and Turkey)
+21. **AI Settings** - Smart SKU generation, product recommendations, and OpenAI API integration
+22. **Refresh Control** - Centralized timing management for all department interfaces
+23. **Department Users** - Team management with role assignments and access control
+24. **Inventory Management** - Independent inventory system with alerts, automation, and real-time monitoring
+25. **Content Management** - Dynamic multilingual content editing system (430+ items in 4 languages)
+26. **[Future Enhancement Slot]** - Reserved for additional administrative functionality
 
 ## Data Flow
 
@@ -191,6 +194,7 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- July 4, 2025: COMPLETED detailed documentation of all 26 Site Management features - provided comprehensive breakdown of complete administrative interface including: 1-Sync Shop, 2-Inquiries, 3-Barcode, 4-Email Settings, 5-Database Backup, 6-CRM, 7-SEO, 8-Categories, 9-SMS, 10-Factory, 11-Super Admin, 12-User Management, 13-Shop, 14-Procedures, 15-SMTP Test, 16-Order Management, 17-Products, 18-Payment Settings, 19-Wallet Management, 20-Geography Analytics, 21-AI Settings, 22-Refresh Control, 23-Department Users, 24-Inventory Management, 25-Content Management, 26-Future Enhancement Slot, updated both documentation PDFs and replit.md with complete feature specifications
 - July 4, 2025: COMPLETED comprehensive documentation enhancement with all features - expanded English documentation to include all 25+ features implemented, added detailed sections for CRM, email automation, payment systems, AI integration, inventory management, barcode system, SEO, and advanced features, Admin Documentation now 5902 bytes, Project Proposal 7433 bytes, Complete Documentation 2992 bytes, documentation now provides comprehensive coverage of entire platform including customer management, order workflows, multi-language support, banking integration, and all specialized tools
 - July 4, 2025: FIXED Persian PDF documentation encoding issues - improved Unicode character handling for Persian/Arabic text in PDF generation, enhanced character escaping and encoding to properly display Persian content, Persian documentation PDFs now generate correctly with full content (8496+ bytes), resolved character corruption in Persian language documentation system
 - July 4, 2025: UPDATED super admin credentials to admin@momtazchem.com with password Ghafari@110 - verified login functionality working correctly with new authentication system

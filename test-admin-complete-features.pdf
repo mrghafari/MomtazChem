@@ -1,0 +1,369 @@
+%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R 4 0 R 5 0 R]
+/Count 3
+>>
+endobj
+
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Resources <<
+/Font <<
+/F1 7 0 R
+>>
+>>
+/Contents 6 0 R
+>>
+endobj
+
+4 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Resources <<
+/Font <<
+/F1 9 0 R
+>>
+>>
+/Contents 8 0 R
+>>
+endobj
+
+5 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Resources <<
+/Font <<
+/F1 11 0 R
+>>
+>>
+/Contents 10 0 R
+>>
+endobj
+
+6 0 obj
+<<
+/Length 1833
+>>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+(Admin Guide Documentation - en) Tj
+0 -20 Td
+(Generated: 7/4/2025) Tj
+0 -25 Td
+(ADMINISTRATOR GUIDE - MOMTAZCHEM PLATFORM) Tj
+0 -14 Td
+(=========================================) Tj
+0 -14 Td
+0 -8 Td
+(Generated: 7/4/2025) Tj
+0 -14 Td
+(ADMIN SYSTEM OVERVIEW) Tj
+0 -14 Td
+(====================) Tj
+0 -14 Td
+0 -8 Td
+(This comprehensive guide covers all administrative functions available) Tj
+0 -14 Td
+(in the Momtazchem platform. As an administrator, you have access to) Tj
+0 -14 Td
+(25+ modules for complete system management.) Tj
+0 -14 Td
+(ADMIN DASHBOARD ACCESS) Tj
+0 -14 Td
+(=====================) Tj
+0 -14 Td
+0 -8 Td
+(- Login with admin credentials) Tj
+0 -14 Td
+(- Navigate to Site Management) Tj
+0 -14 Td
+(- Access centralized control panel) Tj
+0 -14 Td
+(- Monitor system performance) Tj
+0 -14 Td
+(SITE MANAGEMENT MODULES) Tj
+0 -14 Td
+(=======================) Tj
+0 -14 Td
+0 -8 Td
+(1. CONTENT MANAGEMENT) Tj
+0 -14 Td
+(- Edit 430+ multilingual content items) Tj
+0 -14 Td
+(- Manage website sections dynamically) Tj
+0 -14 Td
+(- Upload and organize images) Tj
+0 -14 Td
+(- Control social media links) Tj
+0 -14 Td
+(2. PRODUCT MANAGEMENT) Tj
+0 -14 Td
+(- Add/edit showcase products) Tj
+0 -14 Td
+(- Manage shop inventory) Tj
+0 -14 Td
+(- Generate EAN-13 barcodes) Tj
+0 -14 Td
+(- Set pricing and availability) Tj
+0 -14 Td
+(3. CUSTOMER RELATIONSHIP MANAGEMENT) Tj
+0 -14 Td
+(- View customer database) Tj
+0 -14 Td
+(- Track customer activities) Tj
+0 -14 Td
+(- Analyze customer metrics) Tj
+0 -14 Td
+(- Manage customer segments) Tj
+0 -14 Td
+(4. ORDER MANAGEMENT) Tj
+0 -14 Td
+(- Process orders through 3-department workflow) Tj
+0 -14 Td
+(- Financial approval) Tj
+0 -14 Td
+(- Warehouse preparation) Tj
+0 -14 Td
+(- Logistics coordination) Tj
+0 -14 Td
+(5. EMAIL AUTOMATION) Tj
+0 -14 Td
+(- Configure SMTP settings) Tj
+0 -14 Td
+ET
+endstream
+endobj
+
+7 0 obj
+<<
+/Length 1746
+>>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+(- Set up email categories) Tj
+0 -14 Td
+(- Manage templates) Tj
+0 -14 Td
+(- Monitor delivery statistics) Tj
+0 -14 Td
+(6. BARCODE SYSTEM) Tj
+0 -14 Td
+(- Generate EAN-13 barcodes) Tj
+0 -14 Td
+(- Batch processing) Tj
+0 -14 Td
+(- Validate barcode uniqueness) Tj
+0 -14 Td
+(- Download barcode collections) Tj
+0 -14 Td
+(7. ANALYTICS & REPORTING) Tj
+0 -14 Td
+(- Sales performance analysis) Tj
+0 -14 Td
+(- Customer behavior insights) Tj
+0 -14 Td
+(- Geographic distribution) Tj
+0 -14 Td
+(- Revenue tracking) Tj
+0 -14 Td
+(8. SECURITY MANAGEMENT) Tj
+0 -14 Td
+(- User role administration) Tj
+0 -14 Td
+(- Access control settings) Tj
+0 -14 Td
+(- Admin verification) Tj
+0 -14 Td
+(- Session management) Tj
+0 -14 Td
+(9. DATABASE OPERATIONS) Tj
+0 -14 Td
+(- Backup management) Tj
+0 -14 Td
+(- Data migration) Tj
+0 -14 Td
+(- Performance monitoring) Tj
+0 -14 Td
+(- Maintenance tasks) Tj
+0 -14 Td
+(10. AI INTEGRATION) Tj
+0 -14 Td
+(- SKU generation) Tj
+0 -14 Td
+(- Product recommendations) Tj
+0 -14 Td
+(- Performance monitoring) Tj
+0 -14 Td
+(- System optimization) Tj
+0 -14 Td
+(DETAILED MODULE INSTRUCTIONS) Tj
+0 -14 Td
+(============================) Tj
+0 -14 Td
+0 -8 Td
+(CONTENT MANAGEMENT:) Tj
+0 -14 Td
+(- Access through Site Management) Tj
+0 -14 Td
+(- Select Content tab) Tj
+0 -14 Td
+(- Choose section to edit) Tj
+0 -14 Td
+(- Update content in multiple languages) Tj
+0 -14 Td
+(- Save changes and preview) Tj
+0 -14 Td
+(PRODUCT OPERATIONS:) Tj
+0 -14 Td
+(- Navigate to Products module) Tj
+0 -14 Td
+(- Add new products with specifications) Tj
+0 -14 Td
+(- Generate barcodes automatically) Tj
+0 -14 Td
+(- Set inventory levels) Tj
+0 -14 Td
+(- Configure pricing) Tj
+0 -14 Td
+(CUSTOMER SUPPORT:) Tj
+0 -14 Td
+(- Monitor customer inquiries) Tj
+0 -14 Td
+ET
+endstream
+endobj
+
+8 0 obj
+<<
+/Length 1134
+>>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+(- Respond to support tickets) Tj
+0 -14 Td
+(- Track customer satisfaction) Tj
+0 -14 Td
+(- Manage feedback) Tj
+0 -14 Td
+(ORDER PROCESSING:) Tj
+0 -14 Td
+(- Review pending orders) Tj
+0 -14 Td
+(- Approve financial transactions) Tj
+0 -14 Td
+(- Coordinate warehouse operations) Tj
+0 -14 Td
+(- Manage shipping logistics) Tj
+0 -14 Td
+(EMAIL CONFIGURATION:) Tj
+0 -14 Td
+(- Set up SMTP providers) Tj
+0 -14 Td
+(- Configure routing rules) Tj
+0 -14 Td
+(- Create email templates) Tj
+0 -14 Td
+(- Monitor delivery rates) Tj
+0 -14 Td
+(SYSTEM MONITORING:) Tj
+0 -14 Td
+(- Check performance metrics) Tj
+0 -14 Td
+(- Review error logs) Tj
+0 -14 Td
+(- Monitor user activity) Tj
+0 -14 Td
+(- Analyze system usage) Tj
+0 -14 Td
+(BACKUP & MAINTENANCE:) Tj
+0 -14 Td
+(- Schedule regular backups) Tj
+0 -14 Td
+(- Perform database maintenance) Tj
+0 -14 Td
+(- Update system configurations) Tj
+0 -14 Td
+(- Monitor security status) Tj
+0 -14 Td
+(This guide provides comprehensive coverage of all administrative) Tj
+0 -14 Td
+(functions.) Tj
+0 -14 Td
+(Version: 2.0) Tj
+0 -14 Td
+(Last Updated: 7/4/2025) Tj
+0 -14 Td
+(Language: English) Tj
+0 -14 Td
+ET
+endstream
+endobj
+
+9 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+
+10 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+
+11 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+
+xref
+0 12
+0000000000 65535 f 
+0000000150 00000 n 
+0000000200 00000 n 
+0000000250 00000 n 
+0000000300 00000 n 
+0000000350 00000 n 
+0000000400 00000 n 
+0000000450 00000 n 
+0000000500 00000 n 
+0000000550 00000 n 
+0000000600 00000 n 
+0000000650 00000 n 
+trailer
+<<
+/Size 12
+/Root 1 0 R
+>>
+startxref
+5596
+%%EOF

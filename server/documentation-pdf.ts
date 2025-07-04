@@ -599,7 +599,7 @@ const adminDocumentationEN: DocumentationData = {
         },
         {
           title: "Centralized Site Management",
-          content: "25+ integrated administrative functions:\n• Drag-and-drop Quick Actions layout\n• Centralized refresh control system\n• Global timing management for all departments\n• Sync/individual refresh modes\n• Unified administrative interface\n• Performance optimization settings"
+          content: "26 integrated administrative functions with drag-and-drop interface:\n• 1. Sync Shop - Product synchronization\n• 2. Inquiries - Customer inquiry management\n• 3. Barcode - EAN-13 barcode system\n• 4. Email Settings - Multi-SMTP configuration\n• 5. Database Backup - System maintenance\n• 6. CRM - Customer relationship management\n• 7. SEO - Multilingual SEO management\n• 8. Categories - Product categorization\n• 9. SMS - Communication system\n• 10. Factory - Manufacturing operations\n• 11. Super Admin - Admin verification\n• 12. User Management - Role management\n• 13. Shop - E-commerce administration\n• 14. Procedures - Document management\n• 15. SMTP Test - Email connectivity\n• 16. Order Management - 3-dept workflow\n• 17. Products - Catalog management\n• 18. Payment Settings - Banking integration\n• 19. Wallet Management - Digital payments\n• 20. Geography Analytics - Regional data\n• 21. AI Settings - OpenAI integration\n• 22. Refresh Control - Global timing\n• 23. Department Users - Team management\n• 24. Inventory Management - Stock control\n• 25. Content Management - Multilingual CMS\n• 26. [Future Enhancement Slot]"
         }
       ]
     },
