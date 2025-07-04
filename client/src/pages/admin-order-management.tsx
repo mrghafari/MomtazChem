@@ -105,7 +105,7 @@ const statusColors: Record<string, string> = {
 export default function AdminOrderManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedDepartment, setSelectedDepartment] = useState<'financial' | 'warehouse' | 'logistics'>('financial');
+  const [selectedDepartment, setSelectedDepartment] = useState<'financial' | 'warehouse' | 'logistics' | 'delivered'>('financial');
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
@@ -125,7 +125,11 @@ export default function AdminOrderManagement() {
   const { data: orders, isLoading } = useQuery({
     queryKey: ['orders', selectedDepartment],
     queryFn: async () => {
-      const response = await fetch(`/api/order-management/${selectedDepartment}`, {
+      const apiUrl = selectedDepartment === 'delivered' 
+        ? '/api/delivered/orders' 
+        : `/api/order-management/${selectedDepartment}`;
+      
+      const response = await fetch(apiUrl, {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -251,6 +255,7 @@ export default function AdminOrderManagement() {
       case 'financial': return <CreditCard className="h-4 w-4" />;
       case 'warehouse': return <Package className="h-4 w-4" />;
       case 'logistics': return <Truck className="h-4 w-4" />;
+      case 'delivered': return <CheckCircle className="h-4 w-4" />;
       default: return <Clock className="h-4 w-4" />;
     }
   };
@@ -272,7 +277,7 @@ export default function AdminOrderManagement() {
       </div>
 
       <Tabs value={selectedDepartment} onValueChange={(value) => setSelectedDepartment(value as any)}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="financial" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
             بخش مالی
@@ -285,20 +290,25 @@ export default function AdminOrderManagement() {
             <Truck className="h-4 w-4" />
             لجستیک
           </TabsTrigger>
+          <TabsTrigger value="delivered" className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            سفارشات تحویل شده
+          </TabsTrigger>
         </TabsList>
 
-        {['financial', 'warehouse', 'logistics'].map((dept) => (
+        {['financial', 'warehouse', 'logistics', 'delivered'].map((dept) => (
           <TabsContent key={dept} value={dept} className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {getDepartmentIcon(dept)}
-                  سفارشات بخش {dept === 'financial' ? 'مالی' : dept === 'warehouse' ? 'انبار' : 'لجستیک'}
+                  سفارشات بخش {dept === 'financial' ? 'مالی' : dept === 'warehouse' ? 'انبار' : dept === 'logistics' ? 'لجستیک' : 'تحویل شده'}
                 </CardTitle>
                 <CardDescription>
                   {dept === 'financial' && 'بررسی و تایید واریزی‌های مشتریان'}
                   {dept === 'warehouse' && 'آماده‌سازی و تایید کالاهای سفارش'}
                   {dept === 'logistics' && 'ارسال و تحویل سفارشات به مشتریان'}
+                  {dept === 'delivered' && 'سفارشات تحویل شده و تکمیل شده'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
