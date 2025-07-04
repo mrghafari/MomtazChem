@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { insertContactSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,9 +13,48 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MapPin, Phone, Mail, Clock, IdCard, Briefcase } from "lucide-react";
 
+interface ContentItem {
+  id: number;
+  section: string;
+  key: string;
+  content: string;
+  language: string;
+  contentType: string;
+}
+
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { language } = useLanguage();
+
+  // Map language codes to content management language codes
+  const getLanguageCode = () => {
+    switch(language) {
+      case 'ar': return 'ar';
+      case 'ku': return 'ku';
+      default: return 'en';
+    }
+  };
+
+  // Fetch content from Content Management
+  const { data: contentItems = [], isLoading } = useQuery<ContentItem[]>({
+    queryKey: ['/api/content-management/items'],
+    queryFn: async () => {
+      const response = await fetch('/api/content-management/items');
+      if (!response.ok) throw new Error('Failed to fetch content');
+      return response.json();
+    }
+  });
+
+  // Filter content for contact section
+  const contactContent = contentItems.filter(item => 
+    item.section === 'contact' && item.language === getLanguageCode()
+  );
+
+  const getContent = (key: string, fallback: string = '') => {
+    const item = contactContent.find(item => item.key === key);
+    return item?.content || fallback;
+  };
 
   const form = useForm({
     resolver: zodResolver(insertContactSchema),
@@ -58,53 +98,53 @@ const Contact = () => {
   const contactInfo = [
     {
       icon: <MapPin className="h-6 w-6 text-white" />,
-      title: "Headquarters",
+      title: getContent('address_title', 'Headquarters'),
       content: [
-        "Momtazchem Company",
-        "Erbil",
-        "Chemical Manufacturing Facility"
+        getContent('address_line1', 'Momtazchem Company'),
+        getContent('address_line2', 'Erbil'),
+        getContent('address_line3', 'Chemical Manufacturing Facility')
       ],
       bgColor: "bg-primary-blue",
-      link: "https://maps.app.goo.gl/umCmoKpmaovSkTJ96"
+      link: getContent('address_map_link', 'https://maps.app.goo.gl/umCmoKpmaovSkTJ96')
     },
     {
       icon: <Phone className="h-6 w-6 text-white" />,
-      title: "Phone & WhatsApp",
+      title: getContent('phone_title', 'Phone & WhatsApp'),
       content: [
-        "+9647709996771",
-        "Available on WhatsApp"
+        getContent('phone_number', '+9647709996771'),
+        getContent('phone_availability', 'Available on WhatsApp')
       ],
       bgColor: "bg-primary-green"
     },
     {
       icon: <Mail className="h-6 w-6 text-white" />,
-      title: "Email",
+      title: getContent('email_title', 'Email'),
       content: [
-        "info@momtazchem.com",
-        "sales@momtazchem.com",
-        "support@momtazchem.com"
+        getContent('email_info', 'info@momtazchem.com'),
+        getContent('email_sales', 'sales@momtazchem.com'),
+        getContent('email_support', 'support@momtazchem.com')
       ],
       bgColor: "bg-accent-orange"
     },
     {
       icon: <Clock className="h-6 w-6 text-white" />,
-      title: "Business Hours",
+      title: getContent('hours_title', 'Business Hours'),
       content: [
-        "Monday - Friday: 8:00 AM - 6:00 PM",
-        "Saturday: 9:00 AM - 1:00 PM"
+        getContent('hours_weekdays', 'Monday - Friday: 8:00 AM - 6:00 PM'),
+        getContent('hours_saturday', 'Saturday: 9:00 AM - 1:00 PM')
       ],
       bgColor: "bg-primary-blue"
     },
     {
       icon: <Briefcase className="h-6 w-6 text-white" />,
-      title: "Career Opportunities",
+      title: getContent('career_title', 'Career Opportunities'),
       content: [
-        "Join our growing team",
-        "Chemical Engineers, Lab Technicians",
-        "Sales Representatives, Quality Control"
+        getContent('career_line1', 'Join our growing team'),
+        getContent('career_line2', 'Chemical Engineers, Lab Technicians'),
+        getContent('career_line3', 'Sales Representatives, Quality Control')
       ],
       bgColor: "bg-green-600",
-      link: "mailto:careers@momtazchem.com"
+      link: getContent('career_email', 'mailto:careers@momtazchem.com')
     }
   ];
 
@@ -114,9 +154,11 @@ const Contact = () => {
       <section className="relative py-20 bg-gradient-to-r from-primary to-secondary text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Get In Touch</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              {getContent('hero_title', 'Get In Touch')}
+            </h1>
             <p className="text-xl max-w-3xl mx-auto">
-              Ready to discuss your chemical solution needs? Our team of experts is here to help you find the perfect solution for your industry.
+              {getContent('hero_subtitle', 'Ready to discuss your chemical solution needs? Our team of experts is here to help you find the perfect solution for your industry.')}
             </p>
           </div>
         </div>
@@ -128,7 +170,9 @@ const Contact = () => {
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Contact Form */}
             <div className="bg-gray-50 rounded-2xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {getContent('form_title', 'Send Us a Message')}
+              </h2>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
