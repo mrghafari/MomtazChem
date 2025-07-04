@@ -50,20 +50,22 @@ export default function WarehouseOrders() {
   const [warehouseNotes, setWarehouseNotes] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Auto-refresh every 10 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse/orders'] });
-    }, 10 * 60 * 1000); // 10 minutes
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Get approved orders for warehouse processing
   const { data: orders = [], isLoading, refetch } = useQuery({
     queryKey: ['/api/warehouse/orders'],
-    queryFn: () => fetch('/api/warehouse/orders').then(res => res.json())
+    queryFn: () => fetch('/api/warehouse/orders', { credentials: 'include' }).then(res => res.json())
   });
+
+  // Auto-refresh only after initial data load is successful
+  useEffect(() => {
+    if (orders && orders.length >= 0) { // Start auto-refresh after successful data load
+      const interval = setInterval(() => {
+        refetch();
+      }, 10 * 60 * 1000); // 10 minutes
+
+      return () => clearInterval(interval);
+    }
+  }, [orders, refetch]);
 
   const approveMutation = useMutation({
     mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {

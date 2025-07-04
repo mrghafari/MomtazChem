@@ -61,20 +61,22 @@ export default function LogisticsOrders() {
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Auto-refresh every 10 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['/api/logistics/orders'] });
-    }, 10 * 60 * 1000); // 10 minutes
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Get warehouse-approved orders for logistics processing
   const { data: orders = [], isLoading, refetch } = useQuery({
     queryKey: ['/api/logistics/orders'],
-    queryFn: () => fetch('/api/logistics/orders').then(res => res.json())
+    queryFn: () => fetch('/api/logistics/orders', { credentials: 'include' }).then(res => res.json())
   });
+
+  // Auto-refresh only after initial data load is successful
+  useEffect(() => {
+    if (orders && orders.length >= 0) { // Start auto-refresh after successful data load
+      const interval = setInterval(() => {
+        refetch();
+      }, 10 * 60 * 1000); // 10 minutes
+
+      return () => clearInterval(interval);
+    }
+  }, [orders, refetch]);
 
   const dispatchMutation = useMutation({
     mutationFn: async (data: {

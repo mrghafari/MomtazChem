@@ -54,20 +54,22 @@ export default function FinanceOrders() {
   const [selectedOrderForTracking, setSelectedOrderForTracking] = useState<Order | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Auto-refresh every 10 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['/api/finance/orders'] });
-    }, 10 * 60 * 1000); // 10 minutes
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Get pending orders for financial review
   const { data: orders = [], isLoading, refetch } = useQuery({
     queryKey: ['/api/finance/orders'],
-    queryFn: () => fetch('/api/finance/orders').then(res => res.json())
+    queryFn: () => fetch('/api/finance/orders', { credentials: 'include' }).then(res => res.json())
   });
+
+  // Auto-refresh only after initial data load is successful
+  useEffect(() => {
+    if (orders && orders.length >= 0) { // Start auto-refresh after successful data load
+      const interval = setInterval(() => {
+        refetch();
+      }, 10 * 60 * 1000); // 10 minutes
+
+      return () => clearInterval(interval);
+    }
+  }, [orders, refetch]);
 
   const approveMutation = useMutation({
     mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
