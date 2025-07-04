@@ -1094,7 +1094,8 @@ function generateDocumentationHTML(data: DocumentationData, language: 'en' | 'fa
 export async function generateUserDocumentationPDF(language: 'en' | 'fa' = 'en'): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium-browser'
   });
   
   try {
@@ -1124,7 +1125,8 @@ export async function generateUserDocumentationPDF(language: 'en' | 'fa' = 'en')
 export async function generateAdminDocumentationPDF(language: 'en' | 'fa' = 'en'): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium-browser'
   });
   
   try {
@@ -1154,7 +1156,8 @@ export async function generateAdminDocumentationPDF(language: 'en' | 'fa' = 'en'
 export async function generateTechnicalDocumentationPDF(language: 'en' | 'fa' = 'en'): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium-browser'
   });
   
   try {
@@ -1666,7 +1669,8 @@ const projectProposalFA: DocumentationData = {
 export async function generateProjectProposalPDF(language: 'en' | 'fa' = 'en'): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium-browser'
   });
   
   try {
@@ -1697,7 +1701,8 @@ export async function generateProjectProposalPDF(language: 'en' | 'fa' = 'en'): 
 export async function generateComprehensiveDocumentationPDF(language: 'en' | 'fa' = 'en'): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium-browser'
   });
   
   try {

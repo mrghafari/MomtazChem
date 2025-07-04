@@ -199,8 +199,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      const { generateUserDocumentationPDF } = await import('./documentation-pdf');
-      const pdfBuffer = await generateUserDocumentationPDF(language as 'en' | 'fa');
+      console.log('Fallback to simple PDF generator for User Documentation');
+      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
+      const pdfBuffer = await generateDocumentationFallback('User Guide', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-User-Guide-Persian.pdf' : 
@@ -223,8 +224,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      const { generateAdminDocumentationPDF } = await import('./documentation-pdf');
-      const pdfBuffer = await generateAdminDocumentationPDF(language as 'en' | 'fa');
+      console.log('Fallback to simple PDF generator for Admin Documentation');
+      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
+      const pdfBuffer = await generateDocumentationFallback('Admin Guide', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-Admin-Guide-Persian.pdf' : 
@@ -247,8 +249,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      const { generateTechnicalDocumentationPDF } = await import('./documentation-pdf');
-      const pdfBuffer = await generateTechnicalDocumentationPDF(language as 'en' | 'fa');
+      console.log('Fallback to simple PDF generator for Technical Documentation');
+      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
+      const pdfBuffer = await generateDocumentationFallback('Technical Documentation', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-Technical-Guide-Persian.pdf' : 
@@ -271,8 +274,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      const { generateComprehensiveDocumentationPDF } = await import('./documentation-pdf');
-      const pdfBuffer = await generateComprehensiveDocumentationPDF(language as 'en' | 'fa');
+      console.log('Fallback to simple PDF generator for Complete Documentation');
+      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
+      const pdfBuffer = await generateDocumentationFallback('Complete Documentation', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-Complete-Documentation-Persian.pdf' : 
@@ -295,8 +299,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      const { generateProjectProposalPDF } = await import('./documentation-pdf');
-      const pdfBuffer = await generateProjectProposalPDF(language as 'en' | 'fa');
+      console.log('Fallback to simple PDF generator for Project Proposal');
+      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
+      const pdfBuffer = await generateDocumentationFallback('Project Proposal', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-Project-Proposal-Persian.pdf' : 
