@@ -17,34 +17,10 @@ process.on('unhandledRejection', (reason, promise) => {
 
 const app = express();
 
-// Security headers middleware
+// Basic security headers - minimal for development
 app.use((req, res, next) => {
-  // Prevent clickjacking attacks
-  res.setHeader('X-Frame-Options', 'DENY');
-  
-  // Prevent MIME type sniffing
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  
-  // XSS Protection
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  
-  // Hide server information
+  // Hide server information only
   res.removeHeader('X-Powered-By');
-  
-  // Strict Transport Security (enable when using HTTPS)
-  // res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  
-  // Content Security Policy
-  res.setHeader('Content-Security-Policy', 
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://va.tawk.to; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
-    "img-src 'self' data: https:; " +
-    "connect-src 'self' wss://va.tawk.to; " +
-    "frame-src https://tawk.to;"
-  );
-  
   next();
 });
 
