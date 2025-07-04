@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat } from "lucide-react";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
 
@@ -137,6 +137,10 @@ export default function ProductsPage() {
     { value: "paint-solvents", label: "Paint & Solvents", icon: <Package className="w-4 h-4" /> },
     { value: "agricultural-products", label: "Agricultural Products", icon: <Package className="w-4 h-4" /> },
     { value: "agricultural-fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
+    { value: "industrial-chemicals", label: "Industrial Chemicals", icon: <Package className="w-4 h-4" /> },
+    { value: "paint-thinner", label: "Paint Thinner", icon: <Droplet className="w-4 h-4" /> },
+    { value: "technical-equipment", label: "Technical Equipment", icon: <Package className="w-4 h-4" /> },
+    { value: "commercial-goods", label: "Commercial Goods", icon: <Package className="w-4 h-4" /> },
   ];
 
   const { data: products, isLoading } = useQuery({
