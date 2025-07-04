@@ -181,6 +181,7 @@ function Router() {
           <Route path="/products/commercial-goods" component={CommercialGoods} />
           <Route path="/products/technical-equipment" component={TechnicalEquipment} />
           <Route path="/quote" component={QuotePage} />
+          <Route path="/documentation" component={DocumentationPage} />
           <Route component={NotFound} />
         </Switch>
       </main>
