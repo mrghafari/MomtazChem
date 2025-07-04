@@ -432,14 +432,22 @@ export default function ProductsPage() {
     
     // Auto-generate barcode for new products (no existing barcode and not editing)
     if (productName && category && !currentBarcode && !editingProduct) {
-      const generatedBarcode = generateEAN13Barcode(productName, category);
-      form.setValue("barcode", generatedBarcode);
+      const autoGenerateBarcode = async () => {
+        try {
+          const generatedBarcode = await generateEAN13Barcode(productName, category);
+          form.setValue("barcode", generatedBarcode);
+          
+          toast({
+            title: "Barcode Auto-Generated",
+            description: `Generated EAN-13: ${generatedBarcode}`,
+            variant: "default"
+          });
+        } catch (error) {
+          console.error('Auto-generate barcode error:', error);
+        }
+      };
       
-      toast({
-        title: "Barcode Auto-Generated",
-        description: `Generated EAN-13: ${generatedBarcode}`,
-        variant: "default"
-      });
+      autoGenerateBarcode();
     }
   }, [form.watch("name"), form.watch("category"), editingProduct]);
 
