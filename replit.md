@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a comprehensive chemical solutions e-commerce and management platform for Momtazchem, a leading chemical products company. The system combines a public-facing showcase website, e-commerce functionality, and robust administrative tools including CRM, inventory management, and email automation.
+This is a comprehensive multilingual chemical solutions e-commerce and management platform for Momtazchem, a leading chemical products company in Iraq and the Middle East. The system combines a public-facing showcase website, advanced e-commerce functionality, and robust administrative tools including CRM, inventory management, email automation, content management, and SEO optimization. The platform supports 4 languages (English, Arabic, Kurdish, Turkish) with complete RTL/LTR text direction handling and features 25+ integrated administrative functions centralized in a unified Site Management interface with drag-and-drop Quick Actions layout.
 
 ## System Architecture
 
@@ -31,49 +31,92 @@ This is a comprehensive chemical solutions e-commerce and management platform fo
 
 ### Schema Structure
 The database is organized into multiple schema files:
-- **Main Schema** (`shared/schema.ts`): Core CRM, admin system, and SEO management
-- **Showcase Schema** (`shared/showcase-schema.ts`): Public website products and company info
-- **Shop Schema** (`shared/shop-schema.ts`): E-commerce functionality with inventory management
-- **Customer Schema** (`shared/customer-schema.ts`): Customer portal and order management
-- **Email Schema** (`shared/email-schema.ts`): Email automation and template system
+- **Main Schema** (`shared/schema.ts`): Core CRM, admin system, SEO management, and content management
+- **Showcase Schema** (`shared/showcase-schema.ts`): Public website products, company info, and product variants
+- **Shop Schema** (`shared/shop-schema.ts`): E-commerce functionality, inventory management, and EAN-13 barcodes
+- **Customer Schema** (`shared/customer-schema.ts`): Customer portal, order management, and address management
+- **Email Schema** (`shared/email-schema.ts`): Multi-SMTP email automation, template system, and routing
+- **CRM Schema** (`shared/crm-schema.ts`): Advanced customer relationship management and analytics
+- **Content Management Schema**: Dynamic multilingual content system with 430+ items in 4 languages
+- **SEO Schema**: Comprehensive multilingual SEO with sitemap, robots.txt, and 4-language support
+- **Payment Schema**: Iraqi banking integration with invoice generation and payment gateways
 
 ### Core Modules
 
+#### Content Management System
+- **Dynamic Content**: 430+ multilingual content items across 12 sections in 4 languages
+- **Social Media Management**: Configurable social media links for 6 platforms (LinkedIn, Twitter, Facebook, Instagram, TikTok, WhatsApp)
+- **Image Management**: Upload, organize, and manage visual assets by section
+- **Multilingual Support**: English, Arabic, Kurdish, and Turkish with proper RTL/LTR handling
+
 #### Product Management
-- **Showcase Products**: Display-only products for marketing purposes
-- **Shop Products**: Full e-commerce products with pricing, inventory, and purchasing
-- **Inventory System**: Stock tracking, low-stock alerts, and automated notifications
-- **Category Management**: Hierarchical product categorization
+- **Showcase Products**: Display-only products with variant support and parent-child relationships
+- **Shop Products**: Full e-commerce products with EAN-13 barcodes, pricing, and inventory
+- **Barcode System**: GS1-compliant EAN-13 generation with Iraq country code (864) and batch processing
+- **Inventory Management**: Real-time stock tracking, low-stock alerts, automation, and analytics
+- **Category Management**: Standardized hierarchical product categorization across 9 main categories
 
 #### Customer & CRM System
-- **Customer Portal**: Self-service customer accounts with order history
-- **CRM Integration**: Lead management, activity tracking, and sales pipeline
-- **Order Management**: Complete order lifecycle from cart to fulfillment
-- **Inquiry System**: Customer support and product inquiry management
+- **Unified Customer Management**: Single CRM system with automated migration from legacy portal
+- **Advanced Analytics**: Customer segmentation, purchase history, and performance metrics
+- **Address Management**: Multiple addresses per customer with default address selection
+- **Order Management**: 3-department workflow (Financial → Warehouse → Logistics) with automatic progression
+- **Customer Activities**: Comprehensive activity logging and tracking
+- **Digital Wallet**: Customer balance management with recharge requests and approval workflow
 
-#### Email Automation
-- **Multi-SMTP Configuration**: Category-based email routing
-- **Template System**: Customizable email templates with variable substitution
-- **Automated Notifications**: Order confirmations, inventory alerts, customer communications
-- **Recipient Management**: Role-based email distribution
+#### Email Automation & Communication
+- **Multi-SMTP Configuration**: Category-based intelligent email routing across 8 email categories
+- **Advanced Template System**: Customizable templates with variable substitution and personalization
+- **Routing Intelligence**: Automatic department routing based on product categories and inquiry types
+- **CC/BCC Management**: Independent recipient management with smart monitoring
+- **SMTP Testing**: Comprehensive connectivity testing and validation tools
+- **SMS Integration**: Customer notification and verification systems
+
+#### SEO & Internationalization
+- **Multilingual SEO**: Comprehensive SEO management for 4 languages with meta tags, descriptions, and keywords
+- **Dynamic Sitemap**: Auto-generated XML sitemaps with 47+ entries across all supported languages
+- **Robots.txt Management**: Configurable robots.txt with crawling directives
+- **hreflang Support**: Proper language alternate tags for international SEO
+- **Content Localization**: Dynamic content switching based on user language preference
+
+#### Payment & Financial Systems
+- **Iraqi Banking Integration**: Support for 3 major Iraqi banks (Rasheed, Al-Rafidain, Trade Bank)
+- **Invoice Generation**: Bilingual PDF invoices with automatic download capabilities
+- **Payment Gateway Management**: Admin-configurable payment methods and SWIFT codes
+- **Financial Workflow**: Integrated payment approval and invoice delivery system
+
+#### AI & Automation
+- **Smart SKU Generation**: AI-powered SKU creation with category codes and product identification
+- **Product Recommendations**: Intelligent product suggestions based on industry and requirements
+- **Performance Monitoring**: AI system performance tracking with token usage analytics
+- **Automated Barcode Generation**: Bulk barcode processing for existing products
 
 #### Site Management Features
-- **24+ integrated administrative functions** centralized in unified Site Management interface
-- **Product Management**: Showcase and shop product catalogs with inventory tracking
-- **Barcode System**: EAN-13 generation, batch processing, and inventory management
-- **Order Workflow**: 3-department sequential processing (Financial → Warehouse → Logistics)
-- **CRM Integration**: Customer relationship management with lead tracking and analytics
-- **Email Automation**: Multi-SMTP configuration with intelligent routing and template system
-- **User Management**: Multi-role admin system with department-based access control
-- **AI Integration**: Smart SKU generation, product recommendations, and performance monitoring
-- **Global Refresh Control**: Centralized timing management for all department interfaces
-- **Database Management**: Backup, migration, and system maintenance tools
-- **SEO Management**: Multi-language optimization with structured data
-- **SMS Communication**: Customer notification and verification systems
-- **Factory Management**: Production line and manufacturing operations
-- **Category Management**: Hierarchical product categorization
-- **Analytics Dashboard**: Sales reports, customer metrics, and performance tracking
-- **Security Settings**: Authentication, session management, and access control
+- **25+ integrated administrative functions** centralized in unified Site Management interface with drag-and-drop Quick Actions layout
+- **Content Management**: Dynamic multilingual content editing system for all website sections (430+ content items in 4 languages)
+- **Product Management**: Showcase and shop product catalogs with inventory tracking and EAN-13 barcode system
+- **Barcode System**: Professional GS1-compliant EAN-13 generation, batch processing, and inventory management with Iraq country code
+- **Order Workflow**: 3-department sequential processing (Financial → Warehouse → Logistics) with automatic status progression
+- **CRM Integration**: Customer relationship management with lead tracking, analytics, and automated customer migration
+- **Email Automation**: Multi-SMTP configuration with intelligent category-based routing and advanced template system
+- **User Management**: Multi-role admin system with department-based access control and super admin verification
+- **AI Integration**: Smart SKU generation, product recommendations, performance monitoring, and OpenAI API testing
+- **Global Refresh Control**: Centralized timing management for all department interfaces with sync/individual modes
+- **Database Management**: Automated backup systems, migration tools, and PostgreSQL maintenance
+- **SEO Management**: Comprehensive multilingual SEO with sitemap generation, robots.txt, and 4-language support
+- **SMS Communication**: Customer notification and verification systems with admin toggles
+- **Factory Management**: Production line and manufacturing operations management
+- **Category Management**: Hierarchical product categorization with standardized shop categories
+- **Analytics Dashboard**: Sales reports, customer metrics, geographic analytics, and performance tracking
+- **Security Settings**: Authentication, session management, access control, and admin verification
+- **Social Media Management**: Dynamic social media links management through Content Management (6 platforms)
+- **Inventory Management**: Independent inventory system with alerts, automation, analytics, and real-time monitoring
+- **Payment Gateway Management**: Iraqi banking system integration with 3 major banks and invoice generation
+- **Invoice Management**: Bilingual PDF generation system with automatic download capabilities
+- **Advanced Email Settings**: Multi-category SMTP configuration with CC/BCC management and routing statistics
+- **SMTP Testing Tools**: Comprehensive email connectivity testing and validation systems
+- **Procedures & Methods**: Document management system for operational procedures
+- **Turkish Language Support**: Complete fourth language integration with LTR direction support
 
 ## Data Flow
 
@@ -102,22 +145,27 @@ The database is organized into multiple schema files:
 ## External Dependencies
 
 ### Core Dependencies
-- **Database**: Neon PostgreSQL cloud service
-- **Email Service**: Zoho Mail SMTP (configurable for other providers)
-- **File Storage**: Local filesystem (upgradeable to cloud storage)
-- **UI Components**: Radix UI primitives with Shadcn/ui styling
+- **Database**: Neon PostgreSQL cloud service with connection pooling
+- **Email Service**: Zoho Mail SMTP with multi-category routing (configurable for other providers)
+- **File Storage**: Local filesystem with upload management (upgradeable to cloud storage)
+- **UI Components**: Radix UI primitives with Shadcn/ui styling and custom theming
+- **AI Services**: OpenAI API integration for SKU generation and product recommendations
 
 ### Development Tools
-- **Build System**: Vite for frontend bundling
-- **Type Checking**: TypeScript with strict configuration
-- **Database Tools**: Drizzle Kit for migrations and schema management
-- **Process Management**: tsx for development server
+- **Build System**: Vite for frontend bundling with hot module replacement
+- **Type Checking**: TypeScript with strict configuration and ESM modules
+- **Database Tools**: Drizzle Kit for migrations, schema management, and type-safe queries
+- **Process Management**: tsx for development server with auto-restart
+- **Animation Library**: @hello-pangea/dnd for drag-and-drop functionality
 
 ### Third-Party Integrations
-- **Payment Processing**: Stripe integration (configured but not fully implemented)
-- **Live Chat**: Tawk.to widget for customer support
-- **Analytics**: Ready for Google Analytics integration
-- **PDF Generation**: Puppeteer for document generation
+- **Payment Processing**: Iraqi banking system integration (Rasheed Bank, Al-Rafidain Bank, Trade Bank of Iraq)
+- **Live Chat**: Tawk.to live chat widget for customer support
+- **Analytics**: Geographic analytics with Iraq and Turkey regional data
+- **PDF Generation**: Puppeteer for invoice and report generation
+- **SMS Services**: Customer notification and verification systems
+- **Barcode Generation**: EAN-13 barcode system with GS1 compliance
+- **Font Integration**: Google Fonts for multilingual typography (Arabic, Kurdish, Turkish)
 
 ## Deployment Strategy
 
