@@ -12334,7 +12334,8 @@ momtazchem.com
   app.get("/api/admin/department-assignments", requireAuth, async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
-      const { departmentAssignments, users } = await import("../shared/order-management-schema");
+      const { departmentAssignments } = await import("../shared/order-management-schema");
+      const { users } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
 
       const assignments = await db
