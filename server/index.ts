@@ -17,42 +17,41 @@ process.on('unhandledRejection', (reason, promise) => {
 
 const app = express();
 
-// Basic security headers - minimal for development
-app.use((req, res, next) => {
-  // Hide server information only
-  res.removeHeader('X-Powered-By');
-  next();
-});
+// Remove all security headers for development
+// app.use((req, res, next) => {
+//   res.removeHeader('X-Powered-By');
+//   next();
+// });
 
-// Rate limiting middleware for API endpoints
-const rateLimit = new Map();
-app.use('/api/', (req, res, next) => {
-  const ip = req.ip || req.connection.remoteAddress;
-  const now = Date.now();
-  const windowMs = 15 * 60 * 1000; // 15 minutes
-  const maxRequests = 100; // Max requests per window
+// Disable rate limiting for development
+// const rateLimit = new Map();
+// app.use('/api/', (req, res, next) => {
+//   const ip = req.ip || req.connection.remoteAddress;
+//   const now = Date.now();
+//   const windowMs = 15 * 60 * 1000; // 15 minutes
+//   const maxRequests = 100; // Max requests per window
   
-  if (!rateLimit.has(ip)) {
-    rateLimit.set(ip, { count: 1, resetTime: now + windowMs });
-  } else {
-    const rateLimitInfo = rateLimit.get(ip);
-    if (now > rateLimitInfo.resetTime) {
-      rateLimitInfo.count = 1;
-      rateLimitInfo.resetTime = now + windowMs;
-    } else {
-      rateLimitInfo.count++;
-      if (rateLimitInfo.count > maxRequests) {
-        return res.status(429).json({
-          success: false,
-          message: 'تعداد درخواست‌های شما از حد مجاز تجاوز کرده است. لطفاً چند دقیقه صبر کنید.',
-          retryAfter: Math.ceil((rateLimitInfo.resetTime - now) / 1000)
-        });
-      }
-    }
-  }
+//   if (!rateLimit.has(ip)) {
+//     rateLimit.set(ip, { count: 1, resetTime: now + windowMs });
+//   } else {
+//     const rateLimitInfo = rateLimit.get(ip);
+//     if (now > rateLimitInfo.resetTime) {
+//       rateLimitInfo.count = 1;
+//       rateLimitInfo.resetTime = now + windowMs;
+//     } else {
+//       rateLimitInfo.count++;
+//       if (rateLimitInfo.count > maxRequests) {
+//         return res.status(429).json({
+//           success: false,
+//           message: 'تعداد درخواست‌های شما از حد مجاز تجاوز کرده است. لطفاً چند دقیقه صبر کنید.',
+//           retryAfter: Math.ceil((rateLimitInfo.resetTime - now) / 1000)
+//         });
+//       }
+//     }
+//   }
   
-  next();
-});
+//   next();
+// });
 
 app.use(express.json({ limit: '10mb' })); // Limit JSON payload size
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
