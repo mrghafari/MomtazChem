@@ -132,11 +132,11 @@ export default function ProductsPage() {
   };
 
   const categories: CategoryOption[] = [
-    { value: "commercial", label: "Commercial", icon: <DollarSign className="w-4 h-4" /> },
-    { value: "laboratory", label: "Laboratory", icon: <Beaker className="w-4 h-4" /> },
-    { value: "pharmaceutical", label: "Pharmaceutical", icon: <Package className="w-4 h-4" /> },
-    { value: "specialty", label: "Specialty", icon: <Droplet className="w-4 h-4" /> },
-    { value: "other", label: "Other Products", icon: <Package className="w-4 h-4" /> },
+    { value: "water-treatment", label: "Water Treatment", icon: <Droplet className="w-4 h-4" /> },
+    { value: "fuel-additives", label: "Fuel Additives", icon: <Beaker className="w-4 h-4" /> },
+    { value: "paint-solvents", label: "Paint & Solvents", icon: <Package className="w-4 h-4" /> },
+    { value: "agricultural-products", label: "Agricultural Products", icon: <Package className="w-4 h-4" /> },
+    { value: "agricultural-fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
   ];
 
   const { data: products, isLoading } = useQuery({

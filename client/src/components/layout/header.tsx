@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut } from 'lucide-react';
+import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -62,9 +62,9 @@ export default function Header() {
       titleHover: "group-hover:text-cyan-600 dark:group-hover:text-cyan-400"
     },
     {
-      title: t.paintThinner,
-      href: "/products/paint-thinner",
-      description: "Premium paint formulations and specialty thinners",
+      title: "Paint & Solvents",
+      href: "/products/paint-solvents",
+      description: "Premium paint formulations and specialty solvents",
       icon: <Package className="h-6 w-6" />,
       color: "orange",
       hoverBg: "hover:bg-orange-50 dark:hover:bg-orange-900/20",
@@ -72,9 +72,9 @@ export default function Header() {
       titleHover: "group-hover:text-orange-600 dark:group-hover:text-orange-400"
     },
     {
-      title: t.agriculturalFertilizers, 
-      href: "/products/agricultural-fertilizers",
-      description: "Advanced fertilizer solutions for sustainable farming",
+      title: "Agricultural Products",
+      href: "/products/agricultural-products",
+      description: "Complete agricultural solution products",
       icon: <Wheat className="h-6 w-6" />,
       color: "green",
       hoverBg: "hover:bg-green-50 dark:hover:bg-green-900/20",
@@ -82,14 +82,54 @@ export default function Header() {
       titleHover: "group-hover:text-green-600 dark:group-hover:text-green-400"
     },
     {
-      title: "Other Products",
-      href: "/products/other",
-      description: "Miscellaneous chemical products and specialty solutions",
+      title: t.agriculturalFertilizers, 
+      href: "/products/agricultural-fertilizers",
+      description: "Advanced fertilizer solutions for sustainable farming",
+      icon: <Wheat className="h-6 w-6" />,
+      color: "emerald",
+      hoverBg: "hover:bg-emerald-50 dark:hover:bg-emerald-900/20",
+      iconColor: "text-emerald-600 dark:text-emerald-400",
+      titleHover: "group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+    },
+    {
+      title: "Industrial Chemicals",
+      href: "/products/industrial-chemicals",
+      description: "Professional industrial chemical solutions",
       icon: <Package className="h-6 w-6" />,
       color: "purple",
       hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-900/20",
       iconColor: "text-purple-600 dark:text-purple-400",
       titleHover: "group-hover:text-purple-600 dark:group-hover:text-purple-400"
+    },
+    {
+      title: "Paint Thinner",
+      href: "/products/paint-thinner",
+      description: "Specialty paint thinners and related products",
+      icon: <Package className="h-6 w-6" />,
+      color: "amber",
+      hoverBg: "hover:bg-amber-50 dark:hover:bg-amber-900/20",
+      iconColor: "text-amber-600 dark:text-amber-400",
+      titleHover: "group-hover:text-amber-600 dark:group-hover:text-amber-400"
+    },
+    {
+      title: "Technical Equipment",
+      href: "/products/technical-equipment",
+      description: "Professional technical equipment and tools",
+      icon: <Package className="h-6 w-6" />,
+      color: "indigo",
+      hoverBg: "hover:bg-indigo-50 dark:hover:bg-indigo-900/20",
+      iconColor: "text-indigo-600 dark:text-indigo-400",
+      titleHover: "group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
+    },
+    {
+      title: "Commercial Goods",
+      href: "/products/commercial-goods",
+      description: "Commercial goods and business solutions",
+      icon: <Package className="h-6 w-6" />,
+      color: "slate",
+      hoverBg: "hover:bg-slate-50 dark:hover:bg-slate-900/20",
+      iconColor: "text-slate-600 dark:text-slate-400",
+      titleHover: "group-hover:text-slate-600 dark:group-hover:text-slate-400"
     }
   ];
 

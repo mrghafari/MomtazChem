@@ -59,11 +59,15 @@ export interface PasswordResetData {
 // Map product interest to email category
 function mapProductInterestToCategory(productInterest: string): string {
   const mapping: Record<string, string> = {
+    'water-treatment': 'water-treatment',
     'fuel-additives': 'fuel-additives',
-    'water-treatment': 'water-treatment', 
-    'paint-thinner': 'paint-thinner',
+    'paint-solvents': 'paint-thinner',
+    'agricultural-products': 'agricultural-fertilizers',
     'agricultural-fertilizers': 'agricultural-fertilizers',
-    'other': 'notifications', // Other products go to Support
+    'industrial-chemicals': 'admin',
+    'paint-thinner': 'paint-thinner',
+    'technical-equipment': 'admin',
+    'commercial-goods': 'admin',
     'custom-solutions': 'orders', // Custom solutions go to Sales department
   };
   

@@ -201,11 +201,15 @@ const Contact = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="fuel-additives">Fuel Additives</SelectItem>
                             <SelectItem value="water-treatment">Water Treatment</SelectItem>
-                            <SelectItem value="paint-thinner">Paint & Thinner</SelectItem>
+                            <SelectItem value="fuel-additives">Fuel Additives</SelectItem>
+                            <SelectItem value="paint-solvents">Paint & Solvents</SelectItem>
+                            <SelectItem value="agricultural-products">Agricultural Products</SelectItem>
                             <SelectItem value="agricultural-fertilizers">Agricultural Fertilizers</SelectItem>
-                            <SelectItem value="other">Other Products</SelectItem>
+                            <SelectItem value="industrial-chemicals">Industrial Chemicals</SelectItem>
+                            <SelectItem value="paint-thinner">Paint Thinner</SelectItem>
+                            <SelectItem value="technical-equipment">Technical Equipment</SelectItem>
+                            <SelectItem value="commercial-goods">Commercial Goods</SelectItem>
                             <SelectItem value="custom-solutions">Custom Solutions</SelectItem>
                           </SelectContent>
                         </Select>
