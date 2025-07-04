@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Package } from "lucide-react";
@@ -8,6 +9,22 @@ import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greeting
 export default function AdminPage() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
+  
+  // Fetch admin dashboard content from Content Management
+  const { data: adminContent, isLoading: contentLoading } = useQuery({
+    queryKey: ['/api/content-management/items'],
+    queryFn: () => fetch('/api/content-management/items?section=admin_dashboard')
+      .then(res => res.json())
+      .then(data => data.success ? data.data : []),
+    enabled: isAuthenticated
+  });
+
+  // Helper function to get content by key
+  const getContent = (key: string, defaultValue: string) => {
+    if (!adminContent) return defaultValue;
+    const content = adminContent.find((item: any) => item.key === key && item.language === 'en');
+    return content ? content.content : defaultValue;
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -72,25 +89,42 @@ export default function AdminPage() {
           </Button>
         </div>
 
-        {/* Welcome Message */}
+        {/* Welcome Message - Content from Content Management */}
         <div className="mt-8 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome to Admin Dashboard</h3>
-          <p className="text-gray-600 mb-4">
-            Access all administrative tools through the centralized Site Management interface 
-            which includes comprehensive management for all system components.
-          </p>
-          <div className="text-sm text-gray-600">
-            <h4 className="font-medium text-gray-900 mb-2">Site Management Features</h4>
-            <ul className="space-y-1">
-              <li>• 17 integrated administrative functions</li>
-              <li>• Product catalog and inventory management</li>
-              <li>• CRM and customer relationship management</li>
-              <li>• Order workflow and logistics control</li>
-              <li>• Email and SMS communication systems</li>
-              <li>• User management and security settings</li>
-              <li>• Database backup and system maintenance</li>
-            </ul>
-          </div>
+          {contentLoading ? (
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-300 rounded mb-2"></div>
+              <div className="h-4 bg-gray-300 rounded mb-4"></div>
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-300 rounded"></div>
+                <div className="h-3 bg-gray-300 rounded"></div>
+                <div className="h-3 bg-gray-300 rounded"></div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {getContent('admin_welcome_title', 'Welcome to Admin Dashboard')}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {getContent('admin_welcome_description', 'Access all administrative tools through the centralized Site Management interface which includes comprehensive management for all system components.')}
+              </p>
+              <div className="text-sm text-gray-600">
+                <h4 className="font-medium text-gray-900 mb-2">
+                  {getContent('admin_features_title', 'Site Management Features')}
+                </h4>
+                <ul className="space-y-1">
+                  <li>• {getContent('admin_feature_1', '26 integrated administrative functions')}</li>
+                  <li>• {getContent('admin_feature_2', 'Product catalog and inventory management')}</li>
+                  <li>• {getContent('admin_feature_3', 'CRM and customer relationship management')}</li>
+                  <li>• {getContent('admin_feature_4', 'Order workflow and logistics control')}</li>
+                  <li>• {getContent('admin_feature_5', 'Email and SMS communication systems')}</li>
+                  <li>• {getContent('admin_feature_6', 'User management and security settings')}</li>
+                  <li>• {getContent('admin_feature_7', 'Database backup and system maintenance')}</li>
+                </ul>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
