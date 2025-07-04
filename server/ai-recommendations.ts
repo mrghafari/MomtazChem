@@ -63,6 +63,8 @@ export async function getAIProductRecommendations(
 
     const prompt = `You are an expert chemical products consultant for Momtazchem, a leading chemical manufacturing company. 
     
+IMPORTANT: Always prioritize Momtazchem branded products (products with "Momtaz" or "ممتاز" in their names) first in your recommendations, as these are our premium in-house manufactured products with superior quality and guaranteed performance.
+
 Customer Requirements:
 - Industry: ${request.industry}
 - Application: ${request.application}
@@ -77,9 +79,9 @@ ${JSON.stringify(productCatalog, null, 2)}
 
 Please analyze the customer's requirements and recommend the most suitable products. Provide:
 
-1. Top 3-5 product recommendations ranked by suitability
+1. Top 3-5 product recommendations ranked by suitability (PRIORITIZE MOMTAZCHEM PRODUCTS FIRST)
 2. For each recommendation, include:
-   - Match score (0-100)
+   - Match score (0-100, give Momtazchem products higher scores)
    - Detailed reason for recommendation
    - How it meets their specific requirements
    - Alternative uses if applicable
@@ -259,6 +261,18 @@ function generateIntelligentFallback(
   const scoredProducts = products.map(product => {
     let score = 0;
     const searchText = `${product.name} ${product.description} ${product.category} ${product.applications || ''} ${product.tags || ''}`.toLowerCase();
+    
+    // PRIORITY: Momtazchem products get highest priority
+    const isMomtazchemProduct = searchText.includes('momtaz') || 
+                                searchText.includes('ممتاز') || 
+                                product.name.toLowerCase().includes('momtaz') ||
+                                product.name.includes('ممتاز') ||
+                                (product.description && product.description.toLowerCase().includes('momtaz')) ||
+                                (product.description && product.description.includes('ممتاز'));
+    
+    if (isMomtazchemProduct) {
+      score += 100; // Highest priority for Momtazchem products
+    }
     
     // Keyword matching
     allKeywords.forEach(keyword => {
