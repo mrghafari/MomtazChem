@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom TabsList wrapping fix */
+[data-radix-tabs-list] {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  height: auto !important;
+  min-height: 40px !important;
+}
+
 /* RTL and Language Support */
 [dir="rtl"] {
   direction: rtl;

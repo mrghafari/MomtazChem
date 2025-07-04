@@ -646,13 +646,14 @@ export default function ProductsPage() {
       )}
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-        <TabsList className="flex flex-wrap w-full gap-1 h-auto p-1">
-          <TabsTrigger value="all" className="flex-shrink-0">All Products</TabsTrigger>
+        <TabsList className="flex flex-wrap w-full gap-1 h-auto min-h-[40px] p-1 bg-muted">
+          <TabsTrigger value="all" className="flex-shrink-0 whitespace-nowrap">All Products</TabsTrigger>
           {categories.map((category: CategoryOption) => (
-            <TabsTrigger key={category.value} value={category.value} className="flex-shrink-0">
-              <span className="flex items-center gap-2">
-                {category.icon}
-                {category.label}
+            <TabsTrigger key={category.value} value={category.value} className="flex-shrink-0 whitespace-nowrap">
+              <span className="flex items-center gap-1 text-xs sm:text-sm">
+                <span className="w-3 h-3 sm:w-4 sm:h-4">{category.icon}</span>
+                <span className="hidden sm:inline">{category.label}</span>
+                <span className="sm:hidden">{category.label.split(' ')[0]}</span>
               </span>
             </TabsTrigger>
           ))}
