@@ -11658,7 +11658,10 @@ momtazchem.com
   app.get("/api/finance/orders", requireAuth, attachUserDepartments, requireDepartment('financial'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
-      const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
+      const { orderManagement } = await import("../shared/order-management-schema");
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { orderItems } = await import("../shared/shop-schema");
+      const { crmCustomers } = await import("../shared/schema");
       const { eq, inArray } = await import("drizzle-orm");
 
       // Get orders that need financial review (only payment uploaded, not yet approved)
@@ -11801,7 +11804,10 @@ momtazchem.com
   app.get("/api/warehouse/orders", requireAuth, attachUserDepartments, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
-      const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
+      const { orderManagement } = await import("../shared/order-management-schema");
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { orderItems } = await import("../shared/shop-schema");
+      const { crmCustomers } = await import("../shared/schema");
       const { eq, inArray } = await import("drizzle-orm");
 
       // Get orders approved by finance, pending warehouse processing
@@ -11944,7 +11950,10 @@ momtazchem.com
   app.get("/api/logistics/orders", requireAuth, attachUserDepartments, requireDepartment('logistics'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
-      const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
+      const { orderManagement } = await import("../shared/order-management-schema");
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { orderItems } = await import("../shared/shop-schema");
+      const { crmCustomers } = await import("../shared/schema");
       const { eq, inArray } = await import("drizzle-orm");
 
       // Get orders approved by warehouse, pending logistics processing
@@ -12043,7 +12052,8 @@ momtazchem.com
       });
 
       // Get customer phone number for SMS
-      const { crmCustomers, customerOrders } = await import("../shared/customer-schema");
+      const { crmCustomers } = await import("../shared/schema");
+      const { customerOrders } = await import("../shared/customer-schema");
       const orderResult = await db
         .select()
         .from(customerOrders)
@@ -12103,8 +12113,9 @@ momtazchem.com
   app.get("/api/delivered/orders", requireAuth, attachUserDepartments, requireDepartment(['logistics', 'super_admin']), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
-      const { orderManagement, orderItems } = await import("../shared/order-management-schema");
+      const { orderManagement } = await import("../shared/order-management-schema");
       const { customerOrders } = await import("../shared/customer-schema");
+      const { orderItems } = await import("../shared/shop-schema");
       const { crmCustomers } = await import("../shared/schema");
       const { eq, inArray } = await import("drizzle-orm");
 
