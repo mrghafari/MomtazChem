@@ -3,8 +3,18 @@ import * as path from 'path';
 
 // Simple HTML to PDF text-based generator for Replit compatibility
 export async function generateSimplePDF(htmlContent: string, title: string): Promise<Buffer> {
-  // Clean content and prepare for PDF  
-  const cleanContent = htmlContent.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ');
+  // Clean content and prepare for PDF with proper encoding support
+  let cleanContent = htmlContent
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/&nbsp;/g, ' ') // Replace nbsp with space
+    .replace(/&amp;/g, '&') // Replace HTML entities
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  
+  // Preserve Persian/Arabic characters and normalize line breaks
+  cleanContent = cleanContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const contentLines = cleanContent.split('\n').filter(line => line.trim().length > 0);
   
   // Create comprehensive PDF content with multiple pages
@@ -17,7 +27,14 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
   
   // Start first page
   currentPageContent = 'BT\n/F1 12 Tf\n50 750 Td\n';
-  currentPageContent += `(${title.substring(0, 60).replace(/[()\\]/g, '\\$&')}) Tj\n0 -20 Td\n`;
+  
+  // Handle title with Persian/Arabic support
+  const cleanTitle = title.substring(0, 60).replace(/[()\\]/g, '\\$&');
+  const pdfCompatibleTitle = cleanTitle.replace(/[\u0600-\u06FF]/g, (match) => {
+    return `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`;
+  });
+  
+  currentPageContent += `(${pdfCompatibleTitle}) Tj\n0 -20 Td\n`;
   currentPageContent += `(Generated: ${new Date().toLocaleDateString()}) Tj\n0 -25 Td\n`;
   lineCount = 3;
   
@@ -46,7 +63,11 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
           if ((currentLine + word).length > maxLineLength) {
             if (currentLine.trim()) {
               const escapedLine = currentLine.trim().replace(/[()\\]/g, '\\$&');
-              currentPageContent += `(${escapedLine}) Tj\n0 -14 Td\n`;
+              // Convert Unicode characters to compatible format for PDF
+              const pdfCompatibleLine = escapedLine.replace(/[\u0600-\u06FF]/g, (match) => {
+                return `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`;
+              });
+              currentPageContent += `(${pdfCompatibleLine}) Tj\n0 -14 Td\n`;
               lineCount++;
             }
             currentLine = word + ' ';
@@ -57,12 +78,20 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
         
         if (currentLine.trim()) {
           const escapedLine = currentLine.trim().replace(/[()\\]/g, '\\$&');
-          currentPageContent += `(${escapedLine}) Tj\n0 -14 Td\n`;
+          // Convert Unicode characters to compatible format for PDF
+          const pdfCompatibleLine = escapedLine.replace(/[\u0600-\u06FF]/g, (match) => {
+            return `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`;
+          });
+          currentPageContent += `(${pdfCompatibleLine}) Tj\n0 -14 Td\n`;
           lineCount++;
         }
       } else {
         const escapedLine = line.replace(/[()\\]/g, '\\$&');
-        currentPageContent += `(${escapedLine}) Tj\n0 -14 Td\n`;
+        // Convert Unicode characters to compatible format for PDF
+        const pdfCompatibleLine = escapedLine.replace(/[\u0600-\u06FF]/g, (match) => {
+          return `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`;
+        });
+        currentPageContent += `(${pdfCompatibleLine}) Tj\n0 -14 Td\n`;
         lineCount++;
       }
       
