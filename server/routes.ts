@@ -12119,7 +12119,7 @@ momtazchem.com
           estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
           actualDeliveryDate: orderManagement.actualDeliveryDate,
           logisticsProcessedAt: orderManagement.logisticsProcessedAt,
-          orderTotal: customerOrders.total_amount,
+          orderTotal: customerOrders.totalAmount,
           orderDate: customerOrders.createdAt,
           customerName: crmCustomers.firstName,
           customerLastName: crmCustomers.lastName,
