@@ -44,7 +44,7 @@ export default function ContentManagement() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ar' | 'ku'>('en');
-  const [selectedSection, setSelectedSection] = useState<string>('homepage');
+  const [selectedSection, setSelectedSection] = useState<string>('admin_dashboard');
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
 
   // Query for content items
@@ -152,10 +152,12 @@ export default function ContentManagement() {
   };
 
   const sections = [
-    { value: 'homepage', label: 'Homepage' },
+    { value: 'admin_dashboard', label: 'Admin Dashboard' },
+    { value: 'home', label: 'Home Page' },
     { value: 'about', label: 'About Page' },
+    { value: 'services', label: 'Services Page' },
+    { value: 'contact', label: 'Contact Page' },
     { value: 'products', label: 'Products' },
-    { value: 'contact', label: 'Contact' },
     { value: 'footer', label: 'Footer' },
     { value: 'navigation', label: 'Navigation' },
     { value: 'hero', label: 'Hero Section' },
