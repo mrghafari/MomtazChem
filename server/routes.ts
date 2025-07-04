@@ -803,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // File upload endpoints
   // Generic upload route (for images)
-  app.post("/api/upload", requireAuth, uploadImage.single('image'), (req, res) => {
+  app.post("/api/upload", requireAuth, uploadImage.single('file'), (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
