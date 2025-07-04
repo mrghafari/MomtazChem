@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, decimal, boolean, integer, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, decimal, boolean, integer, json, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { customers, insertCustomerSchema, type InsertCustomer, type Customer } from "./customer-schema";
@@ -677,3 +677,26 @@ export type SupportedLanguage = typeof supportedLanguages.$inferSelect;
 
 export type InsertMultilingualKeyword = z.infer<typeof insertMultilingualKeywordSchema>;
 export type MultilingualKeyword = typeof multilingualKeywords.$inferSelect;
+
+// SMS Logs table for tracking all SMS communications
+export const smsLogs = pgTable("sms_logs", {
+  id: serial("id").primaryKey(),
+  phoneNumber: varchar("phone_number", { length: 20 }).notNull(),
+  message: text("message").notNull(),
+  purpose: varchar("purpose", { length: 50 }).notNull(), // verification, delivery_notification, marketing, etc.
+  status: varchar("status", { length: 20 }).notNull().default("sent"), // sent, failed, pending
+  relatedOrderId: integer("related_order_id"),
+  deliveryCode: varchar("delivery_code", { length: 20 }),
+  sentBy: varchar("sent_by", { length: 50 }).default("system"),
+  smsProvider: varchar("sms_provider", { length: 50 }).default("console"), // can be twilio, aws_sns, etc.
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertSmsLogSchema = createInsertSchema(smsLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSmsLog = z.infer<typeof insertSmsLogSchema>;
+export type SmsLog = typeof smsLogs.$inferSelect;

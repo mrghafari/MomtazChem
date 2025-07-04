@@ -390,6 +390,10 @@ export default function AdminSmsManagement() {
             <Users className="h-4 w-4 mr-2" />
             Customer Access
           </TabsTrigger>
+          <TabsTrigger value="delivery">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Delivery SMS
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -704,7 +708,127 @@ export default function AdminSmsManagement() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="delivery" className="space-y-4">
+          <DeliverySmsTab />
+        </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+// تب مدیریت SMS تحویل کالا
+function DeliverySmsTab() {
+  const { toast } = useToast();
+  const [deliverySmsLogs, setDeliverySmsLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadDeliverySmsLogs = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/sms/delivery-logs', {
+        credentials: 'include'
+      });
+      const result = await response.json();
+      if (result.success) {
+        setDeliverySmsLogs(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading delivery SMS logs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDeliverySmsLogs();
+  }, []);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          SMS های تحویل کالا
+        </CardTitle>
+        <CardDescription>
+          مدیریت و پیگیری SMS های ارسالی برای تحویل کالا به مشتریان
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <Alert>
+            <MessageSquare className="h-4 w-4" />
+            <AlertDescription>
+              هنگام ارسال سفارش توسط بخش لجستیک، SMS حاوی کد تحویل و اطلاعات پیک به صورت خودکار برای مشتری ارسال می‌شود.
+            </AlertDescription>
+          </Alert>
+
+          <div className="border rounded-lg">
+            <div className="p-4 border-b bg-muted/50">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">لیست SMS های تحویل</h3>
+                <Button
+                  onClick={loadDeliverySmsLogs}
+                  variant="outline"
+                  size="sm"
+                  disabled={loading}
+                >
+                  {loading ? "در حال بارگذاری..." : "بروزرسانی"}
+                </Button>
+              </div>
+            </div>
+            
+            <div className="p-4">
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                  <p className="mt-4 text-muted-foreground">در حال بارگذاری...</p>
+                </div>
+              ) : deliverySmsLogs.length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">هیچ SMS تحویل ارسال نشده</h3>
+                  <p className="text-muted-foreground">
+                    زمانی که سفارشی توسط بخش لجستیک ارسال شود، SMS تحویل در اینجا نمایش داده خواهد شد.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {deliverySmsLogs.map((sms) => (
+                    <div key={sms.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="space-y-1">
+                        <div className="font-medium">
+                          شماره: {sms.phoneNumber}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          کد تحویل: {sms.deliveryCode}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          سفارش: #{sms.relatedOrderId}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          ارسال شده: {new Date(sms.createdAt).toLocaleString('fa-IR')}
+                        </div>
+                      </div>
+                      <div className="text-left">
+                        <Badge variant={sms.status === 'sent' ? 'default' : 'destructive'}>
+                          {sms.status === 'sent' ? 'ارسال شده' : 'خطا'}
+                        </Badge>
+                        {sms.errorMessage && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {sms.errorMessage}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

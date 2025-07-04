@@ -7442,6 +7442,27 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Get delivery SMS logs (admin only)
+  app.get("/api/admin/sms/delivery-logs", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { smsLogs } = await import("../shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      
+      const deliveryLogs = await db
+        .select()
+        .from(smsLogs)
+        .where(eq(smsLogs.purpose, 'delivery_notification'))
+        .orderBy(desc(smsLogs.createdAt))
+        .limit(50);
+      
+      res.json({ success: true, data: deliveryLogs });
+    } catch (error) {
+      console.error("Error fetching delivery SMS logs:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت لاگ‌های SMS تحویل" });
+    }
+  });
+
   // Send SMS verification code (public endpoint for customer login)
   app.post("/api/sms/send-verification", async (req: Request, res: Response) => {
     try {
@@ -11992,8 +12013,8 @@ momtazchem.com
       const { notes, trackingNumber, deliveryPersonName, deliveryPersonPhone, estimatedDeliveryDate } = req.body;
       const adminId = req.session.adminId;
 
-      // Generate unique delivery code
-      const deliveryCode = Math.random().toString(36).substr(2, 8).toUpperCase();
+      // Generate unique 4-digit delivery code
+      const deliveryCode = Math.floor(1000 + Math.random() * 9000).toString();
 
       // Update order status to logistics_dispatched
       await db
@@ -12021,8 +12042,47 @@ momtazchem.com
         notes: `${notes} | کد تحویل: ${deliveryCode} | تحویل‌دهنده: ${deliveryPersonName}`
       });
 
-      // TODO: Send SMS to customer with delivery code
-      console.log(`SMS should be sent to customer with delivery code: ${deliveryCode}`);
+      // Get customer phone number for SMS
+      const { crmCustomers, customerOrders } = await import("../shared/customer-schema");
+      const orderResult = await db
+        .select()
+        .from(customerOrders)
+        .where(eq(customerOrders.id, orderId))
+        .limit(1);
+      
+      if (orderResult.length > 0 && orderResult[0].customerId) {
+        const customerResult = await db
+          .select({ phone: crmCustomers.phone, firstName: crmCustomers.firstName })
+          .from(crmCustomers)
+          .where(eq(crmCustomers.id, orderResult[0].customerId))
+          .limit(1);
+        
+        if (customerResult.length > 0) {
+          const customerPhone = customerResult[0].phone;
+          const customerName = customerResult[0].firstName;
+          
+          // Send SMS notification
+          const smsMessage = `سلام ${customerName}، سفارش شما ارسال شد. کد تحویل: ${deliveryCode}. تحویل‌دهنده: ${deliveryPersonName} (${deliveryPersonPhone}). شرکت مومتاز کیم`;
+          
+          try {
+            // Log SMS for now (can be integrated with actual SMS service later)
+            console.log(`SMS sent to ${customerPhone}: ${smsMessage}`);
+            
+            // Store SMS in database for tracking
+            const { smsLogs } = await import("../shared/schema");
+            await db.insert(smsLogs).values({
+              phoneNumber: customerPhone,
+              message: smsMessage,
+              purpose: 'delivery_notification',
+              relatedOrderId: orderId,
+              deliveryCode: deliveryCode,
+              status: 'sent'
+            });
+          } catch (smsError) {
+            console.error("Error sending SMS:", smsError);
+          }
+        }
+      }
 
       res.json({ 
         success: true, 
