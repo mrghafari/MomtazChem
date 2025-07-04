@@ -184,6 +184,13 @@ export default function SiteManagement() {
       icon: Users,
       onClick: () => setLocation("/admin/department-users"),
       className: "border-teal-300 text-teal-600 hover:bg-teal-50"
+    },
+    {
+      id: "inventory-management",
+      label: "Inventory Management",
+      icon: Package,
+      onClick: () => setLocation("/admin/inventory-management"),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
     }
   ];
 

@@ -80,6 +80,7 @@ import DeliveredOrders from "@/pages/admin/delivered-orders";
 import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
 import DepartmentUsers from "@/pages/admin/department-users";
 import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
+import InventoryManagement from "@/pages/inventory-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -148,6 +149,7 @@ function Router() {
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
           <Route path="/admin/department-users" component={DepartmentUsers} />
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
+          <Route path="/admin/inventory-management" component={InventoryManagement} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
