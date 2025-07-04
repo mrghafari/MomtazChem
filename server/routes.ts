@@ -11661,7 +11661,7 @@ momtazchem.com
       const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
       const { eq, inArray } = await import("drizzle-orm");
 
-      // Get orders that need financial review (payment uploaded)
+      // Get orders that need financial review (only payment uploaded, not yet approved)
       const orders = await db
         .select({
           id: orderManagement.id,
@@ -11683,7 +11683,7 @@ momtazchem.com
         .from(orderManagement)
         .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
         .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(inArray(orderManagement.currentStatus, ['payment_uploaded', 'financial_reviewing']))
+        .where(eq(orderManagement.currentStatus, 'payment_uploaded'))
         .orderBy(orderManagement.createdAt); // Oldest first
 
       // Get order items for each order
@@ -11826,7 +11826,7 @@ momtazchem.com
         .from(orderManagement)
         .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
         .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(inArray(orderManagement.currentStatus, ['financial_approved', 'warehouse_processing']))
+        .where(eq(orderManagement.currentStatus, 'financial_approved'))
         .orderBy(orderManagement.financialReviewedAt); // Oldest approved first
 
       // Get order items for each order
@@ -11974,7 +11974,7 @@ momtazchem.com
         .from(orderManagement)
         .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
         .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(inArray(orderManagement.currentStatus, ['warehouse_approved', 'logistics_processing', 'logistics_dispatched']))
+        .where(eq(orderManagement.currentStatus, 'warehouse_approved'))
         .orderBy(orderManagement.warehouseProcessedAt); // Oldest warehouse-approved first
 
       // Get order items for each order
@@ -12094,6 +12094,65 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "خطا در ارسال سفارش",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get delivered orders (logistics dispatched and delivered orders) - Only for logistics and super admin
+  app.get("/api/delivered/orders", requireAuth, attachUserDepartments, requireDepartment(['logistics', 'super_admin']), async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
+      const { eq, inArray } = await import("drizzle-orm");
+
+      // Get orders that are dispatched or delivered
+      const orders = await db
+        .select({
+          id: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          currentStatus: orderManagement.currentStatus,
+          deliveryCode: orderManagement.deliveryCode,
+          trackingNumber: orderManagement.trackingNumber,
+          deliveryPersonName: orderManagement.deliveryPersonName,
+          deliveryPersonPhone: orderManagement.deliveryPersonPhone,
+          estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
+          actualDeliveryDate: orderManagement.actualDeliveryDate,
+          logisticsProcessedAt: orderManagement.logisticsProcessedAt,
+          orderTotal: customerOrders.total,
+          orderDate: customerOrders.createdAt,
+          customerName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName,
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          customerAddress: crmCustomers.address,
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(inArray(orderManagement.currentStatus, ['logistics_dispatched', 'delivered']))
+        .orderBy(orderManagement.logisticsProcessedAt); // Most recent dispatched first
+
+      // Get order items for each order
+      const ordersWithItems = await Promise.all(orders.map(async (order) => {
+        const items = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, order.customerOrderId));
+
+        return {
+          ...order,
+          customerName: `${order.customerName} ${order.customerLastName}`,
+          orderItems: items
+        };
+      }));
+
+      res.json({ success: true, orders: ordersWithItems });
+    } catch (error) {
+      console.error("Error fetching delivered orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت سفارشات ارسال شده",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

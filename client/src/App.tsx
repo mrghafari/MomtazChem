@@ -76,6 +76,7 @@ import AISettings from "@/pages/admin/ai-settings";
 import FinanceOrders from "@/pages/admin/finance-orders";
 import WarehouseOrders from "@/pages/admin/warehouse-orders";
 import LogisticsOrders from "@/pages/admin/logistics-orders";
+import DeliveredOrders from "@/pages/admin/delivered-orders";
 import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
 import DepartmentUsers from "@/pages/admin/department-users";
 import NotFound from "@/pages/not-found";
@@ -142,6 +143,7 @@ function Router() {
           <Route path="/admin/finance-orders" component={FinanceOrders} />
           <Route path="/admin/warehouse-orders" component={WarehouseOrders} />
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
+          <Route path="/admin/delivered-orders" component={DeliveredOrders} />
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
           <Route path="/admin/department-users" component={DepartmentUsers} />
           
