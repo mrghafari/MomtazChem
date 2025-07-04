@@ -20,9 +20,9 @@ import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User,
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
 
-// Custom form schema that handles string inputs for numeric fields
+// Custom form schema that handles numeric inputs properly
 const formSchema = insertShowcaseProductSchema.extend({
-  unitPrice: z.string(),
+  unitPrice: z.coerce.number().min(0),
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
@@ -403,7 +403,7 @@ export default function ProductsPage() {
       stockQuantity: product.stockQuantity || 0,
       minStockLevel: product.minStockLevel || 0,
       maxStockLevel: product.maxStockLevel || 0,
-      unitPrice: String(product.unitPrice || 0),
+      unitPrice: Number(product.unitPrice || 0),
       currency: product.currency || "USD",
       priceRange: product.priceRange || "",
       imageUrl: product.imageUrl || "",

@@ -77,7 +77,7 @@ export const insertShowcaseProductSchema = createInsertSchema(showcaseProducts).
   updatedAt: true,
 }).extend({
   unitPrice: z.union([z.string(), z.number()]).transform((val) => {
-    if (typeof val === 'number') return val.toString();
+    if (typeof val === 'string') return parseFloat(val);
     return val;
   }),
 });
