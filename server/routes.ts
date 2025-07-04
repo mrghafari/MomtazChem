@@ -802,6 +802,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload endpoints
+  // Generic upload route (for images)
+  app.post("/api/upload", requireAuth, uploadImage.single('image'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No file uploaded" 
+        });
+      }
+
+      const imageUrl = `/uploads/images/${req.file.filename}`;
+      res.json({ 
+        success: true, 
+        url: imageUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload file" 
+      });
+    }
+  });
+
   app.post("/api/upload/image", requireAuth, uploadImage.single('image'), (req, res) => {
     try {
       if (!req.file) {
