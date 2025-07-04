@@ -25,6 +25,19 @@ export const requireDepartment = (requiredDepartment: string) => {
         });
       }
 
+      // Check if user is super admin (has access to all departments)
+      const { users } = await import("../shared/schema");
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, adminId))
+        .limit(1);
+
+      // Super admin has access to all departments
+      if (user.length > 0 && (user[0].username === 'info@momtazchem.com' || user[0].username === 'Omid Mohammad')) {
+        return next();
+      }
+
       // Check if user is assigned to the required department
       const assignment = await db
         .select()
@@ -76,9 +89,30 @@ export const getUserDepartments = async (adminId: number): Promise<string[]> => 
 // Middleware to add departments to user object
 export const attachUserDepartments = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    if (req.user?.id) {
-      const departments = await getUserDepartments(req.user.id);
-      req.user.departments = departments;
+    // Only process if user is authenticated
+    const adminId = (req.session as any)?.adminId;
+    if (adminId) {
+      const { users } = await import("../shared/schema");
+      
+      // Get user info from database
+      const userResult = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, adminId))
+        .limit(1);
+
+      if (userResult.length > 0) {
+        const user = userResult[0];
+        const departments = await getUserDepartments(adminId);
+        
+        // Attach user info to request
+        req.user = {
+          id: adminId,
+          username: user.username,
+          role: user.roleId ? 'admin' : 'super_admin',
+          departments: departments
+        };
+      }
     }
     next();
   } catch (error) {

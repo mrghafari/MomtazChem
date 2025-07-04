@@ -11634,7 +11634,7 @@ momtazchem.com
   // =============================================================================
 
   // Finance Department - Get orders pending financial review
-  app.get("/api/finance/orders", requireAuth, requireDepartment('financial'), async (req: Request, res: Response) => {
+  app.get("/api/finance/orders", requireAuth, attachUserDepartments, requireDepartment('financial'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
@@ -11691,7 +11691,7 @@ momtazchem.com
   });
 
   // Finance Department - Approve payment
-  app.post("/api/finance/orders/:orderId/approve", requireAuth, requireDepartment('financial'), async (req: Request, res: Response) => {
+  app.post("/api/finance/orders/:orderId/approve", requireAuth, attachUserDepartments, requireDepartment('financial'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
@@ -11777,7 +11777,7 @@ momtazchem.com
   });
 
   // Warehouse Department - Get orders approved by finance
-  app.get("/api/warehouse/orders", requireAuth, requireDepartment('warehouse'), async (req: Request, res: Response) => {
+  app.get("/api/warehouse/orders", requireAuth, attachUserDepartments, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
@@ -11834,7 +11834,7 @@ momtazchem.com
   });
 
   // Warehouse Department - Approve order (items ready)
-  app.post("/api/warehouse/orders/:orderId/approve", requireAuth, requireDepartment('warehouse'), async (req: Request, res: Response) => {
+  app.post("/api/warehouse/orders/:orderId/approve", requireAuth, attachUserDepartments, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
@@ -11877,7 +11877,7 @@ momtazchem.com
   });
 
   // Warehouse Department - Reject order (out of stock)
-  app.post("/api/warehouse/orders/:orderId/reject", requireAuth, requireDepartment('warehouse'), async (req: Request, res: Response) => {
+  app.post("/api/warehouse/orders/:orderId/reject", requireAuth, attachUserDepartments, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
@@ -11920,7 +11920,7 @@ momtazchem.com
   });
 
   // Logistics Department - Get orders approved by warehouse
-  app.get("/api/logistics/orders", requireAuth, requireDepartment('logistics'), async (req: Request, res: Response) => {
+  app.get("/api/logistics/orders", requireAuth, attachUserDepartments, requireDepartment('logistics'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
@@ -11982,7 +11982,7 @@ momtazchem.com
   });
 
   // Logistics Department - Dispatch order (generate delivery code and send SMS)
-  app.post("/api/logistics/orders/:orderId/dispatch", requireAuth, requireDepartment('logistics'), async (req: Request, res: Response) => {
+  app.post("/api/logistics/orders/:orderId/dispatch", requireAuth, attachUserDepartments, requireDepartment('logistics'), async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
