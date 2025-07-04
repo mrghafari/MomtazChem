@@ -11622,6 +11622,703 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // DEPARTMENT ORDER MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Finance Department - Get orders pending financial review
+  app.get("/api/finance/orders", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
+      const { eq, inArray } = await import("drizzle-orm");
+
+      // Get orders that need financial review (payment uploaded)
+      const orders = await db
+        .select({
+          id: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          currentStatus: orderManagement.currentStatus,
+          paymentReceiptUrl: orderManagement.paymentReceiptUrl,
+          financialNotes: orderManagement.financialNotes,
+          financialReviewedAt: orderManagement.financialReviewedAt,
+          createdAt: orderManagement.createdAt,
+          orderTotal: customerOrders.total,
+          paymentMethod: customerOrders.paymentMethod,
+          paymentGatewayId: customerOrders.paymentGatewayId,
+          orderDate: customerOrders.createdAt,
+          customerName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName,
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(inArray(orderManagement.currentStatus, ['payment_uploaded', 'financial_reviewing']))
+        .orderBy(orderManagement.createdAt); // Oldest first
+
+      // Get order items for each order
+      const ordersWithItems = await Promise.all(orders.map(async (order) => {
+        const items = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, order.customerOrderId));
+
+        return {
+          ...order,
+          customerName: `${order.customerName} ${order.customerLastName}`,
+          orderItems: items
+        };
+      }));
+
+      res.json({ success: true, orders: ordersWithItems });
+    } catch (error) {
+      console.error("Error fetching finance orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت سفارشات مالی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Finance Department - Approve payment
+  app.post("/api/finance/orders/:orderId/approve", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const orderId = parseInt(req.params.orderId);
+      const { notes } = req.body;
+      const adminId = req.session.adminId;
+
+      // Update order status to financial_approved
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'financial_approved',
+          financialReviewerId: adminId,
+          financialReviewedAt: new Date(),
+          financialNotes: notes
+        })
+        .where(eq(orderManagement.customerOrderId, orderId));
+
+      // Add status history
+      await db.insert(orderStatusHistory).values({
+        orderManagementId: orderId,
+        fromStatus: 'payment_uploaded',
+        toStatus: 'financial_approved',
+        changedBy: adminId,
+        changedByDepartment: 'financial',
+        notes: notes
+      });
+
+      res.json({ success: true, message: "پرداخت تایید شد" });
+    } catch (error) {
+      console.error("Error approving finance order:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تایید پرداخت",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Finance Department - Reject payment
+  app.post("/api/finance/orders/:orderId/reject", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const orderId = parseInt(req.params.orderId);
+      const { notes } = req.body;
+      const adminId = req.session.adminId;
+
+      // Update order status to financial_rejected
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'financial_rejected',
+          financialReviewerId: adminId,
+          financialReviewedAt: new Date(),
+          financialNotes: notes
+        })
+        .where(eq(orderManagement.customerOrderId, orderId));
+
+      // Add status history
+      await db.insert(orderStatusHistory).values({
+        orderManagementId: orderId,
+        fromStatus: 'payment_uploaded',
+        toStatus: 'financial_rejected',
+        changedBy: adminId,
+        changedByDepartment: 'financial',
+        notes: notes
+      });
+
+      res.json({ success: true, message: "پرداخت رد شد" });
+    } catch (error) {
+      console.error("Error rejecting finance order:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در رد پرداخت",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Warehouse Department - Get orders approved by finance
+  app.get("/api/warehouse/orders", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
+      const { eq, inArray } = await import("drizzle-orm");
+
+      // Get orders approved by finance, pending warehouse processing
+      const orders = await db
+        .select({
+          id: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          currentStatus: orderManagement.currentStatus,
+          financialNotes: orderManagement.financialNotes,
+          financialReviewedAt: orderManagement.financialReviewedAt,
+          warehouseNotes: orderManagement.warehouseNotes,
+          warehouseProcessedAt: orderManagement.warehouseProcessedAt,
+          createdAt: orderManagement.createdAt,
+          orderTotal: customerOrders.total,
+          orderDate: customerOrders.createdAt,
+          customerName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName,
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          customerAddress: crmCustomers.address,
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(inArray(orderManagement.currentStatus, ['financial_approved', 'warehouse_processing']))
+        .orderBy(orderManagement.financialReviewedAt); // Oldest approved first
+
+      // Get order items for each order
+      const ordersWithItems = await Promise.all(orders.map(async (order) => {
+        const items = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, order.customerOrderId));
+
+        return {
+          ...order,
+          customerName: `${order.customerName} ${order.customerLastName}`,
+          orderItems: items
+        };
+      }));
+
+      res.json({ success: true, orders: ordersWithItems });
+    } catch (error) {
+      console.error("Error fetching warehouse orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت سفارشات انبار",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Warehouse Department - Approve order (items ready)
+  app.post("/api/warehouse/orders/:orderId/approve", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const orderId = parseInt(req.params.orderId);
+      const { notes } = req.body;
+      const adminId = req.session.adminId;
+
+      // Update order status to warehouse_approved
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'warehouse_approved',
+          warehouseAssigneeId: adminId,
+          warehouseProcessedAt: new Date(),
+          warehouseNotes: notes
+        })
+        .where(eq(orderManagement.customerOrderId, orderId));
+
+      // Add status history
+      await db.insert(orderStatusHistory).values({
+        orderManagementId: orderId,
+        fromStatus: 'financial_approved',
+        toStatus: 'warehouse_approved',
+        changedBy: adminId,
+        changedByDepartment: 'warehouse',
+        notes: notes
+      });
+
+      res.json({ success: true, message: "کالا آماده شد" });
+    } catch (error) {
+      console.error("Error approving warehouse order:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تایید انبار",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Warehouse Department - Reject order (out of stock)
+  app.post("/api/warehouse/orders/:orderId/reject", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const orderId = parseInt(req.params.orderId);
+      const { notes } = req.body;
+      const adminId = req.session.adminId;
+
+      // Update order status to warehouse_rejected
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'warehouse_rejected',
+          warehouseAssigneeId: adminId,
+          warehouseProcessedAt: new Date(),
+          warehouseNotes: notes
+        })
+        .where(eq(orderManagement.customerOrderId, orderId));
+
+      // Add status history
+      await db.insert(orderStatusHistory).values({
+        orderManagementId: orderId,
+        fromStatus: 'financial_approved',
+        toStatus: 'warehouse_rejected',
+        changedBy: adminId,
+        changedByDepartment: 'warehouse',
+        notes: notes
+      });
+
+      res.json({ success: true, message: "کالا موجود نیست" });
+    } catch (error) {
+      console.error("Error rejecting warehouse order:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در رد سفارش انبار",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Logistics Department - Get orders approved by warehouse
+  app.get("/api/logistics/orders", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, customerOrders, orderItems, crmCustomers } = await import("../shared/order-management-schema");
+      const { eq, inArray } = await import("drizzle-orm");
+
+      // Get orders approved by warehouse, pending logistics processing
+      const orders = await db
+        .select({
+          id: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          currentStatus: orderManagement.currentStatus,
+          warehouseNotes: orderManagement.warehouseNotes,
+          warehouseProcessedAt: orderManagement.warehouseProcessedAt,
+          logisticsNotes: orderManagement.logisticsNotes,
+          logisticsProcessedAt: orderManagement.logisticsProcessedAt,
+          deliveryCode: orderManagement.deliveryCode,
+          trackingNumber: orderManagement.trackingNumber,
+          deliveryPersonName: orderManagement.deliveryPersonName,
+          deliveryPersonPhone: orderManagement.deliveryPersonPhone,
+          estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
+          createdAt: orderManagement.createdAt,
+          orderTotal: customerOrders.total,
+          orderDate: customerOrders.createdAt,
+          customerName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName,
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          customerAddress: crmCustomers.address,
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(inArray(orderManagement.currentStatus, ['warehouse_approved', 'logistics_processing', 'logistics_dispatched']))
+        .orderBy(orderManagement.warehouseProcessedAt); // Oldest warehouse-approved first
+
+      // Get order items for each order
+      const ordersWithItems = await Promise.all(orders.map(async (order) => {
+        const items = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, order.customerOrderId));
+
+        return {
+          ...order,
+          customerName: `${order.customerName} ${order.customerLastName}`,
+          orderItems: items
+        };
+      }));
+
+      res.json({ success: true, orders: ordersWithItems });
+    } catch (error) {
+      console.error("Error fetching logistics orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت سفارشات لجستیک",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Logistics Department - Dispatch order (generate delivery code and send SMS)
+  app.post("/api/logistics/orders/:orderId/dispatch", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const orderId = parseInt(req.params.orderId);
+      const { notes, trackingNumber, deliveryPersonName, deliveryPersonPhone, estimatedDeliveryDate } = req.body;
+      const adminId = req.session.adminId;
+
+      // Generate unique delivery code
+      const deliveryCode = Math.random().toString(36).substr(2, 8).toUpperCase();
+
+      // Update order status to logistics_dispatched
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'logistics_dispatched',
+          logisticsAssigneeId: adminId,
+          logisticsProcessedAt: new Date(),
+          logisticsNotes: notes,
+          deliveryCode: deliveryCode,
+          trackingNumber: trackingNumber,
+          deliveryPersonName: deliveryPersonName,
+          deliveryPersonPhone: deliveryPersonPhone,
+          estimatedDeliveryDate: estimatedDeliveryDate ? new Date(estimatedDeliveryDate) : null,
+        })
+        .where(eq(orderManagement.customerOrderId, orderId));
+
+      // Add status history
+      await db.insert(orderStatusHistory).values({
+        orderManagementId: orderId,
+        fromStatus: 'warehouse_approved',
+        toStatus: 'logistics_dispatched',
+        changedBy: adminId,
+        changedByDepartment: 'logistics',
+        notes: `${notes} | کد تحویل: ${deliveryCode} | تحویل‌دهنده: ${deliveryPersonName}`
+      });
+
+      // TODO: Send SMS to customer with delivery code
+      console.log(`SMS should be sent to customer with delivery code: ${deliveryCode}`);
+
+      res.json({ 
+        success: true, 
+        message: "سفارش ارسال شد",
+        deliveryCode: deliveryCode
+      });
+    } catch (error) {
+      console.error("Error dispatching logistics order:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ارسال سفارش",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // =============================================================================
+  // INTERNAL TRACKING SYSTEM ENDPOINTS
+  // =============================================================================
+
+  // Get tracking codes for a specific order
+  app.get("/api/tracking/order/:orderId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { internalTrackingCodes } = await import("../shared/internal-tracking-schema");
+      const { eq } = await import("drizzle-orm");
+
+      const orderId = parseInt(req.params.orderId);
+
+      const trackingCodes = await db
+        .select()
+        .from(internalTrackingCodes)
+        .where(eq(internalTrackingCodes.orderId, orderId))
+        .orderBy(internalTrackingCodes.createdAt);
+
+      res.json({ success: true, trackingCodes });
+    } catch (error) {
+      console.error("Error fetching tracking codes:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت کدهای ردیابی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Generate internal tracking codes for order items
+  app.post("/api/tracking/generate/:orderId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { internalTrackingCodes } = await import("../shared/internal-tracking-schema");
+      const { generateInternalBarcode } = await import("../shared/internal-tracking-schema");
+      const { shopProducts, orderItems } = await import("../shared/shop-schema");
+      const { eq } = await import("drizzle-orm");
+
+      const orderId = parseInt(req.params.orderId);
+      const adminId = req.session.adminId;
+
+      // Get order items
+      const items = await db
+        .select({
+          id: orderItems.id,
+          productId: orderItems.productId,
+          productName: orderItems.productName,
+          productSku: orderItems.productSku,
+          quantity: orderItems.quantity,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, orderId));
+
+      if (items.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "آیتم‌های سفارش یافت نشد"
+        });
+      }
+
+      // Generate tracking codes for each item
+      const generatedCodes = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const internalBarcode = generateInternalBarcode(orderId, i + 1);
+
+        const trackingCode = await db
+          .insert(internalTrackingCodes)
+          .values({
+            orderId: orderId,
+            orderItemId: item.id,
+            internalBarcode: internalBarcode,
+            productName: item.productName,
+            productSku: item.productSku || undefined,
+            quantity: item.quantity,
+            currentLocation: 'warehouse_pending',
+            currentDepartment: 'finance',
+            assignedToFinance: adminId,
+          })
+          .returning();
+
+        generatedCodes.push(trackingCode[0]);
+      }
+
+      res.json({ 
+        success: true, 
+        message: `${generatedCodes.length} کد ردیابی ایجاد شد`,
+        trackingCodes: generatedCodes
+      });
+    } catch (error) {
+      console.error("Error generating tracking codes:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ایجاد کدهای ردیابی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Update tracking code status
+  app.post("/api/tracking/:barcode/update", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { internalTrackingCodes, trackingHistory } = await import("../shared/internal-tracking-schema");
+      const { eq } = await import("drizzle-orm");
+
+      const barcode = req.params.barcode;
+      const { location, department, notes, warehouseLocation } = req.body;
+      const adminId = req.session.adminId;
+
+      // Get current tracking code
+      const currentCode = await db
+        .select()
+        .from(internalTrackingCodes)
+        .where(eq(internalTrackingCodes.internalBarcode, barcode))
+        .limit(1);
+
+      if (currentCode.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "کد ردیابی یافت نشد"
+        });
+      }
+
+      const current = currentCode[0];
+
+      // Prepare update data
+      const updateData: any = {
+        currentLocation: location,
+        currentDepartment: department,
+      };
+
+      // Add warehouse location if provided
+      if (warehouseLocation) {
+        updateData.warehouseLocation = warehouseLocation;
+      }
+
+      // Set timestamps based on department
+      const now = new Date();
+      if (department === 'finance') {
+        updateData.financeProcessedAt = now;
+        updateData.assignedToFinance = adminId;
+      } else if (department === 'warehouse') {
+        updateData.warehouseProcessedAt = now;
+        updateData.assignedToWarehouse = adminId;
+      } else if (department === 'logistics') {
+        updateData.logisticsProcessedAt = now;
+        updateData.assignedToLogistics = adminId;
+      }
+
+      // Update tracking code
+      await db
+        .update(internalTrackingCodes)
+        .set(updateData)
+        .where(eq(internalTrackingCodes.internalBarcode, barcode));
+
+      // Add to tracking history
+      await db.insert(trackingHistory).values({
+        trackingCodeId: current.id,
+        internalBarcode: barcode,
+        fromLocation: current.currentLocation,
+        toLocation: location,
+        fromDepartment: current.currentDepartment,
+        toDepartment: department,
+        changedBy: adminId,
+        changedByName: "Admin User", // TODO: Get actual admin name
+        department: department,
+        notes: notes,
+      });
+
+      res.json({ 
+        success: true, 
+        message: "وضعیت ردیابی به‌روزرسانی شد"
+      });
+    } catch (error) {
+      console.error("Error updating tracking code:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در به‌روزرسانی وضعیت ردیابی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Scan barcode
+  app.post("/api/tracking/:barcode/scan", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { internalTrackingCodes, barcodeScanLogs } = await import("../shared/internal-tracking-schema");
+      const { eq } = await import("drizzle-orm");
+
+      const barcode = req.params.barcode;
+      const { scanType, scanLocation, notes } = req.body;
+      const adminId = req.session.adminId;
+
+      // Check if barcode exists
+      const trackingCode = await db
+        .select()
+        .from(internalTrackingCodes)
+        .where(eq(internalTrackingCodes.internalBarcode, barcode))
+        .limit(1);
+
+      const scanResult = trackingCode.length > 0 ? 'success' : 'not_found';
+
+      // Log scan
+      await db.insert(barcodeScanLogs).values({
+        internalBarcode: barcode,
+        scannedBy: adminId,
+        scannedByName: "Admin User", // TODO: Get actual admin name
+        department: scanType.includes('warehouse') ? 'warehouse' : 
+                   scanType.includes('logistics') ? 'logistics' : 'finance',
+        scanType: scanType,
+        scanLocation: scanLocation,
+        scanResult: scanResult,
+        notes: notes,
+      });
+
+      if (scanResult === 'not_found') {
+        return res.status(404).json({
+          success: false,
+          message: "بارکد یافت نشد",
+          scanResult: scanResult
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "بارکد با موفقیت اسکن شد",
+        trackingCode: trackingCode[0],
+        scanResult: scanResult
+      });
+    } catch (error) {
+      console.error("Error scanning barcode:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در اسکن بارکد",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get tracking history for a barcode
+  app.get("/api/tracking/:barcode/history", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { trackingHistory, internalTrackingCodes } = await import("../shared/internal-tracking-schema");
+      const { eq } = await import("drizzle-orm");
+
+      const barcode = req.params.barcode;
+
+      // Get tracking code details
+      const trackingCode = await db
+        .select()
+        .from(internalTrackingCodes)
+        .where(eq(internalTrackingCodes.internalBarcode, barcode))
+        .limit(1);
+
+      if (trackingCode.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "کد ردیابی یافت نشد"
+        });
+      }
+
+      // Get history
+      const history = await db
+        .select()
+        .from(trackingHistory)
+        .where(eq(trackingHistory.internalBarcode, barcode))
+        .orderBy(trackingHistory.createdAt);
+
+      res.json({ 
+        success: true, 
+        trackingCode: trackingCode[0],
+        history: history
+      });
+    } catch (error) {
+      console.error("Error fetching tracking history:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت تاریخچه ردیابی",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

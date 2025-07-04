@@ -73,6 +73,9 @@ import SiteManagement from "@/pages/site-management";
 import GeographicReports from "@/pages/geographic-reports";
 import GeographicAnalytics from "@/pages/admin/geographic-analytics";
 import AISettings from "@/pages/admin/ai-settings";
+import FinanceOrders from "@/pages/admin/finance-orders";
+import WarehouseOrders from "@/pages/admin/warehouse-orders";
+import LogisticsOrders from "@/pages/admin/logistics-orders";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -132,6 +135,12 @@ function Router() {
           <Route path="/admin/geographic-reports" component={GeographicReports} />
           <Route path="/admin/geographic-analytics" component={GeographicAnalytics} />
           <Route path="/admin/ai-settings" component={AISettings} />
+          
+          {/* New Department Order Management Pages */}
+          <Route path="/admin/finance-orders" component={FinanceOrders} />
+          <Route path="/admin/warehouse-orders" component={WarehouseOrders} />
+          <Route path="/admin/logistics-orders" component={LogisticsOrders} />
+          <Route path="/admin/global-refresh-settings" component={lazy(() => import("./pages/admin/global-refresh-settings"))} />
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
