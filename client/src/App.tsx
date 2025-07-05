@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import ShopSearch from "./components/ShopSearch";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import SimpleHeader from "@/components/layout/simple-header";
+import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import Home from "@/pages/home";
 import About from "@/pages/about";
@@ -93,7 +93,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <div className="min-h-screen flex flex-col">
-      <SimpleHeader />
+      <Header />
       <main className="flex-1">
         <Switch>
           <Route path="/" component={Home} />
