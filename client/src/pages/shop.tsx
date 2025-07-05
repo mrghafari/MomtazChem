@@ -446,7 +446,7 @@ const Shop = () => {
                       >
                         <Wallet className="w-4 h-4 text-green-600" />
                         <span className="text-sm font-semibold text-green-800">
-                          ${walletBalance.toFixed(2)}
+                          {walletBalance.toFixed(0)} IQD
                         </span>
                       </Button>
                     </div>
@@ -477,11 +477,11 @@ const Shop = () => {
                   {getTotalItems() > 0 && (
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">
-                        ${getTotalPrice().toFixed(2)}
+                        {getTotalPrice().toFixed(0)} IQD
                       </Badge>
                       {getTotalSavings() > 0 && (
                         <Badge variant="default" className="bg-green-600">
-                          Save ${getTotalSavings().toFixed(2)}
+                          Save {getTotalSavings().toFixed(0)} IQD
                         </Badge>
                       )}
                     </div>
@@ -732,7 +732,7 @@ const Shop = () => {
                           <div className="flex items-center justify-between mb-3">
                             <div>
                               <span className="text-2xl font-bold text-green-600">
-                                ${parseFloat(product.price).toFixed(2)}
+                                {parseFloat(product.price).toFixed(0)} IQD
                               </span>
                               <span className="text-sm text-gray-500 ml-1">
                                 / {product.priceUnit}
@@ -769,7 +769,7 @@ const Shop = () => {
                                     
                                     if (applicableDiscount) {
                                       const savings = parseFloat(product.price) * applicableDiscount.discount * currentQty;
-                                      return `💰 You're saving $${savings.toFixed(2)}!`;
+                                      return `💰 You're saving ${savings.toFixed(0)} IQD!`;
                                     }
                                     
                                     const nextDiscount = product.quantityDiscounts
