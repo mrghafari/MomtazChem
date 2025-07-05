@@ -116,8 +116,8 @@ export interface IShopStorage {
   deleteOrderItem(id: number): Promise<void>;
   
   // Inventory management
-  getInventoryTransactions(productId?: number): Promise<InventoryTransaction[]>;
-  createInventoryTransaction(transaction: InsertInventoryTransaction): Promise<InventoryTransaction>;
+  getInventoryTransactions(productId?: number): Promise<any[]>;
+  createInventoryTransaction(transaction: { productId: number; type: string; quantity: number; notes?: string }): Promise<void>;
   updateProductStock(productId: number, newQuantity: number, reason: string): Promise<void>;
   
   // Analytics
@@ -1118,6 +1118,26 @@ export class ShopStorage implements IShopStorage {
       pendingRefunds,
       netProfit: todaySales - todayReturns - todayRefunds
     };
+  }
+
+  // Create inventory transaction for tracking
+  async createInventoryTransaction(transaction: {
+    productId: number;
+    type: string;
+    quantity: number;
+    notes?: string;
+  }): Promise<void> {
+    await shopDb
+      .insert(shopInventoryMovements)
+      .values({
+        productId: transaction.productId,
+        transactionType: transaction.type,
+        quantity: transaction.quantity,
+        previousStock: 0, // Will be calculated in updateProductStock
+        newStock: 0, // Will be calculated in updateProductStock
+        notes: transaction.notes,
+        createdBy: null, // Can be updated with user ID if needed
+      });
   }
 
   // Process order refund/return
