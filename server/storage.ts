@@ -212,9 +212,11 @@ export class DatabaseStorage implements IStorage {
       const allShopProducts = await shopStorage.getShopProducts();
       const existingShopProduct = allShopProducts.find(p => p.name === showcaseProduct.name);
       
-      // Extract price from priceRange (e.g., "$50 - $100" -> "75")
+      // Extract price from unitPrice first, fallback to priceRange
       let productPrice = "50"; // Default price
-      if (showcaseProduct.priceRange) {
+      if (showcaseProduct.unitPrice && showcaseProduct.unitPrice > 0) {
+        productPrice = showcaseProduct.unitPrice.toString();
+      } else if (showcaseProduct.priceRange) {
         const priceMatch = showcaseProduct.priceRange.match(/\$?(\d+(?:\.\d+)?)/);
         if (priceMatch) {
           productPrice = priceMatch[1];

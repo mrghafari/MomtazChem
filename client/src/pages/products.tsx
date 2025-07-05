@@ -784,11 +784,11 @@ export default function ProductsPage() {
                       </div>
 
                       {/* Stock Level Indicator */}
-                      {product.stockQuantity !== undefined && product.maxStockLevel && (
+                      {product.stockQuantity !== undefined && product.stockQuantity !== null && (
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                             <span>Stock: {product.stockQuantity}</span>
-                            <span>Max: {product.maxStockLevel}</span>
+                            {product.maxStockLevel && <span>Max: {product.maxStockLevel}</span>}
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
@@ -796,14 +796,14 @@ export default function ProductsPage() {
                                 getStockLevelIndicator(
                                   product.stockQuantity, 
                                   product.minStockLevel || 0, 
-                                  product.maxStockLevel
+                                  product.maxStockLevel || 1000
                                 ).color
                               }`}
                               style={{ 
                                 width: `${getStockLevelIndicator(
                                   product.stockQuantity, 
                                   product.minStockLevel || 0, 
-                                  product.maxStockLevel
+                                  product.maxStockLevel || 1000
                                 ).width}%` 
                               }}
                             />
