@@ -244,7 +244,7 @@ export default function Header() {
             </div>
 
             {/* Customer Authentication - Desktop */}
-            {isAuthenticated && customer ? (
+            {isAuthenticated && customer && (
               <div className="hidden md:block">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -273,14 +273,6 @@ export default function Header() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
-            ) : (
-              <div className="hidden md:block">
-                <Link href="/shop">
-                  <Button variant="outline" size="sm">
-                    {t.login}
-                  </Button>
-                </Link>
               </div>
             )}
             
@@ -392,7 +384,7 @@ export default function Header() {
 
 
                 {/* Customer Authentication - Mobile */}
-                {isAuthenticated && customer ? (
+                {isAuthenticated && customer && (
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -432,24 +424,6 @@ export default function Header() {
                         <span>{t.logout}</span>
                       </motion.div>
                     </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: (navigation.length + productCategories.length + 2) * 0.1 }}
-                    className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
-                  >
-                    <Link href="/shop">
-                      <motion.div
-                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors bg-blue-600 text-white hover:bg-blue-700"
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <User className="h-4 w-4" />
-                        <span>{t.login}</span>
-                      </motion.div>
-                    </Link>
                   </motion.div>
                 )}
 
