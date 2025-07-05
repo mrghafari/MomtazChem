@@ -180,6 +180,23 @@ const Shop = () => {
     checkCustomerAuth();
   }, []);
 
+  // Handle cart based on authentication status after customer state is known
+  useEffect(() => {
+    if (customer) {
+      // Authenticated user - load from localStorage
+      const userCart = localStorage.getItem('momtazchem_user_cart');
+      if (userCart) {
+        setCart(JSON.parse(userCart));
+      }
+    } else if (customer === null) {
+      // Guest user confirmed - clear any persistent cart storage
+      // Cart will only exist in memory and be lost on refresh
+      localStorage.removeItem('momtazchem_user_cart');
+      sessionStorage.removeItem('momtazchem_guest_cart');
+      setCart({});
+    }
+  }, [customer]);
+
   const checkCustomerAuth = async () => {
     try {
       const response = await fetch('/api/customers/me', {
@@ -230,16 +247,16 @@ const Shop = () => {
   };
 
   const migrateGuestCartToUser = () => {
-    const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
-    if (guestCart) {
-      const guestCartData = JSON.parse(guestCart);
-      // Merge guest cart with existing user cart if any
+    // Since guest cart is only in memory, get current cart state
+    const currentCart = cart;
+    
+    if (Object.keys(currentCart).length > 0) {
+      // Merge current guest cart with existing user cart if any
       const userCart = localStorage.getItem('momtazchem_user_cart');
       const userCartData = userCart ? JSON.parse(userCart) : {};
       
-      const mergedCart = { ...userCartData, ...guestCartData };
+      const mergedCart = { ...userCartData, ...currentCart };
       localStorage.setItem('momtazchem_user_cart', JSON.stringify(mergedCart));
-      sessionStorage.removeItem('momtazchem_guest_cart');
       
       setCart(mergedCart);
     } else {
@@ -330,11 +347,12 @@ const Shop = () => {
   // Save cart to appropriate storage based on authentication
   const saveCartToStorage = (cartData: {[key: number]: number}) => {
     if (customer) {
-      // Authenticated user - use localStorage
+      // Authenticated user - use localStorage (persists through refresh)
       localStorage.setItem('momtazchem_user_cart', JSON.stringify(cartData));
     } else {
-      // Guest user - use sessionStorage (will persist until login/register or tab close)
-      sessionStorage.setItem('momtazchem_guest_cart', JSON.stringify(cartData));
+      // Guest user - don't save to any persistent storage
+      // Cart will be lost on refresh as requested
+      // Only keep in memory during current session
     }
   };
 
