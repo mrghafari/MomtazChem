@@ -3222,12 +3222,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               // Update product stock
               if (product.stockQuantity !== null && product.stockQuantity !== undefined) {
-                const newQuantity = Math.max(0, product.stockQuantity - (quantity as number));
+                const currentStock = product.stockQuantity;
+                const newQuantity = Math.max(0, currentStock - (quantity as number));
+                console.log(`🛒 STOCK UPDATE - Product ${product.name} (ID: ${productId})`);
+                console.log(`   Current Stock: ${currentStock}`);
+                console.log(`   Quantity Sold: ${quantity}`);
+                console.log(`   New Stock: ${newQuantity}`);
+                
                 await shopStorage.updateProductStock(
                   parseInt(productId as string),
                   newQuantity,
                   `Order ${orderNumber} - Sold ${quantity} units`
                 );
+                
+                console.log(`✅ Stock updated successfully for product ${productId}`);
+              } else {
+                console.log(`⚠️ No stock quantity available for product ${productId}`);
               }
             }
           } catch (productError) {
