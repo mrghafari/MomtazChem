@@ -158,9 +158,22 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     queryKey: ['/api/customers/me'],
     queryFn: async () => {
       try {
-        return await apiRequest('/api/customers/me', 'GET');
+        const response = await fetch('/api/customers/me', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Customer API response:', result);
+          if (result.success) {
+            return result;
+          }
+        }
+        
+        console.log('Customer not authenticated or API failed');
+        return null;
       } catch (error) {
-        // User not logged in, continue with empty form
+        console.log('Error fetching customer data:', error);
         return null;
       }
     },

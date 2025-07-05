@@ -6471,38 +6471,7 @@ ${procedure.content}
     }
   });
 
-  // Get current customer profile
-  app.get("/api/customers/me", async (req: Request, res: Response) => {
-    try {
-      const customerId = (req.session as any)?.customerId;
-      if (!customerId) {
-        return res.status(401).json({
-          success: false,
-          message: "احراز هویت نشده"
-        });
-      }
-
-      const customer = await crmStorage.getCrmCustomerById(customerId);
-      if (!customer) {
-        return res.status(404).json({
-          success: false,
-          message: "مشتری یافت نشد"
-        });
-      }
-
-      res.json({
-        success: true,
-        data: customer
-      });
-
-    } catch (error) {
-      console.error("Error fetching customer profile:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت اطلاعات پروفایل"
-      });
-    }
-  });
+  // Duplicate route removed - using main route at line 2959
 
   // Customer profile update endpoint
   app.put("/api/customers/profile", async (req: Request, res: Response) => {
