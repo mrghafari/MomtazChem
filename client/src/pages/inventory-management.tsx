@@ -80,7 +80,7 @@ export default function InventoryManagement() {
     notificationsSent: 12,
     goodsInTransit: goodsInTransit?.filter((item: any) => item.status === 'in_transit')?.length || 0,
     transitValue: goodsInTransit?.filter((item: any) => item.status === 'in_transit')
-      ?.reduce((sum: number, item: any) => sum + (item.totalAmount || 0), 0) || 0,
+      ?.reduce((sum: number, item: any) => sum + (parseFloat(item.totalAmount) || 0), 0) || 0,
     lastUpdateTime: new Date().toLocaleString('fa-IR')
   };
 
@@ -358,7 +358,7 @@ export default function InventoryManagement() {
                       <p className="text-sm font-medium text-gray-600">ارزش کل</p>
                       <p className="text-2xl font-bold text-blue-600">
                         {(goodsInTransit?.filter((item: any) => item.status === 'in_transit')
-                          ?.reduce((sum: number, item: any) => sum + (item.totalAmount || 0), 0) || 0).toLocaleString()} دینار
+                          ?.reduce((sum: number, item: any) => sum + (parseFloat(item.totalAmount) || 0), 0) || 0).toLocaleString()} دینار
                       </p>
                     </div>
                     <Package className="w-8 h-8 text-blue-500" />
