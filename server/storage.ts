@@ -223,7 +223,7 @@ export class DatabaseStorage implements IStorage {
       
       // Extract price from unitPrice first, fallback to priceRange
       let productPrice = "50"; // Default price
-      if (showcaseProduct.unitPrice && showcaseProduct.unitPrice > 0) {
+      if (showcaseProduct.unitPrice && Number(showcaseProduct.unitPrice) > 0) {
         productPrice = showcaseProduct.unitPrice.toString();
       } else if (showcaseProduct.priceRange) {
         const priceMatch = showcaseProduct.priceRange.match(/\$?(\d+(?:\.\d+)?)/);
