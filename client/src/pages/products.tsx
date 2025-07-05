@@ -173,7 +173,9 @@ export default function ProductsPage() {
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
       apiRequest(`/api/products/${id}`, "PUT", data),
     onSuccess: () => {
+      // Force refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.refetchQueries({ queryKey: ["/api/products"] });
       setDialogOpen(false);
       setEditingProduct(null);
       setImagePreview(null);
