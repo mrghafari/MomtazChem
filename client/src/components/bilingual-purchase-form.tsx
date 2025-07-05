@@ -268,11 +268,31 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Get current translations
   const t = translations[language];
 
-  // Calculate total amount
+  // Calculate discounted price based on quantity
+  const getDiscountedPrice = (product: any, quantity: number) => {
+    const basePrice = parseFloat(product.price);
+    
+    if (product.quantityDiscounts && Array.isArray(product.quantityDiscounts)) {
+      // Sort discounts by minimum quantity (descending)
+      const sortedDiscounts = product.quantityDiscounts
+        .filter((d: any) => quantity >= d.minQty)
+        .sort((a: any, b: any) => b.minQty - a.minQty);
+      
+      if (sortedDiscounts.length > 0) {
+        const discount = sortedDiscounts[0].discount;
+        return basePrice * (1 - discount);
+      }
+    }
+    
+    return basePrice;
+  };
+
+  // Calculate total amount with discounts
   const totalAmount = Object.entries(cart).reduce((sum, [productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
     if (product && product.price) {
-      return sum + (parseFloat(product.price) * quantity);
+      const discountedPrice = getDiscountedPrice(product, quantity);
+      return sum + (discountedPrice * quantity);
     }
     return sum;
   }, 0);
@@ -388,7 +408,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 if (!product) return null;
                 
                 const basePrice = parseFloat(product.price || '0');
-                const itemTotal = basePrice * quantity;
+                const discountedPrice = getDiscountedPrice(product, quantity);
+                const itemTotal = discountedPrice * quantity;
                 
                 return (
                   <div key={productId} className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
@@ -397,7 +418,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{product.name}</h4>
                         <p className="text-xs text-muted-foreground">{product.category}</p>
-                        <p className="text-sm font-medium mt-1">{formatCurrency(basePrice)} {t.each}</p>
+                        <p className="text-sm font-medium mt-1">
+                          {discountedPrice < basePrice && (
+                            <span className="line-through text-gray-400 mr-2">{formatCurrency(basePrice)}</span>
+                          )}
+                          {formatCurrency(discountedPrice)} {t.each}
+                        </p>
                       </div>
                       
                       {/* Quantity Controls */}
