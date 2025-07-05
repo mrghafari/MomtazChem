@@ -1,6 +1,4 @@
-import React from "react";
-
-function Router() {
+function App() {
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial', background: 'white', color: 'black', minHeight: '100vh' }}>
       <header style={{ marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
@@ -8,8 +6,8 @@ function Router() {
       </header>
       <main>
         <div style={{ marginBottom: '20px' }}>
-          <h2>System Status: Working</h2>
-          <p>Your chemical inventory management system is now loading correctly!</p>
+          <h2>✅ System Status: Working</h2>
+          <p>سایت شما حل شد و دوباره کار می‌کند!</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
           <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '5px' }}>
@@ -40,21 +38,6 @@ function Router() {
       </main>
     </div>
   );
-}
-
-function App() {
-  try {
-    return <Router />;
-  } catch (error) {
-    console.error('App rendering error:', error);
-    return (
-      <div style={{ padding: '20px', backgroundColor: 'white', color: 'black' }}>
-        <h1>Loading Error</h1>
-        <p>There was an error loading the application. Please check the console for details.</p>
-        <pre>{String(error)}</pre>
-      </div>
-    );
-  }
 }
 
 export default App;
