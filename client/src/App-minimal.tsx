@@ -8,7 +8,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 
-// Core pages only
+// Essential pages only
 import Home from "@/pages/home";
 import About from "@/pages/about";
 import Services from "@/pages/services";
@@ -16,6 +16,8 @@ import Contact from "@/pages/contact";
 import Shop from "@/pages/shop";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
+
+const NotFound = () => <div className="text-center py-8">صفحه یافت نشد</div>;
 
 function Router() {
   return (
@@ -30,7 +32,7 @@ function Router() {
           <Route path="/shop" component={Shop} />
           <Route path="/admin" component={AdminPage} />
           <Route path="/admin/login" component={AdminLogin} />
-          <Route component={() => <div>صفحه یافت نشد</div>} />
+          <Route component={NotFound} />
         </Switch>
       </main>
       <Footer />
@@ -52,7 +54,7 @@ function App() {
     );
   } catch (error) {
     console.error('App Error:', error);
-    return <div>خطا در بارگذاری برنامه</div>;
+    return <div className="text-center py-8">خطا در بارگذاری برنامه</div>;
   }
 }
 

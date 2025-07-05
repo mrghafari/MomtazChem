@@ -1,29 +1,21 @@
-import React, { lazy, Suspense } from "react";
+import React from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import ShopSearch from "./components/ShopSearch";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 
-// Core pages
+// Essential pages only
 import Home from "@/pages/home";
 import About from "@/pages/about";
 import Services from "@/pages/services";
 import Contact from "@/pages/contact";
 import Shop from "@/pages/shop";
-import Checkout from "@/pages/checkout";
-import Payment from "@/pages/payment";
-import CheckoutSuccess from "@/pages/checkout-success";
-import ShopAdmin from "@/pages/shop-admin";
-import InvoiceManagement from "@/pages/admin/invoice-management";
-import PaymentSettings from "@/pages/admin/payment-settings";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
-import AdminUsers from "@/pages/admin-users";
 
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
 import DatabaseManagement from "@/pages/admin/database-management";
