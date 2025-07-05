@@ -3174,13 +3174,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
               });
 
-              // Update product stock
+              // Reserve product stock instead of reducing it
               if (product.stockQuantity !== null && product.stockQuantity !== undefined) {
-                const newQuantity = Math.max(0, product.stockQuantity - (quantity as number));
-                await shopStorage.updateProductStock(
+                const currentReserved = product.reservedQuantity || 0;
+                const orderQuantity = quantity as number;
+                
+                // Check if enough stock is available (stock - reserved - requested)
+                const availableStock = product.stockQuantity - currentReserved;
+                if (availableStock < orderQuantity) {
+                  throw new Error(`Not enough stock for product ${product.name}. Available: ${availableStock}, Requested: ${orderQuantity}`);
+                }
+                
+                // Reserve the stock for this order
+                await shopStorage.updateProductInventory(
                   parseInt(productId as string),
-                  newQuantity,
-                  `Order ${orderNumber} - Sold ${quantity} units`
+                  product.stockQuantity, // Keep available stock same
+                  currentReserved + orderQuantity, // Increase reserved stock
+                  `Order ${orderNumber} - Reserved ${quantity} units`
                 );
               }
             }
@@ -4440,14 +4450,18 @@ ${procedure.content}
           productSnapshot: null,
         });
 
-        // Update product stock
+        // Reserve product stock (move from available to reserved)
         const product = await shopStorage.getShopProductById(item.productId);
         if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
-          const newQuantity = product.stockQuantity - item.quantity;
-          await shopStorage.updateProductStock(
+          const availableStock = product.stockQuantity - item.quantity;
+          const reservedStock = (product.reservedQuantity || 0) + item.quantity;
+          
+          // Update both available and reserved quantities
+          await shopStorage.updateProductInventory(
             item.productId,
-            newQuantity,
-            `Order ${orderNumber} - Sold ${item.quantity} units`
+            availableStock,
+            reservedStock,
+            `Order ${orderNumber} - Reserved ${item.quantity} units for delivery`
           );
         }
       }
@@ -8541,6 +8555,42 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         // Generate delivery code for final delivery
         const deliveryCode = Math.random().toString().substr(2, 6);
         await orderManagementStorage.generateDeliveryCode(orderId);
+        
+        // Release reserved inventory when order is delivered
+        try {
+          // Get order details
+          const { db } = await import("./db");
+          const { customerOrders } = await import("../shared/customer-schema");
+          const { orderItems } = await import("../shared/shop-schema");
+          const { eq } = await import("drizzle-orm");
+          
+          const [orderDetails] = await db
+            .select()
+            .from(customerOrders)
+            .where(eq(customerOrders.id, orderId));
+          
+          if (orderDetails) {
+            // Get order items
+            const items = await db
+              .select()
+              .from(orderItems)
+              .where(eq(orderItems.orderId, orderId));
+            
+            // Release reserved stock for each item
+            for (const item of items) {
+              if (item.productId && item.quantity) {
+                await shopStorage.releaseReservedStock(
+                  item.productId,
+                  item.quantity,
+                  `Order ${orderId} delivered - releasing reserved stock`
+                );
+              }
+            }
+          }
+        } catch (reserveError) {
+          console.error('Error releasing reserved inventory:', reserveError);
+          // Continue with order processing even if inventory release fails
+        }
       }
       
       // Update order with logistics info

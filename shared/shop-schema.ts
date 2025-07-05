@@ -18,6 +18,7 @@ export const shopProducts = pgTable("shop_products", {
   priceUnit: text("price_unit").notNull(), // per liter, per kg, per ton
   inStock: boolean("in_stock").default(true),
   stockQuantity: integer("stock_quantity").default(0),
+  reservedQuantity: integer("reserved_quantity").default(0), // Stock reserved for pending orders
   lowStockThreshold: integer("low_stock_threshold").default(10),
   sku: text("sku").unique().notNull(),
   barcode: text("barcode"),

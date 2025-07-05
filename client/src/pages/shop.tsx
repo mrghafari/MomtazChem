@@ -257,10 +257,51 @@ const Shop = () => {
 
   // Cart functions
   const addToCart = (productId: number) => {
+    // Find the product to check available stock
+    const product = currentProducts?.find((p: any) => p.id === productId);
+    if (!product) {
+      toast({
+        title: language === "ar" ? "خطأ" : language === "ku" ? "هەڵە" : "Error",
+        description: language === "ar" ? "المنتج غير موجود" : 
+                     language === "ku" ? "بەرهەم نادۆزرێتەوە" : 
+                     "Product not found",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const totalStock = product.stockQuantity || 0;
+    const reservedStock = product.reservedQuantity || 0;
+    const availableStock = totalStock - reservedStock;
+    const currentInCart = cart[productId] || 0;
+    
+    // Check if there's enough available stock
+    if (currentInCart >= availableStock) {
+      toast({
+        title: language === "ar" ? "مخزون غير كافي" : 
+               language === "ku" ? "کۆگای بەردەست نییە" : 
+               "Insufficient Stock",
+        description: language === "ar" ? `فقط ${availableStock} متوفر` : 
+                     language === "ku" ? `تەنها ${availableStock} ماوە` : 
+                     `Only ${availableStock} available`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setCart(prev => ({
       ...prev,
-      [productId]: (prev[productId] || 0) + 1
+      [productId]: currentInCart + 1
     }));
+    
+    toast({
+      title: language === "ar" ? "تمت الإضافة" : 
+             language === "ku" ? "زیادکرا" : 
+             "Added to Cart",
+      description: language === "ar" ? "تم إضافة المنتج إلى السلة" : 
+                   language === "ku" ? "بەرهەم بۆ سەبەتە زیادکرا" : 
+                   "Product added to cart",
+    });
   };
 
   const removeFromCart = (productId: number) => {
@@ -730,18 +771,30 @@ const Shop = () => {
                           </div>
 
                           {/* Low Stock Warning */}
-                          {product.inStock && product.stockQuantity && product.stockQuantity < 10 && (
-                            <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                                <span className="text-sm font-medium text-orange-800">
-                                  {language === "ar" ? `${product.stockQuantity} فقط متبقی` : 
-                                   language === "ku" ? `تەنها ${product.stockQuantity} ماوە` :
-                                   `Only ${product.stockQuantity} left in stock`}
-                                </span>
+                          {product.inStock && (() => {
+                            const totalStock = product.stockQuantity || 0;
+                            const reservedStock = product.reservedQuantity || 0;
+                            const availableStock = totalStock - reservedStock;
+                            const isLowStock = product.lowStockThreshold ? availableStock < product.lowStockThreshold : availableStock < 10;
+                            
+                            return availableStock > 0 && isLowStock && (
+                              <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                                  <span className="text-sm font-medium text-orange-800">
+                                    {language === "ar" ? `${availableStock} فقط متبقی` : 
+                                     language === "ku" ? `تەنها ${availableStock} ماوە` :
+                                     `Only ${availableStock} available`}
+                                  </span>
+                                  {reservedStock > 0 && (
+                                    <span className="text-xs text-orange-600">
+                                      ({reservedStock} {language === "ar" ? "محفوظ" : language === "ku" ? "پاراستراوە" : "reserved"})
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
 
                           {/* Quantity Discounts Display */}
                           {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
@@ -861,18 +914,30 @@ const Shop = () => {
                               </div>
 
                               {/* Low Stock Warning */}
-                              {product.inStock && product.stockQuantity && product.lowStockThreshold && product.stockQuantity < product.lowStockThreshold && (
-                                <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                                    <span className="text-sm font-medium text-orange-800">
-                                      {language === "ar" ? `${product.stockQuantity} فقط متبقی` : 
-                                       language === "ku" ? `تەنها ${product.stockQuantity} ماوە` :
-                                       `Only ${product.stockQuantity} left in stock`}
-                                    </span>
+                              {product.inStock && (() => {
+                                const totalStock = product.stockQuantity || 0;
+                                const reservedStock = product.reservedQuantity || 0;
+                                const availableStock = totalStock - reservedStock;
+                                const isLowStock = product.lowStockThreshold ? availableStock < product.lowStockThreshold : availableStock < 10;
+                                
+                                return availableStock > 0 && isLowStock && (
+                                  <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                                      <span className="text-sm font-medium text-orange-800">
+                                        {language === "ar" ? `${availableStock} فقط متبقی` : 
+                                         language === "ku" ? `تەنها ${availableStock} ماوە` :
+                                         `Only ${availableStock} available`}
+                                      </span>
+                                      {reservedStock > 0 && (
+                                        <span className="text-xs text-orange-600">
+                                          ({reservedStock} {language === "ar" ? "محفوظ" : language === "ku" ? "پاراستراوە" : "reserved"})
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                );
+                              })()}
                             </div>
                             
                             <div className="ml-6">

@@ -116,6 +116,8 @@ export interface IShopStorage {
   getInventoryTransactions(productId?: number): Promise<InventoryTransaction[]>;
   createInventoryTransaction(transaction: InsertInventoryTransaction): Promise<InventoryTransaction>;
   updateProductStock(productId: number, newQuantity: number, reason: string): Promise<void>;
+  updateProductInventory(productId: number, availableStock: number, reservedStock: number, reason: string): Promise<void>;
+  releaseReservedStock(productId: number, releaseQuantity: number, reason: string): Promise<void>;
   
   // Analytics
   getOrderStatistics(): Promise<{
@@ -749,6 +751,48 @@ export class ShopStorage implements IShopStorage {
       productId,
       type: "adjustment",
       quantity: difference,
+      notes: reason,
+    });
+  }
+
+  async updateProductInventory(productId: number, availableStock: number, reservedStock: number, reason: string): Promise<void> {
+    // Get current stock
+    const product = await this.getShopProductById(productId);
+    if (!product) throw new Error("Product not found");
+
+    // Update both available and reserved stock
+    await this.updateShopProduct(productId, { 
+      stockQuantity: availableStock,
+      reservedQuantity: reservedStock
+    });
+
+    // Record inventory transaction for reserved stock
+    await this.createInventoryTransaction({
+      productId,
+      type: "reserve",
+      quantity: reservedStock - (product.reservedQuantity || 0),
+      notes: reason,
+    });
+  }
+
+  async releaseReservedStock(productId: number, releaseQuantity: number, reason: string): Promise<void> {
+    // Get current product
+    const product = await this.getShopProductById(productId);
+    if (!product) throw new Error("Product not found");
+
+    const currentReserved = product.reservedQuantity || 0;
+    const newReservedQuantity = Math.max(0, currentReserved - releaseQuantity);
+
+    // Update reserved stock
+    await this.updateShopProduct(productId, { 
+      reservedQuantity: newReservedQuantity
+    });
+
+    // Record inventory transaction
+    await this.createInventoryTransaction({
+      productId,
+      type: "release",
+      quantity: -releaseQuantity,
       notes: reason,
     });
   }
