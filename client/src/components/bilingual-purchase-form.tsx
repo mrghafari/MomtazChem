@@ -271,8 +271,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Calculate total amount
   const totalAmount = Object.entries(cart).reduce((sum, [productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
-    if (product && product.unitPrice) {
-      return sum + (parseFloat(product.unitPrice) * quantity);
+    if (product && product.price) {
+      return sum + (parseFloat(product.price) * quantity);
     }
     return sum;
   }, 0);
@@ -387,7 +387,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 const product = products.find(p => p.id === parseInt(productId));
                 if (!product) return null;
                 
-                const basePrice = parseFloat(product.unitPrice || '0');
+                const basePrice = parseFloat(product.price || '0');
                 const itemTotal = basePrice * quantity;
                 
                 return (

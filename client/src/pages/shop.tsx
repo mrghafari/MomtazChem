@@ -719,7 +719,7 @@ const Shop = () => {
                           <div className="flex items-center justify-between mb-3">
                             <div>
                               <span className="text-2xl font-bold text-green-600">
-                                ${parseFloat(product.price).toFixed(2)}
+                                ${product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
                               </span>
                               <span className="text-sm text-gray-500 ml-1">
                                 / {product.priceUnit || 'unit'}
@@ -867,7 +867,7 @@ const Shop = () => {
                               <div className="flex items-center gap-4 mb-4">
                                 <div>
                                   <span className="text-2xl font-bold text-green-600">
-                                    ${parseFloat(product.price).toFixed(2)}
+                                    ${product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
                                   </span>
                                   <span className="text-sm text-gray-500 ml-1">
                                     / {product.priceUnit || 'unit'}
