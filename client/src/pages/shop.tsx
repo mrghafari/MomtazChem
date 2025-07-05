@@ -182,16 +182,18 @@ const Shop = () => {
     checkCustomerAuth();
   }, []);
 
-  // Initialize display stock when products are loaded
+  // Initialize display stock when products are loaded and cart is ready
   useEffect(() => {
     if (currentProducts?.length > 0) {
       const initialDisplayStock: {[key: number]: number} = {};
       currentProducts.forEach(product => {
-        initialDisplayStock[product.id] = product.stockQuantity || 0;
+        const productInCart = cart[product.id] || 0;
+        const availableStock = (product.stockQuantity || 0) - productInCart;
+        initialDisplayStock[product.id] = Math.max(0, availableStock);
       });
       setDisplayStock(initialDisplayStock);
     }
-  }, [currentProducts]);
+  }, [currentProducts, cart]);
 
   // Handle cart based on authentication status after customer state is known
   useEffect(() => {
@@ -375,8 +377,7 @@ const Shop = () => {
   };
 
   const setProductQuantity = (productId: number, quantity: number) => {
-    const product = products.find(p => p.id === productId);
-    const maxQuantity = product?.stockQuantity || 999;
+    const maxQuantity = displayStock[productId] || 999;
     const validQuantity = Math.max(1, Math.min(quantity, maxQuantity));
     
     setProductQuantities(prev => ({
@@ -890,9 +891,16 @@ const Shop = () => {
                                 / {product.priceUnit || 'unit'}
                               </span>
                             </div>
-                            <Badge variant={product.inStock ? "secondary" : "destructive"}>
-                              {product.inStock ? "In Stock" : "Out of Stock"}
-                            </Badge>
+                            <div className="flex flex-col gap-1">
+                              <Badge variant={product.inStock ? "secondary" : "destructive"}>
+                                {product.inStock ? "In Stock" : "Out of Stock"}
+                              </Badge>
+                              {product.inStock && displayStock[product.id] !== undefined && (
+                                <span className="text-xs text-gray-600 font-medium">
+                                  Available: {displayStock[product.id]}
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {/* Low Stock Warning */}
@@ -1001,7 +1009,7 @@ const Shop = () => {
                                 <input
                                   type="number"
                                   min="1"
-                                  max={product.stockQuantity || 999}
+                                  max={displayStock[product.id] || 999}
                                   value={getProductQuantity(product.id)}
                                   onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
                                   className="w-16 text-center border rounded px-2 py-1 font-medium"
@@ -1010,7 +1018,7 @@ const Shop = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                  disabled={getProductQuantity(product.id) >= (product.stockQuantity || 0)}
+                                  disabled={getProductQuantity(product.id) >= (displayStock[product.id] || 0)}
                                 >
                                   <Plus className="w-4 h-4" />
                                 </Button>
@@ -1060,9 +1068,16 @@ const Shop = () => {
                                     / {product.priceUnit || 'unit'}
                                   </span>
                                 </div>
-                                <Badge variant={product.inStock ? "secondary" : "destructive"}>
-                                  {product.inStock ? "In Stock" : "Out of Stock"}
-                                </Badge>
+                                <div className="flex flex-col gap-1">
+                                  <Badge variant={product.inStock ? "secondary" : "destructive"}>
+                                    {product.inStock ? "In Stock" : "Out of Stock"}
+                                  </Badge>
+                                  {product.inStock && displayStock[product.id] !== undefined && (
+                                    <span className="text-xs text-gray-600 font-medium">
+                                      Available: {displayStock[product.id]}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
 
                               {/* Low Stock Warning - List View */}
@@ -1126,7 +1141,7 @@ const Shop = () => {
                                     <input
                                       type="number"
                                       min="1"
-                                      max={product.stockQuantity || 999}
+                                      max={displayStock[product.id] || 999}
                                       value={getProductQuantity(product.id)}
                                       onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
                                       className="w-16 text-center border rounded px-2 py-1 font-medium"
@@ -1135,7 +1150,7 @@ const Shop = () => {
                                       size="sm"
                                       variant="outline"
                                       onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                      disabled={getProductQuantity(product.id) >= (product.stockQuantity || 0)}
+                                      disabled={getProductQuantity(product.id) >= (displayStock[product.id] || 0)}
                                     >
                                       <Plus className="w-4 h-4" />
                                     </Button>
