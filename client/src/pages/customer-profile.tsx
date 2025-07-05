@@ -18,6 +18,21 @@ const CustomerProfile = () => {
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
     queryKey: ["/api/customers/me"],
+    queryFn: async () => {
+      const response = await fetch('/api/customers/me', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
+    },
     retry: 1,
   });
 
@@ -63,8 +78,18 @@ const CustomerProfile = () => {
     );
   }
 
+  // Debug logging
+  console.log('Customer Profile Debug:', {
+    customerLoading,
+    customerError,
+    customerData,
+    hasCustomerData: !!customerData,
+    hasSuccess: customerData?.success,
+  });
+
   // Check for authentication errors or missing data
   if (customerError || (!customerLoading && (!customerData || !customerData.success))) {
+    console.log('Authentication error detected:', customerError);
     return (
       <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
         <Card className="w-full max-w-md">
