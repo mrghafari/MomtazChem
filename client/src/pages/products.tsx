@@ -295,7 +295,6 @@ export default function ProductsPage() {
       applications: "",
       barcode: "",
       sku: "",
-      inventoryStatus: "in_stock",
       stockQuantity: 0,
       minStockLevel: 0,
       maxStockLevel: 0,
@@ -421,7 +420,6 @@ export default function ProductsPage() {
       specifications: typeof product.specifications === 'object' ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
-      inventoryStatus: product.inventoryStatus || "in_stock",
       stockQuantity: Number(product.stockQuantity) ?? 0,
       minStockLevel: Number(product.minStockLevel) ?? 0,
       maxStockLevel: Number(product.maxStockLevel) ?? 0,
@@ -1001,34 +999,10 @@ export default function ProductsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Inventory & Pricing</h3>
                   
-                  <FormField
-                    control={form.control}
-                    name="inventoryStatus"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Inventory Status</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="in_stock">In Stock</SelectItem>
-                            <SelectItem value="low_stock">Low Stock</SelectItem>
-                            <SelectItem value="out_of_stock">Out of Stock</SelectItem>
-                            <SelectItem value="discontinued">Discontinued</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
-                      name="currentStock"
+                      name="stockQuantity"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Current Stock</FormLabel>

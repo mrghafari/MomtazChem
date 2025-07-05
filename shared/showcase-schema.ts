@@ -47,7 +47,6 @@ export const showcaseProducts = pgTable("showcase_products", {
   minStockLevel: integer("min_stock_level").default(10), // Minimum stock threshold
   maxStockLevel: integer("max_stock_level").default(1000), // Maximum stock capacity
   stockUnit: text("stock_unit").default("units"), // Unit of measurement (liters, kg, units, etc.)
-  inventoryStatus: text("inventory_status").default("in_stock"), // in_stock, low_stock, out_of_stock, discontinued
   // Pricing fields
   unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).default("0.00"), // Individual unit price
   currency: text("currency").default("USD"), // Currency code (USD, EUR, IQD)
