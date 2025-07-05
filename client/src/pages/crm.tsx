@@ -267,21 +267,25 @@ export default function CRM() {
       return;
     }
 
+    console.log("Frontend editingCustomer secondaryAddress value:", editingCustomer.secondaryAddress);
+
     // Only send editable fields, exclude email and phone as they are read-only
+    // Include all fields even if they are null/undefined to ensure they get updated
     const updateData = {
       firstName: editingCustomer.firstName,
       lastName: editingCustomer.lastName,
-      company: editingCustomer.company,
+      company: editingCustomer.company || null,
       country: editingCustomer.country,
       city: editingCustomer.city,
       address: editingCustomer.address,
-      secondaryAddress: editingCustomer.secondaryAddress,
-      postalCode: editingCustomer.postalCode,
+      secondaryAddress: editingCustomer.secondaryAddress || null,
+      postalCode: editingCustomer.postalCode || null,
       customerType: editingCustomer.customerType,
       customerStatus: editingCustomer.customerStatus,
       customerSource: editingCustomer.customerSource,
     };
 
+    console.log("Frontend updateData being sent:", updateData);
     updateCustomerMutation.mutate({ id: editingCustomer.id, data: updateData });
   };
 
