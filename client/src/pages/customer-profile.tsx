@@ -91,7 +91,22 @@ const CustomerProfile = () => {
   }
 
   const customer = customerData.customer;
-  const customerName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.name || customer.email;
+  
+  // Create proper customer name display
+  let customerName = '';
+  if (customer.firstName && customer.lastName) {
+    customerName = `${customer.firstName} ${customer.lastName}`;
+  } else if (customer.firstName) {
+    customerName = customer.firstName;
+  } else if (customer.lastName) {
+    customerName = customer.lastName;
+  } else if (customer.email) {
+    // Extract name from email (before @)
+    const emailPrefix = customer.email.split('@')[0];
+    customerName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+  } else {
+    customerName = 'مشتری گرامی';
+  }
 
   return (
     <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>

@@ -243,8 +243,49 @@ export default function Header() {
               <LanguageSwitcher />
             </div>
 
+            {/* Customer Authentication */}
+            {isAuthenticated && customer ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span className="hidden sm:inline-block">
+                      {customer.firstName || customer.email?.split('@')[0] || 'مشتری'}
+                    </span>
+                    <ChevronDown className="w-3 h-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => window.location.href = '/customer/profile'}>
+                    <User className="w-4 h-4 mr-2" />
+                    پروفایل
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.location.href = '/customer/wallet'}>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    کیف پول
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.location.href = '/shop'}>
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    فروشگاه
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => logout()}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    خروج
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => window.location.href = '/customer/login'}>
+                  ورود
+                </Button>
+                <Button size="sm" onClick={() => window.location.href = '/customer/register'}>
+                  ثبت نام
+                </Button>
+              </div>
+            )}
 
-            
             {/* Mobile menu button */}
             <Button
               variant="ghost"
