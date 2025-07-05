@@ -424,24 +424,16 @@ const Shop = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate("/customer/wallet")}
+                        onClick={() => {
+                          console.log("Navigating to customer wallet...");
+                          navigate("/customer/wallet");
+                        }}
                         className="flex items-center gap-1 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
                       >
                         <Wallet className="w-4 h-4 text-green-600" />
                         <span className="text-sm font-semibold text-green-800">
                           {walletBalance.toFixed(0)} IQD
                         </span>
-                      </Button>
-                      
-                      {/* Logout Button */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span className="text-sm">خروج</span>
                       </Button>
                     </div>
                   ) : (
