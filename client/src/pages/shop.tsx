@@ -46,6 +46,9 @@ const Shop = () => {
   const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
+  const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [quantityInput, setQuantityInput] = useState(1);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [customer, setCustomer] = useState<any>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
@@ -357,7 +360,7 @@ const Shop = () => {
   };
 
   // Cart functions
-  const addToCart = (productId: number) => {
+  const openQuantityModal = (productId: number) => {
     // Find the product to check stock quantity
     const product = products.find(p => p.id === productId);
     if (!product) {
@@ -369,14 +372,34 @@ const Shop = () => {
       return;
     }
 
-    const currentQuantityInCart = cart[productId] || 0;
+    setSelectedProduct(product);
+    setQuantityInput(1);
+    setShowQuantityModal(true);
+  };
+
+  const addToCart = (productId?: number, quantity?: number) => {
+    const targetProductId = productId || selectedProduct?.id;
+    const targetQuantity = quantity || quantityInput;
+    
+    // Find the product to check stock quantity
+    const product = products.find(p => p.id === targetProductId);
+    if (!product) {
+      toast({
+        title: "خطا",
+        description: "محصول یافت نشد",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const currentQuantityInCart = cart[targetProductId] || 0;
     const availableStock = product.stockQuantity || 0;
 
-    // Check if adding one more item would exceed available stock
-    if (currentQuantityInCart >= availableStock) {
+    // Check if adding items would exceed available stock
+    if (currentQuantityInCart + targetQuantity > availableStock) {
       toast({
         title: "موجودی ناکافی",
-        description: `تنها ${availableStock} عدد از این محصول موجود است`,
+        description: `تنها ${availableStock - currentQuantityInCart} عدد از این محصول قابل اضافه کردن است`,
         variant: "destructive",
       });
       return;
@@ -384,15 +407,16 @@ const Shop = () => {
 
     const newCart = {
       ...cart,
-      [productId]: currentQuantityInCart + 1
+      [targetProductId]: currentQuantityInCart + targetQuantity
     };
     setCart(newCart);
     saveCartToStorage(newCart);
 
-    // Show success message
+    // Close modal and show success message
+    setShowQuantityModal(false);
     toast({
       title: "به سبد خرید اضافه شد",
-      description: `${product.name} به سبد خرید شما اضافه شد`,
+      description: `${targetQuantity} عدد ${product.name} به سبد خرید شما اضافه شد`,
     });
   };
 
@@ -952,7 +976,7 @@ const Shop = () => {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => addToCart(product.id)}
+                                    onClick={() => openQuantityModal(product.id)}
                                   >
                                     <Plus className="w-4 h-4" />
                                   </Button>
@@ -960,7 +984,7 @@ const Shop = () => {
                               ) : (
                                 <Button
                                   className="w-full"
-                                  onClick={() => addToCart(product.id)}
+                                  onClick={() => openQuantityModal(product.id)}
                                 >
                                   <ShoppingCart className="w-4 h-4 mr-2" />
                                   Add to Cart
@@ -1068,13 +1092,13 @@ const Shop = () => {
                                       <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => addToCart(product.id)}
+                                        onClick={() => openQuantityModal(product.id)}
                                       >
                                         <Plus className="w-4 h-4" />
                                       </Button>
                                     </div>
                                   ) : (
-                                    <Button onClick={() => addToCart(product.id)}>
+                                    <Button onClick={() => openQuantityModal(product.id)}>
                                       <ShoppingCart className="w-4 h-4 mr-2" />
                                       Add to Cart
                                     </Button>
