@@ -46,9 +46,7 @@ const Shop = () => {
   const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
-  const [showQuantityModal, setShowQuantityModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [quantityInput, setQuantityInput] = useState(1);
+  const [productQuantities, setProductQuantities] = useState<{[key: number]: number}>({});
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [customer, setCustomer] = useState<any>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
@@ -360,7 +358,20 @@ const Shop = () => {
   };
 
   // Cart functions
-  const openQuantityModal = (productId: number) => {
+  const getProductQuantity = (productId: number) => {
+    return productQuantities[productId] || 1;
+  };
+
+  const setProductQuantity = (productId: number, quantity: number) => {
+    setProductQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, quantity)
+    }));
+  };
+
+  const addToCart = (productId: number) => {
+    const targetQuantity = getProductQuantity(productId);
+    
     // Find the product to check stock quantity
     const product = products.find(p => p.id === productId);
     if (!product) {
@@ -372,27 +383,7 @@ const Shop = () => {
       return;
     }
 
-    setSelectedProduct(product);
-    setQuantityInput(1);
-    setShowQuantityModal(true);
-  };
-
-  const addToCart = (productId?: number, quantity?: number) => {
-    const targetProductId = productId || selectedProduct?.id;
-    const targetQuantity = quantity || quantityInput;
-    
-    // Find the product to check stock quantity
-    const product = products.find(p => p.id === targetProductId);
-    if (!product) {
-      toast({
-        title: "خطا",
-        description: "محصول یافت نشد",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const currentQuantityInCart = cart[targetProductId] || 0;
+    const currentQuantityInCart = cart[productId] || 0;
     const availableStock = product.stockQuantity || 0;
 
     // Check if adding items would exceed available stock
@@ -407,13 +398,13 @@ const Shop = () => {
 
     const newCart = {
       ...cart,
-      [targetProductId]: currentQuantityInCart + targetQuantity
+      [productId]: currentQuantityInCart + targetQuantity
     };
     setCart(newCart);
     saveCartToStorage(newCart);
 
-    // Close modal and show success message
-    setShowQuantityModal(false);
+    // Reset quantity for this product and show success message
+    setProductQuantity(productId, 1);
     toast({
       title: "به سبد خرید اضافه شد",
       description: `${targetQuantity} عدد ${product.name} به سبد خرید شما اضافه شد`,
@@ -962,34 +953,38 @@ const Shop = () => {
 
 
                           {product.inStock && (
-                            <div className="flex items-center gap-2">
-                              {cart[product.id] && cart[product.id] > 0 ? (
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => removeFromCart(product.id)}
-                                  >
-                                    <Minus className="w-4 h-4" />
-                                  </Button>
-                                  <span className="w-8 text-center">{cart[product.id]}</span>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => openQuantityModal(product.id)}
-                                  >
-                                    <Plus className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              ) : (
+                            <div className="space-y-2">
+                              {/* Quantity Controls */}
+                              <div className="flex items-center justify-center gap-2">
                                 <Button
-                                  className="w-full"
-                                  onClick={() => openQuantityModal(product.id)}
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
+                                  disabled={getProductQuantity(product.id) <= 1}
                                 >
-                                  <ShoppingCart className="w-4 h-4 mr-2" />
-                                  Add to Cart
+                                  <Minus className="w-4 h-4" />
                                 </Button>
-                              )}
+                                <span className="w-12 text-center font-medium">
+                                  {getProductQuantity(product.id)}
+                                </span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
+                                  disabled={getProductQuantity(product.id) >= (product.stockQuantity || 0)}
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              {/* Add to Cart Button */}
+                              <Button
+                                className="w-full"
+                                onClick={() => addToCart(product.id)}
+                                disabled={getProductQuantity(product.id) > (product.stockQuantity || 0)}
+                              >
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                              </Button>
                             </div>
                           )}
                         </CardContent>
@@ -1078,31 +1073,38 @@ const Shop = () => {
                             
                             <div className="ml-6">
                               {product.inStock && (
-                                <div className="flex items-center gap-2">
-                                  {cart[product.id] && cart[product.id] > 0 ? (
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => removeFromCart(product.id)}
-                                      >
-                                        <Minus className="w-4 h-4" />
-                                      </Button>
-                                      <span className="w-8 text-center">{cart[product.id]}</span>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => openQuantityModal(product.id)}
-                                      >
-                                        <Plus className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                  ) : (
-                                    <Button onClick={() => openQuantityModal(product.id)}>
-                                      <ShoppingCart className="w-4 h-4 mr-2" />
-                                      Add to Cart
+                                <div className="space-y-2">
+                                  {/* Quantity Controls */}
+                                  <div className="flex items-center justify-center gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
+                                      disabled={getProductQuantity(product.id) <= 1}
+                                    >
+                                      <Minus className="w-4 h-4" />
                                     </Button>
-                                  )}
+                                    <span className="w-12 text-center font-medium">
+                                      {getProductQuantity(product.id)}
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
+                                      disabled={getProductQuantity(product.id) >= (product.stockQuantity || 0)}
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                  {/* Add to Cart Button */}
+                                  <Button
+                                    className="w-full"
+                                    onClick={() => addToCart(product.id)}
+                                    disabled={getProductQuantity(product.id) > (product.stockQuantity || 0)}
+                                  >
+                                    <ShoppingCart className="w-4 h-4 mr-2" />
+                                    {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                                  </Button>
                                 </div>
                               )}
                             </div>
@@ -1212,64 +1214,7 @@ const Shop = () => {
         cartItemsCount={getTotalItems()}
       />
 
-      {/* Quantity Selection Modal */}
-      <Dialog open={showQuantityModal} onOpenChange={setShowQuantityModal}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>انتخاب تعداد</DialogTitle>
-            <DialogDescription>
-              {selectedProduct && `تعداد ${selectedProduct.name} مورد نظر خود را وارد کنید`}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="quantity" className="text-right">
-                تعداد:
-              </label>
-              <div className="col-span-3 flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setQuantityInput(Math.max(1, quantityInput - 1))}
-                  disabled={quantityInput <= 1}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <Input
-                  id="quantity"
-                  type="number"
-                  value={quantityInput}
-                  onChange={(e) => setQuantityInput(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 text-center"
-                  min="1"
-                  max={selectedProduct?.stockQuantity || 1}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setQuantityInput(Math.min((selectedProduct?.stockQuantity || 1), quantityInput + 1))}
-                  disabled={quantityInput >= (selectedProduct?.stockQuantity || 1)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {selectedProduct && (
-              <div className="text-sm text-gray-600">
-                موجودی فعلی: {selectedProduct.stockQuantity} عدد
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowQuantityModal(false)}>
-              انصراف
-            </Button>
-            <Button onClick={() => addToCart()}>
-              افزودن به سبد خرید
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Auth Dialog */}
       <CustomerAuth 
