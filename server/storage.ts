@@ -118,8 +118,8 @@ export class DatabaseStorage implements IStorage {
       category: categoryName, // Store the full category name
       unitPrice: String(insertProduct.unitPrice || 0), // Convert to string for decimal field
       specifications: insertProduct.specifications && typeof insertProduct.specifications === 'object' && !Array.isArray(insertProduct.specifications) && Object.keys(insertProduct.specifications).length > 0 ? insertProduct.specifications : null,
-      features: Array.isArray(insertProduct.features) && insertProduct.features.length > 0 ? insertProduct.features : null,
-      applications: Array.isArray(insertProduct.applications) && insertProduct.applications.length > 0 ? insertProduct.applications : null,
+      features: Array.isArray(insertProduct.features) && insertProduct.features.length > 0 ? insertProduct.features : [],
+      applications: Array.isArray(insertProduct.applications) && insertProduct.applications.length > 0 ? insertProduct.applications : [],
       certifications: Array.isArray(insertProduct.certifications) && insertProduct.certifications.length > 0 ? insertProduct.certifications : null,
     };
 
@@ -186,10 +186,10 @@ export class DatabaseStorage implements IStorage {
       }
     }
     if (productUpdate.features !== undefined) {
-      updateData.features = Array.isArray(productUpdate.features) && productUpdate.features.length > 0 ? productUpdate.features : null;
+      updateData.features = Array.isArray(productUpdate.features) && productUpdate.features.length > 0 ? productUpdate.features : [];
     }
     if (productUpdate.applications !== undefined) {
-      updateData.applications = Array.isArray(productUpdate.applications) && productUpdate.applications.length > 0 ? productUpdate.applications : null;
+      updateData.applications = Array.isArray(productUpdate.applications) && productUpdate.applications.length > 0 ? productUpdate.applications : [];
     }
     if (productUpdate.certifications !== undefined) {
       updateData.certifications = Array.isArray(productUpdate.certifications) && productUpdate.certifications.length > 0 ? productUpdate.certifications : null;
