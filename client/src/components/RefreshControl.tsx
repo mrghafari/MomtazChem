@@ -26,8 +26,8 @@ const REFRESH_INTERVALS = [
 
 export default function RefreshControl({ onRefresh, isLoading = false, departmentName }: RefreshControlProps) {
   const { toast } = useToast();
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(30); // 30 seconds default
+  const [autoRefresh, setAutoRefresh] = useState(false); // Disabled by default
+  const [refreshInterval, setRefreshInterval] = useState(600); // 10 minutes default
   const [timeLeft, setTimeLeft] = useState(refreshInterval);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 

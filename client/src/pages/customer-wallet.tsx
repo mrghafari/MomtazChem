@@ -83,7 +83,7 @@ export default function CustomerWallet() {
   const { data: walletData, isLoading } = useQuery<{ success: boolean; data: WalletSummary }>({
     queryKey: ['/api/customer/wallet'],
     enabled: isAuthenticated, // Only fetch when authenticated
-    refetchInterval: 30000 // Refresh every 30 seconds
+    refetchInterval: 60000 // Refresh every 1 minute for wallet balance
   });
 
   // Fetch all recharge requests - only when authenticated

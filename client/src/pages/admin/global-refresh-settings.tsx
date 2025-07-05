@@ -20,8 +20,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const REFRESH_INTERVALS = [
-  { value: 10, label: "10 ثانیه" },
-  { value: 30, label: "30 ثانیه" },
   { value: 60, label: "1 دقیقه" },
   { value: 120, label: "2 دقیقه" },
   { value: 300, label: "5 دقیقه" },

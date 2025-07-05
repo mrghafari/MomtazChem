@@ -95,7 +95,7 @@ export default function FinancialDepartment() {
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["/api/financial/orders"],
     enabled: !!user,
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: 300000, // Auto-refresh every 5 minutes
   });
 
   // Process order mutation

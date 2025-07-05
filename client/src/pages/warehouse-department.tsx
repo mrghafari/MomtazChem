@@ -99,7 +99,7 @@ export default function WarehouseDepartment() {
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["/api/warehouse/orders"],
     enabled: !!user,
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: 300000, // Auto-refresh every 5 minutes
   });
 
   // Process order mutation
