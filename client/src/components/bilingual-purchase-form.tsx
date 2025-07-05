@@ -118,6 +118,7 @@ interface PurchaseFormProps {
   products: any[];
   onOrderComplete: () => void;
   onClose: () => void;
+  existingCustomer?: any; // Customer data from parent component
 }
 
 // GPS location functionality
@@ -147,7 +148,7 @@ const getCurrentLocation = (): Promise<{latitude: number, longitude: number}> =>
   });
 };
 
-export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose }: PurchaseFormProps) {
+export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose, existingCustomer }: PurchaseFormProps) {
   const { toast } = useToast();
   const [language, setLanguage] = useState<Language>('en');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -199,27 +200,37 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Pre-populate form with customer data when available
   useEffect(() => {
     console.log('=== BilingualPurchaseForm Debug ===');
-    console.log('customerData:', customerData);
+    console.log('existingCustomer from parent:', existingCustomer);
+    console.log('customerData from API:', customerData);
     console.log('isLoadingCustomer:', isLoadingCustomer);
     
-    if (customerData?.success && customerData.customer) {
-      const customer = customerData.customer;
-      console.log('Customer object found:', customer);
-      console.log('Customer firstName:', customer.firstName);
-      console.log('Customer lastName:', customer.lastName);
-      console.log('Customer phone:', customer.phone);
-      console.log('Customer address:', customer.address);
-      console.log('Customer city:', customer.city);
+    // Priority 1: Use existingCustomer passed from parent (shop page)
+    let customerToUse = null;
+    if (existingCustomer) {
+      customerToUse = existingCustomer;
+      console.log('Using existingCustomer from parent');
+    } else if (customerData?.success && customerData.customer) {
+      customerToUse = customerData.customer;
+      console.log('Using customerData from API');
+    }
+    
+    if (customerToUse) {
+      console.log('Customer object found:', customerToUse);
+      console.log('Customer firstName:', customerToUse.firstName);
+      console.log('Customer lastName:', customerToUse.lastName);
+      console.log('Customer phone:', customerToUse.phone);
+      console.log('Customer address:', customerToUse.address);
+      console.log('Customer city:', customerToUse.city);
       
-      const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
+      const fullName = `${customerToUse.firstName || ''} ${customerToUse.lastName || ''}`.trim();
       console.log('Full name constructed:', fullName);
       
       const formData = {
-        customerName: fullName || customer.name || "",
-        phone: customer.phone || "",
-        address: customer.address || "",
-        city: customer.city || "",
-        postalCode: customer.postalCode || "",
+        customerName: fullName || customerToUse.name || "",
+        phone: customerToUse.phone || "",
+        address: customerToUse.address || "",
+        city: customerToUse.city || "",
+        postalCode: customerToUse.postalCode || "",
         notes: "",
         gpsLatitude: undefined,
         gpsLongitude: undefined,
@@ -229,12 +240,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       form.reset(formData);
       console.log('Form reset completed');
     } else {
-      console.log('No customer data available or not authenticated');
-      console.log('customerData?.success:', customerData?.success);
-      console.log('customerData?.customer:', customerData?.customer);
+      console.log('No customer data available');
     }
     console.log('=== End BilingualPurchaseForm Debug ===');
-  }, [customerData, form, isLoadingCustomer]);
+  }, [existingCustomer, customerData, form, isLoadingCustomer]);
 
   // Get current translations
   const t = translations[language];

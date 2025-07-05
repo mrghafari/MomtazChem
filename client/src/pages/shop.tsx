@@ -1046,6 +1046,7 @@ const Shop = () => {
         <BilingualPurchaseForm
           cart={cart}
           products={currentProducts}
+          existingCustomer={customer}
           onOrderComplete={() => {
             setCart({});
             setShowCheckout(false);
