@@ -27,6 +27,7 @@ interface CrmCustomer {
   country?: string;
   city?: string;
   address?: string;
+  secondaryAddress?: string;
   postalCode?: string;
   customerType: string;
   customerStatus: string;
@@ -83,6 +84,8 @@ export default function CRM() {
     country: "",
     city: "",
     address: "",
+    secondaryAddress: "",
+    postalCode: "",
     password: "",
     customerType: "retail",
     customerSource: "website",
@@ -163,6 +166,8 @@ export default function CRM() {
         country: "",
         city: "",
         address: "",
+        secondaryAddress: "",
+        postalCode: "",
         password: "",
         customerType: "retail",
         customerSource: "website",
@@ -760,6 +765,27 @@ export default function CRM() {
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="secondaryAddress">Secondary Address</Label>
+                <Input
+                  id="secondaryAddress"
+                  placeholder="Optional secondary address"
+                  value={newCustomer.secondaryAddress || ""}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, secondaryAddress: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="postalCode">Postal Code</Label>
+                <Input
+                  id="postalCode"
+                  placeholder="Postal code"
+                  value={newCustomer.postalCode || ""}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, postalCode: e.target.value })}
+                />
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="password">Password (Optional)</Label>
               <Input
@@ -925,13 +951,23 @@ export default function CRM() {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="editPostalCode">Postal Code</Label>
-                <Input
-                  id="editPostalCode"
-                  value={editingCustomer.postalCode || ""}
-                  onChange={(e) => setEditingCustomer({ ...editingCustomer, postalCode: e.target.value })}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editSecondaryAddress">Secondary Address</Label>
+                  <Input
+                    id="editSecondaryAddress"
+                    value={editingCustomer.secondaryAddress || ""}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, secondaryAddress: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editPostalCode">Postal Code</Label>
+                  <Input
+                    id="editPostalCode"
+                    value={editingCustomer.postalCode || ""}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, postalCode: e.target.value })}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -403,6 +403,7 @@ export const crmCustomers = pgTable("crm_customers", {
   state: text("state"),
   city: text("city"),
   address: text("address"),
+  secondaryAddress: text("secondary_address"),
   postalCode: text("postal_code"),
   industry: text("industry"),
   businessType: text("business_type"), // manufacturer, distributor, retailer, end_user
