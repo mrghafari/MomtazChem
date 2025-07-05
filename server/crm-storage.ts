@@ -23,6 +23,7 @@ export interface ICrmStorage {
   createCrmCustomer(customer: InsertCrmCustomer): Promise<CrmCustomer>;
   getCrmCustomerById(id: number): Promise<CrmCustomer | undefined>;
   getCrmCustomerByEmail(email: string): Promise<CrmCustomer | undefined>;
+  getCrmCustomerByPhone(phone: string): Promise<CrmCustomer | undefined>;
   updateCrmCustomer(id: number, customer: Partial<InsertCrmCustomer>): Promise<CrmCustomer>;
   deleteCrmCustomer(id: number): Promise<void>;
   searchCrmCustomers(query: string): Promise<CrmCustomer[]>;
@@ -87,6 +88,18 @@ export interface ICrmStorage {
 export class CrmStorage implements ICrmStorage {
   
   async createCrmCustomer(customerData: InsertCrmCustomer): Promise<CrmCustomer> {
+    // Check for duplicate email
+    const existingByEmail = await this.getCrmCustomerByEmail(customerData.email);
+    if (existingByEmail) {
+      throw new Error("ایمیل تکراری است - قبلاً مشتری با این ایمیل ثبت شده است");
+    }
+    
+    // Check for duplicate phone
+    const existingByPhone = await this.getCrmCustomerByPhone(customerData.phone);
+    if (existingByPhone) {
+      throw new Error("شماره تلفن تکراری است - قبلاً مشتری با این شماره ثبت شده است");
+    }
+    
     const [customer] = await customerDb
       .insert(crmCustomers)
       .values(customerData)
@@ -118,6 +131,15 @@ export class CrmStorage implements ICrmStorage {
       .select()
       .from(crmCustomers)
       .where(eq(crmCustomers.email, email))
+      .limit(1);
+    return customer;
+  }
+
+  async getCrmCustomerByPhone(phone: string): Promise<CrmCustomer | undefined> {
+    const [customer] = await customerDb
+      .select()
+      .from(crmCustomers)
+      .where(eq(crmCustomers.phone, phone))
       .limit(1);
     return customer;
   }
