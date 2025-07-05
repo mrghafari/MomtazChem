@@ -3083,7 +3083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await customerStorage.createOrder(orderData);
 
-      // Create order items
+      // Create order items and update stock
       for (const item of items) {
         await customerStorage.createOrderItem({
           orderId: order.id,
@@ -3094,6 +3094,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalPrice: (item.quantity * item.unitPrice).toString(),
           productSku: item.productSku || '',
         });
+
+        // Update product stock
+        try {
+          const product = await shopStorage.getShopProductById(item.productId);
+          if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
+            const currentStock = product.stockQuantity;
+            const newQuantity = Math.max(0, currentStock - item.quantity);
+            console.log(`🛒 STOCK UPDATE - Product ${product.name} (ID: ${item.productId})`);
+            console.log(`   Current Stock: ${currentStock}`);
+            console.log(`   Quantity Sold: ${item.quantity}`);
+            console.log(`   New Stock: ${newQuantity}`);
+            
+            await shopStorage.updateProductStock(
+              item.productId,
+              newQuantity,
+              `Order ${orderNumber} - Sold ${item.quantity} units`
+            );
+            
+            console.log(`✅ Stock updated successfully for product ${item.productId}`);
+          } else {
+            console.log(`⚠️ No stock quantity available for product ${item.productId}`);
+          }
+        } catch (stockError) {
+          console.error(`Error updating stock for product ${item.productId}:`, stockError);
+          // Continue with other products even if stock update fails
+        }
       }
 
       // Log order activity in CRM
