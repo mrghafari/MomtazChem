@@ -735,13 +735,31 @@ const Shop = () => {
                                 ${parseFloat(product.price).toFixed(2)}
                               </span>
                               <span className="text-sm text-gray-500 ml-1">
-                                / {product.priceUnit}
+                                / {product.priceUnit || 'unit'}
                               </span>
                             </div>
                             <Badge variant={product.inStock ? "secondary" : "destructive"}>
                               {product.inStock ? "In Stock" : "Out of Stock"}
                             </Badge>
                           </div>
+
+                          {/* Product Tags */}
+                          {product.tags && Array.isArray(product.tags) && product.tags.length > 0 && (
+                            <div className="mb-3">
+                              <div className="flex flex-wrap gap-1">
+                                {product.tags.slice(0, 3).map((tag: string, index: number) => (
+                                  <Badge key={index} variant="outline" className="text-xs bg-gray-50 text-gray-600 border-gray-200">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {product.tags.length > 3 && (
+                                  <Badge variant="outline" className="text-xs bg-gray-50 text-gray-500 border-gray-200">
+                                    +{product.tags.length - 3}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
 
                           {/* Quantity Discounts Display */}
                           {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
@@ -852,13 +870,31 @@ const Shop = () => {
                                     ${parseFloat(product.price).toFixed(2)}
                                   </span>
                                   <span className="text-sm text-gray-500 ml-1">
-                                    / {product.priceUnit}
+                                    / {product.priceUnit || 'unit'}
                                   </span>
                                 </div>
                                 <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                   {product.inStock ? "In Stock" : "Out of Stock"}
                                 </Badge>
                               </div>
+
+                              {/* Product Tags - List View */}
+                              {product.tags && Array.isArray(product.tags) && product.tags.length > 0 && (
+                                <div className="mb-4">
+                                  <div className="flex flex-wrap gap-2">
+                                    {product.tags.slice(0, 4).map((tag: string, index: number) => (
+                                      <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+                                        {tag}
+                                      </Badge>
+                                    ))}
+                                    {product.tags.length > 4 && (
+                                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-500 border-gray-200">
+                                        +{product.tags.length - 4} more
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                             
                             <div className="ml-6">
