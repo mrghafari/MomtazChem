@@ -198,10 +198,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Pre-populate form with customer data when available
   useEffect(() => {
-    console.log('Customer data in BilingualPurchaseForm:', customerData);
+    console.log('=== BilingualPurchaseForm Debug ===');
+    console.log('customerData:', customerData);
+    console.log('isLoadingCustomer:', isLoadingCustomer);
+    
     if (customerData?.success && customerData.customer) {
       const customer = customerData.customer;
-      console.log('Customer object:', customer);
+      console.log('Customer object found:', customer);
+      console.log('Customer firstName:', customer.firstName);
+      console.log('Customer lastName:', customer.lastName);
+      console.log('Customer phone:', customer.phone);
+      console.log('Customer address:', customer.address);
+      console.log('Customer city:', customer.city);
+      
       const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
       console.log('Full name constructed:', fullName);
       
@@ -218,8 +227,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       
       console.log('Form data to reset:', formData);
       form.reset(formData);
+      console.log('Form reset completed');
+    } else {
+      console.log('No customer data available or not authenticated');
+      console.log('customerData?.success:', customerData?.success);
+      console.log('customerData?.customer:', customerData?.customer);
     }
-  }, [customerData, form]);
+    console.log('=== End BilingualPurchaseForm Debug ===');
+  }, [customerData, form, isLoadingCustomer]);
 
   // Get current translations
   const t = translations[language];
