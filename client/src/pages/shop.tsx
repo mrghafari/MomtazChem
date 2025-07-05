@@ -816,6 +816,19 @@ const Shop = () => {
                             </Badge>
                           </div>
 
+                          {/* Low Stock Warning */}
+                          {product.inStock && product.stockQuantity && product.lowStockThreshold && 
+                            product.stockQuantity <= product.lowStockThreshold && (
+                            <div className="mb-3 p-2 bg-orange-50 rounded-lg border border-orange-200">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                                <span className="text-sm font-semibold text-orange-800">
+                                  تنها {product.stockQuantity} عدد باقی مانده!
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Product Tags */}
                           {(() => {
                             let tags = product.tags;
@@ -963,6 +976,19 @@ const Shop = () => {
                                   {product.inStock ? "In Stock" : "Out of Stock"}
                                 </Badge>
                               </div>
+
+                              {/* Low Stock Warning - List View */}
+                              {product.inStock && product.stockQuantity && product.lowStockThreshold && 
+                                product.stockQuantity <= product.lowStockThreshold && (
+                                <div className="mb-4 p-2 bg-orange-50 rounded-lg border border-orange-200">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                                    <span className="text-sm font-semibold text-orange-800">
+                                      تنها {product.stockQuantity} عدد باقی مانده!
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
 
                               {/* Product Tags - List View */}
                               {(() => {
