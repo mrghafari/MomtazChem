@@ -47,6 +47,7 @@ const Shop = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
   const [productQuantities, setProductQuantities] = useState<{[key: number]: number}>({});
+  const [displayStock, setDisplayStock] = useState<{[key: number]: number}>({});
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [customer, setCustomer] = useState<any>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
@@ -180,6 +181,17 @@ const Shop = () => {
   useEffect(() => {
     checkCustomerAuth();
   }, []);
+
+  // Initialize display stock when products are loaded
+  useEffect(() => {
+    if (currentProducts?.length > 0) {
+      const initialDisplayStock: {[key: number]: number} = {};
+      currentProducts.forEach(product => {
+        initialDisplayStock[product.id] = product.stockQuantity || 0;
+      });
+      setDisplayStock(initialDisplayStock);
+    }
+  }, [currentProducts]);
 
   // Handle cart based on authentication status after customer state is known
   useEffect(() => {
@@ -377,7 +389,7 @@ const Shop = () => {
     const targetQuantity = getProductQuantity(productId);
     
     // Find the product to check stock quantity
-    const product = products.find(p => p.id === productId);
+    const product = currentProducts.find(p => p.id === productId);
     if (!product) {
       toast({
         title: "خطا",
@@ -388,13 +400,13 @@ const Shop = () => {
     }
 
     const currentQuantityInCart = cart[productId] || 0;
-    const availableStock = product.stockQuantity || 0;
+    const currentDisplayStock = displayStock[productId] || 0;
 
-    // Check if adding items would exceed available stock
-    if (currentQuantityInCart + targetQuantity > availableStock) {
+    // Check if adding items would exceed displayed stock (real-time stock)
+    if (targetQuantity > currentDisplayStock) {
       toast({
         title: "موجودی ناکافی",
-        description: `تنها ${availableStock - currentQuantityInCart} عدد از این محصول قابل اضافه کردن است`,
+        description: `تنها ${currentDisplayStock} عدد از این محصول موجود است`,
         variant: "destructive",
       });
       return;
@@ -407,6 +419,13 @@ const Shop = () => {
     setCart(newCart);
     saveCartToStorage(newCart);
 
+    // Update display stock by reducing the added quantity
+    const newDisplayStock = {
+      ...displayStock,
+      [productId]: currentDisplayStock - targetQuantity
+    };
+    setDisplayStock(newDisplayStock);
+
     // Reset quantity for this product and show success message
     setProductQuantity(productId, 1);
     toast({
@@ -416,6 +435,9 @@ const Shop = () => {
   };
 
   const removeFromCart = (productId: number) => {
+    const currentQuantityInCart = cart[productId] || 0;
+    const quantityToRemove = currentQuantityInCart > 1 ? 1 : currentQuantityInCart;
+    
     const newCart = { ...cart };
     if (newCart[productId] > 1) {
       newCart[productId]--;
@@ -424,6 +446,14 @@ const Shop = () => {
     }
     setCart(newCart);
     saveCartToStorage(newCart);
+
+    // Return stock to display stock when removing from cart
+    const currentDisplayStock = displayStock[productId] || 0;
+    const newDisplayStock = {
+      ...displayStock,
+      [productId]: currentDisplayStock + quantityToRemove
+    };
+    setDisplayStock(newDisplayStock);
   };
 
   const getTotalItems = () => {
@@ -866,13 +896,13 @@ const Shop = () => {
                           </div>
 
                           {/* Low Stock Warning */}
-                          {product.inStock && product.stockQuantity && product.lowStockThreshold && 
-                            product.stockQuantity <= product.lowStockThreshold && (
+                          {product.inStock && displayStock[product.id] && product.lowStockThreshold && 
+                            displayStock[product.id] <= product.lowStockThreshold && (
                             <div className="mb-3 p-2 bg-orange-50 rounded-lg border border-orange-200">
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                                 <span className="text-sm font-semibold text-orange-800">
-                                  تنها {product.stockQuantity} عدد باقی مانده!
+                                  تنها {displayStock[product.id] || 0} عدد باقی مانده!
                                 </span>
                               </div>
                             </div>
@@ -989,7 +1019,7 @@ const Shop = () => {
                               <Button
                                 className="w-full"
                                 onClick={() => addToCart(product.id)}
-                                disabled={getProductQuantity(product.id) > (product.stockQuantity || 0)}
+                                disabled={getProductQuantity(product.id) > (displayStock[product.id] || 0) || (displayStock[product.id] || 0) === 0}
                               >
                                 <ShoppingCart className="w-4 h-4 mr-2" />
                                 {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
@@ -1036,13 +1066,13 @@ const Shop = () => {
                               </div>
 
                               {/* Low Stock Warning - List View */}
-                              {product.inStock && product.stockQuantity && product.lowStockThreshold && 
-                                product.stockQuantity <= product.lowStockThreshold && (
+                              {product.inStock && displayStock[product.id] && product.lowStockThreshold && 
+                                displayStock[product.id] <= product.lowStockThreshold && (
                                 <div className="mb-4 p-2 bg-orange-50 rounded-lg border border-orange-200">
                                   <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                                     <span className="text-sm font-semibold text-orange-800">
-                                      تنها {product.stockQuantity} عدد باقی مانده!
+                                      تنها {displayStock[product.id] || 0} عدد باقی مانده!
                                     </span>
                                   </div>
                                 </div>
@@ -1114,7 +1144,7 @@ const Shop = () => {
                                   <Button
                                     className="w-full"
                                     onClick={() => addToCart(product.id)}
-                                    disabled={getProductQuantity(product.id) > (product.stockQuantity || 0)}
+                                    disabled={getProductQuantity(product.id) > (displayStock[product.id] || 0) || (displayStock[product.id] || 0) === 0}
                                   >
                                     <ShoppingCart className="w-4 h-4 mr-2" />
                                     {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
