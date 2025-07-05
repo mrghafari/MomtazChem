@@ -3174,23 +3174,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
               });
 
-              // Reserve product stock instead of reducing it
+              // Update product stock
               if (product.stockQuantity !== null && product.stockQuantity !== undefined) {
-                const currentReserved = product.reservedQuantity || 0;
-                const orderQuantity = quantity as number;
-                
-                // Check if enough stock is available (stock - reserved - requested)
-                const availableStock = product.stockQuantity - currentReserved;
-                if (availableStock < orderQuantity) {
-                  throw new Error(`Not enough stock for product ${product.name}. Available: ${availableStock}, Requested: ${orderQuantity}`);
-                }
-                
-                // Reserve the stock for this order
-                await shopStorage.updateProductInventory(
+                const newQuantity = Math.max(0, product.stockQuantity - (quantity as number));
+                await shopStorage.updateProductStock(
                   parseInt(productId as string),
-                  product.stockQuantity, // Keep available stock same
-                  currentReserved + orderQuantity, // Increase reserved stock
-                  `Order ${orderNumber} - Reserved ${quantity} units`
+                  newQuantity,
+                  `Order ${orderNumber} - Sold ${quantity} units`
                 );
               }
             }
@@ -4450,18 +4440,14 @@ ${procedure.content}
           productSnapshot: null,
         });
 
-        // Reserve product stock (move from available to reserved)
+        // Update product stock
         const product = await shopStorage.getShopProductById(item.productId);
         if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
-          const availableStock = product.stockQuantity - item.quantity;
-          const reservedStock = (product.reservedQuantity || 0) + item.quantity;
-          
-          // Update both available and reserved quantities
-          await shopStorage.updateProductInventory(
+          const newQuantity = product.stockQuantity - item.quantity;
+          await shopStorage.updateProductStock(
             item.productId,
-            availableStock,
-            reservedStock,
-            `Order ${orderNumber} - Reserved ${item.quantity} units for delivery`
+            newQuantity,
+            `Order ${orderNumber} - Sold ${item.quantity} units`
           );
         }
       }
@@ -8555,42 +8541,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         // Generate delivery code for final delivery
         const deliveryCode = Math.random().toString().substr(2, 6);
         await orderManagementStorage.generateDeliveryCode(orderId);
-        
-        // Release reserved inventory when order is delivered
-        try {
-          // Get order details
-          const { db } = await import("./db");
-          const { customerOrders } = await import("../shared/customer-schema");
-          const { orderItems } = await import("../shared/shop-schema");
-          const { eq } = await import("drizzle-orm");
-          
-          const [orderDetails] = await db
-            .select()
-            .from(customerOrders)
-            .where(eq(customerOrders.id, orderId));
-          
-          if (orderDetails) {
-            // Get order items
-            const items = await db
-              .select()
-              .from(orderItems)
-              .where(eq(orderItems.orderId, orderId));
-            
-            // Release reserved stock for each item
-            for (const item of items) {
-              if (item.productId && item.quantity) {
-                await shopStorage.releaseReservedStock(
-                  item.productId,
-                  item.quantity,
-                  `Order ${orderId} delivered - releasing reserved stock`
-                );
-              }
-            }
-          }
-        } catch (reserveError) {
-          console.error('Error releasing reserved inventory:', reserveError);
-          // Continue with order processing even if inventory release fails
-        }
       }
       
       // Update order with logistics info
@@ -10372,49 +10322,6 @@ momtazchem.com
     } catch (error) {
       console.error('Error fetching wallet balance:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch wallet balance' });
-    }
-  });
-
-  // Deduct amount from customer wallet (for order payments)
-  app.post('/api/customers/wallet/deduct', async (req, res) => {
-    try {
-      if (!req.session.customerId) {
-        return res.status(401).json({ success: false, message: "Please log in to access your wallet" });
-      }
-
-      const { amount, description } = req.body;
-
-      if (!amount || amount <= 0) {
-        return res.status(400).json({ success: false, message: "Invalid amount" });
-      }
-
-      // Check current balance
-      const wallet = await walletStorage.getWalletByCustomerId(req.session.customerId);
-      if (!wallet) {
-        return res.status(404).json({ success: false, message: "Wallet not found" });
-      }
-
-      const currentBalance = parseFloat(wallet.balance);
-      if (currentBalance < amount) {
-        return res.status(400).json({ success: false, message: "Insufficient balance" });
-      }
-
-      // Deduct amount
-      const transaction = await walletStorage.debitWallet(
-        req.session.customerId,
-        amount,
-        description || 'Order payment'
-      );
-
-      res.json({ 
-        success: true, 
-        message: "Amount deducted successfully",
-        transaction: transaction,
-        newBalance: currentBalance - amount
-      });
-    } catch (error) {
-      console.error('Error deducting from wallet:', error);
-      res.status(500).json({ success: false, message: 'Failed to deduct from wallet' });
     }
   });
 
