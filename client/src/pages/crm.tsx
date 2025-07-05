@@ -258,7 +258,7 @@ export default function CRM() {
   };
 
   const handleUpdateCustomer = () => {
-    if (!editingCustomer || !editingCustomer.email || !editingCustomer.firstName || !editingCustomer.lastName) {
+    if (!editingCustomer || !editingCustomer.firstName || !editingCustomer.lastName) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -266,7 +266,23 @@ export default function CRM() {
       });
       return;
     }
-    updateCustomerMutation.mutate({ id: editingCustomer.id, data: editingCustomer });
+
+    // Only send editable fields, exclude email and phone as they are read-only
+    const updateData = {
+      firstName: editingCustomer.firstName,
+      lastName: editingCustomer.lastName,
+      company: editingCustomer.company,
+      country: editingCustomer.country,
+      city: editingCustomer.city,
+      address: editingCustomer.address,
+      secondaryAddress: editingCustomer.secondaryAddress,
+      postalCode: editingCustomer.postalCode,
+      customerType: editingCustomer.customerType,
+      customerStatus: editingCustomer.customerStatus,
+      customerSource: editingCustomer.customerSource,
+    };
+
+    updateCustomerMutation.mutate({ id: editingCustomer.id, data: updateData });
   };
 
   const handleDeleteCustomer = (id: number) => {
