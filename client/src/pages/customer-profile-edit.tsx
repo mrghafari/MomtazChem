@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, Save, Shield, Phone } from "lucide-react";
+import { ArrowLeft, Save, Shield, Phone, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -22,13 +22,25 @@ const createEditProfileSchema = (t: any) => z.object({
   firstName: z.string().min(1, t.firstName + " is required"),
   lastName: z.string().min(1, t.lastName + " is required"),
   phone: z.string().min(1, t.phone + " is required"),
+  email: z.string().email("Invalid email").optional(),
   company: z.string().optional(),
   country: z.string().min(1, t.country + " is required"),
   city: z.string().min(1, t.city + " is required"),
   address: z.string().min(1, t.address + " is required"),
+  secondaryAddress: z.string().optional(),
   postalCode: z.string().optional(),
   businessType: z.string().optional(),
   notes: z.string().optional(),
+  customerType: z.string().optional(),
+  customerStatus: z.string().optional(),
+  preferredPaymentMethod: z.string().optional(),
+  creditLimit: z.string().optional(),
+  website: z.string().optional(),
+  taxId: z.string().optional(),
+  registrationNumber: z.string().optional(),
+  preferredCommunication: z.string().optional(),
+  leadSource: z.string().optional(),
+  assignedSalesRep: z.string().optional(),
 });
 
 const createSmsVerificationSchema = (t: any) => z.object({
@@ -64,9 +76,20 @@ export default function CustomerProfileEdit() {
       country: "",
       city: "",
       address: "",
+      secondaryAddress: "",
       postalCode: "",
       businessType: "",
       notes: "",
+      customerType: "",
+      customerStatus: "",
+      preferredPaymentMethod: "",
+      creditLimit: "",
+      website: "",
+      taxId: "",
+      registrationNumber: "",
+      preferredCommunication: "",
+      leadSource: "",
+      assignedSalesRep: "",
     },
   });
 
@@ -85,13 +108,25 @@ export default function CustomerProfileEdit() {
         firstName: customerData.firstName || "",
         lastName: customerData.lastName || "",
         phone: customerData.phone || "",
+        email: customerData.email || "",
         company: customerData.company || "",
         country: customerData.country || "",
         city: customerData.city || "",
         address: customerData.address || "",
+        secondaryAddress: customerData.secondaryAddress || "",
         postalCode: customerData.postalCode || "",
         businessType: customerData.businessType || "",
         notes: customerData.notes || "",
+        customerType: customerData.customerType || "",
+        customerStatus: customerData.customerStatus || "",
+        preferredPaymentMethod: customerData.preferredPaymentMethod || "",
+        creditLimit: customerData.creditLimit || "",
+        website: customerData.website || "",
+        taxId: customerData.taxId || "",
+        registrationNumber: customerData.registrationNumber || "",
+        preferredCommunication: customerData.preferredCommunication || "",
+        leadSource: customerData.leadSource || "",
+        assignedSalesRep: customerData.assignedSalesRep || "",
       });
     }
   }, [customer, form]);
@@ -331,9 +366,10 @@ export default function CustomerProfileEdit() {
                         <FormLabel className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
                           {t.phone}
+                          <span className="text-xs text-gray-500">(Read-only)</span>
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} readOnly className="bg-gray-50" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -353,6 +389,25 @@ export default function CustomerProfileEdit() {
                     )}
                   />
                 </div>
+
+                {/* Email Field - Read Only */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email
+                        <span className="text-xs text-gray-500">(Read-only)</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} readOnly className="bg-gray-50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Location Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -399,6 +454,20 @@ export default function CustomerProfileEdit() {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="secondaryAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Secondary Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Secondary address (optional)" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -432,6 +501,204 @@ export default function CustomerProfileEdit() {
                             <SelectItem value="end_user">End User</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* CRM Additional Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="customerType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select customer type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="regular">Regular</SelectItem>
+                            <SelectItem value="vip">VIP</SelectItem>
+                            <SelectItem value="wholesale">Wholesale</SelectItem>
+                            <SelectItem value="partner">Partner</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="customerStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Status</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="suspended">Suspended</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="preferredPaymentMethod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preferred Payment Method</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select payment method" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                            <SelectItem value="cash">Cash</SelectItem>
+                            <SelectItem value="credit">Credit</SelectItem>
+                            <SelectItem value="check">Check</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="creditLimit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Credit Limit</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g., 10000" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="website"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Website</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="https://example.com" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="taxId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tax ID</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="registrationNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Registration Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="preferredCommunication"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preferred Communication</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select communication method" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="phone">Phone</SelectItem>
+                            <SelectItem value="sms">SMS</SelectItem>
+                            <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="leadSource"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Lead Source</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select lead source" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="website">Website</SelectItem>
+                            <SelectItem value="referral">Referral</SelectItem>
+                            <SelectItem value="social_media">Social Media</SelectItem>
+                            <SelectItem value="advertising">Advertising</SelectItem>
+                            <SelectItem value="trade_show">Trade Show</SelectItem>
+                            <SelectItem value="cold_call">Cold Call</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="assignedSalesRep"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Assigned Sales Rep</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Sales representative name" />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
