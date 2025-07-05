@@ -118,22 +118,8 @@ export class DatabaseStorage implements IStorage {
       category: categoryName, // Store the full category name
       unitPrice: String(insertProduct.unitPrice || 0), // Convert to string for decimal field
       specifications: insertProduct.specifications && typeof insertProduct.specifications === 'object' && !Array.isArray(insertProduct.specifications) && Object.keys(insertProduct.specifications).length > 0 ? insertProduct.specifications : null,
-      features: (() => {
-        if (Array.isArray(insertProduct.features)) {
-          return insertProduct.features.length > 0 ? insertProduct.features : [];
-        } else if (typeof insertProduct.features === 'string' && insertProduct.features.trim()) {
-          return insertProduct.features.split('\n').map(f => f.trim()).filter(f => f.length > 0);
-        }
-        return [];
-      })(),
-      applications: (() => {
-        if (Array.isArray(insertProduct.applications)) {
-          return insertProduct.applications.length > 0 ? insertProduct.applications : [];
-        } else if (typeof insertProduct.applications === 'string' && insertProduct.applications.trim()) {
-          return insertProduct.applications.split('\n').map(a => a.trim()).filter(a => a.length > 0);
-        }
-        return [];
-      })(),
+      features: Array.isArray(insertProduct.features) && insertProduct.features.length > 0 ? insertProduct.features : [],
+      applications: Array.isArray(insertProduct.applications) && insertProduct.applications.length > 0 ? insertProduct.applications : [],
       certifications: Array.isArray(insertProduct.certifications) && insertProduct.certifications.length > 0 ? insertProduct.certifications : null,
     };
 
@@ -200,22 +186,10 @@ export class DatabaseStorage implements IStorage {
       }
     }
     if (productUpdate.features !== undefined) {
-      if (Array.isArray(productUpdate.features)) {
-        updateData.features = productUpdate.features.length > 0 ? productUpdate.features : [];
-      } else if (typeof productUpdate.features === 'string' && productUpdate.features.trim()) {
-        updateData.features = productUpdate.features.split('\n').map(f => f.trim()).filter(f => f.length > 0);
-      } else {
-        updateData.features = [];
-      }
+      updateData.features = Array.isArray(productUpdate.features) && productUpdate.features.length > 0 ? productUpdate.features : [];
     }
     if (productUpdate.applications !== undefined) {
-      if (Array.isArray(productUpdate.applications)) {
-        updateData.applications = productUpdate.applications.length > 0 ? productUpdate.applications : [];
-      } else if (typeof productUpdate.applications === 'string' && productUpdate.applications.trim()) {
-        updateData.applications = productUpdate.applications.split('\n').map(a => a.trim()).filter(a => a.length > 0);
-      } else {
-        updateData.applications = [];
-      }
+      updateData.applications = Array.isArray(productUpdate.applications) && productUpdate.applications.length > 0 ? productUpdate.applications : [];
     }
     if (productUpdate.certifications !== undefined) {
       updateData.certifications = Array.isArray(productUpdate.certifications) && productUpdate.certifications.length > 0 ? productUpdate.certifications : null;
@@ -268,7 +242,6 @@ export class DatabaseStorage implements IStorage {
           stockQuantity: showcaseProduct.stockQuantity || 0,
           lowStockThreshold: showcaseProduct.minStockLevel || 10,
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
-          thumbnailUrl: showcaseProduct.imageUrl || null,
           isActive: showcaseProduct.isActive,
         });
       } else {
@@ -283,7 +256,6 @@ export class DatabaseStorage implements IStorage {
           stockQuantity: showcaseProduct.stockQuantity || 0,
           lowStockThreshold: showcaseProduct.minStockLevel || 10,
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
-          thumbnailUrl: showcaseProduct.imageUrl || null,
           isActive: showcaseProduct.isActive,
           isFeatured: false,
         });
