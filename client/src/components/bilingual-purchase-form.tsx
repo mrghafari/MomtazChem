@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Globe, X, ShoppingCart } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -34,6 +34,15 @@ const translations = {
     submitOrder: "Submit Order",
     cancel: "Cancel",
     loading: "Loading...",
+    
+    // Cart management
+    cartManagement: "Cart Management",
+    each: "each",
+    subtotal: "Subtotal:",
+    totalAmount: "Total Amount",
+    removeItem: "Remove item",
+    decreaseQuantity: "Decrease quantity",
+    increaseQuantity: "Increase quantity",
     
     // Validation messages
     nameRequired: "Customer name is required",
@@ -97,7 +106,16 @@ const translations = {
     
     // Language switcher
     switchLanguage: "English",
-    language: "اللغة"
+    language: "اللغة",
+    
+    // Cart management
+    cartManagement: "إدارة السلة",
+    each: "للوحدة",
+    subtotal: "المجموع الفرعي:",
+    totalAmount: "المبلغ الإجمالي",
+    removeItem: "حذف العنصر",
+    decreaseQuantity: "تقليل الكمية",
+    increaseQuantity: "زيادة الكمية"
   }
 };
 
@@ -119,6 +137,8 @@ interface PurchaseFormProps {
   onOrderComplete: () => void;
   onClose: () => void;
   existingCustomer?: any; // Customer data from parent component
+  onUpdateQuantity?: (productId: number, newQuantity: number) => void;
+  onRemoveItem?: (productId: number) => void;
 }
 
 // GPS location functionality
@@ -148,7 +168,7 @@ const getCurrentLocation = (): Promise<{latitude: number, longitude: number}> =>
   });
 };
 
-export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose, existingCustomer }: PurchaseFormProps) {
+export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose, existingCustomer, onUpdateQuantity, onRemoveItem }: PurchaseFormProps) {
   const { toast } = useToast();
   const [language, setLanguage] = useState<Language>('en');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -356,23 +376,77 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Order Summary */}
+          {/* Cart Management */}
           <div className="bg-muted p-3 rounded-lg">
-            <h3 className="font-medium mb-2">Order Summary</h3>
-            {Object.entries(cart).map(([productId, quantity]) => {
-              const product = products.find(p => p.id === parseInt(productId));
-              if (!product) return null;
-              
-              return (
-                <div key={productId} className="flex justify-between text-sm">
-                  <span>{product.name} × {quantity}</span>
-                  <span>{formatCurrency(parseFloat(product.unitPrice || '0') * quantity)}</span>
-                </div>
-              );
-            })}
-            <div className="border-t mt-2 pt-2 flex justify-between font-semibold">
-              <span>Total</span>
-              <span>{formatCurrency(totalAmount)}</span>
+            <h3 className="font-medium mb-3 flex items-center gap-2">
+              <ShoppingCart className="w-4 h-4" />
+              {t.cartManagement}
+            </h3>
+            <div className="space-y-3">
+              {Object.entries(cart).map(([productId, quantity]) => {
+                const product = products.find(p => p.id === parseInt(productId));
+                if (!product) return null;
+                
+                const basePrice = parseFloat(product.unitPrice || '0');
+                const itemTotal = basePrice * quantity;
+                
+                return (
+                  <div key={productId} className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
+                    <div className="flex items-start justify-between gap-3">
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">{product.name}</h4>
+                        <p className="text-xs text-muted-foreground">{product.category}</p>
+                        <p className="text-sm font-medium mt-1">{formatCurrency(basePrice)} {t.each}</p>
+                      </div>
+                      
+                      {/* Quantity Controls */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity - 1)}
+                          className="h-7 w-7 p-0"
+                          title={t.decreaseQuantity}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                        <span className="w-8 text-center text-sm font-medium">{quantity}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1)}
+                          className="h-7 w-7 p-0"
+                          title={t.increaseQuantity}
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onRemoveItem && onRemoveItem(product.id)}
+                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title={t.removeItem}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Item Total */}
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t">
+                      <span className="text-sm text-muted-foreground">{t.subtotal}</span>
+                      <span className="font-medium">{formatCurrency(itemTotal)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Cart Total */}
+            <div className="border-t mt-3 pt-3 flex justify-between font-semibold text-lg">
+              <span>{t.totalAmount}</span>
+              <span className="text-primary">{formatCurrency(totalAmount)}</span>
             </div>
           </div>
 

@@ -18,6 +18,7 @@ import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
 import BilingualPurchaseForm from "@/components/bilingual-purchase-form";
 import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
+import ShoppingCartModal from "@/components/cart/shopping-cart-modal";
 
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +40,7 @@ const Shop = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [customer, setCustomer] = useState<any>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
