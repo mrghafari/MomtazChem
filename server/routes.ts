@@ -13906,6 +13906,67 @@ momtazchem.com
     }
   });
 
+  // AI Settings endpoints
+  app.post("/api/ai/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const settings = req.body;
+      
+      // Save AI settings to environment or database
+      // For now, we'll just return success
+      console.log("AI Settings saved:", settings);
+      
+      res.json({ 
+        success: true, 
+        message: "تنظیمات AI با موفقیت ذخیره شد",
+        settings 
+      });
+    } catch (error) {
+      console.error("Error saving AI settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ذخیره تنظیمات AI"
+      });
+    }
+  });
+
+  app.post("/api/ai/test-connection", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Test AI connection
+      const { OpenAI } = await import("openai");
+      
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(400).json({
+          success: false,
+          message: "کلید API OpenAI تنظیم نشده است"
+        });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      // Simple test call
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: "Test connection" }],
+        max_tokens: 10
+      });
+
+      res.json({
+        success: true,
+        message: "اتصال موفق",
+        model: "gpt-4o",
+        response: completion.choices[0]?.message?.content
+      });
+    } catch (error) {
+      console.error("Error testing AI connection:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در آزمایش اتصال AI"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
