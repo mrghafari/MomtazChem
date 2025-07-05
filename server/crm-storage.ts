@@ -122,7 +122,7 @@ export class CrmStorage implements ICrmStorage {
     return customer;
   }
 
-  async updateCrmCustomer(id: number, customerUpdate: Partial<InsertCustomer>): Promise<Customer> {
+  async updateCrmCustomer(id: number, customerUpdate: Partial<InsertCrmCustomer>): Promise<CrmCustomer> {
     console.log("CrmStorage updateCrmCustomer called:", { id, customerUpdate });
     
     try {
@@ -149,9 +149,9 @@ export class CrmStorage implements ICrmStorage {
       console.log("Processed update data:", processedUpdate);
       
       const [customer] = await customerDb
-        .update(customers)
+        .update(crmCustomers)
         .set(processedUpdate)
-        .where(eq(customers.id, id))
+        .where(eq(crmCustomers.id, id))
         .returning();
       
       console.log("CrmStorage updateCrmCustomer result:", customer);
