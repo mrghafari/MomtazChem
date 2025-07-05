@@ -1017,6 +1017,22 @@ const Shop = () => {
             setShowCheckout(false);
           }}
           onClose={() => setShowCheckout(false)}
+          onUpdateQuantity={(productId, newQuantity) => {
+            if (newQuantity <= 0) {
+              const { [productId]: removed, ...newCart } = cart;
+              setCart(newCart);
+              localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
+            } else {
+              const newCart = { ...cart, [productId]: newQuantity };
+              setCart(newCart);
+              localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
+            }
+          }}
+          onRemoveItem={(productId) => {
+            const { [productId]: removed, ...newCart } = cart;
+            setCart(newCart);
+            localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
+          }}
         />
       )}
 
