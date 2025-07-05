@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +50,7 @@ export default function InventoryManagement() {
         },
         body: JSON.stringify({
           status: 'delivered',
-          actualDeliveryDate: new Date().toISOString(),
+          actualDeliveryDate: new Date(),
         }),
       });
       if (!response.ok) {
@@ -59,9 +59,11 @@ export default function InventoryManagement() {
       return response.json();
     },
     onSuccess: () => {
-      refetchTransit();
+      if (refetchTransit) {
+        refetchTransit();
+      }
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error marking as delivered:', error);
     },
   });

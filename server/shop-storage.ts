@@ -776,13 +776,23 @@ export class ShopStorage implements IShopStorage {
     return newTransit;
   }
 
-  async updateGoodsInTransit(id: number, transitUpdate: Partial<InsertGoodsInTransit>): Promise<GoodsInTransit> {
+  async updateGoodsInTransit(id: number, transitUpdate: any): Promise<GoodsInTransit> {
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+    
+    // Handle each field separately
+    if (transitUpdate.status) {
+      updateData.status = transitUpdate.status;
+    }
+    
+    if (transitUpdate.actualDeliveryDate) {
+      updateData.actualDeliveryDate = new Date();
+    }
+    
     const [updatedTransit] = await shopDb
       .update(goodsInTransit)
-      .set({
-        ...transitUpdate,
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(eq(goodsInTransit.id, id))
       .returning();
     return updatedTransit;
