@@ -1212,6 +1212,65 @@ const Shop = () => {
         cartItemsCount={getTotalItems()}
       />
 
+      {/* Quantity Selection Modal */}
+      <Dialog open={showQuantityModal} onOpenChange={setShowQuantityModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>انتخاب تعداد</DialogTitle>
+            <DialogDescription>
+              {selectedProduct && `تعداد ${selectedProduct.name} مورد نظر خود را وارد کنید`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="quantity" className="text-right">
+                تعداد:
+              </label>
+              <div className="col-span-3 flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setQuantityInput(Math.max(1, quantityInput - 1))}
+                  disabled={quantityInput <= 1}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  id="quantity"
+                  type="number"
+                  value={quantityInput}
+                  onChange={(e) => setQuantityInput(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20 text-center"
+                  min="1"
+                  max={selectedProduct?.stockQuantity || 1}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setQuantityInput(Math.min((selectedProduct?.stockQuantity || 1), quantityInput + 1))}
+                  disabled={quantityInput >= (selectedProduct?.stockQuantity || 1)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            {selectedProduct && (
+              <div className="text-sm text-gray-600">
+                موجودی فعلی: {selectedProduct.stockQuantity} عدد
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowQuantityModal(false)}>
+              انصراف
+            </Button>
+            <Button onClick={() => addToCart()}>
+              افزودن به سبد خرید
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Auth Dialog */}
       <CustomerAuth 
         open={showAuth}
