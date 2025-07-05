@@ -32,10 +32,15 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  // Initialize cart from localStorage
+  // Initialize cart from localStorage or sessionStorage based on auth status
   const [cart, setCart] = useState<{[key: number]: number}>(() => {
-    const savedCart = localStorage.getItem('momtazchem_cart');
-    return savedCart ? JSON.parse(savedCart) : {};
+    // For guests, use sessionStorage (cleared on tab close/refresh if not logged in)
+    // For logged-in users, use localStorage (persistent)
+    const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
+    const userCart = localStorage.getItem('momtazchem_user_cart');
+    
+    // Start with guest cart if available, will be migrated to user cart on login
+    return guestCart ? JSON.parse(guestCart) : (userCart ? JSON.parse(userCart) : {});
   });
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPreCheckout, setShowPreCheckout] = useState(false);
@@ -163,10 +168,12 @@ const Shop = () => {
     queryKey: ["/api/shop/categories"],
   });
 
-  // Save cart to localStorage whenever cart changes
+  // Sync cart changes with appropriate storage
   useEffect(() => {
-    localStorage.setItem('momtazchem_cart', JSON.stringify(cart));
-  }, [cart]);
+    if (Object.keys(cart).length > 0 || customer !== null) {
+      saveCartToStorage(cart);
+    }
+  }, [cart, customer]);
 
   // Load customer info on component mount
   useEffect(() => {
@@ -185,10 +192,21 @@ const Shop = () => {
           setCustomer(result.customer);
           // Fetch wallet balance
           fetchWalletBalance();
+          
+          // Handle cart migration from guest to authenticated user
+          migrateGuestCartToUser();
+        } else {
+          // User is not authenticated, handle guest cart
+          handleGuestCart();
         }
+      } else {
+        // User is not authenticated, handle guest cart
+        handleGuestCart();
       }
     } catch (error) {
       console.error('Error checking customer auth:', error);
+      // Handle as guest
+      handleGuestCart();
     } finally {
       setIsLoadingCustomer(false);
     }
@@ -211,9 +229,47 @@ const Shop = () => {
     }
   };
 
+  const migrateGuestCartToUser = () => {
+    const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
+    if (guestCart) {
+      const guestCartData = JSON.parse(guestCart);
+      // Merge guest cart with existing user cart if any
+      const userCart = localStorage.getItem('momtazchem_user_cart');
+      const userCartData = userCart ? JSON.parse(userCart) : {};
+      
+      const mergedCart = { ...userCartData, ...guestCartData };
+      localStorage.setItem('momtazchem_user_cart', JSON.stringify(mergedCart));
+      sessionStorage.removeItem('momtazchem_guest_cart');
+      
+      setCart(mergedCart);
+    } else {
+      // Load existing user cart
+      const userCart = localStorage.getItem('momtazchem_user_cart');
+      if (userCart) {
+        setCart(JSON.parse(userCart));
+      }
+    }
+  };
+
+  const handleGuestCart = () => {
+    // Clear user cart data and use session cart only for guests
+    const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
+    if (guestCart) {
+      setCart(JSON.parse(guestCart));
+    } else {
+      // Check if we have any cart data from user cart that needs to be cleared
+      setCart({});
+      localStorage.removeItem('momtazchem_user_cart');
+    }
+  };
+
   const handleLoginSuccess = (customerData: any) => {
     setCustomer(customerData);
     fetchWalletBalance();
+    
+    // Migrate guest cart to user cart
+    migrateGuestCartToUser();
+    
     toast({
       title: "خوش آمدید",
       description: `${customerData.firstName} ${customerData.lastName}`,
@@ -271,24 +327,36 @@ const Shop = () => {
       }
     });
 
+  // Save cart to appropriate storage based on authentication
+  const saveCartToStorage = (cartData: {[key: number]: number}) => {
+    if (customer) {
+      // Authenticated user - use localStorage
+      localStorage.setItem('momtazchem_user_cart', JSON.stringify(cartData));
+    } else {
+      // Guest user - use sessionStorage (will persist until login/register or tab close)
+      sessionStorage.setItem('momtazchem_guest_cart', JSON.stringify(cartData));
+    }
+  };
+
   // Cart functions
   const addToCart = (productId: number) => {
-    setCart(prev => ({
-      ...prev,
-      [productId]: (prev[productId] || 0) + 1
-    }));
+    const newCart = {
+      ...cart,
+      [productId]: (cart[productId] || 0) + 1
+    };
+    setCart(newCart);
+    saveCartToStorage(newCart);
   };
 
   const removeFromCart = (productId: number) => {
-    setCart(prev => {
-      const newCart = { ...prev };
-      if (newCart[productId] > 1) {
-        newCart[productId]--;
-      } else {
-        delete newCart[productId];
-      }
-      return newCart;
-    });
+    const newCart = { ...cart };
+    if (newCart[productId] > 1) {
+      newCart[productId]--;
+    } else {
+      delete newCart[productId];
+    }
+    setCart(newCart);
+    saveCartToStorage(newCart);
   };
 
   const getTotalItems = () => {
