@@ -264,15 +264,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const finalWalletAmount = useWalletPayment ? Math.min(walletAmount || maxWalletAmount, maxWalletAmount) : 0;
   const remainingAmount = totalAmount - finalWalletAmount;
 
-  // Format currency in IQD by default
-  const formatCurrency = (amount: number, currency = 'IQD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2
-    }).format(amount);
-  };
-
   // GPS location handler
   const handleGetLocation = async () => {
     setIsGettingLocation(true);
@@ -586,9 +577,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               type="number"
                               min="0"
                               max={maxWalletAmount}
-                              value={walletAmount}
-                              onChange={(e) => setWalletAmount(Math.min(parseFloat(e.target.value) || 0, maxWalletAmount))}
+                              value={walletAmount || ''}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value) || 0;
+                                setWalletAmount(Math.min(value, maxWalletAmount));
+                              }}
                               className="mt-1"
+                              placeholder="0"
                             />
                           </div>
                           <div>
