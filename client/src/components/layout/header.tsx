@@ -243,7 +243,50 @@ export default function Header() {
               <LanguageSwitcher />
             </div>
 
-
+            {/* Customer Authentication - Desktop */}
+            {isAuthenticated && customer ? (
+              <div className="hidden md:block">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
+                      <div className="bg-blue-100 dark:bg-blue-900/20 px-3 py-1 rounded-full">
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                          {customer.firstName} {customer.lastName}
+                        </span>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/customer/profile" className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        {t.profile}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/customer/wallet" className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4" />
+                        {t.wallet}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout} className="flex items-center gap-2 text-red-600">
+                      <LogOut className="h-4 w-4" />
+                      {t.logout}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <div className="hidden md:block">
+                <Link href="/shop">
+                  <Button variant="outline" size="sm">
+                    {t.login}
+                  </Button>
+                </Link>
+              </div>
+            )}
             
             {/* Mobile menu button */}
             <Button
@@ -352,11 +395,76 @@ export default function Header() {
 
 
 
+                {/* Customer Authentication - Mobile */}
+                {isAuthenticated && customer ? (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (navigation.length + productCategories.length + 2) * 0.1 }}
+                    className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
+                  >
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">
+                      {customer.firstName} {customer.lastName}
+                    </div>
+                    <div className="space-y-2">
+                      <Link href="/customer/profile">
+                        <motion.div
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <User className="h-4 w-4" />
+                          <span>{t.profile}</span>
+                        </motion.div>
+                      </Link>
+                      <Link href="/customer/wallet">
+                        <motion.div
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Wallet className="h-4 w-4" />
+                          <span>{t.wallet}</span>
+                        </motion.div>
+                      </Link>
+                      <motion.div
+                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          logout();
+                          setIsMobileMenuOpen(false);
+                        }}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>{t.logout}</span>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (navigation.length + productCategories.length + 2) * 0.1 }}
+                    className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
+                  >
+                    <Link href="/shop">
+                      <motion.div
+                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors bg-blue-600 text-white hover:bg-blue-700"
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4" />
+                        <span>{t.login}</span>
+                      </motion.div>
+                    </Link>
+                  </motion.div>
+                )}
+
                 {/* Language Switcher - Mobile */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (navigation.length + productCategories.length + 2) * 0.1 }}
+                  transition={{ delay: (navigation.length + productCategories.length + 3) * 0.1 }}
                   className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
                 >
                   <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
