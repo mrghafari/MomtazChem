@@ -34,7 +34,7 @@ import {
   type InsertSalesReport
 } from "@shared/shop-schema";
 import { shopDb } from "./shop-db";
-import { eq, desc, and, gte, lte, sql, count, or, like, ilike, asc } from "drizzle-orm";
+import { eq, desc, and, gte, lte, gt, sql, count, or, like, ilike, asc } from "drizzle-orm";
 
 export interface IShopStorage {
   // Category management
@@ -395,9 +395,20 @@ export class ShopStorage implements IShopStorage {
       whereConditions.push(lte(shopProducts.price, priceMax.toString()));
     }
 
-    // Stock filter
+    // Stock filter - check both inStock flag and actual stockQuantity
     if (inStock !== undefined) {
-      whereConditions.push(eq(shopProducts.inStock, inStock));
+      if (inStock === true) {
+        // For "In Stock Only" filter, require both inStock=true AND stockQuantity > 0
+        whereConditions.push(
+          and(
+            eq(shopProducts.inStock, true),
+            gt(shopProducts.stockQuantity, 0)
+          )
+        );
+      } else {
+        // For other cases, use the inStock flag
+        whereConditions.push(eq(shopProducts.inStock, inStock));
+      }
     }
 
     // Tags filter
