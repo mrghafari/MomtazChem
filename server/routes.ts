@@ -2623,7 +2623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (existingCrmCustomer) {
         return res.status(400).json({ 
           success: false, 
-          message: "Email already exists in our system" 
+          message: "ایمیل تکراری است - قبلاً مشتری با این ایمیل ثبت شده است" 
         });
       }
 
@@ -2727,6 +2727,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error registering customer:", error);
+      
+      // Check if it's a validation error (duplicate email or phone)
+      if (error instanceof Error && error.message.includes('تکراری است')) {
+        return res.status(400).json({ 
+          success: false, 
+          message: error.message 
+        });
+      }
+      
       res.status(500).json({ 
         success: false, 
         message: "Registration failed" 
