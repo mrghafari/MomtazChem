@@ -875,7 +875,7 @@ const Shop = () => {
                               </div>
 
                               {/* Low Stock Warning */}
-                              {product.inStock && product.stockQuantity && product.stockQuantity < 10 && (
+                              {product.inStock && product.stockQuantity && product.lowStockThreshold && product.stockQuantity < product.lowStockThreshold && (
                                 <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                                   <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>

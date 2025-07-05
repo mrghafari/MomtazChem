@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -296,7 +296,7 @@ export default function ProductsPage() {
       barcode: "",
       sku: "",
       stockQuantity: 0,
-      minStockLevel: 0,
+      minStockLevel: 10,
       maxStockLevel: 0,
       unitPrice: "0",
       currency: "IQD",
@@ -1045,16 +1045,19 @@ export default function ProductsPage() {
                       name="minStockLevel"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Min Level</FormLabel>
+                          <FormLabel>Stock Warning Threshold</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
-                              placeholder="0" 
+                              placeholder="10" 
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
+                          <FormDescription>
+                            Show stock warning when quantity falls below this threshold
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
