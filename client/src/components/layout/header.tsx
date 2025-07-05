@@ -249,11 +249,7 @@ export default function Header() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
-                      <div className="bg-blue-100 dark:bg-blue-900/20 px-3 py-1 rounded-full">
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                          {customer.firstName} {customer.lastName}
-                        </span>
-                      </div>
+                      <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                       <ChevronDown className="h-4 w-4 text-gray-500" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -403,9 +399,6 @@ export default function Header() {
                     transition={{ delay: (navigation.length + productCategories.length + 2) * 0.1 }}
                     className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
                   >
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">
-                      {customer.firstName} {customer.lastName}
-                    </div>
                     <div className="space-y-2">
                       <Link href="/customer/profile">
                         <motion.div

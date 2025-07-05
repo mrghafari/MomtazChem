@@ -423,23 +423,7 @@ const Shop = () => {
                 <div className="flex items-center gap-2">
                   {customer ? (
                     <div className="flex items-center gap-2">
-                      {/* Customer Name - Click to Profile */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          console.log("Navigating to customer profile...");
-                          navigate("/customer/profile");
-                        }}
-                        className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100"
-                      >
-                        <User className="w-4 h-4 text-gray-600" />
-                        <span className="text-sm font-medium text-gray-900">
-                          {customer.firstName}
-                        </span>
-                      </Button>
-                      
-                      {/* Wallet Balance Display - Click to Wallet */}
+                      {/* Customer Name & Wallet Balance - Click to Wallet */}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -447,12 +431,18 @@ const Shop = () => {
                           console.log("Navigating to customer wallet...");
                           navigate("/customer/wallet");
                         }}
-                        className="flex items-center gap-1 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
                       >
-                        <Wallet className="w-4 h-4 text-green-600" />
-                        <span className="text-sm font-semibold text-green-800">
-                          ${walletBalance.toFixed(2)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-700">
+                            {customer.firstName} {customer.lastName}
+                          </span>
+                          <div className="w-px h-4 bg-gray-300"></div>
+                          <Wallet className="w-4 h-4 text-green-600" />
+                          <span className="text-sm font-semibold text-green-800">
+                            ${walletBalance.toFixed(2)}
+                          </span>
+                        </div>
                       </Button>
                     </div>
                   ) : (
