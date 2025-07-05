@@ -87,7 +87,7 @@ import DepartmentUsers from "@/pages/admin/department-users";
 import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
 import InventoryManagement from "@/pages/inventory-management";
 import ContentManagement from "@/pages/content-management";
-import SecurityManagement from "@/pages/security-management";
+import SecurityManagement from "@/pages/security-management-new";
 import NotFound from "@/pages/not-found";
 
 function Router() {

@@ -199,14 +199,13 @@ export default function SiteManagement() {
       onClick: () => setLocation("/admin/content-management"),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
     },
-    // Temporarily disabled while fixing TypeScript compilation issues
-    // {
-    //   id: "security-management",
-    //   label: "Security Management",
-    //   icon: Shield,
-    //   onClick: () => setLocation("/admin/security-management"),
-    //   className: "border-red-300 text-red-600 hover:bg-red-50"
-    // }
+    {
+      id: "security-management",
+      label: "Security Management",
+      icon: Shield,
+      onClick: () => setLocation("/admin/security-management"),
+      className: "border-red-300 text-red-600 hover:bg-red-50"
+    }
   ];
 
   // State for managing button order
