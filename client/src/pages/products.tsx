@@ -26,6 +26,9 @@ const formSchema = insertShowcaseProductSchema.extend({
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
+  // Text fields for array handling
+  features: z.string().optional(),
+  applications: z.string().optional(),
   // Variant fields
   isVariant: z.boolean().default(false),
   parentProductId: z.number().optional(),
@@ -1475,7 +1478,25 @@ export default function ProductsPage() {
                       <FormLabel>Features</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Enter product features" 
+                          placeholder="Enter product features (one per line)" 
+                          className="min-h-[80px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="applications"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Applications</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Enter product applications (one per line)" 
                           className="min-h-[80px]"
                           {...field} 
                         />

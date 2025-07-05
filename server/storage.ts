@@ -152,7 +152,7 @@ export class DatabaseStorage implements IStorage {
     // This allows for flexible category management without strict validation
 
     // Ensure JSON fields are properly handled for PostgreSQL
-    const updateData = {
+    const updateData: any = {
       ...productUpdate,
       updatedAt: new Date(),
     };
