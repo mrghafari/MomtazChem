@@ -14,6 +14,16 @@ import { MapPin, Globe, X, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
+// Format currency helper function
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'IQD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount).replace('IQD', '').trim() + ' IQD';
+};
+
 // Language types
 type Language = 'en' | 'ar';
 
@@ -57,7 +67,15 @@ const translations = {
     
     // Language switcher
     switchLanguage: "العربية",
-    language: "Language"
+    language: "Language",
+    
+    // Wallet payment
+    walletPayment: "Pay from Wallet",
+    walletBalance: "Wallet Balance",
+    useWallet: "Use wallet balance",
+    walletAmount: "Amount from Wallet",
+    remainingAmount: "Remaining Amount",
+    insufficientFunds: "Insufficient wallet balance"
   },
   ar: {
     // Form titles
@@ -97,7 +115,15 @@ const translations = {
     
     // Language switcher
     switchLanguage: "English",
-    language: "اللغة"
+    language: "اللغة",
+    
+    // Wallet payment
+    walletPayment: "الدفع من المحفظة",
+    walletBalance: "رصيد المحفظة",
+    useWallet: "استخدام رصيد المحفظة",
+    walletAmount: "المبلغ من المحفظة",
+    remainingAmount: "المبلغ المتبقي",
+    insufficientFunds: "رصيد المحفظة غير كافي"
   }
 };
 
@@ -152,6 +178,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [language, setLanguage] = useState<Language>('en');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
+  const [useWalletPayment, setUseWalletPayment] = useState(false);
+  const [walletAmount, setWalletAmount] = useState(0);
 
   // Fetch current customer data
   const { data: customerData, isLoading: isLoadingCustomer } = useQuery({
@@ -166,6 +194,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Fetch wallet balance for logged-in users
+  const { data: walletData } = useQuery({
+    queryKey: ['/api/customers/wallet/balance'],
+    queryFn: async () => {
+      try {
+        return await apiRequest('/api/customers/wallet/balance', 'GET');
+      } catch (error) {
+        return { balance: 0 };
+      }
+    },
+    enabled: !!customerData?.success,
+    retry: false,
   });
 
   // Dynamic form based on current language
@@ -205,6 +247,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Get current translations
   const t = translations[language];
 
+  // Get wallet balance
+  const walletBalance = walletData?.balance || 0;
+
   // Calculate total amount
   const totalAmount = Object.entries(cart).reduce((sum, [productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
@@ -213,6 +258,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
     return sum;
   }, 0);
+
+  // Calculate wallet payment amounts
+  const maxWalletAmount = Math.min(walletBalance, totalAmount);
+  const finalWalletAmount = useWalletPayment ? Math.min(walletAmount || maxWalletAmount, maxWalletAmount) : 0;
+  const remainingAmount = totalAmount - finalWalletAmount;
 
   // Format currency in IQD by default
   const formatCurrency = (amount: number, currency = 'IQD') => {
@@ -254,23 +304,41 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Submit order mutation
   const submitOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      return apiRequest("/api/customers/orders", "POST", {
+      const orderPayload = {
         ...orderData,
         cart,
         totalAmount,
-        currency: 'IQD'
-      });
+        currency: 'IQD',
+        // Wallet payment information
+        useWalletPayment,
+        walletAmount: useWalletPayment ? finalWalletAmount : 0,
+        remainingAmount: useWalletPayment ? remainingAmount : totalAmount,
+        paymentMethod: useWalletPayment ? 'wallet_and_cash' : 'cash'
+      };
+
+      // If using wallet payment, also update wallet balance
+      if (useWalletPayment && finalWalletAmount > 0) {
+        await apiRequest("/api/customers/wallet/deduct", "POST", {
+          amount: finalWalletAmount,
+          description: `Order payment - ${new Date().toISOString()}`
+        });
+      }
+
+      return apiRequest("/api/customers/orders", "POST", orderPayload);
     },
     onSuccess: () => {
       toast({
         title: t.orderSubmitted,
-        description: "Your order has been received and will be processed."
+        description: useWalletPayment 
+          ? `Order submitted. ${finalWalletAmount} IQD paid from wallet.`
+          : "Your order has been received and will be processed."
       });
       onOrderComplete();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: t.orderError,
+        description: error?.message || "Failed to submit order",
         variant: "destructive"
       });
     }
@@ -474,6 +542,92 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <Badge variant="secondary" className="text-xs">
                       Lat: {locationData.latitude.toFixed(6)}, Lng: {locationData.longitude.toFixed(6)}
                     </Badge>
+                  )}
+                </div>
+
+                {/* Wallet Payment Section - Only for logged-in users */}
+                {customerData?.success && walletBalance > 0 && (
+                  <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium text-green-800">{t.walletPayment}</h3>
+                      <div className="text-sm text-green-600">
+                        {t.walletBalance}: {formatCurrency(walletBalance)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="useWallet"
+                        checked={useWalletPayment}
+                        onChange={(e) => {
+                          setUseWalletPayment(e.target.checked);
+                          if (e.target.checked) {
+                            setWalletAmount(maxWalletAmount);
+                          } else {
+                            setWalletAmount(0);
+                          }
+                        }}
+                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                      />
+                      <label htmlFor="useWallet" className="text-sm text-green-700">
+                        {t.useWallet}
+                      </label>
+                    </div>
+
+                    {useWalletPayment && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-green-700">
+                              {t.walletAmount}
+                            </label>
+                            <Input
+                              type="number"
+                              min="0"
+                              max={maxWalletAmount}
+                              value={walletAmount}
+                              onChange={(e) => setWalletAmount(Math.min(parseFloat(e.target.value) || 0, maxWalletAmount))}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-green-700">
+                              {t.remainingAmount}
+                            </label>
+                            <div className="mt-1 p-2 bg-white border rounded text-sm">
+                              {formatCurrency(remainingAmount)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {walletBalance < totalAmount && (
+                          <div className="text-xs text-orange-600">
+                            {t.insufficientFunds}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Order Summary */}
+                <div className="space-y-2 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Total Amount:</span>
+                    <span className="font-bold">{formatCurrency(totalAmount)}</span>
+                  </div>
+                  {useWalletPayment && finalWalletAmount > 0 && (
+                    <>
+                      <div className="flex justify-between items-center text-green-600">
+                        <span>From Wallet:</span>
+                        <span>-{formatCurrency(finalWalletAmount)}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-t pt-2">
+                        <span className="font-medium">Remaining to Pay:</span>
+                        <span className="font-bold">{formatCurrency(remainingAmount)}</span>
+                      </div>
+                    </>
                   )}
                 </div>
 

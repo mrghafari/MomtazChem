@@ -10325,6 +10325,49 @@ momtazchem.com
     }
   });
 
+  // Deduct amount from customer wallet (for order payments)
+  app.post('/api/customers/wallet/deduct', async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Please log in to access your wallet" });
+      }
+
+      const { amount, description } = req.body;
+
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ success: false, message: "Invalid amount" });
+      }
+
+      // Check current balance
+      const wallet = await walletStorage.getWalletByCustomerId(req.session.customerId);
+      if (!wallet) {
+        return res.status(404).json({ success: false, message: "Wallet not found" });
+      }
+
+      const currentBalance = parseFloat(wallet.balance);
+      if (currentBalance < amount) {
+        return res.status(400).json({ success: false, message: "Insufficient balance" });
+      }
+
+      // Deduct amount
+      const transaction = await walletStorage.debitWallet(
+        req.session.customerId,
+        amount,
+        description || 'Order payment'
+      );
+
+      res.json({ 
+        success: true, 
+        message: "Amount deducted successfully",
+        transaction: transaction,
+        newBalance: currentBalance - amount
+      });
+    } catch (error) {
+      console.error('Error deducting from wallet:', error);
+      res.status(500).json({ success: false, message: 'Failed to deduct from wallet' });
+    }
+  });
+
   // Create wallet recharge request
   app.post('/api/customer/wallet/recharge', async (req, res) => {
     try {
