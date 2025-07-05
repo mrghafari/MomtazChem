@@ -268,6 +268,7 @@ export class DatabaseStorage implements IStorage {
           stockQuantity: showcaseProduct.stockQuantity || 0,
           lowStockThreshold: showcaseProduct.minStockLevel || 10,
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
+          thumbnailUrl: showcaseProduct.imageUrl || null,
           isActive: showcaseProduct.isActive,
         });
       } else {
@@ -282,6 +283,7 @@ export class DatabaseStorage implements IStorage {
           stockQuantity: showcaseProduct.stockQuantity || 0,
           lowStockThreshold: showcaseProduct.minStockLevel || 10,
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
+          thumbnailUrl: showcaseProduct.imageUrl || null,
           isActive: showcaseProduct.isActive,
           isFeatured: false,
         });
