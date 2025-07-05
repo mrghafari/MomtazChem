@@ -363,9 +363,13 @@ const Shop = () => {
   };
 
   const setProductQuantity = (productId: number, quantity: number) => {
+    const product = products.find(p => p.id === productId);
+    const maxQuantity = product?.stockQuantity || 999;
+    const validQuantity = Math.max(1, Math.min(quantity, maxQuantity));
+    
     setProductQuantities(prev => ({
       ...prev,
-      [productId]: Math.max(1, quantity)
+      [productId]: validQuantity
     }));
   };
 
@@ -964,9 +968,14 @@ const Shop = () => {
                                 >
                                   <Minus className="w-4 h-4" />
                                 </Button>
-                                <span className="w-12 text-center font-medium">
-                                  {getProductQuantity(product.id)}
-                                </span>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max={product.stockQuantity || 999}
+                                  value={getProductQuantity(product.id)}
+                                  onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
+                                  className="w-16 text-center border rounded px-2 py-1 font-medium"
+                                />
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -1084,9 +1093,14 @@ const Shop = () => {
                                     >
                                       <Minus className="w-4 h-4" />
                                     </Button>
-                                    <span className="w-12 text-center font-medium">
-                                      {getProductQuantity(product.id)}
-                                    </span>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max={product.stockQuantity || 999}
+                                      value={getProductQuantity(product.id)}
+                                      onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
+                                      className="w-16 text-center border rounded px-2 py-1 font-medium"
+                                    />
                                     <Button
                                       size="sm"
                                       variant="outline"
