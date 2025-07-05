@@ -140,6 +140,37 @@ export interface Translation {
   city: string;
   country: string;
   company: string;
+  postalCode: string;
+  
+  // Checkout form fields
+  firstNamePlaceholder: string;
+  lastNamePlaceholder: string;
+  emailPlaceholder: string;
+  phonePlaceholder: string;
+  addressPlaceholder: string;
+  cityPlaceholder: string;
+  countryPlaceholder: string;
+  companyPlaceholder: string;
+  postalCodePlaceholder: string;
+  
+  // Checkout form labels
+  customerInformation: string;
+  deliveryAddress: string;
+  gpsLocation: string;
+  findLocation: string;
+  orderNotes: string;
+  notesPlaceholder: string;
+  
+  // Wallet payment
+  walletPayment: string;
+  walletBalance: string;
+  useWallet: string;
+  walletAmount: string;
+  remainingAmount: string;
+  insufficientFunds: string;
+  fromWallet: string;
+  remainingToPay: string;
+  submitOrder: string;
   
   // Messages
   welcomeMessage: string;
@@ -343,6 +374,37 @@ export const translations: Record<Language, Translation> = {
     city: 'City',
     country: 'Country',
     company: 'Company',
+    postalCode: 'Postal Code',
+    
+    // Checkout form fields
+    firstNamePlaceholder: 'Enter your first name',
+    lastNamePlaceholder: 'Enter your last name',
+    emailPlaceholder: 'Enter your email address',
+    phonePlaceholder: 'Enter your phone number',
+    addressPlaceholder: 'Enter your full address',
+    cityPlaceholder: 'Enter your city',
+    countryPlaceholder: 'Enter your country',
+    companyPlaceholder: 'Enter your company name (optional)',
+    postalCodePlaceholder: 'Enter postal code (optional)',
+    
+    // Checkout form labels
+    customerInformation: 'Customer Information',
+    deliveryAddress: 'Delivery Address',
+    gpsLocation: 'GPS Location',
+    findLocation: 'Find Location',
+    orderNotes: 'Order Notes',
+    notesPlaceholder: 'Enter any additional notes for your order',
+    
+    // Wallet payment
+    walletPayment: 'Wallet Payment',
+    walletBalance: 'Wallet Balance',
+    useWallet: 'Use wallet for payment',
+    walletAmount: 'Wallet Amount',
+    remainingAmount: 'Remaining Amount',
+    insufficientFunds: 'Insufficient wallet funds',
+    fromWallet: 'From Wallet',
+    remainingToPay: 'Remaining to Pay',
+    submitOrder: 'Submit Order',
     
     // Messages
     welcomeMessage: 'Welcome to Momtazchem',
@@ -544,6 +606,37 @@ export const translations: Record<Language, Translation> = {
     city: 'المدينة',
     country: 'البلد',
     company: 'الشركة',
+    postalCode: 'الرمز البريدي',
+    
+    // Checkout form fields
+    firstNamePlaceholder: 'أدخل اسمك الأول',
+    lastNamePlaceholder: 'أدخل اسمك الأخير',
+    emailPlaceholder: 'أدخل عنوان بريدك الإلكتروني',
+    phonePlaceholder: 'أدخل رقم هاتفك',
+    addressPlaceholder: 'أدخل عنوانك الكامل',
+    cityPlaceholder: 'أدخل مدينتك',
+    countryPlaceholder: 'أدخل بلدك',
+    companyPlaceholder: 'أدخل اسم شركتك (اختياري)',
+    postalCodePlaceholder: 'أدخل الرمز البريدي (اختياري)',
+    
+    // Checkout form labels
+    customerInformation: 'معلومات العميل',
+    deliveryAddress: 'عنوان التسليم',
+    gpsLocation: 'الموقع الجغرافي',
+    findLocation: 'العثور على الموقع',
+    orderNotes: 'ملاحظات الطلب',
+    notesPlaceholder: 'أدخل أي ملاحظات إضافية لطلبك',
+    
+    // Wallet payment
+    walletPayment: 'الدفع من المحفظة',
+    walletBalance: 'رصيد المحفظة',
+    useWallet: 'استخدام المحفظة للدفع',
+    walletAmount: 'مبلغ المحفظة',
+    remainingAmount: 'المبلغ المتبقي',
+    insufficientFunds: 'رصيد المحفظة غير كافي',
+    fromWallet: 'من المحفظة',
+    remainingToPay: 'المتبقي للدفع',
+    submitOrder: 'إرسال الطلب',
     
     // Messages
     welcomeMessage: 'مرحباً بكم في مجمع ممتاز الكيميائي',
@@ -745,6 +838,37 @@ export const translations: Record<Language, Translation> = {
     city: 'شار',
     country: 'وڵات',
     company: 'کۆمپانیا',
+    postalCode: 'کۆدی پۆستە',
+    
+    // Checkout form fields
+    firstNamePlaceholder: 'ناوی یەکەمت بنووسە',
+    lastNamePlaceholder: 'ناوی دواینت بنووسە',
+    emailPlaceholder: 'ناونیشانی ئیمەیلەکەت بنووسە',
+    phonePlaceholder: 'ژمارەی تەلەفۆنەکەت بنووسە',
+    addressPlaceholder: 'ناونیشانی تەواوت بنووسە',
+    cityPlaceholder: 'شارەکەت بنووسە',
+    countryPlaceholder: 'وڵاتەکەت بنووسە',
+    companyPlaceholder: 'ناوی کۆمپانیاکەت بنووسە (ئارەزووی)',
+    postalCodePlaceholder: 'کۆدی پۆستە بنووسە (ئارەزووی)',
+    
+    // Checkout form labels
+    customerInformation: 'زانیاریەکانی کڕیار',
+    deliveryAddress: 'ناونیشانی گەیاندن',
+    gpsLocation: 'شوێنی GPS',
+    findLocation: 'شوێن بدۆزەرەوە',
+    orderNotes: 'تێبینیەکانی داواکاری',
+    notesPlaceholder: 'هەر تێبینیەکی زیادەت بۆ داواکاریەکەت بنووسە',
+    
+    // Wallet payment
+    walletPayment: 'پارەدان لە جزدانەوە',
+    walletBalance: 'باڵانسی جزدان',
+    useWallet: 'بەکارهێنانی جزدان بۆ پارەدان',
+    walletAmount: 'بڕی جزدان',
+    remainingAmount: 'بڕی ماوە',
+    insufficientFunds: 'باڵانسی جزدان بەس نییە',
+    fromWallet: 'لە جزدانەوە',
+    remainingToPay: 'ماوەی بۆ پارەدان',
+    submitOrder: 'ناردنی داواکاری',
     
     // Messages
     welcomeMessage: 'بەخێربێن بۆ مەجمەعی ممتاز الکیمیائی',
@@ -916,6 +1040,37 @@ export const translations: Record<Language, Translation> = {
     city: 'Şehir',
     country: 'Ülke',
     company: 'Şirket',
+    postalCode: 'Posta Kodu',
+    
+    // Checkout form fields
+    firstNamePlaceholder: 'Adınızı girin',
+    lastNamePlaceholder: 'Soyadınızı girin',
+    emailPlaceholder: 'E-posta adresinizi girin',
+    phonePlaceholder: 'Telefon numaranızı girin',
+    addressPlaceholder: 'Tam adresinizi girin',
+    cityPlaceholder: 'Şehrinizi girin',
+    countryPlaceholder: 'Ülkenizi girin',
+    companyPlaceholder: 'Şirket adınızı girin (isteğe bağlı)',
+    postalCodePlaceholder: 'Posta kodunu girin (isteğe bağlı)',
+    
+    // Checkout form labels
+    customerInformation: 'Müşteri Bilgileri',
+    deliveryAddress: 'Teslimat Adresi',
+    gpsLocation: 'GPS Konumu',
+    findLocation: 'Konum Bul',
+    orderNotes: 'Sipariş Notları',
+    notesPlaceholder: 'Siparişiniz için ek notlarınızı girin',
+    
+    // Wallet payment
+    walletPayment: 'Cüzdan Ödemesi',
+    walletBalance: 'Cüzdan Bakiyesi',
+    useWallet: 'Ödeme için cüzdan kullan',
+    walletAmount: 'Cüzdan Tutarı',
+    remainingAmount: 'Kalan Tutar',
+    insufficientFunds: 'Cüzdan bakiyesi yetersiz',
+    fromWallet: 'Cüzdandan',
+    remainingToPay: 'Ödenecek Kalan',
+    submitOrder: 'Sipariş Gönder',
     
     // Messages
     welcomeMessage: 'Momtazchem\'e Hoş Geldiniz',
