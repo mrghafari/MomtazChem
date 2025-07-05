@@ -25,7 +25,7 @@ import VisualBarcode from "@/components/ui/visual-barcode";
 
 const Shop = () => {
   const { toast } = useToast();
-  const { t, direction } = useLanguage();
+  const { language, direction } = useLanguage();
   const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -383,7 +383,7 @@ const Shop = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">{t.loading}</p>
+            <p className="mt-4 text-gray-600">Loading...</p>
           </div>
         </div>
       </div>
@@ -396,7 +396,7 @@ const Shop = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between relative">
-            <h1 className="text-3xl font-bold text-gray-900">{t.shop}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Shop</h1>
             
             {/* AI Recommendations Button - Center */}
             <div className="absolute left-1/2 transform -translate-x-1/2">
@@ -743,6 +743,20 @@ const Shop = () => {
                             </Badge>
                           </div>
 
+                          {/* Low Stock Warning */}
+                          {product.inStock && product.stockQuantity && product.stockQuantity < 10 && (
+                            <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                                <span className="text-sm font-medium text-orange-800">
+                                  {language === "ar" ? `${product.stockQuantity} فقط متبقی` : 
+                                   language === "ku" ? `تەنها ${product.stockQuantity} ماوە` :
+                                   `Only ${product.stockQuantity} left in stock`}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Quantity Discounts Display */}
                           {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
                             <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
@@ -849,7 +863,7 @@ const Shop = () => {
                               <div className="flex items-center gap-4 mb-4">
                                 <div>
                                   <span className="text-2xl font-bold text-green-600">
-                                    ${parseFloat(product.price).toFixed(2)}
+                                    {parseFloat(product.price).toFixed(0)} IQD
                                   </span>
                                   <span className="text-sm text-gray-500 ml-1">
                                     / {product.priceUnit}
@@ -859,6 +873,20 @@ const Shop = () => {
                                   {product.inStock ? "In Stock" : "Out of Stock"}
                                 </Badge>
                               </div>
+
+                              {/* Low Stock Warning */}
+                              {product.inStock && product.stockQuantity && product.stockQuantity < 10 && (
+                                <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                                    <span className="text-sm font-medium text-orange-800">
+                                      {language === "ar" ? `${product.stockQuantity} فقط متبقی` : 
+                                       language === "ku" ? `تەنها ${product.stockQuantity} ماوە` :
+                                       `Only ${product.stockQuantity} left in stock`}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                             
                             <div className="ml-6">
