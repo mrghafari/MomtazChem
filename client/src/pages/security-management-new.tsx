@@ -189,9 +189,9 @@ export default function SecurityManagement() {
                 <Activity className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{metrics.systemHealth}%</div>
+                <div className="text-2xl font-bold">{metrics.systemHealth || 0}%</div>
                 <div className="text-xs text-gray-500 mt-1">
-                  {metrics.systemHealth >= 90 ? 'Excellent' : metrics.systemHealth >= 70 ? 'Good' : 'Needs Attention'}
+                  {(metrics.systemHealth || 0) >= 90 ? 'Excellent' : (metrics.systemHealth || 0) >= 70 ? 'Good' : 'Needs Attention'}
                 </div>
               </CardContent>
             </Card>
@@ -203,7 +203,7 @@ export default function SecurityManagement() {
               </CardHeader>
               <CardContent>
                 <Badge className={getThreatLevelColor(metrics.threatLevel)}>
-                  {metrics.threatLevel.toUpperCase()}
+                  {metrics.threatLevel?.toUpperCase() || 'LOW'}
                 </Badge>
                 <div className="text-xs text-gray-500 mt-2">
                   Current security status
@@ -217,7 +217,7 @@ export default function SecurityManagement() {
                 <AlertTriangle className="h-4 w-4 text-orange-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{metrics.failedLogins}</div>
+                <div className="text-2xl font-bold">{metrics.failedLogins || 0}</div>
                 <div className="text-xs text-gray-500 mt-1">Last 24 hours</div>
               </CardContent>
             </Card>
@@ -228,7 +228,7 @@ export default function SecurityManagement() {
                 <Users className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{metrics.activeSessions}</div>
+                <div className="text-2xl font-bold">{metrics.activeSessions || 0}</div>
                 <div className="text-xs text-gray-500 mt-1">Currently online</div>
               </CardContent>
             </Card>
@@ -245,9 +245,9 @@ export default function SecurityManagement() {
             <CardContent>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm text-gray-600">Last Scan: {new Date(metrics.lastScan).toLocaleString()}</p>
+                  <p className="text-sm text-gray-600">Last Scan: {new Date(metrics.lastScan || new Date()).toLocaleString()}</p>
                   <p className="text-lg font-semibold">
-                    {metrics.vulnerabilities === 0 ? 'No vulnerabilities found' : `${metrics.vulnerabilities} vulnerabilities detected`}
+                    {(metrics.vulnerabilities || 0) === 0 ? 'No vulnerabilities found' : `${metrics.vulnerabilities} vulnerabilities detected`}
                   </p>
                 </div>
                 <Button
