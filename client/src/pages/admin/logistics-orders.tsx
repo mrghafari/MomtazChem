@@ -19,7 +19,7 @@ import {
   Package,
   User
 } from "lucide-react";
-import RefreshControl from "@/components/RefreshControl";
+import GlobalRefreshControl from "@/components/GlobalRefreshControl";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 
@@ -219,10 +219,10 @@ export default function LogisticsOrders() {
 
       {/* Refresh Control */}
       <div className="mb-6">
-        <RefreshControl 
+        <GlobalRefreshControl 
+          pageName="logistics"
           onRefresh={() => refetch()}
           isLoading={isLoading}
-          departmentName="واحد لجستیک"
         />
       </div>
 

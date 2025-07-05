@@ -16,7 +16,7 @@ import {
   Clock,
   AlertCircle
 } from "lucide-react";
-import RefreshControl from "@/components/RefreshControl";
+import GlobalRefreshControl from "@/components/GlobalRefreshControl";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 
@@ -202,10 +202,10 @@ export default function WarehouseOrders() {
 
       {/* Refresh Control */}
       <div className="mb-6">
-        <RefreshControl 
+        <GlobalRefreshControl 
+          pageName="warehouse"
           onRefresh={() => refetch()}
           isLoading={isLoading}
-          departmentName="واحد انبار"
         />
       </div>
 

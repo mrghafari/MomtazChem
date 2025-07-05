@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import GlobalRefreshControl from "@/components/GlobalRefreshControl";
 
 interface OrderManagement {
   id: number;
@@ -214,6 +215,15 @@ export default function FinancialDepartment() {
               <div className="text-2xl font-bold">0</div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Refresh Control */}
+        <div className="mb-6">
+          <GlobalRefreshControl 
+            pageName="financial"
+            onRefresh={() => refetch()}
+            isLoading={isLoading}
+          />
         </div>
 
         {/* Orders List */}
