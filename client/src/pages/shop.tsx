@@ -354,27 +354,13 @@ const Shop = () => {
     setCustomer(customerData);
     setShowAuth(false);
     
-    // Check if customer profile is complete for checkout
-    const isProfileComplete = customerData.phone && customerData.country && 
-                              customerData.city && customerData.address;
-    
-    if (isProfileComplete) {
-      // Profile is complete, proceed to checkout
-      setShowCheckout(true);
-      toast({
-        title: direction === 'rtl' ? "ورود موفق" : "Login Successful",
-        description: direction === 'rtl' ? "خوش آمدید!" : "Welcome back!",
-      });
-    } else {
-      // Profile needs completion, show registration form with pre-filled data
-      setAuthMode('register');
-      setShowAuth(true);
-      toast({
-        title: direction === 'rtl' ? "تکمیل اطلاعات" : "Complete Profile",
-        description: direction === 'rtl' ? "لطفاً اطلاعات ناقص خود را تکمیل کنید" : "Please complete your profile information",
-        variant: "default",
-      });
-    }
+    // For logged in users, always proceed to checkout directly
+    // Checkout form will handle any missing profile information
+    setShowCheckout(true);
+    toast({
+      title: direction === 'rtl' ? "ورود موفق" : "Login Successful",
+      description: direction === 'rtl' ? "خوش آمدید!" : "Welcome back!",
+    });
   };
 
   if (productsLoading) {
