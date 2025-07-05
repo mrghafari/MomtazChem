@@ -69,6 +69,16 @@ const getInventoryStatusIcon = (status: string) => {
   }
 };
 
+// Smart inventory status detection based on actual stock quantities
+const getActualInventoryStatus = (stockQuantity: number | null | undefined, minStockLevel: number | null | undefined): string => {
+  const stock = stockQuantity || 0;
+  const minLevel = minStockLevel || 0;
+
+  if (stock <= 0) return 'out_of_stock';
+  if (stock <= minLevel) return 'low_stock';
+  return 'in_stock';
+};
+
 const getInventoryStatusLabel = (status: string) => {
   switch (status) {
     case 'in_stock':
@@ -607,7 +617,7 @@ export default function ProductsPage() {
                 <div>
                   <p className="text-sm font-medium text-green-600">In Stock</p>
                   <p className="text-2xl font-bold text-green-800">
-                    {products.filter(p => p.inventoryStatus === 'in_stock').length}
+                    {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'in_stock').length}
                   </p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-600" />
@@ -621,7 +631,7 @@ export default function ProductsPage() {
                 <div>
                   <p className="text-sm font-medium text-yellow-600">Low Stock</p>
                   <p className="text-2xl font-bold text-yellow-800">
-                    {products.filter(p => p.inventoryStatus === 'low_stock').length}
+                    {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'low_stock').length}
                   </p>
                 </div>
                 <AlertTriangle className="w-8 h-8 text-yellow-600" />
@@ -635,7 +645,7 @@ export default function ProductsPage() {
                 <div>
                   <p className="text-sm font-medium text-red-600">Out of Stock</p>
                   <p className="text-2xl font-bold text-red-800">
-                    {products.filter(p => p.inventoryStatus === 'out_of_stock').length}
+                    {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'out_of_stock').length}
                   </p>
                 </div>
                 <XCircle className="w-8 h-8 text-red-600" />
@@ -783,10 +793,10 @@ export default function ProductsPage() {
                       <div className="flex items-center justify-between">
                         <Badge 
                           variant="outline" 
-                          className={`flex items-center gap-1 ${getInventoryStatusColor(product.inventoryStatus || 'in_stock')}`}
+                          className={`flex items-center gap-1 ${getInventoryStatusColor(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}`}
                         >
-                          {getInventoryStatusIcon(product.inventoryStatus || 'in_stock')}
-                          {getInventoryStatusLabel(product.inventoryStatus || 'in_stock')}
+                          {getInventoryStatusIcon(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
+                          {getInventoryStatusLabel(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
                         </Badge>
                         {product.priceRange && (
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
