@@ -253,6 +253,8 @@ export default function CRM() {
   };
 
   const handleEditCustomer = (customer: CrmCustomer) => {
+    console.log("Loading customer for edit:", customer);
+    console.log("Customer secondaryAddress from database:", customer.secondaryAddress);
     setEditingCustomer(customer);
     setIsEditCustomerDialogOpen(true);
   };
