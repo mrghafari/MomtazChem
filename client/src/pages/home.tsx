@@ -1,4 +1,6 @@
-import { lazy, Suspense } from "react";
+import HeroSection from "@/components/ui/hero-section";
+import StatsSection from "@/components/ui/stats-section";
+import ProductCard from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,18 +10,11 @@ import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets,
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 import waterTreatmentImg from "@assets/download_1749877891276.jpeg";
 
-// Lazy load heavy components
-const HeroSection = lazy(() => import("@/components/ui/hero-section"));
-const StatsSection = lazy(() => import("@/components/ui/stats-section"));
-const ProductCard = lazy(() => import("@/components/ui/product-card"));
-
 const Home = () => {
-  // Fetch limited products for homepage with caching
+  // Fetch all products from database
   const { data: allProducts, isLoading } = useQuery<ShowcaseProduct[]>({
-    queryKey: ["/api/products", "homepage"],
-    queryFn: () => fetch("/api/products?limit=12").then(res => res.json()),
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
-    gcTime: 10 * 60 * 1000, // 10 minutes cache (gcTime replaces cacheTime in v5)
+    queryKey: ["/api/products"],
+    queryFn: () => fetch("/api/products").then(res => res.json()),
   });
 
   const categoryInfo = [
@@ -62,7 +57,7 @@ const Home = () => {
   ];
 
   // Group products by category
-  const productsByCategory = allProducts?.reduce((acc: Record<string, ShowcaseProduct[]>, product: ShowcaseProduct) => {
+  const productsByCategory = allProducts?.reduce((acc, product) => {
     if (!acc[product.category]) {
       acc[product.category] = [];
     }
@@ -177,9 +172,9 @@ const Home = () => {
                                 <div key={product.id} className="flex items-center justify-between text-sm">
                                   <span className="text-gray-700 truncate flex-1">{product.name}</span>
                                   <div className="flex items-center gap-1 ml-2">
-                                    {(product.stockQuantity ?? 0) > 0 && (
+                                    {product.inventoryStatus === 'in_stock' && (
                                       <Badge variant="outline" className="text-xs border-green-200 text-green-800 bg-green-50">
-                                        موجود ({product.stockQuantity ?? 0})
+                                        In Stock
                                       </Badge>
                                     )}
                                     {product.pdfCatalogUrl && (

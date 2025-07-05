@@ -994,21 +994,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/products", async (req, res) => {
     try {
-      const { category, limit } = req.query;
+      const { category } = req.query;
       let products;
       
       if (category && typeof category === 'string') {
         products = await storage.getProductsByCategory(category);
       } else {
         products = await storage.getProducts();
-      }
-      
-      // Apply limit if specified
-      if (limit && typeof limit === 'string') {
-        const limitNum = parseInt(limit);
-        if (!isNaN(limitNum) && limitNum > 0) {
-          products = products.slice(0, limitNum);
-        }
       }
       
       res.json(products);
