@@ -1056,7 +1056,7 @@ export default function ProductsPage() {
                             />
                           </FormControl>
                           <FormDescription>
-                            Show stock warning when quantity falls below this threshold
+                            Low level hint in shop
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
