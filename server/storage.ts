@@ -174,7 +174,16 @@ export class DatabaseStorage implements IStorage {
 
     // Handle JSON fields properly - use null for empty arrays/objects
     if (productUpdate.specifications !== undefined) {
-      updateData.specifications = productUpdate.specifications && typeof productUpdate.specifications === 'object' && !Array.isArray(productUpdate.specifications) && Object.keys(productUpdate.specifications).length > 0 ? productUpdate.specifications : null;
+      if (typeof productUpdate.specifications === 'string' && productUpdate.specifications.trim()) {
+        // If it's a non-empty string, keep it as string
+        updateData.specifications = productUpdate.specifications.trim();
+      } else if (typeof productUpdate.specifications === 'object' && productUpdate.specifications !== null && !Array.isArray(productUpdate.specifications) && Object.keys(productUpdate.specifications).length > 0) {
+        // If it's a valid object with properties, keep it
+        updateData.specifications = productUpdate.specifications;
+      } else {
+        // Otherwise set to null
+        updateData.specifications = null;
+      }
     }
     if (productUpdate.features !== undefined) {
       updateData.features = Array.isArray(productUpdate.features) && productUpdate.features.length > 0 ? productUpdate.features : null;

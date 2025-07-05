@@ -317,6 +317,26 @@ export default function ProductsPage() {
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
       maxStockLevel: Number(data.maxStockLevel) || 0,
+      // Convert string fields to arrays for backend compatibility
+      features: typeof data.features === 'string' && data.features.trim() 
+        ? data.features.split('\n').map(f => f.trim()).filter(f => f.length > 0)
+        : [],
+      applications: typeof data.applications === 'string' && data.applications.trim()
+        ? data.applications.split('\n').map(a => a.trim()).filter(a => a.length > 0)
+        : [],
+      // Handle specifications - try to parse as JSON if possible, otherwise keep as string
+      specifications: (() => {
+        if (!data.specifications || typeof data.specifications !== 'string') return null;
+        const trimmed = data.specifications.trim();
+        if (!trimmed) return null;
+        
+        try {
+          return JSON.parse(trimmed);
+        } catch {
+          // If not valid JSON, return as string
+          return trimmed;
+        }
+      })(),
     };
     
     if (editingProduct) {
