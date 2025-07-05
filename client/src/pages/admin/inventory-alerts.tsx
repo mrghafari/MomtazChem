@@ -101,7 +101,7 @@ export default function InventoryAlerts() {
     const outOfStock = products.filter((p: ShopProduct) => (p.stockQuantity || 0) <= 0).length;
     const lowStock = products.filter((p: ShopProduct) => {
       const stock = p.stockQuantity || 0;
-      const threshold = p.lowStockThreshold || 10;
+      const threshold = p.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
       return stock > 0 && stock <= threshold;
     }).length;
     const adequateStock = totalProducts - outOfStock - lowStock;
@@ -113,18 +113,18 @@ export default function InventoryAlerts() {
   const outOfStockProducts = products.filter((p: ShopProduct) => (p.stockQuantity || 0) <= 0);
   const lowStockProducts = products.filter((p: ShopProduct) => {
     const stock = p.stockQuantity || 0;
-    const threshold = p.lowStockThreshold || 10;
+    const threshold = p.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
     return stock > 0 && stock <= threshold;
   });
   const adequateStockProducts = products.filter((p: ShopProduct) => {
     const stock = p.stockQuantity || 0;
-    const threshold = p.lowStockThreshold || 10;
+    const threshold = p.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
     return stock > threshold;
   });
 
   const getStockStatus = (product: ShopProduct) => {
     const stock = product.stockQuantity || 0;
-    const threshold = product.lowStockThreshold || 10;
+    const threshold = product.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
     
     if (stock <= 0) return { status: 'out_of_stock', label: 'Out of Stock', color: 'bg-red-500' };
     if (stock <= threshold) return { status: 'low_stock', label: 'Low Stock', color: 'bg-yellow-500' };
@@ -133,7 +133,7 @@ export default function InventoryAlerts() {
 
   const getStockPercentage = (product: ShopProduct) => {
     const stock = product.stockQuantity || 0;
-    const threshold = product.lowStockThreshold || 10;
+    const threshold = product.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
     const maxStock = threshold * 3; // Assume optimal stock is 3x threshold
     return Math.min((stock / maxStock) * 100, 100);
   };
@@ -302,7 +302,7 @@ export default function InventoryAlerts() {
                         <p className="text-sm text-gray-600 mt-1">{product.category}</p>
                         <div className="flex items-center gap-4 mt-2">
                           <span className="text-sm">Current: <strong className="text-red-600">0</strong></span>
-                          <span className="text-sm">Threshold: <strong>{product.lowStockThreshold || 10}</strong></span>
+                          <span className="text-sm">Manager Alert Threshold: <strong>{product.minStockLevel || 5}</strong></span>
                           <span className="text-sm">Price: <strong>{product.price} {product.priceUnit}</strong></span>
                         </div>
                       </div>
@@ -333,7 +333,7 @@ export default function InventoryAlerts() {
                         <p className="text-sm text-gray-600 mt-1">{product.category}</p>
                         <div className="flex items-center gap-4 mt-2">
                           <span className="text-sm">Current: <strong className="text-yellow-600">{product.stockQuantity}</strong></span>
-                          <span className="text-sm">Threshold: <strong>{product.lowStockThreshold || 10}</strong></span>
+                          <span className="text-sm">Manager Alert Threshold: <strong>{product.minStockLevel || 5}</strong></span>
                           <span className="text-sm">Price: <strong>{product.price} {product.priceUnit}</strong></span>
                         </div>
                         <div className="mt-3">

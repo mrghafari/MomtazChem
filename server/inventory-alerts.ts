@@ -70,7 +70,7 @@ export class InventoryAlertService {
 
       for (const product of products) {
         const currentStock = product.stockQuantity || 0;
-        const minimumThreshold = product.lowStockThreshold || 10;
+        const minimumThreshold = product.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
         
         if (currentStock <= 0) {
           alertProducts.push({
@@ -411,7 +411,7 @@ export class InventoryAlertService {
       if (!product) return false;
 
       const currentStock = product.stockQuantity || 0;
-      const minimumThreshold = product.lowStockThreshold || 10;
+      const minimumThreshold = product.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
       
       if (currentStock <= minimumThreshold) {
         const alert: InventoryAlert = {

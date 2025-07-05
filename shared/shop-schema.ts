@@ -53,7 +53,8 @@ export const shopProducts = pgTable("shop_products", {
   reservedQuantity: integer("reserved_quantity").default(0), // کالای رزرو شده
   transitQuantity: integer("transit_quantity").default(0), // کالای در راه
   availableQuantity: integer("available_quantity").default(0), // موجودی قابل فروش
-  lowStockThreshold: integer("low_stock_threshold").default(10),
+  minStockLevel: integer("min_stock_level").default(5), // حد مینیمم برای اعلام به مدیر تولید
+  lowStockThreshold: integer("low_stock_threshold").default(10), // آستانه برای نمایش هشدار به مشتری
   sku: text("sku").unique().notNull(),
   barcode: text("barcode"),
   weight: decimal("weight", { precision: 8, scale: 2 }), // Product weight
