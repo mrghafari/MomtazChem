@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -1242,6 +1243,10 @@ const Shop = () => {
           onOrderComplete={() => {
             setCart({});
             setShowCheckout(false);
+            // Invalidate products cache to get updated stock from server
+            queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+            // Reset display stock - will be recalculated with fresh data
+            setDisplayStock({});
           }}
           onClose={() => setShowCheckout(false)}
           onUpdateQuantity={(productId, newQuantity) => {
