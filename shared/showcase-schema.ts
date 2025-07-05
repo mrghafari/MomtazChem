@@ -76,6 +76,9 @@ export const insertShowcaseProductSchema = createInsertSchema(showcaseProducts).
   updatedAt: true,
 }).extend({
   unitPrice: z.coerce.number().min(0),
+  // Allow features and applications to be either string or array
+  features: z.union([z.string(), z.array(z.string())]).optional(),
+  applications: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
 export type InsertShowcaseProduct = z.infer<typeof insertShowcaseProductSchema>;
