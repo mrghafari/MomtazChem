@@ -10305,6 +10305,26 @@ momtazchem.com
     }
   });
 
+  // Customer wallet balance (simple endpoint for shop integration)
+  app.get('/api/customers/wallet/balance', async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Please log in to access your wallet" });
+      }
+
+      const wallet = await walletStorage.getWalletByCustomerId(req.session.customerId);
+      const balance = wallet ? parseFloat(wallet.balance) : 0;
+      
+      res.json({ 
+        success: true, 
+        balance: balance 
+      });
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch wallet balance' });
+    }
+  });
+
   // Create wallet recharge request
   app.post('/api/customer/wallet/recharge', async (req, res) => {
     try {
