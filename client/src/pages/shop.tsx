@@ -31,7 +31,11 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [cart, setCart] = useState<{[key: number]: number}>({});
+  // Initialize cart from localStorage
+  const [cart, setCart] = useState<{[key: number]: number}>(() => {
+    const savedCart = localStorage.getItem('momtazchem_cart');
+    return savedCart ? JSON.parse(savedCart) : {};
+  });
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -156,6 +160,11 @@ const Shop = () => {
   const { data: categories = [] } = useQuery<ShopCategory[]>({
     queryKey: ["/api/shop/categories"],
   });
+
+  // Save cart to localStorage whenever cart changes
+  useEffect(() => {
+    localStorage.setItem('momtazchem_cart', JSON.stringify(cart));
+  }, [cart]);
 
   // Load customer info on component mount
   useEffect(() => {
