@@ -259,7 +259,7 @@ export default function InventoryAlerts() {
 
       {/* Product Inventory Tabs */}
       <Tabs defaultValue="alerts" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="alerts" className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" />
             Alerts ({stats.outOfStock + stats.lowStock})
@@ -271,6 +271,10 @@ export default function InventoryAlerts() {
           <TabsTrigger value="low-stock">
             <TrendingDown className="w-4 h-4 mr-2" />
             Low Stock ({stats.lowStock})
+          </TabsTrigger>
+          <TabsTrigger value="settings">
+            <Settings className="w-4 h-4 mr-2" />
+            Threshold Settings
           </TabsTrigger>
           <TabsTrigger value="all">
             <BarChart3 className="w-4 h-4 mr-2" />
@@ -482,6 +486,84 @@ export default function InventoryAlerts() {
               );
             })}
           </div>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Threshold Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>مهم:</strong> سیستم دو آستانه مجزا دارد:
+                    <br />
+                    • <strong>Low Stock Threshold (10)</strong>: برای هشدار به مشتریان در فروشگاه
+                    <br />
+                    • <strong>Min Stock Level (5)</strong>: برای اعلام به مدیر تولید در پنل ادمین
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-900 mb-3">نحوه تنظیم آستانه‌ها:</h3>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>1. برای محصولات جدید:</strong></p>
+                    <p className="ml-4">• به Site Management → Products بروید</p>
+                    <p className="ml-4">• در فرم ثبت محصول، فیلدهای "Low Stock Threshold" و "Min Stock Level" را تنظیم کنید</p>
+                    
+                    <p><strong>2. برای محصولات موجود:</strong></p>
+                    <p className="ml-4">• محصولات از طریق فرم ویرایش محصول قابل تنظیم هستند</p>
+                    <p className="ml-4">• یا با دسترسی مستقیم به پایگاه داده</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="border-orange-200 bg-orange-50">
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-orange-900 mb-2">Customer Warning System</h4>
+                      <p className="text-sm text-orange-800 mb-2">lowStockThreshold = 10</p>
+                      <p className="text-xs text-orange-700">
+                        هشدار "تنها X عدد باقی مانده!" در صفحه فروشگاه نمایش داده می‌شود
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-red-200 bg-red-50">
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-red-900 mb-2">Manager Alert System</h4>
+                      <p className="text-sm text-red-800 mb-2">minStockLevel = 5</p>
+                      <p className="text-xs text-red-700">
+                        اعلان خودکار به مدیر تولید برای سفارش محصول ارسال می‌شود
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h4 className="font-semibold mb-3">Current System Status:</h4>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="p-3 bg-gray-50 rounded">
+                      <div className="text-2xl font-bold text-gray-700">{stats.total}</div>
+                      <div className="text-sm text-gray-600">Total Products</div>
+                    </div>
+                    <div className="p-3 bg-yellow-50 rounded">
+                      <div className="text-2xl font-bold text-yellow-700">{stats.lowStock}</div>
+                      <div className="text-sm text-yellow-600">Low Stock Items</div>
+                    </div>
+                    <div className="p-3 bg-red-50 rounded">
+                      <div className="text-2xl font-bold text-red-700">{stats.outOfStock}</div>
+                      <div className="text-sm text-red-600">Out of Stock</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
