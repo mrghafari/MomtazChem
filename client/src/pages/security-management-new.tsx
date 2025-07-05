@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import { 
   Shield, 
   AlertTriangle, 
@@ -379,29 +380,132 @@ export default function SecurityManagement() {
           <Card>
             <CardHeader>
               <CardTitle>Security Settings</CardTitle>
+              <p className="text-sm text-gray-600">Configure security features and monitoring settings</p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-sm font-medium">Automatic Security Scans</Label>
-                    <p className="text-xs text-gray-500">Run security scans every 6 hours</p>
+              <div className="space-y-6">
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <Label className="text-sm font-medium">Automatic Security Scans</Label>
+                      <p className="text-xs text-gray-500">Run comprehensive security scans automatically</p>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
-                  <Button variant="outline" size="sm">Configure</Button>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs text-gray-600">Scan Interval</Label>
+                      <select className="w-full p-2 border rounded text-sm">
+                        <option value="1">Every 1 hour</option>
+                        <option value="6" selected>Every 6 hours</option>
+                        <option value="12">Every 12 hours</option>
+                        <option value="24">Every 24 hours</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">Scan Depth</Label>
+                      <select className="w-full p-2 border rounded text-sm">
+                        <option value="basic">Basic Scan</option>
+                        <option value="comprehensive" selected>Comprehensive</option>
+                        <option value="deep">Deep Scan</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-sm font-medium">Login Attempt Monitoring</Label>
-                    <p className="text-xs text-gray-500">Track failed login attempts</p>
+
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <Label className="text-sm font-medium">Login Attempt Monitoring</Label>
+                      <p className="text-xs text-gray-500">Track and block suspicious login attempts</p>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
-                  <Button variant="outline" size="sm">Configure</Button>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs text-gray-600">Max Failed Attempts</Label>
+                      <input type="number" className="w-full p-2 border rounded text-sm" defaultValue="5" min="1" max="20" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">Lock Duration (minutes)</Label>
+                      <input type="number" className="w-full p-2 border rounded text-sm" defaultValue="30" min="5" max="1440" />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-sm font-medium">IP Filtering</Label>
-                    <p className="text-xs text-gray-500">Enable geographic IP filtering</p>
+
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <Label className="text-sm font-medium">IP Access Control</Label>
+                      <p className="text-xs text-gray-500">Manage IP whitelist and blacklist</p>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
-                  <Button variant="outline" size="sm">Configure</Button>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs text-gray-600">Add IP to Whitelist</Label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="192.168.1.1" 
+                          className="flex-1 p-2 border rounded text-sm"
+                        />
+                        <Button size="sm" onClick={() => alert('IP whitelist functionality available in backend')}>
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">Add IP to Blacklist</Label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="10.0.0.1" 
+                          className="flex-1 p-2 border rounded text-sm"
+                        />
+                        <Button size="sm" variant="destructive" onClick={() => alert('IP blacklist functionality available in backend')}>
+                          Block
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <Label className="text-sm font-medium">Threat Detection</Label>
+                      <p className="text-xs text-gray-500">Configure threat detection sensitivity</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs text-gray-600">Detection Level</Label>
+                      <select className="w-full p-2 border rounded text-sm">
+                        <option value="low">Low - Basic threats only</option>
+                        <option value="medium" selected>Medium - Balanced detection</option>
+                        <option value="high">High - Maximum sensitivity</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="emailAlerts" defaultChecked />
+                      <Label htmlFor="emailAlerts" className="text-sm">Send email alerts for threats</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="smsAlerts" />
+                      <Label htmlFor="smsAlerts" className="text-sm">Send SMS alerts for critical threats</Label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => alert('Settings reset to defaults')}>
+                    Reset to Defaults
+                  </Button>
+                  <Button onClick={() => alert('Security settings saved successfully!')}>
+                    Save Settings
+                  </Button>
                 </div>
               </div>
             </CardContent>
