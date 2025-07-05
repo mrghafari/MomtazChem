@@ -102,7 +102,7 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/shop" component={Shop} />
           <Route path="/product-recommendations" component={ProductRecommendations} />
-          <Route path="/checkout" component={Checkout} />
+          <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
           <Route path="/payment/:orderId" component={Payment} />
           <Route path="/checkout/success/:orderId" component={CheckoutSuccess} />
           <Route path="/shop-search" component={ShopSearch} />
@@ -193,16 +193,27 @@ function Router() {
 }
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </LanguageProvider>
-    </QueryClientProvider>
-  );
+  try {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </LanguageProvider>
+      </QueryClientProvider>
+    );
+  } catch (error) {
+    console.error('App rendering error:', error);
+    return (
+      <div style={{ padding: '20px', backgroundColor: 'white', color: 'black' }}>
+        <h1>Loading Error</h1>
+        <p>There was an error loading the application. Please check the console for details.</p>
+        <pre>{String(error)}</pre>
+      </div>
+    );
+  }
 }
 
 export default App;
