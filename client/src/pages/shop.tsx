@@ -217,14 +217,42 @@ const Shop = () => {
       if (userCart) {
         setCart(JSON.parse(userCart));
       }
-    } else if (customer === null) {
-      // Guest user confirmed - clear any persistent cart storage
-      // Cart will only exist in memory and be lost on refresh
-      localStorage.removeItem('momtazchem_user_cart');
-      sessionStorage.removeItem('momtazchem_guest_cart');
-      setCart({});
+    } else if (customer === null && !isLoadingCustomer) {
+      // Guest user confirmed - load guest cart if available
+      const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
+      if (guestCart) {
+        setCart(JSON.parse(guestCart));
+      } else {
+        setCart({});
+      }
     }
-  }, [customer]);
+  }, [customer, isLoadingCustomer]);
+
+  // Force cart refresh on page load/navigation
+  useEffect(() => {
+    const refreshCart = () => {
+      if (customer) {
+        const userCart = localStorage.getItem('momtazchem_user_cart');
+        if (userCart) {
+          const cartData = JSON.parse(userCart);
+          setCart(cartData);
+        }
+      } else if (!isLoadingCustomer) {
+        const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
+        if (guestCart) {
+          const cartData = JSON.parse(guestCart);
+          setCart(cartData);
+        }
+      }
+    };
+
+    // Refresh cart on window focus (navigation between tabs/pages)
+    window.addEventListener('focus', refreshCart);
+    
+    return () => {
+      window.removeEventListener('focus', refreshCart);
+    };
+  }, [customer, isLoadingCustomer]);
 
   const checkCustomerAuth = async () => {
     try {
