@@ -13,8 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Globe, X, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { translations } from "@/lib/i18n";
 
 // Format currency helper function
 const formatCurrency = (amount: number): string => {
@@ -26,19 +24,115 @@ const formatCurrency = (amount: number): string => {
   }).format(amount).replace('IQD', '').trim() + ' IQD';
 };
 
-// Language types - using the same type from i18n
-type Language = 'en' | 'ar' | 'ku' | 'tr';
+// Language types
+type Language = 'en' | 'ar';
 
-// Simple form schema - validation messages handled by form
-const purchaseSchema = z.object({
-  firstName: z.string().min(2, "Name is required"),
-  lastName: z.string().min(2, "Last name is required"),
-  email: z.string().email("Valid email is required"),
-  company: z.string().optional(),
-  phone: z.string().min(10, "Phone number is required"),
-  country: z.string().min(2, "Country is required"),
-  city: z.string().min(2, "City is required"),
-  address: z.string().min(10, "Address is required"),
+// Translation system
+const translations = {
+  en: {
+    // Form titles
+    purchaseOrder: "Purchase Order",
+    enterDetails: "Enter your details",
+    customerName: "Customer Name",
+    deliveryPhone: "Delivery Phone Number",
+    deliveryAddress: "Delivery Address",
+    city: "City",
+    postalCode: "Postal Code (Optional)",
+    gpsLocation: "GPS Location",
+    findLocation: "Find My Location",
+    orderNotes: "Order Notes",
+    submitOrder: "Submit Order",
+    cancel: "Cancel",
+    loading: "Loading...",
+    
+    // Validation messages
+    nameRequired: "Customer name is required",
+    phoneRequired: "Phone number is required",
+    addressRequired: "Complete delivery address is required",
+    cityRequired: "City is required",
+    
+    // Placeholders
+    namePlaceholder: "e.g. Ahmad Ali",
+    phonePlaceholder: "Enter phone number",
+    addressPlaceholder: "Enter complete address for delivery",
+    cityPlaceholder: "Enter city name",
+    postalCodePlaceholder: "Optional",
+    notesPlaceholder: "Additional notes for the order",
+    
+    // Status messages
+    locationFound: "Location found successfully",
+    locationError: "Could not get location. Please enter manually.",
+    orderSubmitted: "Order submitted successfully",
+    orderError: "Failed to submit order",
+    
+    // Language switcher
+    switchLanguage: "العربية",
+    language: "Language",
+    
+    // Wallet payment
+    walletPayment: "Pay from Wallet",
+    walletBalance: "Wallet Balance",
+    useWallet: "Use wallet balance",
+    walletAmount: "Amount from Wallet",
+    remainingAmount: "Remaining Amount",
+    insufficientFunds: "Insufficient wallet balance"
+  },
+  ar: {
+    // Form titles
+    purchaseOrder: "طلب شراء",
+    enterDetails: "أدخل تفاصيلك",
+    customerName: "اسم العميل",
+    deliveryPhone: "رقم هاتف التوصيل",
+    deliveryAddress: "عنوان التوصيل",
+    city: "المدينة",
+    postalCode: "الرمز البريدي (اختياري)",
+    gpsLocation: "الموقع الجغرافي",
+    findLocation: "العثور على موقعي",
+    orderNotes: "ملاحظات الطلب",
+    submitOrder: "إرسال الطلب",
+    cancel: "إلغاء",
+    loading: "جارٍ التحميل...",
+    
+    // Validation messages
+    nameRequired: "اسم العميل مطلوب",
+    phoneRequired: "رقم الهاتف مطلوب",
+    addressRequired: "العنوان الكامل للتوصيل مطلوب",
+    cityRequired: "المدينة مطلوبة",
+    
+    // Placeholders
+    namePlaceholder: "مثل: أحمد علي",
+    phonePlaceholder: "أدخل رقم الهاتف",
+    addressPlaceholder: "أدخل العنوان الكامل للتوصيل",
+    cityPlaceholder: "أدخل اسم المدينة",
+    postalCodePlaceholder: "اختياري",
+    notesPlaceholder: "ملاحظات إضافية للطلب",
+    
+    // Status messages
+    locationFound: "تم العثور على الموقع بنجاح",
+    locationError: "لا يمكن الحصول على الموقع. يرجى الإدخال يدوياً.",
+    orderSubmitted: "تم إرسال الطلب بنجاح",
+    orderError: "فشل في إرسال الطلب",
+    
+    // Language switcher
+    switchLanguage: "English",
+    language: "اللغة",
+    
+    // Wallet payment
+    walletPayment: "الدفع من المحفظة",
+    walletBalance: "رصيد المحفظة",
+    useWallet: "استخدام رصيد المحفظة",
+    walletAmount: "المبلغ من المحفظة",
+    remainingAmount: "المبلغ المتبقي",
+    insufficientFunds: "رصيد المحفظة غير كافي"
+  }
+};
+
+// Dynamic form schema based on language
+const createPurchaseSchema = (lang: Language) => z.object({
+  customerName: z.string().min(2, translations[lang].nameRequired),
+  phone: z.string().min(10, translations[lang].phoneRequired),
+  address: z.string().min(10, translations[lang].addressRequired),
+  city: z.string().min(2, translations[lang].cityRequired),
   postalCode: z.string().optional(),
   notes: z.string().optional(),
   gpsLatitude: z.number().optional(),
@@ -81,7 +175,7 @@ const getCurrentLocation = (): Promise<{latitude: number, longitude: number}> =>
 
 export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose }: PurchaseFormProps) {
   const { toast } = useToast();
-  const { language } = useLanguage();
+  const [language, setLanguage] = useState<Language>('en');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [useWalletPayment, setUseWalletPayment] = useState(false);
@@ -116,18 +210,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
-  // Form setup with schema validation
+  // Dynamic form based on current language
   const form = useForm({
-    resolver: zodResolver(purchaseSchema),
+    resolver: zodResolver(createPurchaseSchema(language)),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      company: "",
+      customerName: "",
       phone: "",
-      country: "",
-      city: "",
       address: "",
+      city: "",
       postalCode: "",
       notes: "",
       gpsLatitude: undefined,
@@ -139,16 +229,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   useEffect(() => {
     if (customerData?.success && customerData.customer) {
       const customer = customerData.customer;
+      const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
       
       form.reset({
-        firstName: customer.firstName || "",
-        lastName: customer.lastName || "",
-        email: customer.email || "",
-        company: customer.company || "",
+        customerName: fullName || customer.name || "",
         phone: customer.phone || "",
-        country: customer.country || "",
-        city: customer.city || "",
         address: customer.address || "",
+        city: customer.city || "",
         postalCode: customer.postalCode || "",
         notes: "",
         gpsLatitude: undefined,
@@ -157,52 +244,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   }, [customerData, form]);
 
-  // Get current translations using i18n system
-  const t = {
-    purchaseOrder: translate('purchase_order', language),
-    enterDetails: translate('enter_details', language),
-    firstName: translate('first_name', language),
-    lastName: translate('last_name', language),
-    email: translate('email', language),
-    company: translate('company', language),
-    deliveryPhone: translate('delivery_phone', language),
-    country: translate('country', language),
-    deliveryAddress: translate('delivery_address', language),
-    city: translate('city', language),
-    postalCode: translate('postal_code', language),
-    gpsLocation: translate('gps_location', language),
-    getLocation: translate('get_location', language),
-    orderSummary: translate('order_summary', language),
-    walletPayment: translate('wallet_payment', language),
-    orderNotes: translate('order_notes', language),
-    submitOrder: translate('submit_order', language),
-    cancel: translate('cancel', language),
-    loading: translate('loading', language),
-    
-    // Placeholders
-    firstNamePlaceholder: translate('first_name_placeholder', language),
-    lastNamePlaceholder: translate('last_name_placeholder', language),
-    emailPlaceholder: translate('email_placeholder', language),
-    companyPlaceholder: translate('company_placeholder', language),
-    phonePlaceholder: translate('phone_placeholder', language),
-    countryPlaceholder: translate('country_placeholder', language),
-    addressPlaceholder: translate('address_placeholder', language),
-    cityPlaceholder: translate('city_placeholder', language),
-    postalCodePlaceholder: translate('postal_code_placeholder', language),
-    notesPlaceholder: translate('notes_placeholder', language),
-    
-    // Status messages
-    locationFound: translate('location_found', language),
-    locationError: translate('location_error', language),
-    orderSubmitted: translate('order_submitted', language),
-    orderError: translate('order_error', language),
-    
-    // Language switcher
-    switchLanguage: language === 'ar' ? 'English' : 'العربية'
-  };
-
-  // RTL support
-  const isRTL = language === 'ar';
+  // Get current translations
+  const t = translations[language];
 
   // Get wallet balance
   const walletBalance = walletData?.balance || 0;
@@ -296,7 +339,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     submitOrderMutation.mutate(data);
   };
 
-
+  // Set text direction based on language
+  const isRTL = language === 'ar';
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -371,76 +415,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {/* Customer Name - First & Last */}
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{translate('first_name', language)}</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder={translate('first_name_placeholder', language)}
-                            className={isRTL ? 'text-right' : 'text-left'}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{translate('last_name', language)}</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder={translate('last_name_placeholder', language)}
-                            className={isRTL ? 'text-right' : 'text-left'}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Email Address */}
+                {/* Customer Name */}
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="customerName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('email', language)}</FormLabel>
+                      <FormLabel>{t.customerName}</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
-                          type="email"
-                          placeholder={translate('email_placeholder', language)}
-                          className={isRTL ? 'text-right' : 'text-left'}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Company (Optional) */}
-                <FormField
-                  control={form.control}
-                  name="company"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{translate('company', language)}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder={translate('company_placeholder', language)}
+                          placeholder={t.namePlaceholder}
                           className={isRTL ? 'text-right' : 'text-left'}
                         />
                       </FormControl>
@@ -455,31 +440,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('phone', language)}</FormLabel>
+                      <FormLabel>{t.deliveryPhone}</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
                           type="tel"
-                          placeholder={translate('phone_placeholder', language)}
-                          className={isRTL ? 'text-right' : 'text-left'}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Country */}
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{translate('country', language)}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder={translate('country_placeholder', language)}
+                          placeholder={t.phonePlaceholder}
                           className={isRTL ? 'text-right' : 'text-left'}
                         />
                       </FormControl>
@@ -494,12 +460,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('address', language)}</FormLabel>
+                      <FormLabel>{t.deliveryAddress}</FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
                           rows={3}
-                          placeholder={translate('address_placeholder', language)}
+                          placeholder={t.addressPlaceholder}
                           className={isRTL ? 'text-right' : 'text-left'}
                         />
                       </FormControl>
@@ -515,11 +481,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{translate('city', language)}</FormLabel>
+                        <FormLabel>{t.city}</FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
-                            placeholder={translate('city_placeholder', language)}
+                            placeholder={t.cityPlaceholder}
                             className={isRTL ? 'text-right' : 'text-left'}
                           />
                         </FormControl>
@@ -533,11 +499,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     name="postalCode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{translate('postal_code', language)}</FormLabel>
+                        <FormLabel>{t.postalCode}</FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
-                            placeholder={translate('postal_code_placeholder', language)}
+                            placeholder={t.postalCodePlaceholder}
                             className={isRTL ? 'text-right' : 'text-left'}
                           />
                         </FormControl>
@@ -550,7 +516,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 {/* GPS Location */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">{translate('gps_location', language)}</label>
+                    <label className="text-sm font-medium">{t.gpsLocation}</label>
                     <Button
                       type="button"
                       variant="outline"
@@ -560,7 +526,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       className="flex items-center gap-1"
                     >
                       <MapPin className="w-4 h-4" />
-                      {isGettingLocation ? translate('loading', language) : translate('find_location', language)}
+                      {isGettingLocation ? t.loading : t.findLocation}
                     </Button>
                   </div>
                   {locationData && (
@@ -574,9 +540,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 {customerData?.success && walletBalance > 0 && (
                   <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-medium text-green-800">{translate('wallet_payment', language)}</h3>
+                      <h3 className="font-medium text-green-800">{t.walletPayment}</h3>
                       <div className="text-sm text-green-600">
-                        {translate('wallet_balance', language)}: {formatCurrency(walletBalance)}
+                        {t.walletBalance}: {formatCurrency(walletBalance)}
                       </div>
                     </div>
                     
@@ -596,7 +562,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
                       />
                       <label htmlFor="useWallet" className="text-sm text-green-700">
-                        {translate('use_wallet', language)}
+                        {t.useWallet}
                       </label>
                     </div>
 
@@ -605,7 +571,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="text-sm font-medium text-green-700">
-                              {translate('wallet_amount', language)}
+                              {t.walletAmount}
                             </label>
                             <Input
                               type="number"
@@ -622,7 +588,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           </div>
                           <div>
                             <label className="text-sm font-medium text-green-700">
-                              {translate('remaining_amount', language)}
+                              {t.remainingAmount}
                             </label>
                             <div className="mt-1 p-2 bg-white border rounded text-sm">
                               {formatCurrency(remainingAmount)}
@@ -632,7 +598,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         
                         {walletBalance < totalAmount && (
                           <div className="text-xs text-orange-600">
-                            {translate('insufficient_funds', language)}
+                            {t.insufficientFunds}
                           </div>
                         )}
                       </div>
@@ -643,17 +609,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 {/* Order Summary */}
                 <div className="space-y-2 p-4 bg-gray-50 rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">{translate('total_amount', language)}:</span>
+                    <span className="font-medium">Total Amount:</span>
                     <span className="font-bold">{formatCurrency(totalAmount)}</span>
                   </div>
                   {useWalletPayment && finalWalletAmount > 0 && (
                     <>
                       <div className="flex justify-between items-center text-green-600">
-                        <span>{translate('from_wallet', language)}:</span>
+                        <span>From Wallet:</span>
                         <span>-{formatCurrency(finalWalletAmount)}</span>
                       </div>
                       <div className="flex justify-between items-center border-t pt-2">
-                        <span className="font-medium">{translate('remaining_to_pay', language)}:</span>
+                        <span className="font-medium">Remaining to Pay:</span>
                         <span className="font-bold">{formatCurrency(remainingAmount)}</span>
                       </div>
                     </>
@@ -666,12 +632,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('order_notes', language)}</FormLabel>
+                      <FormLabel>{t.orderNotes}</FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
                           rows={3}
-                          placeholder={translate('notes_placeholder', language)}
+                          placeholder={t.notesPlaceholder}
                           className={isRTL ? 'text-right' : 'text-left'}
                         />
                       </FormControl>
@@ -688,14 +654,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     onClick={onClose}
                     className="flex-1"
                   >
-                    {translate('cancel', language)}
+                    {t.cancel}
                   </Button>
                   <Button
                     type="submit"
                     disabled={submitOrderMutation.isPending}
                     className="flex-1"
                   >
-                    {submitOrderMutation.isPending ? translate('loading', language) : translate('submit_order', language)}
+                    {submitOrderMutation.isPending ? t.loading : t.submitOrder}
                   </Button>
                 </div>
               </form>

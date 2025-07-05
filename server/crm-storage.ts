@@ -17,11 +17,10 @@ import {
   type InsertCrmCustomer, 
   type CrmCustomer
 } from "../shared/schema";
-import { validationMessages, type Language } from './i18n-messages';
 
 export interface ICrmStorage {
   // CRM Customer Management (using proper CRM table)
-  createCrmCustomer(customer: InsertCrmCustomer, language?: Language): Promise<CrmCustomer>;
+  createCrmCustomer(customer: InsertCrmCustomer): Promise<CrmCustomer>;
   getCrmCustomerById(id: number): Promise<CrmCustomer | undefined>;
   getCrmCustomerByEmail(email: string): Promise<CrmCustomer | undefined>;
   getCrmCustomerByPhone(phone: string): Promise<CrmCustomer | undefined>;
@@ -88,17 +87,17 @@ export interface ICrmStorage {
 
 export class CrmStorage implements ICrmStorage {
   
-  async createCrmCustomer(customerData: InsertCrmCustomer, language: Language = 'en'): Promise<CrmCustomer> {
+  async createCrmCustomer(customerData: InsertCrmCustomer): Promise<CrmCustomer> {
     // Check for duplicate email
     const existingByEmail = await this.getCrmCustomerByEmail(customerData.email);
     if (existingByEmail) {
-      throw new Error(validationMessages[language].emailExists);
+      throw new Error("ایمیل تکراری است - قبلاً مشتری با این ایمیل ثبت شده است");
     }
     
     // Check for duplicate phone
     const existingByPhone = await this.getCrmCustomerByPhone(customerData.phone);
     if (existingByPhone) {
-      throw new Error(validationMessages[language].phoneExists);
+      throw new Error("شماره تلفن تکراری است - قبلاً مشتری با این شماره ثبت شده است");
     }
     
     const [customer] = await customerDb
