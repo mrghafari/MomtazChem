@@ -896,12 +896,13 @@ export default function CRM() {
               </div>
               
               <div>
-                <Label htmlFor="editEmail">Email</Label>
+                <Label htmlFor="editEmail">Email (Read Only)</Label>
                 <Input
                   id="editEmail"
                   type="email"
                   value={editingCustomer.email}
-                  onChange={(e) => setEditingCustomer({ ...editingCustomer, email: e.target.value })}
+                  disabled
+                  className="bg-gray-100 cursor-not-allowed"
                 />
               </div>
 
@@ -915,11 +916,12 @@ export default function CRM() {
               </div>
 
               <div>
-                <Label htmlFor="editPhone">Phone</Label>
+                <Label htmlFor="editPhone">Phone (Read Only)</Label>
                 <Input
                   id="editPhone"
                   value={editingCustomer.phone || ""}
-                  onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
+                  disabled
+                  className="bg-gray-100 cursor-not-allowed"
                 />
               </div>
 
