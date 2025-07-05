@@ -196,6 +196,19 @@ const Shop = () => {
     }
   }, [currentProducts, cart]);
 
+  // Force recalculation of display stock after order completion
+  useEffect(() => {
+    if (Object.keys(displayStock).length === 0 && currentProducts?.length > 0) {
+      const refreshedDisplayStock: {[key: number]: number} = {};
+      currentProducts.forEach(product => {
+        const productInCart = cart[product.id] || 0;
+        const availableStock = (product.stockQuantity || 0) - productInCart;
+        refreshedDisplayStock[product.id] = Math.max(0, availableStock);
+      });
+      setDisplayStock(refreshedDisplayStock);
+    }
+  }, [currentProducts, displayStock, cart]);
+
   // Handle cart based on authentication status after customer state is known
   useEffect(() => {
     if (customer) {
@@ -1240,13 +1253,19 @@ const Shop = () => {
           cart={cart}
           products={currentProducts}
           existingCustomer={customer}
-          onOrderComplete={() => {
+          onOrderComplete={async () => {
             setCart({});
             setShowCheckout(false);
-            // Invalidate products cache to get updated stock from server
-            queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-            // Reset display stock - will be recalculated with fresh data
+            // Force refresh of products data from server
+            await queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+            await queryClient.refetchQueries({ queryKey: ['/api/products'] });
+            // Reset display stock completely to force recalculation
             setDisplayStock({});
+            // Show success message
+            toast({
+              title: direction === 'rtl' ? "سفارش ثبت شد" : "Order Submitted",
+              description: direction === 'rtl' ? "سفارش شما با موفقیت ثبت شد" : "Your order has been successfully submitted",
+            });
           }}
           onClose={() => setShowCheckout(false)}
           onUpdateQuantity={(productId, newQuantity) => {
