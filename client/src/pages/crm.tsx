@@ -26,6 +26,8 @@ interface CrmCustomer {
   phone?: string;
   country?: string;
   city?: string;
+  address?: string;
+  postalCode?: string;
   customerType: string;
   customerStatus: string;
   customerSource: string;
@@ -892,6 +894,43 @@ export default function CRM() {
                   id="editPhone"
                   value={editingCustomer.phone || ""}
                   onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editCountry">Country</Label>
+                  <Input
+                    id="editCountry"
+                    value={editingCustomer.country || ""}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, country: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editCity">City</Label>
+                  <Input
+                    id="editCity"
+                    value={editingCustomer.city || ""}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, city: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="editAddress">Address</Label>
+                <Input
+                  id="editAddress"
+                  value={editingCustomer.address || ""}
+                  onChange={(e) => setEditingCustomer({ ...editingCustomer, address: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="editPostalCode">Postal Code</Label>
+                <Input
+                  id="editPostalCode"
+                  value={editingCustomer.postalCode || ""}
+                  onChange={(e) => setEditingCustomer({ ...editingCustomer, postalCode: e.target.value })}
                 />
               </div>
 
