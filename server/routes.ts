@@ -18,6 +18,7 @@ import { smsStorage } from "./sms-storage";
 import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { walletStorage } from "./wallet-storage";
+import { getValidationMessage, getLanguageFromRequest, type Language } from './i18n-messages';
 import { requireDepartment, attachUserDepartments } from "./department-auth";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests } from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
@@ -2623,7 +2624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (existingCrmCustomer) {
         return res.status(400).json({ 
           success: false, 
-          message: "ایمیل تکراری است - قبلاً مشتری با این ایمیل ثبت شده است" 
+          message: getValidationMessage(req, 'emailExists')
         });
       }
 
@@ -2631,7 +2632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!phone || !country || !city || !address) {
         return res.status(400).json({ 
           success: false, 
-          message: "Phone, country, city, and address are required fields" 
+          message: getValidationMessage(req, 'requiredFields')
         });
       }
 
@@ -2674,7 +2675,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: true,
       };
 
-      const crmCustomer = await crmStorage.createCrmCustomer(crmCustomerData);
+      const language = getLanguageFromRequest(req);
+      const crmCustomer = await crmStorage.createCrmCustomer(crmCustomerData, language);
 
       // Create corresponding customer portal entry with password (for authentication)
       let portalCustomer = null;
@@ -2729,7 +2731,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error registering customer:", error);
       
       // Check if it's a validation error (duplicate email or phone)
-      if (error instanceof Error && error.message.includes('تکراری است')) {
+      if (error instanceof Error && (
+          error.message.includes('تکراری است') || 
+          error.message.includes('exists') || 
+          error.message.includes('duplicate') ||
+          error.message.includes('موجود است')
+      )) {
         return res.status(400).json({ 
           success: false, 
           message: error.message 

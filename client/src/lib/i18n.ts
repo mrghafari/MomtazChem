@@ -194,6 +194,11 @@ export interface Translation {
   rdScientists: string;
   manufacturingSites: string;
   qualityRate: string;
+  
+  // Validation errors
+  emailExists: string;
+  phoneExists: string;
+  requiredFields: string;
 }
 
 export const translations: Record<Language, Translation> = {
@@ -392,6 +397,11 @@ export const translations: Record<Language, Translation> = {
     rdScientists: 'R&D Scientists',
     manufacturingSites: 'Manufacturing Sites',
     qualityRate: 'Quality Rate',
+    
+    // Validation errors
+    emailExists: 'Email already exists in our system',
+    phoneExists: 'Phone number already exists - a customer with this number is already registered',
+    requiredFields: 'Phone, country, city, and address are required fields',
   },
   
   ar: {
@@ -588,6 +598,11 @@ export const translations: Record<Language, Translation> = {
     rdScientists: 'علماء البحث والتطوير',
     manufacturingSites: 'مواقع التصنيع',
     qualityRate: 'معدل الجودة',
+    
+    // Validation errors
+    emailExists: 'البريد الإلكتروني موجود بالفعل في نظامنا',
+    phoneExists: 'رقم الهاتف موجود بالفعل - عميل بهذا الرقم مسجل سابقاً',
+    requiredFields: 'الهاتف والدولة والمدينة والعنوان حقول مطلوبة',
   },
 
   ku: {
@@ -784,6 +799,11 @@ export const translations: Record<Language, Translation> = {
     rdScientists: 'زانایانی لێکۆڵینەوە و پەرەپێدان',
     manufacturingSites: 'شوێنە بەرهەمهێنانەکان',
     qualityRate: 'ڕێژەی کوالیتی',
+    
+    // Validation errors
+    emailExists: 'ئەم ئیمەیلە پێشتر بەکارهاتووە لە سیستەمەکەماندا',
+    phoneExists: 'ئەم ژمارە تەلەفۆنە پێشتر بەکارهاتووە - کڕیارێک بەم ژمارەیە تۆمارکراوە',
+    requiredFields: 'تەلەفۆن، وڵات، شار و ناونیشان خانە پێویستەکانن',
   },
   
   tr: {
