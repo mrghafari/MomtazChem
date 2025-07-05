@@ -185,11 +185,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Pre-populate form with customer data when available
   useEffect(() => {
+    console.log('Customer data in BilingualPurchaseForm:', customerData);
     if (customerData?.success && customerData.customer) {
       const customer = customerData.customer;
+      console.log('Customer object:', customer);
       const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
+      console.log('Full name constructed:', fullName);
       
-      form.reset({
+      const formData = {
         customerName: fullName || customer.name || "",
         phone: customer.phone || "",
         address: customer.address || "",
@@ -198,7 +201,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         notes: "",
         gpsLatitude: undefined,
         gpsLongitude: undefined,
-      });
+      };
+      
+      console.log('Form data to reset:', formData);
+      form.reset(formData);
     }
   }, [customerData, form]);
 
