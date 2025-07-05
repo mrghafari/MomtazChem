@@ -227,18 +227,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Pre-populate form with customer data when available
   useEffect(() => {
-    console.log("Customer data received:", customerData);
     if (customerData?.success && customerData.customer) {
       const customer = customerData.customer;
       const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
-      
-      console.log("Populating form with customer data:", {
-        fullName,
-        phone: customer.phone,
-        address: customer.address,
-        city: customer.city,
-        postalCode: customer.postalCode
-      });
       
       form.reset({
         customerName: fullName || customer.name || "",

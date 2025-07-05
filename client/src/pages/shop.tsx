@@ -416,7 +416,7 @@ const Shop = () => {
                       >
                         <User className="w-4 h-4 text-gray-600" />
                         <span className="text-sm font-medium text-gray-900">
-                          {customer.firstName}
+                          {`${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email?.split('@')[0] || 'Customer'}
                         </span>
                       </Button>
                       
