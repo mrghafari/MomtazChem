@@ -245,34 +245,32 @@ export default function Header() {
 
             {/* Customer Authentication - Desktop */}
             {isAuthenticated && customer && (
-              <div className="hidden md:block">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
-                      <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                      <ChevronDown className="h-4 w-4 text-gray-500" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem asChild>
-                      <Link href="/customer/profile" className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        {t.profile}
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/customer/wallet" className="flex items-center gap-2">
-                        <Wallet className="h-4 w-4" />
-                        {t.wallet}
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout} className="flex items-center gap-2 text-red-600">
-                      <LogOut className="h-4 w-4" />
-                      {t.logout}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <div className="hidden md:flex items-center gap-2">
+                <Link href="/customer/profile">
+                  <Button variant="ghost" className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <User className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {customer.firstName} {customer.lastName}
+                    </span>
+                  </Button>
+                </Link>
+                <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+                <Link href="/customer/wallet">
+                  <Button variant="ghost" className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t.wallet}
+                    </span>
+                  </Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  onClick={logout} 
+                  className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="text-sm font-medium">{t.logout}</span>
+                </Button>
               </div>
             )}
             
@@ -399,7 +397,7 @@ export default function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <User className="h-4 w-4" />
-                          <span>{t.profile}</span>
+                          <span>{customer.firstName} {customer.lastName}</span>
                         </motion.div>
                       </Link>
                       <Link href="/customer/wallet">
