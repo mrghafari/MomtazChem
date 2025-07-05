@@ -518,16 +518,43 @@ export default function SecurityManagement() {
                       <Label className="text-sm font-medium">Login Attempt Monitoring</Label>
                       <p className="text-xs text-gray-500">Track and block suspicious login attempts</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={securitySettings.loginMonitoringEnabled}
+                      onCheckedChange={(checked) => 
+                        setSecuritySettings(prev => ({ ...prev, loginMonitoringEnabled: checked }))
+                      }
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-xs text-gray-600">Max Failed Attempts</Label>
-                      <input type="number" className="w-full p-2 border rounded text-sm" defaultValue="5" min="1" max="20" />
+                      <input 
+                        type="number" 
+                        className="w-full p-2 border rounded text-sm" 
+                        value={securitySettings.maxFailedAttempts || ''} 
+                        onChange={(e) => setSecuritySettings(prev => ({ 
+                          ...prev, 
+                          maxFailedAttempts: e.target.value ? Number(e.target.value) : 0 
+                        }))}
+                        min="1" 
+                        max="20" 
+                        placeholder="5"
+                      />
                     </div>
                     <div>
                       <Label className="text-xs text-gray-600">Lock Duration (minutes)</Label>
-                      <input type="number" className="w-full p-2 border rounded text-sm" defaultValue="30" min="5" max="1440" />
+                      <input 
+                        type="number" 
+                        className="w-full p-2 border rounded text-sm" 
+                        value={securitySettings.lockDuration || ''} 
+                        onChange={(e) => setSecuritySettings(prev => ({ 
+                          ...prev, 
+                          lockDuration: e.target.value ? Number(e.target.value) : 0 
+                        }))}
+                        min="5" 
+                        max="1440" 
+                        placeholder="30"
+                      />
                     </div>
                   </div>
                 </div>
