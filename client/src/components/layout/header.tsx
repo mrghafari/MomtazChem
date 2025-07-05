@@ -250,7 +250,9 @@ export default function Header() {
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
                     <User className="w-4 h-4" />
                     <span className="hidden sm:inline-block">
-                      {customer.firstName || customer.email?.split('@')[0] || 'مشتری'}
+                      {customer.firstName && customer.lastName 
+                        ? `${customer.firstName} ${customer.lastName}`
+                        : customer.firstName || customer.email?.split('@')[0] || 'مشتری'}
                     </span>
                     <ChevronDown className="w-3 h-3" />
                   </Button>
@@ -392,6 +394,80 @@ export default function Header() {
                 </motion.div>
 
 
+
+                {/* Customer Authentication - Mobile */}
+                {isAuthenticated && customer ? (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
+                    className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
+                  >
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                      {customer.firstName && customer.lastName 
+                        ? `${customer.firstName} ${customer.lastName}`
+                        : customer.firstName || customer.email?.split('@')[0] || 'مشتری'}
+                    </div>
+                    <div className="space-y-1">
+                      <button 
+                        onClick={() => { window.location.href = '/customer/profile'; setIsMobileMenuOpen(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <User className="w-4 h-4" />
+                        پروفایل
+                      </button>
+                      <button 
+                        onClick={() => { window.location.href = '/customer/wallet'; setIsMobileMenuOpen(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <Wallet className="w-4 h-4" />
+                        کیف پول
+                      </button>
+                      <button 
+                        onClick={() => { window.location.href = '/shop'; setIsMobileMenuOpen(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <ShoppingBag className="w-4 h-4" />
+                        فروشگاه
+                      </button>
+                      <button 
+                        onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        خروج
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (navigation.length + productCategories.length + 1) * 0.1 }}
+                    className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
+                  >
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                      حساب کاربری
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => { window.location.href = '/customer/login'; setIsMobileMenuOpen(false); }}
+                        className="w-full"
+                      >
+                        ورود
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        onClick={() => { window.location.href = '/customer/register'; setIsMobileMenuOpen(false); }}
+                        className="w-full"
+                      >
+                        ثبت نام
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* Language Switcher - Mobile */}
                 <motion.div
