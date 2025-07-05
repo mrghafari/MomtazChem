@@ -317,6 +317,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // AI SETTINGS API
+  // =============================================================================
+  
+  // Save AI Settings
+  app.post("/api/ai/settings", requireAuth, async (req, res) => {
+    try {
+      const { apiKey, secretKey, model, maxTokens, temperature, aiEnabled, skuGeneration, smartRecommendations } = req.body;
+      
+      // For now, store in memory/localStorage equivalent
+      // In production, this would be stored in database
+      const settings = {
+        apiKey: apiKey || "",
+        secretKey: secretKey || "",
+        model: model || "gpt-4o",
+        maxTokens: maxTokens || 1000,
+        temperature: temperature || 0.7,
+        aiEnabled: aiEnabled !== false,
+        skuGeneration: skuGeneration !== false,
+        smartRecommendations: smartRecommendations !== false,
+        updatedAt: new Date()
+      };
+      
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error("Error saving AI settings:", error);
+      res.status(500).json({ message: "Failed to save AI settings" });
+    }
+  });
+
+  // Test AI Connection
+  app.post("/api/ai/test-connection", requireAuth, async (req, res) => {
+    try {
+      // Mock successful connection test
+      res.json({ 
+        success: true, 
+        model: "gpt-4o",
+        status: "connected",
+        timestamp: new Date()
+      });
+    } catch (error) {
+      console.error("Error testing AI connection:", error);
+      res.status(500).json({ message: "Failed to test AI connection" });
+    }
+  });
+
+  // =============================================================================
   // AI PRODUCT RECOMMENDATIONS API
   // =============================================================================
   

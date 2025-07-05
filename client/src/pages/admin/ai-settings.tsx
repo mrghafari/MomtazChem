@@ -23,6 +23,8 @@ export default function AISettings() {
   const [maxTokens, setMaxTokens] = useState("1000");
   const [temperature, setTemperature] = useState("0.7");
   const [model, setModel] = useState("gpt-4o");
+  const [apiKey, setApiKey] = useState("");
+  const [secretKey, setSecretKey] = useState("");
 
   // Test AI Connection
   const testAIMutation = useMutation({
@@ -59,6 +61,33 @@ export default function AISettings() {
       toast({
         title: "خطا در تولید SKU",
         description: "امکان تولید SKU تست وجود ندارد",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Save AI Settings
+  const saveSettingsMutation = useMutation({
+    mutationFn: () => apiRequest("/api/ai/settings", "POST", {
+      apiKey,
+      secretKey,
+      model,
+      maxTokens: parseInt(maxTokens),
+      temperature: parseFloat(temperature),
+      aiEnabled,
+      skuGeneration,
+      smartRecommendations
+    }),
+    onSuccess: () => {
+      toast({
+        title: "✅ تنظیمات ذخیره شد",
+        description: "تنظیمات هوش مصنوعی با موفقیت به‌روزرسانی شد",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "❌ خطا در ذخیره",
+        description: "امکان ذخیره تنظیمات وجود ندارد",
         variant: "destructive",
       });
     },
@@ -116,47 +145,92 @@ export default function AISettings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="model">مدل OpenAI</Label>
-                    <Input
-                      id="model"
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                      placeholder="gpt-4o"
-                    />
-                    <p className="text-sm text-gray-500">مدل پیش‌فرض: gpt-4o (آخرین نسخه)</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="maxTokens">حداکثر توکن</Label>
-                    <Input
-                      id="maxTokens"
-                      type="number"
-                      value={maxTokens}
-                      onChange={(e) => setMaxTokens(e.target.value)}
-                      placeholder="1000"
-                    />
-                    <p className="text-sm text-gray-500">تعداد حداکثر توکن‌های پاسخ</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="temperature">دمای تولید (Temperature)</Label>
-                    <Input
-                      id="temperature"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="2"
-                      value={temperature}
-                      onChange={(e) => setTemperature(e.target.value)}
-                      placeholder="0.7"
-                    />
-                    <p className="text-sm text-gray-500">کنترل خلاقیت پاسخ‌ها (0-2)</p>
-                  </div>
-                  
+                <div className="space-y-6">
+                  {/* API Configuration */}
                   <div className="space-y-4">
-                    <Label>فعال‌سازی ماژول‌ها</Label>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      پیکربندی API
+                    </h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="apiKey">OpenAI API Key</Label>
+                        <Input
+                          id="apiKey"
+                          type="password"
+                          value={apiKey}
+                          onChange={(e) => setApiKey(e.target.value)}
+                          placeholder="sk-..."
+                          className="font-mono"
+                        />
+                        <p className="text-sm text-gray-500">کلید API برای دسترسی به سرویس‌های OpenAI</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="secretKey">Secret Key (اختیاری)</Label>
+                        <Input
+                          id="secretKey"
+                          type="password"
+                          value={secretKey}
+                          onChange={(e) => setSecretKey(e.target.value)}
+                          placeholder="کلید امنیتی اضافی"
+                          className="font-mono"
+                        />
+                        <p className="text-sm text-gray-500">کلید امنیتی اضافی برای تأیید هویت</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Model Configuration */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      تنظیمات مدل
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="model">مدل OpenAI</Label>
+                        <Input
+                          id="model"
+                          value={model}
+                          onChange={(e) => setModel(e.target.value)}
+                          placeholder="gpt-4o"
+                        />
+                        <p className="text-sm text-gray-500">مدل پیش‌فرض: gpt-4o (آخرین نسخه)</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="maxTokens">حداکثر توکن</Label>
+                        <Input
+                          id="maxTokens"
+                          type="number"
+                          value={maxTokens}
+                          onChange={(e) => setMaxTokens(e.target.value)}
+                          placeholder="1000"
+                        />
+                        <p className="text-sm text-gray-500">تعداد حداکثر توکن‌های پاسخ</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="temperature">دمای تولید (Temperature)</Label>
+                        <Input
+                          id="temperature"
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="2"
+                          value={temperature}
+                          onChange={(e) => setTemperature(e.target.value)}
+                          placeholder="0.7"
+                        />
+                        <p className="text-sm text-gray-500">کنترل خلاقیت پاسخ‌ها (0-2)</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Module Activation */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      فعال‌سازی ماژول‌ها
+                    </h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="ai-enabled" className="text-sm">هوش مصنوعی کلی</Label>
@@ -186,9 +260,13 @@ export default function AISettings() {
                   </div>
                 </div>
                 
-                <Button className="w-full">
+                <Button 
+                  className="w-full" 
+                  onClick={() => saveSettingsMutation.mutate()}
+                  disabled={saveSettingsMutation.isPending}
+                >
                   <Save className="w-4 h-4 mr-2" />
-                  ذخیره تنظیمات
+                  {saveSettingsMutation.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
                 </Button>
               </CardContent>
             </Card>
