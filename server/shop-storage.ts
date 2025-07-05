@@ -5,7 +5,8 @@ import {
   customerAddresses,
   orders,
   orderItems,
-  inventoryTransactions,
+  shopInventoryMovements,
+  goodsInTransit,
   discountSettings,
   financialTransactions,
   salesReports,
@@ -21,8 +22,10 @@ import {
   type InsertOrder,
   type OrderItem,
   type InsertOrderItem,
-  type InventoryTransaction,
-  type InsertInventoryTransaction,
+  type ShopInventoryMovement,
+  type InsertShopInventoryMovement,
+  type GoodsInTransit,
+  type InsertGoodsInTransit,
   type DiscountSetting,
   type InsertDiscountSetting,
   type FinancialTransaction,
@@ -713,25 +716,85 @@ export class ShopStorage implements IShopStorage {
   }
 
   // Inventory Management
-  async getInventoryTransactions(productId?: number): Promise<InventoryTransaction[]> {
+  async getShopInventoryMovements(productId?: number): Promise<ShopInventoryMovement[]> {
     const query = shopDb
       .select()
-      .from(inventoryTransactions)
-      .orderBy(desc(inventoryTransactions.createdAt));
+      .from(shopInventoryMovements)
+      .orderBy(desc(shopInventoryMovements.createdAt));
 
     if (productId) {
-      return await query.where(eq(inventoryTransactions.productId, productId));
+      return await query.where(eq(shopInventoryMovements.productId, productId));
     }
 
     return await query;
   }
 
-  async createInventoryTransaction(transaction: InsertInventoryTransaction): Promise<InventoryTransaction> {
-    const [newTransaction] = await shopDb
-      .insert(inventoryTransactions)
-      .values(transaction)
+  async createShopInventoryMovement(movement: InsertShopInventoryMovement): Promise<ShopInventoryMovement> {
+    const [newMovement] = await shopDb
+      .insert(shopInventoryMovements)
+      .values(movement)
       .returning();
-    return newTransaction;
+    return newMovement;
+  }
+
+  // Goods in Transit Management
+  async getGoodsInTransit(status?: string): Promise<any[]> {
+    const query = shopDb
+      .select({
+        id: goodsInTransit.id,
+        orderId: goodsInTransit.orderId,
+        customerId: goodsInTransit.customerId,
+        productId: goodsInTransit.productId,
+        productName: shopProducts.name,
+        quantity: goodsInTransit.quantity,
+        status: goodsInTransit.status,
+        paymentDate: goodsInTransit.paymentDate,
+        expectedDeliveryDate: goodsInTransit.expectedDeliveryDate,
+        actualDeliveryDate: goodsInTransit.actualDeliveryDate,
+        trackingNumber: goodsInTransit.trackingNumber,
+        notes: goodsInTransit.notes,
+        createdAt: goodsInTransit.createdAt,
+        updatedAt: goodsInTransit.updatedAt,
+        totalAmount: sql<number>`${goodsInTransit.quantity} * ${shopProducts.price}`.as('total_amount')
+      })
+      .from(goodsInTransit)
+      .leftJoin(shopProducts, eq(goodsInTransit.productId, shopProducts.id))
+      .orderBy(desc(goodsInTransit.paymentDate));
+
+    if (status) {
+      return await query.where(eq(goodsInTransit.status, status));
+    }
+
+    return await query;
+  }
+
+  async createGoodsInTransit(transit: InsertGoodsInTransit): Promise<GoodsInTransit> {
+    const [newTransit] = await shopDb
+      .insert(goodsInTransit)
+      .values(transit)
+      .returning();
+    return newTransit;
+  }
+
+  async updateGoodsInTransit(id: number, transitUpdate: Partial<InsertGoodsInTransit>): Promise<GoodsInTransit> {
+    const [updatedTransit] = await shopDb
+      .update(goodsInTransit)
+      .set({
+        ...transitUpdate,
+        updatedAt: new Date(),
+      })
+      .where(eq(goodsInTransit.id, id))
+      .returning();
+    return updatedTransit;
+  }
+
+  async updateGoodsInTransit(id: number, transitUpdate: Partial<InsertGoodsInTransit>): Promise<GoodsInTransit> {
+    const [updatedTransit] = await shopDb
+      .update(goodsInTransit)
+      .set({ ...transitUpdate, updatedAt: new Date() })
+      .where(eq(goodsInTransit.id, id))
+      .returning();
+    return updatedTransit;
   }
 
   async updateProductStock(productId: number, newQuantity: number, reason: string): Promise<void> {

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,9 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Users
+  Users,
+  Truck,
+  Loader
 } from "lucide-react";
 
 // Import existing components
@@ -25,12 +28,57 @@ import InventoryNotificationSettings from "@/pages/admin/inventory-notification-
 export default function InventoryManagement() {
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Query for goods in transit
+  const { data: goodsInTransit, isLoading: transitLoading, refetch: refetchTransit } = useQuery({
+    queryKey: ['/api/shop/goods-in-transit'],
+    refetchInterval: 30000
+  });
+
+  // Query for inventory movements
+  const { data: inventoryMovements, isLoading: movementsLoading } = useQuery({
+    queryKey: ['/api/shop/inventory-movements'],
+    refetchInterval: 30000
+  });
+
+  // Mutation for marking goods as delivered
+  const markAsDeliveredMutation = useMutation({
+    mutationFn: async (transitId: number) => {
+      const response = await fetch(`/api/shop/goods-in-transit/${transitId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'delivered',
+          actualDeliveryDate: new Date().toISOString(),
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('خطا در تحویل کالا');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchTransit();
+    },
+    onError: (error) => {
+      console.error('Error marking as delivered:', error);
+    },
+  });
+
+  const handleMarkAsDelivered = (transitId: number) => {
+    markAsDeliveredMutation.mutate(transitId);
+  };
+
   const inventoryStats = {
     totalProducts: 25,
     lowStockProducts: 3,
     outOfStockProducts: 1,
     activeAlerts: 4,
     notificationsSent: 12,
+    goodsInTransit: goodsInTransit?.filter((item: any) => item.status === 'in_transit')?.length || 0,
+    transitValue: goodsInTransit?.filter((item: any) => item.status === 'in_transit')
+      ?.reduce((sum: number, item: any) => sum + (item.totalAmount || 0), 0) || 0,
     lastUpdateTime: new Date().toLocaleString('fa-IR')
   };
 
@@ -53,7 +101,7 @@ export default function InventoryManagement() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -101,14 +149,33 @@ export default function InventoryManagement() {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">کالای در راه</p>
+                <p className="text-2xl font-bold text-orange-600">{inventoryStats.goodsInTransit}</p>
+                <p className="text-xs text-gray-500">
+                  {transitLoading ? 'در حال بارگیری...' : `${inventoryStats.transitValue.toLocaleString()} دینار`}
+                </p>
+              </div>
+              <Truck className="w-8 h-8 text-orange-500" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             نمای کلی
+          </TabsTrigger>
+          <TabsTrigger value="transit" className="flex items-center gap-2">
+            <Truck className="w-4 h-4" />
+            کالای در راه
           </TabsTrigger>
           <TabsTrigger value="alerts" className="flex items-center gap-2">
             <Bell className="w-4 h-4" />
@@ -262,6 +329,132 @@ export default function InventoryManagement() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="transit" className="space-y-6">
+          <div className="space-y-6">
+            {/* Transit Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">موارد در راه</p>
+                      <p className="text-2xl font-bold text-orange-600">
+                        {goodsInTransit?.filter((item: any) => item.status === 'in_transit')?.length || 0}
+                      </p>
+                    </div>
+                    <Truck className="w-8 h-8 text-orange-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">ارزش کل</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {(goodsInTransit?.filter((item: any) => item.status === 'in_transit')
+                          ?.reduce((sum: number, item: any) => sum + (item.totalAmount || 0), 0) || 0).toLocaleString()} دینار
+                      </p>
+                    </div>
+                    <Package className="w-8 h-8 text-blue-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">تحویل شده</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {goodsInTransit?.filter((item: any) => item.status === 'delivered')?.length || 0}
+                      </p>
+                    </div>
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Transit Items List */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Truck className="w-5 h-5" />
+                  کالاهای در راه
+                </CardTitle>
+                <CardDescription>
+                  مدیریت کالاهای در راه به مشتریان
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {transitLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader className="w-6 h-6 animate-spin text-gray-500" />
+                    <span className="ml-2 text-gray-500">در حال بارگیری...</span>
+                  </div>
+                ) : goodsInTransit && goodsInTransit.length > 0 ? (
+                  <div className="space-y-4">
+                    {goodsInTransit.map((item: any) => (
+                      <div key={item.id} className="border rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-lg">{item.productName}</h3>
+                              <Badge variant={item.status === 'in_transit' ? 'default' : 'secondary'}>
+                                {item.status === 'in_transit' ? 'در راه' : 'تحویل شده'}
+                              </Badge>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                              <div>
+                                <span className="font-medium">کد سفارش:</span> {item.orderId}
+                              </div>
+                              <div>
+                                <span className="font-medium">مقدار:</span> {item.quantity}
+                              </div>
+                              <div>
+                                <span className="font-medium">مبلغ کل:</span> {(item.totalAmount || 0).toLocaleString()} دینار
+                              </div>
+                              <div>
+                                <span className="font-medium">تاریخ:</span> {new Date(item.createdAt).toLocaleDateString('fa-IR')}
+                              </div>
+                            </div>
+                            {item.notes && (
+                              <p className="text-sm text-gray-500 mt-2">
+                                <span className="font-medium">یادداشت:</span> {item.notes}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            {item.status === 'in_transit' && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleMarkAsDelivered(item.id)}
+                                disabled={markAsDeliveredMutation.isPending}
+                              >
+                                {markAsDeliveredMutation.isPending ? 'در حال تحویل...' : 'تحویل شد'}
+                              </Button>
+                            )}
+                            <Button size="sm" variant="ghost">
+                              جزئیات
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    هیچ کالایی در راه نیست
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="alerts">

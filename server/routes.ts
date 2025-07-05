@@ -4389,6 +4389,56 @@ ${procedure.content}
     }
   });
 
+  // Goods in Transit management endpoints
+  app.get("/api/shop/goods-in-transit", async (req, res) => {
+    try {
+      const { status } = req.query;
+      const goodsInTransit = await shopStorage.getGoodsInTransit(status as string);
+      res.json(goodsInTransit);
+    } catch (error) {
+      console.error("Error fetching goods in transit:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch goods in transit" });
+    }
+  });
+
+  app.get("/api/shop/inventory-movements", async (req, res) => {
+    try {
+      const { productId } = req.query;
+      const movements = await shopStorage.getShopInventoryMovements(productId ? parseInt(productId as string) : undefined);
+      res.json(movements);
+    } catch (error) {
+      console.error("Error fetching inventory movements:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch inventory movements" });
+    }
+  });
+
+  app.post("/api/shop/goods-in-transit", requireAuth, async (req, res) => {
+    try {
+      const transitData = req.body;
+      const newTransit = await shopStorage.createGoodsInTransit(transitData);
+      res.json({ success: true, data: newTransit });
+    } catch (error) {
+      console.error("Error creating goods in transit:", error);
+      res.status(500).json({ success: false, message: "Failed to create goods in transit" });
+    }
+  });
+
+  app.patch("/api/shop/goods-in-transit/:id", requireAuth, async (req, res) => {
+    try {
+      const transitId = parseInt(req.params.id);
+      if (isNaN(transitId)) {
+        return res.status(400).json({ success: false, message: "Invalid transit ID" });
+      }
+      
+      const updates = req.body;
+      const updatedTransit = await shopStorage.updateGoodsInTransit(transitId, updates);
+      res.json({ success: true, data: updatedTransit });
+    } catch (error) {
+      console.error("Error updating goods in transit:", error);
+      res.status(500).json({ success: false, message: "Failed to update goods in transit" });
+    }
+  });
+
   // Inventory management endpoints
   app.get("/api/shop/inventory/:productId", requireAuth, async (req, res) => {
     try {
@@ -4397,7 +4447,7 @@ ${procedure.content}
         return res.status(400).json({ success: false, message: "Invalid product ID" });
       }
       
-      const transactions = await shopStorage.getInventoryTransactions(productId);
+      const transactions = await shopStorage.getShopInventoryMovements(productId);
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching inventory transactions:", error);

@@ -6,6 +6,38 @@ import { z } from "zod";
 // SHOP/ECOMMERCE SCHEMA - For actual product sales and inventory management
 // =============================================================================
 
+// Shop Inventory Movements - Track all shop inventory movements
+export const shopInventoryMovements = pgTable("shop_inventory_movements", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  orderId: integer("order_id"), // ارتباط با سفارش
+  customerId: integer("customer_id"),
+  transactionType: text("transaction_type").notNull(), // 'sale', 'reserve', 'transit', 'delivered', 'returned', 'cancelled'
+  quantity: integer("quantity").notNull(),
+  previousStock: integer("previous_stock").notNull(),
+  newStock: integer("new_stock").notNull(),
+  notes: text("notes"),
+  createdBy: integer("created_by"), // Admin ID
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Goods in Transit - کالاهای در راه
+export const goodsInTransit = pgTable("goods_in_transit", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull(),
+  customerId: integer("customer_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  status: text("status").notNull().default("paid"), // 'paid', 'prepared', 'shipped', 'delivered'
+  paymentDate: timestamp("payment_date").notNull(),
+  expectedDeliveryDate: timestamp("expected_delivery_date"),
+  actualDeliveryDate: timestamp("actual_delivery_date"),
+  trackingNumber: text("tracking_number"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Shop products with actual pricing and inventory
 export const shopProducts = pgTable("shop_products", {
   id: serial("id").primaryKey(),
@@ -18,6 +50,9 @@ export const shopProducts = pgTable("shop_products", {
   priceUnit: text("price_unit").notNull(), // per liter, per kg, per ton
   inStock: boolean("in_stock").default(true),
   stockQuantity: integer("stock_quantity").default(0),
+  reservedQuantity: integer("reserved_quantity").default(0), // کالای رزرو شده
+  transitQuantity: integer("transit_quantity").default(0), // کالای در راه
+  availableQuantity: integer("available_quantity").default(0), // موجودی قابل فروش
   lowStockThreshold: integer("low_stock_threshold").default(10),
   sku: text("sku").unique().notNull(),
   barcode: text("barcode"),
@@ -311,25 +346,26 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
 
-// Inventory tracking
-export const inventoryTransactions = pgTable("inventory_transactions", {
-  id: serial("id").primaryKey(),
-  productId: integer("product_id").notNull(),
-  type: text("type").notNull(), // purchase, sale, adjustment, return
-  quantity: integer("quantity").notNull(), // Positive for incoming, negative for outgoing
-  referenceId: integer("reference_id"), // Order ID, Purchase ID, etc.
-  referenceType: text("reference_type"), // order, purchase, adjustment
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const insertInventoryTransactionSchema = createInsertSchema(inventoryTransactions).omit({
+// Shop Inventory Movement types
+export const insertShopInventoryMovementSchema = createInsertSchema(shopInventoryMovements).omit({
   id: true,
   createdAt: true,
 });
 
-export type InsertInventoryTransaction = z.infer<typeof insertInventoryTransactionSchema>;
-export type InventoryTransaction = typeof inventoryTransactions.$inferSelect;
+export type InsertShopInventoryMovement = z.infer<typeof insertShopInventoryMovementSchema>;
+export type ShopInventoryMovement = typeof shopInventoryMovements.$inferSelect;
+
+// Goods in Transit types
+export const insertGoodsInTransitSchema = createInsertSchema(goodsInTransit).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertGoodsInTransit = z.infer<typeof insertGoodsInTransitSchema>;
+export type GoodsInTransit = typeof goodsInTransit.$inferSelect;
+
+
 
 // Invoices table for customer billing
 export const invoices = pgTable("invoices", {
