@@ -1,5 +1,6 @@
 import { eq, desc, and, or, sql, count, sum, avg } from "drizzle-orm";
 import { customerDb } from "./customer-db";
+import { crmDb } from "./crm-db";
 import { 
   customers, 
   customerOrders,
@@ -12,6 +13,12 @@ import {
   type InsertCustomerSegment,
   type CustomerSegment
 } from "../shared/customer-schema";
+import {
+  crmCustomers,
+  type CrmCustomer,
+  type InsertCrmCustomer,
+  type UpsertCrmCustomer
+} from "../shared/schema";
 import { 
   crmCustomers,
   type InsertCrmCustomer, 
@@ -105,7 +112,7 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async getCrmCustomerById(id: number): Promise<CrmCustomer | undefined> {
-    const [customer] = await customerDb
+    const [customer] = await crmDb
       .select()
       .from(crmCustomers)
       .where(eq(crmCustomers.id, id))
@@ -114,7 +121,7 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async getCrmCustomerByEmail(email: string): Promise<CrmCustomer | undefined> {
-    const [customer] = await customerDb
+    const [customer] = await crmDb
       .select()
       .from(crmCustomers)
       .where(eq(crmCustomers.email, email))
@@ -148,7 +155,7 @@ export class CrmStorage implements ICrmStorage {
       
       console.log("Processed update data:", processedUpdate);
       
-      const [customer] = await customerDb
+      const [customer] = await crmDb
         .update(crmCustomers)
         .set(processedUpdate)
         .where(eq(crmCustomers.id, id))
@@ -244,50 +251,12 @@ export class CrmStorage implements ICrmStorage {
     return customerData;
   }
 
-  async getCrmCustomers(limit: number = 50, offset: number = 0): Promise<Customer[]> {
-    const customerData = await customerDb
-      .select({
-        id: customers.id,
-        email: customers.email,
-        firstName: customers.firstName,
-        lastName: customers.lastName,
-        company: customers.company,
-        phone: customers.phone,
-        country: customers.country,
-        city: customers.city,
-        customerType: customers.customerType,
-        customerStatus: customers.customerStatus,
-        customerSource: customers.customerSource,
-        lastOrderDate: customers.lastOrderDate,
-        createdAt: customers.createdAt,
-        isActive: customers.isActive,
-        totalOrdersCount: sql<number>`COUNT(${customerOrders.id})`,
-        totalSpent: sql<string>`COALESCE(SUM(${customerOrders.totalAmount}), 0)`,
-        averageOrderValue: sql<string>`CASE 
-          WHEN COUNT(${customerOrders.id}) > 0 THEN COALESCE(SUM(${customerOrders.totalAmount}), 0) / COUNT(${customerOrders.id})
-          ELSE 0 
-        END`,
-      })
-      .from(customers)
-      .leftJoin(customerOrders, eq(customers.id, customerOrders.customerId))
-      .where(eq(customers.isActive, true))
-      .groupBy(
-        customers.id,
-        customers.email,
-        customers.firstName,
-        customers.lastName,
-        customers.company,
-        customers.phone,
-        customers.country,
-        customers.city,
-        customers.customerType,
-        customers.customerStatus,
-        customers.customerSource,
-        customers.lastOrderDate,
-        customers.createdAt,
-        customers.isActive
-      )
-      .orderBy(sql`COALESCE(SUM(${customerOrders.totalAmount}), 0) DESC`)
+  async getCrmCustomers(limit: number = 50, offset: number = 0): Promise<CrmCustomer[]> {
+    const customerData = await crmDb
+      .select()
+      .from(crmCustomers)
+      .where(eq(crmCustomers.isActive, true))
+      .orderBy(desc(crmCustomers.updatedAt))
       .limit(limit)
       .offset(offset);
 
