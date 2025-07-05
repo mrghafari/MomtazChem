@@ -11316,7 +11316,7 @@ momtazchem.com
       
       // Search in showcase_products
       try {
-        const showcaseProducts = await storage.getShowcaseProducts();
+        const showcaseProducts = await storage.getProducts();
         const showcaseMatch = showcaseProducts.find((p: any) => p.barcode === barcode);
         if (showcaseMatch) {
           results.push({
@@ -11371,7 +11371,7 @@ momtazchem.com
       const { excludeProductId } = req.query;
       
       // Search in showcase_products
-      const showcaseProducts = await storage.getShowcaseProducts();
+      const showcaseProducts = await storage.getProducts();
       const showcaseMatch = showcaseProducts.find((p: any) => 
         p.barcode === barcode && 
         (excludeProductId ? p.id !== parseInt(excludeProductId as string) : true)
@@ -11420,7 +11420,7 @@ momtazchem.com
       const { productCode } = req.params;
       
       // Search in showcase_products for product codes within barcodes
-      const showcaseProducts = await storage.getShowcaseProducts();
+      const showcaseProducts = await storage.getProducts();
       const showcaseMatch = showcaseProducts.find((p: any) => {
         if (!p.barcode || p.barcode.length !== 13) return false;
         // Extract 5-digit product code from position 8-12 in EAN-13: 846-96771-XXXXX-C
