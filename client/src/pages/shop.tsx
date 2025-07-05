@@ -207,6 +207,11 @@ const Shop = () => {
       title: "خوش آمدید",
       description: `${customerData.firstName} ${customerData.lastName}`,
     });
+    
+    // Redirect to customer profile after successful login
+    setTimeout(() => {
+      navigate("/customer/profile");
+    }, 1000);
   };
 
   const handleLogout = async () => {
