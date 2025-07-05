@@ -437,54 +437,17 @@ const Shop = () => {
             {/* User & Cart Section */}
             <div className="flex items-center gap-4">
               {/* User Account */}
-              {!isLoadingCustomer && (
+              {!isLoadingCustomer && !customer && (
                 <div className="flex items-center gap-2">
-                  {customer ? (
-                    <div className="flex items-center gap-2">
-                      {/* Customer Name & Wallet Balance - Click to Wallet */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          console.log("Navigating to customer wallet...");
-                          navigate("/customer/wallet");
-                        }}
-                        className="flex items-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            {customer.firstName} {customer.lastName}
-                          </span>
-                          <div className="w-px h-4 bg-gray-300"></div>
-                          <Wallet className="w-4 h-4 text-green-600" />
-                          <span className="text-sm font-semibold text-green-800">
-                            ${walletBalance.toFixed(2)}
-                          </span>
-                        </div>
-                      </Button>
-                      
-                      {/* Logout Button */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleLogout()}
-                        className="flex items-center gap-1 px-2 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span className="text-sm">خروج</span>
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setShowAuth(true)}
-                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    >
-                      <User className="w-4 h-4" />
-                      <span className="text-sm">Login</span>
-                    </Button>
-                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowAuth(true)}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="text-sm">Login</span>
+                  </Button>
                 </div>
               )}
 
