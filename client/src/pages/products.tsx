@@ -107,6 +107,7 @@ export default function ProductsPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
@@ -151,6 +152,7 @@ export default function ProductsPage() {
     mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setRefreshKey(prev => prev + 1); // Force component re-render
       setDialogOpen(false);
       setImagePreview(null);
       setCatalogPreview(null);
@@ -173,9 +175,11 @@ export default function ProductsPage() {
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
       apiRequest(`/api/products/${id}`, "PUT", data),
     onSuccess: () => {
-      // Force refresh data
+      // Clear and refresh data completely
+      queryClient.removeQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.refetchQueries({ queryKey: ["/api/products"] });
+      setRefreshKey(prev => prev + 1); // Force component re-render
       setDialogOpen(false);
       setEditingProduct(null);
       setImagePreview(null);
@@ -199,6 +203,7 @@ export default function ProductsPage() {
     mutationFn: (id: number) => apiRequest(`/api/products/${id}`, "DELETE"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setRefreshKey(prev => prev + 1); // Force component re-render
       toast({
         title: "Success",
         description: "Product deleted successfully",
@@ -705,7 +710,7 @@ export default function ProductsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map((product: ShowcaseProduct) => (
-                <Card key={product.id} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
+                <Card key={`${product.id}-${refreshKey}`} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
                       {/* Product Thumbnail */}
