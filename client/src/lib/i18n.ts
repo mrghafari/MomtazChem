@@ -1102,8 +1102,7 @@ export const translations: Record<Language, Translation> = {
     logoutError: 'Çıkış sırasında bir hata oluştu',
     error: 'Hata',
     
-    // Wallet
-    walletBalance: 'Cüzdan Bakiyesi',
+    // Additional wallet fields
     requestRechargeButton: 'Yeniden Yükleme Talep Et',
     rechargeRequests: 'Yeniden Yükleme Talepleri',
     pendingApproval: 'Onay Bekliyor',

@@ -26,19 +26,19 @@ const formatCurrency = (amount: number): string => {
   }).format(amount).replace('IQD', '').trim() + ' IQD';
 };
 
-// Language types
-type Language = 'en' | 'ar';
+// Language types - using the same type from i18n
+type Language = 'en' | 'ar' | 'ku' | 'tr';
 
-// Dynamic form schema based on language  
-const createPurchaseSchema = (lang: Language) => z.object({
-  firstName: z.string().min(2, translate('name_required', lang)),
-  lastName: z.string().min(2, translate('name_required', lang)),
-  email: z.string().email(translate('email_required', lang)),
+// Simple form schema - validation messages handled by form
+const purchaseSchema = z.object({
+  firstName: z.string().min(2, "Name is required"),
+  lastName: z.string().min(2, "Last name is required"),
+  email: z.string().email("Valid email is required"),
   company: z.string().optional(),
-  phone: z.string().min(10, translate('phone_required', lang)),
-  country: z.string().min(2, translate('country_required', lang)),
-  city: z.string().min(2, translate('city_required', lang)),
-  address: z.string().min(10, translate('address_required', lang)),
+  phone: z.string().min(10, "Phone number is required"),
+  country: z.string().min(2, "Country is required"),
+  city: z.string().min(2, "City is required"),
+  address: z.string().min(10, "Address is required"),
   postalCode: z.string().optional(),
   notes: z.string().optional(),
   gpsLatitude: z.number().optional(),
@@ -116,9 +116,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
-  // Dynamic form based on current language
+  // Form setup with schema validation
   const form = useForm({
-    resolver: zodResolver(createPurchaseSchema(language)),
+    resolver: zodResolver(purchaseSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
