@@ -802,31 +802,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload endpoints
-  // Generic upload route (for images)
-  app.post("/api/upload", requireAuth, uploadImage.single('image'), (req, res) => {
-    try {
-      if (!req.file) {
+  // Generic upload route (for images) - accepts both 'file' and 'image' field names
+  const uploadFlexible = multer({
+    storage: imageStorage,
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'));
+      }
+    }
+  });
+
+  app.post("/api/upload", requireAuth, (req, res) => {
+    const upload = uploadFlexible.fields([
+      { name: 'file', maxCount: 1 },
+      { name: 'image', maxCount: 1 }
+    ]);
+
+    upload(req, res, (err) => {
+      if (err) {
+        console.error('Upload error:', err);
         return res.status(400).json({ 
           success: false, 
-          message: "No file uploaded" 
+          message: err.message 
         });
       }
 
-      const imageUrl = `/uploads/images/${req.file.filename}`;
-      res.json({ 
-        success: true, 
-        url: imageUrl,
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        size: req.file.size
-      });
-    } catch (error) {
-      console.error('Upload error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to upload file" 
-      });
-    }
+      try {
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+        const uploadedFile = files?.file?.[0] || files?.image?.[0];
+
+        if (!uploadedFile) {
+          return res.status(400).json({ 
+            success: false, 
+            message: "No file uploaded" 
+          });
+        }
+
+        const imageUrl = `/uploads/images/${uploadedFile.filename}`;
+        res.json({ 
+          success: true, 
+          url: imageUrl,
+          filename: uploadedFile.filename,
+          originalName: uploadedFile.originalname,
+          size: uploadedFile.size
+        });
+      } catch (error) {
+        console.error('Upload processing error:', error);
+        res.status(500).json({ 
+          success: false, 
+          message: "Failed to process upload" 
+        });
+      }
+    });
   });
 
   app.post("/api/upload/image", requireAuth, uploadImage.single('image'), (req, res) => {
