@@ -180,11 +180,16 @@ export default function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.refetchQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
-      setDialogOpen(false);
-      setEditingProduct(null);
-      setImagePreview(null);
-      setCatalogPreview(null);
-      form.reset();
+      
+      // Keep the form values to show updated data
+      // Don't reset form or close dialog immediately
+      
+      setTimeout(() => {
+        setDialogOpen(false);
+        setEditingProduct(null);
+        setImagePreview(null);
+        setCatalogPreview(null);
+      }, 1000); // Allow user to see the updated values for 1 second
       toast({
         title: "Success",
         description: "Product updated successfully",
@@ -407,9 +412,9 @@ export default function ProductsPage() {
       barcode: product.barcode || "",
       sku: product.sku || "",
       inventoryStatus: product.inventoryStatus || "in_stock",
-      stockQuantity: product.stockQuantity || 0,
-      minStockLevel: product.minStockLevel || 0,
-      maxStockLevel: product.maxStockLevel || 0,
+      stockQuantity: Number(product.stockQuantity) ?? 0,
+      minStockLevel: Number(product.minStockLevel) ?? 0,
+      maxStockLevel: Number(product.maxStockLevel) ?? 0,
       unitPrice: Number(product.unitPrice || 0),
       currency: product.currency || "USD",
       priceRange: product.priceRange || "",
