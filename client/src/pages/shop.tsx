@@ -363,21 +363,28 @@ const Shop = () => {
     const isProfileComplete = customerData.phone && customerData.country && 
                               customerData.city && customerData.address;
     
-    if (isProfileComplete) {
-      // Profile is complete, proceed to checkout
+    // Only proceed to checkout if cart has items AND profile is complete
+    if (getTotalItems() > 0 && isProfileComplete) {
+      // Profile is complete and cart has items, proceed to checkout
       setShowCheckout(true);
       toast({
         title: direction === 'rtl' ? "ورود موفق" : "Login Successful",
-        description: direction === 'rtl' ? "خوش آمدید!" : "Welcome back!",
+        description: direction === 'rtl' ? "خوش آمدید! حالا می‌توانید خرید کنید" : "Welcome back! You can now checkout",
       });
-    } else {
-      // Profile needs completion, show registration form with pre-filled data
+    } else if (getTotalItems() > 0 && !isProfileComplete) {
+      // Profile needs completion for checkout, show registration form with pre-filled data
       setAuthMode('register');
       setShowAuth(true);
       toast({
         title: direction === 'rtl' ? "تکمیل اطلاعات" : "Complete Profile",
         description: direction === 'rtl' ? "لطفاً اطلاعات ناقص خود را تکمیل کنید" : "Please complete your profile information",
         variant: "default",
+      });
+    } else {
+      // Just a regular login, no checkout needed
+      toast({
+        title: direction === 'rtl' ? "ورود موفق" : "Login Successful",
+        description: direction === 'rtl' ? "خوش آمدید!" : "Welcome back!",
       });
     }
   };
