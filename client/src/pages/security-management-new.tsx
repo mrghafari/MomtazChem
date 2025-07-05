@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,6 @@ import {
   RefreshCw,
   Download
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface SecurityMetrics {
   systemHealth: number;
@@ -49,26 +49,116 @@ export default function SecurityManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState("dashboard");
+  
+  // State for security settings
+  const [securitySettings, setSecuritySettings] = useState({
+    autoScanEnabled: true,
+    scanInterval: '6',
+    scanDepth: 'comprehensive',
+    loginMonitorEnabled: true,
+    maxFailedAttempts: 5,
+    lockDuration: 30,
+    ipControlEnabled: true,
+    threatDetectionEnabled: true,
+    threatLevel: 'medium',
+    emailAlerts: true,
+    smsAlerts: false
+  });
 
-  // Security metrics query
-  const { data: metrics = {
+  // Security metrics with default values
+  const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useQuery<SecurityMetrics>({
+    queryKey: ['/api/security/metrics'],
+    refetchInterval: 30000,
+  });
+
+  // Use default values when data is not available
+  const metrics: SecurityMetrics = metricsData || {
     systemHealth: 95,
-    threatLevel: 'low' as const,
+    threatLevel: 'low',
     failedLogins: 0,
     activeSessions: 2,
     blockedIPs: 0,
     lastScan: new Date().toISOString(),
     vulnerabilities: 0
-  }, isLoading: metricsLoading } = useQuery<SecurityMetrics>({
-    queryKey: ['/api/security/metrics'],
-    refetchInterval: 30000,
-  });
+  };
 
   // Security logs query
   const { data: logs = [], isLoading: logsLoading } = useQuery<SecurityLog[]>({
     queryKey: ['/api/security/logs'],
     refetchInterval: 10000,
   });
+
+  // Load security settings on mount
+  const { data: settingsData } = useQuery<any>({
+    queryKey: ['/api/security/settings']
+  });
+
+  // Update settings when data is loaded
+  useEffect(() => {
+    if (settingsData?.success && settingsData?.settings) {
+      const settings = settingsData.settings || {};
+      setSecuritySettings(prevSettings => ({
+        ...prevSettings,
+        autoScanEnabled: settings.autoScanEnabled?.value === 'true' || true,
+        scanInterval: settings.scanInterval?.value || '6',
+        scanDepth: settings.scanDepth?.value || 'comprehensive',
+        loginMonitorEnabled: settings.loginMonitorEnabled?.value === 'true' || true,
+        maxFailedAttempts: parseInt(settings.maxFailedAttempts?.value) || 5,
+        lockDuration: parseInt(settings.lockDuration?.value) || 30,
+        ipControlEnabled: settings.ipControlEnabled?.value === 'true' || true,
+        threatDetectionEnabled: settings.threatDetectionEnabled?.value === 'true' || true,
+        threatLevel: settings.threatLevel?.value || 'medium',
+        emailAlerts: settings.emailAlerts?.value === 'true' || true,
+        smsAlerts: settings.smsAlerts?.value === 'true' || false
+      }));
+    }
+  }, [settingsData]);
+
+  // Security settings save mutation
+  const saveSettingsMutation = useMutation({
+    mutationFn: async (settings: any) => {
+      const response = await fetch('/api/security/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          settings: Object.entries(settings).reduce((acc, [key, value]) => {
+            acc[key] = {
+              value: String(value),
+              category: 'security'
+            };
+            return acc;
+          }, {} as any)
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save security settings');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Settings Saved",
+        description: "Security settings have been saved successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/security/settings'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save security settings",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveSettings = () => {
+    saveSettingsMutation.mutate(securitySettings);
+  };
 
   // Security scan mutation
   const scanMutation = useMutation({
@@ -352,7 +442,7 @@ export default function SecurityManagement() {
             <CardContent>
               {logsLoading ? (
                 <div className="text-center py-4">Loading security logs...</div>
-              ) : logs.length === 0 ? (
+              ) : !logs || logs.length === 0 ? (
                 <div className="text-center py-4 text-gray-500">No security events recorded</div>
               ) : (
                 <div className="space-y-2">
@@ -390,14 +480,23 @@ export default function SecurityManagement() {
                       <Label className="text-sm font-medium">Automatic Security Scans</Label>
                       <p className="text-xs text-gray-500">Run comprehensive security scans automatically</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={securitySettings.autoScanEnabled}
+                      onCheckedChange={(checked) => 
+                        setSecuritySettings(prev => ({ ...prev, autoScanEnabled: checked }))
+                      }
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-xs text-gray-600">Scan Interval</Label>
-                      <select className="w-full p-2 border rounded text-sm">
+                      <select 
+                        className="w-full p-2 border rounded text-sm"
+                        value={securitySettings.scanInterval}
+                        onChange={(e) => setSecuritySettings(prev => ({ ...prev, scanInterval: e.target.value }))}
+                      >
                         <option value="1">Every 1 hour</option>
-                        <option value="6" selected>Every 6 hours</option>
+                        <option value="6">Every 6 hours</option>
                         <option value="12">Every 12 hours</option>
                         <option value="24">Every 24 hours</option>
                       </select>
@@ -500,11 +599,31 @@ export default function SecurityManagement() {
                 </div>
 
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => alert('Settings reset to defaults')}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSecuritySettings({
+                        autoScanEnabled: true,
+                        scanInterval: '6',
+                        scanDepth: 'comprehensive',
+                        loginMonitorEnabled: true,
+                        maxFailedAttempts: 5,
+                        lockDuration: 30,
+                        ipControlEnabled: true,
+                        threatDetectionEnabled: true,
+                        threatLevel: 'medium',
+                        emailAlerts: true,
+                        smsAlerts: false
+                      });
+                    }}
+                  >
                     Reset to Defaults
                   </Button>
-                  <Button onClick={() => alert('Security settings saved successfully!')}>
-                    Save Settings
+                  <Button 
+                    onClick={handleSaveSettings}
+                    disabled={saveSettingsMutation.isPending}
+                  >
+                    {saveSettingsMutation.isPending ? 'Saving...' : 'Save Settings'}
                   </Button>
                 </div>
               </div>

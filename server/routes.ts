@@ -13326,6 +13326,83 @@ momtazchem.com
     }
   });
 
+  // Security Settings API endpoints
+  app.get("/api/security/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { securitySettings } = await import('@shared/schema');
+      const settings = await db.select().from(securitySettings);
+      
+      // Convert to key-value format for frontend
+      const settingsMap = settings.reduce((acc: any, setting) => {
+        acc[setting.setting] = {
+          value: setting.value,
+          category: setting.category,
+          isActive: setting.isActive
+        };
+        return acc;
+      }, {});
+      
+      res.json({
+        success: true,
+        settings: settingsMap
+      });
+    } catch (error) {
+      console.error("Error fetching security settings:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch security settings" });
+    }
+  });
+
+  app.post("/api/security/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { securitySettings } = await import('@shared/schema');
+      const { settings } = req.body;
+      const adminId = req.session?.adminId;
+      
+      if (!settings || typeof settings !== 'object') {
+        return res.status(400).json({
+          success: false,
+          message: "Settings object is required"
+        });
+      }
+
+      // Update or insert each setting
+      for (const [key, config] of Object.entries(settings as any)) {
+        const { value, category } = config;
+        
+        await db.insert(securitySettings)
+          .values({
+            setting: key,
+            value: String(value),
+            category: category || 'general',
+            updatedBy: adminId,
+            updatedAt: new Date()
+          })
+          .onConflictDoUpdate({
+            target: securitySettings.setting,
+            set: {
+              value: String(value),
+              updatedBy: adminId,
+              updatedAt: new Date()
+            }
+          });
+      }
+
+      // Log security event
+      await logSecurityEvent(req, 'security_settings_updated', {
+        settingsCount: Object.keys(settings).length,
+        adminId
+      });
+
+      res.json({
+        success: true,
+        message: "Security settings saved successfully"
+      });
+    } catch (error) {
+      console.error("Error saving security settings:", error);
+      res.status(500).json({ success: false, message: "Failed to save security settings" });
+    }
+  });
+
   // Security logs (simplified)
   app.get("/api/security/logs", requireAuth, async (req: Request, res: Response) => {
     try {
