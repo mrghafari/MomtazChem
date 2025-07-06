@@ -6,6 +6,20 @@ import { registerRoutes } from "./routes";
 import InventoryAlertService from "./inventory-alerts";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Environment validation
+function validateEnvironment() {
+  const requiredVars = ['DATABASE_URL'];
+  const missing = requiredVars.filter(varName => !process.env[varName]);
+  
+  if (missing.length > 0) {
+    console.error('Missing required environment variables:', missing.join(', '));
+    console.error('Please set these environment variables before starting the server.');
+    process.exit(1);
+  }
+  
+  console.log('Environment validation passed');
+}
+
 // Global error handlers to prevent server crashes
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
@@ -18,6 +32,37 @@ process.on('unhandledRejection', (reason, promise) => {
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Health check endpoint for deployment validation
+app.get('/health', async (req, res) => {
+  try {
+    // Check database connection
+    const { pool } = await import('./db');
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
+    
+    res.status(200).json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      service: 'Chemical Solutions Platform',
+      version: process.env.npm_package_version || '1.0.0',
+      database: 'connected',
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(503).json({ 
+      status: 'error', 
+      timestamp: new Date().toISOString(),
+      service: 'Chemical Solutions Platform',
+      version: process.env.npm_package_version || '1.0.0',
+      database: 'disconnected',
+      environment: process.env.NODE_ENV || 'development',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
 
 
 
@@ -34,7 +79,7 @@ app.use(session({
   saveUninitialized: false,
   rolling: true, // Reset maxAge on each request
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
     httpOnly: false, // Allow frontend access for debugging
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
@@ -74,6 +119,22 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
+    // Validate environment before starting
+    validateEnvironment();
+    
+    // Test database connection early
+    try {
+      const { pool } = await import('./db');
+      const client = await pool.connect();
+      await client.query('SELECT 1');
+      client.release();
+      console.log('Database connection verified');
+    } catch (dbError) {
+      console.error('Database connection failed:', dbError);
+      console.error('Please check your DATABASE_URL environment variable');
+      process.exit(1);
+    }
+    
     const server = await registerRoutes(app);
 
     // Multer error handling middleware
@@ -108,16 +169,30 @@ app.use((req, res, next) => {
       serveStatic(app);
     }
 
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
+    // Use environment port or default to 5000
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+    
+    // Add graceful shutdown handling
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, shutting down gracefully');
+      server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+      });
+    });
+
+    process.on('SIGINT', () => {
+      console.log('SIGINT received, shutting down gracefully');
+      server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+      });
+    });
+    
+    server.listen(port, "0.0.0.0", () => {
+      log(`Chemical Solutions Platform serving on port ${port}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`Health check available at: http://localhost:${port}/health`);
       
       // Start inventory monitoring service with delayed initialization
       setTimeout(() => {
