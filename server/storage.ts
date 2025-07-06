@@ -304,6 +304,25 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Reverse sync: Update showcase product stock from shop product stock
+  async syncStockFromShop(shopProductId: number, newStockQuantity: number): Promise<void> {
+    try {
+      const shopProduct = await shopStorage.getShopProductById(shopProductId);
+      if (!shopProduct) return;
+
+      const showcaseProducts = await this.getProducts();
+      const matchingShowcaseProduct = showcaseProducts.find(sp => sp.name === shopProduct.name);
+      
+      if (matchingShowcaseProduct) {
+        await this.updateProduct(matchingShowcaseProduct.id, {
+          stockQuantity: newStockQuantity
+        });
+      }
+    } catch (error) {
+      console.error('Error syncing stock from shop to showcase:', error);
+    }
+  }
+
   // User management methods
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db
