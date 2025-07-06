@@ -47,6 +47,7 @@ export interface ContactFormData {
   company: string;
   productInterest: string;
   message: string;
+  categoryEmail?: string; // Optional category-specific email for intelligent routing
 }
 
 export interface PasswordResetData {
@@ -226,9 +227,84 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
   });
 }
 
+// Send email using category email assignment
+async function sendWithCategoryEmailAssignment(formData: ContactFormData): Promise<void> {
+  try {
+    // Use admin category for SMTP settings but send to category-specific email
+    const transporter = await createTransporter('admin');
+    const adminSettings = await emailStorage.getCategoryWithSettings('admin');
+    
+    if (!adminSettings?.smtp) {
+      throw new Error('No admin SMTP configuration found for category email assignment');
+    }
+
+    const mailOptions = {
+      from: adminSettings.smtp.fromEmail,
+      to: formData.categoryEmail,
+      cc: ['info@momtazchem.com'], // Always CC to main company email
+      subject: `درخواست جدید از فرم تماس - ${formData.firstName} ${formData.lastName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+          <h2>درخواست جدید از فرم تماس</h2>
+          <p><strong>نام:</strong> ${formData.firstName} ${formData.lastName}</p>
+          <p><strong>ایمیل:</strong> ${formData.email}</p>
+          <p><strong>شرکت:</strong> ${formData.company || 'نامشخص'}</p>
+          <p><strong>علاقه‌مندی محصول:</strong> ${formData.productInterest}</p>
+          <p><strong>پیام:</strong></p>
+          <div style="border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;">
+            ${formData.message.replace(/\n/g, '<br>')}
+          </div>
+          <hr>
+          <p style="font-size: 12px; color: #666;">
+            این ایمیل به صورت خودکار بر اساس دسته‌بندی محصول مورد علاقه مشتری ارسال شده است.
+          </p>
+        </div>
+      `,
+      text: `
+درخواست جدید از فرم تماس
+
+نام: ${formData.firstName} ${formData.lastName}
+ایمیل: ${formData.email}
+شرکت: ${formData.company || 'نامشخص'}
+علاقه‌مندی محصول: ${formData.productInterest}
+
+پیام:
+${formData.message}
+
+---
+این ایمیل به صورت خودکار بر اساس دسته‌بندی محصول مورد علاقه مشتری ارسال شده است.
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Contact form email sent successfully to category-specific email: ${formData.categoryEmail}`);
+
+    // Log the email
+    await emailStorage.logEmail({
+      categoryId: adminSettings.category.id,
+      toEmail: formData.categoryEmail!,
+      fromEmail: adminSettings.smtp.fromEmail,
+      subject: mailOptions.subject,
+      status: 'sent',
+      sentAt: new Date(),
+    });
+
+  } catch (error) {
+    console.error('Category email assignment error:', error);
+    throw error;
+  }
+}
+
 export async function sendContactEmail(formData: ContactFormData): Promise<void> {
   try {
-    // Determine the appropriate email category based on product interest
+    // Check if there's a specific category email assignment
+    if (formData.categoryEmail) {
+      console.log(`Using category-specific email assignment: ${formData.categoryEmail}`);
+      // Send directly to the assigned category email
+      return await sendWithCategoryEmailAssignment(formData);
+    }
+    
+    // Fallback to the original category-based routing system
     const categoryKey = mapProductInterestToCategory(formData.productInterest);
     console.log(`Contact form for '${formData.productInterest}' routed to category: ${categoryKey}`);
     

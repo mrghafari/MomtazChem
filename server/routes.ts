@@ -961,13 +961,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Helper function to get category email assignment
+  async function getCategoryEmailAssignment(productInterest: string): Promise<string | null> {
+    try {
+      // Map product interests to category keys
+      const categoryMapping: { [key: string]: string } = {
+        'fuel-additives': 'fuel-additives',
+        'water-treatment': 'water-treatment',
+        'paint-solvents': 'paint-thinner',
+        'agricultural-products': 'agricultural-fertilizers',
+        'agricultural-fertilizers': 'agricultural-fertilizers',
+        'industrial-chemicals': 'industrial-chemicals',
+        'paint-thinner': 'paint-thinner',
+        'technical-equipment': 'technical-equipment',
+        'commercial-goods': 'commercial-goods',
+        'other-products': 'orders'
+      };
+
+      const categoryKey = categoryMapping[productInterest] || 'orders';
+      
+      const assignment = await db
+        .select()
+        .from(categoryEmailAssignments)
+        .where(eq(categoryEmailAssignments.categoryKey, categoryKey))
+        .limit(1);
+
+      return assignment.length > 0 ? assignment[0].assignedEmail : null;
+    } catch (error) {
+      console.error("Error getting category email assignment:", error);
+      return null;
+    }
+  }
+
   // Contact form submission
   app.post("/api/contact", async (req, res) => {
     try {
       const contactData = insertContactSchema.parse(req.body);
       const contact = await storage.createContact(contactData);
       
-      // Send email notification
+      // Get category-specific email assignment
+      const categoryEmail = await getCategoryEmailAssignment(contact.productInterest);
+      
+      // Send email notification with intelligent routing
       try {
         await sendContactEmail({
           firstName: contact.firstName,
@@ -975,9 +1010,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: contact.email,
           company: contact.company ?? '',
           productInterest: contact.productInterest,
-          message: contact.message ?? ''
+          message: contact.message ?? '',
+          categoryEmail: categoryEmail ?? undefined // Add category-specific email for routing
         });
-        console.log("Email sent successfully for contact:", contact.id);
+        console.log(`Email sent successfully for contact: ${contact.id}, routed to category email: ${categoryEmail || 'default'}`);
       } catch (emailError) {
         console.error("Failed to send email:", emailError);
         // Continue processing even if email fails
