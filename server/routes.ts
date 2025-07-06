@@ -3018,6 +3018,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Force sync all product stock quantities from showcase to shop  
+  app.post("/api/admin/sync-all-stock", async (req, res) => {
+    try {
+      const { storage } = await import("./storage");
+      
+      console.log("🔄 Starting complete stock synchronization from showcase to shop...");
+      
+      // Get all showcase products (source of truth)
+      const showcaseProducts = await storage.getProducts();
+      console.log(`📦 Found ${showcaseProducts.length} showcase products`);
+      
+      let syncedCount = 0;
+      let errors: string[] = [];
+      
+      for (const showcaseProduct of showcaseProducts) {
+        try {
+          // Find matching shop product by name
+          const shopProducts = await shopStorage.getShopProducts();
+          const matchingShopProduct = shopProducts.find((sp: any) => sp.name === showcaseProduct.name);
+          
+          if (matchingShopProduct) {
+            const showcaseStock = showcaseProduct.stockQuantity || 0;
+            const shopStock = matchingShopProduct.stockQuantity || 0;
+            
+            if (showcaseStock !== shopStock) {
+              console.log(`🔄 Syncing "${showcaseProduct.name}": shop ${shopStock} → showcase ${showcaseStock}`);
+              
+              // Update shop stock to match showcase
+              await shopStorage.updateProductStock(
+                matchingShopProduct.id,
+                showcaseStock,
+                "Admin: Full stock synchronization with showcase database"
+              );
+              
+              syncedCount++;
+            } else {
+              console.log(`✅ Already synced: "${showcaseProduct.name}" (${showcaseStock})`);
+            }
+          } else {
+            console.log(`⚠️ No matching shop product found for: "${showcaseProduct.name}"`);
+          }
+        } catch (error) {
+          const errorMsg = `Failed to sync "${showcaseProduct.name}": ${error}`;
+          console.error(`❌ ${errorMsg}`);
+          errors.push(errorMsg);
+        }
+      }
+      
+      console.log(`✅ Stock synchronization completed. Synced: ${syncedCount}, Errors: ${errors.length}`);
+      
+      res.json({
+        success: true,
+        message: `Stock synchronization completed successfully`,
+        details: {
+          totalShowcaseProducts: showcaseProducts.length,
+          syncedProducts: syncedCount,
+          errorCount: errors.length,
+          errors: errors
+        }
+      });
+      
+    } catch (error) {
+      console.error("❌ Critical error during stock synchronization:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to synchronize stock",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Create shop order - FOCUS ON STOCK REDUCTION ONLY  
   app.post("/api/shop/orders", async (req, res) => {
     try {
@@ -3139,33 +3210,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
               });
 
-              // Update product stock in both shop and showcase products
-              if (product.stockQuantity !== null && product.stockQuantity !== undefined) {
-                const newQuantity = Math.max(0, product.stockQuantity - (quantity as number));
+              // CRITICAL: Synchronized dual-table stock reduction system
+              // Use showcase stock as single source of truth and sync to shop
+              
+              console.log(`🔄 Starting dual-table stock reduction for: ${product.name} (Quantity: ${quantity})`);
+              
+              // 1. FIRST: Get the current showcase product (source of truth)
+              let finalStockQuantity = 0;
+              
+              try {
+                const { storage } = await import("./storage");
+                console.log(`🔍 Finding showcase product with name: "${product.name}"`);
+                const showcaseProducts = await storage.getProducts();
+                console.log(`📦 Found ${showcaseProducts.length} showcase products`);
                 
-                // Update shop product stock
+                const matchingShowcaseProduct = showcaseProducts.find(sp => sp.name === product.name);
+                
+                if (matchingShowcaseProduct) {
+                  console.log(`✅ Found showcase product: ${matchingShowcaseProduct.id} (Stock: ${matchingShowcaseProduct.stockQuantity})`);
+                  
+                  if (matchingShowcaseProduct.stockQuantity !== null && matchingShowcaseProduct.stockQuantity !== undefined) {
+                    // Calculate final stock quantity after order
+                    finalStockQuantity = Math.max(0, matchingShowcaseProduct.stockQuantity - (quantity as number));
+                    
+                    console.log(`📉 Reducing showcase stock: ${matchingShowcaseProduct.stockQuantity} → ${finalStockQuantity}`);
+                    
+                    // Update showcase stock
+                    await storage.updateShowcaseProductStock(
+                      matchingShowcaseProduct.id,
+                      finalStockQuantity,
+                      `Order ${orderNumber} - Sold ${quantity} units`
+                    );
+                    
+                    console.log(`✅ SHOWCASE stock reduced: ${matchingShowcaseProduct.id} (${product.name}) → ${finalStockQuantity}`);
+                  } else {
+                    console.log(`⚠️ Showcase product has null/undefined stock - using 0 as default`);
+                    finalStockQuantity = 0;
+                  }
+                } else {
+                  console.log(`❌ No matching showcase product found for "${product.name}"`);
+                  console.log(`📋 Available products:`, showcaseProducts.map(sp => `"${sp.name}"`));
+                }
+              } catch (showcaseError) {
+                console.error(`❌ CRITICAL: Failed to update showcase stock for "${product.name}":`, showcaseError);
+                // Continue to shop update even if showcase fails
+              }
+
+              // 2. SECOND: Sync the same final stock to shop products table
+              try {
+                console.log(`🔄 Syncing shop stock to match showcase: ${product.stockQuantity} → ${finalStockQuantity}`);
+                
+                // Use the same final stock quantity calculated from showcase
                 await shopStorage.updateProductStock(
                   parseInt(productId as string),
-                  newQuantity,
-                  `Order ${orderNumber} - Sold ${quantity} units`
+                  finalStockQuantity,
+                  `Order ${orderNumber} - Synced with showcase stock (Sold ${quantity} units)`
                 );
                 
-                // Also update corresponding showcase product stock to maintain sync
-                try {
-                  const { storage } = await import("./storage");
-                  const showcaseProducts = await storage.getProducts();
-                  const matchingShowcaseProduct = showcaseProducts.find(sp => sp.name === product.name);
-                  
-                  if (matchingShowcaseProduct) {
-                    await storage.updateProduct(matchingShowcaseProduct.id, {
-                      stockQuantity: newQuantity
-                    });
-                  }
-                } catch (syncError) {
-                  console.error("Error syncing stock to showcase product:", syncError);
-                  // Don't fail the order if sync fails
-                }
+                console.log(`✅ SHOP stock synced: ${productId} (${product.name}) → ${finalStockQuantity}`);
+              } catch (shopError) {
+                console.error(`❌ Error syncing shop stock for product ${productId}:`, shopError);
               }
+              
+              console.log(`🎯 COMPLETED: Both tables now have stock quantity ${finalStockQuantity} for "${product.name}"`);
             }
           } catch (productError) {
             console.error(`Error processing product ${productId}:`, productError);
