@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,8 +18,8 @@ import {
   Calendar,
   Clock,
   CheckCircle,
-  AlertCircle,
   Package,
+  AlertCircle,
   User,
   FileText
 } from "lucide-react";
@@ -59,6 +59,7 @@ const InquiryDetail = () => {
   const [location] = useLocation();
   const inquiryId = location.split('/')[3]; // Get ID from /admin/inquiry/123
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // State for dialogs
   const [isFollowUpDialogOpen, setIsFollowUpDialogOpen] = useState(false);
@@ -92,6 +93,40 @@ const InquiryDetail = () => {
     queryKey: ["/api/inquiries", inquiryId, "responses"],
     queryFn: () => fetch(`/api/inquiries/${inquiryId}/responses`).then(res => res.json()),
     enabled: !!inquiryId,
+  });
+
+  // Mutation for updating inquiry status
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      const response = await fetch(`/api/inquiries/${inquiryId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('مشکلی در به‌روزرسانی وضعیت پیش آمد');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/inquiries", inquiryId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inquiries"] });
+      toast({
+        title: "موفقیت",
+        description: "وضعیت استعلام با موفقیت به‌روزرسانی شد",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "خطا",
+        description: error.message || "مشکلی در به‌روزرسانی وضعیت پیش آمد",
+        variant: "destructive"
+      });
+    }
   });
 
   // Handler for sending follow-up
@@ -399,6 +434,31 @@ const InquiryDetail = () => {
                   <Package className="h-4 w-4 mr-2" />
                   View Related Products
                 </Button>
+                
+                {/* Status Update Buttons */}
+                {inquiry?.status === 'open' && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full bg-yellow-50 hover:bg-yellow-100 border-yellow-300 text-yellow-800"
+                    onClick={() => updateStatusMutation.mutate('in_progress')}
+                    disabled={updateStatusMutation.isPending}
+                  >
+                    <Clock className="h-4 w-4 mr-2" />
+                    {updateStatusMutation.isPending ? 'در حال به‌روزرسانی...' : 'شروع بررسی'}
+                  </Button>
+                )}
+                
+                {inquiry?.status === 'in_progress' && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full bg-green-50 hover:bg-green-100 border-green-300 text-green-800"
+                    onClick={() => updateStatusMutation.mutate('resolved')}
+                    disabled={updateStatusMutation.isPending}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    {updateStatusMutation.isPending ? 'در حال به‌روزرسانی...' : 'حل شده'}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -29,6 +29,7 @@ export interface ISimpleCustomerStorage {
   getInquiriesByCustomer(customerId: number): Promise<CustomerInquiry[]>;
   getAllInquiries(): Promise<CustomerInquiry[]>;
   updateInquiry(id: number, inquiry: Partial<InsertCustomerInquiry>): Promise<CustomerInquiry>;
+  updateInquiryStatus(id: number, status: string): Promise<CustomerInquiry>;
   
   // Inquiry responses
   createInquiryResponse(response: InsertInquiryResponse): Promise<InquiryResponse>;
@@ -152,6 +153,18 @@ export class SimpleCustomerStorage implements ISimpleCustomerStorage {
       .update(customerInquiries)
       .set({
         ...inquiryUpdate,
+        updatedAt: new Date(),
+      })
+      .where(eq(customerInquiries.id, id))
+      .returning();
+    return inquiry;
+  }
+
+  async updateInquiryStatus(id: number, status: string): Promise<CustomerInquiry> {
+    const [inquiry] = await customerDb
+      .update(customerInquiries)
+      .set({
+        status: status,
         updatedAt: new Date(),
       })
       .where(eq(customerInquiries.id, id))

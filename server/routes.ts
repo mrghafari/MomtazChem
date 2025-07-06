@@ -5856,6 +5856,50 @@ Leading Chemical Solutions Provider
     }
   });
 
+  // Update inquiry status (admin only)
+  app.patch("/api/inquiries/:id/status", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid inquiry ID"
+        });
+      }
+
+      const { status } = req.body;
+      if (!status) {
+        return res.status(400).json({
+          success: false,
+          message: "Status is required"
+        });
+      }
+
+      // Validate status values
+      const validStatuses = ['open', 'in_progress', 'resolved', 'closed'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status value"
+        });
+      }
+
+      const updatedInquiry = await simpleCustomerStorage.updateInquiryStatus(id, status);
+      
+      res.json({
+        success: true,
+        message: "Inquiry status updated successfully",
+        inquiry: updatedInquiry
+      });
+    } catch (error) {
+      console.error("Error updating inquiry status:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update inquiry status"
+      });
+    }
+  });
+
   // Quote request routes (public)
   app.post("/api/quote-requests", async (req, res) => {
     try {
