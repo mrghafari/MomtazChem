@@ -3086,6 +3086,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let finalCustomerInfo = customerInfo;
       let finalCrmCustomerId = crmCustomerId;
 
+      // If user is logged in, get customer info from database
+      if (customerId && !customerInfo) {
+        console.log('Getting customer info for customerId:', customerId);
+        const customer = await customerStorage.getCustomerById(customerId);
+        console.log('Retrieved customer:', customer);
+        if (customer) {
+          finalCustomerInfo = {
+            email: customer.email,
+            firstName: customer.firstName,
+            lastName: customer.lastName,
+            company: customer.company || '',
+            phone: customer.phone || '',
+            country: customer.country || 'Iraq',
+            city: customer.city || 'Baghdad',
+            address: customer.address || 'Default Address',
+          };
+          console.log('finalCustomerInfo set to:', finalCustomerInfo);
+        }
+      }
+
+      console.log('Final customer info before order creation:', finalCustomerInfo);
+
       // If user is not logged in, create or update CRM customer from order info
       if (!customerId && customerInfo) {
         const orderData = {
@@ -3136,13 +3158,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create order items and update stock
       for (const item of items) {
+        const unitPrice = item.unitPrice || item.price || 0;
+        
         await customerStorage.createOrderItem({
           orderId: order.id,
           productId: item.productId,
           productName: item.productName || 'Unknown Product',
-          quantity: item.quantity.toString(),
-          unitPrice: item.unitPrice.toString(),
-          totalPrice: (item.quantity * item.unitPrice).toString(),
+          quantity: String(item.quantity),
+          unitPrice: String(unitPrice),
+          totalPrice: String(item.quantity * unitPrice),
           productSku: item.productSku || '',
         });
 
