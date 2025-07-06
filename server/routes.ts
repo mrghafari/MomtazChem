@@ -4619,6 +4619,12 @@ ${procedure.content}
             newQuantity,
             `Order ${orderNumber} - Sold ${item.quantity} units`
           );
+          
+          // Auto-sync inventory from shop back to showcase
+          const updatedProduct = await shopStorage.getShopProductById(item.productId);
+          if (updatedProduct) {
+            await storage.syncProductFromShop(updatedProduct);
+          }
         }
       }
 
@@ -5145,6 +5151,17 @@ ${procedure.content}
     } catch (error) {
       console.error("Error syncing products:", error);
       res.status(500).json({ success: false, message: "Failed to sync products" });
+    }
+  });
+
+  // Reverse sync: Update showcase inventory from shop sales
+  app.post("/api/sync-products-reverse", requireAuth, async (req, res) => {
+    try {
+      await storage.syncAllProductsFromShop();
+      res.json({ success: true, message: "All products synchronized from shop to showcase successfully" });
+    } catch (error) {
+      console.error("Error syncing products from shop:", error);
+      res.status(500).json({ success: false, message: "Failed to sync products from shop" });
     }
   });
 
