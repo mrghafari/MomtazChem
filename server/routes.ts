@@ -3163,17 +3163,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               `Order ${orderNumber} - Sold ${item.quantity} units`
             );
             
-            // Auto-sync inventory from shop back to showcase
+            // Auto-sync inventory from shop back to showcase using new sync manager
             try {
               console.log(`🔄 Starting sync to showcase for product ID: ${item.productId}`);
-              const updatedProduct = await shopStorage.getShopProductById(item.productId);
-              if (updatedProduct) {
-                console.log(`🔄 Found updated product: ${updatedProduct.name}, stock: ${updatedProduct.stockQuantity}`);
-                await storage.syncProductFromShop(updatedProduct);
-                console.log(`🔄 Synced inventory to showcase for product: ${updatedProduct.name}`);
-              } else {
-                console.log(`⚠️ Could not find updated product with ID: ${item.productId}`);
-              }
+              const { InventorySyncManager } = await import('./inventory-sync-manager');
+              await InventorySyncManager.syncShopToShowcase(item.productId);
+              console.log(`✅ Successfully synced inventory to showcase for product ID: ${item.productId}`);
             } catch (syncError) {
               console.error(`❌ Error syncing to showcase for product ${item.productId}:`, syncError);
             }
