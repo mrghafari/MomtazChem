@@ -200,6 +200,13 @@ export default function SiteManagement() {
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
     },
     {
+      id: "customer-communications",
+      label: "Customer Communications",
+      icon: MessageSquare,
+      onClick: () => setLocation("/admin/customer-communications"),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
+    },
+    {
       id: "security-management",
       label: "Security Management",
       icon: Shield,

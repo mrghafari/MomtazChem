@@ -13,6 +13,7 @@ import { customerStorage } from "./customer-storage";
 import { customerAddressStorage } from "./customer-address-storage";
 import { emailStorage } from "./email-storage";
 import { crmStorage } from "./crm-storage";
+import { customerCommunicationStorage } from "./customer-communication-storage";
 import { crmDb } from "./crm-db";
 import { smsStorage } from "./sms-storage";
 import { widgetRecommendationStorage } from "./widget-recommendation-storage";
@@ -26,6 +27,7 @@ import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, ord
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
+import * as nodemailer from "nodemailer";
 import { db } from "./db";
 import { sql, eq, and, or, isNull, isNotNull, desc } from "drizzle-orm";
 import puppeteer from "puppeteer";
@@ -5720,6 +5722,121 @@ ${procedure.content}
         isInternal: false,
       });
 
+      // Send follow-up email to customer
+      try {
+        // Create transporter using existing email system
+        const createTransporter = async (categoryKey: string) => {
+          const categorySettings = await emailStorage.getCategoryWithSettings(categoryKey);
+          
+          if (!categorySettings?.smtp) {
+            throw new Error(`No SMTP configuration found for category: ${categoryKey}`);
+          }
+
+          const smtp = categorySettings.smtp;
+          
+          return nodemailer.createTransport({
+            host: smtp.host,
+            port: smtp.port,
+            secure: smtp.port === 465,
+            auth: {
+              user: smtp.username,
+              pass: smtp.password,
+            },
+          });
+        };
+
+        const transporter = await createTransporter('admin');
+        const categorySettings = await emailStorage.getCategoryWithSettings('admin');
+        const smtp = categorySettings?.smtp;
+
+        if (smtp) {
+          // Send follow-up email to customer
+          await transporter.sendMail({
+            from: `${smtp.fromName} <${smtp.fromEmail}>`,
+            to: inquiry.contactEmail,
+            subject: `Follow-up: ${inquiry.subject || 'Your Inquiry'} - ${inquiry.inquiryNumber}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
+                  <h1 style="margin: 0; font-size: 24px;">Momtaz Chemical</h1>
+                  <p style="margin: 5px 0 0 0; opacity: 0.9;">Follow-up Response</p>
+                </div>
+                
+                <div style="padding: 30px; background-color: #f9f9f9;">
+                  <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
+                    Dear ${inquiry.contactName || 'Valued Customer'},
+                  </p>
+                  
+                  <p style="color: #666; margin-bottom: 15px;">
+                    Thank you for your inquiry. We have prepared a follow-up response regarding your request:
+                  </p>
+                  
+                  <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+                    <h3 style="color: #333; margin-top: 0;">Your Original Inquiry:</h3>
+                    <p style="color: #666; margin-bottom: 15px;"><strong>Inquiry Number:</strong> ${inquiry.inquiryNumber}</p>
+                    <p style="color: #666; margin-bottom: 15px;"><strong>Subject:</strong> ${inquiry.subject || 'Product Inquiry'}</p>
+                    <p style="color: #666;"><strong>Category:</strong> ${inquiry.category || 'General'}</p>
+                  </div>
+                  
+                  <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
+                    <h3 style="color: #333; margin-top: 0;">Our Response:</h3>
+                    <p style="color: #444; line-height: 1.6; white-space: pre-wrap;">${responseText}</p>
+                  </div>
+                  
+                  <div style="margin-top: 30px; padding: 20px; background: #e8f4f8; border-radius: 8px;">
+                    <h4 style="color: #333; margin-top: 0;">Need Further Assistance?</h4>
+                    <p style="color: #666; margin-bottom: 15px;">
+                      If you have any additional questions or need clarification, please don't hesitate to contact us:
+                    </p>
+                    <ul style="color: #666; margin: 0;">
+                      <li>Email: info@momtazchem.com</li>
+                      <li>Phone: +964 XXX XXX XXXX</li>
+                      <li>Website: www.momtazchem.com</li>
+                    </ul>
+                  </div>
+                  
+                  <p style="color: #888; font-size: 14px; margin-top: 30px; text-align: center;">
+                    Best regards,<br>
+                    <strong>Momtaz Chemical Team</strong><br>
+                    Leading Chemical Solutions Provider
+                  </p>
+                </div>
+              </div>
+            `,
+            text: `
+Follow-up Response - Momtaz Chemical
+
+Dear ${inquiry.contactName || 'Valued Customer'},
+
+Thank you for your inquiry. We have prepared a follow-up response regarding your request.
+
+Your Original Inquiry:
+Inquiry Number: ${inquiry.inquiryNumber}
+Subject: ${inquiry.subject || 'Product Inquiry'}
+Category: ${inquiry.category || 'General'}
+
+Our Response:
+${responseText}
+
+Need Further Assistance?
+If you have any additional questions or need clarification, please don't hesitate to contact us:
+- Email: info@momtazchem.com
+- Phone: +964 XXX XXX XXXX
+- Website: www.momtazchem.com
+
+Best regards,
+Momtaz Chemical Team
+Leading Chemical Solutions Provider
+            `
+          });
+
+          console.log(`Follow-up email sent successfully to: ${inquiry.contactEmail}`);
+        }
+      } catch (emailError) {
+        console.error('Error sending follow-up email:', emailError);
+        // Don't fail the response creation if email fails
+      }
+
       // Update inquiry status to 'in_progress' if it was 'open'
       if (inquiry.status === 'open') {
         await simpleCustomerStorage.updateInquiry(id, { status: 'in_progress' });
@@ -5727,7 +5844,7 @@ ${procedure.content}
 
       res.json({
         success: true,
-        message: "Response sent successfully",
+        message: "Follow-up response sent successfully to customer's email",
         response
       });
     } catch (error) {
@@ -13968,6 +14085,250 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "خطا در آزمایش اتصال AI"
+      });
+    }
+  });
+
+  // Customer Communication API Routes
+  
+  // Send message to customer
+  app.post("/api/customer-communications/send", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { categoryId, customerEmail, customerName, subject, message, messageType = "outbound" } = req.body;
+      
+      if (!categoryId || !customerEmail || !subject || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields"
+        });
+      }
+
+      const communication = await customerCommunicationStorage.sendMessage({
+        categoryId,
+        customerEmail,
+        customerName,
+        subject,
+        message,
+        messageType,
+        sentBy: req.session.adminId
+      });
+
+      res.json({
+        success: true,
+        data: communication,
+        message: "Message sent successfully"
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send message"
+      });
+    }
+  });
+
+  // Get communications by category
+  app.get("/api/customer-communications/category/:categoryId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.categoryId);
+      const communications = await customerCommunicationStorage.getCommunicationsByCategory(categoryId);
+      
+      res.json({
+        success: true,
+        data: communications
+      });
+    } catch (error) {
+      console.error("Error fetching communications:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch communications"
+      });
+    }
+  });
+
+  // Get communications by customer
+  app.get("/api/customer-communications/customer/:email", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const email = req.params.email;
+      const communications = await customerCommunicationStorage.getCommunicationsByCustomer(email);
+      
+      res.json({
+        success: true,
+        data: communications
+      });
+    } catch (error) {
+      console.error("Error fetching customer communications:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch customer communications"
+      });
+    }
+  });
+
+  // Get communication thread
+  app.get("/api/customer-communications/thread/:messageId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      const thread = await customerCommunicationStorage.getCommunicationThread(messageId);
+      
+      res.json({
+        success: true,
+        data: thread
+      });
+    } catch (error) {
+      console.error("Error fetching communication thread:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch communication thread"
+      });
+    }
+  });
+
+  // Mark message as read
+  app.put("/api/customer-communications/:messageId/read", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      await customerCommunicationStorage.markAsRead(messageId);
+      
+      res.json({
+        success: true,
+        message: "Message marked as read"
+      });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to mark message as read"
+      });
+    }
+  });
+
+  // Mark message as replied
+  app.put("/api/customer-communications/:messageId/replied", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      await customerCommunicationStorage.markAsReplied(messageId);
+      
+      res.json({
+        success: true,
+        message: "Message marked as replied"
+      });
+    } catch (error) {
+      console.error("Error marking message as replied:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to mark message as replied"
+      });
+    }
+  });
+
+  // Get recent communications
+  app.get("/api/customer-communications/recent", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const communications = await customerCommunicationStorage.getRecentCommunications(limit);
+      
+      res.json({
+        success: true,
+        data: communications
+      });
+    } catch (error) {
+      console.error("Error fetching recent communications:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch recent communications"
+      });
+    }
+  });
+
+  // Get communication stats
+  app.get("/api/customer-communications/stats", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const stats = await customerCommunicationStorage.getCommunicationStats(categoryId);
+      
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error("Error fetching communication stats:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch communication stats"
+      });
+    }
+  });
+
+  // Search communications
+  app.get("/api/customer-communications/search", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const searchTerm = req.query.q as string;
+      if (!searchTerm) {
+        return res.status(400).json({
+          success: false,
+          message: "Search term is required"
+        });
+      }
+
+      const communications = await customerCommunicationStorage.searchCommunications(searchTerm);
+      
+      res.json({
+        success: true,
+        data: communications
+      });
+    } catch (error) {
+      console.error("Error searching communications:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to search communications"
+      });
+    }
+  });
+
+  // Update communication status
+  app.put("/api/customer-communications/:messageId/status", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({
+          success: false,
+          message: "Status is required"
+        });
+      }
+
+      await customerCommunicationStorage.updateStatus(messageId, status);
+      
+      res.json({
+        success: true,
+        message: "Status updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update status"
+      });
+    }
+  });
+
+  // Delete communication
+  app.delete("/api/customer-communications/:messageId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      await customerCommunicationStorage.deleteCommunication(messageId);
+      
+      res.json({
+        success: true,
+        message: "Communication deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting communication:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete communication"
       });
     }
   });

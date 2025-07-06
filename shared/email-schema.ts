@@ -78,6 +78,26 @@ export const emailLogs = pgTable("email_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Customer Communications Table - for direct communication with customers per category
+export const customerCommunications = pgTable("customer_communications", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => emailCategories.id),
+  customerEmail: text("customer_email").notNull(),
+  customerName: text("customer_name"),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  messageType: text("message_type").default("outbound"), // outbound, inbound, follow_up
+  status: text("status").default("sent"), // sent, delivered, read, replied, failed
+  sentBy: integer("sent_by"), // admin user ID who sent the message
+  replyToMessageId: integer("reply_to_message_id").references(() => customerCommunications.id),
+  attachments: text("attachments").array(), // array of file paths
+  emailId: text("email_id"), // external email provider message ID
+  readAt: timestamp("read_at"),
+  repliedAt: timestamp("replied_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Types
 export type EmailCategory = typeof emailCategories.$inferSelect;
 export type InsertEmailCategory = typeof emailCategories.$inferInsert;
@@ -89,6 +109,8 @@ export type EmailTemplate = typeof emailTemplates.$inferSelect;
 export type InsertEmailTemplate = typeof emailTemplates.$inferInsert;
 export type EmailLog = typeof emailLogs.$inferSelect;
 export type InsertEmailLog = typeof emailLogs.$inferInsert;
+export type CustomerCommunication = typeof customerCommunications.$inferSelect;
+export type InsertCustomerCommunication = typeof customerCommunications.$inferInsert;
 
 // Zod Schemas
 export const insertEmailCategorySchema = createInsertSchema(emailCategories).omit({
@@ -118,6 +140,12 @@ export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit
 export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertCustomerCommunicationSchema = createInsertSchema(customerCommunications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Validation schemas with additional rules
