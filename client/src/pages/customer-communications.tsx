@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,6 +73,24 @@ export default function CustomerCommunications() {
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  // Authentication check
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/admin/login");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
+  // Authentication loading state
+  if (authLoading) {
+    return <div className="flex items-center justify-center min-h-screen">در حال بارگذاری...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Fetch email categories
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<EmailCategory[]>({
@@ -111,13 +131,7 @@ export default function CustomerCommunications() {
       message: string;
       messageType?: string;
     }) => {
-      return await apiRequest("/api/customer-communications/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("/api/customer-communications/send", "POST", data);
     },
     onSuccess: () => {
       toast({
@@ -139,12 +153,7 @@ export default function CustomerCommunications() {
   // Mark as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest(`/api/customer-communications/${messageId}/read`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      return await apiRequest(`/api/customer-communications/${messageId}/read`, "PATCH");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/customer-communications"] });
@@ -158,9 +167,7 @@ export default function CustomerCommunications() {
   // Mark as replied mutation
   const markAsRepliedMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest(`/api/customer-communications/${messageId}/replied`, {
-        method: "PUT",
-      });
+      return await apiRequest(`/api/customer-communications/${messageId}/replied`, "PUT");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/customer-communications"] });
@@ -170,9 +177,7 @@ export default function CustomerCommunications() {
   // Delete communication mutation
   const deleteCommunicationMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest(`/api/customer-communications/${messageId}`, {
-        method: "DELETE",
-      });
+      return await apiRequest(`/api/customer-communications/${messageId}`, "DELETE");
     },
     onSuccess: () => {
       toast({
