@@ -240,59 +240,81 @@ export class DatabaseStorage implements IStorage {
     await showcaseDb.delete(showcaseProducts).where(eq(showcaseProducts.id, id));
   }
 
-  // Product synchronization methods
+  // Product synchronization methods - Enhanced for complete shop card data
   async syncProductToShop(showcaseProduct: ShowcaseProduct): Promise<void> {
     try {
-      // Generate SKU from name if not available
-      const productSku = `SP-${showcaseProduct.id}-${showcaseProduct.name.replace(/\s+/g, '-').toUpperCase().substring(0, 10)}`;
+      // Generate enhanced SKU from name if not available
+      const productSku = showcaseProduct.sku || `SP-${showcaseProduct.id}-${showcaseProduct.name.replace(/\s+/g, '-').toUpperCase().substring(0, 10)}`;
       
-      // Check if product already exists in shop by name (since showcase doesn't have SKU)
+      // Check if product already exists in shop by name or SKU
       const allShopProducts = await shopStorage.getShopProducts();
-      const existingShopProduct = allShopProducts.find(p => p.name === showcaseProduct.name);
+      const existingShopProduct = allShopProducts.find(p => p.name === showcaseProduct.name || p.sku === productSku);
       
-      // Extract price from unitPrice first, fallback to priceRange
+      // Extract price with better logic
       let productPrice = "50"; // Default price
       if (showcaseProduct.unitPrice && showcaseProduct.unitPrice > 0) {
         productPrice = showcaseProduct.unitPrice.toString();
+      } else if (showcaseProduct.price) {
+        const priceMatch = showcaseProduct.price.match(/\d+(?:\.\d+)?/);
+        if (priceMatch) {
+          productPrice = priceMatch[0];
+        }
       } else if (showcaseProduct.priceRange) {
         const priceMatch = showcaseProduct.priceRange.match(/\$?(\d+(?:\.\d+)?)/);
         if (priceMatch) {
           productPrice = priceMatch[1];
         }
       }
+
+      // Enhanced compare at price logic
+      let compareAtPrice = null;
+      if (showcaseProduct.compareAtPrice) {
+        const compareMatch = showcaseProduct.compareAtPrice.match(/\d+(?:\.\d+)?/);
+        if (compareMatch) {
+          compareAtPrice = compareMatch[0];
+        }
+      }
+      
+      // Prepare comprehensive product data for shop card
+      const syncData = {
+        name: showcaseProduct.name,
+        sku: productSku,
+        description: showcaseProduct.description || showcaseProduct.shortDescription || '',
+        shortDescription: showcaseProduct.shortDescription || showcaseProduct.description?.substring(0, 100) || '',
+        price: productPrice,
+        compareAtPrice: compareAtPrice,
+        priceUnit: showcaseProduct.priceUnit || 'unit',
+        category: showcaseProduct.category,
+        stockQuantity: showcaseProduct.stockQuantity || 0,
+        lowStockThreshold: showcaseProduct.minStockLevel || showcaseProduct.lowStockThreshold || 10,
+        weight: showcaseProduct.weight || null,
+        weightUnit: showcaseProduct.weightUnit || null,
+        dimensions: showcaseProduct.dimensions || null,
+        imageUrls: showcaseProduct.imageUrls || (showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null),
+        thumbnailUrl: showcaseProduct.thumbnailUrl || showcaseProduct.imageUrl || null,
+        isActive: showcaseProduct.isActive !== false, // Default to true if not specified
+        isFeatured: showcaseProduct.isFeatured || false,
+        tags: showcaseProduct.tags || null,
+        barcode: showcaseProduct.barcode || null,
+        specifications: showcaseProduct.specifications || null,
+        features: showcaseProduct.features || null,
+        applications: showcaseProduct.applications || null,
+        safetyInformation: showcaseProduct.safetyInformation || null,
+        storageInstructions: showcaseProduct.storageInstructions || null,
+        usageInstructions: showcaseProduct.usageInstructions || null
+      };
       
       if (existingShopProduct) {
-        // Update existing shop product with real inventory data
-        await shopStorage.updateShopProduct(existingShopProduct.id, {
-          name: showcaseProduct.name,
-          description: showcaseProduct.description,
-          price: productPrice,
-          category: showcaseProduct.category,
-          stockQuantity: showcaseProduct.stockQuantity || 0,
-          lowStockThreshold: showcaseProduct.minStockLevel || 10,
-          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
-          thumbnailUrl: showcaseProduct.imageUrl || null,
-          isActive: showcaseProduct.isActive,
-        });
+        // Update existing shop product with comprehensive data
+        await shopStorage.updateShopProduct(existingShopProduct.id, syncData);
+        console.log(`✅ Updated shop product: ${showcaseProduct.name} (ID: ${existingShopProduct.id})`);
       } else {
-        // Create new shop product with real inventory data
-        await shopStorage.createShopProduct({
-          name: showcaseProduct.name,
-          sku: productSku,
-          description: showcaseProduct.description || '',
-          price: productPrice,
-          priceUnit: 'unit',
-          category: showcaseProduct.category,
-          stockQuantity: showcaseProduct.stockQuantity || 0,
-          lowStockThreshold: showcaseProduct.minStockLevel || 10,
-          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
-          thumbnailUrl: showcaseProduct.imageUrl || null,
-          isActive: showcaseProduct.isActive,
-          isFeatured: false,
-        });
+        // Create new shop product with complete data
+        await shopStorage.createShopProduct(syncData);
+        console.log(`✅ Created new shop product: ${showcaseProduct.name}`);
       }
     } catch (error) {
-      console.error('Error syncing product to shop:', error);
+      console.error(`❌ Error syncing product ${showcaseProduct.name} to shop:`, error);
     }
   }
 

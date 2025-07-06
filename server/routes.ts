@@ -4939,6 +4939,66 @@ ${procedure.content}
     }
   });
 
+  // Enhanced sync with stock synchronization
+  app.post("/api/sync-products-enhanced", requireAuth, async (req, res) => {
+    try {
+      console.log("🔄 Starting enhanced product and stock synchronization...");
+      
+      // 1. Sync all product data from showcase to shop
+      await storage.syncAllProductsToShop();
+      
+      // 2. Get all products to verify sync
+      const showcaseProducts = await storage.getProducts();
+      const shopProducts = await shopStorage.getShopProducts();
+      
+      let stockSyncResults = {
+        updated: 0,
+        matched: 0,
+        errors: 0
+      };
+      
+      // 3. Sync stock quantities between databases
+      for (const showcaseProduct of showcaseProducts) {
+        try {
+          const matchingShopProduct = shopProducts.find(sp => 
+            sp.name === showcaseProduct.name || sp.sku === showcaseProduct.sku
+          );
+          
+          if (matchingShopProduct) {
+            stockSyncResults.matched++;
+            
+            // If stock quantities are different, sync them
+            if (matchingShopProduct.stockQuantity !== showcaseProduct.stockQuantity) {
+              await shopStorage.updateProductStock(
+                matchingShopProduct.id,
+                showcaseProduct.stockQuantity || 0,
+                "Enhanced sync - showcase to shop"
+              );
+              stockSyncResults.updated++;
+              console.log(`✅ Synced stock: ${showcaseProduct.name} → ${showcaseProduct.stockQuantity} units`);
+            }
+          }
+        } catch (error) {
+          stockSyncResults.errors++;
+          console.error(`❌ Stock sync error for ${showcaseProduct.name}:`, error);
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Enhanced product and stock synchronization completed successfully",
+        results: {
+          productsMatched: stockSyncResults.matched,
+          stockUpdated: stockSyncResults.updated,
+          errors: stockSyncResults.errors
+        }
+      });
+    } catch (error) {
+      console.error("Error in enhanced sync:", error);
+      res.status(500).json({ success: false, message: "Failed to complete enhanced sync" });
+    }
+  });
+
   // Stock synchronization endpoint to fix discrepancies between shop and admin
   app.post("/api/sync-stock", requireAuth, async (req, res) => {
     try {
