@@ -3040,7 +3040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await customerStorage.createOrder(orderData);
 
-      // Create order items
+      // Create order items and reduce stock
       for (const item of items) {
         await customerStorage.createOrderItem({
           orderId: order.id,
@@ -3051,6 +3051,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalPrice: (item.quantity * item.unitPrice).toString(),
           productSku: item.productSku || '',
         });
+
+        // CRITICAL: Reduce stock in shop_products table automatically
+        try {
+          const product = await shopStorage.getShopProductById(item.productId);
+          if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
+            const newQuantity = Math.max(0, product.stockQuantity - item.quantity);
+            
+            // Update shop product stock immediately when order is placed
+            await shopStorage.updateProductStock(
+              item.productId,
+              newQuantity,
+              `Order ${orderNumber} - Sold ${item.quantity} units`
+            );
+            
+            console.log(`Stock reduced for product ${item.productId}: ${product.stockQuantity} → ${newQuantity}`);
+          }
+        } catch (stockError) {
+          console.error(`Error reducing stock for product ${item.productId}:`, stockError);
+          // Continue with order creation even if stock update fails
+        }
       }
 
       // Log order activity in CRM
