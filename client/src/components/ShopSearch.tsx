@@ -31,6 +31,10 @@ interface ShopProduct {
   specifications?: any;
   features?: any;
   applications?: any;
+  quantityDiscounts?: Array<{
+    minQty: number;
+    discount: number;
+  }>;
 }
 
 interface SearchFilters {
@@ -454,6 +458,20 @@ export default function ShopSearch() {
                           SKU: {product.sku}
                         </div>
                       </div>
+
+                      {/* Discount Information */}
+                      {product.quantityDiscounts && product.quantityDiscounts.length > 0 && (
+                        <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
+                          <div className="text-xs font-semibold text-orange-800 mb-1">
+                            💰 پیشنهاد ویژه
+                          </div>
+                          {product.quantityDiscounts.map((discount, index) => (
+                            <div key={index} className="text-xs text-orange-700">
+                              خرید {discount.minQty}+ عدد → {Math.round(discount.discount * 100)}% تخفیف
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       {product.tags && product.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-3">
