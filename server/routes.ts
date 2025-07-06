@@ -3150,6 +3150,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
               `Order ${orderNumber} - Sold ${item.quantity} units`
             );
             
+            // Auto-sync inventory from shop back to showcase
+            try {
+              console.log(`🔄 Starting sync to showcase for product ID: ${item.productId}`);
+              const updatedProduct = await shopStorage.getShopProductById(item.productId);
+              if (updatedProduct) {
+                console.log(`🔄 Found updated product: ${updatedProduct.name}, stock: ${updatedProduct.stockQuantity}`);
+                await storage.syncProductFromShop(updatedProduct);
+                console.log(`🔄 Synced inventory to showcase for product: ${updatedProduct.name}`);
+              } else {
+                console.log(`⚠️ Could not find updated product with ID: ${item.productId}`);
+              }
+            } catch (syncError) {
+              console.error(`❌ Error syncing to showcase for product ${item.productId}:`, syncError);
+            }
+            
             console.log(`✅ Stock updated successfully for product ${item.productId}`);
           } else {
             console.log(`⚠️ No stock quantity available for product ${item.productId}`);
