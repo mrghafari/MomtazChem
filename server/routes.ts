@@ -995,33 +995,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req, res) => {
     try {
       const { category } = req.query;
-      let showcaseProducts;
+      let products;
       
       if (category && typeof category === 'string') {
-        showcaseProducts = await storage.getProductsByCategory(category);
+        // Filter shop products by category
+        const allProducts = await shopStorage.getShopProducts();
+        products = allProducts.filter(product => product.category === category);
       } else {
-        showcaseProducts = await storage.getProducts();
+        // Get all products from single source of truth (shop_products)
+        products = await shopStorage.getShopProducts();
       }
-
-      // Get shop products to ensure we have the most up-to-date stock quantities
-      const shopProducts = await shopStorage.getShopProducts();
       
-      // Create a map for quick lookup of shop product stock
-      const shopStockMap = new Map();
-      shopProducts.forEach(shopProduct => {
-        shopStockMap.set(shopProduct.name, shopProduct.stockQuantity);
-      });
-
-      // Update showcase products with current stock from shop
-      const productsWithCurrentStock = showcaseProducts.map(product => {
-        const currentStock = shopStockMap.get(product.name);
-        return {
-          ...product,
-          stockQuantity: currentStock !== undefined ? currentStock : product.stockQuantity
-        };
-      });
-      
-      res.json(productsWithCurrentStock);
+      res.json(products);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ 
