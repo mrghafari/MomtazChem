@@ -87,7 +87,12 @@ const Shop = () => {
         filters.tags.forEach(tag => params.append('tags', tag));
       }
 
-      const response = await fetch(`/api/shop/search?${params}`);
+      const response = await fetch(`/api/shop/search?${params}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (!response.ok) throw new Error('Search failed');
       return response.json();
     }
