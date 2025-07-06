@@ -84,9 +84,12 @@ export default function AdvancedEmailSettingsPage() {
     receiveTypes: [],
     recipientType: 'to'
   });
+  const [assignmentForm, setAssignmentForm] = useState<{[key: string]: string}>({});
   const [showPassword, setShowPassword] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<any>(null);
+  
+
 
   // Check authentication
   useEffect(() => {
@@ -117,6 +120,12 @@ export default function AdvancedEmailSettingsPage() {
   const { data: categoriesData, isLoading } = useQuery({
     queryKey: ["/api/admin/email/categories"],
     queryFn: () => fetch("/api/admin/email/categories").then(res => res.json())
+  });
+
+  // Load category email assignments
+  const { data: categoryAssignmentsData = [], refetch: refetchCategoryAssignments } = useQuery({
+    queryKey: ["/api/admin/email/category-assignments"],
+    queryFn: () => fetch("/api/admin/email/category-assignments").then(res => res.json())
   });
 
   // Save SMTP settings
@@ -235,6 +244,40 @@ export default function AdvancedEmailSettingsPage() {
     }
   };
 
+  // Fetch category email assignments
+  const { data: categoryAssignments = [] } = useQuery({
+    queryKey: ["/api/admin/email/category-assignments"],
+    enabled: true
+  });
+
+  // Save category email assignment
+  const saveCategoryAssignmentMutation = useMutation({
+    mutationFn: async (data: { categoryKey: string; assignedEmail: string }) => {
+      const response = await fetch("/api/admin/email/category-assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save category assignment");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "تخصیص ایمیل با موفقیت ذخیره شد" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/category-assignments"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در ذخیره تخصیص ایمیل",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
   // Save recipients
   const saveRecipientsMutation = useMutation({
     mutationFn: (data: { categoryId: number; recipients: EmailRecipient[] }) => 
@@ -252,6 +295,8 @@ export default function AdvancedEmailSettingsPage() {
       toast({ title: "Failed to save recipients", variant: "destructive" });
     }
   });
+
+
 
   const categories: EmailCategory[] = categoriesData?.categories || [];
 
@@ -452,9 +497,10 @@ export default function AdvancedEmailSettingsPage() {
         <div className="lg:col-span-2">
           {selectedCategory ? (
             <Tabs defaultValue="smtp" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="smtp">SMTP Settings</TabsTrigger>
                 <TabsTrigger value="recipients">Email Recipients</TabsTrigger>
+                <TabsTrigger value="category-assignment">Category Assignment</TabsTrigger>
                 <TabsTrigger value="control">Email Control Panel</TabsTrigger>
               </TabsList>
 
@@ -950,6 +996,96 @@ export default function AdvancedEmailSettingsPage() {
                       <Save className="w-4 h-4 mr-2" />
                       Save Recipients
                     </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="category-assignment">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Mail className="w-5 h-5" />
+                      Category Email Assignment
+                    </CardTitle>
+                    <CardDescription>
+                      تخصیص ایمیل برای هر دسته‌بندی محصولات - درخواست‌های خرید بر اساس دسته‌بندی به ایمیل مربوطه ارسال می‌شود
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle className="w-5 h-5 text-blue-600" />
+                        <span className="font-medium text-blue-900">توضیحات سیستم</span>
+                      </div>
+                      <p className="text-blue-700 text-sm">
+                        هنگامی که مشتری درخواست خرید محصولی می‌دهد، بر اساس دسته‌بندی محصول، ایمیل به آدرس مخصوص همان دسته‌بندی ارسال خواهد شد.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Category Email Assignment Grid */}
+                      <div className="grid gap-4">
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium mb-3 flex items-center gap-2">
+                            <Mail className="w-4 h-4" />
+                            تخصیص ایمیل دسته‌بندی‌ها
+                          </h4>
+                          <div className="space-y-3">
+                            {Array.isArray(categoryAssignments) && categoryAssignments.map((assignment: any) => (
+                              <div key={assignment.categoryKey} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">
+                                    {assignment.categoryName}
+                                  </Label>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {assignment.categoryKey}
+                                  </Badge>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-sm">آدرس ایمیل تخصیص یافته</Label>
+                                  <Input 
+                                    value={assignmentForm[assignment.categoryKey] || assignment.assignedEmail || ''}
+                                    onChange={(e) => setAssignmentForm({
+                                      ...assignmentForm,
+                                      [assignment.categoryKey]: e.target.value
+                                    })}
+                                    placeholder={`${assignment.categoryKey}@momtazchem.com`}
+                                    className="text-sm"
+                                  />
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => {
+                                    if (assignmentForm[assignment.categoryKey]) {
+                                      saveCategoryAssignmentMutation.mutate({
+                                        categoryKey: assignment.categoryKey,
+                                        assignedEmail: assignmentForm[assignment.categoryKey]
+                                      });
+                                    }
+                                  }}
+                                  disabled={!assignmentForm[assignment.categoryKey] || saveCategoryAssignmentMutation.isPending}
+                                >
+                                  <Check className="w-4 h-4" />
+                                  Save
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Statistics and Info */}
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <span className="font-medium text-green-900">وضعیت سیستم</span>
+                        </div>
+                        <p className="text-green-700 text-sm">
+                          تنظیمات تخصیص ایمیل فعال است. درخواست‌های خرید بر اساس دسته‌بندی محصول به آدرس ایمیل مربوطه ارسال می‌شود.
+                        </p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

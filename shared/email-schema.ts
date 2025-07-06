@@ -45,6 +45,17 @@ export const emailRecipients = pgTable("email_recipients", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Category Email Assignment Table - maps product categories to specific email addresses
+export const categoryEmailAssignments = pgTable("category_email_assignments", {
+  id: serial("id").primaryKey(),
+  categoryKey: text("category_key").notNull().unique(), // fuel-additives, water-treatment, etc.
+  categoryName: text("category_name").notNull(), // Persian name for display
+  assignedEmail: text("assigned_email").notNull(), // Email address for this category
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Email Templates Table
 export const emailTemplates = pgTable("email_templates", {
   id: serial("id").primaryKey(),
@@ -148,6 +159,12 @@ export const insertCustomerCommunicationSchema = createInsertSchema(customerComm
   updatedAt: true,
 });
 
+export const insertCategoryEmailAssignmentSchema = createInsertSchema(categoryEmailAssignments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Validation schemas with additional rules
 export const smtpConfigSchema = z.object({
   host: z.string().min(1, "SMTP host is required"),
@@ -165,3 +182,7 @@ export const emailRecipientConfigSchema = z.object({
   isPrimary: z.boolean().default(false),
   receiveTypes: z.array(z.string()).min(1, "At least one receive type required"),
 });
+
+// Additional Export types for new table
+export type CategoryEmailAssignment = typeof categoryEmailAssignments.$inferSelect;
+export type InsertCategoryEmailAssignment = z.infer<typeof insertCategoryEmailAssignmentSchema>;

@@ -22,7 +22,7 @@ import { walletStorage } from "./wallet-storage";
 import { requireDepartment, attachUserDepartments } from "./department-auth";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests } from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
-import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients } from "@shared/email-schema";
+import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients, categoryEmailAssignments, insertCategoryEmailAssignmentSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders, shopProducts } from "@shared/shop-schema";
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
@@ -9031,6 +9031,79 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       res.status(500).json({ 
         success: false, 
         message: 'Error fetching email routing statistics' 
+      });
+    }
+  });
+
+  // Get category email assignments
+  app.get("/api/admin/email/category-assignments", requireAuth, async (req, res) => {
+    try {
+      const assignments = await db
+        .select()
+        .from(categoryEmailAssignments)
+        .orderBy(categoryEmailAssignments.categoryKey);
+
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching category email assignments:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch category email assignments"
+      });
+    }
+  });
+
+  // Save/update category email assignment
+  app.post("/api/admin/email/category-assignments", requireAuth, async (req, res) => {
+    try {
+      const { categoryKey, categoryName, assignedEmail } = req.body;
+
+      if (!categoryKey || !assignedEmail) {
+        return res.status(400).json({
+          success: false,
+          message: "Category key and assigned email are required"
+        });
+      }
+
+      // Check if assignment already exists
+      const existing = await db
+        .select()
+        .from(categoryEmailAssignments)
+        .where(eq(categoryEmailAssignments.categoryKey, categoryKey))
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing assignment
+        await db
+          .update(categoryEmailAssignments)
+          .set({
+            categoryName: categoryName || existing[0].categoryName,
+            assignedEmail,
+            updatedAt: new Date()
+          })
+          .where(eq(categoryEmailAssignments.categoryKey, categoryKey));
+      } else {
+        // Create new assignment with default category name
+        await db
+          .insert(categoryEmailAssignments)
+          .values({
+            categoryKey,
+            categoryName: categoryName || categoryKey,
+            assignedEmail,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+      }
+
+      res.json({
+        success: true,
+        message: "Category email assignment updated successfully"
+      });
+    } catch (error) {
+      console.error("Error saving category email assignment:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to save category email assignment"
       });
     }
   });
