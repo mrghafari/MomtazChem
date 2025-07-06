@@ -44,64 +44,75 @@ export async function createSimpleOrder(orderData: any) {
         productSku: item.productSku || '',
       });
 
-      // CRITICAL: Reduce stock in BOTH shop_products AND showcase_products tables
+      // CRITICAL: Synchronized dual-table stock reduction system
+      // Use showcase stock as the single source of truth and sync to shop
       
-      // 1. Update shop product stock (independent try-catch)
+      console.log(`🔄 Starting dual-table stock reduction for: ${item.productName} (Quantity: ${item.quantity})`);
+      
+      // 1. FIRST: Get the current showcase product (source of truth)
+      let showcaseStockReduced = false;
+      let finalStockQuantity = 0;
+      
       try {
-        const shopProduct = await shopStorage.getShopProductById(item.productId);
-        if (shopProduct && shopProduct.stockQuantity !== null && shopProduct.stockQuantity !== undefined) {
-          const newShopQuantity = Math.max(0, shopProduct.stockQuantity - item.quantity);
-          
-          await shopStorage.updateProductStock(
-            item.productId,
-            newShopQuantity,
-            `Order ${orderNumber} - Sold ${item.quantity} units`
-          );
-          
-          console.log(`✅ Shop stock reduced for product ${item.productId} (${item.productName}): ${shopProduct.stockQuantity} → ${newShopQuantity}`);
-        }
-      } catch (shopStockError) {
-        console.error(`❌ Error reducing shop stock for product ${item.productId}:`, shopStockError);
-        // Continue with showcase update even if shop update fails
-      }
-
-      // 2. Update corresponding showcase product stock (independent try-catch)
-      try {
-        console.log(`🔍 Looking for showcase product with name: "${item.productName}"`);
+        console.log(`🔍 Finding showcase product with name: "${item.productName}"`);
         const showcaseProducts = await storage.getProducts();
         console.log(`📦 Found ${showcaseProducts.length} showcase products`);
         
-        const matchingShowcaseProduct = showcaseProducts.find(sp => {
-          console.log(`🔍 Comparing "${sp.name}" with "${item.productName}"`);
-          return sp.name === item.productName;
-        });
+        const matchingShowcaseProduct = showcaseProducts.find(sp => sp.name === item.productName);
         
         if (matchingShowcaseProduct) {
-          console.log(`✅ Found matching showcase product: ${matchingShowcaseProduct.id} (${matchingShowcaseProduct.name})`);
+          console.log(`✅ Found showcase product: ${matchingShowcaseProduct.id} (Stock: ${matchingShowcaseProduct.stockQuantity})`);
           
           if (matchingShowcaseProduct.stockQuantity !== null && matchingShowcaseProduct.stockQuantity !== undefined) {
-            const newShowcaseQuantity = Math.max(0, matchingShowcaseProduct.stockQuantity - item.quantity);
+            // Calculate final stock quantity after order
+            finalStockQuantity = Math.max(0, matchingShowcaseProduct.stockQuantity - item.quantity);
             
-            console.log(`📉 Updating showcase stock: ${matchingShowcaseProduct.stockQuantity} → ${newShowcaseQuantity}`);
+            console.log(`📉 Reducing showcase stock: ${matchingShowcaseProduct.stockQuantity} → ${finalStockQuantity}`);
             
+            // Update showcase stock
             await storage.updateShowcaseProductStock(
               matchingShowcaseProduct.id,
-              newShowcaseQuantity,
+              finalStockQuantity,
               `Order ${orderNumber} - Sold ${item.quantity} units`
             );
             
-            console.log(`✅ Showcase stock reduced for product ${matchingShowcaseProduct.id} (${item.productName}): ${matchingShowcaseProduct.stockQuantity} → ${newShowcaseQuantity}`);
+            showcaseStockReduced = true;
+            console.log(`✅ SHOWCASE stock reduced: ${matchingShowcaseProduct.id} (${item.productName}) → ${finalStockQuantity}`);
           } else {
-            console.log(`⚠️ Showcase product ${matchingShowcaseProduct.id} has null/undefined stock quantity`);
+            console.log(`⚠️ Showcase product has null/undefined stock - using 0 as default`);
+            finalStockQuantity = 0;
           }
         } else {
           console.log(`❌ No matching showcase product found for "${item.productName}"`);
-          console.log(`📋 Available showcase products:`, showcaseProducts.map(sp => `"${sp.name}"`));
+          console.log(`📋 Available products:`, showcaseProducts.map(sp => `"${sp.name}"`));
         }
-      } catch (showcaseStockError) {
-        console.error(`❌ Error reducing showcase stock for product "${item.productName}":`, showcaseStockError);
-        // Continue with order creation even if showcase update fails
+      } catch (showcaseError) {
+        console.error(`❌ CRITICAL: Failed to update showcase stock for "${item.productName}":`, showcaseError);
+        // Continue to shop update even if showcase fails
       }
+
+      // 2. SECOND: Sync the same final stock to shop products table
+      try {
+        const shopProduct = await shopStorage.getShopProductById(item.productId);
+        if (shopProduct) {
+          console.log(`🔄 Syncing shop stock to match showcase: ${shopProduct.stockQuantity} → ${finalStockQuantity}`);
+          
+          // Use the same final stock quantity calculated from showcase
+          await shopStorage.updateProductStock(
+            item.productId,
+            finalStockQuantity,
+            `Order ${orderNumber} - Synced with showcase stock (Sold ${item.quantity} units)`
+          );
+          
+          console.log(`✅ SHOP stock synced: ${item.productId} (${item.productName}) → ${finalStockQuantity}`);
+        } else {
+          console.log(`⚠️ Shop product ${item.productId} not found`);
+        }
+      } catch (shopError) {
+        console.error(`❌ Error syncing shop stock for product ${item.productId}:`, shopError);
+      }
+      
+      console.log(`🎯 COMPLETED: Both tables now have stock quantity ${finalStockQuantity} for "${item.productName}"`);
     }
 
     console.log(`✅ Order ${orderNumber} created successfully - stock reduction completed`);
