@@ -342,9 +342,11 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
         console.error("✗ Failed to trigger inventory refresh:", error);
       }
       
-      // Invalidate specific shop queries to fetch fresh inventory data
+      // Invalidate all product-related queries to fetch fresh inventory data
       queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/shop/search"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] }); // Admin products page
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/products"] });
       
       onOrderComplete();
       toast({
