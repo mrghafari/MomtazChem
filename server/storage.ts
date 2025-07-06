@@ -161,7 +161,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProductsByCategory(category: string): Promise<ShowcaseProduct[]> {
-    return await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.category, category));
+    // Map URL-friendly category names to database category names
+    const categoryMap: { [key: string]: string } = {
+      'fuel-additives': 'Fuel Additives',
+      'water-treatment': 'Water Treatment',
+      'paint-solvents': 'Paint & Solvents',
+      'agricultural-fertilizers': 'Agricultural Fertilizers',
+      'industrial-chemicals': 'Industrial Chemicals',
+      'technical-equipment': 'Technical Equipment',
+      'commercial-goods': 'Commercial Goods'
+    };
+    
+    // Use mapped category name or original if no mapping exists
+    const dbCategory = categoryMap[category] || category;
+    
+    return await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.category, dbCategory));
   }
 
   async updateProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
