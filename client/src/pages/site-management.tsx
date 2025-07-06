@@ -25,10 +25,10 @@ export default function SiteManagement() {
   // Initial button configuration
   const getInitialButtons = (): QuickActionButton[] => [
     {
-      id: "sync-shop",
-      label: "Force Inventory Sync",
-      icon: RefreshCw,
-      onClick: () => forceInventorySyncMutation.mutate(),
+      id: "unified-inventory",
+      label: "Unified Inventory",
+      icon: Package,
+      onClick: () => setLocation("/admin/unified-inventory"),
       className: "border-green-300 text-green-600 hover:bg-green-50"
     },
     {
@@ -275,26 +275,7 @@ export default function SiteManagement() {
     },
   });
 
-  // Mutation for force inventory synchronization
-  const forceInventorySyncMutation = useMutation({
-    mutationFn: () => apiRequest("/api/inventory/sync/force", "POST"),
-    onSuccess: () => {
-      toast({ 
-        title: "✅ Inventory Sync Complete", 
-        description: "All inventory quantities synchronized successfully between showcase and shop",
-        duration: 5000
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
-    },
-    onError: () => {
-      toast({ 
-        title: "❌ Inventory Sync Failed", 
-        description: "Unable to synchronize inventory quantities", 
-        variant: "destructive" 
-      });
-    },
-  });
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

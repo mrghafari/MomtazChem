@@ -3146,36 +3146,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           productSku: item.productSku || '',
         });
 
-        // Update product stock
+        // Update product stock using unified inventory manager
         try {
-          const product = await shopStorage.getShopProductById(item.productId);
-          if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
-            const currentStock = product.stockQuantity;
-            const newQuantity = Math.max(0, currentStock - item.quantity);
-            console.log(`🛒 STOCK UPDATE - Product ${product.name} (ID: ${item.productId})`);
-            console.log(`   Current Stock: ${currentStock}`);
-            console.log(`   Quantity Sold: ${item.quantity}`);
-            console.log(`   New Stock: ${newQuantity}`);
-            
-            await shopStorage.updateProductStock(
-              item.productId,
-              newQuantity,
-              `Order ${orderNumber} - Sold ${item.quantity} units`
-            );
-            
-            // Auto-sync inventory from shop back to showcase using new sync manager
-            try {
-              console.log(`🔄 Starting sync to showcase for product ID: ${item.productId}`);
-              const { InventorySyncManager } = await import('./inventory-sync-manager');
-              await InventorySyncManager.syncShopToShowcase(item.productId);
-              console.log(`✅ Successfully synced inventory to showcase for product ID: ${item.productId}`);
-            } catch (syncError) {
-              console.error(`❌ Error syncing to showcase for product ${item.productId}:`, syncError);
-            }
-            
-            console.log(`✅ Stock updated successfully for product ${item.productId}`);
+          console.log(`🛒 UNIFIED STOCK UPDATE - Product ${item.productName} (ID: ${item.productId})`);
+          
+          // Use unified inventory manager for single source of truth
+          const { UnifiedInventoryManager } = await import('./unified-inventory-manager');
+          const success = await UnifiedInventoryManager.reduceInventoryForOrder([{
+            productName: item.productName,
+            quantity: item.quantity
+          }]);
+          
+          if (success) {
+            console.log(`✅ Stock updated successfully using unified system for product ${item.productId}`);
           } else {
-            console.log(`⚠️ No stock quantity available for product ${item.productId}`);
+            console.log(`⚠️ Failed to update stock for product ${item.productId}`);
           }
         } catch (stockError) {
           console.error(`Error updating stock for product ${item.productId}:`, stockError);
@@ -4545,6 +4530,36 @@ ${procedure.content}
     } catch (error) {
       console.error("Error in force sync:", error);
       res.status(500).json({ success: false, message: "Failed to sync inventories" });
+    }
+  });
+
+  // Unified inventory endpoint - single source of truth
+  app.get("/api/inventory/unified/products", async (req, res) => {
+    try {
+      const { UnifiedInventoryManager } = await import('./unified-inventory-manager');
+      const products = await UnifiedInventoryManager.getAllProductsWithInventory();
+      res.json(products);
+    } catch (error) {
+      console.error("Error getting unified products:", error);
+      res.status(500).json({ success: false, message: "Failed to get unified products" });
+    }
+  });
+
+  // Get specific product inventory
+  app.get("/api/products/:name/inventory", async (req, res) => {
+    try {
+      const productName = decodeURIComponent(req.params.name);
+      const { UnifiedInventoryManager } = await import('./unified-inventory-manager');
+      const inventory = await UnifiedInventoryManager.getProductInventory(productName);
+      
+      if (!inventory) {
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+      
+      res.json({ success: true, inventory });
+    } catch (error) {
+      console.error("Error getting product inventory:", error);
+      res.status(500).json({ success: false, message: "Failed to get product inventory" });
     }
   });
 
