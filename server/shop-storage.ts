@@ -30,6 +30,7 @@ import {
   type SalesReport,
   type InsertSalesReport
 } from "@shared/shop-schema";
+import { showcaseProducts } from "@shared/showcase-schema";
 import { shopDb } from "./shop-db";
 import { eq, desc, and, gte, lte, sql, count, or, like, ilike, asc } from "drizzle-orm";
 
@@ -484,7 +485,15 @@ export class ShopStorage implements IShopStorage {
       .from(discountSettings)
       .where(eq(discountSettings.isActive, true));
 
-    // Add discount information to each product
+    // ===== CRITICAL: Fetch stock quantities from showcase_products =====
+    // Get all showcase products for stock synchronization
+    const showcaseProductsData = await shopDb
+      .select()
+      .from(showcaseProducts);
+    
+    console.log(`🔍 Found ${showcaseProductsData.length} showcase products for stock sync`);
+
+    // Add discount information and SHOWCASE STOCK to each product
     const productsWithDiscounts = products.map(product => {
       const applicableDiscounts = activeDiscounts.filter(discount => {
         // Check if discount applies to all products or specific products
@@ -509,8 +518,20 @@ export class ShopStorage implements IShopStorage {
         }))
         .sort((a, b) => a.minQty - b.minQty);
 
+      // ===== FIND MATCHING SHOWCASE PRODUCT FOR STOCK =====
+      const matchingShowcaseProduct = showcaseProductsData.find(sp => sp.name === product.name);
+      
+      let actualStockQuantity = product.stockQuantity;
+      if (matchingShowcaseProduct) {
+        actualStockQuantity = matchingShowcaseProduct.stockQuantity;
+        console.log(`📦 Stock sync: ${product.name} - showcase: ${matchingShowcaseProduct.stockQuantity}, shop: ${product.stockQuantity}`);
+      } else {
+        console.log(`⚠️ No showcase match found for: ${product.name}`);
+      }
+
       return {
         ...product,
+        stockQuantity: actualStockQuantity, // Use showcase stock quantity
         quantityDiscounts
       };
     });
