@@ -21,6 +21,9 @@ export interface IStorage {
   syncProductToShop(showcaseProduct: ShowcaseProduct): Promise<void>;
   syncAllProductsToShop(): Promise<void>;
   
+  // Stock management for showcase products
+  updateShowcaseProductStock(productId: number, newQuantity: number, reason?: string): Promise<void>;
+  
   // User management
   createUser(user: InsertUser): Promise<User>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -320,6 +323,24 @@ export class DatabaseStorage implements IStorage {
       }
     } catch (error) {
       console.error('Error syncing stock from shop to showcase:', error);
+    }
+  }
+
+  // Update showcase product stock directly
+  async updateShowcaseProductStock(productId: number, newQuantity: number, reason?: string): Promise<void> {
+    try {
+      await showcaseDb
+        .update(showcaseProducts)
+        .set({ 
+          stockQuantity: newQuantity,
+          updatedAt: new Date()
+        })
+        .where(eq(showcaseProducts.id, productId));
+      
+      console.log(`✅ Showcase product stock updated: Product ${productId} → ${newQuantity} units ${reason ? `(${reason})` : ''}`);
+    } catch (error) {
+      console.error('❌ Error updating showcase product stock:', error);
+      throw error;
     }
   }
 

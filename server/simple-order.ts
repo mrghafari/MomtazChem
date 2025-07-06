@@ -1,6 +1,7 @@
 // Simple order creation without CRM dependencies
 import { shopStorage } from './shop-storage.js';
 import { customerStorage } from './customer-storage.js';
+import { storage } from './storage.js';
 
 export async function createSimpleOrder(orderData: any) {
   try {
@@ -43,21 +44,38 @@ export async function createSimpleOrder(orderData: any) {
         productSku: item.productSku || '',
       });
 
-      // CRITICAL: Reduce stock in shop_products table
+      // CRITICAL: Reduce stock in BOTH shop_products AND showcase_products tables
       try {
-        const product = await shopStorage.getShopProductById(item.productId);
-        if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
-          const newQuantity = Math.max(0, product.stockQuantity - item.quantity);
+        // 1. Update shop product stock
+        const shopProduct = await shopStorage.getShopProductById(item.productId);
+        if (shopProduct && shopProduct.stockQuantity !== null && shopProduct.stockQuantity !== undefined) {
+          const newShopQuantity = Math.max(0, shopProduct.stockQuantity - item.quantity);
           
-          // Update shop product stock immediately
           await shopStorage.updateProductStock(
             item.productId,
-            newQuantity,
+            newShopQuantity,
             `Order ${orderNumber} - Sold ${item.quantity} units`
           );
           
-          console.log(`✅ Stock reduced for product ${item.productId} (${item.productName}): ${product.stockQuantity} → ${newQuantity}`);
+          console.log(`✅ Shop stock reduced for product ${item.productId} (${item.productName}): ${shopProduct.stockQuantity} → ${newShopQuantity}`);
         }
+
+        // 2. Update corresponding showcase product stock
+        const showcaseProducts = await storage.getProducts();
+        const matchingShowcaseProduct = showcaseProducts.find(sp => sp.name === item.productName);
+        
+        if (matchingShowcaseProduct && matchingShowcaseProduct.stockQuantity !== null && matchingShowcaseProduct.stockQuantity !== undefined) {
+          const newShowcaseQuantity = Math.max(0, matchingShowcaseProduct.stockQuantity - item.quantity);
+          
+          await storage.updateShowcaseProductStock(
+            matchingShowcaseProduct.id,
+            newShowcaseQuantity,
+            `Order ${orderNumber} - Sold ${item.quantity} units`
+          );
+          
+          console.log(`✅ Showcase stock reduced for product ${matchingShowcaseProduct.id} (${item.productName}): ${matchingShowcaseProduct.stockQuantity} → ${newShowcaseQuantity}`);
+        }
+        
       } catch (stockError) {
         console.error(`❌ Error reducing stock for product ${item.productId}:`, stockError);
         // Continue with order creation even if stock update fails
