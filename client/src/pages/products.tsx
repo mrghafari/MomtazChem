@@ -155,13 +155,15 @@ export default function ProductsPage() {
   ];
 
   const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/shop/products"],
+    staleTime: 0, // Always fetch fresh data for inventory
+    gcTime: 0, // Don't cache at all for inventory data
   });
 
   const { mutate: createProduct } = useMutation({
     mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
       setDialogOpen(false);
       setImagePreview(null);
@@ -186,9 +188,9 @@ export default function ProductsPage() {
       apiRequest(`/api/products/${id}`, "PUT", data),
     onSuccess: () => {
       // Clear and refresh data completely
-      queryClient.removeQueries({ queryKey: ["/api/products"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.refetchQueries({ queryKey: ["/api/products"] });
+      queryClient.removeQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.refetchQueries({ queryKey: ["/api/shop/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
       
       // Keep the form values to show updated data
@@ -217,7 +219,7 @@ export default function ProductsPage() {
   const { mutate: deleteProduct } = useMutation({
     mutationFn: (id: number) => apiRequest(`/api/products/${id}`, "DELETE"),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
       toast({
         title: "Success",
