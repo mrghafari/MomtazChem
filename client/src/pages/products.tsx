@@ -14,14 +14,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
+import { insertShopProductSchema, type ShopProduct, type InsertShopProduct } from "@shared/shop-schema";
 import { z } from "zod";
 import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat } from "lucide-react";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
 
 // Custom form schema that handles numeric inputs properly
-const formSchema = insertShowcaseProductSchema.extend({
+const formSchema = insertShopProductSchema.extend({
   unitPrice: z.coerce.number().min(0),
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
@@ -110,7 +110,7 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ShopProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [catalogPreview, setCatalogPreview] = useState<string | null>(null);
@@ -154,14 +154,14 @@ export default function ProductsPage() {
     { value: "commercial-goods", label: "Commercial Goods", icon: <Package className="w-4 h-4" /> },
   ];
 
-  const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
+  const { data: products, isLoading } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
     staleTime: 0, // Always fetch fresh data for inventory
     gcTime: 0, // Don't cache at all for inventory data
   });
 
   const { mutate: createProduct } = useMutation({
-    mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
+    mutationFn: (data: InsertShopProduct) => apiRequest("/api/shop/products", "POST", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
@@ -184,8 +184,8 @@ export default function ProductsPage() {
   });
 
   const { mutate: updateProduct } = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
-      apiRequest(`/api/products/${id}`, "PUT", data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<InsertShopProduct> }) =>
+      apiRequest(`/api/shop/products/${id}`, "PUT", data),
     onSuccess: () => {
       // Clear and refresh data completely
       queryClient.removeQueries({ queryKey: ["/api/shop/products"] });
@@ -311,7 +311,7 @@ export default function ProductsPage() {
     },
   });
 
-  const onSubmit = (data: InsertShowcaseProduct) => {
+  const onSubmit = (data: InsertShopProduct) => {
     // Convert numeric fields to strings for API compatibility
     const processedData = {
       ...data,
@@ -428,7 +428,7 @@ export default function ProductsPage() {
     setDialogOpen(true);
   };
 
-  const openEditDialog = (product: ShowcaseProduct) => {
+  const openEditDialog = (product: ShopProduct) => {
     setEditingProduct(product);
     setImagePreview(product.imageUrl || null);
     setCatalogPreview(product.pdfCatalogUrl || null);
@@ -456,7 +456,7 @@ export default function ProductsPage() {
   };
 
   // Filter products based on category and search
-  const filteredProducts = (products || []).filter((product: ShowcaseProduct) => {
+  const filteredProducts = (products || []).filter((product: ShopProduct) => {
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = !searchQuery || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -744,7 +744,7 @@ export default function ProductsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product: ShowcaseProduct) => (
+              {filteredProducts.map((product: ShopProduct) => (
                 <Card key={`${product.id}-${refreshKey}`} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
