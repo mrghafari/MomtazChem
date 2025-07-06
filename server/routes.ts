@@ -14090,39 +14090,165 @@ momtazchem.com
   });
 
   // Customer Communication API Routes
-  
+  const { customerCommunicationStorage } = await import("./customer-communication-storage");
+
   // Send message to customer
   app.post("/api/customer-communications/send", requireAuth, async (req: Request, res: Response) => {
     try {
       const { categoryId, customerEmail, customerName, subject, message, messageType = "outbound" } = req.body;
+      const adminId = req.session.adminId;
       
       if (!categoryId || !customerEmail || !subject || !message) {
         return res.status(400).json({
           success: false,
-          message: "Missing required fields"
+          message: "تمام فیلدهای ضروری باید پر شوند"
         });
       }
 
       const communication = await customerCommunicationStorage.sendMessage({
         categoryId,
         customerEmail,
-        customerName,
+        customerName: customerName || "مشتری گرامی",
         subject,
         message,
         messageType,
-        sentBy: req.session.adminId
+        sentBy: adminId,
+        status: "sent"
       });
 
       res.json({
         success: true,
         data: communication,
-        message: "Message sent successfully"
+        message: "پیام با موفقیت ارسال شد"
       });
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error sending customer communication:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to send message"
+        message: "خطا در ارسال پیام"
+      });
+    }
+  });
+
+  // Smart reply suggestion based on product category
+  app.post("/api/customer-communications/smart-reply", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { customerMessage, productCategory, customerName } = req.body;
+      
+      if (!customerMessage || !productCategory) {
+        return res.status(400).json({
+          success: false,
+          message: "پیام مشتری و دسته‌بندی محصول ضروری است"
+        });
+      }
+
+      // Generate smart reply based on category
+      const categoryResponses: Record<string, string> = {
+        'fuel-additives': `سلام ${customerName || "مشتری گرامی"}،\n\nاز تماس شما برای افزودنی‌های سوخت مومتاز کم متشکریم.\n\nمحصولات ما شامل:\n- افزودنی‌های بنزین\n- افزودنی‌های گازوئیل\n- پاک‌کننده‌های سیستم سوخت\n\nبا تشکر,\nتیم فروش مومتاز کم`,
+        'water-treatment': `سلام ${customerName || "مشتری گرامی"}،\n\nاز علاقه شما به محصولات تصفیه آب سپاسگزاریم.\n\nمحصولات تصفیه آب ما:\n- مواد شیمیایی تصفیه\n- کلرین و فلوکولانت\n- ضدعفونی کننده‌ها\n\nبا احترام,\nتیم فنی مومتاز کم`,
+        'paint-solvents': `سلام ${customerName || "مشتری گرامی"}،\n\nاز درخواست شما برای رنگ و حلال‌ها تشکر می‌کنیم.\n\nمحصولات ما:\n- رنگ‌های صنعتی\n- حلال‌های مختلف\n- مواد نازک‌کننده\n\nبا تشکر,\nتیم فروش رنگ مومتاز کم`,
+        'agricultural-products': `سلام ${customerName || "مشتری گرامی"}،\n\nاز تماس شما برای محصولات کشاورزی خرسندیم.\n\nمحصولات کشاورزی:\n- کودهای شیمیایی\n- سموم کشاورزی\n- تنظیم‌کننده‌های رشد\n\nبا احترام,\nتیم کشاورزی مومتاز کم`,
+        'default': `سلام ${customerName || "مشتری گرامی"}،\n\nاز تماس شما با مومتاز کم متشکریم.\n\nما آماده ارائه بهترین محصولات شیمیایی هستیم.\n\nبا تشکر,\nتیم پشتیبانی مومتاز کم`
+      };
+
+      const smartReply = categoryResponses[productCategory] || categoryResponses.default;
+
+      res.json({
+        success: true,
+        data: {
+          suggestedReply: smartReply,
+          category: productCategory,
+          customerMessage
+        }
+      });
+    } catch (error) {
+      console.error("Error generating smart reply:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تولید پاسخ هوشمند"
+      });
+    }
+  });
+
+  // Get recent communications
+  app.get("/api/customer-communications/recent", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const communications = await customerCommunicationStorage.getRecentCommunications(limit);
+
+      res.json({
+        success: true,
+        data: communications
+      });
+    } catch (error) {
+      console.error("Error fetching recent communications:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت ارتباطات اخیر"
+      });
+    }
+  });
+
+  // Get communication statistics
+  app.get("/api/customer-communications/stats", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const stats = await customerCommunicationStorage.getCommunicationStats(categoryId);
+
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error("Error fetching communication stats:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت آمار ارتباطات"
+      });
+    }
+  });
+
+  // Search communications
+  app.get("/api/customer-communications/search", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { q } = req.query;
+      if (!q) {
+        return res.status(400).json({
+          success: false,
+          message: "پارامتر جستجو ضروری است"
+        });
+      }
+
+      const communications = await customerCommunicationStorage.searchCommunications(q as string);
+
+      res.json({
+        success: true,
+        data: communications
+      });
+    } catch (error) {
+      console.error("Error searching communications:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در جستجو ارتباطات"
+      });
+    }
+  });
+
+  // Mark communication as read
+  app.patch("/api/customer-communications/:id/read", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      await customerCommunicationStorage.markAsRead(messageId);
+
+      res.json({
+        success: true,
+        message: "پیام به عنوان خوانده شده علامت‌گذاری شد"
+      });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در علامت‌گذاری پیام"
       });
     }
   });

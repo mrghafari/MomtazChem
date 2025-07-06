@@ -73,8 +73,9 @@ export default function CustomerCommunications() {
   const queryClient = useQueryClient();
 
   // Fetch email categories
-  const { data: categories = [] } = useQuery<EmailCategory[]>({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<EmailCategory[]>({
     queryKey: ["/api/admin/email/categories"],
+    retry: false,
   });
 
   // Fetch communications by category
@@ -112,6 +113,9 @@ export default function CustomerCommunications() {
     }) => {
       return await apiRequest("/api/customer-communications/send", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
     },
@@ -136,11 +140,18 @@ export default function CustomerCommunications() {
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: number) => {
       return await apiRequest(`/api/customer-communications/${messageId}/read`, {
-        method: "PUT",
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/customer-communications"] });
+      toast({
+        title: "بروزرسانی موفق",
+        description: "پیام به عنوان خوانده شده علامت‌گذاری شد",
+      });
     },
   });
 
@@ -308,8 +319,11 @@ export default function CustomerCommunications() {
         </TabsList>
 
         <TabsContent value="categories" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categories.map((category) => (
+          {categoriesLoading ? (
+            <div className="text-center py-8">در حال بارگذاری دسته‌بندی‌ها...</div>
+          ) : categories && categories.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categories.map((category) => (
               <Card 
                 key={category.id} 
                 className={`cursor-pointer transition-all hover:shadow-md ${
@@ -330,8 +344,13 @@ export default function CustomerCommunications() {
                   </Badge>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              هیچ دسته‌بندی‌ای پیدا نشد
+            </div>
+          )}
 
           {selectedCategory && (
             <Card>
@@ -416,7 +435,8 @@ export default function CustomerCommunications() {
             <CardContent>
               <ScrollArea className="h-96">
                 <div className="space-y-4">
-                  {recentCommunications.map((comm) => (
+                  {recentCommunications && recentCommunications.length > 0 ? (
+                    recentCommunications.map((comm) => (
                     <div key={comm.id} className="border rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div>
@@ -435,7 +455,12 @@ export default function CustomerCommunications() {
                       </div>
                       <p className="text-gray-700 text-sm">{comm.message.substring(0, 150)}...</p>
                     </div>
-                  ))}
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      هیچ ارتباط اخیری وجود ندارد
+                    </div>
+                  )}
                 </div>
               </ScrollArea>
             </CardContent>
@@ -464,26 +489,32 @@ export default function CustomerCommunications() {
               {searchTerm.length > 2 && (
                 <ScrollArea className="h-96">
                   <div className="space-y-4">
-                    {searchResults.map((comm) => (
-                      <div key={comm.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h4 className="font-semibold">{comm.subject}</h4>
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                              <User className="h-4 w-4" />
-                              {comm.customerName || comm.customerEmail}
-                              <Calendar className="h-4 w-4 ml-4" />
-                              {new Date(comm.createdAt).toLocaleDateString("fa-IR")}
+                    {searchResults && searchResults.length > 0 ? (
+                      searchResults.map((comm) => (
+                        <div key={comm.id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h4 className="font-semibold">{comm.subject}</h4>
+                              <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                                <User className="h-4 w-4" />
+                                {comm.customerName || comm.customerEmail}
+                                <Calendar className="h-4 w-4 ml-4" />
+                                {new Date(comm.createdAt).toLocaleDateString("fa-IR")}
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              {getStatusBadge(comm.status)}
+                              {getMessageTypeBadge(comm.messageType)}
                             </div>
                           </div>
-                          <div className="flex gap-2">
-                            {getStatusBadge(comm.status)}
-                            {getMessageTypeBadge(comm.messageType)}
-                          </div>
+                          <p className="text-gray-700 text-sm">{comm.message.substring(0, 150)}...</p>
                         </div>
-                        <p className="text-gray-700 text-sm">{comm.message.substring(0, 150)}...</p>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        نتیجه‌ای یافت نشد
                       </div>
-                    ))}
+                    )}
                   </div>
                 </ScrollArea>
               )}
