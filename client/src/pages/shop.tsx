@@ -65,9 +65,11 @@ const Shop = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Advanced search query
+  // Advanced search query with proper caching
   const { data: searchResults, isLoading: productsLoading } = useQuery({
     queryKey: ['shopSearch', debouncedQuery, filters, currentPage],
+    staleTime: 0, // Always fetch fresh data for inventory
+    gcTime: 0, // Don't cache at all for inventory data
     queryFn: async () => {
       const params = new URLSearchParams({
         q: debouncedQuery,
@@ -94,7 +96,9 @@ const Shop = () => {
   // Fetch shop products (fallback)
   const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
-    enabled: !searchResults
+    enabled: !searchResults,
+    staleTime: 0, // Always fetch fresh data for inventory
+    gcTime: 0, // Don't cache at all for inventory data
   });
 
   // Get data from search results or fallback to regular products

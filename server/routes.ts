@@ -4188,6 +4188,13 @@ ${procedure.content}
   // Shop/E-commerce API endpoints - Inventory-based product management
   app.get("/api/shop/products", async (req, res) => {
     try {
+      // Disable caching for inventory data to ensure real-time stock updates
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
       const products = await shopStorage.getShopProducts();
       res.json(products);
     } catch (error) {
@@ -4277,6 +4284,13 @@ ${procedure.content}
   // Advanced shop product search
   app.get("/api/shop/search", async (req, res) => {
     try {
+      // Disable caching for real-time inventory search results
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
       const {
         q: query = '',
         category,
