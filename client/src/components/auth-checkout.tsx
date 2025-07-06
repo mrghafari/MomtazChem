@@ -342,13 +342,9 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
         console.error("✗ Failed to trigger inventory refresh:", error);
       }
       
-      // Clear all caches and force fresh data
-      queryClient.clear();
-      
-      // Reload page to ensure fresh data
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      // Invalidate specific shop queries to fetch fresh inventory data
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/search"] });
       
       onOrderComplete();
       toast({

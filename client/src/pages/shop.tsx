@@ -183,18 +183,17 @@ const Shop = () => {
     checkCustomerAuth();
   }, []);
 
-  // Initialize display stock when products are loaded and cart is ready
+  // Initialize display stock from actual database values (not affected by cart)
   useEffect(() => {
     if (currentProducts?.length > 0) {
       const initialDisplayStock: {[key: number]: number} = {};
       currentProducts.forEach(product => {
-        const productInCart = cart[product.id] || 0;
-        const availableStock = (product.stockQuantity || 0) - productInCart;
-        initialDisplayStock[product.id] = Math.max(0, availableStock);
+        // Show actual stock quantity from database, not reduced by cart items
+        initialDisplayStock[product.id] = product.stockQuantity || 0;
       });
       setDisplayStock(initialDisplayStock);
     }
-  }, [currentProducts, cart]);
+  }, [currentProducts]); // Removed cart dependency to prevent UI stock reduction
 
   // Force recalculation of display stock after order completion
   useEffect(() => {
@@ -419,8 +418,10 @@ const Shop = () => {
   };
 
   const setProductQuantity = (productId: number, quantity: number) => {
-    const maxQuantity = displayStock[productId] || 999;
-    const validQuantity = Math.max(1, Math.min(quantity, maxQuantity));
+    // Find the product to get actual stock quantity
+    const product = currentProducts.find(p => p.id === productId);
+    const actualStock = product?.stockQuantity || 999;
+    const validQuantity = Math.max(1, Math.min(quantity, actualStock));
     
     setProductQuantities(prev => ({
       ...prev,
@@ -443,13 +444,14 @@ const Shop = () => {
     }
 
     const currentQuantityInCart = cart[productId] || 0;
-    const currentDisplayStock = displayStock[productId] || 0;
+    const actualStock = product.stockQuantity || 0;
+    const totalRequestedQuantity = currentQuantityInCart + targetQuantity;
 
-    // Check if adding items would exceed displayed stock (real-time stock)
-    if (targetQuantity > currentDisplayStock) {
+    // Check if total cart quantity would exceed actual database stock
+    if (totalRequestedQuantity > actualStock) {
       toast({
         title: "موجودی ناکافی",
-        description: `تنها ${currentDisplayStock} عدد از این محصول موجود است`,
+        description: `تنها ${actualStock} عدد از این محصول موجود است`,
         variant: "destructive",
       });
       return;
@@ -457,17 +459,13 @@ const Shop = () => {
 
     const newCart = {
       ...cart,
-      [productId]: currentQuantityInCart + targetQuantity
+      [productId]: totalRequestedQuantity
     };
     setCart(newCart);
     saveCartToStorage(newCart);
 
-    // Update display stock by reducing the added quantity
-    const newDisplayStock = {
-      ...displayStock,
-      [productId]: currentDisplayStock - targetQuantity
-    };
-    setDisplayStock(newDisplayStock);
+    // DO NOT update displayStock here - it should only reflect actual database values
+    // Display stock will be updated only after successful order submission
 
     // Reset quantity for this product and show success message
     setProductQuantity(productId, 1);
@@ -479,7 +477,6 @@ const Shop = () => {
 
   const removeFromCart = (productId: number) => {
     const currentQuantityInCart = cart[productId] || 0;
-    const quantityToRemove = currentQuantityInCart > 1 ? 1 : currentQuantityInCart;
     
     const newCart = { ...cart };
     if (newCart[productId] > 1) {
@@ -490,13 +487,8 @@ const Shop = () => {
     setCart(newCart);
     saveCartToStorage(newCart);
 
-    // Return stock to display stock when removing from cart
-    const currentDisplayStock = displayStock[productId] || 0;
-    const newDisplayStock = {
-      ...displayStock,
-      [productId]: currentDisplayStock + quantityToRemove
-    };
-    setDisplayStock(newDisplayStock);
+    // DO NOT update displayStock - it should only reflect actual database values
+    // Display stock will be updated only after successful order submission
   };
 
   const getTotalItems = () => {
