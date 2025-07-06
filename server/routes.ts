@@ -2982,126 +2982,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create shop order and integrate with CRM
+  // Create shop order - FOCUS ON STOCK REDUCTION ONLY  
   app.post("/api/shop/orders", async (req, res) => {
     try {
       const customerId = (req.session as any)?.customerId;
-      const crmCustomerId = (req.session as any)?.crmCustomerId;
       const { items, customerInfo, totalAmount, notes, shippingMethod, paymentMethod } = req.body;
 
-      let finalCustomerInfo = customerInfo;
-      let finalCrmCustomerId = crmCustomerId;
-
-      // If user is not logged in, create or update CRM customer from order info
-      if (!customerId && customerInfo) {
-        const orderData = {
-          email: customerInfo.email,
-          firstName: customerInfo.firstName,
-          lastName: customerInfo.lastName,
-          company: customerInfo.company,
-          phone: customerInfo.phone,
-          country: customerInfo.country,
-          city: customerInfo.city,
-          address: customerInfo.address,
-          orderValue: totalAmount,
-        };
-
-        const crmCustomer = await crmStorage.createOrUpdateCustomerFromOrder(orderData);
-        finalCrmCustomerId = crmCustomer.id;
-        finalCustomerInfo = crmCustomer;
-      }
-
-      // Generate order number
-      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-      // Create order in customer orders table
-      const orderData = {
-        orderNumber,
-        customerId: customerId || null,
-        totalAmount: totalAmount.toString(),
-        status: 'pending' as const,
-        paymentMethod: paymentMethod || 'bank_transfer',
-        shippingAddress: {
-          address: finalCustomerInfo.address,
-          city: finalCustomerInfo.city,
-          country: finalCustomerInfo.country,
-        },
-        notes: notes || '',
-        ...(customerId ? {} : {
-          guestEmail: finalCustomerInfo.email,
-          guestName: `${finalCustomerInfo.firstName} ${finalCustomerInfo.lastName}`,
-        }),
-        // Store shipping method information
-        carrier: shippingMethod === 'standard' ? 'Standard Shipping (5-7 days)' : 
-                shippingMethod === 'express' ? 'Express Shipping (2-3 days)' : 
-                shippingMethod === 'overnight' ? 'Overnight Shipping' : 
-                'Standard Shipping',
-      };
-
-      const order = await customerStorage.createOrder(orderData);
-
-      // Create order items and reduce stock
-      for (const item of items) {
-        await customerStorage.createOrderItem({
-          orderId: order.id,
-          productId: item.productId,
-          productName: item.productName || 'Unknown Product',
-          quantity: item.quantity.toString(),
-          unitPrice: item.unitPrice.toString(),
-          totalPrice: (item.quantity * item.unitPrice).toString(),
-          productSku: item.productSku || '',
-        });
-
-        // CRITICAL: Reduce stock in shop_products table automatically
-        try {
-          const product = await shopStorage.getShopProductById(item.productId);
-          if (product && product.stockQuantity !== null && product.stockQuantity !== undefined) {
-            const newQuantity = Math.max(0, product.stockQuantity - item.quantity);
-            
-            // Update shop product stock immediately when order is placed
-            await shopStorage.updateProductStock(
-              item.productId,
-              newQuantity,
-              `Order ${orderNumber} - Sold ${item.quantity} units`
-            );
-            
-            console.log(`Stock reduced for product ${item.productId}: ${product.stockQuantity} → ${newQuantity}`);
-          }
-        } catch (stockError) {
-          console.error(`Error reducing stock for product ${item.productId}:`, stockError);
-          // Continue with order creation even if stock update fails
-        }
-      }
-
-      // Log order activity in CRM
-      if (finalCrmCustomerId) {
-        await crmStorage.logCustomerActivity({
-          customerId: finalCrmCustomerId,
-          activityType: 'order_placed',
-          description: `سفارش جدید به مبلغ $${totalAmount} ثبت شد`,
-          activityData: {
-            orderId: order.id,
-            totalAmount,
-            itemCount: items.length,
-            source: 'website',
-            orderDate: new Date().toISOString(),
-          },
-          relatedOrderId: order.id,
-        });
-
-        // Update customer metrics in CRM
-        await crmStorage.updateCustomerMetrics(finalCrmCustomerId);
-      }
+      // Import the simple order function
+      const { createSimpleOrder } = await import('./simple-order.js');
+      
+      // Create order using simple function
+      const result = await createSimpleOrder({
+        customerId,
+        items,
+        customerInfo,
+        totalAmount,
+        notes,
+        shippingMethod,
+        paymentMethod
+      });
 
       res.json({
         success: true,
         message: "سفارش با موفقیت ثبت شد",
-        order: {
-          id: order.id,
-          totalAmount: order.totalAmount,
-          status: order.status,
-          crmCustomerId: finalCrmCustomerId,
-        }
+        order: result.order
       });
 
     } catch (error) {
@@ -3112,6 +3016,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+
 
   // Create customer order (from BilingualPurchaseForm)
   app.post("/api/customers/orders", async (req, res) => {
