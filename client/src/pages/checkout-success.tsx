@@ -122,6 +122,16 @@ export default function CheckoutSuccess() {
     }
   }, [orderId, orderData, invoiceData]);
 
+  // Invalidate product cache when order is complete to show updated inventory
+  useEffect(() => {
+    if (orderId && orderData) {
+      // Clear product cache to show updated inventory quantities
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/unified/products"] });
+    }
+  }, [orderId, orderData, queryClient]);
+
   const handleRequestOfficial = () => {
     if (!selectedLanguage) {
       setShowLanguagePrompt(true);

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -173,7 +173,14 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
   const [orderNumber, setOrderNumber] = useState("");
   const [emailExists, setEmailExists] = useState(false);
   const [savedCartData, setSavedCartData] = useState<any>(null);
+  const [language] = useState<Language>('ar'); // Default language
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Create schemas based on current language
+  const loginSchema = createLoginSchema(language);
+  const registerSchema = createRegisterSchema(language);
+  const checkoutSchema = createCheckoutSchema(language);
 
   // Save cart data to preserve during authentication
   useEffect(() => {
@@ -326,6 +333,12 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
       setCurrentStep("complete");
       // Clear saved cart data
       localStorage.removeItem('pendingCart');
+      
+      // CRITICAL: Invalidate product cache to show updated inventory immediately
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/unified/products"] });
+      
       onOrderComplete();
       toast({
         title: "سفارش ثبت شد",
