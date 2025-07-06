@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, X, ChevronDown, Star, ShoppingCart, Eye } from 'lucide-react';
+import { Search, Filter, X, ChevronDown, Star, ShoppingCart, Eye, Package } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -456,6 +456,23 @@ export default function ShopSearch() {
                         </div>
                         <div className="text-xs text-gray-500">
                           SKU: {product.sku}
+                        </div>
+                      </div>
+
+                      {/* Stock Quantity Display */}
+                      <div className="flex items-center justify-between mb-3 p-2 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Package className="w-4 h-4 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-700">موجودی انبار:</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={`font-bold text-sm ${
+                            product.stockQuantity > 20 ? 'text-green-600' :
+                            product.stockQuantity > 5 ? 'text-orange-600' : 'text-red-600'
+                          }`}>
+                            {product.stockQuantity}
+                          </span>
+                          <span className="text-xs text-gray-500">عدد</span>
                         </div>
                       </div>
 
