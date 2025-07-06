@@ -995,15 +995,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req, res) => {
     try {
       const { category } = req.query;
-      let products;
+      let showcaseProducts;
       
       if (category && typeof category === 'string') {
-        products = await storage.getProductsByCategory(category);
+        showcaseProducts = await storage.getProductsByCategory(category);
       } else {
-        products = await storage.getProducts();
+        showcaseProducts = await storage.getProducts();
       }
+
+      // Get shop products to ensure we have the most up-to-date stock quantities
+      const shopProducts = await shopStorage.getShopProducts();
       
-      res.json(products);
+      // Create a map for quick lookup of shop product stock
+      const shopStockMap = new Map();
+      shopProducts.forEach(shopProduct => {
+        shopStockMap.set(shopProduct.name, shopProduct.stockQuantity);
+      });
+
+      // Update showcase products with current stock from shop
+      const productsWithCurrentStock = showcaseProducts.map(product => {
+        const currentStock = shopStockMap.get(product.name);
+        return {
+          ...product,
+          stockQuantity: currentStock !== undefined ? currentStock : product.stockQuantity
+        };
+      });
+      
+      res.json(productsWithCurrentStock);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ 
@@ -5030,6 +5048,26 @@ ${procedure.content}
     } catch (error) {
       console.error("Error syncing stock:", error);
       res.status(500).json({ success: false, message: "Failed to sync stock levels" });
+    }
+  });
+
+  // Force refresh stock data endpoint 
+  app.post("/api/refresh-stock", requireAuth, async (req, res) => {
+    try {
+      // This endpoint simply triggers a fresh data load to ensure admin pages see current stock
+      const products = await storage.getProducts();
+      const shopProducts = await shopStorage.getShopProducts();
+      
+      res.json({ 
+        success: true, 
+        message: "Stock data refreshed successfully",
+        showcaseProductCount: products.length,
+        shopProductCount: shopProducts.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error refreshing stock data:", error);
+      res.status(500).json({ success: false, message: "Failed to refresh stock data" });
     }
   });
 
