@@ -29,11 +29,21 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // Add cache-busting for inventory-related endpoints
+    const isInventoryEndpoint = (queryKey[0] as string).includes('/api/shop/');
+    
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
+      ...(isInventoryEndpoint && {
+        cache: 'no-store',
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        }
+      })
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
@@ -50,7 +60,16 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: (query) => {
+        // Disable caching for inventory-related endpoints
+        const queryKey = query.queryKey[0] as string;
+        return queryKey.includes('/api/shop/') ? 0 : 5 * 60 * 1000;
+      },
+      gcTime: (query) => {
+        // Don't cache inventory data at all
+        const queryKey = query.queryKey[0] as string;
+        return queryKey.includes('/api/shop/') ? 0 : 5 * 60 * 1000;
+      },
       retry: false,
     },
     mutations: {
