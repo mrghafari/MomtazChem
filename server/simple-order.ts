@@ -45,8 +45,9 @@ export async function createSimpleOrder(orderData: any) {
       });
 
       // CRITICAL: Reduce stock in BOTH shop_products AND showcase_products tables
+      
+      // 1. Update shop product stock (independent try-catch)
       try {
-        // 1. Update shop product stock
         const shopProduct = await shopStorage.getShopProductById(item.productId);
         if (shopProduct && shopProduct.stockQuantity !== null && shopProduct.stockQuantity !== undefined) {
           const newShopQuantity = Math.max(0, shopProduct.stockQuantity - item.quantity);
@@ -59,26 +60,47 @@ export async function createSimpleOrder(orderData: any) {
           
           console.log(`✅ Shop stock reduced for product ${item.productId} (${item.productName}): ${shopProduct.stockQuantity} → ${newShopQuantity}`);
         }
+      } catch (shopStockError) {
+        console.error(`❌ Error reducing shop stock for product ${item.productId}:`, shopStockError);
+        // Continue with showcase update even if shop update fails
+      }
 
-        // 2. Update corresponding showcase product stock
+      // 2. Update corresponding showcase product stock (independent try-catch)
+      try {
+        console.log(`🔍 Looking for showcase product with name: "${item.productName}"`);
         const showcaseProducts = await storage.getProducts();
-        const matchingShowcaseProduct = showcaseProducts.find(sp => sp.name === item.productName);
+        console.log(`📦 Found ${showcaseProducts.length} showcase products`);
         
-        if (matchingShowcaseProduct && matchingShowcaseProduct.stockQuantity !== null && matchingShowcaseProduct.stockQuantity !== undefined) {
-          const newShowcaseQuantity = Math.max(0, matchingShowcaseProduct.stockQuantity - item.quantity);
+        const matchingShowcaseProduct = showcaseProducts.find(sp => {
+          console.log(`🔍 Comparing "${sp.name}" with "${item.productName}"`);
+          return sp.name === item.productName;
+        });
+        
+        if (matchingShowcaseProduct) {
+          console.log(`✅ Found matching showcase product: ${matchingShowcaseProduct.id} (${matchingShowcaseProduct.name})`);
           
-          await storage.updateShowcaseProductStock(
-            matchingShowcaseProduct.id,
-            newShowcaseQuantity,
-            `Order ${orderNumber} - Sold ${item.quantity} units`
-          );
-          
-          console.log(`✅ Showcase stock reduced for product ${matchingShowcaseProduct.id} (${item.productName}): ${matchingShowcaseProduct.stockQuantity} → ${newShowcaseQuantity}`);
+          if (matchingShowcaseProduct.stockQuantity !== null && matchingShowcaseProduct.stockQuantity !== undefined) {
+            const newShowcaseQuantity = Math.max(0, matchingShowcaseProduct.stockQuantity - item.quantity);
+            
+            console.log(`📉 Updating showcase stock: ${matchingShowcaseProduct.stockQuantity} → ${newShowcaseQuantity}`);
+            
+            await storage.updateShowcaseProductStock(
+              matchingShowcaseProduct.id,
+              newShowcaseQuantity,
+              `Order ${orderNumber} - Sold ${item.quantity} units`
+            );
+            
+            console.log(`✅ Showcase stock reduced for product ${matchingShowcaseProduct.id} (${item.productName}): ${matchingShowcaseProduct.stockQuantity} → ${newShowcaseQuantity}`);
+          } else {
+            console.log(`⚠️ Showcase product ${matchingShowcaseProduct.id} has null/undefined stock quantity`);
+          }
+        } else {
+          console.log(`❌ No matching showcase product found for "${item.productName}"`);
+          console.log(`📋 Available showcase products:`, showcaseProducts.map(sp => `"${sp.name}"`));
         }
-        
-      } catch (stockError) {
-        console.error(`❌ Error reducing stock for product ${item.productId}:`, stockError);
-        // Continue with order creation even if stock update fails
+      } catch (showcaseStockError) {
+        console.error(`❌ Error reducing showcase stock for product "${item.productName}":`, showcaseStockError);
+        // Continue with order creation even if showcase update fails
       }
     }
 
