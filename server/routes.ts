@@ -994,19 +994,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/products", async (req, res) => {
     try {
+      // Disable caching for real-time inventory
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+
       const { category } = req.query;
       let products;
       
       if (category && typeof category === 'string') {
-        // Filter shop products by category
-        const allProducts = await shopStorage.getShopProducts();
-        products = allProducts.filter(product => product.category === category);
+        // Filter showcase products by category - this is the source of truth for stock
+        products = await storage.getProductsByCategory(category);
       } else {
-        // Get all products from single source of truth (shop_products)
-        products = await shopStorage.getShopProducts();
+        // Get all products from showcase (products table) - source of truth for stock
+        products = await storage.getProducts();
       }
       
-      res.json(products);
+      // Transform showcase products to match shop product interface for display
+      const transformedProducts = products.map(product => ({
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        description: product.description,
+        shortDescription: product.shortDescription || product.description?.substring(0, 100) || '',
+        price: product.unitPrice || 0,
+        compareAtPrice: null,
+        priceUnit: product.currency || 'IQD',
+        inStock: (product.stockQuantity || 0) > 0,
+        stockQuantity: product.stockQuantity || 0, // This is the source of truth
+        lowStockThreshold: product.minStockLevel || 10,
+        sku: product.sku || '',
+        barcode: product.barcode || '',
+        weight: product.weight || 0,
+        weightUnit: product.weightUnit || 'kg',
+        dimensions: {},
+        imageUrls: product.imageUrls || [],
+        thumbnailUrl: product.thumbnailUrl || product.imageUrl || '',
+        specifications: product.specifications || {},
+        features: product.features || {},
+        applications: product.applications || {},
+        tags: product.tags || [],
+        isActive: true,
+        isFeatured: product.isFeatured || false,
+        createdAt: product.createdAt || new Date(),
+        updatedAt: product.updatedAt || new Date()
+      }));
+      
+      res.json(transformedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ 
