@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { customerCommunications, emailCategories, CustomerCommunication, InsertCustomerCommunication } from "@shared/email-schema";
-import { eq, desc, and, or } from "drizzle-orm";
+import { eq, desc, and, or, ilike } from "drizzle-orm";
 
 export class CustomerCommunicationStorage {
   // Send a new message to customer
@@ -109,9 +109,10 @@ export class CustomerCommunicationStorage {
       .from(customerCommunications)
       .where(
         or(
-          eq(customerCommunications.customerEmail, searchTerm),
-          eq(customerCommunications.customerName, searchTerm),
-          eq(customerCommunications.subject, searchTerm)
+          ilike(customerCommunications.customerEmail, `%${searchTerm}%`),
+          ilike(customerCommunications.customerName, `%${searchTerm}%`),
+          ilike(customerCommunications.subject, `%${searchTerm}%`),
+          ilike(customerCommunications.message, `%${searchTerm}%`)
         )
       )
       .orderBy(desc(customerCommunications.createdAt));
