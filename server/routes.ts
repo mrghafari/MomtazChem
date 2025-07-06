@@ -3174,14 +3174,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
               });
 
-              // Update product stock
+              // Update product stock in both shop and showcase products
               if (product.stockQuantity !== null && product.stockQuantity !== undefined) {
                 const newQuantity = Math.max(0, product.stockQuantity - (quantity as number));
+                
+                // Update shop product stock
                 await shopStorage.updateProductStock(
                   parseInt(productId as string),
                   newQuantity,
                   `Order ${orderNumber} - Sold ${quantity} units`
                 );
+                
+                // Also update corresponding showcase product stock to maintain sync
+                try {
+                  const { storage } = await import("./storage");
+                  const showcaseProducts = await storage.getProducts();
+                  const matchingShowcaseProduct = showcaseProducts.find(sp => sp.name === product.name);
+                  
+                  if (matchingShowcaseProduct) {
+                    await storage.updateProduct(matchingShowcaseProduct.id, {
+                      stockQuantity: newQuantity
+                    });
+                  }
+                } catch (syncError) {
+                  console.error("Error syncing stock to showcase product:", syncError);
+                  // Don't fail the order if sync fails
+                }
               }
             }
           } catch (productError) {
@@ -4975,6 +4993,43 @@ ${procedure.content}
     } catch (error) {
       console.error("Error syncing products:", error);
       res.status(500).json({ success: false, message: "Failed to sync products" });
+    }
+  });
+
+  // Stock synchronization endpoint to fix discrepancies between shop and admin
+  app.post("/api/sync-stock", requireAuth, async (req, res) => {
+    try {
+      const showcaseProducts = await storage.getProducts();
+      const shopProducts = await shopStorage.getShopProducts();
+      
+      let syncedCount = 0;
+      let errors = [];
+
+      // Sync stock from shop products (source of truth after orders) to showcase products
+      for (const shopProduct of shopProducts) {
+        try {
+          const matchingShowcaseProduct = showcaseProducts.find(sp => sp.name === shopProduct.name);
+          
+          if (matchingShowcaseProduct && matchingShowcaseProduct.stockQuantity !== shopProduct.stockQuantity) {
+            await storage.updateProduct(matchingShowcaseProduct.id, {
+              stockQuantity: shopProduct.stockQuantity || 0
+            });
+            syncedCount++;
+          }
+        } catch (error) {
+          errors.push(`Error syncing ${shopProduct.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Stock synchronization completed. ${syncedCount} products updated.`,
+        syncedCount,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error) {
+      console.error("Error syncing stock:", error);
+      res.status(500).json({ success: false, message: "Failed to sync stock levels" });
     }
   });
 

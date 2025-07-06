@@ -751,6 +751,15 @@ export class ShopStorage implements IShopStorage {
       quantity: difference,
       notes: reason,
     });
+
+    // Sync stock back to showcase products to maintain consistency
+    try {
+      const { storage } = await import("./storage");
+      await storage.syncStockFromShop(productId, newQuantity);
+    } catch (syncError) {
+      console.error("Error syncing stock to showcase products:", syncError);
+      // Don't fail the stock update if sync fails
+    }
   }
 
   // Analytics
