@@ -4541,6 +4541,30 @@ ${procedure.content}
     }
   });
 
+  // Inventory synchronization endpoints  
+  app.post("/api/inventory/sync/force", async (req, res) => {
+    try {
+      const { InventorySyncManager } = await import("./inventory-sync-manager");
+      await InventorySyncManager.forceBidirectionalSync();
+      res.json({ success: true, message: "Bidirectional sync completed successfully" });
+    } catch (error) {
+      console.error("Error in force sync:", error);
+      res.status(500).json({ success: false, message: "Failed to sync inventories" });
+    }
+  });
+
+  app.post("/api/inventory/sync/product/:name", async (req, res) => {
+    try {
+      const productName = decodeURIComponent(req.params.name);
+      const { InventorySyncManager } = await import("./inventory-sync-manager");
+      await InventorySyncManager.syncProductByName(productName);
+      res.json({ success: true, message: `Product ${productName} synchronized successfully` });
+    } catch (error) {
+      console.error("Error syncing product:", error);
+      res.status(500).json({ success: false, message: "Failed to sync product" });
+    }
+  });
+
   // Inventory management endpoints
   app.get("/api/shop/inventory/:productId", requireAuth, async (req, res) => {
     try {

@@ -26,9 +26,9 @@ export default function SiteManagement() {
   const getInitialButtons = (): QuickActionButton[] => [
     {
       id: "sync-shop",
-      label: "Sync Shop",
+      label: "Force Inventory Sync",
       icon: RefreshCw,
-      onClick: () => syncProductsMutation.mutate(),
+      onClick: () => forceInventorySyncMutation.mutate(),
       className: "border-green-300 text-green-600 hover:bg-green-50"
     },
     {
@@ -272,6 +272,27 @@ export default function SiteManagement() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to sync products", variant: "destructive" });
+    },
+  });
+
+  // Mutation for force inventory synchronization
+  const forceInventorySyncMutation = useMutation({
+    mutationFn: () => apiRequest("/api/inventory/sync/force", "POST"),
+    onSuccess: () => {
+      toast({ 
+        title: "✅ Inventory Sync Complete", 
+        description: "All inventory quantities synchronized successfully between showcase and shop",
+        duration: 5000
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+    },
+    onError: () => {
+      toast({ 
+        title: "❌ Inventory Sync Failed", 
+        description: "Unable to synchronize inventory quantities", 
+        variant: "destructive" 
+      });
     },
   });
 
