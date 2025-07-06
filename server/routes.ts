@@ -1170,6 +1170,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const productData = insertShowcaseProductSchema.partial().parse(req.body);
       const product = await storage.updateProduct(id, productData);
+      
+      // 🔄 Reverse sync: Update shop inventory when showcase inventory changes
+      if (productData.stockQuantity !== undefined) {
+        try {
+          console.log(`🔄 Starting reverse sync from showcase to shop for product ID: ${id}`);
+          await storage.syncInventoryToShop(product);
+          console.log(`🔄 Synced inventory from showcase to shop for product: ${product.name}`);
+        } catch (syncError) {
+          console.warn(`⚠️ Failed to sync to shop:`, syncError);
+          // Don't fail the main update if sync fails
+        }
+      }
+      
       res.json(product);
     } catch (error) {
       console.error("Error updating product:", error);

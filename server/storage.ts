@@ -20,6 +20,7 @@ export interface IStorage {
   // Product synchronization with shop
   syncProductToShop(showcaseProduct: ShowcaseProduct): Promise<void>;
   syncAllProductsToShop(): Promise<void>;
+  syncInventoryToShop(showcaseProduct: ShowcaseProduct): Promise<void>;
   
   // User management
   createUser(user: InsertUser): Promise<User>;
@@ -305,6 +306,27 @@ export class DatabaseStorage implements IStorage {
       }
     } catch (error) {
       console.error('Error syncing all products from shop:', error);
+    }
+  }
+
+  // Reverse inventory sync: Update shop inventory from showcase changes
+  async syncInventoryToShop(showcaseProduct: ShowcaseProduct): Promise<void> {
+    try {
+      // Find matching shop product by name
+      const shopProducts = await shopStorage.getShopProducts();
+      const matchingShopProduct = shopProducts.find(p => p.name === showcaseProduct.name);
+      
+      if (matchingShopProduct) {
+        // Update shop product inventory to match showcase inventory
+        await shopStorage.updateShopProduct(matchingShopProduct.id, {
+          stockQuantity: showcaseProduct.stockQuantity,
+          lowStockThreshold: showcaseProduct.minStockLevel || matchingShopProduct.lowStockThreshold
+        });
+        
+        console.log(`Synced inventory from showcase to shop for product: ${showcaseProduct.name}`);
+      }
+    } catch (error) {
+      console.error('Error syncing inventory to shop:', error);
     }
   }
 
