@@ -425,10 +425,14 @@ export class ShopStorage implements IShopStorage {
         break;
     }
 
-    // Get filtered products with proper query building
+    // Get filtered products with showcase stock synchronization
     let baseQuery = shopDb
-      .select()
+      .select({
+        ...shopProducts,
+        stockQuantity: showcaseProducts.stockQuantity
+      })
       .from(shopProducts)
+      .leftJoin(showcaseProducts, eq(shopProducts.name, showcaseProducts.name))
       .where(and(...whereConditions));
 
     // Apply ordering
