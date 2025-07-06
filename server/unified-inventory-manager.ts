@@ -164,4 +164,64 @@ export class UnifiedInventoryManager {
       return false;
     }
   }
+
+  /**
+   * Sync inventory from shop to showcase (for compatibility with existing system)
+   * This ensures any updates in shop table are reflected in showcase table
+   */
+  static async syncFromShopToShowcase(): Promise<boolean> {
+    try {
+      console.log(`📦 [SYNC] Starting shop→showcase inventory sync...`);
+      
+      const { db } = await import("./db");
+      const { shopProducts } = await import("../shared/shop-schema");
+      const { showcaseProducts } = await import("../shared/showcase-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      // Get all shop products
+      const shopProductsData = await db.select().from(shopProducts);
+      console.log(`📦 [SYNC] Found ${shopProductsData.length} shop products to sync`);
+      
+      let synced = 0;
+      for (const shopProduct of shopProductsData) {
+        try {
+          // Find corresponding showcase product by name
+          const showcaseProduct = await db.select()
+            .from(showcaseProducts)
+            .where(eq(showcaseProducts.name, shopProduct.name))
+            .limit(1);
+          
+          if (showcaseProduct.length > 0) {
+            // Update showcase inventory with shop data
+            await db.update(showcaseProducts)
+              .set({ 
+                stockQuantity: shopProduct.stockQuantity || 0,
+                minStockLevel: shopProduct.minStockLevel || 5,
+                updatedAt: new Date()
+              })
+              .where(eq(showcaseProducts.id, showcaseProduct[0].id));
+            
+            console.log(`✓ [SYNC] ${shopProduct.name}: shop(${shopProduct.stockQuantity}) → showcase`);
+            synced++;
+          } else {
+            console.log(`⚠ [SYNC] No showcase product found for: ${shopProduct.name}`);
+          }
+        } catch (error) {
+          console.error(`✗ [SYNC] Error syncing ${shopProduct.name}:`, error);
+        }
+      }
+      
+      console.log(`✅ [SYNC] Completed shop→showcase sync. ${synced}/${shopProductsData.length} products synced`);
+      return true;
+      
+    } catch (error) {
+      console.error(`❌ [SYNC] Error in shop→showcase sync:`, error);
+      return false;
+    }
+  }
+}
+
+// Export functions for compatibility
+export async function syncFromShopToShowcase(): Promise<boolean> {
+  return UnifiedInventoryManager.syncFromShopToShowcase();
 }

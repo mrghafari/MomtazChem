@@ -12290,6 +12290,33 @@ momtazchem.com
     }
   });
 
+  // Force inventory refresh endpoint - to be called after order completion
+  app.post("/api/inventory/force-refresh", async (req: Request, res: Response) => {
+    try {
+      console.log("Force refreshing inventory data...");
+      
+      // Trigger inventory sync from shop to showcase
+      const { syncFromShopToShowcase } = await import("./unified-inventory-manager");
+      await syncFromShopToShowcase();
+      
+      console.log("✓ Inventory force refresh completed");
+      
+      res.json({
+        success: true,
+        message: "Inventory refreshed successfully",
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error("✗ Error force refreshing inventory:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to refresh inventory",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // =============================================================================
   // DEPARTMENT ORDER MANAGEMENT ENDPOINTS
   // =============================================================================

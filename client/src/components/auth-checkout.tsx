@@ -328,16 +328,27 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
     mutationFn: async (orderData: any) => {
       return apiRequest("/api/shop/orders", "POST", orderData);
     },
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       setOrderNumber(data.order.id);
       setCurrentStep("complete");
       // Clear saved cart data
       localStorage.removeItem('pendingCart');
       
-      // CRITICAL: Invalidate product cache to show updated inventory immediately
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/unified/products"] });
+      // Force refresh inventory using dedicated endpoint
+      try {
+        await apiRequest("/api/inventory/force-refresh", "POST", {});
+        console.log("✓ Inventory force refresh triggered");
+      } catch (error) {
+        console.error("✗ Failed to trigger inventory refresh:", error);
+      }
+      
+      // Clear all caches and force fresh data
+      queryClient.clear();
+      
+      // Reload page to ensure fresh data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
       
       onOrderComplete();
       toast({
