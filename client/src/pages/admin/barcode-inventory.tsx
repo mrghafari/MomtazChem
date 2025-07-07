@@ -462,13 +462,7 @@ const BarcodeInventory = () => {
           flex-grow: 1;
         }
         
-        .barcode-number {
-          font-size: 10px;
-          font-family: monospace;
-          color: #333;
-          margin-top: 2px;
-          letter-spacing: 1px;
-        }
+
         
         @media print {
           body { margin: 0; padding: 5px; }
@@ -491,7 +485,6 @@ const BarcodeInventory = () => {
             <div class="barcode-section">
               ${generateBarcodeSVG(product.barcode!)}
             </div>
-            <div class="barcode-number">${product.barcode}</div>
           </div>
         `).join('')}
       </div>
@@ -1198,9 +1191,6 @@ const BarcodeInventory = () => {
                         fontSize={10}
                         className="bg-white"
                       />
-                    </div>
-                    <div className="text-xs font-mono text-gray-700 tracking-wide">
-                      {products[0].barcode}
                     </div>
                   </div>
                 ) : (
