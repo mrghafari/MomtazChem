@@ -334,12 +334,19 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
       // Clear saved cart data
       localStorage.removeItem('pendingCart');
       
-      // Force refresh inventory using dedicated endpoint
+      // Force refresh inventory using dedicated endpoint - CRITICAL FOR SYNC
       try {
-        await apiRequest("/api/inventory/force-refresh", "POST", {});
-        console.log("✓ Inventory force refresh triggered");
+        const refreshResult = await apiRequest("/api/inventory/force-refresh", "POST", {});
+        console.log("✓ Inventory force refresh completed:", refreshResult);
       } catch (error) {
         console.error("✗ Failed to trigger inventory refresh:", error);
+        // Retry once if it fails
+        try {
+          await apiRequest("/api/inventory/force-refresh", "POST", {});
+          console.log("✓ Inventory force refresh completed on retry");
+        } catch (retryError) {
+          console.error("✗ Inventory refresh failed on retry:", retryError);
+        }
       }
       
       // Invalidate all product-related queries to fetch fresh inventory data
