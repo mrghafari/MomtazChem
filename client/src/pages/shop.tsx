@@ -967,48 +967,71 @@ const Shop = () => {
                           {/* Fixed Height Discount Container */}
                           <div className="mb-3 h-20 overflow-hidden">
                             {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
-                              <div className="p-2 bg-blue-50 rounded-lg border border-blue-200 h-full">
-                                <div className="flex items-center justify-between mb-1">
-                                  <h4 className="text-xs font-semibold text-blue-800">📦 Bulk Discounts</h4>
-                                  <div className="text-xs text-gray-600">
-                                    {product.quantityDiscounts.map((d: any, i: number) => 
-                                      `${d.minQty}+:${(d.discount * 100).toFixed(0)}%`
-                                    ).join(' • ')}
-                                  </div>
+                              <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 h-full relative overflow-hidden">
+                                {/* Background Pattern */}
+                                <div className="absolute inset-0 opacity-10">
+                                  <div className="absolute top-0 right-0 w-8 h-8 bg-blue-300 rounded-full transform translate-x-2 -translate-y-2"></div>
+                                  <div className="absolute bottom-0 left-0 w-6 h-6 bg-indigo-300 rounded-full transform -translate-x-1 translate-y-1"></div>
                                 </div>
-                                {(() => {
-                                  const currentQty = getProductQuantity(product.id);
-                                  const currentDiscount = getCurrentDiscountInfo(product, currentQty);
-                                  const nextDiscount = getNextDiscountInfo(product, currentQty);
-                                  
-                                  return (
-                                    <div className="space-y-1">
-                                      {/* Current Active Discount */}
-                                      {currentDiscount ? (
-                                        <div className="bg-green-50 border border-green-200 rounded p-1">
-                                          <div className="flex items-center justify-between text-xs">
-                                            <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs py-0 px-1">
-                                              {(currentDiscount.discount * 100).toFixed(0)}% OFF
-                                            </Badge>
-                                            <span className="text-green-700 font-medium">
-                                              Save ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      ) : nextDiscount ? (
-                                        <div className="bg-blue-50 border border-blue-200 rounded p-1">
-                                          <div className="text-xs text-blue-700 font-medium">
-                                            +{nextDiscount.remaining} for {(nextDiscount.discount * 100).toFixed(0)}% discount!
-                                          </div>
-                                        </div>
-                                      ) : (
-                                        <div className="text-xs text-blue-700">
-                                          Start with {product.quantityDiscounts[0].minQty} items for {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
-                                        </div>
-                                      )}
+                                
+                                <div className="relative z-10">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <div className="flex items-center gap-1">
+                                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                      <span className="text-xs font-bold text-blue-800">BULK SAVINGS</span>
                                     </div>
-                                  );
-                                })()}
+                                    <div className="flex gap-1">
+                                      {product.quantityDiscounts.map((d: any, i: number) => (
+                                        <div key={i} className="px-2 py-0.5 bg-white/70 rounded-full text-xs font-medium text-blue-700 border border-blue-200">
+                                          {d.minQty}+: {(d.discount * 100).toFixed(0)}%
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  
+                                  {(() => {
+                                    const currentQty = getProductQuantity(product.id);
+                                    const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                    const nextDiscount = getNextDiscountInfo(product, currentQty);
+                                    
+                                    return (
+                                      <div>
+                                        {/* Current Active Discount */}
+                                        {currentDiscount ? (
+                                          <div className="bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 rounded-lg p-2 shadow-sm">
+                                            <div className="flex items-center justify-between text-xs">
+                                              <div className="flex items-center gap-1">
+                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                <span className="font-bold text-green-800">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                              </div>
+                                              <span className="text-green-700 font-bold">
+                                                💰 ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} saved
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ) : nextDiscount ? (
+                                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-lg p-2 shadow-sm">
+                                            <div className="flex items-center gap-1 text-xs">
+                                              <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
+                                              <span className="text-amber-800 font-bold">
+                                                +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF! 🎯
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-lg p-2">
+                                            <div className="flex items-center gap-1 text-xs">
+                                              <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
+                                              <span className="text-slate-700 font-medium">
+                                                Buy {product.quantityDiscounts[0].minQty}+ for {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% discount 🚀
+                                              </span>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
                               </div>
                             ) : (
                               <div className="h-full"></div>
@@ -1101,50 +1124,71 @@ const Shop = () => {
                               {/* Fixed Height Discount Container - List View */}
                               <div className="mb-4 h-16">
                                 {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
-                                  <div className="h-full">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <div className="text-sm font-medium text-gray-700">Quantity Discounts:</div>
-                                      <div className="text-xs text-gray-600">
-                                        {product.quantityDiscounts.map((d: any, i: number) => 
-                                          `${d.minQty}+:${(d.discount * 100).toFixed(0)}%`
-                                        ).join(' • ')}
-                                      </div>
+                                  <div className="h-full p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 relative overflow-hidden">
+                                    {/* Background Pattern */}
+                                    <div className="absolute inset-0 opacity-10">
+                                      <div className="absolute top-0 right-0 w-6 h-6 bg-blue-300 rounded-full transform translate-x-1 -translate-y-1"></div>
+                                      <div className="absolute bottom-0 left-0 w-4 h-4 bg-indigo-300 rounded-full transform -translate-x-1 translate-y-1"></div>
                                     </div>
-                                    {(() => {
-                                      const currentQty = getProductQuantity(product.id);
-                                      const currentDiscount = getCurrentDiscountInfo(product, currentQty);
-                                      const nextDiscount = getNextDiscountInfo(product, currentQty);
-                                      
-                                      return (
-                                        <div className="flex items-center gap-2">
-                                          {/* Current Active Discount */}
-                                          {currentDiscount ? (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-2 flex-1">
-                                              <div className="flex items-center justify-between text-sm">
-                                                <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                                                  {(currentDiscount.discount * 100).toFixed(0)}% OFF Active
-                                                </Badge>
-                                                <span className="text-green-700 font-medium">
-                                                  Save ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)}
-                                                </span>
-                                              </div>
-                                            </div>
-                                          ) : nextDiscount ? (
-                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 flex-1">
-                                              <div className="text-sm text-blue-700 font-medium">
-                                                +{nextDiscount.remaining} more for {(nextDiscount.discount * 100).toFixed(0)}% discount!
-                                              </div>
-                                            </div>
-                                          ) : (
-                                            <div className="bg-gray-50 rounded-lg p-2 flex-1">
-                                              <div className="text-xs text-gray-700">
-                                                Start with {product.quantityDiscounts[0].minQty} items for {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
-                                              </div>
-                                            </div>
-                                          )}
+                                    
+                                    <div className="relative z-10 h-full flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1">
+                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                          <span className="text-sm font-bold text-blue-800">BULK SAVINGS</span>
                                         </div>
-                                      );
-                                    })()}
+                                        <div className="flex gap-1">
+                                          {product.quantityDiscounts.map((d: any, i: number) => (
+                                            <div key={i} className="px-2 py-1 bg-white/80 rounded-full text-xs font-medium text-blue-700 border border-blue-200">
+                                              {d.minQty}+: {(d.discount * 100).toFixed(0)}%
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                      
+                                      {(() => {
+                                        const currentQty = getProductQuantity(product.id);
+                                        const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                        const nextDiscount = getNextDiscountInfo(product, currentQty);
+                                        
+                                        return (
+                                          <div className="flex-1 ml-4">
+                                            {/* Current Active Discount */}
+                                            {currentDiscount ? (
+                                              <div className="bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 rounded-lg p-2 shadow-sm">
+                                                <div className="flex items-center justify-between text-sm">
+                                                  <div className="flex items-center gap-1">
+                                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                    <span className="font-bold text-green-800">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                                  </div>
+                                                  <span className="text-green-700 font-bold">
+                                                    💰 ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} saved
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            ) : nextDiscount ? (
+                                              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-lg p-2 shadow-sm">
+                                                <div className="flex items-center gap-1 text-sm">
+                                                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
+                                                  <span className="text-amber-800 font-bold">
+                                                    +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF! 🎯
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            ) : (
+                                              <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-lg p-2">
+                                                <div className="flex items-center gap-1 text-sm">
+                                                  <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
+                                                  <span className="text-slate-700 font-medium">
+                                                    Buy {product.quantityDiscounts[0].minQty}+ for {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% discount 🚀
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })()}
+                                    </div>
                                   </div>
                                 ) : (
                                   <div className="h-full"></div>
