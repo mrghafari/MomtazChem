@@ -54,7 +54,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
   const formatPrice = (product: Product) => {
     if (!product.price) return '';
     const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
-    const currency = product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : 'د.ع';
+    const currency = product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : 'IQD';
     const unit = product.priceUnit || 'واحد';
     return `${price.toFixed(2)} ${currency} / ${unit}`;
   };
