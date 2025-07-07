@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BarcodeScanner from "@/components/ui/barcode-scanner";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
@@ -72,12 +71,6 @@ const BarcodeInventory = () => {
   const [reference, setReference] = useState('');
   const [scanMode, setScanMode] = useState<'lookup' | 'inventory_in' | 'inventory_out' | 'audit'>('lookup');
   const [showGenerator, setShowGenerator] = useState(false);
-  const [selectedProductsForBatch, setSelectedProductsForBatch] = useState<number[]>([]);
-  const [printDialogOpen, setPrintDialogOpen] = useState(false);
-  const [batchPrintOpen, setBatchPrintOpen] = useState(false);
-  const [showPriceDialog, setShowPriceDialog] = useState(false);
-  const [includePriceInPrint, setIncludePriceInPrint] = useState(false);
-  const [pendingPrintProducts, setPendingPrintProducts] = useState<Product[]>([]);
   const { toast } = useToast();
 
   // Check authentication
@@ -254,39 +247,25 @@ const BarcodeInventory = () => {
   // EAN-13 CSV export function
   const exportEAN13Data = async () => {
     try {
-      const response = await fetch('/api/ean13/export', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Export error:', errorText);
-        throw new Error(`Export failed: ${response.status}`);
-      }
+      const response = await fetch('/api/ean13/export');
+      if (!response.ok) throw new Error('Export failed');
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `EAN13_Export_${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       toast({
-        title: "تصدیر موفق",
-        description: "فایل CSV دیتای EAN-13 با موفقیت دانلود شد"
+        title: "Export Complete",
+        description: "EAN-13 data exported successfully"
       });
     } catch (error) {
-      console.error('CSV export error:', error);
       toast({
-        title: "خطا در تصدیر",
-        description: "امکان تصدیر فایل CSV وجود ندارد",
+        title: "Export Failed",
+        description: "Failed to export EAN-13 data",
         variant: "destructive"
       });
     }
@@ -317,210 +296,6 @@ const BarcodeInventory = () => {
         variant: "destructive"
       });
     }
-  };
-
-  // Single label printing function
-  const printSingleLabel = (product: Product) => {
-    if (!product.barcode) {
-      toast({
-        title: "خطا",
-        description: "این محصول بارکد ندارد",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Show price confirmation dialog
-    setPendingPrintProducts([product]);
-    setShowPriceDialog(true);
-  };
-
-  // Batch printing function  
-  const printBatchLabels = () => {
-    const selectedProducts = products?.filter(p => 
-      selectedProductsForBatch.includes(p.id) && p.barcode
-    ) || [];
-
-    if (selectedProducts.length === 0) {
-      toast({
-        title: "خطا",
-        description: "هیچ محصولی با بارکد انتخاب نشده",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Show price confirmation dialog for batch printing
-    setPendingPrintProducts(selectedProducts);
-    setShowPriceDialog(true);
-  };
-
-  // Execute the actual printing after price confirmation
-  const executePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const printContent = generateLabelHTML(pendingPrintProducts, includePriceInPrint);
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-
-    toast({
-      title: pendingPrintProducts.length === 1 ? "چاپ لیبل" : "چاپ دسته‌جمعی",
-      description: pendingPrintProducts.length === 1 ? 
-        `لیبل ${pendingPrintProducts[0].name} آماده چاپ است` :
-        `${pendingPrintProducts.length} لیبل آماده چاپ است`
-    });
-
-    // Clean up state
-    setShowPriceDialog(false);
-    setIncludePriceInPrint(false);
-    setPendingPrintProducts([]);
-    if (pendingPrintProducts.length > 1) {
-      setSelectedProductsForBatch([]);
-    }
-  };
-
-  // Generate HTML for label printing
-  const generateLabelHTML = (productList: Product[], includePrice: boolean = false) => {
-    const generateBarcodeSVG = (barcode: string) => {
-      try {
-        const canvas = document.createElement('canvas');
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '200');
-        svg.setAttribute('height', '80');
-        
-        // Generate barcode using JsBarcode
-        JsBarcode(svg, barcode, {
-          format: barcode.length === 13 ? "EAN13" : "CODE128",
-          width: 1.5,
-          height: 60,
-          displayValue: true,
-          fontSize: 12,
-          background: '#ffffff',
-          lineColor: '#000000'
-        });
-        
-        return svg.outerHTML;
-      } catch (error) {
-        return `<div style="width: 200px; height: 80px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">Invalid Barcode</div>`;
-      }
-    };
-
-    return `
-    <!DOCTYPE html>
-    <html dir="rtl" lang="fa">
-    <head>
-      <meta charset="UTF-8">
-      <title>چاپ لیبل بارکد</title>
-      <style>
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          margin: 0;
-          padding: 10px;
-          background: white;
-          direction: rtl;
-        }
-        
-        .label-container {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 10px;
-          width: 100%;
-        }
-        
-        .label {
-          border: 2px solid #333;
-          padding: 8px;
-          margin-bottom: 10px;
-          background: white;
-          box-sizing: border-box;
-          text-align: center;
-          page-break-inside: avoid;
-          width: 250px;
-          height: 150px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
-        
-        .product-name {
-          font-size: 12px;
-          font-weight: bold;
-          color: #333;
-          margin-bottom: 4px;
-          line-height: 1.2;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        
-        .product-info {
-          font-size: 10px;
-          color: #666;
-          margin-bottom: 4px;
-        }
-        
-        .barcode-section {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          flex-grow: 1;
-        }
-        
-
-        
-        @media print {
-          body { margin: 0; padding: 5px; }
-          .label { margin-bottom: 5px; }
-          @page { margin: 0.5cm; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="label-container">
-        ${productList.map(product => `
-          <div class="label">
-            <div>
-              <div class="product-name">${product.name}</div>
-              <div class="product-info">
-                کد کالا: ${product.sku || 'ندارد'} | 
-                دسته: ${product.category}
-                ${includePrice && product.price ? `<br/>قیمت: ${product.price} ${product.priceUnit || 'IQD'}` : ''}
-              </div>
-            </div>
-            <div class="barcode-section">
-              ${generateBarcodeSVG(product.barcode!)}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    </body>
-    </html>
-    `;
-  };
-
-  // Toggle product selection for batch printing
-  const toggleProductSelection = (productId: number) => {
-    setSelectedProductsForBatch(prev => 
-      prev.includes(productId) 
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    );
-  };
-
-  // Select all products with barcodes
-  const selectAllProductsWithBarcodes = () => {
-    const productsWithBarcodes = products?.filter(p => p.barcode).map(p => p.id) || [];
-    setSelectedProductsForBatch(productsWithBarcodes);
-  };
-
-  // Clear all selections
-  const clearAllSelections = () => {
-    setSelectedProductsForBatch([]);
   };
 
   const getStockStatusColor = (product: Product) => {
@@ -630,13 +405,12 @@ const BarcodeInventory = () => {
       </Card>
 
       <Tabs defaultValue="scanner" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="scanner">Scanner</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="generator">Barcode Generator</TabsTrigger>
           <TabsTrigger value="ean13">EAN-13 Retail</TabsTrigger>
-          <TabsTrigger value="printing">Print Label</TabsTrigger>
         </TabsList>
 
         {/* Scanner Tab */}
@@ -996,7 +770,7 @@ const BarcodeInventory = () => {
                       onClick={() => exportEAN13Data()}
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      تصدیر CSV بارکدهای EAN-13
+                      Export EAN-13 CSV
                     </Button>
                     <Button 
                       className="w-full" 
@@ -1088,29 +862,16 @@ const BarcodeInventory = () => {
                           )}
                         </td>
                         <td className="p-2">
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedProduct(product);
-                                setShowGenerator(true);
-                              }}
-                            >
-                              {product.barcode?.length === 13 ? 'Update' : 'Generate'} EAN-13
-                            </Button>
-                            {product.barcode && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => printSingleLabel(product)}
-                                className="text-blue-600 hover:text-blue-800"
-                              >
-                                <Printer className="h-3 w-3 mr-1" />
-                                Print Label
-                              </Button>
-                            )}
-                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setShowGenerator(true);
+                            }}
+                          >
+                            {product.barcode?.length === 13 ? 'Update' : 'Generate'} EAN-13
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -1120,219 +881,7 @@ const BarcodeInventory = () => {
             </CardContent>
           </Card>
         </TabsContent>
-
-        {/* Label Printing Tab */}
-        <TabsContent value="printing" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Batch Printing Controls */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Printer className="h-5 w-5" />
-                  Print Label Batch
-                </CardTitle>
-                <p className="text-sm text-gray-600">
-                  انتخاب محصولات برای چاپ دسته‌جمعی لیبل‌های بارکد
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2 mb-4">
-                  <Button 
-                    variant="outline"
-                    onClick={selectAllProductsWithBarcodes}
-                    className="flex-1"
-                  >
-                    انتخاب همه محصولات
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={clearAllSelections}
-                    className="flex-1"
-                  >
-                    پاک کردن انتخاب‌ها
-                  </Button>
-                </div>
-                
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm font-medium text-blue-800">
-                    تعداد انتخاب شده: {selectedProductsForBatch.length} محصول
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    فقط محصولاتی که بارکد دارند قابل چاپ هستند
-                  </p>
-                </div>
-
-                <Button 
-                  className="w-full"
-                  onClick={printBatchLabels}
-                  disabled={selectedProductsForBatch.length === 0}
-                >
-                  <Printer className="h-4 w-4 mr-2" />
-                  چاپ {selectedProductsForBatch.length} لیبل انتخاب شده
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Printing Preview */}
-            <Card>
-              <CardHeader>
-                <CardTitle>پیش‌نمایش لیبل</CardTitle>
-                <p className="text-sm text-gray-600">
-                  نمونه لیبل برای چاپ
-                </p>
-              </CardHeader>
-              <CardContent>
-                {products && products.length > 0 && products[0].barcode ? (
-                  <div className="border-2 border-gray-300 p-4 rounded-lg bg-white text-center max-w-xs mx-auto">
-                    <div className="font-bold text-sm mb-2 text-gray-800 truncate">
-                      {products[0].name}
-                    </div>
-                    <div className="text-xs text-gray-600 mb-3">
-                      کد کالا: {products[0].sku || 'ندارد'} | دسته: {products[0].category}
-                      {products[0].price && (
-                        <><br/>قیمت: {products[0].price} {products[0].priceUnit || 'IQD'}</>
-                      )}
-                    </div>
-                    <div className="mb-2">
-                      <VisualBarcode 
-                        value={products[0].barcode}
-                        productName={products[0].name}
-                        sku={products[0].sku || undefined}
-                        width={1.5}
-                        height={40}
-                        fontSize={10}
-                        className="bg-white"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    هیچ محصولی با بارکد برای نمایش پیش‌نمایش وجود ندارد
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Product Selection List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>انتخاب محصولات برای چاپ</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-right p-2">انتخاب</th>
-                      <th className="text-right p-2">نام محصول</th>
-                      <th className="text-right p-2">دسته</th>
-                      <th className="text-right p-2">کد کالا</th>
-                      <th className="text-right p-2">بارکد</th>
-                      <th className="text-right p-2">عملیات</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products?.filter(p => p.barcode).map((product) => (
-                      <tr key={product.id} className="border-b hover:bg-gray-50">
-                        <td className="p-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedProductsForBatch.includes(product.id)}
-                            onChange={() => toggleProductSelection(product.id)}
-                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                        </td>
-                        <td className="p-2">
-                          <div className="font-medium">{product.name}</div>
-                        </td>
-                        <td className="p-2">
-                          <Badge variant="outline">{product.category}</Badge>
-                        </td>
-                        <td className="p-2">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {product.sku || 'ندارد'}
-                          </code>
-                        </td>
-                        <td className="p-2">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">
-                            {product.barcode}
-                          </code>
-                        </td>
-                        <td className="p-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => printSingleLabel(product)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            <Printer className="h-3 w-3 mr-1" />
-                            Print Label
-                          </Button>
-                        </td>
-                      </tr>
-                    )) || []}
-                  </tbody>
-                </table>
-                {(!products || products.filter(p => p.barcode).length === 0) && (
-                  <div className="text-center py-8 text-gray-500">
-                    هیچ محصولی با بارکد برای چاپ وجود ندارد
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
-
-      {/* Price Confirmation Dialog */}
-      <Dialog open={showPriceDialog} onOpenChange={setShowPriceDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Print Label Settings</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="include-price"
-                checked={includePriceInPrint}
-                onCheckedChange={setIncludePriceInPrint}
-              />
-              <Label htmlFor="include-price" className="text-sm font-medium">
-                Include price on labels?
-              </Label>
-            </div>
-            <div className="text-sm text-gray-600">
-              {pendingPrintProducts.length === 1 ? (
-                <p>Printing label for: <strong>{pendingPrintProducts[0]?.name}</strong></p>
-              ) : (
-                <p>Printing labels for <strong>{pendingPrintProducts.length}</strong> products</p>
-              )}
-              {includePriceInPrint && (
-                <p className="mt-2 text-blue-600">
-                  ✓ Product prices will be included on the labels
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowPriceDialog(false);
-                setIncludePriceInPrint(false);
-                setPendingPrintProducts([]);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={executePrint}>
-              <Printer className="h-4 w-4 mr-2" />
-              Print Labels
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Generator Dialog */}
       <Dialog open={showGenerator} onOpenChange={setShowGenerator}>

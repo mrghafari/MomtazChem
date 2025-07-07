@@ -33,45 +33,26 @@ export default function AdminLogin() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: (data: LoginForm) => {
-      return fetch("/api/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include', // Ensure cookies are included
-        body: JSON.stringify(data),
-      }).then(async (res) => {
-        const result = await res.json();
-        if (!res.ok) {
-          throw new Error(result.message || "Login failed");
-        }
-        return result;
-      });
-    },
+    mutationFn: (data: LoginForm) => apiRequest("/api/admin/login", "POST", data),
     onSuccess: async (response) => {
       console.log("Login response:", response);
       
-      if (response.success && response.user) {
-        // Login was successful according to backend
-        toast({ title: "Success", description: "Admin login successful" });
-        
-        // Clear cache and set fresh auth data
-        queryClient.removeQueries({ queryKey: ["/api/admin/me"] });
-        queryClient.setQueryData(["/api/admin/me"], {
-          success: true,
-          user: response.user
-        });
-        
-        // Navigate immediately - no verification needed since backend confirmed success
-        setLocation("/admin");
-      } else {
-        toast({ 
-          title: "Login Failed", 
-          description: "Invalid response from server", 
-          variant: "destructive" 
-        });
-      }
+      // Clear existing cache and refetch auth state
+      queryClient.removeQueries({ queryKey: ["/api/admin/me"] });
+      
+      // Wait a moment for session to be established
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Prefetch the auth data to ensure it's available
+      await queryClient.prefetchQuery({
+        queryKey: ["/api/admin/me"],
+        queryFn: () => fetch("/api/admin/me", { credentials: 'include' }).then(res => res.json()),
+      });
+      
+      toast({ title: "Success", description: "Admin login successful" });
+      
+      // Navigate to admin panel
+      setLocation("/admin");
     },
     onError: (error: any) => {
       toast({ 
