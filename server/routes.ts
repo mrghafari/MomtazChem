@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import puppeteer from "puppeteer";
+import nodemailer from "nodemailer";
 import { storage } from "./storage";
 import { insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
 import { insertContactSchema, insertShowcaseProductSchema, showcaseProducts } from "@shared/showcase-schema";
@@ -1595,6 +1597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
     
     const dims = labelDimensions[labelSize] || labelDimensions.standard;
+    const isRoll = labelSize === 'roll';
     
     const formatPrice = (product: any) => {
       if (!product.price) return '';
@@ -1606,43 +1609,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const generateBarcode = (value: string) => {
       // Simple barcode representation for printing
-      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: 20px; letter-spacing: 0.5px; text-align: center; margin: 2px 0;">${value}</div>`;
+      const fontSize = isRoll ? '12px' : '20px';
+      const margin = isRoll ? '1px 0' : '2px 0';
+      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${fontSize}; letter-spacing: 0.5px; text-align: center; margin: ${margin};">${value}</div>`;
     };
 
-    const labelsHTML = products.map(product => `
+    const labelsHTML = products.map(product => {
+      // For roll printer, truncate long product names
+      const displayName = isRoll && product.name.length > 18 ? 
+        product.name.substring(0, 15) + '...' : product.name;
+      
+      return `
       <div style="
         width: ${dims.width}; 
         height: ${dims.height}; 
         border: 1px solid #ccc; 
-        padding: 4mm; 
-        margin: 2mm; 
+        padding: ${isRoll ? '1.5mm' : '4mm'}; 
+        margin: ${isRoll ? '1mm' : '2mm'}; 
         display: inline-block; 
         vertical-align: top;
         background: white;
         box-sizing: border-box;
         page-break-inside: avoid;
         font-family: Arial, sans-serif;
+        ${isRoll ? 'overflow: hidden;' : ''}
       ">
-        <div style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <div style="font-weight: bold; font-size: ${dims.fontSize}; margin-bottom: 2mm; line-height: 1.2; word-wrap: break-word;">
-              ${product.name}
+        <div style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: ${isRoll ? 'flex-start' : 'space-between'}; ${isRoll ? 'gap: 0.5mm;' : ''}">
+          ${isRoll ? `
+            <div style="font-weight: bold; font-size: ${dims.fontSize}; line-height: 1; margin-bottom: 0.5mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${displayName}
             </div>
-            ${showSKU && product.sku ? `<div style="font-size: 7px; color: #666; font-family: monospace; margin-bottom: 1mm;">SKU: ${product.sku}</div>` : ''}
-            <div style="margin: 2mm 0;">
+            ${showSKU && product.sku ? `<div style="font-size: 5px; color: #666; font-family: monospace; line-height: 1;">SKU: ${product.sku}</div>` : ''}
+            <div style="margin: 0.5mm 0;">
               ${generateBarcode(product.barcode || '')}
-              <div style="font-size: 8px; font-family: monospace; margin-top: 1mm;">
+              <div style="font-size: 5px; font-family: monospace; margin-top: 0.5mm; line-height: 1;">
                 ${product.barcode || ''}
               </div>
             </div>
-          </div>
-          <div style="font-size: 7px; color: #666;">
-            ${showPrice && product.price ? `<div style="font-weight: bold; color: #2d5a27; margin-bottom: 1mm;">${formatPrice(product)}</div>` : ''}
-            ${showWebsite ? `<div>${website}</div>` : ''}
-          </div>
+            ${showPrice && product.price ? `<div style="font-size: 5px; color: #2d5a27; font-weight: bold; line-height: 1;">${formatPrice(product)}</div>` : ''}
+            ${showWebsite ? `<div style="font-size: 4px; color: #666; line-height: 1;">${website}</div>` : ''}
+          ` : `
+            <div>
+              <div style="font-weight: bold; font-size: ${dims.fontSize}; margin-bottom: 2mm; line-height: 1.2; word-wrap: break-word;">
+                ${displayName}
+              </div>
+              ${showSKU && product.sku ? `<div style="font-size: 7px; color: #666; font-family: monospace; margin-bottom: 1mm;">SKU: ${product.sku}</div>` : ''}
+              <div style="margin: 2mm 0;">
+                ${generateBarcode(product.barcode || '')}
+                <div style="font-size: 8px; font-family: monospace; margin-top: 1mm;">
+                  ${product.barcode || ''}
+                </div>
+              </div>
+            </div>
+            <div style="font-size: 7px; color: #666;">
+              ${showPrice && product.price ? `<div style="font-weight: bold; color: #2d5a27; margin-bottom: 1mm;">${formatPrice(product)}</div>` : ''}
+              ${showWebsite ? `<div>${website}</div>` : ''}
+            </div>
+          `}
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
 
     return `
       <!DOCTYPE html>
@@ -1676,6 +1703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate printable labels for products
   app.post("/api/barcode/generate-labels", requireAuth, async (req, res) => {
     try {
+      console.log('🏷️  [LABELS] Request received:', { labelSize: req.body.labelSize, productsCount: req.body.products?.length });
       const { products, showPrice, showWebsite, showSKU, labelSize, website } = req.body;
       
       if (!products || !Array.isArray(products) || products.length === 0) {
@@ -1694,32 +1722,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         website: website || 'www.momtazchem.com'
       });
 
-      // Generate PDF using Puppeteer
-      const puppeteer = require('puppeteer');
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-      
-      const page = await browser.newPage();
-      await page.setContent(labelHTML, { waitUntil: 'networkidle0' });
-      
-      const pdf = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '10mm',
-          right: '10mm',
-          bottom: '10mm',
-          left: '10mm',
-        }
-      });
-      
-      await browser.close();
+      // For roll printer, return HTML directly for better compatibility
+      if (labelSize === 'roll') {
+        console.log('🏷️  [LABELS] Generating HTML for roll printer');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Content-Disposition', 'inline; filename="Roll_Labels.html"');
+        return res.send(labelHTML);
+      }
 
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="Product_Labels_${new Date().toISOString().split('T')[0]}.pdf"`);
-      res.send(pdf);
+      // For other sizes, generate PDF using Puppeteer
+      try {
+        const browser = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        
+        const page = await browser.newPage();
+        await page.setContent(labelHTML, { waitUntil: 'networkidle0' });
+        
+        const pdf = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+          margin: {
+            top: '10mm',
+            right: '10mm',
+            bottom: '10mm',
+            left: '10mm',
+          }
+        });
+        
+        await browser.close();
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="Product_Labels_${new Date().toISOString().split('T')[0]}.pdf"`);
+        res.send(pdf);
+      } catch (pdfError) {
+        // Fallback to HTML if PDF generation fails
+        console.log('PDF generation failed, falling back to HTML:', pdfError.message);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Content-Disposition', 'inline; filename="Product_Labels.html"');
+        res.send(labelHTML);
+      }
 
       console.log(`✅ [LABELS] Generated labels PDF for ${products.length} products`);
     } catch (error) {
@@ -6797,7 +6840,7 @@ Leading Chemical Solutions Provider
         });
       }
 
-      const nodemailer = require('nodemailer');
+      // Nodemailer is already imported at the top
       
       const transporter = nodemailer.createTransport({
         host,
@@ -10634,7 +10677,6 @@ momtazchem.com
       `;
 
       // Use the simple PDF generator
-      const puppeteer = require('puppeteer');
       const browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
