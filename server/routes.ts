@@ -4854,10 +4854,23 @@ ${procedure.content}
             `Order ${orderNumber} - Sold ${item.quantity} units`
           );
           
-          // Auto-sync inventory from shop back to showcase
-          const updatedProduct = await shopStorage.getShopProductById(item.productId);
-          if (updatedProduct) {
-            await storage.syncProductFromShop(updatedProduct);
+          // Auto-sync inventory from shop back to showcase - CRITICAL FOR REAL-TIME SYNC
+          try {
+            const { UnifiedInventoryManager } = await import("./unified-inventory-manager");
+            const syncResult = await UnifiedInventoryManager.syncFromShopToShowcase();
+            console.log(`✓ [AUTO-SYNC] Order ${orderNumber}: shop→showcase sync completed`);
+          } catch (syncError) {
+            console.error(`✗ [AUTO-SYNC] Order ${orderNumber}: sync failed:`, syncError);
+            // Fallback: Try individual product sync
+            try {
+              const updatedProduct = await shopStorage.getShopProductById(item.productId);
+              if (updatedProduct) {
+                await storage.syncProductFromShop(updatedProduct);
+                console.log(`✓ [FALLBACK-SYNC] Product ${updatedProduct.name} synced individually`);
+              }
+            } catch (fallbackError) {
+              console.error(`✗ [FALLBACK-SYNC] Individual sync failed:`, fallbackError);
+            }
           }
         }
       }
