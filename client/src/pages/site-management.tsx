@@ -25,13 +25,6 @@ export default function SiteManagement() {
   // Initial button configuration
   const getInitialButtons = (): QuickActionButton[] => [
     {
-      id: "unified-inventory",
-      label: "Unified Inventory",
-      icon: Package,
-      onClick: () => setLocation("/admin/unified-inventory"),
-      className: "border-green-300 text-green-600 hover:bg-green-50"
-    },
-    {
       id: "inquiries",
       label: "Inquiries",
       icon: BarChart3,
