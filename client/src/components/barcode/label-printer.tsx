@@ -56,7 +56,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
     const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
     const currency = product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : 'د.ع';
     const unit = product.priceUnit || 'واحد';
-    return `${currency}${price.toFixed(2)} / ${unit}`;
+    return `${price.toFixed(2)} ${currency} / ${unit}`;
   };
 
   const generateLabels = async (format: 'pdf' | 'print') => {
