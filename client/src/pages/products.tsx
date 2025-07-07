@@ -468,30 +468,33 @@ export default function ProductsPage() {
 
   // Auto-generate barcode for new products when name and category are available
   useEffect(() => {
-    const productName = form.watch("name");
-    const category = form.watch("category");
-    const currentBarcode = form.watch("barcode");
+    const subscription = form.watch((value, { name, type }) => {
+      if ((name === "name" || name === "category") && value.name && value.category && !value.barcode && !editingProduct) {
+        const autoGenerateBarcode = async () => {
+          try {
+            console.log('Auto-generating barcode for:', value.name, value.category);
+            const generatedBarcode = generateEAN13Barcode(value.name, value.category);
+            console.log('Generated barcode:', generatedBarcode);
+            form.setValue("barcode", generatedBarcode);
+            
+            toast({
+              title: "Barcode Auto-Generated",
+              description: `Generated EAN-13: ${generatedBarcode}`,
+              variant: "default"
+            });
+          } catch (error) {
+            console.error('Auto-generate barcode error:', error);
+          }
+        };
+        
+        // Delay auto-generation to prevent excessive calls
+        const timeoutId = setTimeout(autoGenerateBarcode, 500);
+        return () => clearTimeout(timeoutId);
+      }
+    });
     
-    // Auto-generate barcode for new products (no existing barcode and not editing)
-    if (productName && category && !currentBarcode && !editingProduct) {
-      const autoGenerateBarcode = async () => {
-        try {
-          const generatedBarcode = await generateEAN13Barcode(productName, category);
-          form.setValue("barcode", generatedBarcode);
-          
-          toast({
-            title: "Barcode Auto-Generated",
-            description: `Generated EAN-13: ${generatedBarcode}`,
-            variant: "default"
-          });
-        } catch (error) {
-          console.error('Auto-generate barcode error:', error);
-        }
-      };
-      
-      autoGenerateBarcode();
-    }
-  }, [form.watch("name"), form.watch("category"), editingProduct]);
+    return () => subscription.unsubscribe();
+  }, [form, editingProduct, toast]);
 
   // Generate barcode image when barcode value changes or dialog opens
   useEffect(() => {
