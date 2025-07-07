@@ -22,11 +22,11 @@ import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
 import ShoppingCartModal from "@/components/cart/shopping-cart-modal";
 
 import CustomerAuth from "@/components/auth/customer-auth";
-import { useToast } from "@/hooks/use-toast";
+import { useMultilingualToast } from "@/hooks/use-multilingual-toast";
 import VisualBarcode from "@/components/ui/visual-barcode";
 
 const Shop = () => {
-  const { toast } = useToast();
+  const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
   const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -430,8 +430,8 @@ const Shop = () => {
     const product = currentProducts.find(p => p.id === productId);
     if (!product) {
       toast({
-        title: "خطا",
-        description: "محصول یافت نشد",
+        title: "errorOccurred",
+        description: "productNotFound",
         variant: "destructive",
       });
       return;
@@ -444,8 +444,8 @@ const Shop = () => {
     // Check if total cart quantity would exceed actual database stock
     if (totalRequestedQuantity > actualStock) {
       toast({
-        title: "موجودی ناکافی",
-        description: `تنها ${actualStock} عدد از این محصول موجود است`,
+        title: "warning",
+        description: `${t.inStock}: ${actualStock}`,
         variant: "destructive",
       });
       return;
@@ -464,8 +464,8 @@ const Shop = () => {
     // Reset quantity for this product and show success message
     setProductQuantity(productId, 1);
     toast({
-      title: "به سبد خرید اضافه شد",
-      description: `${targetQuantity} عدد ${product.name} به سبد خرید شما اضافه شد`,
+      title: "success",
+      description: "addedToCart",
     });
   };
 
@@ -1286,8 +1286,8 @@ const Shop = () => {
             setDisplayStock({});
             // Show success message
             toast({
-              title: direction === 'rtl' ? "سفارش ثبت شد" : "Order Submitted",
-              description: direction === 'rtl' ? "سفارش شما با موفقیت ثبت شد" : "Your order has been successfully submitted",
+              title: "success",
+              description: "orderCreated",
             });
           }}
           onClose={() => setShowCheckout(false)}

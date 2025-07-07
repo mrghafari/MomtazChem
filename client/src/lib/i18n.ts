@@ -147,6 +147,35 @@ export interface Translation {
   orderConfirmed: string;
   contactSuccess: string;
   
+  // Notifications and Toast Messages
+  success: string;
+  errorOccurred: string;
+  warning: string;
+  info: string;
+  loginSuccessful: string;
+  loginFailed: string;
+  registrationSuccessful: string;
+  registrationFailed: string;
+  orderCreated: string;
+  orderFailed: string;
+  addedToCart: string;
+  removedFromCart: string;
+  cartCleared: string;
+  profileUpdated: string;
+  profileUpdateFailed: string;
+  passwordChanged: string;
+  passwordChangeFailed: string;
+  emailSent: string;
+  emailFailed: string;
+  dataLoaded: string;
+  dataLoadFailed: string;
+  unauthorized: string;
+  unauthorizedDesc: string;
+  productNotFound: string;
+  networkError: string;
+  tryAgain: string;
+  pleaseWait: string;
+  
   // Product categories
   waterTreatment: string;
   fuelAdditives: string;
@@ -345,6 +374,35 @@ export const translations: Record<Language, Translation> = {
     orderConfirmed: 'Your order has been confirmed',
     contactSuccess: 'Your message has been sent successfully',
     
+    // Notifications and Toast Messages
+    success: 'Success',
+    errorOccurred: 'Error Occurred',
+    warning: 'Warning',
+    info: 'Information',
+    loginSuccessful: 'Login Successful',
+    loginFailed: 'Login Failed',
+    registrationSuccessful: 'Registration Successful',
+    registrationFailed: 'Registration Failed',
+    orderCreated: 'Order Created Successfully',
+    orderFailed: 'Order Creation Failed',
+    addedToCart: 'Product Added to Cart',
+    removedFromCart: 'Product Removed from Cart',
+    cartCleared: 'Cart Cleared',
+    profileUpdated: 'Profile Updated Successfully',
+    profileUpdateFailed: 'Profile Update Failed',
+    passwordChanged: 'Password Changed Successfully',
+    passwordChangeFailed: 'Password Change Failed',
+    emailSent: 'Email Sent Successfully',
+    emailFailed: 'Email Sending Failed',
+    dataLoaded: 'Data Loaded Successfully',
+    dataLoadFailed: 'Data Loading Failed',
+    unauthorized: 'Unauthorized',
+    unauthorizedDesc: 'You are logged out. Logging in again...',
+    productNotFound: 'Product Not Found',
+    networkError: 'Network Error',
+    tryAgain: 'Please try again',
+    pleaseWait: 'Please wait...',
+    
     // Product categories
     waterTreatment: 'Water Treatment',
     fuelAdditives: 'Fuel Additives',
@@ -541,6 +599,35 @@ export const translations: Record<Language, Translation> = {
     orderConfirmed: 'تم تأكيد طلبكم',
     contactSuccess: 'تم إرسال رسالتكم بنجاح',
     
+    // Notifications and Toast Messages
+    success: 'نجح',
+    errorOccurred: 'حدث خطأ',
+    warning: 'تحذير',
+    info: 'معلومات',
+    loginSuccessful: 'تم تسجيل الدخول بنجاح',
+    loginFailed: 'فشل تسجيل الدخول',
+    registrationSuccessful: 'تم التسجيل بنجاح',
+    registrationFailed: 'فشل التسجيل',
+    orderCreated: 'تم إنشاء الطلب بنجاح',
+    orderFailed: 'فشل في إنشاء الطلب',
+    addedToCart: 'تم إضافة المنتج إلى السلة',
+    removedFromCart: 'تم إزالة المنتج من السلة',
+    cartCleared: 'تم تفريغ السلة',
+    profileUpdated: 'تم تحديث الملف الشخصي بنجاح',
+    profileUpdateFailed: 'فشل في تحديث الملف الشخصي',
+    passwordChanged: 'تم تغيير كلمة المرور بنجاح',
+    passwordChangeFailed: 'فشل في تغيير كلمة المرور',
+    emailSent: 'تم إرسال البريد الإلكتروني بنجاح',
+    emailFailed: 'فشل في إرسال البريد الإلكتروني',
+    dataLoaded: 'تم تحميل البيانات بنجاح',
+    dataLoadFailed: 'فشل في تحميل البيانات',
+    unauthorized: 'غير مخول',
+    unauthorizedDesc: 'تم تسجيل خروجك. جاري تسجيل الدخول مرة أخرى...',
+    productNotFound: 'المنتج غير موجود',
+    networkError: 'خطأ في الشبكة',
+    tryAgain: 'يرجى المحاولة مرة أخرى',
+    pleaseWait: 'يرجى الانتظار...',
+    
     // Product categories
     waterTreatment: 'معالجة المياه',
     fuelAdditives: 'إضافات الوقود',
@@ -736,6 +823,35 @@ export const translations: Record<Language, Translation> = {
     thankYou: 'سوپاستان',
     orderConfirmed: 'داواکاریەکەتان پەسەندکرا',
     contactSuccess: 'پەیامەکەتان بە سەرکەوتووی نێردرا',
+    
+    // Notifications and Toast Messages
+    success: 'سەرکەوتن',
+    errorOccurred: 'هەڵەیەک ڕوویدا',
+    warning: 'ئاگاداری',
+    info: 'زانیاری',
+    loginSuccessful: 'چوونەژوورەوە سەرکەوتوو بوو',
+    loginFailed: 'چوونەژوورەوە سەرنەکەوت',
+    registrationSuccessful: 'تۆمارکردن سەرکەوتوو بوو',
+    registrationFailed: 'تۆمارکردن سەرنەکەوت',
+    orderCreated: 'داواکاری بە سەرکەوتووی درووستکرا',
+    orderFailed: 'درووستکردنی داواکاری سەرنەکەوت',
+    addedToCart: 'بەرهەم بۆ سەبەتە زیادکرا',
+    removedFromCart: 'بەرهەم لە سەبەتەوە لابرا',
+    cartCleared: 'سەبەتە پاککرایەوە',
+    profileUpdated: 'پرۆفایل بە سەرکەوتووی نوێکرایەوە',
+    profileUpdateFailed: 'نوێکردنەوەی پرۆفایل سەرنەکەوت',
+    passwordChanged: 'ووشەی نهێنی بە سەرکەوتووی گۆڕدرا',
+    passwordChangeFailed: 'گۆڕینی ووشەی نهێنی سەرنەکەوت',
+    emailSent: 'ئیمەیل بە سەرکەوتووی نێردرا',
+    emailFailed: 'ناردنی ئیمەیل سەرنەکەوت',
+    dataLoaded: 'داتا بە سەرکەوتووی بارکرا',
+    dataLoadFailed: 'بارکردنی داتا سەرنەکەوت',
+    unauthorized: 'ڕێپێدان نییە',
+    unauthorizedDesc: 'دەرچوویت. جارێکی تر چوونەژوورەوە...',
+    productNotFound: 'بەرهەم نەدۆزرایەوە',
+    networkError: 'هەڵەی تۆڕ',
+    tryAgain: 'تکایە دووبارە هەوڵبدە',
+    pleaseWait: 'تکایە چاوەڕێبە...',
     
     // Product categories
     waterTreatment: 'چارەسەری ئاو',
