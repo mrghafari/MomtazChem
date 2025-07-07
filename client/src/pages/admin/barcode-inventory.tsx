@@ -247,25 +247,39 @@ const BarcodeInventory = () => {
   // EAN-13 CSV export function
   const exportEAN13Data = async () => {
     try {
-      const response = await fetch('/api/ean13/export');
-      if (!response.ok) throw new Error('Export failed');
+      const response = await fetch('/api/ean13/export', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Export error:', errorText);
+        throw new Error(`Export failed: ${response.status}`);
+      }
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `EAN13_Export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       toast({
-        title: "Export Complete",
-        description: "EAN-13 data exported successfully"
+        title: "تصدیر موفق",
+        description: "فایل CSV دیتای EAN-13 با موفقیت دانلود شد"
       });
     } catch (error) {
+      console.error('CSV export error:', error);
       toast({
-        title: "Export Failed",
-        description: "Failed to export EAN-13 data",
+        title: "خطا در تصدیر",
+        description: "امکان تصدیر فایل CSV وجود ندارد",
         variant: "destructive"
       });
     }
@@ -770,7 +784,7 @@ const BarcodeInventory = () => {
                       onClick={() => exportEAN13Data()}
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      Export EAN-13 CSV
+                      تصدیر CSV بارکدهای EAN-13
                     </Button>
                     <Button 
                       className="w-full" 
