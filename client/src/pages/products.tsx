@@ -1187,31 +1187,49 @@ export default function ProductsPage() {
                 <FormField
                   control={form.control}
                   name="sku"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SKU</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input placeholder="Enter SKU" {...field} />
-                        </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={generateSmartSKU}
-                          disabled={generateSKUMutation.isPending}
-                          className="whitespace-nowrap"
-                        >
-                          {generateSKUMutation.isPending ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          ) : (
-                            "🤖 AI SKU"
-                          )}
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const existingSKU = editingProduct?.sku;
+                    const isSkuProtected = existingSKU && field.value;
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel>SKU</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter SKU" 
+                              {...field}
+                              disabled={isSkuProtected}
+                              className={isSkuProtected ? "bg-gray-100 cursor-not-allowed" : ""}
+                            />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={generateSmartSKU}
+                            disabled={generateSKUMutation.isPending || isSkuProtected}
+                            className="whitespace-nowrap"
+                          >
+                            {generateSKUMutation.isPending ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            ) : (
+                              "🤖 AI SKU"
+                            )}
+                          </Button>
+                        </div>
+                        {isSkuProtected && (
+                          <div className="text-xs text-amber-600 font-medium">
+                            🔒 SKU محافظت شده - قابل تغییر نیست
+                          </div>
+                        )}
+                        <div className="text-xs text-muted-foreground">
+                          SKU یکبار ایجاد شود، دیگر قابل تغییر نخواهد بود
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
