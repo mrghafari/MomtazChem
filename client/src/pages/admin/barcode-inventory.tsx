@@ -382,31 +382,59 @@ const BarcodeInventory = () => {
     const generateBarcodeDataURL = (barcode: string) => {
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = 200;
-        canvas.height = 80;
+        canvas.width = 220;
+        canvas.height = 100;
+        
+        // Get canvas context
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas context not available');
+        
+        // Clear canvas with white background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Generate barcode using JsBarcode with canvas
         JsBarcode(canvas, barcode, {
           format: barcode.length === 13 ? "EAN13" : "CODE128",
-          width: 1.5,
-          height: 60,
+          width: 2,
+          height: 70,
           displayValue: true,
-          fontSize: 12,
+          fontSize: 14,
           background: '#ffffff',
-          lineColor: '#000000'
+          lineColor: '#000000',
+          margin: 10
         });
         
         return canvas.toDataURL('image/png');
       } catch (error) {
         console.error('Barcode generation error:', error);
-        return 'data:image/svg+xml;base64,' + btoa(`
-          <svg width="200" height="80" xmlns="http://www.w3.org/2000/svg">
-            <rect width="200" height="80" fill="#f0f0f0" stroke="#ccc"/>
-            <text x="100" y="40" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">
-              ${barcode}
-            </text>
-          </svg>
-        `);
+        // Create a simple barcode-like pattern manually if JsBarcode fails
+        const canvas = document.createElement('canvas');
+        canvas.width = 220;
+        canvas.height = 100;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          // White background
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw simple barcode pattern
+          ctx.fillStyle = '#000000';
+          for (let i = 0; i < barcode.length; i++) {
+            const x = 20 + (i * 12);
+            const width = parseInt(barcode[i]) % 2 === 0 ? 2 : 4;
+            ctx.fillRect(x, 20, width, 50);
+          }
+          
+          // Draw text
+          ctx.fillStyle = '#000000';
+          ctx.font = '12px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(barcode, canvas.width / 2, 85);
+        }
+        
+        return canvas.toDataURL('image/png');
       }
     };
 
@@ -472,9 +500,12 @@ const BarcodeInventory = () => {
         }
         
         .barcode-image {
-          max-width: 180px;
-          max-height: 60px;
+          max-width: 200px;
+          max-height: 80px;
           border: none;
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+          image-rendering: pixelated;
         }
         
         .barcode-number {
@@ -1119,7 +1150,7 @@ const BarcodeInventory = () => {
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 <Printer className="h-3 w-3 mr-1" />
-                                چاپ لیبل
+                                Print Label
                               </Button>
                             )}
                           </div>
@@ -1180,7 +1211,7 @@ const BarcodeInventory = () => {
                   disabled={selectedProductsForBatch.length === 0}
                 >
                   <Printer className="h-4 w-4 mr-2" />
-                  چاپ {selectedProductsForBatch.length} لیبل انتخاب شده
+                  Print {selectedProductsForBatch.length} Selected Labels
                 </Button>
               </CardContent>
             </Card>
@@ -1279,7 +1310,7 @@ const BarcodeInventory = () => {
                             className="text-blue-600 hover:text-blue-800"
                           >
                             <Printer className="h-3 w-3 mr-1" />
-                            چاپ لیبل
+                            Print Label
                           </Button>
                         </td>
                       </tr>
