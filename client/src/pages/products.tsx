@@ -486,9 +486,10 @@ export default function ProductsPage() {
       }
       
       // Auto-generate when ALL THREE fields (name, category, SKU) are available, and no existing barcode
+      // Only auto-generate for new products (not editing existing ones with IDs)
       if ((name === "name" || name === "category" || name === "sku") && 
           value.name && value.category && value.sku && 
-          !value.barcode && !editingProduct) {
+          !value.barcode && !editingProduct?.id) {
         
         console.log('ALL CONDITIONS MET for auto-generation:', { 
           name: value.name, 
@@ -505,7 +506,7 @@ export default function ProductsPage() {
             });
             
             // Use SKU as the primary identifier for barcode generation
-            const generatedBarcode = generateEAN13Barcode(value.sku, value.category);
+            const generatedBarcode = await generateEAN13Barcode(value.sku, value.category);
             console.log('Generated barcode:', generatedBarcode);
             form.setValue("barcode", generatedBarcode);
             
@@ -524,7 +525,8 @@ export default function ProductsPage() {
           hasCategory: !!value.category,
           hasSku: !!value.sku,
           hasBarcode: !!value.barcode,
-          isEditing: !!editingProduct
+          isEditing: !!editingProduct?.id,
+          triggeredField: name
         });
       }
     });
