@@ -466,25 +466,44 @@ export default function ProductsPage() {
     return matchesCategory && matchesSearch;
   });
 
-  // Auto-generate barcode for new products when category and SKU are available
+  // Auto-generate barcode for new products when name, category and SKU are all available
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     
     const subscription = form.watch((value, { name, type }) => {
-      console.log('Form watch triggered:', { name, category: value.category, sku: value.sku, barcode: value.barcode, editingProduct });
+      console.log('Form watch triggered:', { 
+        field: name, 
+        productName: value.name, 
+        category: value.category, 
+        sku: value.sku, 
+        barcode: value.barcode, 
+        editingProduct 
+      });
       
       // Clear any existing timeout
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
       
-      // Auto-generate when category and SKU are both available, and no existing barcode
-      if ((name === "category" || name === "sku") && value.category && value.sku && !value.barcode && !editingProduct) {
-        console.log('Conditions met for auto-generation:', { category: value.category, sku: value.sku });
+      // Auto-generate when ALL THREE fields (name, category, SKU) are available, and no existing barcode
+      if ((name === "name" || name === "category" || name === "sku") && 
+          value.name && value.category && value.sku && 
+          !value.barcode && !editingProduct) {
+        
+        console.log('ALL CONDITIONS MET for auto-generation:', { 
+          name: value.name, 
+          category: value.category, 
+          sku: value.sku 
+        });
         
         timeoutId = setTimeout(async () => {
           try {
-            console.log('Auto-generating barcode for category:', value.category, 'SKU:', value.sku);
+            console.log('Auto-generating barcode for:', {
+              name: value.name,
+              category: value.category, 
+              sku: value.sku
+            });
+            
             // Use SKU as the primary identifier for barcode generation
             const generatedBarcode = generateEAN13Barcode(value.sku, value.category);
             console.log('Generated barcode:', generatedBarcode);
@@ -492,13 +511,21 @@ export default function ProductsPage() {
             
             toast({
               title: "بارکد خودکار تولید شد",
-              description: `بارکد EAN-13 تولید شد: ${generatedBarcode}`,
+              description: `بارکد EAN-13 برای ${value.name} تولید شد: ${generatedBarcode}`,
               variant: "default"
             });
           } catch (error) {
             console.error('Auto-generate barcode error:', error);
           }
         }, 1000);
+      } else {
+        console.log('Conditions NOT met:', {
+          hasName: !!value.name,
+          hasCategory: !!value.category,
+          hasSku: !!value.sku,
+          hasBarcode: !!value.barcode,
+          isEditing: !!editingProduct
+        });
       }
     });
     
@@ -1342,7 +1369,7 @@ export default function ProductsPage() {
                         </Button>
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        بارکد خودکار وقتی دسته‌بندی و SKU وارد شود تولید می‌شود. می‌توانید با کلیک "Generate" هم دستی ایجاد کنید.
+                        بارکد خودکار وقتی <strong>نام محصول، دسته‌بندی و SKU</strong> هر سه وارد شوند تولید می‌شود. می‌توانید با کلیک "Generate" هم دستی ایجاد کنید.
                         <span className="text-amber-600 font-medium">توجه: بارکدهای موجود از بازنویسی محافظت می‌شوند.</span>
                       </div>
                       
