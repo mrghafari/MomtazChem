@@ -32,7 +32,7 @@ Fix admin authentication and enhance automatic barcode generation system
 - Removed: `client/src/pages/shop-admin-broken.tsx` - Fixed syntax errors
 
 ## Key Features:
-1. ✅ Admin login works reliably with session persistence
+1. ✅ Admin login works reliably with session persistence (admin@momtazchem.com / Ghafari@110)
 2. ✅ Automatic barcode generation when name + category + SKU are entered
 3. ✅ SKU protection prevents accidental modifications
 4. ✅ Enhanced authentication with proper error handling
