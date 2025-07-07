@@ -964,56 +964,49 @@ const Shop = () => {
 
 
 
-                          {/* Quantity Discounts Display */}
-                          {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
-                            <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                              <h4 className="text-xs font-semibold text-blue-800 mb-1">📦 Bulk Discounts</h4>
-                              <div className="space-y-1">
-                                {product.quantityDiscounts.map((discount: any, index: number) => (
-                                  <div key={index} className="flex justify-between items-center text-xs">
-                                    <span className="text-blue-700">
-                                      {discount.minQty}+ items:
-                                    </span>
-                                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs py-0 px-1">
-                                      {(discount.discount * 100).toFixed(0)}% OFF
-                                    </Badge>
-                                  </div>
-                                ))}
-                              </div>
-                              {(() => {
-                                const currentQty = getProductQuantity(product.id);
-                                const currentDiscount = getCurrentDiscountInfo(product, currentQty);
-                                const nextDiscount = getNextDiscountInfo(product, currentQty);
-                                
-                                return (
-                                  <div className="space-y-2 mt-2">
-                                    {/* Current Discount Display */}
-                                    {currentDiscount && (
-                                      <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-                                        <div className="flex items-center justify-between">
-                                          <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                                            {(currentDiscount.discount * 100).toFixed(0)}% Active Discount
-                                          </Badge>
-                                          <div className="text-xs text-green-700 font-semibold">
-                                            You Save: ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(2)}
+                          {/* Fixed Height Discount Container */}
+                          <div className="mb-3 h-20 overflow-hidden">
+                            {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
+                              <div className="p-2 bg-blue-50 rounded-lg border border-blue-200 h-full">
+                                <h4 className="text-xs font-semibold text-blue-800 mb-1">📦 Bulk Discounts</h4>
+                                {(() => {
+                                  const currentQty = getProductQuantity(product.id);
+                                  const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                  const nextDiscount = getNextDiscountInfo(product, currentQty);
+                                  
+                                  return (
+                                    <div className="space-y-1">
+                                      {/* Current Active Discount */}
+                                      {currentDiscount ? (
+                                        <div className="bg-green-50 border border-green-200 rounded p-1">
+                                          <div className="flex items-center justify-between text-xs">
+                                            <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs py-0 px-1">
+                                              {(currentDiscount.discount * 100).toFixed(0)}% OFF
+                                            </Badge>
+                                            <span className="text-green-700 font-medium">
+                                              Save ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)}
+                                            </span>
                                           </div>
                                         </div>
-                                      </div>
-                                    )}
-                                    
-                                    {/* Next Discount Display */}
-                                    {nextDiscount && (
-                                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                                        <div className="text-xs text-blue-700 font-medium">
-                                          Add {nextDiscount.remaining} more for {(nextDiscount.discount * 100).toFixed(0)}% discount!
+                                      ) : nextDiscount ? (
+                                        <div className="bg-blue-50 border border-blue-200 rounded p-1">
+                                          <div className="text-xs text-blue-700 font-medium">
+                                            +{nextDiscount.remaining} for {(nextDiscount.discount * 100).toFixed(0)}% discount!
+                                          </div>
                                         </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          )}
+                                      ) : (
+                                        <div className="text-xs text-blue-700">
+                                          {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            ) : (
+                              <div className="h-full"></div>
+                            )}
+                          </div>
 
 
 
@@ -1098,53 +1091,51 @@ const Shop = () => {
                                 </div>
                               </div>
                               
-                              {/* Quantity Discounts for List View */}
-                              {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
-                                <div className="mb-4">
-                                  <div className="text-sm font-medium text-gray-700 mb-2">Quantity Discounts:</div>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {product.quantityDiscounts.map((discount: any, index: number) => (
-                                      <div key={index} className="bg-gray-50 rounded-lg p-2">
-                                        <Badge variant="outline" className="text-xs">
-                                          {discount.minQty}+ items → {(discount.discount * 100).toFixed(0)}% off
-                                        </Badge>
-                                      </div>
-                                    ))}
-                                  </div>
-                                  {(() => {
-                                    const currentQty = getProductQuantity(product.id);
-                                    const currentDiscount = getCurrentDiscountInfo(product, currentQty);
-                                    const nextDiscount = getNextDiscountInfo(product, currentQty);
-                                    
-                                    return (
-                                      <div className="space-y-2 mt-3">
-                                        {/* Current Discount Display */}
-                                        {currentDiscount && (
-                                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                                            <div className="flex items-center justify-between">
-                                              <Badge variant="secondary" className="bg-green-100 text-green-700 text-sm">
-                                                {(currentDiscount.discount * 100).toFixed(0)}% Active Discount
-                                              </Badge>
-                                              <div className="text-sm text-green-700 font-semibold">
-                                                You Save: ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(2)}
+                              {/* Fixed Height Discount Container - List View */}
+                              <div className="mb-4 h-16">
+                                {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
+                                  <div className="h-full">
+                                    <div className="text-sm font-medium text-gray-700 mb-2">Quantity Discounts:</div>
+                                    {(() => {
+                                      const currentQty = getProductQuantity(product.id);
+                                      const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                      const nextDiscount = getNextDiscountInfo(product, currentQty);
+                                      
+                                      return (
+                                        <div className="flex items-center gap-2">
+                                          {/* Current Active Discount */}
+                                          {currentDiscount ? (
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-2 flex-1">
+                                              <div className="flex items-center justify-between text-sm">
+                                                <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                                                  {(currentDiscount.discount * 100).toFixed(0)}% OFF Active
+                                                </Badge>
+                                                <span className="text-green-700 font-medium">
+                                                  Save ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)}
+                                                </span>
                                               </div>
                                             </div>
-                                          </div>
-                                        )}
-                                        
-                                        {/* Next Discount Display */}
-                                        {nextDiscount && (
-                                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                            <div className="text-sm text-blue-700 font-medium">
-                                              Add {nextDiscount.remaining} more for {(nextDiscount.discount * 100).toFixed(0)}% discount!
+                                          ) : nextDiscount ? (
+                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 flex-1">
+                                              <div className="text-sm text-blue-700 font-medium">
+                                                +{nextDiscount.remaining} more for {(nextDiscount.discount * 100).toFixed(0)}% discount!
+                                              </div>
                                             </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })()}
-                                </div>
-                              )}
+                                          ) : (
+                                            <div className="bg-gray-50 rounded-lg p-2 flex-1">
+                                              <Badge variant="outline" className="text-xs">
+                                                {product.quantityDiscounts[0].minQty}+ items → {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% off
+                                              </Badge>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+                                ) : (
+                                  <div className="h-full"></div>
+                                )}
+                              </div>
 
                               {/* Low Stock Warning - List View */}
                               {product.inStock && displayStock[product.id] && product.lowStockThreshold && 
