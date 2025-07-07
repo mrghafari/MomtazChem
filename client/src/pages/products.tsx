@@ -876,10 +876,14 @@ export default function ProductsPage() {
                               {product.barcode ? `Barcode: ${product.barcode}` : 'No Barcode'}
                             </span>
                           </div>
+                          {/* Debug info */}
+                          <div className="text-xs text-gray-400">
+                            Debug: barcode="{product.barcode}", type={typeof product.barcode}, length={product.barcode?.length}
+                          </div>
                           {product.barcode && (
                             <div className="flex justify-center bg-white p-2 border rounded">
                               <VisualBarcode 
-                                value={product.barcode}
+                                value={String(product.barcode)}
                                 width={1.2}
                                 height={35}
                                 fontSize={8}
