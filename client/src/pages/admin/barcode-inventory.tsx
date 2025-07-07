@@ -245,35 +245,8 @@ const BarcodeInventory = () => {
     }
   };
 
-  // EAN-13 CSV export function
-  const exportEAN13Data = async () => {
-    try {
-      const response = await fetch('/api/ean13/export');
-      if (!response.ok) throw new Error('Export failed');
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `EAN13_Export_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: "خروجی EAN-13 تکمیل شد",
-        description: "فایل CSV با پشتیبانی چندزبانه ایجاد شد"
-      });
-    } catch (error) {
-      toast({
-        title: "خطا در خروجی گیری",
-        description: "عدم موفقیت در ایجاد فایل EAN-13",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Complete barcode CSV export with pricing and multilingual support
-  const exportCompleteData = async () => {
+  // Unified CSV export function with complete data and multilingual support
+  const exportCSVData = async () => {
     try {
       const response = await fetch('/api/barcode/export-all');
       if (!response.ok) throw new Error('Export failed');
@@ -282,18 +255,18 @@ const BarcodeInventory = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Complete_Barcode_Export_${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `Barcode_Export_${new Date().toISOString().split('T')[0]}.csv`;
       link.click();
       window.URL.revokeObjectURL(url);
       
       toast({
-        title: "خروجی کامل تکمیل شد",
-        description: "فایل CSV جامع با قیمت‌گذاری و پشتیبانی کامل از فارسی، عربی و کوردی ایجاد شد"
+        title: "خروجی CSV تکمیل شد",
+        description: "فایل شامل کلیه اطلاعات محصولات، بارکدها و قیمت‌ها"
       });
     } catch (error) {
       toast({
         title: "خطا در خروجی گیری",
-        description: "عدم موفقیت در ایجاد فایل جامع بارکد",
+        description: "عدم موفقیت در ایجاد فایل CSV",
         variant: "destructive"
       });
     }
@@ -795,18 +768,10 @@ const BarcodeInventory = () => {
                     <Button 
                       className="w-full" 
                       variant="outline"
-                      onClick={() => exportEAN13Data()}
+                      onClick={() => exportCSVData()}
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      خروجی EAN-13 CSV
-                    </Button>
-                    <Button 
-                      className="w-full" 
-                      variant="outline"
-                      onClick={() => exportCompleteData()}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      خروجی کامل با قیمت (فارسی/عربی/کوردی)
+                      Export CSV
                     </Button>
                     <Button 
                       className="w-full" 
