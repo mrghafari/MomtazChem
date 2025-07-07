@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode } from "@shared/barcode-utils";
+import JsBarcode from "jsbarcode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -377,15 +378,15 @@ const BarcodeInventory = () => {
 
   // Generate HTML for label printing
   const generateLabelHTML = (productList: Product[]) => {
-    const generateBarcodeSVG = (barcode: string) => {
+    // Generate barcode data URL for each product
+    const generateBarcodeDataURL = (barcode: string) => {
       try {
         const canvas = document.createElement('canvas');
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '200');
-        svg.setAttribute('height', '80');
+        canvas.width = 200;
+        canvas.height = 80;
         
-        // Generate barcode using JsBarcode
-        JsBarcode(svg, barcode, {
+        // Generate barcode using JsBarcode with canvas
+        JsBarcode(canvas, barcode, {
           format: barcode.length === 13 ? "EAN13" : "CODE128",
           width: 1.5,
           height: 60,
@@ -395,9 +396,17 @@ const BarcodeInventory = () => {
           lineColor: '#000000'
         });
         
-        return svg.outerHTML;
+        return canvas.toDataURL('image/png');
       } catch (error) {
-        return `<div style="width: 200px; height: 80px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">Invalid Barcode</div>`;
+        console.error('Barcode generation error:', error);
+        return 'data:image/svg+xml;base64,' + btoa(`
+          <svg width="200" height="80" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="80" fill="#f0f0f0" stroke="#ccc"/>
+            <text x="100" y="40" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">
+              ${barcode}
+            </text>
+          </svg>
+        `);
       }
     };
 
@@ -462,6 +471,12 @@ const BarcodeInventory = () => {
           flex-grow: 1;
         }
         
+        .barcode-image {
+          max-width: 180px;
+          max-height: 60px;
+          border: none;
+        }
+        
         .barcode-number {
           font-size: 10px;
           font-family: monospace;
@@ -489,13 +504,12 @@ const BarcodeInventory = () => {
               </div>
             </div>
             <div class="barcode-section">
-              ${generateBarcodeSVG(product.barcode!)}
+              <img src="${generateBarcodeDataURL(product.barcode!)}" class="barcode-image" alt="Barcode: ${product.barcode}" />
             </div>
             <div class="barcode-number">${product.barcode}</div>
           </div>
         `).join('')}
       </div>
-      <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     </body>
     </html>
     `;
