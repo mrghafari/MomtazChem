@@ -968,7 +968,14 @@ const Shop = () => {
                           <div className="mb-3 h-20 overflow-hidden">
                             {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
                               <div className="p-2 bg-blue-50 rounded-lg border border-blue-200 h-full">
-                                <h4 className="text-xs font-semibold text-blue-800 mb-1">📦 Bulk Discounts</h4>
+                                <div className="flex items-center justify-between mb-1">
+                                  <h4 className="text-xs font-semibold text-blue-800">📦 Bulk Discounts</h4>
+                                  <div className="text-xs text-gray-600">
+                                    {product.quantityDiscounts.map((d: any, i: number) => 
+                                      `${d.minQty}+:${(d.discount * 100).toFixed(0)}%`
+                                    ).join(' • ')}
+                                  </div>
+                                </div>
                                 {(() => {
                                   const currentQty = getProductQuantity(product.id);
                                   const currentDiscount = getCurrentDiscountInfo(product, currentQty);
@@ -996,7 +1003,7 @@ const Shop = () => {
                                         </div>
                                       ) : (
                                         <div className="text-xs text-blue-700">
-                                          {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
+                                          Start with {product.quantityDiscounts[0].minQty} items for {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
                                         </div>
                                       )}
                                     </div>
@@ -1095,7 +1102,14 @@ const Shop = () => {
                               <div className="mb-4 h-16">
                                 {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
                                   <div className="h-full">
-                                    <div className="text-sm font-medium text-gray-700 mb-2">Quantity Discounts:</div>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="text-sm font-medium text-gray-700">Quantity Discounts:</div>
+                                      <div className="text-xs text-gray-600">
+                                        {product.quantityDiscounts.map((d: any, i: number) => 
+                                          `${d.minQty}+:${(d.discount * 100).toFixed(0)}%`
+                                        ).join(' • ')}
+                                      </div>
+                                    </div>
                                     {(() => {
                                       const currentQty = getProductQuantity(product.id);
                                       const currentDiscount = getCurrentDiscountInfo(product, currentQty);
@@ -1123,9 +1137,9 @@ const Shop = () => {
                                             </div>
                                           ) : (
                                             <div className="bg-gray-50 rounded-lg p-2 flex-1">
-                                              <Badge variant="outline" className="text-xs">
-                                                {product.quantityDiscounts[0].minQty}+ items → {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% off
-                                              </Badge>
+                                              <div className="text-xs text-gray-700">
+                                                Start with {product.quantityDiscounts[0].minQty} items for {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
+                                              </div>
                                             </div>
                                           )}
                                         </div>
