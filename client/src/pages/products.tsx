@@ -466,78 +466,32 @@ export default function ProductsPage() {
     return matchesCategory && matchesSearch;
   });
 
-  // Auto-generate barcode for new products when name, category and SKU are all available
+  // Auto-generate barcode for new products when name and category are available
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    const productName = form.watch("name");
+    const category = form.watch("category");
+    const currentBarcode = form.watch("barcode");
     
-    const subscription = form.watch((value, { name, type }) => {
-      console.log('Form watch triggered:', { 
-        field: name, 
-        productName: value.name, 
-        category: value.category, 
-        sku: value.sku, 
-        barcode: value.barcode, 
-        editingProduct 
-      });
+    // Auto-generate barcode for new products (no existing barcode and not editing)
+    if (productName && category && !currentBarcode && !editingProduct) {
+      const autoGenerateBarcode = async () => {
+        try {
+          const generatedBarcode = await generateEAN13Barcode(productName, category);
+          form.setValue("barcode", generatedBarcode);
+          
+          toast({
+            title: "Barcode Auto-Generated",
+            description: `Generated EAN-13: ${generatedBarcode}`,
+            variant: "default"
+          });
+        } catch (error) {
+          console.error('Auto-generate barcode error:', error);
+        }
+      };
       
-      // Clear any existing timeout
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      
-      // Auto-generate when ALL THREE fields (name, category, SKU) are available, and no existing barcode
-      // Only auto-generate for new products (not editing existing ones with IDs)
-      if ((name === "name" || name === "category" || name === "sku") && 
-          value.name && value.category && value.sku && 
-          !value.barcode && !editingProduct?.id) {
-        
-        console.log('ALL CONDITIONS MET for auto-generation:', { 
-          name: value.name, 
-          category: value.category, 
-          sku: value.sku 
-        });
-        
-        timeoutId = setTimeout(async () => {
-          try {
-            console.log('Auto-generating barcode for:', {
-              name: value.name,
-              category: value.category, 
-              sku: value.sku
-            });
-            
-            // Use SKU as the primary identifier for barcode generation
-            const generatedBarcode = await generateEAN13Barcode(value.sku, value.category);
-            console.log('Generated barcode:', generatedBarcode);
-            form.setValue("barcode", generatedBarcode);
-            
-            toast({
-              title: "بارکد خودکار تولید شد",
-              description: `بارکد EAN-13 برای ${value.name} تولید شد: ${generatedBarcode}`,
-              variant: "default"
-            });
-          } catch (error) {
-            console.error('Auto-generate barcode error:', error);
-          }
-        }, 1000);
-      } else {
-        console.log('Conditions NOT met:', {
-          hasName: !!value.name,
-          hasCategory: !!value.category,
-          hasSku: !!value.sku,
-          hasBarcode: !!value.barcode,
-          isEditing: !!editingProduct?.id,
-          triggeredField: name
-        });
-      }
-    });
-    
-    return () => {
-      subscription.unsubscribe();
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [form, editingProduct, toast]);
+      autoGenerateBarcode();
+    }
+  }, [form.watch("name"), form.watch("category"), editingProduct]);
 
   // Generate barcode image when barcode value changes or dialog opens
   useEffect(() => {
@@ -907,36 +861,32 @@ export default function ProductsPage() {
                       )}
 
                       {/* Product Codes */}
-                      <div className="space-y-2 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
                         {product.sku && (
-                          <div className="flex items-center gap-1">
+                          <span className="flex items-center gap-1">
                             <BarChart3 className="w-3 h-3" />
-                            <span>SKU: {product.sku}</span>
+                            SKU: {product.sku}
+                          </span>
+                        )}
+                        {product.barcode && (
+                          <div className="space-y-2">
+                            <span className="flex items-center gap-1">
+                              <QrCode className="w-3 h-3" />
+                              {product.barcode}
+                            </span>
+                            {product.barcode && (
+                              <div className="flex justify-center">
+                                <VisualBarcode 
+                                  value={product.barcode}
+                                  width={1.2}
+                                  height={35}
+                                  fontSize={8}
+                                  className="bg-white p-1 border rounded"
+                                />
+                              </div>
+                            )}
                           </div>
                         )}
-                        {/* Always show barcode status for debugging */}
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-1">
-                            <QrCode className="w-3 h-3" />
-                            <span className="font-medium">
-                              {product.barcode ? `Barcode: ${product.barcode}` : 'No Barcode'}
-                            </span>
-                          </div>
-                          {/* Debug info */}
-                          <div className="text-xs text-gray-400">
-                            Debug: barcode="{product.barcode}", type={typeof product.barcode}, length={product.barcode?.length}
-                          </div>
-                          {product.barcode && (
-                            <div className="flex justify-center bg-white p-2 border rounded">
-                              <VisualBarcode 
-                                value={String(product.barcode)}
-                                width={1.2}
-                                height={35}
-                                fontSize={8}
-                              />
-                            </div>
-                          )}
-                        </div>
                       </div>
 
                       {/* Tags */}
@@ -1189,49 +1139,31 @@ export default function ProductsPage() {
                 <FormField
                   control={form.control}
                   name="sku"
-                  render={({ field }) => {
-                    const existingSKU = editingProduct?.sku;
-                    const isSkuProtected = existingSKU && field.value;
-                    
-                    return (
-                      <FormItem>
-                        <FormLabel>SKU</FormLabel>
-                        <div className="flex gap-2">
-                          <FormControl>
-                            <Input 
-                              placeholder="Enter SKU" 
-                              {...field}
-                              disabled={isSkuProtected}
-                              className={isSkuProtected ? "bg-gray-100 cursor-not-allowed" : ""}
-                            />
-                          </FormControl>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={generateSmartSKU}
-                            disabled={generateSKUMutation.isPending || isSkuProtected}
-                            className="whitespace-nowrap"
-                          >
-                            {generateSKUMutation.isPending ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                            ) : (
-                              "🤖 AI SKU"
-                            )}
-                          </Button>
-                        </div>
-                        {isSkuProtected && (
-                          <div className="text-xs text-amber-600 font-medium">
-                            🔒 SKU محافظت شده - قابل تغییر نیست
-                          </div>
-                        )}
-                        <div className="text-xs text-muted-foreground">
-                          SKU یکبار ایجاد شود، دیگر قابل تغییر نخواهد بود
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SKU</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input placeholder="Enter SKU" {...field} />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={generateSmartSKU}
+                          disabled={generateSKUMutation.isPending}
+                          className="whitespace-nowrap"
+                        >
+                          {generateSKUMutation.isPending ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          ) : (
+                            "🤖 AI SKU"
+                          )}
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
                 <FormField
@@ -1243,7 +1175,7 @@ export default function ProductsPage() {
                       <div className="flex gap-2">
                         <FormControl>
                           <Input 
-                            placeholder="خودکار تولید می‌شود یا دستی وارد کنید" 
+                            placeholder="Auto-generated or enter manually" 
                             {...field}
                             onChange={async (e) => {
                               const newBarcode = e.target.value;
@@ -1300,23 +1232,10 @@ export default function ProductsPage() {
                             const productName = form.getValues("name");
                             const category = form.getValues("category");
                             
-                            const productSKU = form.getValues("sku");
-                            
-                            if (!category) {
+                            if (!productName || !category) {
                               toast({
-                                title: "اطلاعات ناقص",
-                                description: "لطفاً ابتدا دسته‌بندی محصول را انتخاب کنید",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
-                            
-                            // Use SKU if available, otherwise use product name
-                            const identifierForBarcode = productSKU || productName;
-                            if (!identifierForBarcode) {
-                              toast({
-                                title: "اطلاعات ناقص", 
-                                description: "لطفاً نام محصول یا SKU را وارد کنید",
+                                title: "Missing Information",
+                                description: "Please enter product name and select category first",
                                 variant: "destructive"
                               });
                               return;
@@ -1326,10 +1245,10 @@ export default function ProductsPage() {
                             try {
                               const { generateUniqueEAN13Barcode } = await import('@shared/barcode-utils');
                               const excludeId = editingProduct?.id;
-                              const generatedBarcode = await generateUniqueEAN13Barcode(identifierForBarcode, category, excludeId);
+                              const generatedBarcode = await generateUniqueEAN13Barcode(productName, category, excludeId);
                               
                               console.log('Generated unique barcode:', {
-                                identifier: identifierForBarcode,
+                                productName,
                                 category,
                                 generated: generatedBarcode,
                                 isValid: validateEAN13(generatedBarcode)
@@ -1338,15 +1257,15 @@ export default function ProductsPage() {
                               form.setValue("barcode", generatedBarcode);
                               
                               toast({
-                                title: "بارکد تولید شد",
-                                description: "بارکد منحصر به فرد EAN-13 با موفقیت ایجاد شد",
+                                title: "Barcode Generated",
+                                description: "Unique EAN-13 barcode created successfully",
                                 variant: "default"
                               });
                             } catch (error) {
                               console.error('Error generating unique barcode:', error);
                               toast({
-                                title: "خطا در تولید",
-                                description: "امکان تولید بارکد منحصر به فرد وجود ندارد",
+                                title: "Generation Failed",
+                                description: "Failed to generate unique barcode",
                                 variant: "destructive"
                               });
                               return;
@@ -1389,8 +1308,8 @@ export default function ProductsPage() {
                         </Button>
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        بارکد خودکار وقتی <strong>نام محصول، دسته‌بندی و SKU</strong> هر سه وارد شوند تولید می‌شود. می‌توانید با کلیک "Generate" هم دستی ایجاد کنید.
-                        <span className="text-amber-600 font-medium">توجه: بارکدهای موجود از بازنویسی محافظت می‌شوند.</span>
+                        Click "Generate" to create GS1-compliant EAN-13 barcode automatically. 
+                        <span className="text-amber-600 font-medium">Note: Existing barcodes are protected from overwriting.</span>
                       </div>
                       
                       {/* Barcode Display - Canvas always rendered for stable ref */}

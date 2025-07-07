@@ -47,18 +47,15 @@ const VisualBarcode = ({
         canvasRef.current.innerHTML = '';
         setError(null);
         
-        console.log(`🔍 Generating barcode for: ${value} (length: ${value.length})`);
-        
-        // Validate barcode format - be more flexible
+        // Validate barcode format
         if (value.length !== 13) {
-          console.warn(`⚠️ Barcode length ${value.length}, expected 13`);
+          throw new Error('EAN-13 barcode must be exactly 13 digits');
         }
         
         if (!/^\d+$/.test(value)) {
           throw new Error('Barcode must contain only digits');
         }
         
-        // Try to generate barcode with error handling
         JsBarcode(canvasRef.current, value, {
           format: format,
           width: width,
@@ -71,10 +68,8 @@ const VisualBarcode = ({
           textMargin: 5,
           valid: function(valid) {
             if (!valid) {
-              console.error(`❌ Invalid barcode: ${value}`);
               setError('Invalid barcode format');
             } else {
-              console.log(`✅ Barcode generated successfully: ${value}`);
               setIsGenerated(true);
             }
           }
@@ -96,12 +91,10 @@ const VisualBarcode = ({
           });
         }
       } catch (error) {
-        console.error("❌ Error generating barcode:", error, "for value:", value);
+        console.error("Error generating barcode:", error);
         setError(error instanceof Error ? error.message : 'Failed to generate barcode');
         setIsGenerated(false);
       }
-    } else {
-      console.log(`🔍 Missing requirements - canvasRef: ${!!canvasRef.current}, value: ${value}`);
     }
   }, [value, width, height, format, displayValue, fontSize, showDownload, showPrint]);
 
