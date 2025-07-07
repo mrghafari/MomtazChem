@@ -59,53 +59,53 @@ export default function AdminLogin() {
       // Wait longer for session to be properly established
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Manually verify auth status multiple times to ensure session is active
-      let authVerified = false;
-      let attempts = 0;
-      
-      while (!authVerified && attempts < 5) {
-        try {
-          const authCheck = await fetch("/api/admin/me", { 
-            credentials: 'include',
-            cache: 'no-store',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          
-          if (authCheck.ok) {
-            const authData = await authCheck.json();
-            console.log("Auth verification attempt", attempts + 1, ":", authData);
-            
-            if (authData.success && authData.user) {
-              authVerified = true;
-              // Force refresh the auth cache with verified data
-              queryClient.setQueryData(["/api/admin/me"], authData);
-            }
+      // Simplified auth verification - since backend confirms success, trust it
+      try {
+        const authCheck = await fetch("/api/admin/me", { 
+          credentials: 'include',
+          cache: 'no-store',
+          headers: {
+            'Content-Type': 'application/json',
           }
-          
-          if (!authVerified) {
-            await new Promise(resolve => setTimeout(resolve, 200));
-            attempts++;
-          }
-        } catch (error) {
-          console.error("Auth verification error:", error);
-          await new Promise(resolve => setTimeout(resolve, 200));
-          attempts++;
-        }
-      }
-      
-      if (authVerified) {
-        toast({ title: "Success", description: "Admin login successful" });
+        });
         
-        // Navigate to admin panel
-        setLocation("/admin");
-      } else {
+        if (authCheck.ok) {
+          const authData = await authCheck.json();
+          console.log("Auth verification success:", authData);
+          
+          if (authData.success && authData.user) {
+            // Force refresh the auth cache with verified data
+            queryClient.setQueryData(["/api/admin/me"], authData);
+            
+            toast({ title: "Success", description: "Admin login successful" });
+            
+            // Navigate to admin panel immediately
+            setLocation("/admin");
+            return;
+          }
+        }
+        
+        // If we reach here, something went wrong
+        console.error("Auth verification failed:", authCheck.status);
         toast({ 
           title: "Login Issue", 
-          description: "Please try logging in again", 
+          description: "Authentication succeeded but verification failed. Redirecting anyway...", 
           variant: "destructive" 
         });
+        
+        // Still redirect since backend login was successful
+        setTimeout(() => setLocation("/admin"), 1000);
+        
+      } catch (error) {
+        console.error("Auth verification error:", error);
+        toast({ 
+          title: "Warning", 
+          description: "Login succeeded but verification failed. Redirecting...", 
+          variant: "destructive" 
+        });
+        
+        // Still redirect since backend login was successful
+        setTimeout(() => setLocation("/admin"), 1000);
       }
     },
     onError: (error: any) => {
