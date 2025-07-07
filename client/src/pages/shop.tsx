@@ -964,28 +964,30 @@ const Shop = () => {
 
 
 
-                          {/* Fixed Height Discount Container */}
-                          <div className="mb-3 h-20 overflow-hidden">
+                          {/* Modern Discount Card */}
+                          <div className="mb-3 h-24 overflow-hidden">
                             {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
-                              <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 h-full relative overflow-hidden">
-                                {/* Background Pattern */}
-                                <div className="absolute inset-0 opacity-10">
-                                  <div className="absolute top-0 right-0 w-8 h-8 bg-blue-300 rounded-full transform translate-x-2 -translate-y-2"></div>
-                                  <div className="absolute bottom-0 left-0 w-6 h-6 bg-indigo-300 rounded-full transform -translate-x-1 translate-y-1"></div>
+                              <div className="relative h-full bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 rounded-2xl overflow-hidden shadow-xl">
+                                {/* Animated Background */}
+                                <div className="absolute inset-0">
+                                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-white/20 rounded-full animate-pulse"></div>
+                                  <div className="absolute -bottom-2 -left-2 w-12 h-12 bg-yellow-300/30 rounded-full animate-bounce"></div>
+                                  <div className="absolute top-1/2 left-1/3 w-8 h-8 bg-pink-300/25 rounded-full animate-ping"></div>
                                 </div>
                                 
-                                <div className="relative z-10">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <div className="flex items-center gap-1">
-                                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                                      <span className="text-xs font-bold text-blue-800">BULK SAVINGS</span>
+                                {/* Glassmorphism Overlay */}
+                                <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+                                
+                                <div className="relative z-20 p-3 h-full flex flex-col justify-between text-white">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg animate-pulse"></div>
+                                      <span className="text-xs font-black uppercase tracking-wider">Volume Deals</span>
                                     </div>
-                                    <div className="flex gap-1">
-                                      {product.quantityDiscounts.map((d: any, i: number) => (
-                                        <div key={i} className="px-2 py-0.5 bg-white/70 rounded-full text-xs font-medium text-blue-700 border border-blue-200">
-                                          {d.minQty}+: {(d.discount * 100).toFixed(0)}%
-                                        </div>
-                                      ))}
+                                    <div className="bg-white/20 backdrop-blur-sm rounded-full px-2 py-1">
+                                      <span className="text-xs font-bold">
+                                        {product.quantityDiscounts.length} Tiers
+                                      </span>
                                     </div>
                                   </div>
                                   
@@ -995,35 +997,54 @@ const Shop = () => {
                                     const nextDiscount = getNextDiscountInfo(product, currentQty);
                                     
                                     return (
-                                      <div>
-                                        {/* Current Active Discount */}
+                                      <div className="space-y-1">
+                                        {/* Discount Levels Bar */}
+                                        <div className="flex gap-1 mb-2">
+                                          {product.quantityDiscounts.map((d: any, i: number) => {
+                                            const isActive = currentDiscount && currentDiscount.discount === d.discount;
+                                            return (
+                                              <div
+                                                key={i}
+                                                className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
+                                                  isActive 
+                                                    ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50' 
+                                                    : currentQty >= d.minQty 
+                                                      ? 'bg-green-400' 
+                                                      : 'bg-white/40'
+                                                }`}
+                                              />
+                                            );
+                                          })}
+                                        </div>
+                                        
+                                        {/* Status Display */}
                                         {currentDiscount ? (
-                                          <div className="bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 rounded-lg p-2 shadow-sm">
+                                          <div className="bg-green-500/80 backdrop-blur-sm rounded-lg p-2 border border-green-300/50">
                                             <div className="flex items-center justify-between text-xs">
                                               <div className="flex items-center gap-1">
-                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                <span className="font-bold text-green-800">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                                <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
+                                                <span className="font-black text-green-100">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
                                               </div>
-                                              <span className="text-green-700 font-bold">
-                                                💰 ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} saved
+                                              <span className="font-black text-green-100">
+                                                ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} OFF
                                               </span>
                                             </div>
                                           </div>
                                         ) : nextDiscount ? (
-                                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-lg p-2 shadow-sm">
+                                          <div className="bg-orange-500/80 backdrop-blur-sm rounded-lg p-2 border border-orange-300/50">
                                             <div className="flex items-center gap-1 text-xs">
-                                              <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
-                                              <span className="text-amber-800 font-bold">
-                                                +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF! 🎯
+                                              <div className="w-2 h-2 bg-orange-200 rounded-full animate-bounce"></div>
+                                              <span className="font-black text-orange-100">
+                                                +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
                                               </span>
                                             </div>
                                           </div>
                                         ) : (
-                                          <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-lg p-2">
+                                          <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
                                             <div className="flex items-center gap-1 text-xs">
-                                              <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
-                                              <span className="text-slate-700 font-medium">
-                                                Buy {product.quantityDiscounts[0].minQty}+ for {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% discount 🚀
+                                              <div className="w-2 h-2 bg-white/70 rounded-full"></div>
+                                              <span className="font-bold text-white/90">
+                                                {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
                                               </span>
                                             </div>
                                           </div>
@@ -1121,73 +1142,93 @@ const Shop = () => {
                                 </div>
                               </div>
                               
-                              {/* Fixed Height Discount Container - List View */}
-                              <div className="mb-4 h-16">
+                              {/* Modern Discount Card - List View */}
+                              <div className="mb-4 h-20">
                                 {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
-                                  <div className="h-full p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 relative overflow-hidden">
-                                    {/* Background Pattern */}
-                                    <div className="absolute inset-0 opacity-10">
-                                      <div className="absolute top-0 right-0 w-6 h-6 bg-blue-300 rounded-full transform translate-x-1 -translate-y-1"></div>
-                                      <div className="absolute bottom-0 left-0 w-4 h-4 bg-indigo-300 rounded-full transform -translate-x-1 translate-y-1"></div>
+                                  <div className="relative h-full bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 rounded-2xl overflow-hidden shadow-xl">
+                                    {/* Animated Background */}
+                                    <div className="absolute inset-0">
+                                      <div className="absolute -top-2 -right-2 w-12 h-12 bg-white/20 rounded-full animate-pulse"></div>
+                                      <div className="absolute -bottom-1 -left-1 w-8 h-8 bg-yellow-300/30 rounded-full animate-bounce"></div>
+                                      <div className="absolute top-1/3 left-1/4 w-6 h-6 bg-pink-300/25 rounded-full animate-ping"></div>
                                     </div>
                                     
-                                    <div className="relative z-10 h-full flex items-center justify-between">
-                                      <div className="flex items-center gap-2">
-                                        <div className="flex items-center gap-1">
-                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                                          <span className="text-sm font-bold text-blue-800">BULK SAVINGS</span>
-                                        </div>
-                                        <div className="flex gap-1">
-                                          {product.quantityDiscounts.map((d: any, i: number) => (
-                                            <div key={i} className="px-2 py-1 bg-white/80 rounded-full text-xs font-medium text-blue-700 border border-blue-200">
-                                              {d.minQty}+: {(d.discount * 100).toFixed(0)}%
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                      
-                                      {(() => {
-                                        const currentQty = getProductQuantity(product.id);
-                                        const currentDiscount = getCurrentDiscountInfo(product, currentQty);
-                                        const nextDiscount = getNextDiscountInfo(product, currentQty);
-                                        
-                                        return (
-                                          <div className="flex-1 ml-4">
-                                            {/* Current Active Discount */}
-                                            {currentDiscount ? (
-                                              <div className="bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 rounded-lg p-2 shadow-sm">
-                                                <div className="flex items-center justify-between text-sm">
-                                                  <div className="flex items-center gap-1">
-                                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                    <span className="font-bold text-green-800">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
-                                                  </div>
-                                                  <span className="text-green-700 font-bold">
-                                                    💰 ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} saved
-                                                  </span>
-                                                </div>
-                                              </div>
-                                            ) : nextDiscount ? (
-                                              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-lg p-2 shadow-sm">
-                                                <div className="flex items-center gap-1 text-sm">
-                                                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
-                                                  <span className="text-amber-800 font-bold">
-                                                    +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF! 🎯
-                                                  </span>
-                                                </div>
-                                              </div>
-                                            ) : (
-                                              <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-lg p-2">
-                                                <div className="flex items-center gap-1 text-sm">
-                                                  <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
-                                                  <span className="text-slate-700 font-medium">
-                                                    Buy {product.quantityDiscounts[0].minQty}+ for {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% discount 🚀
-                                                  </span>
-                                                </div>
-                                              </div>
-                                            )}
+                                    {/* Glassmorphism Overlay */}
+                                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+                                    
+                                    <div className="relative z-20 p-3 h-full text-white">
+                                      <div className="flex items-center justify-between h-full">
+                                        <div className="flex items-center gap-3">
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg animate-pulse"></div>
+                                            <span className="text-sm font-black uppercase tracking-wider">Volume Deals</span>
                                           </div>
-                                        );
-                                      })()}
+                                          
+                                          {/* Progress Bar */}
+                                          <div className="flex gap-1">
+                                            {product.quantityDiscounts.map((d: any, i: number) => {
+                                              const currentQty = getProductQuantity(product.id);
+                                              const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                              const isActive = currentDiscount && currentDiscount.discount === d.discount;
+                                              return (
+                                                <div
+                                                  key={i}
+                                                  className={`w-8 h-2 rounded-full transition-all duration-300 ${
+                                                    isActive 
+                                                      ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50' 
+                                                      : currentQty >= d.minQty 
+                                                        ? 'bg-green-400' 
+                                                        : 'bg-white/40'
+                                                  }`}
+                                                />
+                                              );
+                                            })}
+                                          </div>
+                                        </div>
+                                        
+                                        {(() => {
+                                          const currentQty = getProductQuantity(product.id);
+                                          const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                          const nextDiscount = getNextDiscountInfo(product, currentQty);
+                                          
+                                          return (
+                                            <div className="flex-1 ml-4">
+                                              {/* Status Display */}
+                                              {currentDiscount ? (
+                                                <div className="bg-green-500/80 backdrop-blur-sm rounded-lg p-2 border border-green-300/50">
+                                                  <div className="flex items-center justify-between text-sm">
+                                                    <div className="flex items-center gap-1">
+                                                      <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
+                                                      <span className="font-black text-green-100">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                                    </div>
+                                                    <span className="font-black text-green-100">
+                                                      ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} OFF
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              ) : nextDiscount ? (
+                                                <div className="bg-orange-500/80 backdrop-blur-sm rounded-lg p-2 border border-orange-300/50">
+                                                  <div className="flex items-center gap-1 text-sm">
+                                                    <div className="w-2 h-2 bg-orange-200 rounded-full animate-bounce"></div>
+                                                    <span className="font-black text-orange-100">
+                                                      +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              ) : (
+                                                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
+                                                  <div className="flex items-center gap-1 text-sm">
+                                                    <div className="w-2 h-2 bg-white/70 rounded-full"></div>
+                                                    <span className="font-bold text-white/90">
+                                                      {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        })()}
+                                      </div>
                                     </div>
                                   </div>
                                 ) : (
