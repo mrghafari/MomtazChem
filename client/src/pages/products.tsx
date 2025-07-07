@@ -468,10 +468,21 @@ export default function ProductsPage() {
 
   // Auto-generate barcode for new products when category and SKU are available
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     const subscription = form.watch((value, { name, type }) => {
+      console.log('Form watch triggered:', { name, category: value.category, sku: value.sku, barcode: value.barcode, editingProduct });
+      
+      // Clear any existing timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      
       // Auto-generate when category and SKU are both available, and no existing barcode
       if ((name === "category" || name === "sku") && value.category && value.sku && !value.barcode && !editingProduct) {
-        const autoGenerateBarcode = async () => {
+        console.log('Conditions met for auto-generation:', { category: value.category, sku: value.sku });
+        
+        timeoutId = setTimeout(async () => {
           try {
             console.log('Auto-generating barcode for category:', value.category, 'SKU:', value.sku);
             // Use SKU as the primary identifier for barcode generation
@@ -487,15 +498,16 @@ export default function ProductsPage() {
           } catch (error) {
             console.error('Auto-generate barcode error:', error);
           }
-        };
-        
-        // Delay auto-generation to prevent excessive calls
-        const timeoutId = setTimeout(autoGenerateBarcode, 800);
-        return () => clearTimeout(timeoutId);
+        }, 1000);
       }
     });
     
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [form, editingProduct, toast]);
 
   // Generate barcode image when barcode value changes or dialog opens
