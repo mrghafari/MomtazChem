@@ -52,27 +52,61 @@ export default function AdminLogin() {
     onSuccess: async (response) => {
       console.log("Login response:", response);
       
-      // Clear existing cache and refetch auth state
+      // Clear existing cache and wait for proper cleanup
       queryClient.removeQueries({ queryKey: ["/api/admin/me"] });
+      queryClient.clear();
       
-      // Wait a moment for session to be established
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait longer for session to be properly established
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Prefetch the auth data to ensure it's available
-      await queryClient.prefetchQuery({
-        queryKey: ["/api/admin/me"],
-        queryFn: () => fetch("/api/admin/me", { 
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+      // Manually verify auth status multiple times to ensure session is active
+      let authVerified = false;
+      let attempts = 0;
+      
+      while (!authVerified && attempts < 5) {
+        try {
+          const authCheck = await fetch("/api/admin/me", { 
+            credentials: 'include',
+            cache: 'no-store',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          
+          if (authCheck.ok) {
+            const authData = await authCheck.json();
+            console.log("Auth verification attempt", attempts + 1, ":", authData);
+            
+            if (authData.success && authData.user) {
+              authVerified = true;
+              // Force refresh the auth cache with verified data
+              queryClient.setQueryData(["/api/admin/me"], authData);
+            }
           }
-        }).then(res => res.json()),
-      });
+          
+          if (!authVerified) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            attempts++;
+          }
+        } catch (error) {
+          console.error("Auth verification error:", error);
+          await new Promise(resolve => setTimeout(resolve, 200));
+          attempts++;
+        }
+      }
       
-      toast({ title: "Success", description: "Admin login successful" });
-      
-      // Navigate to admin panel
-      setLocation("/admin");
+      if (authVerified) {
+        toast({ title: "Success", description: "Admin login successful" });
+        
+        // Navigate to admin panel
+        setLocation("/admin");
+      } else {
+        toast({ 
+          title: "Login Issue", 
+          description: "Please try logging in again", 
+          variant: "destructive" 
+        });
+      }
     },
     onError: (error: any) => {
       toast({ 
