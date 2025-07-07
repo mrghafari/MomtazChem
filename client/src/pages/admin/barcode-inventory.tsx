@@ -71,6 +71,9 @@ const BarcodeInventory = () => {
   const [reference, setReference] = useState('');
   const [scanMode, setScanMode] = useState<'lookup' | 'inventory_in' | 'inventory_out' | 'audit'>('lookup');
   const [showGenerator, setShowGenerator] = useState(false);
+  const [selectedProductsForBatch, setSelectedProductsForBatch] = useState<number[]>([]);
+  const [printDialogOpen, setPrintDialogOpen] = useState(false);
+  const [batchPrintOpen, setBatchPrintOpen] = useState(false);
   const { toast } = useToast();
 
   // Check authentication
@@ -312,6 +315,212 @@ const BarcodeInventory = () => {
     }
   };
 
+  // Single label printing function
+  const printSingleLabel = (product: Product) => {
+    if (!product.barcode) {
+      toast({
+        title: "خطا",
+        description: "این محصول بارکد ندارد",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = generateLabelHTML([product]);
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+    toast({
+      title: "چاپ لیبل",
+      description: `لیبل ${product.name} آماده چاپ است`
+    });
+  };
+
+  // Batch printing function  
+  const printBatchLabels = () => {
+    const selectedProducts = products?.filter(p => 
+      selectedProductsForBatch.includes(p.id) && p.barcode
+    ) || [];
+
+    if (selectedProducts.length === 0) {
+      toast({
+        title: "خطا",
+        description: "هیچ محصولی با بارکد انتخاب نشده",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = generateLabelHTML(selectedProducts);
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+    toast({
+      title: "چاپ دسته‌جمعی",
+      description: `${selectedProducts.length} لیبل آماده چاپ است`
+    });
+    setBatchPrintOpen(false);
+    setSelectedProductsForBatch([]);
+  };
+
+  // Generate HTML for label printing
+  const generateLabelHTML = (productList: Product[]) => {
+    const generateBarcodeSVG = (barcode: string) => {
+      try {
+        const canvas = document.createElement('canvas');
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '200');
+        svg.setAttribute('height', '80');
+        
+        // Generate barcode using JsBarcode
+        JsBarcode(svg, barcode, {
+          format: barcode.length === 13 ? "EAN13" : "CODE128",
+          width: 1.5,
+          height: 60,
+          displayValue: true,
+          fontSize: 12,
+          background: '#ffffff',
+          lineColor: '#000000'
+        });
+        
+        return svg.outerHTML;
+      } catch (error) {
+        return `<div style="width: 200px; height: 80px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">Invalid Barcode</div>`;
+      }
+    };
+
+    return `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="fa">
+    <head>
+      <meta charset="UTF-8">
+      <title>چاپ لیبل بارکد</title>
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 0;
+          padding: 10px;
+          background: white;
+          direction: rtl;
+        }
+        
+        .label-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 10px;
+          width: 100%;
+        }
+        
+        .label {
+          border: 2px solid #333;
+          padding: 8px;
+          margin-bottom: 10px;
+          background: white;
+          box-sizing: border-box;
+          text-align: center;
+          page-break-inside: avoid;
+          width: 250px;
+          height: 150px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        
+        .product-name {
+          font-size: 12px;
+          font-weight: bold;
+          color: #333;
+          margin-bottom: 4px;
+          line-height: 1.2;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        
+        .product-info {
+          font-size: 10px;
+          color: #666;
+          margin-bottom: 4px;
+        }
+        
+        .barcode-section {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-grow: 1;
+        }
+        
+        .barcode-number {
+          font-size: 10px;
+          font-family: monospace;
+          color: #333;
+          margin-top: 2px;
+          letter-spacing: 1px;
+        }
+        
+        @media print {
+          body { margin: 0; padding: 5px; }
+          .label { margin-bottom: 5px; }
+          @page { margin: 0.5cm; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="label-container">
+        ${productList.map(product => `
+          <div class="label">
+            <div>
+              <div class="product-name">${product.name}</div>
+              <div class="product-info">
+                کد کالا: ${product.sku || 'ندارد'} | 
+                دسته: ${product.category}
+              </div>
+            </div>
+            <div class="barcode-section">
+              ${generateBarcodeSVG(product.barcode!)}
+            </div>
+            <div class="barcode-number">${product.barcode}</div>
+          </div>
+        `).join('')}
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    </body>
+    </html>
+    `;
+  };
+
+  // Toggle product selection for batch printing
+  const toggleProductSelection = (productId: number) => {
+    setSelectedProductsForBatch(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  // Select all products with barcodes
+  const selectAllProductsWithBarcodes = () => {
+    const productsWithBarcodes = products?.filter(p => p.barcode).map(p => p.id) || [];
+    setSelectedProductsForBatch(productsWithBarcodes);
+  };
+
+  // Clear all selections
+  const clearAllSelections = () => {
+    setSelectedProductsForBatch([]);
+  };
+
   const getStockStatusColor = (product: Product) => {
     if (product.stockQuantity <= 0) return 'bg-red-100 text-red-800';
     if (product.stockQuantity <= product.minStockLevel) return 'bg-yellow-100 text-yellow-800';
@@ -419,12 +628,13 @@ const BarcodeInventory = () => {
       </Card>
 
       <Tabs defaultValue="scanner" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="scanner">Scanner</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="generator">Barcode Generator</TabsTrigger>
           <TabsTrigger value="ean13">EAN-13 Retail</TabsTrigger>
+          <TabsTrigger value="printing">چاپ لیبل</TabsTrigger>
         </TabsList>
 
         {/* Scanner Tab */}
@@ -876,21 +1086,197 @@ const BarcodeInventory = () => {
                           )}
                         </td>
                         <td className="p-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setShowGenerator(true);
-                            }}
-                          >
-                            {product.barcode?.length === 13 ? 'Update' : 'Generate'} EAN-13
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setShowGenerator(true);
+                              }}
+                            >
+                              {product.barcode?.length === 13 ? 'Update' : 'Generate'} EAN-13
+                            </Button>
+                            {product.barcode && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => printSingleLabel(product)}
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                <Printer className="h-3 w-3 mr-1" />
+                                چاپ لیبل
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Label Printing Tab */}
+        <TabsContent value="printing" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Batch Printing Controls */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Printer className="h-5 w-5" />
+                  چاپ دسته‌جمعی لیبل‌ها
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  انتخاب محصولات برای چاپ دسته‌جمعی لیبل‌های بارکد
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2 mb-4">
+                  <Button 
+                    variant="outline"
+                    onClick={selectAllProductsWithBarcodes}
+                    className="flex-1"
+                  >
+                    انتخاب همه محصولات
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={clearAllSelections}
+                    className="flex-1"
+                  >
+                    پاک کردن انتخاب‌ها
+                  </Button>
+                </div>
+                
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm font-medium text-blue-800">
+                    تعداد انتخاب شده: {selectedProductsForBatch.length} محصول
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    فقط محصولاتی که بارکد دارند قابل چاپ هستند
+                  </p>
+                </div>
+
+                <Button 
+                  className="w-full"
+                  onClick={printBatchLabels}
+                  disabled={selectedProductsForBatch.length === 0}
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  چاپ {selectedProductsForBatch.length} لیبل انتخاب شده
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Printing Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle>پیش‌نمایش لیبل</CardTitle>
+                <p className="text-sm text-gray-600">
+                  نمونه لیبل برای چاپ
+                </p>
+              </CardHeader>
+              <CardContent>
+                {products && products.length > 0 && products[0].barcode ? (
+                  <div className="border-2 border-gray-300 p-4 rounded-lg bg-white text-center max-w-xs mx-auto">
+                    <div className="font-bold text-sm mb-2 text-gray-800 truncate">
+                      {products[0].name}
+                    </div>
+                    <div className="text-xs text-gray-600 mb-3">
+                      کد کالا: {products[0].sku || 'ندارد'} | دسته: {products[0].category}
+                    </div>
+                    <div className="mb-2">
+                      <VisualBarcode 
+                        value={products[0].barcode}
+                        productName={products[0].name}
+                        sku={products[0].sku || undefined}
+                        width={1.5}
+                        height={40}
+                        fontSize={10}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="text-xs font-mono text-gray-700 tracking-wide">
+                      {products[0].barcode}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    هیچ محصولی با بارکد برای نمایش پیش‌نمایش وجود ندارد
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Product Selection List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>انتخاب محصولات برای چاپ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-right p-2">انتخاب</th>
+                      <th className="text-right p-2">نام محصول</th>
+                      <th className="text-right p-2">دسته</th>
+                      <th className="text-right p-2">کد کالا</th>
+                      <th className="text-right p-2">بارکد</th>
+                      <th className="text-right p-2">عملیات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products?.filter(p => p.barcode).map((product) => (
+                      <tr key={product.id} className="border-b hover:bg-gray-50">
+                        <td className="p-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedProductsForBatch.includes(product.id)}
+                            onChange={() => toggleProductSelection(product.id)}
+                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="p-2">
+                          <div className="font-medium">{product.name}</div>
+                        </td>
+                        <td className="p-2">
+                          <Badge variant="outline">{product.category}</Badge>
+                        </td>
+                        <td className="p-2">
+                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            {product.sku || 'ندارد'}
+                          </code>
+                        </td>
+                        <td className="p-2">
+                          <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">
+                            {product.barcode}
+                          </code>
+                        </td>
+                        <td className="p-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => printSingleLabel(product)}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            <Printer className="h-3 w-3 mr-1" />
+                            چاپ لیبل
+                          </Button>
+                        </td>
+                      </tr>
+                    )) || []}
+                  </tbody>
+                </table>
+                {(!products || products.filter(p => p.barcode).length === 0) && (
+                  <div className="text-center py-8 text-gray-500">
+                    هیچ محصولی با بارکد برای چاپ وجود ندارد
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
