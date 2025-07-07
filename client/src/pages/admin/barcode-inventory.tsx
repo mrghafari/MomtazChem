@@ -2,14 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode } from "@shared/barcode-utils";
-import JsBarcode from "jsbarcode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BarcodeScanner from "@/components/ui/barcode-scanner";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
@@ -75,9 +74,6 @@ const BarcodeInventory = () => {
   const [selectedProductsForBatch, setSelectedProductsForBatch] = useState<number[]>([]);
   const [printDialogOpen, setPrintDialogOpen] = useState(false);
   const [batchPrintOpen, setBatchPrintOpen] = useState(false);
-  const [priceConfirmOpen, setPriceConfirmOpen] = useState(false);
-  const [includePrice, setIncludePrice] = useState(false);
-  const [pendingPrintProducts, setPendingPrintProducts] = useState<Product[]>([]);
   const { toast } = useToast();
 
   // Check authentication
@@ -319,33 +315,6 @@ const BarcodeInventory = () => {
     }
   };
 
-  // Show price confirmation dialog
-  const showPriceConfirmation = (products: Product[]) => {
-    setPendingPrintProducts(products);
-    setPriceConfirmOpen(true);
-  };
-
-  // Execute print with price preference
-  const executePrint = () => {
-    const printContent = generateLabelHTML(pendingPrintProducts, includePrice);
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-
-    toast({
-      title: "چاپ لیبل",
-      description: `${pendingPrintProducts.length} لیبل آماده چاپ است`
-    });
-
-    setPriceConfirmOpen(false);
-    setPendingPrintProducts([]);
-  };
-
   // Single label printing function
   const printSingleLabel = (product: Product) => {
     if (!product.barcode) {
@@ -357,7 +326,20 @@ const BarcodeInventory = () => {
       return;
     }
 
-    showPriceConfirmation([product]);
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = generateLabelHTML([product]);
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+    toast({
+      title: "چاپ لیبل",
+      description: `لیبل ${product.name} آماده چاپ است`
+    });
   };
 
   // Batch printing function  
@@ -375,70 +357,47 @@ const BarcodeInventory = () => {
       return;
     }
 
-    showPriceConfirmation(selectedProducts);
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = generateLabelHTML(selectedProducts);
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+    toast({
+      title: "چاپ دسته‌جمعی",
+      description: `${selectedProducts.length} لیبل آماده چاپ است`
+    });
     setBatchPrintOpen(false);
     setSelectedProductsForBatch([]);
   };
 
   // Generate HTML for label printing
-  const generateLabelHTML = (productList: Product[], includePrice: boolean = false) => {
-    // Generate barcode data URL for each product
-    const generateBarcodeDataURL = (barcode: string) => {
+  const generateLabelHTML = (productList: Product[]) => {
+    const generateBarcodeSVG = (barcode: string) => {
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = 220;
-        canvas.height = 100;
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '200');
+        svg.setAttribute('height', '80');
         
-        // Get canvas context
-        const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error('Canvas context not available');
-        
-        // Clear canvas with white background
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Generate barcode using JsBarcode with canvas
-        JsBarcode(canvas, barcode, {
+        // Generate barcode using JsBarcode
+        JsBarcode(svg, barcode, {
           format: barcode.length === 13 ? "EAN13" : "CODE128",
-          width: 2,
-          height: 70,
+          width: 1.5,
+          height: 60,
           displayValue: true,
-          fontSize: 14,
+          fontSize: 12,
           background: '#ffffff',
-          lineColor: '#000000',
-          margin: 10
+          lineColor: '#000000'
         });
         
-        return canvas.toDataURL('image/png');
+        return svg.outerHTML;
       } catch (error) {
-        console.error('Barcode generation error:', error);
-        // Create a simple barcode-like pattern manually if JsBarcode fails
-        const canvas = document.createElement('canvas');
-        canvas.width = 220;
-        canvas.height = 100;
-        const ctx = canvas.getContext('2d');
-        
-        if (ctx) {
-          // White background
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          // Draw simple barcode pattern
-          ctx.fillStyle = '#000000';
-          for (let i = 0; i < barcode.length; i++) {
-            const x = 20 + (i * 12);
-            const width = parseInt(barcode[i]) % 2 === 0 ? 2 : 4;
-            ctx.fillRect(x, 20, width, 50);
-          }
-          
-          // Draw text
-          ctx.fillStyle = '#000000';
-          ctx.font = '12px monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText(barcode, canvas.width / 2, 85);
-        }
-        
-        return canvas.toDataURL('image/png');
+        return `<div style="width: 200px; height: 80px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">Invalid Barcode</div>`;
       }
     };
 
@@ -479,15 +438,6 @@ const BarcodeInventory = () => {
           justify-content: space-between;
         }
         
-        .company-name {
-          font-size: 10px;
-          font-weight: bold;
-          color: #0066cc;
-          margin-bottom: 2px;
-          text-align: center;
-          letter-spacing: 0.5px;
-        }
-        
         .product-name {
           font-size: 12px;
           font-weight: bold;
@@ -512,15 +462,6 @@ const BarcodeInventory = () => {
           flex-grow: 1;
         }
         
-        .barcode-image {
-          max-width: 200px;
-          max-height: 80px;
-          border: none;
-          image-rendering: -webkit-optimize-contrast;
-          image-rendering: crisp-edges;
-          image-rendering: pixelated;
-        }
-        
         .barcode-number {
           font-size: 10px;
           font-family: monospace;
@@ -541,21 +482,20 @@ const BarcodeInventory = () => {
         ${productList.map(product => `
           <div class="label">
             <div>
-              <div class="company-name">Momtazchem</div>
               <div class="product-name">${product.name}</div>
               <div class="product-info">
                 کد کالا: ${product.sku || 'ندارد'} | 
                 دسته: ${product.category}
-                ${includePrice && product.unitPrice ? ` | قیمت: ${product.unitPrice} ${product.currency || 'IQD'}` : ''}
               </div>
             </div>
             <div class="barcode-section">
-              <img src="${generateBarcodeDataURL(product.barcode!)}" class="barcode-image" alt="Barcode: ${product.barcode}" />
+              ${generateBarcodeSVG(product.barcode!)}
             </div>
             <div class="barcode-number">${product.barcode}</div>
           </div>
         `).join('')}
       </div>
+      <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     </body>
     </html>
     `;
@@ -1165,7 +1105,7 @@ const BarcodeInventory = () => {
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 <Printer className="h-3 w-3 mr-1" />
-                                Print Label
+                                چاپ لیبل
                               </Button>
                             )}
                           </div>
@@ -1226,7 +1166,7 @@ const BarcodeInventory = () => {
                   disabled={selectedProductsForBatch.length === 0}
                 >
                   <Printer className="h-4 w-4 mr-2" />
-                  Print {selectedProductsForBatch.length} Selected Labels
+                  چاپ {selectedProductsForBatch.length} لیبل انتخاب شده
                 </Button>
               </CardContent>
             </Card>
@@ -1242,9 +1182,6 @@ const BarcodeInventory = () => {
               <CardContent>
                 {products && products.length > 0 && products[0].barcode ? (
                   <div className="border-2 border-gray-300 p-4 rounded-lg bg-white text-center max-w-xs mx-auto">
-                    <div className="text-xs font-bold text-blue-600 mb-1">
-                      Momtazchem
-                    </div>
                     <div className="font-bold text-sm mb-2 text-gray-800 truncate">
                       {products[0].name}
                     </div>
@@ -1328,7 +1265,7 @@ const BarcodeInventory = () => {
                             className="text-blue-600 hover:text-blue-800"
                           >
                             <Printer className="h-3 w-3 mr-1" />
-                            Print Label
+                            چاپ لیبل
                           </Button>
                         </td>
                       </tr>
@@ -1345,58 +1282,6 @@ const BarcodeInventory = () => {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Price Confirmation Dialog */}
-      <Dialog open={priceConfirmOpen} onOpenChange={setPriceConfirmOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>تنظیمات چاپ لیبل</DialogTitle>
-            <p className="text-sm text-gray-600">
-              آیا می‌خواهید قیمت محصولات در لیبل‌ها نمایش داده شود؟
-            </p>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="includePrice"
-                checked={includePrice}
-                onChange={(e) => setIncludePrice(e.target.checked)}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="includePrice" className="text-sm font-medium text-gray-700">
-                نمایش قیمت در لیبل
-              </label>
-            </div>
-            
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <p className="text-xs text-blue-700">
-                تعداد لیبل برای چاپ: {pendingPrintProducts.length}
-              </p>
-              {includePrice && (
-                <p className="text-xs text-blue-600 mt-1">
-                  قیمت محصولات در لیبل‌ها نمایش داده خواهد شد
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setPriceConfirmOpen(false)}
-            >
-              لغو
-            </Button>
-            <Button
-              onClick={executePrint}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              چاپ لیبل‌ها
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Generator Dialog */}
       <Dialog open={showGenerator} onOpenChange={setShowGenerator}>
