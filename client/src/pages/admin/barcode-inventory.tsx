@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BarcodeScanner from "@/components/ui/barcode-scanner";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
@@ -74,6 +75,9 @@ const BarcodeInventory = () => {
   const [selectedProductsForBatch, setSelectedProductsForBatch] = useState<number[]>([]);
   const [printDialogOpen, setPrintDialogOpen] = useState(false);
   const [batchPrintOpen, setBatchPrintOpen] = useState(false);
+  const [showPriceDialog, setShowPriceDialog] = useState(false);
+  const [includePriceInPrint, setIncludePriceInPrint] = useState(false);
+  const [pendingPrintProducts, setPendingPrintProducts] = useState<Product[]>([]);
   const { toast } = useToast();
 
   // Check authentication
@@ -326,20 +330,9 @@ const BarcodeInventory = () => {
       return;
     }
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const printContent = generateLabelHTML([product]);
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-
-    toast({
-      title: "چاپ لیبل",
-      description: `لیبل ${product.name} آماده چاپ است`
-    });
+    // Show price confirmation dialog
+    setPendingPrintProducts([product]);
+    setShowPriceDialog(true);
   };
 
   // Batch printing function  
@@ -357,10 +350,17 @@ const BarcodeInventory = () => {
       return;
     }
 
+    // Show price confirmation dialog for batch printing
+    setPendingPrintProducts(selectedProducts);
+    setShowPriceDialog(true);
+  };
+
+  // Execute the actual printing after price confirmation
+  const executePrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const printContent = generateLabelHTML(selectedProducts);
+    const printContent = generateLabelHTML(pendingPrintProducts, includePriceInPrint);
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.focus();
@@ -368,15 +368,23 @@ const BarcodeInventory = () => {
     printWindow.close();
 
     toast({
-      title: "چاپ دسته‌جمعی",
-      description: `${selectedProducts.length} لیبل آماده چاپ است`
+      title: pendingPrintProducts.length === 1 ? "چاپ لیبل" : "چاپ دسته‌جمعی",
+      description: pendingPrintProducts.length === 1 ? 
+        `لیبل ${pendingPrintProducts[0].name} آماده چاپ است` :
+        `${pendingPrintProducts.length} لیبل آماده چاپ است`
     });
-    setBatchPrintOpen(false);
-    setSelectedProductsForBatch([]);
+
+    // Clean up state
+    setShowPriceDialog(false);
+    setIncludePriceInPrint(false);
+    setPendingPrintProducts([]);
+    if (pendingPrintProducts.length > 1) {
+      setSelectedProductsForBatch([]);
+    }
   };
 
   // Generate HTML for label printing
-  const generateLabelHTML = (productList: Product[]) => {
+  const generateLabelHTML = (productList: Product[], includePrice: boolean = false) => {
     const generateBarcodeSVG = (barcode: string) => {
       try {
         const canvas = document.createElement('canvas');
@@ -480,6 +488,7 @@ const BarcodeInventory = () => {
               <div class="product-info">
                 کد کالا: ${product.sku || 'ندارد'} | 
                 دسته: ${product.category}
+                ${includePrice && product.unitPrice ? `<br/>قیمت: ${product.unitPrice} ${product.currency || 'IQD'}` : ''}
               </div>
             </div>
             <div class="barcode-section">
@@ -627,7 +636,7 @@ const BarcodeInventory = () => {
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="generator">Barcode Generator</TabsTrigger>
           <TabsTrigger value="ean13">EAN-13 Retail</TabsTrigger>
-          <TabsTrigger value="printing">چاپ لیبل</TabsTrigger>
+          <TabsTrigger value="printing">Print Label</TabsTrigger>
         </TabsList>
 
         {/* Scanner Tab */}
@@ -1098,7 +1107,7 @@ const BarcodeInventory = () => {
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 <Printer className="h-3 w-3 mr-1" />
-                                چاپ لیبل
+                                Print Label
                               </Button>
                             )}
                           </div>
@@ -1120,7 +1129,7 @@ const BarcodeInventory = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Printer className="h-5 w-5" />
-                  چاپ دسته‌جمعی لیبل‌ها
+                  Print Label Batch
                 </CardTitle>
                 <p className="text-sm text-gray-600">
                   انتخاب محصولات برای چاپ دسته‌جمعی لیبل‌های بارکد
@@ -1255,7 +1264,7 @@ const BarcodeInventory = () => {
                             className="text-blue-600 hover:text-blue-800"
                           >
                             <Printer className="h-3 w-3 mr-1" />
-                            چاپ لیبل
+                            Print Label
                           </Button>
                         </td>
                       </tr>
@@ -1272,6 +1281,55 @@ const BarcodeInventory = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Price Confirmation Dialog */}
+      <Dialog open={showPriceDialog} onOpenChange={setShowPriceDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Print Label Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="include-price"
+                checked={includePriceInPrint}
+                onCheckedChange={setIncludePriceInPrint}
+              />
+              <Label htmlFor="include-price" className="text-sm font-medium">
+                Include price on labels?
+              </Label>
+            </div>
+            <div className="text-sm text-gray-600">
+              {pendingPrintProducts.length === 1 ? (
+                <p>Printing label for: <strong>{pendingPrintProducts[0]?.name}</strong></p>
+              ) : (
+                <p>Printing labels for <strong>{pendingPrintProducts.length}</strong> products</p>
+              )}
+              {includePriceInPrint && (
+                <p className="mt-2 text-blue-600">
+                  ✓ Product prices will be included on the labels
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPriceDialog(false);
+                setIncludePriceInPrint(false);
+                setPendingPrintProducts([]);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={executePrint}>
+              <Printer className="h-4 w-4 mr-2" />
+              Print Labels
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Generator Dialog */}
       <Dialog open={showGenerator} onOpenChange={setShowGenerator}>
