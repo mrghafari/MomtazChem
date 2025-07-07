@@ -117,6 +117,36 @@ const uploadCatalog = multer({
   }
 });
 
+// MSDS upload configuration
+const msdsDir = path.join(process.cwd(), 'uploads', 'msds');
+if (!fs.existsSync(msdsDir)) {
+  fs.mkdirSync(msdsDir, { recursive: true });
+}
+
+const msdsStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, msdsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `msds-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const uploadMsds = multer({
+  storage: msdsStorage,
+  limits: {
+    fileSize: 15 * 1024 * 1024, // 15MB limit for MSDS files
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed for MSDS uploads'));
+    }
+  }
+});
+
 // Multer configuration for document uploads
 const documentStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -957,6 +987,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Failed to upload catalog" 
+      });
+    }
+  });
+
+  // MSDS upload endpoint
+  app.post("/api/upload/msds", requireAuth, uploadMsds.single('msds'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No MSDS file uploaded" 
+        });
+      }
+
+      const msdsUrl = `/uploads/msds/${req.file.filename}`;
+      res.json({ 
+        success: true, 
+        url: msdsUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('MSDS upload error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload MSDS file" 
+      });
+    }
+  });
+
+  // Update product MSDS information (for both shop and showcase products)
+  app.put("/api/products/:id/msds", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { msdsUrl, showMsdsToCustomers, msdsFileName } = req.body;
+
+      // Update shop product MSDS
+      await storage.updateShopProduct(parseInt(id), {
+        msdsUrl,
+        showMsdsToCustomers,
+        msdsFileName,
+        msdsUploadDate: new Date()
+      });
+
+      // Also update showcase product if it exists
+      try {
+        await storage.updateShowcaseProduct(parseInt(id), {
+          msdsUrl,
+          showMsdsToCustomers,
+          msdsFileName,
+          msdsUploadDate: new Date()
+        });
+      } catch (error) {
+        // Showcase product might not exist, continue with shop product only
+        console.log('Showcase product not found, updated shop product only');
+      }
+
+      res.json({ 
+        success: true, 
+        message: "MSDS information updated successfully" 
+      });
+    } catch (error) {
+      console.error('Error updating MSDS information:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update MSDS information" 
+      });
+    }
+  });
+
+  // Get MSDS file for customers (only if showMsdsToCustomers is true)
+  app.get("/api/products/:id/msds", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Get product MSDS information
+      const product = await storage.getShopProduct(parseInt(id));
+      
+      if (!product || !product.msdsUrl || !product.showMsdsToCustomers) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "MSDS not available for this product" 
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          msdsUrl: product.msdsUrl,
+          msdsFileName: product.msdsFileName || 'MSDS.pdf',
+          msdsUploadDate: product.msdsUploadDate
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching MSDS:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch MSDS" 
       });
     }
   });

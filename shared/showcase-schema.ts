@@ -41,6 +41,11 @@ export const showcaseProducts = pgTable("showcase_products", {
   applications: text("applications").array(), // Applications array
   technicalDataSheet: text("technical_data_sheet_url"),
   safetyDataSheet: text("safety_data_sheet_url"),
+  // MSDS (Material Safety Data Sheet) fields
+  msdsUrl: text("msds_url"), // URL to MSDS PDF file
+  showMsdsToCustomers: boolean("show_msds_to_customers").default(false), // Checkbox to control visibility
+  msdsFileName: text("msds_file_name"), // Original filename for display
+  msdsUploadDate: timestamp("msds_upload_date"), // When MSDS was uploaded
   certifications: json("certifications"), // Array of certifications
   // Inventory management fields
   stockQuantity: integer("stock_quantity").default(0), // Current stock level

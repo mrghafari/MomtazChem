@@ -76,6 +76,11 @@ export const shopProducts = pgTable("shop_products", {
   isFeatured: boolean("is_featured").default(false),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
+  // MSDS (Material Safety Data Sheet) fields
+  msdsUrl: text("msds_url"), // URL to MSDS PDF file
+  showMsdsToCustomers: boolean("show_msds_to_customers").default(false), // Checkbox to control visibility
+  msdsFileName: text("msds_file_name"), // Original filename for display
+  msdsUploadDate: timestamp("msds_upload_date"), // When MSDS was uploaded
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   

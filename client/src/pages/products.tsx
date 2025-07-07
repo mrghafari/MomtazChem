@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
@@ -34,6 +35,10 @@ const formSchema = insertShowcaseProductSchema.extend({
   parentProductId: z.number().optional(),
   variantType: z.string().optional(),
   variantValue: z.string().optional(),
+  // MSDS fields
+  msdsUrl: z.string().optional(),
+  msdsFileName: z.string().optional(),
+  showMsdsToCustomers: z.boolean().optional(),
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -117,8 +122,10 @@ export default function ProductsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [catalogPreview, setCatalogPreview] = useState<string | null>(null);
+  const [msdsPreview, setMsdsPreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
+  const [uploadingMsds, setUploadingMsds] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [, setLocation] = useLocation();
@@ -169,6 +176,7 @@ export default function ProductsPage() {
       setDialogOpen(false);
       setImagePreview(null);
       setCatalogPreview(null);
+      setMsdsPreview(null);
       form.reset();
       toast({
         title: "Success",
@@ -202,6 +210,7 @@ export default function ProductsPage() {
         setEditingProduct(null);
         setImagePreview(null);
         setCatalogPreview(null);
+        setMsdsPreview(null);
       }, 1000); // Allow user to see the updated values for 1 second
       toast({
         title: "Success",
@@ -309,6 +318,10 @@ export default function ProductsPage() {
       parentProductId: undefined,
       variantType: undefined,
       variantValue: undefined,
+      // MSDS fields
+      msdsUrl: "",
+      msdsFileName: "",
+      showMsdsToCustomers: false,
     },
   });
 
@@ -421,10 +434,48 @@ export default function ProductsPage() {
     }
   };
 
+  const handleMsdsUpload = async (file: File) => {
+    if (!file) return;
+
+    setUploadingMsds(true);
+    const formData = new FormData();
+    formData.append('msds', file);
+
+    try {
+      const response = await fetch('/api/upload/msds', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('MSDS upload failed');
+      }
+
+      const { url, originalName } = await response.json();
+      form.setValue('msdsUrl', url);
+      form.setValue('msdsFileName', originalName);
+      setMsdsPreview(url);
+      
+      toast({
+        title: "Success",
+        description: "MSDS file uploaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload MSDS file",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingMsds(false);
+    }
+  };
+
   const openCreateDialog = () => {
     setEditingProduct(null);
     setImagePreview(null);
     setCatalogPreview(null);
+    setMsdsPreview(null);
     form.reset();
     setDialogOpen(true);
   };
@@ -433,6 +484,7 @@ export default function ProductsPage() {
     setEditingProduct(product);
     setImagePreview(product.imageUrl || null);
     setCatalogPreview(product.pdfCatalogUrl || null);
+    setMsdsPreview(product.msdsUrl || null);
     form.reset({
       name: product.name,
       description: product.description || "",
@@ -451,6 +503,9 @@ export default function ProductsPage() {
       priceRange: product.priceRange || "",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
+      msdsUrl: product.msdsUrl || "",
+      msdsFileName: product.msdsFileName || "",
+      showMsdsToCustomers: product.showMsdsToCustomers || false,
       isActive: product.isActive !== false,
     });
     setDialogOpen(true);
@@ -1627,6 +1682,78 @@ export default function ProductsPage() {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* MSDS Upload Section */}
+                <div className="space-y-2">
+                  <FormLabel>MSDS (Material Safety Data Sheet)</FormLabel>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    {msdsPreview ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                          <FileText className="w-4 h-4" />
+                          <span className="text-sm truncate">
+                            {form.getValues('msdsFileName') || 'MSDS uploaded'}
+                          </span>
+                        </div>
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setMsdsPreview(null);
+                            form.setValue('msdsUrl', '');
+                            form.setValue('msdsFileName', '');
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="mt-2">
+                          <label htmlFor="msds-upload" className="cursor-pointer">
+                            <span className="text-sm text-blue-600 hover:text-blue-500">
+                              {uploadingMsds ? 'Uploading...' : 'Upload MSDS'}
+                            </span>
+                            <input
+                              id="msds-upload"
+                              type="file"
+                              className="sr-only"
+                              accept=".pdf,.doc,.docx"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleMsdsUpload(file);
+                              }}
+                              disabled={uploadingMsds}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* MSDS Visibility Control */}
+                  <div className="flex items-center space-x-2">
+                    <FormField
+                      control={form.control}
+                      name="showMsdsToCustomers"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            Show MSDS to customers
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
               </div>
