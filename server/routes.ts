@@ -1523,64 +1523,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create CSV with UTF-8 BOM for proper multilingual character display
       const BOM = '\uFEFF';
       
-      // Comprehensive multilingual headers
-      const csvHeader = "نام محصول,کد محصول,بارکد,نوع بارکد,دسته‌بندی,قیمت واحد,واحد قیمت,قیمت فروشگاه,موجودی نمایشی,موجودی فروشگاه,وضعیت موجودی,حد کمینه موجودی,آستانه موجودی کم,نوع محصول,تاریخ ایجاد\n";
+      // Comprehensive multilingual headers with proper pricing information
+      const csvHeader = "نام محصول,کد محصول,بارکد,نوع بارکد,دسته‌بندی,قیمت فروشگاه,واحد قیمت,ارز,موجودی فروشگاه,وضعیت موجودی,حد کمینه موجودی,آستانه موجودی کم,تاریخ ایجاد\n";
       
-      const allProductsData: any[] = [];
-      
-      // Process showcase products
-      showcaseProducts.forEach(product => {
-        allProductsData.push({
-          name: product.name,
-          sku: product.sku || '',
-          barcode: product.barcode || 'بدون بارکد',
-          barcodeType: product.barcode ? (product.barcode.length === 13 ? 'EAN-13' : 'سفارشی') : 'ندارد',
-          category: product.category,
-          unitPrice: product.unitPrice || 'قیمت تعیین نشده',
-          currency: product.currency || 'دینار عراقی',
-          shopPrice: '',
-          showcaseStock: product.stockQuantity || 0,
-          shopStock: '',
-          stockStatus: (product.stockQuantity && product.stockQuantity > 0) ? 'موجود' : 'ناموجود',
-          minStockLevel: product.minStockLevel || 0,
-          lowStockThreshold: 10,
-          productType: 'نمایشی',
-          createdAt: product.createdAt ? new Date(product.createdAt).toLocaleDateString('fa-IR') : ''
-        });
-      });
-      
-      // Process shop products and merge with showcase data
-      shopProducts.forEach(shopProduct => {
-        const existingIndex = allProductsData.findIndex(p => p.name === shopProduct.name);
-        if (existingIndex >= 0) {
-          // Update existing showcase product with shop data
-          allProductsData[existingIndex].shopPrice = shopProduct.price || 'قیمت تعیین نشده';
-          allProductsData[existingIndex].shopStock = shopProduct.stockQuantity || 0;
-          allProductsData[existingIndex].productType = 'نمایشی + فروشگاه';
-        } else {
-          // Add shop-only product
-          allProductsData.push({
-            name: shopProduct.name,
-            sku: shopProduct.sku || '',
-            barcode: shopProduct.barcode || 'بدون بارکد',
-            barcodeType: shopProduct.barcode ? (shopProduct.barcode.length === 13 ? 'EAN-13' : 'سفارشی') : 'ندارد',
-            category: shopProduct.category,
-            unitPrice: '',
-            currency: '',
-            shopPrice: shopProduct.price || 'قیمت تعیین نشده',
-            showcaseStock: '',
-            shopStock: shopProduct.stockQuantity || 0,
-            stockStatus: (shopProduct.stockQuantity && shopProduct.stockQuantity > 0) ? 'موجود' : 'ناموجود',
-            minStockLevel: shopProduct.minStockLevel || 0,
-            lowStockThreshold: shopProduct.lowStockThreshold || 10,
-            productType: 'فروشگاه',
-            createdAt: shopProduct.createdAt ? new Date(shopProduct.createdAt).toLocaleDateString('fa-IR') : ''
-          });
-        }
-      });
-      
-      // Generate CSV rows
-      const csvRows = allProductsData.map(product => {
+      // Process shop products only (single table system)
+      const csvRows = shopProducts.map(product => {
         // Escape quotes and handle special characters for CSV
         const escapeCsvField = (field: string | number) => {
           const str = String(field || '');
@@ -1589,23 +1536,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           return `"${str}"`;
         };
-        
+
+        // Format price properly
+        const formatPrice = (price: any) => {
+          if (!price) return 'قیمت تعیین نشده';
+          if (typeof price === 'string' && !isNaN(parseFloat(price))) {
+            return parseFloat(price).toFixed(2);
+          }
+          if (typeof price === 'number') {
+            return price.toFixed(2);
+          }
+          return String(price);
+        };
+
         return [
           escapeCsvField(product.name),
-          escapeCsvField(product.sku),
-          escapeCsvField(product.barcode),
-          escapeCsvField(product.barcodeType),
+          escapeCsvField(product.sku || ''),
+          escapeCsvField(product.barcode || 'بدون بارکد'),
+          escapeCsvField(product.barcode ? (product.barcode.length === 13 ? 'EAN-13' : 'سفارشی') : 'ندارد'),
           escapeCsvField(product.category),
-          escapeCsvField(product.unitPrice),
-          escapeCsvField(product.currency),
-          escapeCsvField(product.shopPrice),
-          escapeCsvField(product.showcaseStock),
-          escapeCsvField(product.shopStock),
-          escapeCsvField(product.stockStatus),
-          escapeCsvField(product.minStockLevel),
-          escapeCsvField(product.lowStockThreshold),
-          escapeCsvField(product.productType),
-          escapeCsvField(product.createdAt)
+          escapeCsvField(formatPrice(product.price)), // Shop price
+          escapeCsvField(product.priceUnit || 'واحد'),
+          escapeCsvField(product.currency || 'دینار عراقی'),
+          escapeCsvField(product.stockQuantity || 0),
+          escapeCsvField((product.stockQuantity && product.stockQuantity > 0) ? 'موجود' : 'ناموجود'),
+          escapeCsvField(product.minStockLevel || 0),
+          escapeCsvField(product.lowStockThreshold || 10),
+          escapeCsvField(product.createdAt ? new Date(product.createdAt).toLocaleDateString('fa-IR') : '')
         ].join(',');
       }).join('\n');
       
@@ -1616,12 +1573,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Disposition', `attachment; filename="Complete_Barcode_Export_${new Date().toISOString().split('T')[0]}.csv"`);
       res.send(csvContent);
       
-      console.log(`✅ [EXPORT] Generated complete barcode CSV with ${allProductsData.length} products including pricing`);
+      console.log(`✅ [EXPORT] Generated complete barcode CSV with ${shopProducts.length} products including pricing`);
     } catch (error) {
-      console.error("❌ [EXPORT] Error exporting complete barcode data:", error);
+      console.error("❌ [EXPORT] Error exporting barcode data with pricing:", error);
       res.status(500).json({ 
         success: false, 
-        message: "خطا در خروجی گیری فایل جامع بارکد" 
+        message: "خطا در خروجی گیری فایل CSV با اطلاعات قیمت" 
       });
     }
   });
