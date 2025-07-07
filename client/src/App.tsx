@@ -158,6 +158,7 @@ function Router() {
           <Route path="/admin/department-users" component={DepartmentUsers} />
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           <Route path="/admin/inventory-management" component={UnifiedInventory} />
+          <Route path="/admin/unified-inventory" component={UnifiedInventory} />
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/security-management" component={SecurityManagement} />
           
