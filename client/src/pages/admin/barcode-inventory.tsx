@@ -488,7 +488,7 @@ const BarcodeInventory = () => {
               <div class="product-info">
                 کد کالا: ${product.sku || 'ندارد'} | 
                 دسته: ${product.category}
-                ${includePrice && product.unitPrice ? `<br/>قیمت: ${product.unitPrice} ${product.currency || 'IQD'}` : ''}
+                ${includePrice && product.price ? `<br/>قیمت: ${product.price} ${product.priceUnit || 'IQD'}` : ''}
               </div>
             </div>
             <div class="barcode-section">
@@ -1189,6 +1189,9 @@ const BarcodeInventory = () => {
                     </div>
                     <div className="text-xs text-gray-600 mb-3">
                       کد کالا: {products[0].sku || 'ندارد'} | دسته: {products[0].category}
+                      {products[0].price && (
+                        <><br/>قیمت: {products[0].price} {products[0].priceUnit || 'IQD'}</>
+                      )}
                     </div>
                     <div className="mb-2">
                       <VisualBarcode 
