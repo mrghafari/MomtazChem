@@ -975,14 +975,8 @@ const Shop = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => {
-                                    if (cart[product.id] && cart[product.id] > 0) {
-                                      removeFromCart(product.id);
-                                    } else {
-                                      setProductQuantity(product.id, getProductQuantity(product.id) - 1);
-                                    }
-                                  }}
-                                  disabled={getProductQuantity(product.id) <= 1 && (!cart[product.id] || cart[product.id] === 0)}
+                                  onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
+                                  disabled={getProductQuantity(product.id) <= 1}
                                 >
                                   <Minus className="w-4 h-4" />
                                 </Button>
@@ -997,72 +991,12 @@ const Shop = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => {
-                                    if (cart[product.id] && cart[product.id] > 0) {
-                                      const currentCartQty = cart[product.id];
-                                      const actualStock = product.stockQuantity || 0;
-                                      
-                                      if (currentCartQty < actualStock) {
-                                        const newCart = { ...cart, [product.id]: currentCartQty + 1 };
-                                        setCart(newCart);
-                                        saveCartToStorage(newCart);
-                                        
-                                        toast({
-                                          title: "به‌روزرسانی سبد خرید",
-                                          description: `یک واحد ${product.name} به سبد خرید اضافه شد`,
-                                        });
-                                      } else {
-                                        toast({
-                                          title: "موجودی ناکافی",
-                                          description: `تنها ${actualStock} عدد از این محصول موجود است`,
-                                          variant: "destructive",
-                                        });
-                                      }
-                                    } else {
-                                      setProductQuantity(product.id, getProductQuantity(product.id) + 1);
-                                    }
-                                  }}
+                                  onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
                                   disabled={getProductQuantity(product.id) >= (displayStock[product.id] || 0)}
                                 >
                                   <Plus className="w-4 h-4" />
                                 </Button>
                               </div>
-                              
-                              {/* Price Display with Discounts - Grid View */}
-                              <div className="text-center mt-2">
-                                {(() => {
-                                  const currentQty = cart[product.id] || getProductQuantity(product.id);
-                                  const discountedPrice = getDiscountedPrice(product, currentQty);
-                                  const basePrice = parseFloat(product.price);
-                                  const totalPrice = discountedPrice * currentQty;
-                                  
-                                  return (
-                                    <div className="space-y-1">
-                                      <div className="flex items-center justify-center gap-2">
-                                        <span className="text-lg font-bold text-blue-600">
-                                          ${discountedPrice.toFixed(2)}
-                                        </span>
-                                        {discountedPrice < basePrice && (
-                                          <span className="text-sm text-gray-500 line-through">
-                                            ${basePrice.toFixed(2)}
-                                          </span>
-                                        )}
-                                      </div>
-                                      {currentQty > 1 && (
-                                        <div className="text-sm text-gray-600">
-                                          Total: ${totalPrice.toFixed(2)} ({currentQty} items)
-                                        </div>
-                                      )}
-                                      {discountedPrice < basePrice && (
-                                        <div className="text-xs text-green-600 font-medium">
-                                          Save ${((basePrice - discountedPrice) * currentQty).toFixed(2)}!
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                              
                               {/* Add to Cart Button */}
                               <Button
                                 className="w-full"
@@ -1139,14 +1073,8 @@ const Shop = () => {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => {
-                                        if (cart[product.id] && cart[product.id] > 0) {
-                                          removeFromCart(product.id);
-                                        } else {
-                                          setProductQuantity(product.id, getProductQuantity(product.id) - 1);
-                                        }
-                                      }}
-                                      disabled={getProductQuantity(product.id) <= 1 && (!cart[product.id] || cart[product.id] === 0)}
+                                      onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
+                                      disabled={getProductQuantity(product.id) <= 1}
                                     >
                                       <Minus className="w-4 h-4" />
                                     </Button>
@@ -1161,72 +1089,12 @@ const Shop = () => {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => {
-                                        if (cart[product.id] && cart[product.id] > 0) {
-                                          const currentCartQty = cart[product.id];
-                                          const actualStock = product.stockQuantity || 0;
-                                          
-                                          if (currentCartQty < actualStock) {
-                                            const newCart = { ...cart, [product.id]: currentCartQty + 1 };
-                                            setCart(newCart);
-                                            saveCartToStorage(newCart);
-                                            
-                                            toast({
-                                              title: "به‌روزرسانی سبد خرید",
-                                              description: `یک واحد ${product.name} به سبد خرید اضافه شد`,
-                                            });
-                                          } else {
-                                            toast({
-                                              title: "موجودی ناکافی",
-                                              description: `تنها ${actualStock} عدد از این محصول موجود است`,
-                                              variant: "destructive",
-                                            });
-                                          }
-                                        } else {
-                                          setProductQuantity(product.id, getProductQuantity(product.id) + 1);
-                                        }
-                                      }}
+                                      onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
                                       disabled={getProductQuantity(product.id) >= (displayStock[product.id] || 0)}
                                     >
                                       <Plus className="w-4 h-4" />
                                     </Button>
                                   </div>
-                                  
-                                  {/* Price Display with Discounts - List View */}
-                                  <div className="text-center mt-2">
-                                    {(() => {
-                                      const currentQty = cart[product.id] || getProductQuantity(product.id);
-                                      const discountedPrice = getDiscountedPrice(product, currentQty);
-                                      const basePrice = parseFloat(product.price);
-                                      const totalPrice = discountedPrice * currentQty;
-                                      
-                                      return (
-                                        <div className="space-y-1">
-                                          <div className="flex items-center justify-center gap-2">
-                                            <span className="text-lg font-bold text-blue-600">
-                                              ${discountedPrice.toFixed(2)}
-                                            </span>
-                                            {discountedPrice < basePrice && (
-                                              <span className="text-sm text-gray-500 line-through">
-                                                ${basePrice.toFixed(2)}
-                                              </span>
-                                            )}
-                                          </div>
-                                          {currentQty > 1 && (
-                                            <div className="text-sm text-gray-600">
-                                              Total: ${totalPrice.toFixed(2)} ({currentQty} items)
-                                            </div>
-                                          )}
-                                          {discountedPrice < basePrice && (
-                                            <div className="text-xs text-green-600 font-medium">
-                                              Save ${((basePrice - discountedPrice) * currentQty).toFixed(2)}!
-                                            </div>
-                                          )}
-                                        </div>
-                                      );
-                                    })()}
-                                  </div>
-                                  
                                   {/* Add to Cart Button */}
                                   <Button
                                     className="w-full"
