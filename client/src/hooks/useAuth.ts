@@ -4,11 +4,11 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 export function useAuth() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["/api/admin/me"],
-    retry: 1, // Allow one retry for better reliability
-    staleTime: 0, // Always fetch fresh data to avoid authentication issues
-    gcTime: 0, // Don't cache auth data
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-    refetchOnMount: true, // Always refetch on mount
+    retry: false, // Don't retry to avoid interference with login flow
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes after successful login
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch on focus to avoid interrupting user flow
+    refetchOnMount: false, // Don't auto-refetch to avoid conflicts
     // Ensure credentials are included with requests
     queryFn: () => fetch("/api/admin/me", {
       credentials: 'include',
