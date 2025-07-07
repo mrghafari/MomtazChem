@@ -738,14 +738,18 @@ const Shop = () => {
                             </Badge>
                           </div>
 
-                          {/* Stock Quantity Display - Only show when < 10 */}
-                          {product.stockQuantity !== undefined && product.stockQuantity !== null && product.stockQuantity < 10 && (
+                          {/* Stock Quantity Display */}
+                          {product.stockQuantity !== undefined && product.stockQuantity !== null && (
                             <div className="mb-2 flex items-center gap-2">
                               <Package className={`w-4 h-4 ${
-                                product.stockQuantity >= 5 ? 'text-orange-500' : 'text-red-500'
+                                product.stockQuantity > 20 ? 'text-green-600' :
+                                product.stockQuantity >= 5 ? 'text-orange-500' :
+                                'text-red-500'
                               }`} />
                               <span className={`text-sm font-medium ${
-                                product.stockQuantity >= 5 ? 'text-orange-500' : 'text-red-500'
+                                product.stockQuantity > 20 ? 'text-green-600' :
+                                product.stockQuantity >= 5 ? 'text-orange-500' :
+                                'text-red-500'
                               }`}>
                                 {product.stockQuantity} موجود در انبار
                               </span>
@@ -883,14 +887,18 @@ const Shop = () => {
                                 </Badge>
                               </div>
 
-                              {/* Stock Quantity Display - Only show when < 10 */}
-                              {product.stockQuantity !== undefined && product.stockQuantity !== null && product.stockQuantity < 10 && (
+                              {/* Stock Quantity Display */}
+                              {product.stockQuantity !== undefined && product.stockQuantity !== null && (
                                 <div className="mb-3 flex items-center gap-2">
                                   <Package className={`w-4 h-4 ${
-                                    product.stockQuantity >= 5 ? 'text-orange-500' : 'text-red-500'
+                                    product.stockQuantity > 20 ? 'text-green-600' :
+                                    product.stockQuantity >= 5 ? 'text-orange-500' :
+                                    'text-red-500'
                                   }`} />
                                   <span className={`text-sm font-medium ${
-                                    product.stockQuantity >= 5 ? 'text-orange-500' : 'text-red-500'
+                                    product.stockQuantity > 20 ? 'text-green-600' :
+                                    product.stockQuantity >= 5 ? 'text-orange-500' :
+                                    'text-red-500'
                                   }`}>
                                     {product.stockQuantity} موجود در انبار
                                   </span>
