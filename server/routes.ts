@@ -1055,8 +1055,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Protected admin routes for product management
   app.post("/api/products", requireAuth, async (req, res) => {
     try {
-      const productData = insertShowcaseProductSchema.parse(req.body);
-      const product = await storage.createProduct(productData);
+      const productData = req.body;
+      
+      // Create product directly in unified shop_products table
+      const shopProductData = {
+        name: productData.name,
+        category: productData.category,
+        description: productData.description,
+        shortDescription: productData.shortDescription || null,
+        price: productData.unitPrice || productData.price || 0,
+        compareAtPrice: null,
+        priceUnit: productData.currency || 'IQD',
+        inStock: true,
+        stockQuantity: productData.stockQuantity || 0,
+        lowStockThreshold: 10,
+        sku: productData.sku || `SKU-${Date.now()}`,
+        barcode: productData.barcode || null,
+        weight: null,
+        weightUnit: 'kg',
+        dimensions: null,
+        imageUrls: productData.imageUrl ? [productData.imageUrl] : [],
+        thumbnailUrl: productData.imageUrl || null,
+        specifications: productData.specifications || {},
+        features: productData.features || [],
+        applications: productData.applications || [],
+        tags: [],
+        minimumOrderQuantity: 1,
+        maximumOrderQuantity: null,
+        leadTime: null,
+        shippingClass: 'standard',
+        taxClass: 'standard',
+        isActive: productData.isActive !== false,
+        isFeatured: false,
+        metaTitle: productData.name,
+        metaDescription: productData.shortDescription,
+        quantityDiscounts: [],
+        parentProductId: productData.parentProductId || null,
+        isVariant: productData.isVariant || false,
+        variantType: productData.variantType || null,
+        variantValue: productData.variantValue || null,
+        sortOrder: 0,
+        minStockLevel: productData.minStockLevel || 5
+      };
+      
+      const product = await shopStorage.createShopProduct(shopProductData);
       res.status(201).json(product);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -1081,10 +1123,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category } = req.query;
       let products;
       
+      // shop_products is now our single unified product table
       if (category && typeof category === 'string') {
-        products = await storage.getProductsByCategory(category);
+        products = await shopStorage.getShopProductsByCategory(category);
       } else {
-        products = await storage.getProducts();
+        products = await shopStorage.getShopProducts();
       }
       
       res.json(products);
@@ -1108,7 +1151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const product = await storage.getProductById(id);
+      const product = await shopStorage.getShopProductById(id);
       if (!product) {
         return res.status(404).json({ 
           success: false, 
@@ -1136,8 +1179,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const productData = insertShowcaseProductSchema.partial().parse(req.body);
-      const product = await storage.updateProduct(id, productData);
+      const productData = req.body;
+      const product = await shopStorage.updateShopProduct(id, productData);
       res.json(product);
     } catch (error) {
       console.error("Error updating product:", error);
@@ -1168,8 +1211,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const productData = insertShowcaseProductSchema.partial().parse(req.body);
-      const product = await storage.updateProduct(id, productData);
+      const productData = req.body;
+      const product = await shopStorage.updateShopProduct(id, productData);
       
       // 🔄 Reverse sync: Update shop inventory when showcase inventory changes
       if (productData.stockQuantity !== undefined) {
@@ -1212,7 +1255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      await storage.deleteProduct(id);
+      await shopStorage.deleteShopProduct(id);
       res.json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
       res.status(500).json({ 
@@ -1258,11 +1301,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Then search in regular products
-      const products = await storage.getProducts();
+      const products = await shopStorage.getShopProducts();
       const product = products.find(p => 
         p.barcode === decodedBarcode || 
-        p.sku === decodedBarcode || 
-        p.qrCode === decodedBarcode
+        p.sku === decodedBarcode
       );
       
       if (!product) {
@@ -1293,7 +1335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (qrCode) updateData.qrCode = qrCode;
       if (sku) updateData.sku = sku;
       
-      const updatedProduct = await storage.updateProduct(parseInt(id), updateData);
+      const updatedProduct = await shopStorage.updateShopProduct(parseInt(id), updateData);
       res.json(updatedProduct);
     } catch (error) {
       console.error("Error updating product barcode:", error);
@@ -1364,7 +1406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const productId of productIds) {
         try {
-          const products = await storage.getProducts();
+          const products = await shopStorage.getShopProducts();
           const product = products.find(p => p.id === productId);
           if (!product || (product.barcode && product.barcode.length === 13)) {
             continue; // Skip if product not found or already has EAN-13
@@ -1384,7 +1426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const ean13 = barcode12 + checkDigit.toString();
 
           // Update product with EAN-13
-          await storage.updateProduct(productId, { barcode: ean13 });
+          await shopStorage.updateShopProduct(productId, { barcode: ean13 });
           generated++;
         } catch (error) {
           console.error(`Error generating EAN-13 for product ${productId}:`, error);
@@ -1408,7 +1450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Export EAN-13 data as CSV with multilingual support
   app.get("/api/ean13/export", requireAuth, async (req, res) => {
     try {
-      const products = await storage.getProducts();
+      const products = await shopStorage.getShopProducts();
       const ean13Products = products.filter(p => p.barcode && p.barcode.length === 13);
       
       // Create CSV with UTF-8 BOM for proper multilingual character display
@@ -1476,7 +1518,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Export all barcode data (both showcase and shop) with pricing
   app.get("/api/barcode/export-all", requireAuth, async (req, res) => {
     try {
-      const showcaseProducts = await storage.getProducts();
       const shopProducts = await shopStorage.getShopProducts();
       
       // Create CSV with UTF-8 BOM for proper multilingual character display
@@ -4096,7 +4137,7 @@ ${procedure.content}
       const { productId, transactionType, quantity, reason, reference, scannedBarcode } = req.body;
       
       // Get current product
-      const product = await storage.getProductById(productId);
+      const product = await shopStorage.getShopProductById(productId);
       if (!product) {
         return res.status(404).json({ 
           success: false, 
@@ -4121,7 +4162,7 @@ ${procedure.content}
       }
       
       // Update product stock
-      await storage.updateProduct(productId, { stockQuantity: newStock });
+      await shopStorage.updateShopProduct(productId, { stockQuantity: newStock });
       
       // Log transaction
       console.log('Inventory transaction:', {
@@ -4177,7 +4218,7 @@ ${procedure.content}
         // Get product name for email
         let productName = 'Product';
         if (inquiryData.productIds && Array.isArray(inquiryData.productIds) && inquiryData.productIds.length > 0) {
-          const product = await storage.getProductById(inquiryData.productIds[0]);
+          const product = await shopStorage.getShopProductById(inquiryData.productIds[0]);
           if (product) {
             productName = product.name;
           }
@@ -4865,7 +4906,7 @@ ${procedure.content}
             try {
               const updatedProduct = await shopStorage.getShopProductById(item.productId);
               if (updatedProduct) {
-                await storage.syncProductFromShop(updatedProduct);
+                // No sync needed - unified table approach
                 console.log(`✓ [FALLBACK-SYNC] Product ${updatedProduct.name} synced individually`);
               }
             } catch (fallbackError) {
@@ -5393,7 +5434,7 @@ ${procedure.content}
   // Product synchronization endpoint
   app.post("/api/sync-products", requireAuth, async (req, res) => {
     try {
-      await storage.syncAllProductsToShop();
+      // No sync needed - unified table approach
       res.json({ success: true, message: "All products synchronized successfully" });
     } catch (error) {
       console.error("Error syncing products:", error);
@@ -5404,7 +5445,7 @@ ${procedure.content}
   // Reverse sync: Update showcase inventory from shop sales
   app.post("/api/sync-products-reverse", requireAuth, async (req, res) => {
     try {
-      await storage.syncAllProductsFromShop();
+      // No sync needed - unified table approach
       res.json({ success: true, message: "All products synchronized from shop to showcase successfully" });
     } catch (error) {
       console.error("Error syncing products from shop:", error);
@@ -11894,7 +11935,7 @@ momtazchem.com
       const { productId } = req.params;
       
       // Try to get from showcase_products first
-      const showcaseProduct = await storage.getShowcaseProductById(parseInt(productId));
+      const showcaseProduct = await shopStorage.getShopProductById(parseInt(productId));
       if (showcaseProduct) {
         let barcode = showcaseProduct.barcode;
         
@@ -11903,7 +11944,7 @@ momtazchem.com
           barcode = generateEAN13Barcode(showcaseProduct.name, showcaseProduct.category);
           
           // Update product with generated barcode
-          await storage.updateShowcaseProduct(showcaseProduct.id, { barcode });
+          await shopStorage.updateShopProduct(showcaseProduct.id, { barcode });
         }
         
         const parsed = parseEAN13Barcode(barcode);
@@ -11983,7 +12024,7 @@ momtazchem.com
       
       // Search in showcase_products
       try {
-        const showcaseProducts = await storage.getProducts();
+        const showcaseProducts = await shopStorage.getShopProducts();
         const showcaseMatch = showcaseProducts.find((p: any) => p.barcode === barcode);
         if (showcaseMatch) {
           results.push({
@@ -12038,7 +12079,7 @@ momtazchem.com
       const { excludeProductId } = req.query;
       
       // Search in showcase_products
-      const showcaseProducts = await storage.getProducts();
+      const showcaseProducts = await shopStorage.getShopProducts();
       const showcaseMatch = showcaseProducts.find((p: any) => 
         p.barcode === barcode && 
         (excludeProductId ? p.id !== parseInt(excludeProductId as string) : true)
@@ -12087,7 +12128,7 @@ momtazchem.com
       const { productCode } = req.params;
       
       // Search in showcase_products for product codes within barcodes
-      const showcaseProducts = await storage.getProducts();
+      const showcaseProducts = await shopStorage.getShopProducts();
       const showcaseMatch = showcaseProducts.find((p: any) => {
         if (!p.barcode || p.barcode.length !== 13) return false;
         // Extract 5-digit product code from position 8-12 in EAN-13: 846-96771-XXXXX-C
