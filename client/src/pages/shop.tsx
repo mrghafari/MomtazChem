@@ -929,11 +929,6 @@ const Shop = () => {
                               <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                 {product.inStock ? "In Stock" : "Out of Stock"}
                               </Badge>
-                              {product.inStock && displayStock[product.id] !== undefined && (
-                                <span className="text-xs text-gray-600 font-medium">
-                                  Available: {displayStock[product.id]}
-                                </span>
-                              )}
                             </div>
                           </div>
 
@@ -1106,11 +1101,6 @@ const Shop = () => {
                                   <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                     {product.inStock ? "In Stock" : "Out of Stock"}
                                   </Badge>
-                                  {product.inStock && displayStock[product.id] !== undefined && (
-                                    <span className="text-xs text-gray-600 font-medium">
-                                      Available: {displayStock[product.id]}
-                                    </span>
-                                  )}
                                 </div>
                               </div>
 
