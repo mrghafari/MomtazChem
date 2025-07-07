@@ -61,7 +61,7 @@ const Shop = () => {
     priceMin: undefined as number | undefined,
     priceMax: undefined as number | undefined,
     inStock: undefined as boolean | undefined,
-    tags: [] as string[],
+
     sortBy: 'relevance' as 'name' | 'price' | 'created' | 'relevance',
     sortOrder: 'desc' as 'asc' | 'desc'
   });
@@ -141,13 +141,7 @@ const Shop = () => {
     setCurrentPage(0);
   };
 
-  const handleTagToggle = (tag: string) => {
-    const currentTags = filters.tags || [];
-    const newTags = currentTags.includes(tag)
-      ? currentTags.filter(t => t !== tag)
-      : [...currentTags, tag];
-    handleFilterChange('tags', newTags.length ? newTags : []);
-  };
+
 
   const clearFilters = () => {
     setFilters({
@@ -155,7 +149,7 @@ const Shop = () => {
       priceMin: undefined,
       priceMax: undefined,
       inStock: undefined,
-      tags: [],
+
       sortBy: 'relevance',
       sortOrder: 'desc'
     });
@@ -809,27 +803,7 @@ const Shop = () => {
                   </div>
                 </div>
 
-                {/* Tags */}
-                {availableFilters?.availableTags && availableFilters.availableTags.length > 0 && (
-                  <>
-                    <Separator />
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">Tags</label>
-                      <div className="flex flex-wrap gap-1">
-                        {availableFilters.availableTags.slice(0, 12).map((tag: any) => (
-                          <Badge
-                            key={tag}
-                            variant={filters.tags?.includes(tag) ? "default" : "outline"}
-                            className="cursor-pointer text-xs"
-                            onClick={() => handleTagToggle(tag)}
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
+
 
                 <Separator />
 
@@ -945,36 +919,7 @@ const Shop = () => {
                             </div>
                           )}
 
-                          {/* Product Tags */}
-                          {(() => {
-                            let tags = product.tags;
-                            
-                            // If tags is a string, try to parse it as JSON
-                            if (typeof tags === 'string') {
-                              try {
-                                tags = JSON.parse(tags);
-                              } catch (e) {
-                                tags = null;
-                              }
-                            }
-                            
-                            return tags && Array.isArray(tags) && tags.length > 0 && (
-                              <div className="mb-3">
-                                <div className="flex flex-wrap gap-1">
-                                  {tags.slice(0, 3).map((tag: string, index: number) => (
-                                    <Badge key={index} variant="outline" className="text-xs bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100 transition-colors">
-                                      #{tag}
-                                    </Badge>
-                                  ))}
-                                  {tags.length > 3 && (
-                                    <Badge variant="outline" className="text-xs bg-gray-50 text-gray-500 border-gray-200">
-                                      +{tags.length - 3}
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })()}
+
 
                           {/* Quantity Discounts Display */}
                           {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
@@ -1117,36 +1062,7 @@ const Shop = () => {
                                 </div>
                               )}
 
-                              {/* Product Tags - List View */}
-                              {(() => {
-                                let tags = product.tags;
-                                
-                                // If tags is a string, try to parse it as JSON
-                                if (typeof tags === 'string') {
-                                  try {
-                                    tags = JSON.parse(tags);
-                                  } catch (e) {
-                                    tags = null;
-                                  }
-                                }
-                                
-                                return tags && Array.isArray(tags) && tags.length > 0 && (
-                                  <div className="mb-4">
-                                    <div className="flex flex-wrap gap-2">
-                                      {tags.slice(0, 4).map((tag: string, index: number) => (
-                                        <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 transition-colors">
-                                          #{tag}
-                                        </Badge>
-                                      ))}
-                                      {tags.length > 4 && (
-                                        <Badge variant="outline" className="text-xs bg-gray-50 text-gray-500 border-gray-200">
-                                          +{tags.length - 4} more
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })()}
+
                             </div>
                             
                             <div className="ml-6">
