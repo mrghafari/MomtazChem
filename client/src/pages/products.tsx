@@ -466,20 +466,22 @@ export default function ProductsPage() {
     return matchesCategory && matchesSearch;
   });
 
-  // Auto-generate barcode for new products when name and category are available
+  // Auto-generate barcode for new products when category and SKU are available
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
-      if ((name === "name" || name === "category") && value.name && value.category && !value.barcode && !editingProduct) {
+      // Auto-generate when category and SKU are both available, and no existing barcode
+      if ((name === "category" || name === "sku") && value.category && value.sku && !value.barcode && !editingProduct) {
         const autoGenerateBarcode = async () => {
           try {
-            console.log('Auto-generating barcode for:', value.name, value.category);
-            const generatedBarcode = generateEAN13Barcode(value.name, value.category);
+            console.log('Auto-generating barcode for category:', value.category, 'SKU:', value.sku);
+            // Use SKU as the primary identifier for barcode generation
+            const generatedBarcode = generateEAN13Barcode(value.sku, value.category);
             console.log('Generated barcode:', generatedBarcode);
             form.setValue("barcode", generatedBarcode);
             
             toast({
-              title: "Barcode Auto-Generated",
-              description: `Generated EAN-13: ${generatedBarcode}`,
+              title: "بارکد خودکار تولید شد",
+              description: `بارکد EAN-13 تولید شد: ${generatedBarcode}`,
               variant: "default"
             });
           } catch (error) {
@@ -488,7 +490,7 @@ export default function ProductsPage() {
         };
         
         // Delay auto-generation to prevent excessive calls
-        const timeoutId = setTimeout(autoGenerateBarcode, 500);
+        const timeoutId = setTimeout(autoGenerateBarcode, 800);
         return () => clearTimeout(timeoutId);
       }
     });
@@ -1182,7 +1184,7 @@ export default function ProductsPage() {
                       <div className="flex gap-2">
                         <FormControl>
                           <Input 
-                            placeholder="Auto-generated or enter manually" 
+                            placeholder="خودکار تولید می‌شود یا دستی وارد کنید" 
                             {...field}
                             onChange={async (e) => {
                               const newBarcode = e.target.value;
@@ -1239,10 +1241,23 @@ export default function ProductsPage() {
                             const productName = form.getValues("name");
                             const category = form.getValues("category");
                             
-                            if (!productName || !category) {
+                            const productSKU = form.getValues("sku");
+                            
+                            if (!category) {
                               toast({
-                                title: "Missing Information",
-                                description: "Please enter product name and select category first",
+                                title: "اطلاعات ناقص",
+                                description: "لطفاً ابتدا دسته‌بندی محصول را انتخاب کنید",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            
+                            // Use SKU if available, otherwise use product name
+                            const identifierForBarcode = productSKU || productName;
+                            if (!identifierForBarcode) {
+                              toast({
+                                title: "اطلاعات ناقص", 
+                                description: "لطفاً نام محصول یا SKU را وارد کنید",
                                 variant: "destructive"
                               });
                               return;
@@ -1252,10 +1267,10 @@ export default function ProductsPage() {
                             try {
                               const { generateUniqueEAN13Barcode } = await import('@shared/barcode-utils');
                               const excludeId = editingProduct?.id;
-                              const generatedBarcode = await generateUniqueEAN13Barcode(productName, category, excludeId);
+                              const generatedBarcode = await generateUniqueEAN13Barcode(identifierForBarcode, category, excludeId);
                               
                               console.log('Generated unique barcode:', {
-                                productName,
+                                identifier: identifierForBarcode,
                                 category,
                                 generated: generatedBarcode,
                                 isValid: validateEAN13(generatedBarcode)
@@ -1264,15 +1279,15 @@ export default function ProductsPage() {
                               form.setValue("barcode", generatedBarcode);
                               
                               toast({
-                                title: "Barcode Generated",
-                                description: "Unique EAN-13 barcode created successfully",
+                                title: "بارکد تولید شد",
+                                description: "بارکد منحصر به فرد EAN-13 با موفقیت ایجاد شد",
                                 variant: "default"
                               });
                             } catch (error) {
                               console.error('Error generating unique barcode:', error);
                               toast({
-                                title: "Generation Failed",
-                                description: "Failed to generate unique barcode",
+                                title: "خطا در تولید",
+                                description: "امکان تولید بارکد منحصر به فرد وجود ندارد",
                                 variant: "destructive"
                               });
                               return;
@@ -1315,8 +1330,8 @@ export default function ProductsPage() {
                         </Button>
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Click "Generate" to create GS1-compliant EAN-13 barcode automatically. 
-                        <span className="text-amber-600 font-medium">Note: Existing barcodes are protected from overwriting.</span>
+                        بارکد خودکار وقتی دسته‌بندی و SKU وارد شود تولید می‌شود. می‌توانید با کلیک "Generate" هم دستی ایجاد کنید.
+                        <span className="text-amber-600 font-medium">توجه: بارکدهای موجود از بازنویسی محافظت می‌شوند.</span>
                       </div>
                       
                       {/* Barcode Display - Canvas always rendered for stable ref */}
