@@ -52,60 +52,25 @@ export default function AdminLogin() {
     onSuccess: async (response) => {
       console.log("Login response:", response);
       
-      // Clear existing cache and wait for proper cleanup
-      queryClient.removeQueries({ queryKey: ["/api/admin/me"] });
-      queryClient.clear();
-      
-      // Wait longer for session to be properly established
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Simplified auth verification - since backend confirms success, trust it
-      try {
-        const authCheck = await fetch("/api/admin/me", { 
-          credentials: 'include',
-          cache: 'no-store',
-          headers: {
-            'Content-Type': 'application/json',
-          }
+      if (response.success && response.user) {
+        // Login was successful according to backend
+        toast({ title: "Success", description: "Admin login successful" });
+        
+        // Clear cache and set fresh auth data
+        queryClient.removeQueries({ queryKey: ["/api/admin/me"] });
+        queryClient.setQueryData(["/api/admin/me"], {
+          success: true,
+          user: response.user
         });
         
-        if (authCheck.ok) {
-          const authData = await authCheck.json();
-          console.log("Auth verification success:", authData);
-          
-          if (authData.success && authData.user) {
-            // Force refresh the auth cache with verified data
-            queryClient.setQueryData(["/api/admin/me"], authData);
-            
-            toast({ title: "Success", description: "Admin login successful" });
-            
-            // Navigate to admin panel immediately
-            setLocation("/admin");
-            return;
-          }
-        }
-        
-        // If we reach here, something went wrong
-        console.error("Auth verification failed:", authCheck.status);
+        // Navigate immediately - no verification needed since backend confirmed success
+        setLocation("/admin");
+      } else {
         toast({ 
-          title: "Login Issue", 
-          description: "Authentication succeeded but verification failed. Redirecting anyway...", 
+          title: "Login Failed", 
+          description: "Invalid response from server", 
           variant: "destructive" 
         });
-        
-        // Still redirect since backend login was successful
-        setTimeout(() => setLocation("/admin"), 1000);
-        
-      } catch (error) {
-        console.error("Auth verification error:", error);
-        toast({ 
-          title: "Warning", 
-          description: "Login succeeded but verification failed. Redirecting...", 
-          variant: "destructive" 
-        });
-        
-        // Still redirect since backend login was successful
-        setTimeout(() => setLocation("/admin"), 1000);
       }
     },
     onError: (error: any) => {
