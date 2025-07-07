@@ -7,6 +7,18 @@ export function useAuth() {
     retry: false,
     staleTime: 0, // Always fetch fresh data to avoid authentication issues
     refetchOnWindowFocus: false,
+    // Ensure credentials are included with requests
+    queryFn: () => fetch("/api/admin/me", {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    }).then(res => {
+      if (!res.ok) {
+        throw new Error('Authentication failed');
+      }
+      return res.json();
+    }),
   });
 
   const logout = useMutation({
@@ -19,6 +31,14 @@ export function useAuth() {
 
   const user = (data as any)?.success ? (data as any).user : null;
   const isAuthenticated = !!((data as any)?.success && (data as any)?.user) && !error;
+
+  console.log('useAuth state:', {
+    data,
+    isLoading,
+    error,
+    user,
+    isAuthenticated
+  });
 
   return {
     user,

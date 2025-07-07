@@ -33,7 +33,22 @@ export default function AdminLogin() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: (data: LoginForm) => apiRequest("/api/admin/login", "POST", data),
+    mutationFn: (data: LoginForm) => {
+      return fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: 'include', // Ensure cookies are included
+        body: JSON.stringify(data),
+      }).then(async (res) => {
+        const result = await res.json();
+        if (!res.ok) {
+          throw new Error(result.message || "Login failed");
+        }
+        return result;
+      });
+    },
     onSuccess: async (response) => {
       console.log("Login response:", response);
       
@@ -41,12 +56,17 @@ export default function AdminLogin() {
       queryClient.removeQueries({ queryKey: ["/api/admin/me"] });
       
       // Wait a moment for session to be established
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       // Prefetch the auth data to ensure it's available
       await queryClient.prefetchQuery({
         queryKey: ["/api/admin/me"],
-        queryFn: () => fetch("/api/admin/me", { credentials: 'include' }).then(res => res.json()),
+        queryFn: () => fetch("/api/admin/me", { 
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }).then(res => res.json()),
       });
       
       toast({ title: "Success", description: "Admin login successful" });
