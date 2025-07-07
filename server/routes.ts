@@ -1583,6 +1583,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to generate label HTML
+  function generateLabelHTML(products: any[], options: any) {
+    const { showPrice, showWebsite, labelSize, website } = options;
+    
+    const labelDimensions = {
+      small: { width: '48mm', height: '32mm', fontSize: '8px', barcodeHeight: '15mm' },
+      standard: { width: '64mm', height: '40mm', fontSize: '10px', barcodeHeight: '20mm' },
+      large: { width: '80mm', height: '48mm', fontSize: '12px', barcodeHeight: '25mm' }
+    };
+    
+    const dims = labelDimensions[labelSize] || labelDimensions.standard;
+    
+    const formatPrice = (product: any) => {
+      if (!product.price) return '';
+      const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+      const currency = product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : 'د.ع';
+      const unit = product.priceUnit || 'واحد';
+      return `${currency}${price.toFixed(2)} / ${unit}`;
+    };
+
+    const generateBarcode = (value: string) => {
+      // Simple barcode representation for printing
+      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: 20px; letter-spacing: 0.5px; text-align: center; margin: 2px 0;">${value}</div>`;
+    };
+
+    const labelsHTML = products.map(product => `
+      <div style="
+        width: ${dims.width}; 
+        height: ${dims.height}; 
+        border: 1px solid #ccc; 
+        padding: 4mm; 
+        margin: 2mm; 
+        display: inline-block; 
+        vertical-align: top;
+        background: white;
+        box-sizing: border-box;
+        page-break-inside: avoid;
+        font-family: Arial, sans-serif;
+      ">
+        <div style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="font-weight: bold; font-size: ${dims.fontSize}; margin-bottom: 2mm; line-height: 1.2; word-wrap: break-word;">
+              ${product.name}
+            </div>
+            <div style="margin: 2mm 0;">
+              ${generateBarcode(product.barcode || '')}
+              <div style="font-size: 8px; font-family: monospace; margin-top: 1mm;">
+                ${product.barcode || ''}
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 7px; color: #666;">
+            ${showPrice && product.price ? `<div style="font-weight: bold; color: #2d5a27; margin-bottom: 1mm;">${formatPrice(product)}</div>` : ''}
+            ${showWebsite ? `<div>${website}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <title>Product Labels</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap');
+          body { 
+            margin: 0; 
+            padding: 10mm; 
+            font-family: Arial, sans-serif;
+            direction: rtl;
+          }
+          @media print {
+            body { margin: 0; padding: 5mm; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div style="text-align: center;">
+          ${labelsHTML}
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  // Generate printable labels for products
+  app.post("/api/barcode/generate-labels", requireAuth, async (req, res) => {
+    try {
+      const { products, showPrice, showWebsite, labelSize, website } = req.body;
+      
+      if (!products || !Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "محصولات برای تولید لیبل مورد نیاز است"
+        });
+      }
+
+      // Generate HTML for labels
+      const labelHTML = generateLabelHTML(products, {
+        showPrice,
+        showWebsite,
+        labelSize,
+        website: website || 'www.momtazchem.com'
+      });
+
+      // Generate PDF using Puppeteer
+      const puppeteer = require('puppeteer');
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      
+      const page = await browser.newPage();
+      await page.setContent(labelHTML, { waitUntil: 'networkidle0' });
+      
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '10mm',
+          right: '10mm',
+          bottom: '10mm',
+          left: '10mm',
+        }
+      });
+      
+      await browser.close();
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="Product_Labels_${new Date().toISOString().split('T')[0]}.pdf"`);
+      res.send(pdf);
+
+      console.log(`✅ [LABELS] Generated labels PDF for ${products.length} products`);
+    } catch (error) {
+      console.error("❌ [LABELS] Error generating labels:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تولید لیبل‌ها"
+      });
+    }
+  });
+
   // Validate EAN-13 barcode
   app.post("/api/ean13/validate", requireAuth, async (req, res) => {
     try {
@@ -12322,22 +12467,7 @@ momtazchem.com
     try {
       const { format = 'zip' } = req.query;
       
-      // Get all products with barcodes from both tables
-      const showcaseProductsWithBarcodes = await db
-        .select({
-          id: showcaseProducts.id,
-          name: showcaseProducts.name,
-          sku: showcaseProducts.sku,
-          barcode: showcaseProducts.barcode,
-          category: showcaseProducts.category,
-          type: sql<string>`'showcase'`
-        })
-        .from(showcaseProducts)
-        .where(and(
-          isNotNull(showcaseProducts.barcode),
-          sql`LENGTH(${showcaseProducts.barcode}) = 13`
-        ));
-
+      // Get all products with barcodes from shop_products table
       const shopProductsWithBarcodes = await db
         .select({
           id: shopProducts.id,
@@ -12353,9 +12483,7 @@ momtazchem.com
           sql`LENGTH(${shopProducts.barcode}) = 13`
         ));
 
-      const allProducts = [...showcaseProductsWithBarcodes, ...shopProductsWithBarcodes];
-      
-      if (allProducts.length === 0) {
+      if (shopProductsWithBarcodes.length === 0) {
         return res.status(404).json({
           success: false,
           message: "No products with valid EAN-13 barcodes found"
@@ -12365,9 +12493,9 @@ momtazchem.com
       if (format === 'csv') {
         // CSV format for bulk import into label printers
         const csvData = [
-          'Name,SKU,Barcode,Category,Type',
-          ...allProducts.map(p => 
-            `"${p.name}","${p.sku || ''}","${p.barcode}","${p.category}","${p.type}"`
+          'Name,SKU,Barcode,Category',
+          ...shopProductsWithBarcodes.map(p => 
+            `"${p.name}","${p.sku || ''}","${p.barcode}","${p.category}"`
           )
         ].join('\n');
 
@@ -12379,10 +12507,8 @@ momtazchem.com
         res.json({
           success: true,
           data: {
-            totalProducts: allProducts.length,
-            showcaseCount: showcaseProductsWithBarcodes.length,
-            shopCount: shopProductsWithBarcodes.length,
-            products: allProducts
+            totalProducts: shopProductsWithBarcodes.length,
+            products: shopProductsWithBarcodes
           },
           exportedAt: new Date().toISOString()
         });

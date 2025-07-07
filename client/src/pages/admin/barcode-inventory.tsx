@@ -14,6 +14,7 @@ import BarcodeScanner from "@/components/ui/barcode-scanner";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
 import EAN13Generator from "@/components/ui/ean13-generator";
 import VisualBarcode from "@/components/ui/visual-barcode";
+import LabelPrinter from "@/components/barcode/label-printer";
 import { 
   Package, 
   Scan, 
@@ -272,32 +273,7 @@ const BarcodeInventory = () => {
     }
   };
 
-  // Download CSV for label printers
-  const downloadLabelPrinterCSV = async () => {
-    try {
-      const response = await fetch('/api/barcode/download-all?format=csv');
-      if (!response.ok) throw new Error('Download failed');
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `label-printer-barcodes-${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: "دانلود موفق",
-        description: "فایل CSV برای لیبل پرینتر دانلود شد"
-      });
-    } catch (error) {
-      toast({
-        title: "خطا در دانلود",
-        description: "امکان دانلود فایل CSV وجود ندارد",
-        variant: "destructive"
-      });
-    }
-  };
+
 
   const getStockStatusColor = (product: Product) => {
     if (product.stockQuantity <= 0) return 'bg-red-100 text-red-800';
@@ -773,14 +749,10 @@ const BarcodeInventory = () => {
                       <Download className="h-4 w-4 mr-2" />
                       Export CSV
                     </Button>
-                    <Button 
-                      className="w-full" 
-                      variant="outline"
-                      onClick={() => downloadLabelPrinterCSV()}
-                    >
-                      <Printer className="h-4 w-4 mr-2" />
-                      دانلود CSV برای لیبل پرینتر
-                    </Button>
+                    <LabelPrinter 
+                      products={products || []} 
+                      selectedProducts={[]}
+                    />
                   </div>
                 </div>
               </CardContent>
