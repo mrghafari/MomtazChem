@@ -861,32 +861,32 @@ export default function ProductsPage() {
                       )}
 
                       {/* Product Codes */}
-                      <div className="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="space-y-2 text-xs text-gray-500 dark:text-gray-400">
                         {product.sku && (
-                          <span className="flex items-center gap-1">
+                          <div className="flex items-center gap-1">
                             <BarChart3 className="w-3 h-3" />
-                            SKU: {product.sku}
-                          </span>
-                        )}
-                        {product.barcode && (
-                          <div className="space-y-2">
-                            <span className="flex items-center gap-1">
-                              <QrCode className="w-3 h-3" />
-                              {product.barcode}
-                            </span>
-                            {product.barcode && (
-                              <div className="flex justify-center">
-                                <VisualBarcode 
-                                  value={product.barcode}
-                                  width={1.2}
-                                  height={35}
-                                  fontSize={8}
-                                  className="bg-white p-1 border rounded"
-                                />
-                              </div>
-                            )}
+                            <span>SKU: {product.sku}</span>
                           </div>
                         )}
+                        {/* Always show barcode status for debugging */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-1">
+                            <QrCode className="w-3 h-3" />
+                            <span className="font-medium">
+                              {product.barcode ? `Barcode: ${product.barcode}` : 'No Barcode'}
+                            </span>
+                          </div>
+                          {product.barcode && (
+                            <div className="flex justify-center bg-white p-2 border rounded">
+                              <VisualBarcode 
+                                value={product.barcode}
+                                width={1.2}
+                                height={35}
+                                fontSize={8}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Tags */}
