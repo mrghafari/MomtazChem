@@ -14,6 +14,7 @@ interface Product {
   id: number;
   name: string;
   barcode?: string;
+  sku?: string;
   price?: string | number;
   priceUnit?: string;
   currency?: string;
@@ -28,6 +29,7 @@ interface LabelPrinterProps {
 const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts = [] }) => {
   const [showPrice, setShowPrice] = useState(true);
   const [showWebsite, setShowWebsite] = useState(true);
+  const [showSKU, setShowSKU] = useState(false);
   const [labelSize, setLabelSize] = useState('standard'); // standard, small, large, roll
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>(selectedProducts);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -68,6 +70,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
         products: selectedProducts,
         showPrice,
         showWebsite,
+        showSKU,
         labelSize,
         website: 'www.momtazchem.com'
       };
@@ -123,6 +126,13 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
           <h4 className={`font-semibold mb-1 truncate ${
             labelSize === 'roll' ? 'text-xs' : 'text-sm'
           }`}>{product.name}</h4>
+          {showSKU && product.sku && (
+            <div className={`text-gray-600 mb-1 font-mono ${
+              labelSize === 'roll' ? 'text-xs' : 'text-xs'
+            }`}>
+              SKU: {product.sku}
+            </div>
+          )}
           <div className="mb-2">
             <VisualBarcode 
               value={product.barcode!} 
@@ -199,6 +209,15 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
                       onCheckedChange={setShowPrice}
                     />
                     <Label htmlFor="showPrice">نمایش قیمت</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Checkbox 
+                      id="showSKU" 
+                      checked={showSKU}
+                      onCheckedChange={setShowSKU}
+                    />
+                    <Label htmlFor="showSKU">نمایش SKU</Label>
                   </div>
                   
                   <div className="flex items-center space-x-2 space-x-reverse">

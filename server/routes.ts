@@ -1585,12 +1585,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to generate label HTML
   function generateLabelHTML(products: any[], options: any) {
-    const { showPrice, showWebsite, labelSize, website } = options;
+    const { showPrice, showWebsite, showSKU, labelSize, website } = options;
     
     const labelDimensions = {
       small: { width: '48mm', height: '32mm', fontSize: '8px', barcodeHeight: '15mm' },
       standard: { width: '64mm', height: '40mm', fontSize: '10px', barcodeHeight: '20mm' },
-      large: { width: '80mm', height: '48mm', fontSize: '12px', barcodeHeight: '25mm' }
+      large: { width: '80mm', height: '48mm', fontSize: '12px', barcodeHeight: '25mm' },
+      roll: { width: '50mm', height: '25mm', fontSize: '7px', barcodeHeight: '12mm' }
     };
     
     const dims = labelDimensions[labelSize] || labelDimensions.standard;
@@ -1627,6 +1628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div style="font-weight: bold; font-size: ${dims.fontSize}; margin-bottom: 2mm; line-height: 1.2; word-wrap: break-word;">
               ${product.name}
             </div>
+            ${showSKU && product.sku ? `<div style="font-size: 7px; color: #666; font-family: monospace; margin-bottom: 1mm;">SKU: ${product.sku}</div>` : ''}
             <div style="margin: 2mm 0;">
               ${generateBarcode(product.barcode || '')}
               <div style="font-size: 8px; font-family: monospace; margin-top: 1mm;">
@@ -1674,7 +1676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate printable labels for products
   app.post("/api/barcode/generate-labels", requireAuth, async (req, res) => {
     try {
-      const { products, showPrice, showWebsite, labelSize, website } = req.body;
+      const { products, showPrice, showWebsite, showSKU, labelSize, website } = req.body;
       
       if (!products || !Array.isArray(products) || products.length === 0) {
         return res.status(400).json({
@@ -1687,6 +1689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const labelHTML = generateLabelHTML(products, {
         showPrice,
         showWebsite,
+        showSKU,
         labelSize,
         website: website || 'www.momtazchem.com'
       });
