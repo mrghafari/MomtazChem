@@ -28,7 +28,7 @@ interface LabelPrinterProps {
 const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts = [] }) => {
   const [showPrice, setShowPrice] = useState(true);
   const [showWebsite, setShowWebsite] = useState(true);
-  const [labelSize, setLabelSize] = useState('standard'); // standard, small, large
+  const [labelSize, setLabelSize] = useState('standard'); // standard, small, large, roll
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>(selectedProducts);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -115,28 +115,47 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
     <div className={`border rounded-lg p-3 bg-white text-center ${
       labelSize === 'small' ? 'w-48 h-32' : 
       labelSize === 'large' ? 'w-80 h-48' : 
+      labelSize === 'roll' ? 'w-52 h-24' : 
       'w-64 h-40'
     } shadow-sm`}>
       <div className="h-full flex flex-col justify-between">
         <div>
-          <h4 className="font-semibold text-sm mb-1 truncate">{product.name}</h4>
+          <h4 className={`font-semibold mb-1 truncate ${
+            labelSize === 'roll' ? 'text-xs' : 'text-sm'
+          }`}>{product.name}</h4>
           <div className="mb-2">
             <VisualBarcode 
               value={product.barcode!} 
-              width={labelSize === 'small' ? 1.5 : labelSize === 'large' ? 2.5 : 2}
-              height={labelSize === 'small' ? 30 : labelSize === 'large' ? 50 : 40}
-              fontSize={labelSize === 'small' ? 10 : labelSize === 'large' ? 14 : 12}
+              width={
+                labelSize === 'small' ? 1.5 : 
+                labelSize === 'large' ? 2.5 : 
+                labelSize === 'roll' ? 1.8 : 2
+              }
+              height={
+                labelSize === 'small' ? 30 : 
+                labelSize === 'large' ? 50 : 
+                labelSize === 'roll' ? 25 : 40
+              }
+              fontSize={
+                labelSize === 'small' ? 10 : 
+                labelSize === 'large' ? 14 : 
+                labelSize === 'roll' ? 8 : 12
+              }
             />
           </div>
         </div>
-        <div className="text-xs">
+        <div className={labelSize === 'roll' ? 'text-xs' : 'text-xs'}>
           {showPrice && product.price && (
-            <div className="font-bold text-green-600 mb-1">
+            <div className={`font-bold text-green-600 mb-1 ${
+              labelSize === 'roll' ? 'text-xs' : 'text-xs'
+            }`}>
               {formatPrice(product)}
             </div>
           )}
           {showWebsite && (
-            <div className="text-gray-500">
+            <div className={`text-gray-500 ${
+              labelSize === 'roll' ? 'text-xs' : 'text-xs'
+            }`}>
               www.momtazchem.com
             </div>
           )}
@@ -204,6 +223,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
                       <SelectItem value="small">کوچک (48x32mm)</SelectItem>
                       <SelectItem value="standard">استاندارد (64x40mm)</SelectItem>
                       <SelectItem value="large">بزرگ (80x48mm)</SelectItem>
+                      <SelectItem value="roll">پرینتر رولی (50x25mm)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
