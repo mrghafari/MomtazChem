@@ -518,6 +518,49 @@ const Shop = () => {
     return basePrice;
   };
 
+  // Helper function to get next discount info
+  const getNextDiscountInfo = (product: any, currentQuantity: number = 0) => {
+    if (!product.quantityDiscounts || !Array.isArray(product.quantityDiscounts)) {
+      return null;
+    }
+
+    // Sort discounts by minQty
+    const sortedDiscounts = [...product.quantityDiscounts].sort((a, b) => a.minQty - b.minQty);
+    
+    // Find the next applicable discount
+    for (const discount of sortedDiscounts) {
+      if (currentQuantity < discount.minQty) {
+        const remaining = discount.minQty - currentQuantity;
+        return {
+          remaining,
+          minQty: discount.minQty,
+          discount: discount.discount
+        };
+      }
+    }
+
+    return null;
+  };
+
+  // Helper function to get current discount info
+  const getCurrentDiscountInfo = (product: any, quantity: number = 1) => {
+    if (!product.quantityDiscounts || !Array.isArray(product.quantityDiscounts)) {
+      return null;
+    }
+
+    // Find the highest applicable discount
+    let applicableDiscount = null;
+    for (const discount of product.quantityDiscounts) {
+      if (quantity >= discount.minQty) {
+        if (!applicableDiscount || discount.discount > applicableDiscount.discount) {
+          applicableDiscount = discount;
+        }
+      }
+    }
+
+    return applicableDiscount;
+  };
+
   // Calculate total savings
   const getTotalSavings = () => {
     return Object.entries(cart).reduce((savings, [productId, qty]) => {
@@ -890,14 +933,56 @@ const Shop = () => {
                             {product.shortDescription || product.description}
                           </p>
                           
-                          <div className="flex items-center justify-between mb-3">
-                            <div>
-                              <span className="text-2xl font-bold text-green-600">
-                                ${product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
-                              </span>
-                              <span className="text-sm text-gray-500 ml-1">
-                                / {product.priceUnit || 'unit'}
-                              </span>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              {(() => {
+                                const currentQty = cart[product.id] || 1;
+                                const originalPrice = parseFloat(product.price || "0");
+                                const discountedPrice = getDiscountedPrice(product, currentQty);
+                                const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                
+                                return (
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      {currentDiscount && discountedPrice < originalPrice ? (
+                                        <>
+                                          <span className="text-lg text-gray-400 line-through">
+                                            ${originalPrice.toFixed(2)}
+                                          </span>
+                                          <span className="text-2xl font-bold text-green-600">
+                                            ${discountedPrice.toFixed(2)}
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <span className="text-2xl font-bold text-green-600">
+                                          ${originalPrice.toFixed(2)}
+                                        </span>
+                                      )}
+                                      <span className="text-sm text-gray-500">
+                                        / {product.priceUnit || 'unit'}
+                                      </span>
+                                    </div>
+                                    
+                                    {currentDiscount && (
+                                      <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                                        {(currentDiscount.discount * 100).toFixed(0)}% تخفیف فعال
+                                      </Badge>
+                                    )}
+                                    
+                                    {(() => {
+                                      const nextDiscount = getNextDiscountInfo(product, currentQty);
+                                      if (nextDiscount) {
+                                        return (
+                                          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded font-medium">
+                                            {nextDiscount.remaining} عدد دیگر تا {(nextDiscount.discount * 100).toFixed(0)}% تخفیف
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    })()}
+                                  </div>
+                                );
+                              })()}
                             </div>
                             <div className="flex flex-col gap-1">
                               <Badge variant={product.inStock ? "secondary" : "destructive"}>
@@ -1033,14 +1118,56 @@ const Shop = () => {
                                 {product.description}
                               </p>
                               
-                              <div className="flex items-center gap-4 mb-4">
-                                <div>
-                                  <span className="text-2xl font-bold text-green-600">
-                                    ${product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
-                                  </span>
-                                  <span className="text-sm text-gray-500 ml-1">
-                                    / {product.priceUnit || 'unit'}
-                                  </span>
+                              <div className="flex items-start gap-4 mb-4">
+                                <div className="flex-1">
+                                  {(() => {
+                                    const currentQty = cart[product.id] || 1;
+                                    const originalPrice = parseFloat(product.price || "0");
+                                    const discountedPrice = getDiscountedPrice(product, currentQty);
+                                    const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                    
+                                    return (
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          {currentDiscount && discountedPrice < originalPrice ? (
+                                            <>
+                                              <span className="text-lg text-gray-400 line-through">
+                                                ${originalPrice.toFixed(2)}
+                                              </span>
+                                              <span className="text-2xl font-bold text-green-600">
+                                                ${discountedPrice.toFixed(2)}
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span className="text-2xl font-bold text-green-600">
+                                              ${originalPrice.toFixed(2)}
+                                            </span>
+                                          )}
+                                          <span className="text-sm text-gray-500">
+                                            / {product.priceUnit || 'unit'}
+                                          </span>
+                                        </div>
+                                        
+                                        {currentDiscount && (
+                                          <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                                            {(currentDiscount.discount * 100).toFixed(0)}% تخفیف فعال
+                                          </Badge>
+                                        )}
+                                        
+                                        {(() => {
+                                          const nextDiscount = getNextDiscountInfo(product, currentQty);
+                                          if (nextDiscount) {
+                                            return (
+                                              <div className="text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded font-medium">
+                                                {nextDiscount.remaining} عدد دیگر تا {(nextDiscount.discount * 100).toFixed(0)}% تخفیف
+                                              </div>
+                                            );
+                                          }
+                                          return null;
+                                        })()}
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                                 <div className="flex flex-col gap-1">
                                   <Badge variant={product.inStock ? "secondary" : "destructive"}>
