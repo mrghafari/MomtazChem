@@ -987,28 +987,25 @@ const Shop = () => {
                                 
                                 return (
                                   <div className="space-y-2 mt-2">
-                                    {/* نمایش تخفیف فعلی */}
+                                    {/* Current Discount Display */}
                                     {currentDiscount && (
                                       <div className="bg-green-50 border border-green-200 rounded-lg p-2">
                                         <div className="flex items-center justify-between">
                                           <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                                            {(currentDiscount.discount * 100).toFixed(0)}% تخفیف فعال
+                                            {(currentDiscount.discount * 100).toFixed(0)}% Active Discount
                                           </Badge>
                                           <div className="text-xs text-green-700 font-semibold">
-                                            صرفه‌جویی: ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(2)}
+                                            You Save: ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(2)}
                                           </div>
                                         </div>
                                       </div>
                                     )}
                                     
-                                    {/* نمایش تخفیف بعدی */}
+                                    {/* Next Discount Display */}
                                     {nextDiscount && (
                                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
                                         <div className="text-xs text-blue-700 font-medium">
-                                          {nextDiscount.remaining} عدد دیگر تا {(nextDiscount.discount * 100).toFixed(0)}% تخفیف!
-                                        </div>
-                                        <div className="text-xs text-blue-600 mt-1">
-                                          صرفه‌جویی اضافی: ${(parseFloat(product.price || "0") * (nextDiscount.discount - (currentDiscount?.discount || 0)) * currentQty).toFixed(2)}
+                                          Add {nextDiscount.remaining} more for {(nextDiscount.discount * 100).toFixed(0)}% discount!
                                         </div>
                                       </div>
                                     )}
@@ -1101,15 +1098,15 @@ const Shop = () => {
                                 </div>
                               </div>
                               
-                              {/* نمایش تخفیف برای List View */}
+                              {/* Quantity Discounts for List View */}
                               {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 && (
                                 <div className="mb-4">
-                                  <div className="text-sm font-medium text-gray-700 mb-2">تخفیف‌های کمی:</div>
+                                  <div className="text-sm font-medium text-gray-700 mb-2">Quantity Discounts:</div>
                                   <div className="grid grid-cols-2 gap-2">
                                     {product.quantityDiscounts.map((discount: any, index: number) => (
                                       <div key={index} className="bg-gray-50 rounded-lg p-2">
                                         <Badge variant="outline" className="text-xs">
-                                          {discount.minQty}+ عدد → {(discount.discount * 100).toFixed(0)}% تخفیف
+                                          {discount.minQty}+ items → {(discount.discount * 100).toFixed(0)}% off
                                         </Badge>
                                       </div>
                                     ))}
@@ -1121,28 +1118,25 @@ const Shop = () => {
                                     
                                     return (
                                       <div className="space-y-2 mt-3">
-                                        {/* نمایش تخفیف فعلی */}
+                                        {/* Current Discount Display */}
                                         {currentDiscount && (
                                           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                                             <div className="flex items-center justify-between">
                                               <Badge variant="secondary" className="bg-green-100 text-green-700 text-sm">
-                                                {(currentDiscount.discount * 100).toFixed(0)}% تخفیف فعال
+                                                {(currentDiscount.discount * 100).toFixed(0)}% Active Discount
                                               </Badge>
                                               <div className="text-sm text-green-700 font-semibold">
-                                                صرفه‌جویی: ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(2)}
+                                                You Save: ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(2)}
                                               </div>
                                             </div>
                                           </div>
                                         )}
                                         
-                                        {/* نمایش تخفیف بعدی */}
+                                        {/* Next Discount Display */}
                                         {nextDiscount && (
                                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                             <div className="text-sm text-blue-700 font-medium">
-                                              {nextDiscount.remaining} عدد دیگر تا {(nextDiscount.discount * 100).toFixed(0)}% تخفیف!
-                                            </div>
-                                            <div className="text-sm text-blue-600 mt-1">
-                                              صرفه‌جویی اضافی: ${(parseFloat(product.price || "0") * (nextDiscount.discount - (currentDiscount?.discount || 0)) * currentQty).toFixed(2)}
+                                              Add {nextDiscount.remaining} more for {(nextDiscount.discount * 100).toFixed(0)}% discount!
                                             </div>
                                           </div>
                                         )}
