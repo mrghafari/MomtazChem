@@ -30,7 +30,8 @@ import {
   Download,
   Upload,
   Barcode,
-  Printer
+  Printer,
+  FileText
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -259,13 +260,40 @@ const BarcodeInventory = () => {
       window.URL.revokeObjectURL(url);
       
       toast({
-        title: "Export Complete",
-        description: "EAN-13 data exported successfully"
+        title: "خروجی EAN-13 تکمیل شد",
+        description: "فایل CSV با پشتیبانی چندزبانه ایجاد شد"
       });
     } catch (error) {
       toast({
-        title: "Export Failed",
-        description: "Failed to export EAN-13 data",
+        title: "خطا در خروجی گیری",
+        description: "عدم موفقیت در ایجاد فایل EAN-13",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Complete barcode CSV export with pricing and multilingual support
+  const exportCompleteData = async () => {
+    try {
+      const response = await fetch('/api/barcode/export-all');
+      if (!response.ok) throw new Error('Export failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Complete_Barcode_Export_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "خروجی کامل تکمیل شد",
+        description: "فایل CSV جامع با قیمت‌گذاری و پشتیبانی کامل از فارسی، عربی و کوردی ایجاد شد"
+      });
+    } catch (error) {
+      toast({
+        title: "خطا در خروجی گیری",
+        description: "عدم موفقیت در ایجاد فایل جامع بارکد",
         variant: "destructive"
       });
     }
@@ -770,7 +798,15 @@ const BarcodeInventory = () => {
                       onClick={() => exportEAN13Data()}
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      Export EAN-13 CSV
+                      خروجی EAN-13 CSV
+                    </Button>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => exportCompleteData()}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      خروجی کامل با قیمت (فارسی/عربی/کوردی)
                     </Button>
                     <Button 
                       className="w-full" 
