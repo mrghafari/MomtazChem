@@ -962,9 +962,9 @@ const Shop = () => {
                     {viewMode === "grid" ? (
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
-                          {product.thumbnailUrl ? (
+                          {product.imageUrl ? (
                             <img 
-                              src={product.thumbnailUrl} 
+                              src={product.imageUrl} 
                               alt={product.name}
                               className="w-full h-full object-cover"
                             />
@@ -1179,9 +1179,9 @@ const Shop = () => {
                     ) : (
                       <div className="flex">
                         <div className="w-48 h-48 bg-gray-100 flex-shrink-0">
-                          {product.thumbnailUrl ? (
+                          {product.imageUrl ? (
                             <img 
-                              src={product.thumbnailUrl} 
+                              src={product.imageUrl} 
                               alt={product.name}
                               className="w-full h-full object-cover"
                             />
