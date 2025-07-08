@@ -286,47 +286,40 @@ const BarcodeInventory = () => {
         return;
       }
 
-      const response = await fetch('/api/barcode/generate-labels', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          products: productsWithBarcodes.map(p => ({
-            id: p.id,
-            name: p.name,
-            sku: p.sku || `SKU${p.id.toString().padStart(4, '0')}`,
-            barcode: p.barcode,
-            price: p.unitPrice,
-            currency: p.currency || 'IQD'
-          })),
-          labelSize: 'standard',
-          includePrice: true,
-          includeWebsite: true
-        })
-      });
+      // Generate continuous label format for standard printers
+      const continuousLabels = productsWithBarcodes.map(product => {
+        const sku = product.sku || `SKU${product.id.toString().padStart(4, '0')}`;
+        const price = product.unitPrice ? `${product.unitPrice} ${product.currency || 'IQD'}` : '';
+        
+        return `
+^XA
+^FO50,30^A0N,30,25^FD${product.name.substring(0, 25)}^FS
+^FO50,70^A0N,25,20^FDSKU: ${sku}^FS
+^FO50,100^BY2,3,100^BCN,100,Y,N,N^FD${product.barcode}^FS
+^FO50,220^A0N,20,15^FD${price}^FS
+^FO50,250^A0N,15,12^FDwww.momtazchem.com^FS
+^XZ
+        `.trim();
+      }).join('\n\n');
 
-      if (!response.ok) {
-        throw new Error('Label generation failed');
-      }
-
-      const blob = await response.blob();
+      // Create downloadable ZPL file for continuous printing
+      const blob = new Blob([continuousLabels], { type: 'text/plain' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Labels_${new Date().toISOString().split('T')[0]}.pdf`;
+      link.download = `Continuous_Labels_${new Date().toISOString().split('T')[0]}.zpl`;
       link.click();
       window.URL.revokeObjectURL(url);
 
       toast({
-        title: "چاپ برچسب موفق",
-        description: `${productsWithBarcodes.length} برچسب محصول تولید شد`
+        title: "فایل چاپ پیوسته تولید شد",
+        description: `${productsWithBarcodes.length} برچسب ZPL برای دستگاه‌های حرفه‌ای آماده شد`
       });
     } catch (error) {
       console.error('Print labels error:', error);
       toast({
-        title: "خطا در چاپ برچسب",
-        description: "عدم موفقیت در تولید برچسب‌ها",
+        title: "خطا در تولید فایل چاپ",
+        description: "عدم موفقیت در تولید برچسب‌های پیوسته",
         variant: "destructive"
       });
     }
@@ -690,7 +683,7 @@ const BarcodeInventory = () => {
                       onClick={() => handlePrintLabels()}
                     >
                       <Printer className="h-4 w-4 mr-2" />
-                      Print Labels
+                      چاپ پیوسته ZPL
                     </Button>
 
                   </div>
