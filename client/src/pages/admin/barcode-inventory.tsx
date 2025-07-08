@@ -665,7 +665,16 @@ export default function BarcodeInventory() {
                       {product.barcode ? (
                         <div className="space-y-2">
                           <div className="font-mono text-sm">{product.barcode}</div>
-                          <VisualBarcode value={product.barcode} />
+                          <VisualBarcode 
+                            value={product.barcode} 
+                            width={1.5}
+                            height={40}
+                            fontSize={10}
+                            showDownload={true}
+                            productName={product.name}
+                            sku={product.sku}
+                            price={product.price}
+                          />
                         </div>
                       ) : (
                         <span className="text-gray-400">No barcode</span>

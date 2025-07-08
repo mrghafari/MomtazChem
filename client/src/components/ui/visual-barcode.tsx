@@ -47,6 +47,7 @@ const VisualBarcode = ({
         // Clear previous content
         canvasRef.current.innerHTML = '';
         setError(null);
+        setIsGenerated(false);
         
         JsBarcode(canvasRef.current, value, {
           format: format,
@@ -61,16 +62,27 @@ const VisualBarcode = ({
           valid: function(valid) {
             if (!valid) {
               setError('Invalid barcode format');
+              setIsGenerated(false);
             } else {
               setIsGenerated(true);
             }
           }
         });
+        
+        // Set as generated after successful rendering
+        setTimeout(() => {
+          if (canvasRef.current && canvasRef.current.children.length > 0) {
+            setIsGenerated(true);
+          }
+        }, 100);
+        
       } catch (error) {
         console.error("Error generating barcode:", error);
         setError(error instanceof Error ? error.message : 'Failed to generate barcode');
         setIsGenerated(false);
       }
+    } else {
+      setIsGenerated(false);
     }
   }, [value, width, height, format, displayValue, fontSize]);
 
@@ -173,10 +185,11 @@ const VisualBarcode = ({
     );
   }
 
-  if (!isGenerated && !error) {
+  // Always show the barcode container, even if not fully generated
+  if (!value) {
     return (
       <div className={`text-gray-500 text-sm ${className}`}>
-        Generating barcode...
+        No barcode value
       </div>
     );
   }
