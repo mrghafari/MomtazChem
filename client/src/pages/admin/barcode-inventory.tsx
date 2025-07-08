@@ -33,7 +33,8 @@ import {
   Upload,
   Barcode,
   Printer,
-  FileText
+  FileText,
+  Eye
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -78,6 +79,8 @@ const BarcodeInventory = () => {
   const [includePrice, setIncludePrice] = useState(true);
   const [includeSKU, setIncludeSKU] = useState(true);
   const [includeWebsite, setIncludeWebsite] = useState(true);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
 
   // Check authentication
@@ -278,6 +281,42 @@ const BarcodeInventory = () => {
     }
   };
 
+  const generateLabelZPL = (product: Product) => {
+    const sku = product.sku || `SKU${product.id.toString().padStart(4, '0')}`;
+    const price = product.unitPrice ? `${product.unitPrice} ${product.currency || 'IQD'}` : '';
+    
+    // Define label dimensions (compact 50mm x 30mm label)
+    let labelCommands = `^XA\n^LL240\n^PW400\n`;
+    
+    // Product name (top)
+    labelCommands += `^FO10,8^A0N,20,15^FD${product.name.substring(0, 30)}^FS\n`;
+    let yPosition = 30;
+    
+    // Add SKU if selected
+    if (includeSKU) {
+      labelCommands += `^FO10,${yPosition}^A0N,15,12^FDSKU: ${sku.substring(0, 15)}^FS\n`;
+      yPosition += 18;
+    }
+    
+    // Add barcode (compact size)
+    labelCommands += `^FO10,${yPosition}^BY1,2,50^BCN,50,Y,N,N^FD${product.barcode}^FS\n`;
+    yPosition += 60;
+    
+    // Add price if selected (compact)
+    if (includePrice && price) {
+      labelCommands += `^FO10,${yPosition}^A0N,14,10^FD${price}^FS\n`;
+      yPosition += 15;
+    }
+    
+    // Add website if selected (compact)
+    if (includeWebsite) {
+      labelCommands += `^FO10,${yPosition}^A0N,10,8^FDmomtazchem.com^FS\n`;
+    }
+    
+    labelCommands += '^XZ';
+    return labelCommands;
+  };
+
   const handlePrintLabels = async () => {
     try {
       const productsWithBarcodes = products?.filter(p => p.barcode) || [];
@@ -291,42 +330,22 @@ const BarcodeInventory = () => {
         return;
       }
 
+      // Filter selected products or use all
+      const targetProducts = selectedProducts.length > 0 
+        ? productsWithBarcodes.filter(p => selectedProducts.includes(p.id))
+        : productsWithBarcodes;
+
+      if (targetProducts.length === 0) {
+        toast({
+          title: "هیچ محصولی انتخاب نشده",
+          description: "لطفاً محصولات مورد نظر را انتخاب کنید",
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Generate continuous label format for standard printers
-      const continuousLabels = productsWithBarcodes.map(product => {
-        const sku = product.sku || `SKU${product.id.toString().padStart(4, '0')}`;
-        const price = product.unitPrice ? `${product.unitPrice} ${product.currency || 'IQD'}` : '';
-        
-        // Define label dimensions (compact 50mm x 30mm label)
-        let labelCommands = `^XA\n^LL240\n^PW400\n`;
-        
-        // Product name (top)
-        labelCommands += `^FO10,8^A0N,20,15^FD${product.name.substring(0, 30)}^FS\n`;
-        let yPosition = 30;
-        
-        // Add SKU if selected
-        if (includeSKU) {
-          labelCommands += `^FO10,${yPosition}^A0N,15,12^FDSKU: ${sku.substring(0, 15)}^FS\n`;
-          yPosition += 18;
-        }
-        
-        // Add barcode (compact size)
-        labelCommands += `^FO10,${yPosition}^BY1,2,50^BCN,50,Y,N,N^FD${product.barcode}^FS\n`;
-        yPosition += 60;
-        
-        // Add price if selected (compact)
-        if (includePrice && price) {
-          labelCommands += `^FO10,${yPosition}^A0N,14,10^FD${price}^FS\n`;
-          yPosition += 15;
-        }
-        
-        // Add website if selected (compact)
-        if (includeWebsite) {
-          labelCommands += `^FO10,${yPosition}^A0N,10,8^FDmomtazchem.com^FS\n`;
-        }
-        
-        labelCommands += '^XZ';
-        return labelCommands;
-      }).join('\n\n');
+      const continuousLabels = targetProducts.map(product => generateLabelZPL(product)).join('\n\n');
 
       // Create downloadable ZPL file for continuous printing
       const blob = new Blob([continuousLabels], { type: 'text/plain' });
@@ -339,7 +358,7 @@ const BarcodeInventory = () => {
 
       toast({
         title: "فایل چاپ پیوسته تولید شد",
-        description: `${productsWithBarcodes.length} برچسب ZPL برای دستگاه‌های حرفه‌ای آماده شد`
+        description: `${targetProducts.length} برچسب ZPL برای دستگاه‌های حرفه‌ای آماده شد`
       });
     } catch (error) {
       console.error('Print labels error:', error);
@@ -734,14 +753,24 @@ const BarcodeInventory = () => {
                       </div>
                     </div>
                     
-                    <Button 
-                      className="w-full" 
-                      variant="outline"
-                      onClick={() => handlePrintLabels()}
-                    >
-                      <Printer className="h-4 w-4 mr-2" />
-                      چاپ پیوسته ZPL
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        className="flex-1" 
+                        variant="outline"
+                        onClick={() => setShowPreview(true)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        پیش‌نمایش
+                      </Button>
+                      <Button 
+                        className="flex-1" 
+                        variant="outline"
+                        onClick={() => handlePrintLabels()}
+                      >
+                        <Printer className="h-4 w-4 mr-2" />
+                        چاپ ZPL
+                      </Button>
+                    </div>
 
                   </div>
                 </div>
@@ -759,6 +788,18 @@ const BarcodeInventory = () => {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b">
+                      <th className="text-left p-2">
+                        <Checkbox 
+                          checked={selectedProducts.length === products?.length && products?.length > 0}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedProducts(products?.map(p => p.id) || []);
+                            } else {
+                              setSelectedProducts([]);
+                            }
+                          }}
+                        />
+                      </th>
                       <th className="text-left p-2">Product</th>
                       <th className="text-left p-2">Category</th>
                       <th className="text-left p-2">Current Barcode</th>
@@ -769,6 +810,18 @@ const BarcodeInventory = () => {
                   <tbody>
                     {products?.map((product) => (
                       <tr key={product.id} className="border-b hover:bg-gray-50">
+                        <td className="p-2">
+                          <Checkbox 
+                            checked={selectedProducts.includes(product.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedProducts(prev => [...prev, product.id]);
+                              } else {
+                                setSelectedProducts(prev => prev.filter(id => id !== product.id));
+                              }
+                            }}
+                          />
+                        </td>
                         <td className="p-2">
                           <div>
                             <p className="font-medium">{product.name}</p>
@@ -845,6 +898,59 @@ const BarcodeInventory = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Label Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>پیش‌نمایش برچسب</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-sm text-gray-600">
+              {selectedProducts.length > 0 
+                ? `${selectedProducts.length} محصول انتخاب شده` 
+                : `${products?.filter(p => p.barcode)?.length || 0} محصول با بارکد`}
+            </div>
+            <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+              {(() => {
+                const targetProducts = selectedProducts.length > 0 
+                  ? products?.filter(p => selectedProducts.includes(p.id) && p.barcode)
+                  : products?.filter(p => p.barcode);
+                
+                return targetProducts?.map((product) => (
+                  <div key={product.id} className="border rounded-lg p-4 bg-white">
+                    <div className="font-medium text-sm mb-2">{product.name.substring(0, 30)}</div>
+                    {includeSKU && (
+                      <div className="text-xs text-gray-600 mb-1">
+                        SKU: {product.sku || `SKU${product.id.toString().padStart(4, '0')}`}
+                      </div>
+                    )}
+                    <div className="my-2">
+                      <VisualBarcode 
+                        value={product.barcode} 
+                        format="CODE128" 
+                        width={1.5} 
+                        height={30}
+                        fontSize={10}
+                      />
+                    </div>
+                    {includePrice && product.unitPrice && (
+                      <div className="text-xs text-green-600 font-medium">
+                        {product.unitPrice} {product.currency || 'IQD'}
+                      </div>
+                    )}
+                    {includeWebsite && (
+                      <div className="text-xs text-blue-600 mt-1">
+                        momtazchem.com
+                      </div>
+                    )}
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Generator Dialog */}
       <Dialog open={showGenerator} onOpenChange={setShowGenerator}>
