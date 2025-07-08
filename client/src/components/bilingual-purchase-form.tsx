@@ -232,6 +232,32 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  // Fetch complete CRM customer data for logged-in customers
+  const { data: crmCustomerData } = useQuery({
+    queryKey: ['/api/customer/crm-profile'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/customer/crm-profile', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('CRM Customer API response:', result);
+          if (result.success) {
+            return result.data;
+          }
+        }
+        return null;
+      } catch (error) {
+        console.log('Error fetching CRM customer data:', error);
+        return null;
+      }
+    },
+    enabled: !!(customerData?.success && customerData.customer?.crmId),
+    retry: false,
+  });
+
   // Fetch wallet data for logged-in customers
   const { data: walletData } = useQuery({
     queryKey: ['/api/customer/wallet'],
@@ -279,16 +305,22 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     console.log('=== BilingualPurchaseForm Debug ===');
     console.log('existingCustomer from parent:', existingCustomer);
     console.log('customerData from API:', customerData);
+    console.log('crmCustomerData from API:', crmCustomerData);
     console.log('isLoadingCustomer:', isLoadingCustomer);
     
-    // Priority 1: Use existingCustomer passed from parent (shop page)
+    // Priority 1: Use CRM customer data (most complete)
+    // Priority 2: Use existingCustomer passed from parent (shop page)
+    // Priority 3: Use basic customerData from API
     let customerToUse = null;
-    if (existingCustomer) {
+    if (crmCustomerData) {
+      customerToUse = crmCustomerData;
+      console.log('Using CRM customer data (most complete)');
+    } else if (existingCustomer) {
       customerToUse = existingCustomer;
       console.log('Using existingCustomer from parent');
     } else if (customerData?.success && customerData.customer) {
       customerToUse = customerData.customer;
-      console.log('Using customerData from API');
+      console.log('Using basic customerData from API');
     }
     
     if (customerToUse) {
@@ -297,7 +329,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('Customer lastName:', customerToUse.lastName);
       console.log('Customer phone:', customerToUse.phone);
       console.log('Customer address:', customerToUse.address);
+      console.log('Customer secondaryAddress:', customerToUse.secondaryAddress);
       console.log('Customer city:', customerToUse.city);
+      console.log('Customer country:', customerToUse.country);
+      console.log('Customer postalCode:', customerToUse.postalCode);
       
       const fullName = `${customerToUse.firstName || ''} ${customerToUse.lastName || ''}`.trim();
       console.log('Full name constructed:', fullName);
@@ -305,9 +340,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       const formData = {
         customerName: fullName || customerToUse.name || "",
         phone: customerToUse.phone || "",
-        address: customerToUse.address || "",
+        address: customerToUse.address || customerToUse.secondaryAddress || "",
         city: customerToUse.city || "",
-        country: customerToUse.country || "Iraq", // Add country to form data
+        country: customerToUse.country || "Iraq",
         postalCode: customerToUse.postalCode || "",
         notes: "",
         gpsLatitude: undefined,
@@ -321,7 +356,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('No customer data available');
     }
     console.log('=== End BilingualPurchaseForm Debug ===');
-  }, [existingCustomer, customerData, form, isLoadingCustomer]);
+  }, [existingCustomer, customerData, crmCustomerData, form, isLoadingCustomer]);
 
   // Get current translations based on site language
   const t = translations[language] || translations['en']; // fallback to English

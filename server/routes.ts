@@ -3473,6 +3473,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get complete CRM customer data for logged-in customer
+  app.get("/api/customer/crm-profile", async (req, res) => {
+    console.log('=== /api/customer/crm-profile endpoint called ===');
+    try {
+      const session = req.session as any;
+      const crmCustomerId = session?.crmCustomerId;
+      
+      console.log('Session data:', {
+        hasSession: !!session,
+        customerId: session?.customerId,
+        crmCustomerId: crmCustomerId,
+        customerEmail: session?.customerEmail
+      });
+      
+      if (!crmCustomerId) {
+        console.log('No CRM customer ID found in session');
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت نشده یا اطلاعات CRM موجود نیست" 
+        });
+      }
+
+      console.log(`Fetching CRM customer with ID: ${crmCustomerId}`);
+      const crmCustomer = await crmStorage.getCrmCustomerById(crmCustomerId);
+      
+      if (!crmCustomer) {
+        console.log('CRM customer not found in database');
+        return res.status(404).json({ 
+          success: false, 
+          message: "اطلاعات مشتری در CRM یافت نشد" 
+        });
+      }
+
+      console.log('CRM customer found:', {
+        id: crmCustomer.id,
+        email: crmCustomer.email,
+        firstName: crmCustomer.firstName,
+        lastName: crmCustomer.lastName,
+        hasSecondaryAddress: !!crmCustomer.secondaryAddress,
+        hasPostalCode: !!crmCustomer.postalCode
+      });
+
+      res.json({
+        success: true,
+        data: crmCustomer
+      });
+    } catch (error) {
+      console.error("Error fetching CRM customer profile:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت اطلاعات CRM" 
+      });
+    }
+  });
+
   app.get("/api/customers/me", async (req, res) => {
     try {
       const customerId = (req.session as any)?.customerId;
