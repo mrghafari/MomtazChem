@@ -1137,6 +1137,19 @@ const Shop = () => {
                                   <Plus className="w-4 h-4" />
                                 </Button>
                               </div>
+                              {/* Product Catalog Button */}
+                              {product.pdfCatalogUrl && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full mb-2 text-green-600 border-green-600 hover:bg-green-50"
+                                  onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
+                                >
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  مشاهده کاتالوگ
+                                </Button>
+                              )}
+
                               {/* MSDS Download Button */}
                               {product.showMsdsToCustomers && product.msdsUrl && (
                                 <Button
@@ -1342,6 +1355,19 @@ const Shop = () => {
                                       <Plus className="w-4 h-4" />
                                     </Button>
                                   </div>
+                                  {/* Product Catalog Button */}
+                                  {product.pdfCatalogUrl && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="w-full mb-2 text-green-600 border-green-600 hover:bg-green-50"
+                                      onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
+                                    >
+                                      <Eye className="w-4 h-4 mr-2" />
+                                      مشاهده کاتالوگ
+                                    </Button>
+                                  )}
+
                                   {/* MSDS Download Button */}
                                   {product.showMsdsToCustomers && product.msdsUrl && (
                                     <Button
