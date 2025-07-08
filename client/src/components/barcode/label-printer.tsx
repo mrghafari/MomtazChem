@@ -66,6 +66,11 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
     try {
       const selectedProducts = productsWithBarcodes.filter(p => selectedProductIds.includes(p.id));
       
+      if (selectedProducts.length === 0) {
+        console.error('No products selected for label generation');
+        return;
+      }
+
       const labelConfig = {
         products: selectedProducts,
         showPrice,
@@ -75,6 +80,8 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
         website: 'www.momtazchem.com'
       };
 
+      console.log('🏷️ Generating labels with config:', labelConfig);
+
       // Generate labels
       const response = await fetch('/api/barcode/generate-labels', {
         method: 'POST',
@@ -82,33 +89,45 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(labelConfig),
+        credentials: 'include'
       });
 
-      if (response.ok) {
-        if (format === 'pdf') {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = url;
-          a.download = `Product_Labels_${new Date().toISOString().split('T')[0]}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Label generation failed:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const blob = await response.blob();
+      
+      if (format === 'pdf') {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Product_Labels_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        console.log('✅ PDF labels downloaded successfully');
+      } else {
+        // For print, open in new window
+        const url = window.URL.createObjectURL(blob);
+        const printWindow = window.open(url);
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.print();
+            window.URL.revokeObjectURL(url);
+          };
         } else {
-          // For print, open in new window
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const printWindow = window.open(url);
-          if (printWindow) {
-            printWindow.onload = () => {
-              printWindow.print();
-            };
-          }
+          console.error('Failed to open print window');
+          window.URL.revokeObjectURL(url);
         }
       }
     } catch (error) {
       console.error('خطا در تولید لیبل:', error);
+      // Could add toast notification here if needed
     } finally {
       setIsGenerating(false);
     }

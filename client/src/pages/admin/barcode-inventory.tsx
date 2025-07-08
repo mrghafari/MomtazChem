@@ -14,7 +14,7 @@ import BarcodeScanner from "@/components/ui/barcode-scanner";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
 import EAN13Generator from "@/components/ui/ean13-generator";
 import VisualBarcode from "@/components/ui/visual-barcode";
-import LabelPrinter from "@/components/barcode/label-printer";
+
 import { 
   Package, 
   Scan, 
@@ -382,10 +382,8 @@ const BarcodeInventory = () => {
       </Card>
 
       <Tabs defaultValue="scanner" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="scanner">Scanner</TabsTrigger>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="generator">Barcode Generator</TabsTrigger>
           <TabsTrigger value="ean13">EAN-13 Retail</TabsTrigger>
         </TabsList>
@@ -513,129 +511,9 @@ const BarcodeInventory = () => {
           </div>
         </TabsContent>
 
-        {/* Products Tab */}
-        <TabsContent value="products" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Inventory</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {productsLoading ? (
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {products?.map((product) => (
-                    <div key={product.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{product.name}</h3>
-                          <p className="text-sm text-gray-600">{product.category}</p>
-                          {product.barcode && (
-                            <div className="mt-2">
-                              <p className="text-xs font-mono text-gray-500 mb-1">{product.barcode}</p>
-                              <VisualBarcode 
-                                value={product.barcode} 
-                                width={1.5}
-                                height={40}
-                                fontSize={10}
-                                className="max-w-full"
-                              />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <Badge className={getStockStatusColor(product)}>
-                            {getStockStatusIcon(product)}
-                            <span className="ml-1">{product.stockQuantity} {product.stockUnit}</span>
-                          </Badge>
-                          <Button
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setShowGenerator(true);
-                            }}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <QrCode className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        {/* Transactions Tab */}
-        <TabsContent value="transactions" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="h-5 w-5" />
-                Recent Transactions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {transactionsLoading ? (
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {Array.isArray(transactions) && transactions.length > 0 ? (
-                    transactions.slice(0, 20).map((transaction) => {
-                      const product = products?.find(p => p.id === transaction.productId);
-                      return (
-                        <div key={transaction.id} className="border-l-4 border-gray-200 pl-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{product?.name || `Product ${transaction.productId}`}</p>
-                              <p className="text-sm text-gray-600">
-                                {transaction.transactionType === 'in' ? '+' : transaction.transactionType === 'out' ? '-' : ''}
-                                {Math.abs(transaction.quantity)} units - {transaction.reason}
-                              </p>
-                              {transaction.reference && (
-                                <p className="text-xs text-gray-500">Ref: {transaction.reference}</p>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-mono">
-                                {transaction.previousStock} → {transaction.newStock}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(transaction.createdAt).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="text-center py-12">
-                      <History className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-600 mb-2">No Transactions</h3>
-                      <p className="text-gray-500">No inventory transactions found</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+
+
 
         {/* Generator Tab */}
         <TabsContent value="generator" className="space-y-6">
