@@ -134,7 +134,9 @@ const VisualBarcode = ({
     // Add barcode SVG
     const barcodeContainer = document.createElement('div');
     barcodeContainer.style.cssText = 'margin: 15px 0;';
-    JsBarcode(barcodeContainer, value, {
+    
+    const barcodeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    JsBarcode(barcodeSvg, value, {
       format: format,
       width: 3,
       height: 80,
@@ -145,6 +147,8 @@ const VisualBarcode = ({
       lineColor: "#000000",
       textMargin: 8
     });
+    
+    barcodeContainer.appendChild(barcodeSvg);
     container.appendChild(barcodeContainer);
     
     // Add SKU if available
