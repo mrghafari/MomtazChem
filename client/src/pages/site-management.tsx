@@ -211,31 +211,45 @@ export default function SiteManagement() {
   // State for managing button order
   const [buttons, setButtons] = useState<QuickActionButton[]>(() => {
     const savedOrder = localStorage.getItem('site-management-button-order');
+    console.log('Loading button order from localStorage:', savedOrder);
+    
     if (savedOrder) {
       try {
         const buttonIds = JSON.parse(savedOrder);
+        console.log('Parsed button IDs:', buttonIds);
+        
         const initialButtons = getInitialButtons();
+        console.log('Initial buttons count:', initialButtons.length);
+        
         const orderedButtons = buttonIds.map((id: string) => 
           initialButtons.find(btn => btn.id === id)
         ).filter(Boolean);
+        console.log('Ordered buttons count:', orderedButtons.length);
         
         // Add any new buttons that might not be in saved order
         const existingIds = new Set(buttonIds);
         const newButtons = initialButtons.filter(btn => !existingIds.has(btn.id));
+        console.log('New buttons count:', newButtons.length);
         
-        return [...orderedButtons, ...newButtons];
+        const finalOrder = [...orderedButtons, ...newButtons];
+        console.log('Final button order:', finalOrder.map(btn => btn.id));
+        
+        return finalOrder;
       } catch (error) {
         console.error('Error loading button order:', error);
         return getInitialButtons();
       }
     }
+    console.log('No saved order found, using default');
     return getInitialButtons();
   });
 
   // Save button order to localStorage whenever it changes
   useEffect(() => {
     const buttonIds = buttons.map(btn => btn.id);
+    console.log('Saving button order to localStorage:', buttonIds);
     localStorage.setItem('site-management-button-order', JSON.stringify(buttonIds));
+    console.log('Button order saved successfully');
   }, [buttons]);
 
   // Handle drag end
