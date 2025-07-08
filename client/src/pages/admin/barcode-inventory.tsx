@@ -51,6 +51,10 @@ interface Product {
   stockUnit: string;
   warehouseLocation?: string;
   batchNumber?: string;
+  price?: number;
+  priceUnit?: string;
+  unitPrice?: number;
+  currency?: string;
 }
 
 interface InventoryTransaction {
@@ -283,7 +287,7 @@ const BarcodeInventory = () => {
 
   const generateLabelZPL = (product: Product) => {
     const sku = product.sku || `SKU${product.id.toString().padStart(4, '0')}`;
-    const price = product.unitPrice ? `${product.unitPrice} ${product.currency || 'IQD'}` : '';
+    const price = product.price ? `${product.price} ${product.priceUnit || 'IQD'}` : '';
     
     // Define label dimensions (compact 50mm x 30mm label)
     let labelCommands = `^XA\n^LL240\n^PW400\n`;
@@ -303,8 +307,9 @@ const BarcodeInventory = () => {
     yPosition += 60;
     
     // Add price if selected (compact)
-    if (includePrice && price) {
-      labelCommands += `^FO10,${yPosition}^A0N,14,10^FD${price}^FS\n`;
+    if (includePrice) {
+      const priceText = price || 'قیمت تعریف نشده';
+      labelCommands += `^FO10,${yPosition}^A0N,14,10^FD${priceText}^FS\n`;
       yPosition += 15;
     }
     
@@ -934,9 +939,9 @@ const BarcodeInventory = () => {
                         fontSize={10}
                       />
                     </div>
-                    {includePrice && product.unitPrice && (
+                    {includePrice && (
                       <div className="text-xs text-green-600 font-medium">
-                        {product.unitPrice} {product.currency || 'IQD'}
+                        {product.price ? `${product.price} ${product.priceUnit || 'IQD'}` : 'قیمت تعریف نشده'}
                       </div>
                     )}
                     {includeWebsite && (
