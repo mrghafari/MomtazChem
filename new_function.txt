@@ -1,0 +1,190 @@
+  // Helper function to generate label HTML with fixed grid layout
+  function generateLabelHTML(products: any[], options: any) {
+    const { showPrice, showWebsite, showSKU, labelSize, website } = options;
+    
+    // Fixed label dimensions matching frontend design
+    const labelConfigs = {
+      small: { 
+        width: '40mm', height: '28mm', padding: '1mm',
+        nameFont: '8px', skuFont: '6px', priceFont: '6px', websiteFont: '6px',
+        barcodeFont: '10px', nameMaxLength: 15, skuMaxLength: 10
+      },
+      standard: { 
+        width: '56mm', height: '36mm', padding: '2mm',
+        nameFont: '10px', skuFont: '8px', priceFont: '8px', websiteFont: '8px',
+        barcodeFont: '12px', nameMaxLength: 25, skuMaxLength: 15
+      },
+      large: { 
+        width: '72mm', height: '44mm', padding: '3mm',
+        nameFont: '14px', skuFont: '10px', priceFont: '10px', websiteFont: '10px',
+        barcodeFont: '16px', nameMaxLength: 35, skuMaxLength: 18
+      },
+      roll: { 
+        width: '48mm', height: '20mm', padding: '1mm',
+        nameFont: '7px', skuFont: '6px', priceFont: '6px', websiteFont: '6px',
+        barcodeFont: '8px', nameMaxLength: 18, skuMaxLength: 12
+      }
+    };
+    
+    const config = labelConfigs[labelSize] || labelConfigs.standard;
+    
+    const formatPrice = (product: any) => {
+      if (!product.price) return '';
+      const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+      const currency = product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : 'د.ع';
+      const unit = product.priceUnit || 'واحد';
+      return `${currency}${price.toFixed(2)} / ${unit}`;
+    };
+
+    const truncateText = (text: string, maxLength: number) => {
+      return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+    };
+
+    const generateBarcode = (value: string) => {
+      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${config.barcodeFont}; letter-spacing: 0.2px; text-align: center; line-height: 1;">${value}</div>`;
+    };
+
+    const labelsHTML = products.map(product => {
+      const displayName = truncateText(product.name, config.nameMaxLength);
+      const displaySku = product.sku ? truncateText(product.sku, config.skuMaxLength) : '';
+      
+      return `
+      <div style="
+        width: ${config.width}; 
+        height: ${config.height}; 
+        border: 2px solid #888; 
+        padding: ${config.padding}; 
+        margin: 1mm; 
+        display: inline-block; 
+        vertical-align: top;
+        background: white;
+        box-sizing: border-box;
+        page-break-inside: avoid;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        position: relative;
+      ">
+        <!-- Fixed 4-row grid layout -->
+        <div style="
+          height: 100%; 
+          display: grid; 
+          grid-template-rows: 1fr 1fr 1fr 1fr; 
+          gap: 1mm;
+          text-align: center;
+        ">
+          <!-- Row 1: Product Name (always shown) -->
+          <div style="
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-weight: bold; 
+            font-size: ${config.nameFont}; 
+            line-height: 1.1; 
+            overflow: hidden;
+            padding: 0 1mm;
+          ">
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
+              ${displayName}
+            </span>
+          </div>
+
+          <!-- Row 2: SKU (if enabled) -->
+          <div style="
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            min-height: 0;
+          ">
+            ${showSKU && product.sku ? `
+              <span style="
+                font-size: ${config.skuFont}; 
+                color: #666; 
+                font-family: monospace;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 100%;
+              ">
+                SKU: ${displaySku}
+              </span>
+            ` : '<div style="height: 100%;"></div>'}
+          </div>
+
+          <!-- Row 3: Barcode (always shown) -->
+          <div style="
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            min-height: 0;
+          ">
+            ${generateBarcode(product.barcode)}
+          </div>
+
+          <!-- Row 4: Price and Website -->
+          <div style="
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            gap: 0.5mm;
+            min-height: 0;
+          ">
+            ${showPrice && product.price ? `
+              <span style="
+                font-weight: bold; 
+                color: #2d5a27; 
+                font-size: ${config.priceFont}; 
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 100%;
+              ">
+                ${formatPrice(product)}
+              </span>
+            ` : ''}
+            
+            ${showWebsite ? `
+              <span style="
+                color: #666; 
+                font-size: ${config.websiteFont}; 
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 100%;
+              ">
+                momtazchem.com
+              </span>
+            ` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Product Labels</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap');
+          body { 
+            margin: 0; 
+            padding: 5mm; 
+            font-family: Arial, sans-serif;
+            background: white;
+          }
+          @media print {
+            body { margin: 0; padding: 5mm; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div style="display: flex; flex-wrap: wrap; gap: 2mm; align-items: flex-start;">
+          ${labelsHTML}
+        </div>
+      </body>
+      </html>
+    `;
+  }

@@ -115,88 +115,120 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
   };
 
   const LabelPreview = ({ product }: { product: Product }) => {
-    // Calculate optimal sizing based on label size and selected elements
-    const elementCount = 1 + (showSKU ? 1 : 0) + (showPrice ? 1 : 0) + (showWebsite ? 1 : 0); // +1 for barcode
-    
-    const getDimensions = () => {
+    // Fixed dimensions based on actual label paper sizes with grid layout
+    const getLabelConfig = () => {
       switch (labelSize) {
         case 'small':
-          return { width: 'w-48', height: 'h-32', padding: 'p-2' };
+          return {
+            container: 'w-40 h-28',
+            padding: 'p-1',
+            nameFont: 'text-xs',
+            barcodeWidth: 1.0,
+            barcodeHeight: 18,
+            barcodeFontSize: 6,
+            skuFont: 'text-xs',
+            priceFont: 'text-xs',
+            websiteFont: 'text-xs',
+            nameMaxLength: 15,
+            skuMaxLength: 10
+          };
         case 'large':
-          return { width: 'w-80', height: 'h-48', padding: 'p-4' };
+          return {
+            container: 'w-72 h-44',
+            padding: 'p-3',
+            nameFont: 'text-base',
+            barcodeWidth: 2.0,
+            barcodeHeight: 40,
+            barcodeFontSize: 10,
+            skuFont: 'text-sm',
+            priceFont: 'text-sm',
+            websiteFont: 'text-sm',
+            nameMaxLength: 35,
+            skuMaxLength: 18
+          };
         case 'roll':
-          return { width: 'w-52', height: 'h-24', padding: 'p-1' };
-        default:
-          return { width: 'w-64', height: 'h-40', padding: 'p-3' };
+          return {
+            container: 'w-48 h-20',
+            padding: 'p-1',
+            nameFont: 'text-xs',
+            barcodeWidth: 1.3,
+            barcodeHeight: 15,
+            barcodeFontSize: 5,
+            skuFont: 'text-xs',
+            priceFont: 'text-xs',
+            websiteFont: 'text-xs',
+            nameMaxLength: 18,
+            skuMaxLength: 12
+          };
+        default: // standard
+          return {
+            container: 'w-56 h-36',
+            padding: 'p-2',
+            nameFont: 'text-sm',
+            barcodeWidth: 1.6,
+            barcodeHeight: 28,
+            barcodeFontSize: 8,
+            skuFont: 'text-xs',
+            priceFont: 'text-xs',
+            websiteFont: 'text-xs',
+            nameMaxLength: 25,
+            skuMaxLength: 15
+          };
       }
     };
 
-    const dims = getDimensions();
-    const isCompact = labelSize === 'roll' || labelSize === 'small';
+    const config = getLabelConfig();
+    
+    // Text truncation helpers
+    const truncateText = (text: string, maxLength: number) => {
+      return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+    };
     
     return (
-      <div className={`border rounded-lg bg-white text-center ${dims.width} ${dims.height} ${dims.padding} shadow-sm overflow-hidden`}>
-        <div className="h-full flex flex-col justify-between">
-          {/* Product Name - Always at top, truncated */}
-          <div className={`font-semibold truncate leading-tight ${
-            isCompact ? 'text-xs mb-1' : 'text-sm mb-2'
-          }`}>
-            {isCompact && product.name.length > 20 ? 
-              product.name.substring(0, 17) + '...' : 
-              product.name
-            }
+      <div className={`border-2 border-gray-400 bg-white ${config.container} ${config.padding} relative overflow-hidden`}>
+        {/* Fixed layout grid - 4 equal sections */}
+        <div className="h-full grid grid-rows-4 gap-1">
+          {/* Row 1: Product Name (always shown) */}
+          <div className="flex items-center justify-center text-center min-h-0">
+            <span className={`font-semibold ${config.nameFont} leading-tight truncate px-1`}>
+              {truncateText(product.name, config.nameMaxLength)}
+            </span>
           </div>
 
-          {/* Middle section - Barcode and SKU */}
-          <div className="flex-1 flex flex-col justify-center items-center">
-            {showSKU && product.sku && (
-              <div className={`text-gray-600 font-mono truncate mb-1 ${
-                isCompact ? 'text-xs' : 'text-xs'
-              }`}>
-                SKU: {isCompact && product.sku.length > 12 ? 
-                  product.sku.substring(0, 9) + '...' : 
-                  product.sku
-                }
-              </div>
+          {/* Row 2: SKU (if enabled) */}
+          <div className="flex items-center justify-center min-h-0">
+            {showSKU && product.sku ? (
+              <span className={`text-gray-600 font-mono ${config.skuFont} truncate`}>
+                SKU: {truncateText(product.sku, config.skuMaxLength)}
+              </span>
+            ) : (
+              <div className="h-4"></div>
             )}
-            
+          </div>
+
+          {/* Row 3: Barcode (always shown) - takes center space */}
+          <div className="flex items-center justify-center min-h-0">
             <div className="flex-shrink-0">
               <VisualBarcode 
                 value={product.barcode!} 
-                width={
-                  labelSize === 'small' ? 1.2 : 
-                  labelSize === 'large' ? 2.2 : 
-                  labelSize === 'roll' ? 1.5 : 1.8
-                }
-                height={
-                  labelSize === 'small' ? 25 : 
-                  labelSize === 'large' ? 45 : 
-                  labelSize === 'roll' ? 20 : 35
-                }
-                fontSize={
-                  labelSize === 'small' ? 8 : 
-                  labelSize === 'large' ? 12 : 
-                  labelSize === 'roll' ? 6 : 10
-                }
+                width={config.barcodeWidth}
+                height={config.barcodeHeight}
+                fontSize={config.barcodeFontSize}
               />
             </div>
           </div>
 
-          {/* Bottom section - Price and Website */}
-          <div className="space-y-1">
+          {/* Row 4: Price and Website (bottom section) */}
+          <div className="flex flex-col items-center justify-center min-h-0 gap-0.5">
             {showPrice && product.price && (
-              <div className={`font-bold text-green-600 truncate ${
-                isCompact ? 'text-xs' : 'text-xs'
-              }`}>
+              <span className={`font-bold text-green-600 ${config.priceFont} truncate text-center`}>
                 {formatPrice(product)}
-              </div>
+              </span>
             )}
             {showWebsite && (
-              <div className={`text-gray-500 ${
-                isCompact ? 'text-xs' : 'text-xs'
-              }`}>
-                www.momtazchem.com
-              </div>
+              <span className={`text-gray-500 ${config.websiteFont} truncate`}>
+                momtazchem.com
+              </span>
             )}
           </div>
         </div>

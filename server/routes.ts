@@ -1714,32 +1714,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Helper function to generate label HTML
+  // Helper function to generate label HTML with fixed grid layout
   function generateLabelHTML(products: any[], options: any) {
     const { showPrice, showWebsite, showSKU, labelSize, website } = options;
     
-    const labelDimensions = {
+    // Fixed label dimensions matching frontend design
+    const labelConfigs = {
       small: { 
-        width: '48mm', height: '32mm', fontSize: '8px', barcodeHeight: '15mm',
-        padding: '2mm', titleSize: '9px', skuSize: '6px', priceSize: '7px', websiteSize: '6px'
+        width: '40mm', height: '28mm', padding: '1mm',
+        nameFont: '8px', skuFont: '6px', priceFont: '6px', websiteFont: '6px',
+        barcodeFont: '10px', nameMaxLength: 15, skuMaxLength: 10
       },
       standard: { 
-        width: '64mm', height: '40mm', fontSize: '10px', barcodeHeight: '20mm',
-        padding: '3mm', titleSize: '11px', skuSize: '8px', priceSize: '9px', websiteSize: '8px'
+        width: '56mm', height: '36mm', padding: '2mm',
+        nameFont: '10px', skuFont: '8px', priceFont: '8px', websiteFont: '8px',
+        barcodeFont: '12px', nameMaxLength: 25, skuMaxLength: 15
       },
       large: { 
-        width: '80mm', height: '48mm', fontSize: '12px', barcodeHeight: '25mm',
-        padding: '4mm', titleSize: '13px', skuSize: '10px', priceSize: '11px', websiteSize: '10px'
+        width: '72mm', height: '44mm', padding: '3mm',
+        nameFont: '14px', skuFont: '10px', priceFont: '10px', websiteFont: '10px',
+        barcodeFont: '16px', nameMaxLength: 35, skuMaxLength: 18
       },
       roll: { 
-        width: '50mm', height: '25mm', fontSize: '7px', barcodeHeight: '12mm',
-        padding: '1mm', titleSize: '8px', skuSize: '5px', priceSize: '6px', websiteSize: '5px'
+        width: '48mm', height: '20mm', padding: '1mm',
+        nameFont: '7px', skuFont: '6px', priceFont: '6px', websiteFont: '6px',
+        barcodeFont: '8px', nameMaxLength: 18, skuMaxLength: 12
       }
     };
     
-    const dims = labelDimensions[labelSize] || labelDimensions.standard;
-    const isRoll = labelSize === 'roll';
-    const isCompact = labelSize === 'roll' || labelSize === 'small';
+    const config = labelConfigs[labelSize] || labelConfigs.standard;
     
     const formatPrice = (product: any) => {
       if (!product.price) return '';
@@ -1749,29 +1752,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return `${currency}${price.toFixed(2)} / ${unit}`;
     };
 
+    const truncateText = (text: string, maxLength: number) => {
+      return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+    };
+
     const generateBarcode = (value: string) => {
-      const fontSize = isRoll ? '10px' : labelSize === 'large' ? '18px' : '14px';
-      const margin = isRoll ? '0.5mm 0' : '1mm 0';
-      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${fontSize}; letter-spacing: 0.3px; text-align: center; margin: ${margin}; line-height: 1;">${value}</div>`;
+      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${config.barcodeFont}; letter-spacing: 0.2px; text-align: center; line-height: 1;">${value}</div>`;
     };
 
     const labelsHTML = products.map(product => {
-      // Smart truncation based on label size
-      const maxNameLength = isRoll ? 15 : labelSize === 'small' ? 20 : labelSize === 'large' ? 35 : 25;
-      const displayName = product.name.length > maxNameLength ? 
-        product.name.substring(0, maxNameLength - 3) + '...' : product.name;
-      
-      // Smart SKU truncation
-      const maxSkuLength = isRoll ? 10 : labelSize === 'small' ? 12 : 15;
-      const displaySku = product.sku && product.sku.length > maxSkuLength ?
-        product.sku.substring(0, maxSkuLength - 3) + '...' : product.sku;
+      const displayName = truncateText(product.name, config.nameMaxLength);
+      const displaySku = product.sku ? truncateText(product.sku, config.skuMaxLength) : '';
       
       return `
       <div style="
-        width: ${dims.width}; 
-        height: ${dims.height}; 
-        border: 1px solid #ccc; 
-        padding: ${dims.padding}; 
+        width: ${config.width}; 
+        height: ${config.height}; 
+        border: 2px solid #888; 
+        padding: ${config.padding}; 
         margin: 1mm; 
         display: inline-block; 
         vertical-align: top;
@@ -1782,93 +1780,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
         overflow: hidden;
         position: relative;
       ">
+        <!-- Fixed 4-row grid layout -->
         <div style="
-          text-align: center; 
           height: 100%; 
-          display: flex; 
-          flex-direction: column; 
-          justify-content: space-between;
-          gap: ${isCompact ? '1mm' : '2mm'};
+          display: grid; 
+          grid-template-rows: 1fr 1fr 1fr 1fr; 
+          gap: 1mm;
+          text-align: center;
         ">
-          <!-- Product Name (Always at top) -->
+          <!-- Row 1: Product Name (always shown) -->
           <div style="
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
             font-weight: bold; 
-            font-size: ${dims.titleSize}; 
+            font-size: ${config.nameFont}; 
             line-height: 1.1; 
-            overflow: hidden; 
-            text-overflow: ellipsis;
-            white-space: ${isCompact ? 'nowrap' : 'normal'};
-            ${isCompact ? '' : 'max-height: 2.5em; word-wrap: break-word;'}
+            overflow: hidden;
+            padding: 0 1mm;
           ">
-            ${displayName}
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
+              ${displayName}
+            </span>
           </div>
 
-          <!-- Middle section: SKU and Barcode -->
+          <!-- Row 2: SKU (if enabled) -->
           <div style="
-            flex: 1; 
             display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center;
-            gap: ${isCompact ? '0.5mm' : '1mm'};
+            align-items: center; 
+            justify-content: center;
+            min-height: 0;
           ">
             ${showSKU && product.sku ? `
-              <div style="
-                font-size: ${dims.skuSize}; 
+              <span style="
+                font-size: ${config.skuFont}; 
                 color: #666; 
-                font-family: monospace; 
-                line-height: 1;
-                overflow: hidden; 
-                text-overflow: ellipsis; 
+                font-family: monospace;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 white-space: nowrap;
                 max-width: 100%;
               ">
                 SKU: ${displaySku}
-              </div>
-            ` : ''}
-            
-            <div style="margin: 0;">
-              ${generateBarcode(product.barcode || '')}
-              <div style="
-                font-size: ${dims.skuSize}; 
-                font-family: monospace; 
-                margin-top: 0.5mm; 
-                line-height: 1;
-                color: #333;
-              ">
-                ${product.barcode || ''}
-              </div>
-            </div>
+              </span>
+            ` : '<div style="height: 100%;"></div>'}
           </div>
 
-          <!-- Bottom section: Price and Website -->
+          <!-- Row 3: Barcode (always shown) -->
           <div style="
             display: flex; 
-            flex-direction: column; 
-            gap: ${isCompact ? '0.5mm' : '1mm'};
+            align-items: center; 
+            justify-content: center;
+            min-height: 0;
+          ">
+            ${generateBarcode(product.barcode)}
+          </div>
+
+          <!-- Row 4: Price and Website -->
+          <div style="
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            gap: 0.5mm;
+            min-height: 0;
           ">
             ${showPrice && product.price ? `
-              <div style="
-                font-size: ${dims.priceSize}; 
-                color: #2d5a27; 
+              <span style="
                 font-weight: bold; 
-                line-height: 1;
-                overflow: hidden; 
-                text-overflow: ellipsis; 
+                color: #2d5a27; 
+                font-size: ${config.priceFont}; 
+                overflow: hidden;
+                text-overflow: ellipsis;
                 white-space: nowrap;
+                max-width: 100%;
               ">
                 ${formatPrice(product)}
-              </div>
+              </span>
             ` : ''}
             
             ${showWebsite ? `
-              <div style="
-                font-size: ${dims.websiteSize}; 
+              <span style="
                 color: #666; 
-                line-height: 1;
+                font-size: ${config.websiteFont}; 
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 100%;
               ">
-                ${website}
-              </div>
+                momtazchem.com
+              </span>
             ` : ''}
           </div>
         </div>
@@ -1877,7 +1878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     return `
       <!DOCTYPE html>
-      <html dir="rtl">
+      <html>
       <head>
         <meta charset="UTF-8">
         <title>Product Labels</title>
@@ -1885,9 +1886,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           @import url('https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap');
           body { 
             margin: 0; 
-            padding: 10mm; 
+            padding: 5mm; 
             font-family: Arial, sans-serif;
-            direction: rtl;
+            background: white;
           }
           @media print {
             body { margin: 0; padding: 5mm; }
@@ -1896,7 +1897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </style>
       </head>
       <body>
-        <div style="text-align: center;">
+        <div style="display: flex; flex-wrap: wrap; gap: 2mm; align-items: flex-start;">
           ${labelsHTML}
         </div>
       </body>
