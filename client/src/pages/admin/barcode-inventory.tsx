@@ -287,7 +287,7 @@ const BarcodeInventory = () => {
 
   const generateLabelZPL = (product: Product) => {
     const sku = product.sku || `SKU${product.id.toString().padStart(4, '0')}`;
-    const price = product.price ? `${product.price} ${product.priceUnit || 'IQD'}` : '';
+    const price = product.price ? `${product.price} IQD` : '';
     
     // Define label dimensions (compact 50mm x 30mm label)
     let labelCommands = `^XA\n^LL240\n^PW400\n`;
@@ -308,7 +308,7 @@ const BarcodeInventory = () => {
     
     // Add price if selected (compact)
     if (includePrice) {
-      const priceText = price || 'قیمت تعریف نشده';
+      const priceText = price || 'قیمت تعریف نشده IQD';
       labelCommands += `^FO10,${yPosition}^A0N,14,10^FD${priceText}^FS\n`;
       yPosition += 15;
     }
@@ -941,7 +941,7 @@ const BarcodeInventory = () => {
                     </div>
                     {includePrice && (
                       <div className="text-xs text-green-600 font-medium">
-                        {product.price ? `${product.price} ${product.priceUnit || 'IQD'}` : 'قیمت تعریف نشده'}
+                        {product.price ? `${product.price} IQD` : 'قیمت تعریف نشده IQD'}
                       </div>
                     )}
                     {includeWebsite && (
