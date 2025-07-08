@@ -809,7 +809,7 @@ const BarcodeInventory = () => {
                       <th className="text-left p-2">Category</th>
                       <th className="text-left p-2">Current Barcode</th>
                       <th className="text-left p-2">EAN-13 Status</th>
-                      <th className="text-left p-2">Actions</th>
+
                     </tr>
                   </thead>
                   <tbody>
@@ -838,33 +838,20 @@ const BarcodeInventory = () => {
                         </td>
                         <td className="p-2">
                           {product.barcode ? (
-                            <div className="space-y-2">
-                              <code className="text-xs bg-gray-100 px-2 py-1 rounded block cursor-pointer hover:bg-gray-200 transition-colors"
-                                    title="کلیک کنید تا کپی شود"
-                                    onClick={() => {
-                                      navigator.clipboard.writeText(product.barcode!);
-                                      toast({
-                                        title: "بارکد کپی شد",
-                                        description: `${product.barcode} کپی شد`
-                                      });
-                                    }}>
-                                {product.barcode}
-                              </code>
-                              <div className="flex justify-center">
-                                <VisualBarcode 
-                                  value={product.barcode}
-                                  productName={product.name}
-                                  sku={product.sku || undefined}
-                                  price={product.price}
-                                  width={1.5}
-                                  height={40}
-                                  fontSize={10}
-                                  showDownload={true}
-                                  showPrint={true}
-                                  showCopy={true}
-                                  className="bg-white p-1 border rounded"
-                                />
-                              </div>
+                            <div className="flex justify-center">
+                              <VisualBarcode 
+                                value={product.barcode}
+                                productName={product.name}
+                                sku={product.sku || undefined}
+                                price={product.price}
+                                width={3}
+                                height={80}
+                                fontSize={14}
+                                showDownload={true}
+                                showPrint={true}
+                                showCopy={true}
+                                className="bg-white p-4 border rounded"
+                              />
                             </div>
                           ) : (
                             <span className="text-gray-400">No barcode</span>
@@ -883,18 +870,7 @@ const BarcodeInventory = () => {
                             </Badge>
                           )}
                         </td>
-                        <td className="p-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setShowGenerator(true);
-                            }}
-                          >
-                            {product.barcode?.length === 13 ? 'Update' : 'Generate'} EAN-13
-                          </Button>
-                        </td>
+
                       </tr>
                     ))}
                   </tbody>
