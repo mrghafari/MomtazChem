@@ -3737,11 +3737,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Handle wallet payment processing
+      let finalPaymentStatus = "pending";
+      let walletAmountUsed = 0;
+      let remainingAmount = totalAmount;
+
+      if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
+        walletAmountUsed = parseFloat(orderData.walletAmountUsed || 0);
+        remainingAmount = parseFloat(orderData.remainingAmount || totalAmount);
+        
+        if (walletAmountUsed > 0) {
+          // TODO: Deduct from customer wallet and log transaction
+          console.log(`Wallet payment: ${walletAmountUsed} IQD used, ${remainingAmount} IQD remaining`);
+          
+          if (remainingAmount === 0) {
+            finalPaymentStatus = "paid"; // Fully paid by wallet
+          } else {
+            finalPaymentStatus = "partial"; // Partially paid by wallet
+          }
+        }
+      }
+
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
         orderNumber,
         status: "pending",
-        paymentStatus: "pending",
+        paymentStatus: finalPaymentStatus,
+        paymentMethod: orderData.paymentMethod || "traditional",
         totalAmount: totalAmount.toString(),
         currency: orderData.currency || "IQD",
         notes: orderData.notes || "",

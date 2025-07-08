@@ -10,9 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Language types
 type Language = 'en' | 'ar';
@@ -66,7 +69,18 @@ const translations = {
     
     // Language switcher
     switchLanguage: "العربية",
-    language: "Language"
+    language: "Language",
+    
+    // Payment options
+    paymentMethod: "Payment Method",
+    walletPayment: "Pay from Wallet",
+    traditionalPayment: "Traditional Payment",
+    walletBalance: "Wallet Balance",
+    useWalletFull: "Pay full amount from wallet",
+    useWalletPartial: "Pay partial amount from wallet",
+    walletAmount: "Amount from wallet",
+    remainingAmount: "Remaining amount",
+    insufficientWallet: "Insufficient wallet balance"
   },
   ar: {
     // Form titles
@@ -115,7 +129,18 @@ const translations = {
     totalAmount: "المبلغ الإجمالي",
     removeItem: "حذف العنصر",
     decreaseQuantity: "تقليل الكمية",
-    increaseQuantity: "زيادة الكمية"
+    increaseQuantity: "زيادة الكمية",
+    
+    // Payment options
+    paymentMethod: "طريقة الدفع",
+    walletPayment: "الدفع من المحفظة",
+    traditionalPayment: "الدفع التقليدي",
+    walletBalance: "رصيد المحفظة",
+    useWalletFull: "دفع المبلغ كاملاً من المحفظة",
+    useWalletPartial: "دفع مبلغ جزئي من المحفظة",
+    walletAmount: "المبلغ من المحفظة",
+    remainingAmount: "المبلغ المتبقي",
+    insufficientWallet: "رصيد المحفظة غير كافي"
   }
 };
 
@@ -170,9 +195,11 @@ const getCurrentLocation = (): Promise<{latitude: number, longitude: number}> =>
 
 export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose, existingCustomer, onUpdateQuantity, onRemoveItem }: PurchaseFormProps) {
   const { toast } = useToast();
-  const [language, setLanguage] = useState<Language>('en');
+  const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'traditional' | 'wallet_full' | 'wallet_partial'>('traditional');
+  const [walletAmount, setWalletAmount] = useState<number>(0);
 
   // Fetch current customer data
   const { data: customerData, isLoading: isLoadingCustomer } = useQuery({
@@ -200,6 +227,31 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Fetch wallet data for logged-in customers
+  const { data: walletData } = useQuery({
+    queryKey: ['/api/customers/wallet/summary'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/customers/wallet/summary', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            return result.data;
+          }
+        }
+        return null;
+      } catch (error) {
+        console.log('Error fetching wallet data:', error);
+        return null;
+      }
+    },
+    enabled: !!(customerData?.success && customerData.customer),
+    retry: false,
   });
 
   // Dynamic form based on current language
@@ -265,8 +317,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     console.log('=== End BilingualPurchaseForm Debug ===');
   }, [existingCustomer, customerData, form, isLoadingCustomer]);
 
-  // Get current translations
-  const t = translations[language];
+  // Get current translations based on site language
+  const t = translations[language] || translations['en']; // fallback to English
+  const isRTL = direction === 'rtl';
+  
+  // Calculate wallet payment amounts
+  const walletBalance = walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
+  const canUseWallet = walletBalance > 0 && customerData?.success;
+  const maxWalletAmount = Math.min(walletBalance, totalAmount);
+  const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
+  
+
 
   // Calculate discounted price based on quantity
   const getDiscountedPrice = (product: any, quantity: number) => {
@@ -329,10 +390,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   };
 
-  // Language toggle handler
-  const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'ar' : 'en');
-  };
+
 
   // Submit order mutation
   const submitOrderMutation = useMutation({
@@ -341,7 +399,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         ...orderData,
         cart,
         totalAmount,
-        currency: 'IQD'
+        currency: 'IQD',
+        paymentMethod: paymentMethod,
+        walletAmountUsed: paymentMethod === 'wallet_full' ? totalAmount : 
+                         paymentMethod === 'wallet_partial' ? walletAmount : 0,
+        remainingAmount: remainingAfterWallet
       });
     },
     onSuccess: () => {
@@ -363,8 +425,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     submitOrderMutation.mutate(data);
   };
 
-  // Set text direction based on language
-  const isRTL = language === 'ar';
+
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -375,16 +436,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             <CardTitle className="text-lg">{t.purchaseOrder}</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            {/* Language switcher */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleLanguage}
-              className="flex items-center gap-1"
-            >
-              <Globe className="w-4 h-4" />
-              {t.switchLanguage}
-            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -619,6 +670,93 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     </Badge>
                   )}
                 </div>
+
+                {/* Payment Method Selection */}
+                {canUseWallet && customerData?.success && customerData.customer && (
+                  <div className="space-y-3 border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+                    <div className="flex items-center gap-2">
+                      <Wallet className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-medium text-blue-900 dark:text-blue-100">{t.paymentMethod}</h3>
+                    </div>
+                    
+                    {/* Wallet Balance Display */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">{t.walletBalance}:</span>
+                        <span className="font-semibold text-green-600">{formatCurrency(walletBalance)}</span>
+                      </div>
+                    </div>
+
+                    {/* Payment Options */}
+                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
+                      <div className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value="traditional" id="traditional" />
+                        <Label htmlFor="traditional" className="flex items-center gap-2 cursor-pointer">
+                          <CreditCard className="w-4 h-4" />
+                          {t.traditionalPayment}
+                        </Label>
+                      </div>
+                      
+                      {walletBalance >= totalAmount && (
+                        <div className="flex items-center space-x-2 space-x-reverse">
+                          <RadioGroupItem value="wallet_full" id="wallet_full" />
+                          <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
+                            <Wallet className="w-4 h-4 text-green-600" />
+                            {t.useWalletFull} ({formatCurrency(totalAmount)})
+                          </Label>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value="wallet_partial" id="wallet_partial" />
+                        <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
+                          <Wallet className="w-4 h-4 text-orange-600" />
+                          {t.useWalletPartial}
+                        </Label>
+                      </div>
+                    </RadioGroup>
+
+                    {/* Partial Payment Amount Input */}
+                    {paymentMethod === 'wallet_partial' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="walletAmount">{t.walletAmount}</Label>
+                        <Input
+                          id="walletAmount"
+                          type="number"
+                          min="0"
+                          max={maxWalletAmount}
+                          value={walletAmount}
+                          onChange={(e) => setWalletAmount(Math.min(parseFloat(e.target.value) || 0, maxWalletAmount))}
+                          placeholder="0"
+                          className={isRTL ? 'text-right' : 'text-left'}
+                        />
+                        <div className="text-sm text-muted-foreground">
+                          {t.remainingAmount}: {formatCurrency(remainingAfterWallet)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Payment Summary */}
+                    {paymentMethod !== 'traditional' && (
+                      <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span>{t.totalAmount}:</span>
+                            <span>{formatCurrency(totalAmount)}</span>
+                          </div>
+                          <div className="flex justify-between text-green-600">
+                            <span>{t.walletAmount}:</span>
+                            <span>-{formatCurrency(paymentMethod === 'wallet_full' ? totalAmount : walletAmount)}</span>
+                          </div>
+                          <div className="flex justify-between font-medium border-t pt-1">
+                            <span>{t.remainingAmount}:</span>
+                            <span>{formatCurrency(remainingAfterWallet)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Order Notes */}
                 <FormField
