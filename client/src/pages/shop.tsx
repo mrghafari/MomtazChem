@@ -501,17 +501,34 @@ const Shop = () => {
 
   // Calculate discounted price based on quantity
   const getDiscountedPrice = (product: any, quantity: number) => {
-    const basePrice = parseFloat(product.price);
+    const basePrice = parseFloat(product.price || '0');
     
-    if (product.quantityDiscounts && Array.isArray(product.quantityDiscounts)) {
-      // Sort discounts by minimum quantity (descending)
-      const sortedDiscounts = product.quantityDiscounts
-        .filter((d: any) => quantity >= d.minQty)
-        .sort((a: any, b: any) => b.minQty - a.minQty);
+    // Check if product has quantity discounts
+    let discounts = product.quantityDiscounts;
+    
+    // If quantityDiscounts is a string, try to parse it
+    if (typeof discounts === 'string') {
+      try {
+        discounts = JSON.parse(discounts);
+      } catch (e) {
+        console.log('Failed to parse quantityDiscounts:', discounts);
+        return basePrice;
+      }
+    }
+    
+    if (discounts && Array.isArray(discounts) && discounts.length > 0) {
+      // Sort discounts by minimum quantity (descending) to get highest applicable discount
+      const sortedDiscounts = discounts
+        .filter((d: any) => quantity >= parseInt(d.minQty || d.min_qty || 0))
+        .sort((a: any, b: any) => parseInt(b.minQty || b.min_qty || 0) - parseInt(a.minQty || a.min_qty || 0));
       
       if (sortedDiscounts.length > 0) {
-        const discount = sortedDiscounts[0].discount;
-        return basePrice * (1 - discount);
+        const discount = sortedDiscounts[0];
+        // Handle both discount formats: decimal (0.1) and percentage (10)
+        const discountValue = discount.discount || (parseFloat(discount.discountPercent || discount.discount_percent || 0) / 100);
+        const discountedPrice = basePrice * (1 - discountValue);
+        console.log(`Shop Product ${product.name}: quantity=${quantity}, basePrice=${basePrice}, discount=${discountValue}, discountedPrice=${discountedPrice}`);
+        return discountedPrice;
       }
     }
     
