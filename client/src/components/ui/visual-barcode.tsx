@@ -77,21 +77,8 @@ const VisualBarcode = ({
           }
         });
 
-        // Generate print version if needed
-        if (printCanvasRef.current && (showDownload || showPrint)) {
-          printCanvasRef.current.innerHTML = '';
-          JsBarcode(printCanvasRef.current, value, {
-            format: format,
-            width: 3,
-            height: 80,
-            displayValue: true,
-            fontSize: 14,
-            margin: 20,
-            background: "#ffffff",
-            lineColor: "#000000",
-            textMargin: 8
-          });
-        }
+        // Generate print version only when download/print is actually triggered
+        // Don't auto-generate to avoid duplication
       } catch (error) {
         console.error("Error generating barcode:", error);
         setError(error instanceof Error ? error.message : 'Failed to generate barcode');
@@ -120,6 +107,20 @@ const VisualBarcode = ({
 
   const handleDownload = () => {
     if (!printCanvasRef.current) return;
+    
+    // Generate print version for download
+    printCanvasRef.current.innerHTML = '';
+    JsBarcode(printCanvasRef.current, value, {
+      format: format,
+      width: 3,
+      height: 80,
+      displayValue: true,
+      fontSize: 14,
+      margin: 20,
+      background: "#ffffff",
+      lineColor: "#000000",
+      textMargin: 8
+    });
     
     try {
       // Create a temporary canvas to convert SVG to image
@@ -201,6 +202,20 @@ const VisualBarcode = ({
 
   const handlePrint = () => {
     if (!printCanvasRef.current) return;
+    
+    // Generate print version for printing
+    printCanvasRef.current.innerHTML = '';
+    JsBarcode(printCanvasRef.current, value, {
+      format: format,
+      width: 3,
+      height: 80,
+      displayValue: true,
+      fontSize: 14,
+      margin: 20,
+      background: "#ffffff",
+      lineColor: "#000000",
+      textMargin: 8
+    });
     
     try {
       const printWindow = window.open('', '_blank');
