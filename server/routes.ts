@@ -1747,9 +1747,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const formatPrice = (product: any) => {
       if (!product.price) return '';
       const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
-      const currency = product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : 'د.ع';
+      // Always use IQD as the currency for Iraqi market
       const unit = product.priceUnit || 'واحد';
-      return `${currency}${price.toFixed(2)} / ${unit}`;
+      return `${Math.round(price).toLocaleString()} IQD / ${unit}`;
     };
 
     const truncateText = (text: string, maxLength: number) => {

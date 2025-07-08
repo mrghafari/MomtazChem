@@ -56,9 +56,9 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
   const formatPrice = (product: Product) => {
     if (!product.price) return '';
     const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
-    const currency = product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : 'IQD';
-    const unit = product.priceUnit || 'Unit';
-    return `${unit} / ${price.toFixed(2)} ${currency}`;
+    // Always use IQD as the currency for Iraqi market
+    const unit = product.priceUnit || 'واحد';
+    return `${Math.round(price).toLocaleString()} IQD / ${unit}`;
   };
 
   const generateLabels = async (format: 'pdf' | 'print') => {
