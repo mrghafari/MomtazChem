@@ -320,14 +320,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Get current translations based on site language
   const t = translations[language] || translations['en']; // fallback to English
   const isRTL = direction === 'rtl';
-  
-  // Calculate wallet payment amounts
-  const walletBalance = walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
-  const canUseWallet = walletBalance > 0 && customerData?.success;
-  const maxWalletAmount = Math.min(walletBalance, totalAmount);
-  const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
-  
-
 
   // Calculate discounted price based on quantity
   const getDiscountedPrice = (product: any, quantity: number) => {
@@ -340,13 +332,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         .sort((a: any, b: any) => b.minQty - a.minQty);
       
       if (sortedDiscounts.length > 0) {
-        const discount = sortedDiscounts[0].discount;
-        return basePrice * (1 - discount);
+        const discount = sortedDiscounts[0];
+        return basePrice * (1 - discount.discountPercent / 100);
       }
     }
     
     return basePrice;
   };
+  
+
+
+
 
   // Calculate total amount with discounts
   const totalAmount = Object.entries(cart).reduce((sum, [productId, quantity]) => {
@@ -357,6 +353,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
     return sum;
   }, 0);
+
+  // Calculate wallet payment amounts
+  const walletBalance = walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
+  const canUseWallet = walletBalance > 0 && customerData?.success;
+  const maxWalletAmount = Math.min(walletBalance, totalAmount);
+  const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
 
   // Format currency in IQD by default
   const formatCurrency = (amount: number, currency = 'IQD') => {
