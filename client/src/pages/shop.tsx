@@ -412,11 +412,12 @@ const Shop = () => {
   };
 
   const setProductQuantity = (productId: number, quantity: number) => {
-    // Use displayStock which considers current cart deductions
-    const availableStock = displayStock[productId] || 0;
+    // Find the product to get actual stock and inStock status
+    const product = currentProducts.find(p => p.id === productId);
+    if (!product) return;
     
-    // Prevent quantity selection if no stock available
-    if (availableStock <= 0) {
+    // Check if product is in stock
+    if (!product.inStock || (product.stockQuantity || 0) <= 0) {
       toast({
         title: "موجودی ناکافی",
         description: "این محصول در حال حاضر موجود نیست",
@@ -425,7 +426,8 @@ const Shop = () => {
       return;
     }
     
-    const validQuantity = Math.max(1, Math.min(quantity, availableStock));
+    const actualStock = product.stockQuantity || 0;
+    const validQuantity = Math.max(1, Math.min(quantity, actualStock));
     
     setProductQuantities(prev => ({
       ...prev,
@@ -451,8 +453,8 @@ const Shop = () => {
     const newQuantityInCart = currentQuantityInCart + targetQuantity;
     const actualStock = product.stockQuantity || 0;
     
-    // First check: ensure product has stock
-    if (actualStock <= 0) {
+    // First check: ensure product is in stock and has available quantity
+    if (!product.inStock || actualStock <= 0) {
       toast({
         title: "موجودی ناکافی",
         description: "این محصول موجود نیست",
