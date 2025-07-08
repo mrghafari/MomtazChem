@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -1137,6 +1137,19 @@ const Shop = () => {
                                   <Plus className="w-4 h-4" />
                                 </Button>
                               </div>
+                              {/* MSDS Download Button */}
+                              {product.showMsdsToCustomers && product.msdsUrl && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full mb-2 text-blue-600 border-blue-600 hover:bg-blue-50"
+                                  onClick={() => window.open(product.msdsUrl, '_blank')}
+                                >
+                                  <FileText className="w-4 h-4 mr-2" />
+                                  دانلود MSDS
+                                </Button>
+                              )}
+                              
                               {/* Add to Cart Button */}
                               <Button
                                 className="w-full"
@@ -1329,6 +1342,19 @@ const Shop = () => {
                                       <Plus className="w-4 h-4" />
                                     </Button>
                                   </div>
+                                  {/* MSDS Download Button */}
+                                  {product.showMsdsToCustomers && product.msdsUrl && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="w-full mb-2 text-blue-600 border-blue-600 hover:bg-blue-50"
+                                      onClick={() => window.open(product.msdsUrl, '_blank')}
+                                    >
+                                      <FileText className="w-4 h-4 mr-2" />
+                                      دانلود MSDS
+                                    </Button>
+                                  )}
+                                  
                                   {/* Add to Cart Button */}
                                   <Button
                                     className="w-full"
