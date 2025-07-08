@@ -352,9 +352,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       
       if (sortedDiscounts.length > 0) {
         const discount = sortedDiscounts[0];
-        const discountPercent = parseFloat(discount.discountPercent || discount.discount_percent || 0);
-        const discountedPrice = basePrice * (1 - discountPercent / 100);
-        console.log(`Product ${product.name}: quantity=${quantity}, basePrice=${basePrice}, discountPercent=${discountPercent}%, discountedPrice=${discountedPrice}`);
+        // Handle both discount formats: decimal (0.1) and percentage (10)
+        const discountValue = discount.discount || (parseFloat(discount.discountPercent || discount.discount_percent || 0) / 100);
+        const discountedPrice = basePrice * (1 - discountValue);
+        console.log(`BilingualForm Product ${product.name}: quantity=${quantity}, basePrice=${basePrice}, discount=${discountValue}, discountedPrice=${discountedPrice}`);
         return discountedPrice;
       }
     }
