@@ -273,7 +273,64 @@ const BarcodeInventory = () => {
     }
   };
 
+  const handlePrintLabels = async () => {
+    try {
+      const productsWithBarcodes = products?.filter(p => p.barcode) || [];
+      
+      if (productsWithBarcodes.length === 0) {
+        toast({
+          title: "هیچ محصولی یافت نشد",
+          description: "هیچ محصولی با بارکد برای چاپ برچسب وجود ندارد",
+          variant: "destructive"
+        });
+        return;
+      }
 
+      const response = await fetch('/api/barcode/generate-labels', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          products: productsWithBarcodes.map(p => ({
+            id: p.id,
+            name: p.name,
+            sku: p.sku || `SKU${p.id.toString().padStart(4, '0')}`,
+            barcode: p.barcode,
+            price: p.unitPrice,
+            currency: p.currency || 'IQD'
+          })),
+          labelSize: 'standard',
+          includePrice: true,
+          includeWebsite: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Label generation failed');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Labels_${new Date().toISOString().split('T')[0]}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "چاپ برچسب موفق",
+        description: `${productsWithBarcodes.length} برچسب محصول تولید شد`
+      });
+    } catch (error) {
+      console.error('Print labels error:', error);
+      toast({
+        title: "خطا در چاپ برچسب",
+        description: "عدم موفقیت در تولید برچسب‌ها",
+        variant: "destructive"
+      });
+    }
+  };
 
   const getStockStatusColor = (product: Product) => {
     if (product.stockQuantity <= 0) return 'bg-red-100 text-red-800';
@@ -626,6 +683,14 @@ const BarcodeInventory = () => {
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Export CSV
+                    </Button>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => handlePrintLabels()}
+                    >
+                      <Printer className="h-4 w-4 mr-2" />
+                      Print Labels
                     </Button>
 
                   </div>
