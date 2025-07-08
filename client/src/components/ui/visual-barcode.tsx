@@ -192,125 +192,169 @@ const VisualBarcode = ({
   };
 
   const handleDownload = () => {
-    if (!printCanvasRef.current) return;
-    
-    // Generate comprehensive print version
-    generatePrintVersion();
+    if (!canvasRef.current) return;
     
     try {
-      // Use html2canvas approach for better DOM to image conversion
+      // Create a canvas for the complete label
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       
-      // Set canvas size to match label dimensions
-      canvas.width = 240 * 2;  // Double resolution for better quality
-      canvas.height = 160 * 2;
+      // Set canvas size to match label dimensions with higher resolution
+      canvas.width = 240 * 3;  // Triple resolution for better quality
+      canvas.height = 160 * 3;
       
       if (ctx) {
         // Scale for higher quality
-        ctx.scale(2, 2);
+        ctx.scale(3, 3);
         
         // White background
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, 240, 160);
         
-        // Get the container element
-        const container = printCanvasRef.current.firstChild as HTMLElement;
-        if (container) {
-          // Convert HTML to canvas manually for better control
-          const drawElement = (element: HTMLElement, x: number, y: number, width: number, height: number) => {
-            const computedStyle = window.getComputedStyle(element);
-            
-            // Draw background
-            ctx.fillStyle = computedStyle.backgroundColor || '#ffffff';
-            ctx.fillRect(x, y, width, height);
-            
-            // Draw border
-            if (computedStyle.borderWidth && computedStyle.borderWidth !== '0px') {
-              ctx.strokeStyle = computedStyle.borderColor || '#666666';
-              ctx.lineWidth = parseInt(computedStyle.borderWidth) || 2;
-              ctx.strokeRect(x, y, width, height);
-            }
-            
-            // Draw text content
-            const textContent = element.textContent?.trim();
-            if (textContent && !element.querySelector('svg')) {
-              ctx.fillStyle = computedStyle.color || '#000000';
-              ctx.font = `${computedStyle.fontWeight || 'normal'} ${computedStyle.fontSize || '12px'} ${computedStyle.fontFamily || 'Arial'}`;
-              ctx.textAlign = 'center';
-              ctx.fillText(textContent, x + width/2, y + height/2 + 5);
-            }
-          };
-          
-          // Draw main container
-          drawElement(container, 0, 0, 240, 160);
-          
-          // Simple text-based rendering for label elements
-          let yOffset = 20;
-          
-          // Product name
-          if (productName) {
-            ctx.fillStyle = '#000000';
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'center';
-            const truncatedName = productName.length > 25 ? productName.substring(0, 22) + '...' : productName;
-            ctx.fillText(truncatedName, 120, yOffset);
-            yOffset += 25;
-          }
-          
-          // SKU
-          if (sku) {
-            ctx.fillStyle = '#666666';
-            ctx.font = '10px monospace';
-            ctx.textAlign = 'center';
-            const truncatedSku = sku.length > 15 ? sku.substring(0, 12) + '...' : sku;
-            ctx.fillText(`SKU: ${truncatedSku}`, 120, yOffset);
-            yOffset += 20;
-          }
-          
-          // Barcode text representation (since SVG is complex to render)
-          ctx.fillStyle = '#000000';
-          ctx.font = '8px monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText(value, 120, yOffset + 25);
-          yOffset += 45;
-          
-          // Price
-          if (price) {
-            ctx.fillStyle = '#16a34a';
-            ctx.font = 'bold 10px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`${Math.round(price)} IQD`, 120, yOffset);
-            yOffset += 15;
-          }
-          
-          // Website
-          ctx.fillStyle = '#6b7280';
-          ctx.font = '8px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText('momtazchem.com', 120, yOffset);
-        }
+        // Draw border like label preview
+        ctx.strokeStyle = '#666666';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(8, 8, 224, 144);
         
-        // Download the image
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `label-${productName || 'product'}-${value}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            toast({
-              title: "دانلود موفق",
-              description: "لیبل محصول دانلود شد",
+        let yOffset = 25;
+        
+        // Row 1: Product Name (always shown)
+        if (productName) {
+          ctx.fillStyle = '#000000';
+          ctx.font = 'bold 14px Arial';
+          ctx.textAlign = 'center';
+          const truncatedName = productName.length > 25 ? productName.substring(0, 22) + '...' : productName;
+          ctx.fillText(truncatedName, 120, yOffset);
+        }
+        yOffset += 25;
+
+        // Row 2: SKU (if available)
+        if (sku) {
+          ctx.fillStyle = '#666666';
+          ctx.font = '10px monospace';
+          ctx.textAlign = 'center';
+          const truncatedSku = sku.length > 15 ? sku.substring(0, 12) + '...' : sku;
+          ctx.fillText(`SKU: ${truncatedSku}`, 120, yOffset);
+        }
+        yOffset += 20;
+
+        // Row 3: Generate and draw actual barcode
+        if (value) {
+          // Create a temporary SVG for barcode generation
+          const tempSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          tempSvg.setAttribute('width', '180');
+          tempSvg.setAttribute('height', '50');
+          
+          try {
+            JsBarcode(tempSvg, value, {
+              format: format,
+              width: 1.5,
+              height: 40,
+              displayValue: true,
+              fontSize: 8,
+              margin: 2,
+              background: "#ffffff",
+              lineColor: "#000000",
+              textMargin: 2
             });
+            
+            // Convert SVG to image and draw it
+            const svgData = new XMLSerializer().serializeToString(tempSvg);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const barcodeImg = new Image();
+            barcodeImg.onload = () => {
+              // Draw the barcode image
+              ctx.drawImage(barcodeImg, 30, yOffset, 180, 50);
+              
+              yOffset += 60;
+              
+              // Row 4: Price and Website
+              if (price) {
+                ctx.fillStyle = '#16a34a';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${Math.round(price)} IQD`, 120, yOffset);
+                yOffset += 15;
+              }
+              
+              // Website
+              ctx.fillStyle = '#6b7280';
+              ctx.font = '8px Arial';
+              ctx.textAlign = 'center';
+              ctx.fillText('momtazchem.com', 120, yOffset);
+              
+              // Download the final image
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `label-${productName || 'product'}-${value}.png`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  
+                  toast({
+                    title: "دانلود موفق",
+                    description: "لیبل کامل با بارکد دانلود شد",
+                  });
+                }
+              }, 'image/png', 1.0);
+              
+              URL.revokeObjectURL(svgUrl);
+            };
+            
+            barcodeImg.src = svgUrl;
+          } catch (barcodeError) {
+            console.error('Barcode generation error:', barcodeError);
+            // Fallback: draw barcode as text if generation fails
+            ctx.fillStyle = '#000000';
+            ctx.font = '8px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(value, 120, yOffset + 25);
+            
+            yOffset += 45;
+            
+            // Continue with price and website
+            if (price) {
+              ctx.fillStyle = '#16a34a';
+              ctx.font = 'bold 10px Arial';
+              ctx.textAlign = 'center';
+              ctx.fillText(`${Math.round(price)} IQD`, 120, yOffset);
+              yOffset += 15;
+            }
+            
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '8px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('momtazchem.com', 120, yOffset);
+            
+            // Download without barcode image
+            canvas.toBlob((blob) => {
+              if (blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `label-${productName || 'product'}-${value}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                toast({
+                  title: "دانلود موفق",
+                  description: "لیبل دانلود شد (بدون بارکد نموداری)",
+                });
+              }
+            }, 'image/png', 1.0);
           }
-        }, 'image/png', 1.0);
+        }
       }
     } catch (error) {
+      console.error('Download error:', error);
       toast({
         title: "خطا در دانلود",
         description: "امکان دانلود لیبل وجود ندارد",
