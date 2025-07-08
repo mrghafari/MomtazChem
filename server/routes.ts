@@ -3712,6 +3712,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         address: orderData.address,
         city: orderData.city,
         postalCode: orderData.postalCode || '',
+        country: orderData.country || 'Iraq', // Add country from form
+        notes: orderData.notes || '', // Add notes from form
       };
 
       // Generate unique order number
@@ -3848,19 +3850,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Extract customer information from order data
+        // Extract customer information from order data - enhanced with all form fields
+        const nameParts = customerInfo.name.split(' ');
+        const firstName = nameParts[0] || 'Unknown';
+        const lastName = nameParts.slice(1).join(' ') || 'Customer';
+        
         const crmOrderData = {
           email: customerForCrm?.email || `customer${finalCustomerId}@temp.local`,
-          firstName: customerInfo.name.split(' ')[0] || 'Unknown',
-          lastName: customerInfo.name.split(' ').slice(1).join(' ') || 'Customer',
+          firstName: firstName,
+          lastName: lastName,
           company: customerForCrm?.company || null,
           phone: customerInfo.phone,
-          country: 'Iraq', // Default country
+          country: customerInfo.country || 'Iraq', // Use form country or default
           city: customerInfo.city || 'Unknown',
           address: customerInfo.address,
-          postalCode: customerInfo.postalCode,
+          postalCode: customerInfo.postalCode || null,
           orderValue: totalAmount,
         };
+        
+        console.log('CRM Order Data being captured:', {
+          firstName,
+          lastName,
+          phone: customerInfo.phone,
+          country: customerInfo.country,
+          city: customerInfo.city,
+          address: customerInfo.address,
+          postalCode: customerInfo.postalCode,
+          orderValue: totalAmount
+        });
 
         await crmStorage.createOrUpdateCustomerFromOrder(crmOrderData);
         console.log(`✅ Customer auto-captured in CRM for order ${orderNumber}`);

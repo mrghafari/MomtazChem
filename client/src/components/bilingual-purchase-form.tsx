@@ -152,6 +152,7 @@ const createPurchaseSchema = (lang: Language) => z.object({
   phone: z.string().min(10, translations[lang].phoneRequired),
   address: z.string().min(10, translations[lang].addressRequired),
   city: z.string().min(2, translations[lang].cityRequired),
+  country: z.string().default('Iraq'), // Add country field with default
   postalCode: z.string().optional(),
   notes: z.string().optional(),
   gpsLatitude: z.number().optional(),
@@ -265,6 +266,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       phone: "",
       address: "",
       city: "",
+      country: "Iraq", // Add country default
       postalCode: "",
       notes: "",
       gpsLatitude: undefined,
@@ -305,6 +307,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         phone: customerToUse.phone || "",
         address: customerToUse.address || "",
         city: customerToUse.city || "",
+        country: customerToUse.country || "Iraq", // Add country to form data
         postalCode: customerToUse.postalCode || "",
         notes: "",
         gpsLatitude: undefined,
