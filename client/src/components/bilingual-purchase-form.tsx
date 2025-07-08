@@ -378,10 +378,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   }, 0);
 
   // Calculate wallet payment amounts
-  const walletBalance = walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
+  const walletBalance = walletData?.data?.wallet ? parseFloat(walletData.data.wallet.balance) : 
+                       walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
   const canUseWallet = walletBalance > 0 && customerData?.success;
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
+  
+  console.log('Wallet Debug:', { walletData, walletBalance, canUseWallet, totalAmount });
 
 
 
@@ -563,7 +566,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           </div>
 
           {/* Payment Method Selection - moved up below total */}
-          {(canUseWallet || true) && (
+          {customerData?.success && (
             <div className="space-y-3 border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
               <div className="flex items-center gap-2">
                 <Wallet className="w-5 h-5 text-blue-600" />
@@ -616,8 +619,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     type="number"
                     min="0"
                     max={maxWalletAmount}
-                    value={walletAmount}
-                    onChange={(e) => setWalletAmount(Math.min(parseFloat(e.target.value) || 0, maxWalletAmount))}
+                    value={walletAmount || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      setWalletAmount(Math.min(value, maxWalletAmount));
+                    }}
                     placeholder="0"
                     className={isRTL ? 'text-right' : 'text-left'}
                   />
