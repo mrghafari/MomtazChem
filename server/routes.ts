@@ -3809,6 +3809,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Auto-capture customer data in CRM system
+      try {
+        // Get customer details for CRM capture
+        let customerForCrm = null;
+        if (finalCustomerId) {
+          try {
+            customerForCrm = await customerStorage.getCustomerById(finalCustomerId);
+          } catch (err) {
+            console.log("Customer not found in customer storage, checking CRM...");
+            try {
+              customerForCrm = await crmStorage.getCrmCustomerById(finalCustomerId);
+            } catch (crmErr) {
+              console.log("Customer not found in CRM either, will create from order data");
+            }
+          }
+        }
+
+        // Extract customer information from order data
+        const crmOrderData = {
+          email: customerForCrm?.email || `customer${finalCustomerId}@temp.local`,
+          firstName: customerInfo.name.split(' ')[0] || 'Unknown',
+          lastName: customerInfo.name.split(' ').slice(1).join(' ') || 'Customer',
+          company: customerForCrm?.company || null,
+          phone: customerInfo.phone,
+          country: 'Iraq', // Default country
+          city: customerInfo.city || 'Unknown',
+          address: customerInfo.address,
+          postalCode: customerInfo.postalCode,
+          orderValue: totalAmount,
+        };
+
+        await crmStorage.createOrUpdateCustomerFromOrder(crmOrderData);
+        console.log(`✅ Customer auto-captured in CRM for order ${orderNumber}`);
+      } catch (crmError) {
+        console.error("❌ Error auto-capturing customer in CRM:", crmError);
+        // Don't fail the order if CRM capture fails
+      }
+
       res.json({
         success: true,
         message: "Order created successfully",
@@ -4519,6 +4557,69 @@ ${procedure.content}
       } catch (emailError) {
         console.error("Failed to send inquiry email:", emailError);
         // Don't fail the inquiry creation if email fails
+      }
+
+      // Auto-capture customer data in CRM system
+      try {
+        // Check if customer exists in CRM
+        let existingCustomer = null;
+        if (inquiryData.contactEmail) {
+          existingCustomer = await crmStorage.getCrmCustomerByEmail(inquiryData.contactEmail);
+        }
+
+        if (existingCustomer) {
+          // Log inquiry activity for existing customer
+          await crmStorage.logCustomerActivity({
+            customerId: existingCustomer.id,
+            activityType: 'product_inquiry',
+            description: `Product inquiry: ${inquiryData.subject || 'General inquiry'}`,
+            performedBy: 'system',
+            activityData: {
+              source: 'website_product_inquiry',
+              inquiryType: inquiryData.type,
+              category: inquiryData.category,
+              priority: inquiryData.priority,
+              productName: productName,
+              inquiryNumber: inquiry.inquiryNumber,
+              message: inquiryData.message
+            }
+          });
+          console.log(`✅ Product inquiry logged to existing CRM customer: ${inquiryData.contactEmail}`);
+        } else {
+          // Create new CRM customer from inquiry
+          const newCrmCustomer = await crmStorage.createCrmCustomer({
+            email: inquiryData.contactEmail,
+            firstName: (inquiryData.contactEmail.split('@')[0] || 'Customer').split('.')[0],
+            lastName: '',
+            company: inquiryData.company || null,
+            phone: inquiryData.contactPhone || null,
+            customerType: 'prospect',
+            customerSource: 'website_inquiry',
+            isActive: true,
+            passwordHash: '', // Will be set when customer creates account
+          });
+
+          // Log initial inquiry activity
+          await crmStorage.logCustomerActivity({
+            customerId: newCrmCustomer.id,
+            activityType: 'first_contact',
+            description: `First contact via product inquiry: ${inquiryData.subject || 'General inquiry'}`,
+            performedBy: 'system',
+            activityData: {
+              source: 'website_product_inquiry',
+              inquiryType: inquiryData.type,
+              category: inquiryData.category,
+              priority: inquiryData.priority,
+              productName: productName,
+              inquiryNumber: inquiry.inquiryNumber,
+              message: inquiryData.message
+            }
+          });
+          console.log(`✅ New CRM customer created from product inquiry: ${inquiryData.contactEmail}`);
+        }
+      } catch (crmError) {
+        console.error("❌ Error auto-capturing customer in CRM from product inquiry:", crmError);
+        // Don't fail the inquiry if CRM capture fails
       }
       
       res.status(201).json({ 
@@ -6549,6 +6650,66 @@ Leading Chemical Solutions Provider
         priority: urgency || "normal",
         notes: `Contact: ${firstName} ${lastName}`,
       });
+
+      // Auto-capture customer data in CRM system
+      try {
+        // Check if customer exists in CRM
+        let existingCustomer = await crmStorage.getCrmCustomerByEmail(email);
+
+        if (existingCustomer) {
+          // Log quote request activity for existing customer
+          await crmStorage.logCustomerActivity({
+            customerId: existingCustomer.id,
+            activityType: 'quote_request',
+            description: `Quote requested for ${productName} - Category: ${category || 'general'}`,
+            performedBy: 'system',
+            activityData: {
+              source: 'website_quote_form',
+              productName: productName,
+              category: category,
+              quantity: quantity,
+              urgency: urgency,
+              quoteNumber: quoteRequest.quoteNumber,
+              message: message
+            }
+          });
+          console.log(`✅ Quote request logged to existing CRM customer: ${email}`);
+        } else {
+          // Create new CRM customer from quote request
+          const newCrmCustomer = await crmStorage.createCrmCustomer({
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            company: company,
+            phone: phone || null,
+            customerType: 'prospect',
+            customerSource: 'website_quote',
+            isActive: true,
+            passwordHash: '', // Will be set when customer creates account
+          });
+
+          // Log initial quote request activity
+          await crmStorage.logCustomerActivity({
+            customerId: newCrmCustomer.id,
+            activityType: 'first_contact',
+            description: `First contact via quote request: ${productName} - Category: ${category || 'general'}`,
+            performedBy: 'system',
+            activityData: {
+              source: 'website_quote_form',
+              productName: productName,
+              category: category,
+              quantity: quantity,
+              urgency: urgency,
+              quoteNumber: quoteRequest.quoteNumber,
+              message: message
+            }
+          });
+          console.log(`✅ New CRM customer created from quote request: ${email}`);
+        }
+      } catch (crmError) {
+        console.error("❌ Error auto-capturing customer in CRM from quote request:", crmError);
+        // Don't fail the quote request if CRM capture fails
+      }
 
       res.json({
         success: true,
