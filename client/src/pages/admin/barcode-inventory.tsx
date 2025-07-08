@@ -296,28 +296,32 @@ const BarcodeInventory = () => {
         const sku = product.sku || `SKU${product.id.toString().padStart(4, '0')}`;
         const price = product.unitPrice ? `${product.unitPrice} ${product.currency || 'IQD'}` : '';
         
-        let labelCommands = `^XA\n^FO50,30^A0N,30,25^FD${product.name.substring(0, 25)}^FS\n`;
-        let yPosition = 70;
+        // Define label dimensions (compact 50mm x 30mm label)
+        let labelCommands = `^XA\n^LL240\n^PW400\n`;
+        
+        // Product name (top)
+        labelCommands += `^FO10,8^A0N,20,15^FD${product.name.substring(0, 30)}^FS\n`;
+        let yPosition = 30;
         
         // Add SKU if selected
         if (includeSKU) {
-          labelCommands += `^FO50,${yPosition}^A0N,25,20^FDSKU: ${sku}^FS\n`;
-          yPosition += 30;
+          labelCommands += `^FO10,${yPosition}^A0N,15,12^FDSKU: ${sku.substring(0, 15)}^FS\n`;
+          yPosition += 18;
         }
         
-        // Add barcode
-        labelCommands += `^FO50,${yPosition}^BY2,3,100^BCN,100,Y,N,N^FD${product.barcode}^FS\n`;
-        yPosition += 120;
+        // Add barcode (compact size)
+        labelCommands += `^FO10,${yPosition}^BY1,2,50^BCN,50,Y,N,N^FD${product.barcode}^FS\n`;
+        yPosition += 60;
         
-        // Add price if selected
+        // Add price if selected (compact)
         if (includePrice && price) {
-          labelCommands += `^FO50,${yPosition}^A0N,20,15^FD${price}^FS\n`;
-          yPosition += 30;
+          labelCommands += `^FO10,${yPosition}^A0N,14,10^FD${price}^FS\n`;
+          yPosition += 15;
         }
         
-        // Add website if selected
+        // Add website if selected (compact)
         if (includeWebsite) {
-          labelCommands += `^FO50,${yPosition}^A0N,15,12^FDwww.momtazchem.com^FS\n`;
+          labelCommands += `^FO10,${yPosition}^A0N,10,8^FDmomtazchem.com^FS\n`;
         }
         
         labelCommands += '^XZ';
