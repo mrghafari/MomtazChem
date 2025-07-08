@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Barcode, Scan, Download, Printer, Code, Plus, ArrowLeft, Settings, CheckCircle, AlertTriangle, Search } from "lucide-react";
+import { Barcode, Scan, Download, Printer, Code, Plus, ArrowLeft, Settings, CheckCircle, AlertTriangle, Search, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
 import VisualBarcode from "@/components/ui/visual-barcode";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -56,6 +56,8 @@ export default function BarcodeInventory() {
   const [transactionReason, setTransactionReason] = useState<string>('');
   const [transactionReference, setTransactionReference] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showLabelPreview, setShowLabelPreview] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [labelOptions, setLabelOptions] = useState({
@@ -152,13 +154,50 @@ export default function BarcodeInventory() {
     iraqBarcodeGeneration.mutate();
   };
 
-  // Filter products based on search term
+  // Filter and sort products
   const filteredProducts = products?.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.barcode?.includes(searchTerm) ||
-    product.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (product.price && product.price.toString().includes(searchTerm)) ||
+    (product.priceUnit && product.priceUnit.toLowerCase().includes(searchTerm.toLowerCase()))
   ) || [];
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue: any = a[sortField as keyof Product];
+    let bValue: any = b[sortField as keyof Product];
+    
+    // Handle null/undefined values
+    if (aValue == null) aValue = '';
+    if (bValue == null) bValue = '';
+    
+    // Convert to string for comparison if needed
+    if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+    if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+    
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
+    return sortDirection === 'asc' 
+      ? <ChevronUp className="h-4 w-4 text-blue-600" />
+      : <ChevronDown className="h-4 w-4 text-blue-600" />;
+  };
 
   const handleBarcodeGenerated = (barcode: string, type: string = 'default') => {
     if (selectedProduct) {
@@ -207,7 +246,7 @@ export default function BarcodeInventory() {
   };
 
   const handleSelectAll = () => {
-    const allIds = filteredProducts.map(p => p.id);
+    const allIds = sortedProducts.map(p => p.id);
     if (selectedProducts.length === allIds.length) {
       setSelectedProducts([]);
     } else {
@@ -457,11 +496,11 @@ export default function BarcodeInventory() {
           <div className="flex items-center gap-2 mb-4">
             <Checkbox 
               id="select-all"
-              checked={selectedProducts.length === filteredProducts.length}
+              checked={selectedProducts.length === sortedProducts.length}
               onCheckedChange={handleSelectAll}
             />
             <label htmlFor="select-all" className="text-sm font-medium">
-              انتخاب همه ({filteredProducts.length} محصول)
+              انتخاب همه ({sortedProducts.length} محصول)
             </label>
           </div>
 
@@ -542,15 +581,56 @@ export default function BarcodeInventory() {
               <thead>
                 <tr className="bg-gray-50">
                   <th className="text-left p-3 border border-gray-200">انتخاب</th>
-                  <th className="text-left p-3 border border-gray-200">محصول</th>
-                  <th className="text-left p-3 border border-gray-200">دسته</th>
-                  <th className="text-left p-3 border border-gray-200">موجودی</th>
-                  <th className="text-left p-3 border border-gray-200">بارکد</th>
+                  <th 
+                    className="text-left p-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('name')}
+                  >
+                    <div className="flex items-center gap-2">
+                      محصول
+                      {getSortIcon('name')}
+                    </div>
+                  </th>
+                  <th 
+                    className="text-left p-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('category')}
+                  >
+                    <div className="flex items-center gap-2">
+                      دسته
+                      {getSortIcon('category')}
+                    </div>
+                  </th>
+                  <th 
+                    className="text-left p-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('stockQuantity')}
+                  >
+                    <div className="flex items-center gap-2">
+                      موجودی
+                      {getSortIcon('stockQuantity')}
+                    </div>
+                  </th>
+                  <th 
+                    className="text-left p-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('price')}
+                  >
+                    <div className="flex items-center gap-2">
+                      قیمت
+                      {getSortIcon('price')}
+                    </div>
+                  </th>
+                  <th 
+                    className="text-left p-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('barcode')}
+                  >
+                    <div className="flex items-center gap-2">
+                      بارکد
+                      {getSortIcon('barcode')}
+                    </div>
+                  </th>
                   <th className="text-left p-3 border border-gray-200">وضعیت</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map(product => (
+                {sortedProducts.map(product => (
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="p-3 border border-gray-200">
                       <Checkbox 
@@ -571,6 +651,14 @@ export default function BarcodeInventory() {
                       <div className={`flex items-center gap-2 p-2 rounded ${getStockStatusColor(product)} text-white`}>
                         {getStockStatusIcon(product)}
                         <span>{product.stockQuantity} {product.stockUnit}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 border border-gray-200">
+                      <div className="font-medium">
+                        {product.price ? 
+                          `${Math.round(product.price).toLocaleString()} ${product.priceUnit || 'IQD'}` 
+                          : 'قیمت تعریف نشده'
+                        }
                       </div>
                     </td>
                     <td className="p-3 border border-gray-200">
