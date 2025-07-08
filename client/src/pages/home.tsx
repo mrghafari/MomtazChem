@@ -7,12 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Award, Leaf, FlaskRound, Truck, Headphones, FuelIcon as Fuel, Droplets, PaintBucket, Wheat, Download, FileText, Image } from "lucide-react";
-import type { ShowcaseProduct } from "@shared/showcase-schema";
+import type { ShopProduct } from "@shared/shop-schema";
 import waterTreatmentImg from "@assets/download_1749877891276.jpeg";
 
 const Home = () => {
   // Fetch all products from database
-  const { data: allProducts, isLoading } = useQuery<ShowcaseProduct[]>({
+  const { data: allProducts, isLoading } = useQuery<ShopProduct[]>({
     queryKey: ["/api/products"],
     queryFn: () => fetch("/api/products").then(res => res.json()),
   });
@@ -63,7 +63,7 @@ const Home = () => {
     }
     acc[product.category].push(product);
     return acc;
-  }, {} as Record<string, ShowcaseProduct[]>) || {};
+  }, {} as Record<string, ShopProduct[]>) || {};
 
   const services = [
     {

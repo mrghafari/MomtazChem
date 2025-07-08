@@ -54,7 +54,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   stockUnit: text("stock_unit").default("units"), // Unit of measurement (liters, kg, units, etc.)
   // Pricing fields
   unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).default("0.00"), // Individual unit price
-  currency: text("currency").default("USD"), // Currency code (USD, EUR, IQD)
+  currency: text("currency").default("IQD"), // Currency code (USD, EUR, IQD)
   lastRestockDate: timestamp("last_restock_date"),
   supplier: text("supplier"), // Supplier information
   warehouseLocation: text("warehouse_location"), // Storage location

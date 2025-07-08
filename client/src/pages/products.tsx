@@ -499,7 +499,7 @@ export default function ProductsPage() {
       minStockLevel: Number(product.minStockLevel) ?? 0,
       maxStockLevel: Number(product.maxStockLevel) ?? 0,
       unitPrice: Number(product.unitPrice || 0),
-      currency: product.currency || "USD",
+      currency: product.currency || "IQD",
       priceRange: product.priceRange || "",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
@@ -1174,9 +1174,9 @@ export default function ProductsPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
+                              <SelectItem value="IQD">IQD</SelectItem>
                               <SelectItem value="USD">USD</SelectItem>
                               <SelectItem value="EUR">EUR</SelectItem>
-                              <SelectItem value="IQD">IQD</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />

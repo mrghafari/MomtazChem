@@ -1254,7 +1254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category } = req.query;
       let products;
       
-      // shop_products is now our single unified product table
+      // Use shop_products table for main products interface (both shop and showcase use same table)
       if (category && typeof category === 'string') {
         products = await shopStorage.getShopProductsByCategory(category);
       } else {
@@ -1343,21 +1343,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = req.body;
-      const product = await shopStorage.updateShopProduct(id, productData);
+      console.log(`📝 Updating product ${id} with data:`, productData);
       
-      // 🔄 Reverse sync: Update shop inventory when showcase inventory changes
-      if (productData.stockQuantity !== undefined) {
-        try {
-          console.log(`🔄 Starting reverse sync from showcase to shop for product ID: ${id}`);
-          await storage.syncInventoryToShop(product);
-          console.log(`🔄 Synced inventory from showcase to shop for product: ${product.name}`);
-        } catch (syncError) {
-          console.warn(`⚠️ Failed to sync to shop:`, syncError);
-          // Don't fail the main update if sync fails
-        }
-      }
+      // Update shop product (unified product table)
+      const shopProduct = await shopStorage.updateShopProduct(id, productData);
+      console.log(`✅ Updated product:`, shopProduct.name);
       
-      res.json(product);
+      res.json(shopProduct);
     } catch (error) {
       console.error("Error updating product:", error);
       if (error instanceof z.ZodError) {

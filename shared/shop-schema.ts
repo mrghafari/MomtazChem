@@ -55,6 +55,7 @@ export const shopProducts = pgTable("shop_products", {
   availableQuantity: integer("available_quantity").default(0), // موجودی قابل فروش
   minStockLevel: integer("min_stock_level").default(5), // حد مینیمم برای اعلام به مدیر تولید
   lowStockThreshold: integer("low_stock_threshold").default(10), // آستانه برای نمایش هشدار به مشتری
+  maxStockLevel: integer("max_stock_level").default(1000), // حداکثر موجودی مجاز
   sku: text("sku").unique().notNull(),
   barcode: text("barcode"),
   weight: decimal("weight", { precision: 8, scale: 2 }), // Product weight
@@ -308,7 +309,7 @@ export const orders = pgTable("orders", {
   shippingAmount: decimal("shipping_amount", { precision: 12, scale: 2 }).default("0"),
   discountAmount: decimal("discount_amount", { precision: 12, scale: 2 }).default("0"),
   totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).notNull(),
-  currency: text("currency").default("USD"),
+  currency: text("currency").default("IQD"),
   notes: text("notes"),
   billingAddress: json("billing_address"),
   shippingAddress: json("shipping_address"),
