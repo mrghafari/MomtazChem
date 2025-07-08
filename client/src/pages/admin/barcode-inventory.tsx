@@ -629,15 +629,12 @@ export default function BarcodeInventory() {
                     </td>
                     <td className="p-3 border border-gray-200">
                       {product.barcode ? (
-                        <div className="space-y-2">
-                          <div className="font-mono text-sm">{product.barcode}</div>
-                          <VisualBarcode 
-                            value={product.barcode} 
-                            productName={product.name}
-                            sku={product.sku}
-                            price={product.price}
-                          />
-                        </div>
+                        <VisualBarcode 
+                          value={product.barcode} 
+                          productName={product.name}
+                          sku={product.sku}
+                          price={product.price}
+                        />
                       ) : (
                         <span className="text-gray-400">No barcode</span>
                       )}
