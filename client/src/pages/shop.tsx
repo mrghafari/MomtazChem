@@ -1193,25 +1193,15 @@ const Shop = () => {
                                 </Button>
                               )}
                               
-                              {/* Add to Cart Button - Only show if product has stock */}
-                              {product.inStock && product.stockQuantity > 0 ? (
-                                <Button
-                                  className="w-full"
-                                  onClick={() => addToCart(product.id)}
-                                  disabled={getProductQuantity(product.id) >= product.stockQuantity}
-                                >
-                                  <ShoppingCart className="w-4 h-4 mr-2" />
-                                  {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
-                                </Button>
-                              ) : (
-                                <Button
-                                  className="w-full bg-gray-300 text-gray-500 cursor-not-allowed"
-                                  disabled={true}
-                                >
-                                  <AlertTriangle className="w-4 h-4 mr-2" />
-                                  موجود نیست
-                                </Button>
-                              )}
+                              {/* Add to Cart Button */}
+                              <Button
+                                className="w-full"
+                                onClick={() => addToCart(product.id)}
+                                disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                              >
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                              </Button>
                             </div>
                           )}
                         </CardContent>
@@ -1421,25 +1411,15 @@ const Shop = () => {
                                     </Button>
                                   )}
                                   
-                                  {/* Add to Cart Button - Only show if product has stock */}
-                                  {product.inStock && product.stockQuantity > 0 ? (
-                                    <Button
-                                      className="w-full"
-                                      onClick={() => addToCart(product.id)}
-                                      disabled={getProductQuantity(product.id) >= product.stockQuantity}
-                                    >
-                                      <ShoppingCart className="w-4 h-4 mr-2" />
-                                      {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
-                                    </Button>
-                                  ) : (
-                                    <Button
-                                      className="w-full bg-gray-300 text-gray-500 cursor-not-allowed"
-                                      disabled={true}
-                                    >
-                                      <AlertTriangle className="w-4 h-4 mr-2" />
-                                      موجود نیست
-                                    </Button>
-                                  )}
+                                  {/* Add to Cart Button */}
+                                  <Button
+                                    className="w-full"
+                                    onClick={() => addToCart(product.id)}
+                                    disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                                  >
+                                    <ShoppingCart className="w-4 h-4 mr-2" />
+                                    {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                                  </Button>
                                 </div>
                               )}
                             </div>
