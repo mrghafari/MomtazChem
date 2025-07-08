@@ -92,13 +92,21 @@ const catalogStorage = multer.diskStorage({
 const uploadImage = multer({
   storage: imageStorage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 2 * 1024 * 1024, // 2MB limit - optimized for web display
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    // Allow only optimal image formats for web display
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg', 
+      'image/png',
+      'image/webp'
+    ];
+    
+    if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'));
+      cb(new Error('Only JPEG, PNG, and WebP images are allowed for optimal customer display'));
     }
   }
 });
@@ -886,13 +894,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const uploadFlexible = multer({
     storage: imageStorage,
     limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB limit
+      fileSize: 2 * 1024 * 1024, // 2MB limit - optimized for web display
     },
     fileFilter: (req, file, cb) => {
-      if (file.mimetype.startsWith('image/')) {
+      // Allow only optimal image formats for web display
+      const allowedMimeTypes = [
+        'image/jpeg',
+        'image/jpg', 
+        'image/png',
+        'image/webp'
+      ];
+      
+      if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
-        cb(new Error('Only image files are allowed'));
+        cb(new Error('Only JPEG, PNG, and WebP images are allowed for optimal customer display'));
       }
     }
   });

@@ -373,6 +373,27 @@ export default function ProductsPage() {
   const handleImageUpload = async (file: File) => {
     if (!file) return;
 
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Image must be less than 2MB. Please compress or resize the image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file format
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid Format",
+        description: "Only JPEG, PNG, and WebP images are allowed for optimal customer display.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploadingImage(true);
     const formData = new FormData();
     formData.append('file', file);
@@ -384,7 +405,8 @@ export default function ProductsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Upload failed');
       }
 
       const { url } = await response.json();
@@ -393,12 +415,12 @@ export default function ProductsPage() {
       
       toast({
         title: "Success",
-        description: "Image uploaded successfully",
+        description: "Image uploaded successfully - optimized for customer display",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to upload image",
+        title: "Upload Error",
+        description: error instanceof Error ? error.message : "Failed to upload image",
         variant: "destructive",
       });
     } finally {
@@ -1689,7 +1711,7 @@ export default function ProductsPage() {
                               id="image-upload"
                               type="file"
                               className="sr-only"
-                              accept="image/*"
+                              accept="image/jpeg,image/jpg,image/png,image/webp"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) handleImageUpload(file);
@@ -1697,6 +1719,10 @@ export default function ProductsPage() {
                               disabled={uploadingImage}
                             />
                           </label>
+                          <div className="mt-2 text-xs text-gray-500">
+                            <p>Optimal sizes: 350x350px (cards), 600x600px (details)</p>
+                            <p>Formats: JPEG, PNG, WebP | Max: 2MB</p>
+                          </div>
                         </div>
                       </div>
                     )}
