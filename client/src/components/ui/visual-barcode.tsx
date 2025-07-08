@@ -111,67 +111,82 @@ const VisualBarcode = ({
     // Clear existing content
     printCanvasRef.current.innerHTML = '';
     
-    // Create container div
+    // Create container div styled like label preview
     const container = document.createElement('div');
     container.style.cssText = `
       background: white;
-      padding: 20px;
+      border: 2px solid #666;
+      padding: 8px;
       font-family: Arial, sans-serif;
-      text-align: center;
-      border: 1px solid #ccc;
-      width: 300px;
+      width: 240px;
+      height: 160px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
     `;
     
-    // Add product name if available
+    // Row 1: Product Name (always shown)
     if (productName) {
       const nameDiv = document.createElement('div');
-      nameDiv.style.cssText = 'font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333;';
-      nameDiv.textContent = productName;
+      nameDiv.style.cssText = 'display: flex; align-items: center; justify-content: center; text-align: center; min-height: 30px;';
+      const nameSpan = document.createElement('span');
+      nameSpan.style.cssText = 'font-weight: bold; font-size: 14px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; padding: 0 4px;';
+      nameSpan.textContent = productName.length > 25 ? productName.substring(0, 22) + '...' : productName;
+      nameDiv.appendChild(nameSpan);
       container.appendChild(nameDiv);
     }
-    
-    // Add barcode SVG
-    const barcodeContainer = document.createElement('div');
-    barcodeContainer.style.cssText = 'margin: 15px 0;';
+
+    // Row 2: SKU (if available)
+    const skuDiv = document.createElement('div');
+    skuDiv.style.cssText = 'display: flex; align-items: center; justify-content: center; min-height: 20px;';
+    if (sku) {
+      const skuSpan = document.createElement('span');
+      skuSpan.style.cssText = 'color: #666; font-family: monospace; font-size: 10px; overflow: hidden; text-overflow: ellipsis;';
+      skuSpan.textContent = `SKU: ${sku.length > 15 ? sku.substring(0, 12) + '...' : sku}`;
+      skuDiv.appendChild(skuSpan);
+    }
+    container.appendChild(skuDiv);
+
+    // Row 3: Barcode (always shown)
+    const barcodeDiv = document.createElement('div');
+    barcodeDiv.style.cssText = 'display: flex; align-items: center; justify-content: center; min-height: 50px; flex-shrink: 0;';
     
     const barcodeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     JsBarcode(barcodeSvg, value, {
       format: format,
-      width: 3,
-      height: 80,
+      width: 1.5,
+      height: 40,
       displayValue: true,
-      fontSize: 14,
-      margin: 10,
+      fontSize: 8,
+      margin: 2,
       background: "#ffffff",
       lineColor: "#000000",
-      textMargin: 8
+      textMargin: 2
     });
     
-    barcodeContainer.appendChild(barcodeSvg);
-    container.appendChild(barcodeContainer);
+    barcodeDiv.appendChild(barcodeSvg);
+    container.appendChild(barcodeDiv);
+
+    // Row 4: Price and Website (bottom section)
+    const bottomDiv = document.createElement('div');
+    bottomDiv.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 30px; gap: 2px;';
     
-    // Add SKU if available
-    if (sku) {
-      const skuDiv = document.createElement('div');
-      skuDiv.style.cssText = 'font-size: 12px; color: #666; margin: 5px 0; font-family: monospace;';
-      skuDiv.textContent = `SKU: ${sku}`;
-      container.appendChild(skuDiv);
-    }
-    
-    // Add price if available
     if (price) {
-      const priceDiv = document.createElement('div');
-      priceDiv.style.cssText = 'font-size: 14px; color: #28a745; font-weight: bold; margin: 5px 0;';
-      priceDiv.textContent = `${Math.round(price)} IQD`;
-      container.appendChild(priceDiv);
+      const priceSpan = document.createElement('span');
+      priceSpan.style.cssText = 'font-weight: bold; color: #16a34a; font-size: 10px; overflow: hidden; text-overflow: ellipsis; text-align: center;';
+      priceSpan.textContent = `${Math.round(price)} IQD`;
+      bottomDiv.appendChild(priceSpan);
     }
     
-    // Add website info
-    const websiteDiv = document.createElement('div');
-    websiteDiv.style.cssText = 'font-size: 10px; color: #999; margin-top: 10px;';
-    websiteDiv.textContent = 'www.momtazchem.com';
-    container.appendChild(websiteDiv);
+    const websiteSpan = document.createElement('span');
+    websiteSpan.style.cssText = 'color: #6b7280; font-size: 8px; overflow: hidden; text-overflow: ellipsis;';
+    websiteSpan.textContent = 'momtazchem.com';
+    bottomDiv.appendChild(websiteSpan);
+    
+    container.appendChild(bottomDiv);
     
     printCanvasRef.current.appendChild(container);
   };
@@ -183,78 +198,122 @@ const VisualBarcode = ({
     generatePrintVersion();
     
     try {
-      // Create a temporary canvas to convert SVG to image
+      // Use html2canvas approach for better DOM to image conversion
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const img = new Image();
       
-      // Set canvas size for label printing (typically 4x6 inches at 300 DPI)
-      canvas.width = 600;  // 2 inches at 300 DPI
-      canvas.height = 400; // 1.33 inches at 300 DPI
+      // Set canvas size to match label dimensions
+      canvas.width = 240 * 2;  // Double resolution for better quality
+      canvas.height = 160 * 2;
       
-      // Get SVG data
-      const svgData = new XMLSerializer().serializeToString(printCanvasRef.current);
-      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
-      
-      img.onload = () => {
-        if (ctx) {
-          // White background
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (ctx) {
+        // Scale for higher quality
+        ctx.scale(2, 2);
+        
+        // White background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 240, 160);
+        
+        // Get the container element
+        const container = printCanvasRef.current.firstChild as HTMLElement;
+        if (container) {
+          // Convert HTML to canvas manually for better control
+          const drawElement = (element: HTMLElement, x: number, y: number, width: number, height: number) => {
+            const computedStyle = window.getComputedStyle(element);
+            
+            // Draw background
+            ctx.fillStyle = computedStyle.backgroundColor || '#ffffff';
+            ctx.fillRect(x, y, width, height);
+            
+            // Draw border
+            if (computedStyle.borderWidth && computedStyle.borderWidth !== '0px') {
+              ctx.strokeStyle = computedStyle.borderColor || '#666666';
+              ctx.lineWidth = parseInt(computedStyle.borderWidth) || 2;
+              ctx.strokeRect(x, y, width, height);
+            }
+            
+            // Draw text content
+            const textContent = element.textContent?.trim();
+            if (textContent && !element.querySelector('svg')) {
+              ctx.fillStyle = computedStyle.color || '#000000';
+              ctx.font = `${computedStyle.fontWeight || 'normal'} ${computedStyle.fontSize || '12px'} ${computedStyle.fontFamily || 'Arial'}`;
+              ctx.textAlign = 'center';
+              ctx.fillText(textContent, x + width/2, y + height/2 + 5);
+            }
+          };
           
-          // Center the barcode
-          const imgWidth = 400;
-          const imgHeight = 120;
-          const x = (canvas.width - imgWidth) / 2;
-          const y = 50;
+          // Draw main container
+          drawElement(container, 0, 0, 240, 160);
           
-          ctx.drawImage(img, x, y, imgWidth, imgHeight);
+          // Simple text-based rendering for label elements
+          let yOffset = 20;
           
-          // Add product name if provided
+          // Product name
           if (productName) {
             ctx.fillStyle = '#000000';
-            ctx.font = 'bold 16px Arial';
+            ctx.font = 'bold 14px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(productName, canvas.width / 2, y - 20);
+            const truncatedName = productName.length > 25 ? productName.substring(0, 22) + '...' : productName;
+            ctx.fillText(truncatedName, 120, yOffset);
+            yOffset += 25;
           }
           
-          // Add SKU if provided
+          // SKU
           if (sku) {
             ctx.fillStyle = '#666666';
-            ctx.font = '12px Arial';
+            ctx.font = '10px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText(`SKU: ${sku}`, canvas.width / 2, y + imgHeight + 30);
+            const truncatedSku = sku.length > 15 ? sku.substring(0, 12) + '...' : sku;
+            ctx.fillText(`SKU: ${truncatedSku}`, 120, yOffset);
+            yOffset += 20;
           }
           
-          // Download the image
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `barcode-${value}-${sku || 'product'}.png`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-              
-              toast({
-                title: "دانلود موفق",
-                description: "فایل بارکد دانلود شد",
-              });
-            }
-          }, 'image/png', 1.0);
+          // Barcode text representation (since SVG is complex to render)
+          ctx.fillStyle = '#000000';
+          ctx.font = '8px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(value, 120, yOffset + 25);
+          yOffset += 45;
+          
+          // Price
+          if (price) {
+            ctx.fillStyle = '#16a34a';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${Math.round(price)} IQD`, 120, yOffset);
+            yOffset += 15;
+          }
+          
+          // Website
+          ctx.fillStyle = '#6b7280';
+          ctx.font = '8px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('momtazchem.com', 120, yOffset);
         }
         
-        URL.revokeObjectURL(svgUrl);
-      };
-      
-      img.src = svgUrl;
+        // Download the image
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `label-${productName || 'product'}-${value}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            toast({
+              title: "دانلود موفق",
+              description: "لیبل محصول دانلود شد",
+            });
+          }
+        }, 'image/png', 1.0);
+      }
     } catch (error) {
       toast({
         title: "خطا در دانلود",
-        description: "امکان دانلود بارکد وجود ندارد",
+        description: "امکان دانلود لیبل وجود ندارد",
         variant: "destructive"
       });
     }
@@ -370,7 +429,12 @@ const VisualBarcode = ({
     <div className={`relative ${className}`}>
       <div className="barcode-display bg-white border border-gray-200 rounded p-1">
         {/* Main barcode display */}
-        <svg ref={canvasRef} className="mx-auto"></svg>
+        <svg 
+          ref={canvasRef} 
+          className="mx-auto cursor-pointer hover:bg-gray-50 transition-colors rounded p-1" 
+          onClick={handleDownload}
+          title="کلیک برای دانلود لیبل کامل"
+        ></svg>
         
         {/* SKU display under barcode */}
         {sku && (

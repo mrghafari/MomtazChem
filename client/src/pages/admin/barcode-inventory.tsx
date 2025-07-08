@@ -631,7 +631,12 @@ export default function BarcodeInventory() {
                       {product.barcode ? (
                         <div className="space-y-2">
                           <div className="font-mono text-sm">{product.barcode}</div>
-                          <VisualBarcode value={product.barcode} />
+                          <VisualBarcode 
+                            value={product.barcode} 
+                            productName={product.name}
+                            sku={product.sku}
+                            price={product.price}
+                          />
                         </div>
                       ) : (
                         <span className="text-gray-400">No barcode</span>
@@ -679,7 +684,12 @@ export default function BarcodeInventory() {
                   <div key={productId} className="border rounded-lg p-4 bg-white">
                     <div className="text-sm font-medium truncate">{product.name}</div>
                     <div className="flex justify-center my-2">
-                      <VisualBarcode value={product.barcode || ''} />
+                      <VisualBarcode 
+                        value={product.barcode || ''} 
+                        productName={product.name}
+                        sku={product.sku}
+                        price={price}
+                      />
                     </div>
                     <div className="text-xs text-gray-600">
                       <div>{priceText}</div>
