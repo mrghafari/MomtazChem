@@ -627,10 +627,7 @@ const BarcodeInventory = () => {
                       <Download className="h-4 w-4 mr-2" />
                       Export CSV
                     </Button>
-                    <LabelPrinter 
-                      products={products || []} 
-                      selectedProducts={[]}
-                    />
+
                   </div>
                 </div>
               </CardContent>
