@@ -1129,7 +1129,7 @@ const Shop = () => {
 
 
 
-                          {product.inStock && (displayStock[product.id] || 0) > 0 && (
+                          {product.inStock && product.stockQuantity > 0 && (
                             <div className="space-y-2">
                               {/* Quantity Controls */}
                               <div className="flex items-center justify-center gap-2">
@@ -1144,7 +1144,7 @@ const Shop = () => {
                                 <input
                                   type="number"
                                   min="1"
-                                  max={displayStock[product.id] || 999}
+                                  max={product.stockQuantity || 999}
                                   value={getProductQuantity(product.id)}
                                   onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
                                   className="w-16 text-center border rounded px-2 py-1 font-medium"
@@ -1153,7 +1153,7 @@ const Shop = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                  disabled={getProductQuantity(product.id) >= (displayStock[product.id] || 0) || (displayStock[product.id] || 0) <= 0}
+                                  disabled={getProductQuantity(product.id) >= product.stockQuantity}
                                 >
                                   <Plus className="w-4 h-4" />
                                 </Button>
@@ -1188,7 +1188,7 @@ const Shop = () => {
                               <Button
                                 className="w-full"
                                 onClick={() => addToCart(product.id)}
-                                disabled={getProductQuantity(product.id) > (displayStock[product.id] || 0) || (displayStock[product.id] || 0) === 0}
+                                disabled={getProductQuantity(product.id) >= product.stockQuantity || product.stockQuantity === 0}
                               >
                                 <ShoppingCart className="w-4 h-4 mr-2" />
                                 {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
@@ -1347,7 +1347,7 @@ const Shop = () => {
                             </div>
                             
                             <div className="ml-6">
-                              {product.inStock && (displayStock[product.id] || 0) > 0 && (
+                              {product.inStock && product.stockQuantity > 0 && (
                                 <div className="space-y-2">
                                   {/* Quantity Controls */}
                                   <div className="flex items-center justify-center gap-2">
@@ -1362,7 +1362,7 @@ const Shop = () => {
                                     <input
                                       type="number"
                                       min="1"
-                                      max={displayStock[product.id] || 999}
+                                      max={product.stockQuantity || 999}
                                       value={getProductQuantity(product.id)}
                                       onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
                                       className="w-16 text-center border rounded px-2 py-1 font-medium"
@@ -1371,7 +1371,7 @@ const Shop = () => {
                                       size="sm"
                                       variant="outline"
                                       onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                      disabled={getProductQuantity(product.id) >= (displayStock[product.id] || 0)}
+                                      disabled={getProductQuantity(product.id) >= product.stockQuantity}
                                     >
                                       <Plus className="w-4 h-4" />
                                     </Button>
@@ -1406,7 +1406,7 @@ const Shop = () => {
                                   <Button
                                     className="w-full"
                                     onClick={() => addToCart(product.id)}
-                                    disabled={getProductQuantity(product.id) > (displayStock[product.id] || 0) || (displayStock[product.id] || 0) === 0}
+                                    disabled={getProductQuantity(product.id) >= product.stockQuantity || product.stockQuantity === 0}
                                   >
                                     <ShoppingCart className="w-4 h-4 mr-2" />
                                     {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
