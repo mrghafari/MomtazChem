@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -1193,15 +1193,25 @@ const Shop = () => {
                                 </Button>
                               )}
                               
-                              {/* Add to Cart Button */}
-                              <Button
-                                className="w-full"
-                                onClick={() => addToCart(product.id)}
-                                disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
-                              >
-                                <ShoppingCart className="w-4 h-4 mr-2" />
-                                {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
-                              </Button>
+                              {/* Add to Cart Button - Only show if product has stock */}
+                              {product.inStock && product.stockQuantity > 0 ? (
+                                <Button
+                                  className="w-full"
+                                  onClick={() => addToCart(product.id)}
+                                  disabled={getProductQuantity(product.id) >= product.stockQuantity}
+                                >
+                                  <ShoppingCart className="w-4 h-4 mr-2" />
+                                  {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                                </Button>
+                              ) : (
+                                <Button
+                                  className="w-full bg-gray-300 text-gray-500 cursor-not-allowed"
+                                  disabled={true}
+                                >
+                                  <AlertTriangle className="w-4 h-4 mr-2" />
+                                  موجود نیست
+                                </Button>
+                              )}
                             </div>
                           )}
                         </CardContent>
@@ -1411,15 +1421,25 @@ const Shop = () => {
                                     </Button>
                                   )}
                                   
-                                  {/* Add to Cart Button */}
-                                  <Button
-                                    className="w-full"
-                                    onClick={() => addToCart(product.id)}
-                                    disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
-                                  >
-                                    <ShoppingCart className="w-4 h-4 mr-2" />
-                                    {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
-                                  </Button>
+                                  {/* Add to Cart Button - Only show if product has stock */}
+                                  {product.inStock && product.stockQuantity > 0 ? (
+                                    <Button
+                                      className="w-full"
+                                      onClick={() => addToCart(product.id)}
+                                      disabled={getProductQuantity(product.id) >= product.stockQuantity}
+                                    >
+                                      <ShoppingCart className="w-4 h-4 mr-2" />
+                                      {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      className="w-full bg-gray-300 text-gray-500 cursor-not-allowed"
+                                      disabled={true}
+                                    >
+                                      <AlertTriangle className="w-4 h-4 mr-2" />
+                                      موجود نیست
+                                    </Button>
+                                  )}
                                 </div>
                               )}
                             </div>
