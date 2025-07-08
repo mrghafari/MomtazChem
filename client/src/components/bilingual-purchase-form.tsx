@@ -80,7 +80,8 @@ const translations = {
     useWalletPartial: "Pay partial amount from wallet",
     walletAmount: "Amount from wallet",
     remainingAmount: "Remaining amount",
-    insufficientWallet: "Insufficient wallet balance"
+    insufficientWallet: "Insufficient wallet balance",
+    discountApplied: "Discount Applied"
   },
   ar: {
     // Form titles
@@ -140,7 +141,8 @@ const translations = {
     useWalletPartial: "دفع مبلغ جزئي من المحفظة",
     walletAmount: "المبلغ من المحفظة",
     remainingAmount: "المبلغ المتبقي",
-    insufficientWallet: "رصيد المحفظة غير كافي"
+    insufficientWallet: "رصيد المحفظة غير كافي",
+    discountApplied: "تم تطبيق الخصم"
   }
 };
 
@@ -521,10 +523,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       </div>
                     </div>
                     
-                    {/* Item Total */}
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t">
-                      <span className="text-sm text-muted-foreground">{t.subtotal}</span>
-                      <span className="font-medium">{formatCurrency(itemTotal)}</span>
+                    {/* Item Total with discount info */}
+                    <div className="mt-2 pt-2 border-t space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">{t.subtotal}</span>
+                        <span className="font-medium">{formatCurrency(itemTotal)}</span>
+                      </div>
+                      {discountedPrice < basePrice && (
+                        <div className="flex justify-between items-center text-xs text-green-600">
+                          <span>{t.discountApplied}</span>
+                          <span>-{formatCurrency((basePrice - discountedPrice) * quantity)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -537,6 +547,93 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               <span className="text-primary">{formatCurrency(totalAmount)}</span>
             </div>
           </div>
+
+          {/* Payment Method Selection - moved up below total */}
+          {true && (
+            <div className="space-y-3 border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+              <div className="flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-blue-600" />
+                <h3 className="font-medium text-blue-900 dark:text-blue-100">{t.paymentMethod}</h3>
+              </div>
+              
+              {/* Wallet Balance Display */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{t.walletBalance}:</span>
+                  <span className="font-semibold text-green-600">{formatCurrency(walletBalance)}</span>
+                </div>
+              </div>
+
+              {/* Payment Options */}
+              <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value="traditional" id="traditional" />
+                  <Label htmlFor="traditional" className="flex items-center gap-2 cursor-pointer">
+                    <CreditCard className="w-4 h-4" />
+                    {t.traditionalPayment}
+                  </Label>
+                </div>
+                
+                {walletBalance >= totalAmount && (
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <RadioGroupItem value="wallet_full" id="wallet_full" />
+                    <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
+                      <Wallet className="w-4 h-4 text-green-600" />
+                      {t.useWalletFull} ({formatCurrency(totalAmount)})
+                    </Label>
+                  </div>
+                )}
+                
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value="wallet_partial" id="wallet_partial" />
+                  <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
+                    <Wallet className="w-4 h-4 text-orange-600" />
+                    {t.useWalletPartial}
+                  </Label>
+                </div>
+              </RadioGroup>
+
+              {/* Partial Payment Amount Input */}
+              {paymentMethod === 'wallet_partial' && (
+                <div className="space-y-2">
+                  <Label htmlFor="walletAmount">{t.walletAmount}</Label>
+                  <Input
+                    id="walletAmount"
+                    type="number"
+                    min="0"
+                    max={maxWalletAmount}
+                    value={walletAmount}
+                    onChange={(e) => setWalletAmount(Math.min(parseFloat(e.target.value) || 0, maxWalletAmount))}
+                    placeholder="0"
+                    className={isRTL ? 'text-right' : 'text-left'}
+                  />
+                  <div className="text-sm text-muted-foreground">
+                    {t.remainingAmount}: {formatCurrency(remainingAfterWallet)}
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Summary */}
+              {paymentMethod !== 'traditional' && (
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span>{t.totalAmount}:</span>
+                      <span>{formatCurrency(totalAmount)}</span>
+                    </div>
+                    <div className="flex justify-between text-green-600">
+                      <span>{t.walletAmount}:</span>
+                      <span>-{formatCurrency(paymentMethod === 'wallet_full' ? totalAmount : walletAmount)}</span>
+                    </div>
+                    <div className="flex justify-between font-medium border-t pt-1">
+                      <span>{t.remainingAmount}:</span>
+                      <span>{formatCurrency(remainingAfterWallet)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Customer Data Status */}
           {customerData?.success && customerData.customer && (
@@ -682,92 +779,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   )}
                 </div>
 
-                {/* Payment Method Selection - Always show for testing */}
-                {true && (
-                  <div className="space-y-3 border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
-                    <div className="flex items-center gap-2">
-                      <Wallet className="w-5 h-5 text-blue-600" />
-                      <h3 className="font-medium text-blue-900 dark:text-blue-100">{t.paymentMethod}</h3>
-                    </div>
-                    
-                    {/* Wallet Balance Display */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">{t.walletBalance}:</span>
-                        <span className="font-semibold text-green-600">{formatCurrency(walletBalance)}</span>
-                      </div>
-                    </div>
 
-                    {/* Payment Options */}
-                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
-                      <div className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem value="traditional" id="traditional" />
-                        <Label htmlFor="traditional" className="flex items-center gap-2 cursor-pointer">
-                          <CreditCard className="w-4 h-4" />
-                          {t.traditionalPayment}
-                        </Label>
-                      </div>
-                      
-                      {walletBalance >= totalAmount && (
-                        <div className="flex items-center space-x-2 space-x-reverse">
-                          <RadioGroupItem value="wallet_full" id="wallet_full" />
-                          <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
-                            <Wallet className="w-4 h-4 text-green-600" />
-                            {t.useWalletFull} ({formatCurrency(totalAmount)})
-                          </Label>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem value="wallet_partial" id="wallet_partial" />
-                        <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
-                          <Wallet className="w-4 h-4 text-orange-600" />
-                          {t.useWalletPartial}
-                        </Label>
-                      </div>
-                    </RadioGroup>
-
-                    {/* Partial Payment Amount Input */}
-                    {paymentMethod === 'wallet_partial' && (
-                      <div className="space-y-2">
-                        <Label htmlFor="walletAmount">{t.walletAmount}</Label>
-                        <Input
-                          id="walletAmount"
-                          type="number"
-                          min="0"
-                          max={maxWalletAmount}
-                          value={walletAmount}
-                          onChange={(e) => setWalletAmount(Math.min(parseFloat(e.target.value) || 0, maxWalletAmount))}
-                          placeholder="0"
-                          className={isRTL ? 'text-right' : 'text-left'}
-                        />
-                        <div className="text-sm text-muted-foreground">
-                          {t.remainingAmount}: {formatCurrency(remainingAfterWallet)}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Payment Summary */}
-                    {paymentMethod !== 'traditional' && (
-                      <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
-                        <div className="space-y-1 text-sm">
-                          <div className="flex justify-between">
-                            <span>{t.totalAmount}:</span>
-                            <span>{formatCurrency(totalAmount)}</span>
-                          </div>
-                          <div className="flex justify-between text-green-600">
-                            <span>{t.walletAmount}:</span>
-                            <span>-{formatCurrency(paymentMethod === 'wallet_full' ? totalAmount : walletAmount)}</span>
-                          </div>
-                          <div className="flex justify-between font-medium border-t pt-1">
-                            <span>{t.remainingAmount}:</span>
-                            <span>{formatCurrency(remainingAfterWallet)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
 
                 {/* Order Notes */}
                 <FormField
