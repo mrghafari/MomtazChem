@@ -114,65 +114,95 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
     }
   };
 
-  const LabelPreview = ({ product }: { product: Product }) => (
-    <div className={`border rounded-lg p-3 bg-white text-center ${
-      labelSize === 'small' ? 'w-48 h-32' : 
-      labelSize === 'large' ? 'w-80 h-48' : 
-      labelSize === 'roll' ? 'w-52 h-24' : 
-      'w-64 h-40'
-    } shadow-sm`}>
-      <div className="h-full flex flex-col justify-between">
-        <div>
-          <h4 className={`font-semibold mb-1 truncate ${
-            labelSize === 'roll' ? 'text-xs' : 'text-sm'
-          }`}>{product.name}</h4>
-          {showSKU && product.sku && (
-            <div className={`text-gray-600 mb-1 font-mono ${
-              labelSize === 'roll' ? 'text-xs' : 'text-xs'
-            }`}>
-              SKU: {product.sku}
+  const LabelPreview = ({ product }: { product: Product }) => {
+    // Calculate optimal sizing based on label size and selected elements
+    const elementCount = 1 + (showSKU ? 1 : 0) + (showPrice ? 1 : 0) + (showWebsite ? 1 : 0); // +1 for barcode
+    
+    const getDimensions = () => {
+      switch (labelSize) {
+        case 'small':
+          return { width: 'w-48', height: 'h-32', padding: 'p-2' };
+        case 'large':
+          return { width: 'w-80', height: 'h-48', padding: 'p-4' };
+        case 'roll':
+          return { width: 'w-52', height: 'h-24', padding: 'p-1' };
+        default:
+          return { width: 'w-64', height: 'h-40', padding: 'p-3' };
+      }
+    };
+
+    const dims = getDimensions();
+    const isCompact = labelSize === 'roll' || labelSize === 'small';
+    
+    return (
+      <div className={`border rounded-lg bg-white text-center ${dims.width} ${dims.height} ${dims.padding} shadow-sm overflow-hidden`}>
+        <div className="h-full flex flex-col justify-between">
+          {/* Product Name - Always at top, truncated */}
+          <div className={`font-semibold truncate leading-tight ${
+            isCompact ? 'text-xs mb-1' : 'text-sm mb-2'
+          }`}>
+            {isCompact && product.name.length > 20 ? 
+              product.name.substring(0, 17) + '...' : 
+              product.name
+            }
+          </div>
+
+          {/* Middle section - Barcode and SKU */}
+          <div className="flex-1 flex flex-col justify-center items-center">
+            {showSKU && product.sku && (
+              <div className={`text-gray-600 font-mono truncate mb-1 ${
+                isCompact ? 'text-xs' : 'text-xs'
+              }`}>
+                SKU: {isCompact && product.sku.length > 12 ? 
+                  product.sku.substring(0, 9) + '...' : 
+                  product.sku
+                }
+              </div>
+            )}
+            
+            <div className="flex-shrink-0">
+              <VisualBarcode 
+                value={product.barcode!} 
+                width={
+                  labelSize === 'small' ? 1.2 : 
+                  labelSize === 'large' ? 2.2 : 
+                  labelSize === 'roll' ? 1.5 : 1.8
+                }
+                height={
+                  labelSize === 'small' ? 25 : 
+                  labelSize === 'large' ? 45 : 
+                  labelSize === 'roll' ? 20 : 35
+                }
+                fontSize={
+                  labelSize === 'small' ? 8 : 
+                  labelSize === 'large' ? 12 : 
+                  labelSize === 'roll' ? 6 : 10
+                }
+              />
             </div>
-          )}
-          <div className="mb-2">
-            <VisualBarcode 
-              value={product.barcode!} 
-              width={
-                labelSize === 'small' ? 1.5 : 
-                labelSize === 'large' ? 2.5 : 
-                labelSize === 'roll' ? 1.8 : 2
-              }
-              height={
-                labelSize === 'small' ? 30 : 
-                labelSize === 'large' ? 50 : 
-                labelSize === 'roll' ? 25 : 40
-              }
-              fontSize={
-                labelSize === 'small' ? 10 : 
-                labelSize === 'large' ? 14 : 
-                labelSize === 'roll' ? 8 : 12
-              }
-            />
+          </div>
+
+          {/* Bottom section - Price and Website */}
+          <div className="space-y-1">
+            {showPrice && product.price && (
+              <div className={`font-bold text-green-600 truncate ${
+                isCompact ? 'text-xs' : 'text-xs'
+              }`}>
+                {formatPrice(product)}
+              </div>
+            )}
+            {showWebsite && (
+              <div className={`text-gray-500 ${
+                isCompact ? 'text-xs' : 'text-xs'
+              }`}>
+                www.momtazchem.com
+              </div>
+            )}
           </div>
         </div>
-        <div className={labelSize === 'roll' ? 'text-xs' : 'text-xs'}>
-          {showPrice && product.price && (
-            <div className={`font-bold text-green-600 mb-1 ${
-              labelSize === 'roll' ? 'text-xs' : 'text-xs'
-            }`}>
-              {formatPrice(product)}
-            </div>
-          )}
-          {showWebsite && (
-            <div className={`text-gray-500 ${
-              labelSize === 'roll' ? 'text-xs' : 'text-xs'
-            }`}>
-              www.momtazchem.com
-            </div>
-          )}
-        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Dialog>

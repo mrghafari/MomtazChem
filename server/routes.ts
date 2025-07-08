@@ -1719,14 +1719,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { showPrice, showWebsite, showSKU, labelSize, website } = options;
     
     const labelDimensions = {
-      small: { width: '48mm', height: '32mm', fontSize: '8px', barcodeHeight: '15mm' },
-      standard: { width: '64mm', height: '40mm', fontSize: '10px', barcodeHeight: '20mm' },
-      large: { width: '80mm', height: '48mm', fontSize: '12px', barcodeHeight: '25mm' },
-      roll: { width: '50mm', height: '25mm', fontSize: '7px', barcodeHeight: '12mm' }
+      small: { 
+        width: '48mm', height: '32mm', fontSize: '8px', barcodeHeight: '15mm',
+        padding: '2mm', titleSize: '9px', skuSize: '6px', priceSize: '7px', websiteSize: '6px'
+      },
+      standard: { 
+        width: '64mm', height: '40mm', fontSize: '10px', barcodeHeight: '20mm',
+        padding: '3mm', titleSize: '11px', skuSize: '8px', priceSize: '9px', websiteSize: '8px'
+      },
+      large: { 
+        width: '80mm', height: '48mm', fontSize: '12px', barcodeHeight: '25mm',
+        padding: '4mm', titleSize: '13px', skuSize: '10px', priceSize: '11px', websiteSize: '10px'
+      },
+      roll: { 
+        width: '50mm', height: '25mm', fontSize: '7px', barcodeHeight: '12mm',
+        padding: '1mm', titleSize: '8px', skuSize: '5px', priceSize: '6px', websiteSize: '5px'
+      }
     };
     
     const dims = labelDimensions[labelSize] || labelDimensions.standard;
     const isRoll = labelSize === 'roll';
+    const isCompact = labelSize === 'roll' || labelSize === 'small';
     
     const formatPrice = (product: any) => {
       if (!product.price) return '';
@@ -1737,67 +1750,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
 
     const generateBarcode = (value: string) => {
-      // Simple barcode representation for printing
-      const fontSize = isRoll ? '12px' : '20px';
-      const margin = isRoll ? '1px 0' : '2px 0';
-      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${fontSize}; letter-spacing: 0.5px; text-align: center; margin: ${margin};">${value}</div>`;
+      const fontSize = isRoll ? '10px' : labelSize === 'large' ? '18px' : '14px';
+      const margin = isRoll ? '0.5mm 0' : '1mm 0';
+      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${fontSize}; letter-spacing: 0.3px; text-align: center; margin: ${margin}; line-height: 1;">${value}</div>`;
     };
 
     const labelsHTML = products.map(product => {
-      // For roll printer, truncate long product names
-      const displayName = isRoll && product.name.length > 18 ? 
-        product.name.substring(0, 15) + '...' : product.name;
+      // Smart truncation based on label size
+      const maxNameLength = isRoll ? 15 : labelSize === 'small' ? 20 : labelSize === 'large' ? 35 : 25;
+      const displayName = product.name.length > maxNameLength ? 
+        product.name.substring(0, maxNameLength - 3) + '...' : product.name;
+      
+      // Smart SKU truncation
+      const maxSkuLength = isRoll ? 10 : labelSize === 'small' ? 12 : 15;
+      const displaySku = product.sku && product.sku.length > maxSkuLength ?
+        product.sku.substring(0, maxSkuLength - 3) + '...' : product.sku;
       
       return `
       <div style="
         width: ${dims.width}; 
         height: ${dims.height}; 
         border: 1px solid #ccc; 
-        padding: ${isRoll ? '1.5mm' : '4mm'}; 
-        margin: ${isRoll ? '1mm' : '2mm'}; 
+        padding: ${dims.padding}; 
+        margin: 1mm; 
         display: inline-block; 
         vertical-align: top;
         background: white;
         box-sizing: border-box;
         page-break-inside: avoid;
         font-family: Arial, sans-serif;
-        ${isRoll ? 'overflow: hidden;' : ''}
+        overflow: hidden;
+        position: relative;
       ">
-        <div style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: ${isRoll ? 'flex-start' : 'space-between'}; ${isRoll ? 'gap: 0.5mm;' : ''}">
-          ${isRoll ? `
-            <div style="font-weight: bold; font-size: ${dims.fontSize}; line-height: 1; margin-bottom: 0.5mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              ${displayName}
-            </div>
-            ${showSKU && product.sku ? `<div style="font-size: 5px; color: #666; font-family: monospace; line-height: 1;">SKU: ${product.sku}</div>` : ''}
-            <div style="margin: 0.5mm 0;">
+        <div style="
+          text-align: center; 
+          height: 100%; 
+          display: flex; 
+          flex-direction: column; 
+          justify-content: space-between;
+          gap: ${isCompact ? '1mm' : '2mm'};
+        ">
+          <!-- Product Name (Always at top) -->
+          <div style="
+            font-weight: bold; 
+            font-size: ${dims.titleSize}; 
+            line-height: 1.1; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+            white-space: ${isCompact ? 'nowrap' : 'normal'};
+            ${isCompact ? '' : 'max-height: 2.5em; word-wrap: break-word;'}
+          ">
+            ${displayName}
+          </div>
+
+          <!-- Middle section: SKU and Barcode -->
+          <div style="
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            gap: ${isCompact ? '0.5mm' : '1mm'};
+          ">
+            ${showSKU && product.sku ? `
+              <div style="
+                font-size: ${dims.skuSize}; 
+                color: #666; 
+                font-family: monospace; 
+                line-height: 1;
+                overflow: hidden; 
+                text-overflow: ellipsis; 
+                white-space: nowrap;
+                max-width: 100%;
+              ">
+                SKU: ${displaySku}
+              </div>
+            ` : ''}
+            
+            <div style="margin: 0;">
               ${generateBarcode(product.barcode || '')}
-              <div style="font-size: 5px; font-family: monospace; margin-top: 0.5mm; line-height: 1;">
+              <div style="
+                font-size: ${dims.skuSize}; 
+                font-family: monospace; 
+                margin-top: 0.5mm; 
+                line-height: 1;
+                color: #333;
+              ">
                 ${product.barcode || ''}
               </div>
             </div>
-            ${showPrice && product.price ? `<div style="font-size: 5px; color: #2d5a27; font-weight: bold; line-height: 1;">${formatPrice(product)}</div>` : ''}
-            ${showWebsite ? `<div style="font-size: 4px; color: #666; line-height: 1;">${website}</div>` : ''}
-          ` : `
-            <div>
-              <div style="font-weight: bold; font-size: ${dims.fontSize}; margin-bottom: 2mm; line-height: 1.2; word-wrap: break-word;">
-                ${displayName}
+          </div>
+
+          <!-- Bottom section: Price and Website -->
+          <div style="
+            display: flex; 
+            flex-direction: column; 
+            gap: ${isCompact ? '0.5mm' : '1mm'};
+          ">
+            ${showPrice && product.price ? `
+              <div style="
+                font-size: ${dims.priceSize}; 
+                color: #2d5a27; 
+                font-weight: bold; 
+                line-height: 1;
+                overflow: hidden; 
+                text-overflow: ellipsis; 
+                white-space: nowrap;
+              ">
+                ${formatPrice(product)}
               </div>
-              ${showSKU && product.sku ? `<div style="font-size: 7px; color: #666; font-family: monospace; margin-bottom: 1mm;">SKU: ${product.sku}</div>` : ''}
-              <div style="margin: 2mm 0;">
-                ${generateBarcode(product.barcode || '')}
-                <div style="font-size: 8px; font-family: monospace; margin-top: 1mm;">
-                  ${product.barcode || ''}
-                </div>
+            ` : ''}
+            
+            ${showWebsite ? `
+              <div style="
+                font-size: ${dims.websiteSize}; 
+                color: #666; 
+                line-height: 1;
+              ">
+                ${website}
               </div>
-            </div>
-            <div style="font-size: 7px; color: #666;">
-              ${showPrice && product.price ? `<div style="font-weight: bold; color: #2d5a27; margin-bottom: 1mm;">${formatPrice(product)}</div>` : ''}
-              ${showWebsite ? `<div>${website}</div>` : ''}
-            </div>
-          `}
+            ` : ''}
+          </div>
         </div>
-      </div>
-      `;
+      </div>`;
     }).join('');
 
     return `

@@ -208,48 +208,69 @@ export default function SiteManagement() {
     }
   ];
 
-  // State for managing button order
+  // State for managing button order with improved persistence
   const [buttons, setButtons] = useState<QuickActionButton[]>(() => {
-    const savedOrder = localStorage.getItem('site-management-button-order');
-    console.log('Loading button order from localStorage:', savedOrder);
-    
-    if (savedOrder) {
-      try {
+    try {
+      const savedOrder = localStorage.getItem('site-management-button-order');
+      console.log('🔄 Loading button order from localStorage:', savedOrder);
+      
+      if (savedOrder) {
         const buttonIds = JSON.parse(savedOrder);
-        console.log('Parsed button IDs:', buttonIds);
+        console.log('📦 Parsed button IDs:', buttonIds);
         
-        const initialButtons = getInitialButtons();
-        console.log('Initial buttons count:', initialButtons.length);
-        
-        const orderedButtons = buttonIds.map((id: string) => 
-          initialButtons.find(btn => btn.id === id)
-        ).filter(Boolean);
-        console.log('Ordered buttons count:', orderedButtons.length);
-        
-        // Add any new buttons that might not be in saved order
-        const existingIds = new Set(buttonIds);
-        const newButtons = initialButtons.filter(btn => !existingIds.has(btn.id));
-        console.log('New buttons count:', newButtons.length);
-        
-        const finalOrder = [...orderedButtons, ...newButtons];
-        console.log('Final button order:', finalOrder.map(btn => btn.id));
-        
-        return finalOrder;
-      } catch (error) {
-        console.error('Error loading button order:', error);
-        return getInitialButtons();
+        if (Array.isArray(buttonIds) && buttonIds.length > 0) {
+          const initialButtons = getInitialButtons();
+          console.log('🎯 Initial buttons count:', initialButtons.length);
+          
+          // Create a map for faster lookup
+          const buttonMap = new Map(initialButtons.map(btn => [btn.id, btn]));
+          
+          // Reconstruct ordered buttons preserving saved order
+          const orderedButtons = buttonIds
+            .map((id: string) => buttonMap.get(id))
+            .filter(Boolean) as QuickActionButton[];
+          
+          console.log('✅ Ordered buttons count:', orderedButtons.length);
+          
+          // Add any new buttons that might not be in saved order
+          const existingIds = new Set(buttonIds);
+          const newButtons = initialButtons.filter(btn => !existingIds.has(btn.id));
+          console.log('🆕 New buttons count:', newButtons.length);
+          
+          const finalOrder = [...orderedButtons, ...newButtons];
+          console.log('🎯 Final button order restored:', finalOrder.map(btn => btn.id));
+          
+          return finalOrder;
+        }
       }
+    } catch (error) {
+      console.error('❌ Error loading button order:', error);
     }
-    console.log('No saved order found, using default');
+    
+    console.log('🔧 No valid saved order found, using default');
     return getInitialButtons();
   });
 
-  // Save button order to localStorage whenever it changes
+  // Enhanced localStorage persistence with debouncing
   useEffect(() => {
-    const buttonIds = buttons.map(btn => btn.id);
-    console.log('Saving button order to localStorage:', buttonIds);
-    localStorage.setItem('site-management-button-order', JSON.stringify(buttonIds));
-    console.log('Button order saved successfully');
+    if (buttons.length > 0) {
+      const buttonIds = buttons.map(btn => btn.id);
+      console.log('💾 Saving button order to localStorage:', buttonIds);
+      
+      try {
+        localStorage.setItem('site-management-button-order', JSON.stringify(buttonIds));
+        console.log('✅ Button order saved successfully');
+        
+        // Verify save was successful
+        const verification = localStorage.getItem('site-management-button-order');
+        if (verification) {
+          const verified = JSON.parse(verification);
+          console.log('🔍 Verification - saved order:', verified);
+        }
+      } catch (error) {
+        console.error('❌ Error saving button order:', error);
+      }
+    }
   }, [buttons]);
 
   // Handle drag end
@@ -365,7 +386,17 @@ export default function SiteManagement() {
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      setButtons(getInitialButtons());
+                      console.log('🔄 Resetting button order to default');
+                      
+                      // Clear localStorage
+                      localStorage.removeItem('site-management-button-order');
+                      console.log('🗑️ Cleared localStorage order data');
+                      
+                      // Reset to initial buttons
+                      const defaultButtons = getInitialButtons();
+                      setButtons(defaultButtons);
+                      console.log('✅ Reset to default order:', defaultButtons.map(btn => btn.id));
+                      
                       toast({
                         title: "ترتیب بازنشانی شد",
                         description: "ترتیب بلوک‌های مدیریتی به حالت اولیه بازگشت",
