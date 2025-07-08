@@ -427,7 +427,20 @@ const Shop = () => {
     }
     
     const actualStock = product.stockQuantity || 0;
-    const validQuantity = Math.max(1, Math.min(quantity, actualStock));
+    const currentInCart = cart[productId] || 0;
+    const availableForQuantityInput = actualStock - currentInCart;
+    
+    // Check if there's any stock available after considering cart items
+    if (availableForQuantityInput <= 0) {
+      toast({
+        title: "موجودی ناکافی",
+        description: "حداکثر موجودی این محصول در سبد خرید قرار دارد",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const validQuantity = Math.max(1, Math.min(quantity, availableForQuantityInput));
     
     setProductQuantities(prev => ({
       ...prev,
@@ -1154,7 +1167,7 @@ const Shop = () => {
                               <input
                                 type="number"
                                 min="1"
-                                max={product.stockQuantity || 999}
+                                max={Math.max(1, (product.stockQuantity || 0) - (cart[product.id] || 0))}
                                 value={getProductQuantity(product.id)}
                                 onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
                                 className="w-16 text-center border rounded px-2 py-1 font-medium"
@@ -1163,7 +1176,7 @@ const Shop = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                                disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity || (cart[product.id] || 0) + getProductQuantity(product.id) >= product.stockQuantity}
                               >
                                 <Plus className="w-4 h-4" />
                               </Button>
@@ -1370,7 +1383,7 @@ const Shop = () => {
                                   <input
                                     type="number"
                                     min="1"
-                                    max={product.stockQuantity || 999}
+                                    max={Math.max(1, (product.stockQuantity || 0) - (cart[product.id] || 0))}
                                     value={getProductQuantity(product.id)}
                                     onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
                                     className="w-16 text-center border rounded px-2 py-1 font-medium"
@@ -1379,7 +1392,7 @@ const Shop = () => {
                                     size="sm"
                                     variant="outline"
                                     onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                    disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                                    disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity || (cart[product.id] || 0) + getProductQuantity(product.id) >= product.stockQuantity}
                                   >
                                     <Plus className="w-4 h-4" />
                                   </Button>
