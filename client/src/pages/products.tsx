@@ -886,11 +886,18 @@ export default function ProductsPage() {
                           {getInventoryStatusIcon(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
                           {getInventoryStatusLabel(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
                         </Badge>
-                        {product.priceRange && (
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {product.priceRange}
-                          </span>
-                        )}
+                        <div className="flex flex-col items-end">
+                          {product.priceRange && (
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {product.priceRange}
+                            </span>
+                          )}
+                          {product.unitPrice && (
+                            <span className="text-sm font-bold text-green-600">
+                              {product.unitPrice} {product.currency || 'IQD'}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Stock Level Indicator */}
