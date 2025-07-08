@@ -36,7 +36,6 @@ const VisualBarcode = ({
   showCopy = false
 }: VisualBarcodeProps) => {
   const canvasRef = useRef<SVGSVGElement>(null);
-  const printCanvasRef = useRef<SVGSVGElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isGenerated, setIsGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -48,15 +47,6 @@ const VisualBarcode = ({
         // Clear previous content
         canvasRef.current.innerHTML = '';
         setError(null);
-        
-        // Validate barcode format
-        if (value.length !== 13) {
-          throw new Error('EAN-13 barcode must be exactly 13 digits');
-        }
-        
-        if (!/^\d+$/.test(value)) {
-          throw new Error('Barcode must contain only digits');
-        }
         
         JsBarcode(canvasRef.current, value, {
           format: format,
@@ -76,16 +66,13 @@ const VisualBarcode = ({
             }
           }
         });
-
-        // Generate print version only when download/print is actually triggered
-        // Don't auto-generate to avoid duplication
       } catch (error) {
         console.error("Error generating barcode:", error);
         setError(error instanceof Error ? error.message : 'Failed to generate barcode');
         setIsGenerated(false);
       }
     }
-  }, [value, width, height, format, displayValue, fontSize, showDownload, showPrint]);
+  }, [value, width, height, format, displayValue, fontSize]);
 
   const handleCopy = async () => {
     try {
@@ -105,153 +92,71 @@ const VisualBarcode = ({
     }
   };
 
-  const generatePrintVersion = () => {
-    if (!printCanvasRef.current) return;
-    
-    // Clear existing content
-    printCanvasRef.current.innerHTML = '';
-    
-    // Create container div
-    const container = document.createElement('div');
-    container.style.cssText = `
-      background: white;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      border: 1px solid #ccc;
-      width: 300px;
-      margin: 0 auto;
-    `;
-    
-    // Add product name if available
-    if (productName) {
-      const nameDiv = document.createElement('div');
-      nameDiv.style.cssText = 'font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333;';
-      nameDiv.textContent = productName;
-      container.appendChild(nameDiv);
-    }
-    
-    // Add barcode SVG
-    const barcodeContainer = document.createElement('div');
-    barcodeContainer.style.cssText = 'margin: 15px 0;';
-    
-    const barcodeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    JsBarcode(barcodeSvg, value, {
-      format: format,
-      width: 3,
-      height: 80,
-      displayValue: true,
-      fontSize: 14,
-      margin: 10,
-      background: "#ffffff",
-      lineColor: "#000000",
-      textMargin: 8
-    });
-    
-    barcodeContainer.appendChild(barcodeSvg);
-    container.appendChild(barcodeContainer);
-    
-    // Add SKU if available
-    if (sku) {
-      const skuDiv = document.createElement('div');
-      skuDiv.style.cssText = 'font-size: 12px; color: #666; margin: 5px 0; font-family: monospace;';
-      skuDiv.textContent = `SKU: ${sku}`;
-      container.appendChild(skuDiv);
-    }
-    
-    // Add price if available
-    if (price) {
-      const priceDiv = document.createElement('div');
-      priceDiv.style.cssText = 'font-size: 14px; color: #28a745; font-weight: bold; margin: 5px 0;';
-      priceDiv.textContent = `${Math.round(price)} IQD`;
-      container.appendChild(priceDiv);
-    }
-    
-    // Add website info
-    const websiteDiv = document.createElement('div');
-    websiteDiv.style.cssText = 'font-size: 10px; color: #999; margin-top: 10px;';
-    websiteDiv.textContent = 'www.momtazchem.com';
-    container.appendChild(websiteDiv);
-    
-    printCanvasRef.current.appendChild(container);
-  };
-
   const handleDownload = () => {
-    if (!printCanvasRef.current) return;
-    
-    // Generate comprehensive print version
-    generatePrintVersion();
+    if (!canvasRef.current) return;
     
     try {
       // Create a temporary canvas to convert SVG to image
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const img = new Image();
+      if (!ctx) return;
+
+      // Set canvas size
+      canvas.width = 400;
+      canvas.height = 200;
       
-      // Set canvas size for label printing (typically 4x6 inches at 300 DPI)
-      canvas.width = 600;  // 2 inches at 300 DPI
-      canvas.height = 400; // 1.33 inches at 300 DPI
+      // White background
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Get SVG data
-      const svgData = new XMLSerializer().serializeToString(printCanvasRef.current);
+      const svgData = new XMLSerializer().serializeToString(canvasRef.current);
       const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
+      const url = URL.createObjectURL(svgBlob);
       
+      // Create image from SVG
+      const img = new Image();
       img.onload = () => {
-        if (ctx) {
-          // White background
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          // Center the barcode
-          const imgWidth = 400;
-          const imgHeight = 120;
-          const x = (canvas.width - imgWidth) / 2;
-          const y = 50;
-          
-          ctx.drawImage(img, x, y, imgWidth, imgHeight);
-          
-          // Add product name if provided
-          if (productName) {
-            ctx.fillStyle = '#000000';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(productName, canvas.width / 2, y - 20);
-          }
-          
-          // Add SKU if provided
-          if (sku) {
-            ctx.fillStyle = '#666666';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`SKU: ${sku}`, canvas.width / 2, y + imgHeight + 30);
-          }
-          
-          // Download the image
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `barcode-${value}-${sku || 'product'}.png`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-              
-              toast({
-                title: "دانلود موفق",
-                description: "فایل بارکد دانلود شد",
-              });
-            }
-          }, 'image/png', 1.0);
+        // Draw SVG image centered on canvas
+        const scale = Math.min(canvas.width / img.width, (canvas.height - 40) / img.height);
+        const x = (canvas.width - img.width * scale) / 2;
+        const y = 20; // Top margin
+        
+        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        
+        // Add product name if available
+        if (productName) {
+          ctx.font = '16px Arial';
+          ctx.fillStyle = 'black';
+          ctx.textAlign = 'center';
+          ctx.fillText(productName, canvas.width / 2, 15);
         }
         
-        URL.revokeObjectURL(svgUrl);
+        // Download the image
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const downloadUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `barcode_${value}_${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(downloadUrl);
+            
+            toast({
+              title: "دانلود موفق",
+              description: "بارکد به صورت عکس دانلود شد",
+            });
+          }
+        }, 'image/png');
+        
+        URL.revokeObjectURL(url);
       };
       
-      img.src = svgUrl;
+      img.src = url;
     } catch (error) {
+      console.error('Download error:', error);
       toast({
         title: "خطا در دانلود",
         description: "امکان دانلود بارکد وجود ندارد",
@@ -260,176 +165,81 @@ const VisualBarcode = ({
     }
   };
 
-  const handlePrint = () => {
-    if (!printCanvasRef.current) return;
-    
-    // Generate comprehensive print version
-    generatePrintVersion();
-    
-    try {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        const svgContent = printCanvasRef.current.outerHTML;
-        
-        printWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Print Barcode - ${value}</title>
-            <style>
-              @page {
-                size: 4in 2in;
-                margin: 0.2in;
-              }
-              body {
-                margin: 0;
-                padding: 10px;
-                font-family: Arial, sans-serif;
-                text-align: center;
-                background: white;
-              }
-              .barcode-container {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-              }
-              .product-name {
-                font-size: 12px;
-                font-weight: bold;
-                margin-bottom: 10px;
-                color: #000;
-              }
-              .sku {
-                font-size: 10px;
-                margin-top: 10px;
-                color: #666;
-              }
-              svg {
-                max-width: 100%;
-                height: auto;
-              }
-              @media print {
-                body { -webkit-print-color-adjust: exact; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="barcode-container">
-              ${productName ? `<div class="product-name">${productName}</div>` : ''}
-              ${svgContent}
-              ${sku ? `<div class="sku">SKU: ${sku}</div>` : ''}
-              ${price ? `<div class="price" style="color: #16a34a; font-weight: 500; text-align: center; margin-top: 4px;">${Math.round(price)} IQD</div>` : ''}
-            </div>
-          </body>
-          </html>
-        `);
-        
-        printWindow.document.close();
-        printWindow.focus();
-        
-        // Wait for content to load then print
-        setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-        }, 500);
-        
-        toast({
-          title: "چاپ آماده",
-          description: "پنجره چاپ باز شد",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "خطا در چاپ",
-        description: "امکان چاپ بارکد وجود ندارد",
-        variant: "destructive"
-      });
-    }
-  };
-
-  if (!value) {
+  if (error) {
     return (
-      <div className={`text-gray-400 text-sm p-2 border border-gray-200 rounded ${className}`}>
-        بارکد موجود نیست
+      <div className={`text-red-500 text-sm ${className}`}>
+        Error: {error}
       </div>
     );
   }
 
-  if (error) {
+  if (!isGenerated && !error) {
     return (
-      <div className={`text-red-500 text-sm p-2 border border-red-200 rounded bg-red-50 ${className}`}>
-        خطا در تولید بارکد: {error}
+      <div className={`text-gray-500 text-sm ${className}`}>
+        Generating barcode...
       </div>
     );
   }
 
   return (
-    <div className={`relative ${className}`}>
-      <div className="barcode-display bg-white border border-gray-200 rounded p-1">
-        {/* Main barcode display */}
-        <svg ref={canvasRef} className="mx-auto"></svg>
-        
-        {/* SKU display under barcode */}
-        {sku && (
-          <div className="text-center mt-1 text-xs text-gray-600 font-mono">
-            SKU: {sku}
-          </div>
-        )}
-        
-        {/* Price display */}
-        {price && (
-          <div className="text-center mt-0.5 text-xs text-green-600 font-medium">
-            {Math.round(price)} IQD
-          </div>
-        )}
-        
-        {/* Hidden print version */}
-        <svg ref={printCanvasRef} style={{ display: 'none' }}></svg>
+    <div className={`flex flex-col items-center space-y-2 ${className}`}>
+      {/* Barcode Display */}
+      <div 
+        className="cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={handleDownload}
+        title="کلیک کنید تا بارکد را دانلود کنید"
+      >
+        <svg 
+          ref={canvasRef}
+          className="border border-gray-200 rounded bg-white p-2"
+        />
       </div>
       
-      {/* Action buttons */}
-      {(showCopy || showDownload || showPrint) && isGenerated && (
-        <div className="flex gap-2 mt-2 justify-center">
-          {showCopy && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopy}
-              className="flex items-center gap-1"
-            >
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              {copied ? 'کپی شد' : 'کپی'}
-            </Button>
-          )}
-          
-          {showDownload && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownload}
-              className="flex items-center gap-1"
-            >
-              <Download className="w-3 h-3" />
-              دانلود
-            </Button>
-          )}
-          
-          {showPrint && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              className="flex items-center gap-1"
-            >
-              <Printer className="w-3 h-3" />
-              چاپ لیبل
-            </Button>
-          )}
+      {/* Product Info */}
+      {productName && (
+        <div className="text-sm font-medium text-gray-800 text-center">
+          {productName}
         </div>
       )}
+      
+      {sku && (
+        <div className="text-xs text-gray-600 font-mono">
+          SKU: {sku}
+        </div>
+      )}
+      
+      {price && (
+        <div className="text-sm font-medium text-green-600">
+          {Math.round(price).toLocaleString()} IQD
+        </div>
+      )}
+      
+      {/* Action Buttons */}
+      <div className="flex space-x-2 mt-2">
+        {showCopy && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopy}
+            className="flex items-center space-x-1"
+          >
+            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            <span>{copied ? "کپی شد" : "کپی"}</span>
+          </Button>
+        )}
+        
+        {showDownload && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownload}
+            className="flex items-center space-x-1"
+          >
+            <Download className="w-4 h-4" />
+            <span>دانلود</span>
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
