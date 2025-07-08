@@ -436,30 +436,45 @@ const Shop = () => {
   const addToCart = (productId: number) => {
     const targetQuantity = getProductQuantity(productId);
     
-    // Check available stock using displayStock (real-time inventory after cart deductions)
-    const availableStock = displayStock[productId] || 0;
-    
-    if (availableStock <= 0) {
+    // Find the product to get actual stock quantity
+    const product = currentProducts.find(p => p.id === productId);
+    if (!product) {
       toast({
-        title: "موجودی ناکافی",
-        description: "این محصول در حال حاضر موجود نیست",
+        title: "خطا",
+        description: "محصول یافت نشد",
         variant: "destructive",
       });
       return;
     }
 
+    const currentQuantityInCart = cart[productId] || 0;
+    const newQuantityInCart = currentQuantityInCart + targetQuantity;
+    const actualStock = product.stockQuantity || 0;
+    
+    // Check if total cart quantity would exceed actual database stock
+    if (newQuantityInCart > actualStock) {
+      toast({
+        title: "موجودی ناکافی",
+        description: `حداکثر ${actualStock} عدد از این محصول موجود است. شما قبلاً ${currentQuantityInCart} عدد در سبد خرید دارید.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Additional check: ensure target quantity doesn't exceed available display stock
+    const availableStock = displayStock[productId] || 0;
     if (targetQuantity > availableStock) {
       toast({
         title: "موجودی ناکافی",
-        description: `فقط ${availableStock} عدد از این محصول موجود است`,
+        description: `فقط ${availableStock} عدد از این محصول قابل اضافه کردن است`,
         variant: "destructive",
       });
       return;
     }
-
+    
     const newCart = {
       ...cart,
-      [productId]: totalRequestedQuantity
+      [productId]: newQuantityInCart
     };
     setCart(newCart);
     saveCartToStorage(newCart);
