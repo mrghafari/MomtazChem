@@ -64,10 +64,10 @@ const VisualBarcode = ({
           height: height,
           displayValue: displayValue,
           fontSize: fontSize,
-          margin: 10,
+          margin: 5,
           background: "#ffffff",
           lineColor: "#000000",
-          textMargin: 5,
+          textMargin: 3,
           valid: function(valid) {
             if (!valid) {
               setError('Invalid barcode format');
@@ -319,20 +319,20 @@ const VisualBarcode = ({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="barcode-display bg-white border border-gray-200 rounded p-2">
+      <div className="barcode-display bg-white border border-gray-200 rounded p-1">
         {/* Main barcode display */}
         <svg ref={canvasRef} className="mx-auto"></svg>
         
         {/* SKU display under barcode */}
         {sku && (
-          <div className="text-center mt-2 text-xs text-gray-600 font-mono">
+          <div className="text-center mt-1 text-xs text-gray-600 font-mono">
             SKU: {sku}
           </div>
         )}
         
         {/* Price display */}
         {price && (
-          <div className="text-center mt-1 text-xs text-green-600 font-medium">
+          <div className="text-center mt-0.5 text-xs text-green-600 font-medium">
             {Math.round(price)} IQD
           </div>
         )}

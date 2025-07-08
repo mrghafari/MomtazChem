@@ -844,13 +844,13 @@ const BarcodeInventory = () => {
                                 productName={product.name}
                                 sku={product.sku || undefined}
                                 price={product.price}
-                                width={3}
-                                height={80}
-                                fontSize={14}
+                                width={1.8}
+                                height={50}
+                                fontSize={10}
                                 showDownload={true}
                                 showPrint={true}
                                 showCopy={true}
-                                className="bg-white p-4 border rounded"
+                                className="bg-white p-2 border rounded"
                               />
                             </div>
                           ) : (
