@@ -855,6 +855,7 @@ const BarcodeInventory = () => {
                                   value={product.barcode}
                                   productName={product.name}
                                   sku={product.sku || undefined}
+                                  price={product.price}
                                   width={1.5}
                                   height={40}
                                   fontSize={10}

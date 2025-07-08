@@ -8,6 +8,7 @@ interface VisualBarcodeProps {
   value: string;
   productName?: string;
   sku?: string;
+  price?: number;
   width?: number;
   height?: number;
   format?: string;
@@ -23,6 +24,7 @@ const VisualBarcode = ({
   value,
   productName,
   sku,
+  price,
   width = 2,
   height = 60,
   format = "EAN13",
@@ -255,6 +257,7 @@ const VisualBarcode = ({
               ${productName ? `<div class="product-name">${productName}</div>` : ''}
               ${svgContent}
               ${sku ? `<div class="sku">SKU: ${sku}</div>` : ''}
+              ${price ? `<div class="price" style="color: #16a34a; font-weight: 500; text-align: center; margin-top: 4px;">${Math.round(price)} IQD</div>` : ''}
             </div>
           </body>
           </html>
@@ -309,6 +312,13 @@ const VisualBarcode = ({
         {sku && (
           <div className="text-center mt-2 text-xs text-gray-600 font-mono">
             SKU: {sku}
+          </div>
+        )}
+        
+        {/* Price display */}
+        {price && (
+          <div className="text-center mt-1 text-xs text-green-600 font-medium">
+            {Math.round(price)} IQD
           </div>
         )}
         
