@@ -18,6 +18,8 @@ interface VisualBarcodeProps {
   showDownload?: boolean;
   showPrint?: boolean;
   showCopy?: boolean;
+  showPrice?: boolean;
+  showWebsite?: boolean;
 }
 
 const VisualBarcode = ({
@@ -33,7 +35,9 @@ const VisualBarcode = ({
   className = "",
   showDownload = false,
   showPrint = false,
-  showCopy = false
+  showCopy = false,
+  showPrice = true,
+  showWebsite = true
 }: VisualBarcodeProps) => {
   const canvasRef = useRef<SVGSVGElement>(null);
   const printCanvasRef = useRef<SVGSVGElement>(null);
@@ -271,7 +275,7 @@ const VisualBarcode = ({
               yOffset += 60;
               
               // Row 4: Price and Website
-              if (price) {
+              if (showPrice && price) {
                 ctx.fillStyle = '#16a34a';
                 ctx.font = 'bold 10px Arial';
                 ctx.textAlign = 'center';
@@ -280,10 +284,12 @@ const VisualBarcode = ({
               }
               
               // Website
-              ctx.fillStyle = '#6b7280';
-              ctx.font = '8px Arial';
-              ctx.textAlign = 'center';
-              ctx.fillText('momtazchem.com', 120, yOffset);
+              if (showWebsite) {
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '8px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('momtazchem.com', 120, yOffset);
+              }
               
               // Download the final image
               canvas.toBlob((blob) => {
@@ -319,7 +325,7 @@ const VisualBarcode = ({
             yOffset += 45;
             
             // Continue with price and website
-            if (price) {
+            if (showPrice && price) {
               ctx.fillStyle = '#16a34a';
               ctx.font = 'bold 10px Arial';
               ctx.textAlign = 'center';
@@ -327,10 +333,12 @@ const VisualBarcode = ({
               yOffset += 15;
             }
             
-            ctx.fillStyle = '#6b7280';
-            ctx.font = '8px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('momtazchem.com', 120, yOffset);
+            if (showWebsite) {
+              ctx.fillStyle = '#6b7280';
+              ctx.font = '8px Arial';
+              ctx.textAlign = 'center';
+              ctx.fillText('momtazchem.com', 120, yOffset);
+            }
             
             // Download without barcode image
             canvas.toBlob((blob) => {

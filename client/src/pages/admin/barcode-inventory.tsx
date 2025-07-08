@@ -634,6 +634,8 @@ export default function BarcodeInventory() {
                           productName={product.name}
                           sku={product.sku}
                           price={product.price}
+                          showPrice={true}
+                          showWebsite={true}
                         />
                       ) : (
                         <span className="text-gray-400">No barcode</span>

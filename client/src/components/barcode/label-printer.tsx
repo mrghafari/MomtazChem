@@ -233,6 +233,11 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ products, selectedProducts 
                 width={config.barcodeWidth}
                 height={config.barcodeHeight}
                 fontSize={config.barcodeFontSize}
+                productName={product.name}
+                sku={product.sku}
+                price={typeof product.price === 'string' ? parseFloat(product.price) : product.price}
+                showPrice={showPrice}
+                showWebsite={showWebsite}
               />
             </div>
           </div>
