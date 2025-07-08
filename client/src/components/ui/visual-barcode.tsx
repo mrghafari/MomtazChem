@@ -105,22 +105,78 @@ const VisualBarcode = ({
     }
   };
 
-  const handleDownload = () => {
+  const generatePrintVersion = () => {
     if (!printCanvasRef.current) return;
     
-    // Generate print version for download
+    // Clear existing content
     printCanvasRef.current.innerHTML = '';
-    JsBarcode(printCanvasRef.current, value, {
+    
+    // Create container div
+    const container = document.createElement('div');
+    container.style.cssText = `
+      background: white;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      border: 1px solid #ccc;
+      width: 300px;
+      margin: 0 auto;
+    `;
+    
+    // Add product name if available
+    if (productName) {
+      const nameDiv = document.createElement('div');
+      nameDiv.style.cssText = 'font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333;';
+      nameDiv.textContent = productName;
+      container.appendChild(nameDiv);
+    }
+    
+    // Add barcode SVG
+    const barcodeContainer = document.createElement('div');
+    barcodeContainer.style.cssText = 'margin: 15px 0;';
+    JsBarcode(barcodeContainer, value, {
       format: format,
       width: 3,
       height: 80,
       displayValue: true,
       fontSize: 14,
-      margin: 20,
+      margin: 10,
       background: "#ffffff",
       lineColor: "#000000",
       textMargin: 8
     });
+    container.appendChild(barcodeContainer);
+    
+    // Add SKU if available
+    if (sku) {
+      const skuDiv = document.createElement('div');
+      skuDiv.style.cssText = 'font-size: 12px; color: #666; margin: 5px 0; font-family: monospace;';
+      skuDiv.textContent = `SKU: ${sku}`;
+      container.appendChild(skuDiv);
+    }
+    
+    // Add price if available
+    if (price) {
+      const priceDiv = document.createElement('div');
+      priceDiv.style.cssText = 'font-size: 14px; color: #28a745; font-weight: bold; margin: 5px 0;';
+      priceDiv.textContent = `${Math.round(price)} IQD`;
+      container.appendChild(priceDiv);
+    }
+    
+    // Add website info
+    const websiteDiv = document.createElement('div');
+    websiteDiv.style.cssText = 'font-size: 10px; color: #999; margin-top: 10px;';
+    websiteDiv.textContent = 'www.momtazchem.com';
+    container.appendChild(websiteDiv);
+    
+    printCanvasRef.current.appendChild(container);
+  };
+
+  const handleDownload = () => {
+    if (!printCanvasRef.current) return;
+    
+    // Generate comprehensive print version
+    generatePrintVersion();
     
     try {
       // Create a temporary canvas to convert SVG to image
@@ -203,19 +259,8 @@ const VisualBarcode = ({
   const handlePrint = () => {
     if (!printCanvasRef.current) return;
     
-    // Generate print version for printing
-    printCanvasRef.current.innerHTML = '';
-    JsBarcode(printCanvasRef.current, value, {
-      format: format,
-      width: 3,
-      height: 80,
-      displayValue: true,
-      fontSize: 14,
-      margin: 20,
-      background: "#ffffff",
-      lineColor: "#000000",
-      textMargin: 8
-    });
+    // Generate comprehensive print version
+    generatePrintVersion();
     
     try {
       const printWindow = window.open('', '_blank');
