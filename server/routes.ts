@@ -5115,7 +5115,16 @@ ${procedure.content}
   app.get("/api/shop/products", async (req, res) => {
     try {
       const products = await shopStorage.getShopProducts();
-      res.json(products);
+      
+      // Map database fields to frontend expected format
+      const mappedProducts = products.map(product => ({
+        ...product,
+        imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+        unitPrice: product.price,
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit
+      }));
+      
+      res.json(mappedProducts);
     } catch (error) {
       console.error("Error fetching shop products:", error);
       res.status(500).json({ success: false, message: "Failed to fetch products" });
@@ -5143,7 +5152,16 @@ ${procedure.content}
       if (!product) {
         return res.status(404).json({ success: false, message: "Product not found" });
       }
-      res.json(product);
+      
+      // Map database fields to frontend expected format
+      const mappedProduct = {
+        ...product,
+        imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+        unitPrice: product.price,
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit
+      };
+      
+      res.json(mappedProduct);
     } catch (error) {
       console.error("Error fetching shop product:", error);
       res.status(500).json({ success: false, message: "Failed to fetch product" });
@@ -5230,9 +5248,20 @@ ${procedure.content}
 
       const searchResults = await shopStorage.searchShopProducts(query as string, filters);
       
+      // Map database fields to frontend expected format
+      const mappedProducts = searchResults.products.map(product => ({
+        ...product,
+        imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+        unitPrice: product.price,
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit
+      }));
+      
       res.json({
         success: true,
-        data: searchResults,
+        data: {
+          ...searchResults,
+          products: mappedProducts
+        },
         query: {
           searchTerm: query,
           filters: filters,
