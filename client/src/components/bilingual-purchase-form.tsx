@@ -233,17 +233,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Fetch wallet data for logged-in customers
   const { data: walletData } = useQuery({
-    queryKey: ['/api/customers/wallet/summary'],
+    queryKey: ['/api/customers/wallet'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/customers/wallet/summary', {
+        const response = await fetch('/api/customers/wallet', {
           credentials: 'include'
         });
         
         if (response.ok) {
           const result = await response.json();
+          console.log('Wallet API response:', result);
           if (result.success) {
-            return result.data;
+            return result;
           }
         }
         return null;
@@ -362,14 +363,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
 
-  // Debug wallet and customer data
-  console.log('=== WALLET DEBUG ===');
-  console.log('walletData:', walletData);
-  console.log('walletBalance:', walletBalance);
-  console.log('customerData:', customerData);
-  console.log('canUseWallet:', canUseWallet);
-  console.log('totalAmount:', totalAmount);
-  console.log('==================');
+
 
   // Format currency in IQD by default
   const formatCurrency = (amount: number, currency = 'IQD') => {
@@ -549,7 +543,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           </div>
 
           {/* Payment Method Selection - moved up below total */}
-          {true && (
+          {(canUseWallet || true) && (
             <div className="space-y-3 border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
               <div className="flex items-center gap-2">
                 <Wallet className="w-5 h-5 text-blue-600" />
