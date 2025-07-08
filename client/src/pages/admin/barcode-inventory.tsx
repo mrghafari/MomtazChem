@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import BarcodeScanner from "@/components/ui/barcode-scanner";
 import BarcodeGenerator from "@/components/ui/barcode-generator";
 import EAN13Generator from "@/components/ui/ean13-generator";
@@ -73,6 +74,10 @@ const BarcodeInventory = () => {
   const [reference, setReference] = useState('');
   const [scanMode, setScanMode] = useState<'lookup' | 'inventory_in' | 'inventory_out' | 'audit'>('lookup');
   const [showGenerator, setShowGenerator] = useState(false);
+  // Label printing options
+  const [includePrice, setIncludePrice] = useState(true);
+  const [includeSKU, setIncludeSKU] = useState(true);
+  const [includeWebsite, setIncludeWebsite] = useState(true);
   const { toast } = useToast();
 
   // Check authentication
@@ -291,15 +296,32 @@ const BarcodeInventory = () => {
         const sku = product.sku || `SKU${product.id.toString().padStart(4, '0')}`;
         const price = product.unitPrice ? `${product.unitPrice} ${product.currency || 'IQD'}` : '';
         
-        return `
-^XA
-^FO50,30^A0N,30,25^FD${product.name.substring(0, 25)}^FS
-^FO50,70^A0N,25,20^FDSKU: ${sku}^FS
-^FO50,100^BY2,3,100^BCN,100,Y,N,N^FD${product.barcode}^FS
-^FO50,220^A0N,20,15^FD${price}^FS
-^FO50,250^A0N,15,12^FDwww.momtazchem.com^FS
-^XZ
-        `.trim();
+        let labelCommands = `^XA\n^FO50,30^A0N,30,25^FD${product.name.substring(0, 25)}^FS\n`;
+        let yPosition = 70;
+        
+        // Add SKU if selected
+        if (includeSKU) {
+          labelCommands += `^FO50,${yPosition}^A0N,25,20^FDSKU: ${sku}^FS\n`;
+          yPosition += 30;
+        }
+        
+        // Add barcode
+        labelCommands += `^FO50,${yPosition}^BY2,3,100^BCN,100,Y,N,N^FD${product.barcode}^FS\n`;
+        yPosition += 120;
+        
+        // Add price if selected
+        if (includePrice && price) {
+          labelCommands += `^FO50,${yPosition}^A0N,20,15^FD${price}^FS\n`;
+          yPosition += 30;
+        }
+        
+        // Add website if selected
+        if (includeWebsite) {
+          labelCommands += `^FO50,${yPosition}^A0N,15,12^FDwww.momtazchem.com^FS\n`;
+        }
+        
+        labelCommands += '^XZ';
+        return labelCommands;
       }).join('\n\n');
 
       // Create downloadable ZPL file for continuous printing
@@ -677,6 +699,37 @@ const BarcodeInventory = () => {
                       <Download className="h-4 w-4 mr-2" />
                       Export CSV
                     </Button>
+                    {/* Label Printing Options */}
+                    <div className="border-t pt-4 space-y-3">
+                      <h4 className="text-sm font-medium">آپشن‌های چاپ برچسب</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="include-price"
+                            checked={includePrice}
+                            onCheckedChange={(checked) => setIncludePrice(checked === true)}
+                          />
+                          <Label htmlFor="include-price" className="text-sm">نمایش قیمت</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="include-sku"
+                            checked={includeSKU}
+                            onCheckedChange={(checked) => setIncludeSKU(checked === true)}
+                          />
+                          <Label htmlFor="include-sku" className="text-sm">نمایش SKU</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="include-website"
+                            checked={includeWebsite}
+                            onCheckedChange={(checked) => setIncludeWebsite(checked === true)}
+                          />
+                          <Label htmlFor="include-website" className="text-sm">نمایش وب‌سایت</Label>
+                        </div>
+                      </div>
+                    </div>
+                    
                     <Button 
                       className="w-full" 
                       variant="outline"
