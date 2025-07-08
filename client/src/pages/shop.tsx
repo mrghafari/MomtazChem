@@ -705,6 +705,36 @@ const Shop = () => {
                 </div>
               )}
 
+              {/* Logged in Customer */}
+              {!isLoadingCustomer && customer && (
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigate('/customer/wallet')}
+                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      {customer.firstName} {customer.lastName}
+                    </span>
+                    <div className="h-4 w-px bg-gray-300" />
+                    <Wallet className="w-4 h-4" />
+                    <span className="text-sm">
+                      {walletBalance.toLocaleString()} IQD
+                    </span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleLogout}
+                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+
               {/* Cart Summary */}
               <div className="relative">
                 <Button 
