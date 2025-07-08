@@ -1394,11 +1394,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle catalog fields mapping
       if (productData.catalogFileName !== undefined) {
         shopData.catalogFileName = productData.catalogFileName;
-        delete shopData.catalogFileName;
       }
       if (productData.showCatalogToCustomers !== undefined) {
         shopData.showCatalogToCustomers = productData.showCatalogToCustomers;
-        delete shopData.showCatalogToCustomers;
       }
       
       // Update shop product (unified product table)

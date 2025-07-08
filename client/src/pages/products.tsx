@@ -305,7 +305,6 @@ export default function ProductsPage() {
       shortDescription: "",
       priceRange: "",
       imageUrl: "",
-      pdfCatalogUrl: "",
       specifications: "",
       features: "",
       applications: "",
