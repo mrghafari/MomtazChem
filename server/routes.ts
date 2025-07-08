@@ -1391,6 +1391,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shopData.imageUrls = productData.imageUrl ? [productData.imageUrl] : [];
         delete shopData.imageUrl; // Remove the frontend field name
       }
+      // Handle catalog fields mapping
+      if (productData.catalogFileName !== undefined) {
+        shopData.catalogFileName = productData.catalogFileName;
+        delete shopData.catalogFileName;
+      }
+      if (productData.showCatalogToCustomers !== undefined) {
+        shopData.showCatalogToCustomers = productData.showCatalogToCustomers;
+        delete shopData.showCatalogToCustomers;
+      }
       
       // Update shop product (unified product table)
       const shopProduct = await shopStorage.updateShopProduct(id, shopData);
@@ -1401,7 +1410,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...shopProduct,
         unitPrice: shopProduct.price, // Map price field to unitPrice for frontend
         currency: (shopProduct.priceUnit === 'IQD' || !shopProduct.priceUnit || shopProduct.priceUnit === 'unit') ? 'IQD' : shopProduct.priceUnit, // Default to IQD
-        imageUrl: shopProduct.imageUrls && shopProduct.imageUrls.length > 0 ? shopProduct.imageUrls[0] : null // Map first image from array to single imageUrl for frontend
+        imageUrl: shopProduct.imageUrls && shopProduct.imageUrls.length > 0 ? shopProduct.imageUrls[0] : null, // Map first image from array to single imageUrl for frontend
+        catalogFileName: shopProduct.catalogFileName,
+        showCatalogToCustomers: shopProduct.showCatalogToCustomers
       };
       
       res.json(mappedProduct);

@@ -82,6 +82,11 @@ export const shopProducts = pgTable("shop_products", {
   showMsdsToCustomers: boolean("show_msds_to_customers").default(false), // Checkbox to control visibility
   msdsFileName: text("msds_file_name"), // Original filename for display
   msdsUploadDate: timestamp("msds_upload_date"), // When MSDS was uploaded
+  // Product Catalog fields
+  pdfCatalogUrl: text("pdf_catalog_url"), // URL to product catalog PDF file
+  showCatalogToCustomers: boolean("show_catalog_to_customers").default(false), // Checkbox to control visibility
+  catalogFileName: text("catalog_file_name"), // Original filename for display
+  catalogUploadDate: timestamp("catalog_upload_date"), // When catalog was uploaded
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   

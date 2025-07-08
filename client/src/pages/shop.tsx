@@ -1138,7 +1138,7 @@ const Shop = () => {
                                 </Button>
                               </div>
                               {/* Product Catalog Button */}
-                              {product.pdfCatalogUrl && (
+                              {product.showCatalogToCustomers && product.pdfCatalogUrl && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -1356,7 +1356,7 @@ const Shop = () => {
                                     </Button>
                                   </div>
                                   {/* Product Catalog Button */}
-                                  {product.pdfCatalogUrl && (
+                                  {product.showCatalogToCustomers && product.pdfCatalogUrl && (
                                     <Button
                                       variant="outline"
                                       size="sm"
