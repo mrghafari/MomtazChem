@@ -122,6 +122,7 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedInventoryStatus, setSelectedInventoryStatus] = useState<string>("all");
   const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -523,7 +524,7 @@ export default function ProductsPage() {
     setDialogOpen(true);
   };
 
-  // Filter products based on category and search
+  // Filter products based on category, inventory status, and search
   const filteredProducts = (products || []).filter((product: ShowcaseProduct) => {
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = !searchQuery || 
@@ -531,7 +532,11 @@ export default function ProductsPage() {
       product.barcode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.sku?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    return matchesCategory && matchesSearch;
+    // Check inventory status
+    const inventoryStatus = getActualInventoryStatus(product.stockQuantity, product.minStockLevel);
+    const matchesInventoryStatus = selectedInventoryStatus === "all" || inventoryStatus === selectedInventoryStatus;
+    
+    return matchesCategory && matchesSearch && matchesInventoryStatus;
   });
 
   // Auto-generate barcode for new products when name and category are available
@@ -687,6 +692,43 @@ export default function ProductsPage() {
           </div>
         </div>
 
+        {/* Active Filters */}
+        {(selectedInventoryStatus !== "all" || selectedCategory !== "all" || searchQuery) && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            <span className="text-sm font-medium text-gray-700">Active Filters:</span>
+            {selectedInventoryStatus !== "all" && (
+              <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedInventoryStatus("all")}>
+                Status: {getInventoryStatusLabel(selectedInventoryStatus)}
+                <X className="w-3 h-3 ml-1" />
+              </Badge>
+            )}
+            {selectedCategory !== "all" && (
+              <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedCategory("all")}>
+                Category: {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
+                <X className="w-3 h-3 ml-1" />
+              </Badge>
+            )}
+            {searchQuery && (
+              <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSearchQuery("")}>
+                Search: {searchQuery}
+                <X className="w-3 h-3 ml-1" />
+              </Badge>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setSelectedInventoryStatus("all");
+                setSelectedCategory("all");
+                setSearchQuery("");
+              }}
+              className="h-6 text-xs"
+            >
+              Clear All
+            </Button>
+          </div>
+        )}
+
         {/* Management Actions */}
         <div className="mb-6">
           <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 h-12 text-sm">
@@ -699,7 +741,7 @@ export default function ProductsPage() {
       {/* Inventory Dashboard Summary */}
       {products && products.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('in_stock')}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -713,7 +755,7 @@ export default function ProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200">
+          <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('low_stock')}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -727,7 +769,7 @@ export default function ProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
+          <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('out_of_stock')}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -741,7 +783,7 @@ export default function ProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('all')}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -881,7 +923,8 @@ export default function ProductsPage() {
                       <div className="flex items-center justify-between">
                         <Badge 
                           variant="outline" 
-                          className={`flex items-center gap-1 ${getInventoryStatusColor(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}`}
+                          className={`flex items-center gap-1 cursor-pointer hover:shadow-md transition-shadow ${getInventoryStatusColor(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}`}
+                          onClick={() => setSelectedInventoryStatus(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
                         >
                           {getInventoryStatusIcon(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
                           {getInventoryStatusLabel(getActualInventoryStatus(product.stockQuantity, product.minStockLevel))}
