@@ -1138,35 +1138,34 @@ const Shop = () => {
 
 
 
-                          {product.inStock && product.stockQuantity > 0 && (
-                            <div className="space-y-2">
-                              {/* Quantity Controls */}
-                              <div className="flex items-center justify-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
-                                  disabled={getProductQuantity(product.id) <= 1}
-                                >
-                                  <Minus className="w-4 h-4" />
-                                </Button>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  max={product.stockQuantity || 999}
-                                  value={getProductQuantity(product.id)}
-                                  onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
-                                  className="w-16 text-center border rounded px-2 py-1 font-medium"
-                                />
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                  disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </Button>
-                              </div>
+                          <div className="space-y-2">
+                            {/* Quantity Controls - Always show */}
+                            <div className="flex items-center justify-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
+                                disabled={getProductQuantity(product.id) <= 1}
+                              >
+                                <Minus className="w-4 h-4" />
+                              </Button>
+                              <input
+                                type="number"
+                                min="1"
+                                max={product.stockQuantity || 999}
+                                value={getProductQuantity(product.id)}
+                                onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
+                                className="w-16 text-center border rounded px-2 py-1 font-medium"
+                              />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
+                                disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </div>
                               {/* Product Catalog Button */}
                               {product.showCatalogToCustomers && product.pdfCatalogUrl && (
                                 <Button
@@ -1193,17 +1192,16 @@ const Shop = () => {
                                 </Button>
                               )}
                               
-                              {/* Add to Cart Button */}
-                              <Button
-                                className="w-full"
-                                onClick={() => addToCart(product.id)}
-                                disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
-                              >
-                                <ShoppingCart className="w-4 h-4 mr-2" />
-                                {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
-                              </Button>
-                            </div>
-                          )}
+                            {/* Add to Cart Button - Always show */}
+                            <Button
+                              className="w-full"
+                              onClick={() => addToCart(product.id)}
+                              disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                            >
+                              <ShoppingCart className="w-4 h-4 mr-2" />
+                              {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                            </Button>
+                          </div>
                         </CardContent>
                       </>
                     ) : (
@@ -1356,35 +1354,34 @@ const Shop = () => {
                             </div>
                             
                             <div className="ml-6">
-                              {product.inStock && product.stockQuantity > 0 && (
-                                <div className="space-y-2">
-                                  {/* Quantity Controls */}
-                                  <div className="flex items-center justify-center gap-2">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
-                                      disabled={getProductQuantity(product.id) <= 1}
-                                    >
-                                      <Minus className="w-4 h-4" />
-                                    </Button>
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max={product.stockQuantity || 999}
-                                      value={getProductQuantity(product.id)}
-                                      onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
-                                      className="w-16 text-center border rounded px-2 py-1 font-medium"
-                                    />
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                      disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                    </Button>
-                                  </div>
+                              <div className="space-y-2">
+                                {/* Quantity Controls - Always show */}
+                                <div className="flex items-center justify-center gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) - 1)}
+                                    disabled={getProductQuantity(product.id) <= 1}
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </Button>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max={product.stockQuantity || 999}
+                                    value={getProductQuantity(product.id)}
+                                    onChange={(e) => setProductQuantity(product.id, parseInt(e.target.value) || 1)}
+                                    className="w-16 text-center border rounded px-2 py-1 font-medium"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
+                                    disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </Button>
+                                </div>
                                   {/* Product Catalog Button */}
                                   {product.showCatalogToCustomers && product.pdfCatalogUrl && (
                                     <Button
@@ -1411,17 +1408,16 @@ const Shop = () => {
                                     </Button>
                                   )}
                                   
-                                  {/* Add to Cart Button */}
-                                  <Button
-                                    className="w-full"
-                                    onClick={() => addToCart(product.id)}
-                                    disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
-                                  >
-                                    <ShoppingCart className="w-4 h-4 mr-2" />
-                                    {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
-                                  </Button>
-                                </div>
-                              )}
+                                {/* Add to Cart Button - Always show */}
+                                <Button
+                                  className="w-full"
+                                  onClick={() => addToCart(product.id)}
+                                  disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
+                                >
+                                  <ShoppingCart className="w-4 h-4 mr-2" />
+                                  {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </CardContent>
