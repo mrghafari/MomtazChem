@@ -748,11 +748,11 @@ const Shop = () => {
                   {getTotalItems() > 0 && (
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">
-                        ${getTotalPrice().toFixed(2)}
+                        {getTotalPrice().toFixed(2)}
                       </Badge>
                       {getTotalSavings() > 0 && (
                         <Badge variant="default" className="bg-green-600">
-                          Save ${getTotalSavings().toFixed(2)}
+                          Save {getTotalSavings().toFixed(2)}
                         </Badge>
                       )}
                     </div>
@@ -983,7 +983,7 @@ const Shop = () => {
                           <div className="flex items-center justify-between mb-3">
                             <div>
                               <span className="text-2xl font-bold text-green-600">
-                                ${product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
+                                {product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
                               </span>
                               <span className="text-sm text-gray-500 ml-1">
                                 / {product.priceUnit || 'unit'}
@@ -1202,7 +1202,7 @@ const Shop = () => {
                               <div className="flex items-center gap-4 mb-4">
                                 <div>
                                   <span className="text-2xl font-bold text-green-600">
-                                    ${product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
+                                    {product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
                                   </span>
                                   <span className="text-sm text-gray-500 ml-1">
                                     / {product.priceUnit || 'unit'}
