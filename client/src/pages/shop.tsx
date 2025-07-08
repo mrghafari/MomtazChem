@@ -451,22 +451,31 @@ const Shop = () => {
     const newQuantityInCart = currentQuantityInCart + targetQuantity;
     const actualStock = product.stockQuantity || 0;
     
-    // Check if total cart quantity would exceed actual database stock
-    if (newQuantityInCart > actualStock) {
+    // First check: ensure product has stock
+    if (actualStock <= 0) {
       toast({
         title: "موجودی ناکافی",
-        description: `حداکثر ${actualStock} عدد از این محصول موجود است. شما قبلاً ${currentQuantityInCart} عدد در سبد خرید دارید.`,
+        description: "این محصول موجود نیست",
         variant: "destructive",
       });
       return;
     }
-
-    // Additional check: ensure target quantity doesn't exceed available display stock
-    const availableStock = displayStock[productId] || 0;
-    if (targetQuantity > availableStock) {
+    
+    // Second check: ensure target quantity is valid
+    if (targetQuantity <= 0) {
+      toast({
+        title: "خطا",
+        description: "تعداد محصول باید بیشتر از صفر باشد",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Third check: ensure total cart quantity doesn't exceed stock
+    if (newQuantityInCart > actualStock) {
       toast({
         title: "موجودی ناکافی",
-        description: `فقط ${availableStock} عدد از این محصول قابل اضافه کردن است`,
+        description: `حداکثر ${actualStock} عدد از این محصول موجود است. شما قبلاً ${currentQuantityInCart} عدد در سبد خرید دارید.`,
         variant: "destructive",
       });
       return;
@@ -1153,7 +1162,7 @@ const Shop = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                  disabled={getProductQuantity(product.id) >= product.stockQuantity}
+                                  disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                                 >
                                   <Plus className="w-4 h-4" />
                                 </Button>
@@ -1188,7 +1197,7 @@ const Shop = () => {
                               <Button
                                 className="w-full"
                                 onClick={() => addToCart(product.id)}
-                                disabled={getProductQuantity(product.id) >= product.stockQuantity || product.stockQuantity === 0}
+                                disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                               >
                                 <ShoppingCart className="w-4 h-4 mr-2" />
                                 {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
@@ -1371,7 +1380,7 @@ const Shop = () => {
                                       size="sm"
                                       variant="outline"
                                       onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                      disabled={getProductQuantity(product.id) >= product.stockQuantity}
+                                      disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                                     >
                                       <Plus className="w-4 h-4" />
                                     </Button>
@@ -1406,7 +1415,7 @@ const Shop = () => {
                                   <Button
                                     className="w-full"
                                     onClick={() => addToCart(product.id)}
-                                    disabled={getProductQuantity(product.id) >= product.stockQuantity || product.stockQuantity === 0}
+                                    disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                                   >
                                     <ShoppingCart className="w-4 h-4 mr-2" />
                                     {cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
