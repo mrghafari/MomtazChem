@@ -412,10 +412,20 @@ const Shop = () => {
   };
 
   const setProductQuantity = (productId: number, quantity: number) => {
-    // Find the product to get actual stock quantity
-    const product = currentProducts.find(p => p.id === productId);
-    const actualStock = product?.stockQuantity || 999;
-    const validQuantity = Math.max(1, Math.min(quantity, actualStock));
+    // Use displayStock which considers current cart deductions
+    const availableStock = displayStock[productId] || 0;
+    
+    // Prevent quantity selection if no stock available
+    if (availableStock <= 0) {
+      toast({
+        title: "موجودی ناکافی",
+        description: "این محصول در حال حاضر موجود نیست",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const validQuantity = Math.max(1, Math.min(quantity, availableStock));
     
     setProductQuantities(prev => ({
       ...prev,
@@ -426,26 +436,22 @@ const Shop = () => {
   const addToCart = (productId: number) => {
     const targetQuantity = getProductQuantity(productId);
     
-    // Find the product to check stock quantity
-    const product = currentProducts.find(p => p.id === productId);
-    if (!product) {
+    // Check available stock using displayStock (real-time inventory after cart deductions)
+    const availableStock = displayStock[productId] || 0;
+    
+    if (availableStock <= 0) {
       toast({
-        title: "errorOccurred",
-        description: "productNotFound",
+        title: "موجودی ناکافی",
+        description: "این محصول در حال حاضر موجود نیست",
         variant: "destructive",
       });
       return;
     }
 
-    const currentQuantityInCart = cart[productId] || 0;
-    const actualStock = product.stockQuantity || 0;
-    const totalRequestedQuantity = currentQuantityInCart + targetQuantity;
-
-    // Check if total cart quantity would exceed actual database stock
-    if (totalRequestedQuantity > actualStock) {
+    if (targetQuantity > availableStock) {
       toast({
-        title: "warning",
-        description: `${t.inStock}: ${actualStock}`,
+        title: "موجودی ناکافی",
+        description: `فقط ${availableStock} عدد از این محصول موجود است`,
         variant: "destructive",
       });
       return;
@@ -1108,7 +1114,7 @@ const Shop = () => {
 
 
 
-                          {product.inStock && (
+                          {product.inStock && (displayStock[product.id] || 0) > 0 && (
                             <div className="space-y-2">
                               {/* Quantity Controls */}
                               <div className="flex items-center justify-center gap-2">
@@ -1132,7 +1138,7 @@ const Shop = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => setProductQuantity(product.id, getProductQuantity(product.id) + 1)}
-                                  disabled={getProductQuantity(product.id) >= (displayStock[product.id] || 0)}
+                                  disabled={getProductQuantity(product.id) >= (displayStock[product.id] || 0) || (displayStock[product.id] || 0) <= 0}
                                 >
                                   <Plus className="w-4 h-4" />
                                 </Button>
@@ -1326,7 +1332,7 @@ const Shop = () => {
                             </div>
                             
                             <div className="ml-6">
-                              {product.inStock && (
+                              {product.inStock && (displayStock[product.id] || 0) > 0 && (
                                 <div className="space-y-2">
                                   {/* Quantity Controls */}
                                   <div className="flex items-center justify-center gap-2">
