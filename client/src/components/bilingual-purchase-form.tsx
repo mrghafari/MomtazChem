@@ -550,6 +550,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity - 1)}
                           className="h-7 w-7 p-0"
                           title={t.decreaseQuantity}
+                          disabled={quantity <= 1}
                         >
                           <Minus className="w-3 h-3" />
                         </Button>
@@ -557,9 +558,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1)}
+                          onClick={() => {
+                            // Check stock availability before allowing increase
+                            if (!product.inStock || (product.stockQuantity || 0) <= 0) return;
+                            if (quantity >= (product.stockQuantity || 0)) return;
+                            onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1);
+                          }}
                           className="h-7 w-7 p-0"
                           title={t.increaseQuantity}
+                          disabled={!product.inStock || (product.stockQuantity || 0) <= 0 || quantity >= (product.stockQuantity || 0)}
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
