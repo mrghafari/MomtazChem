@@ -1757,7 +1757,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
 
     const generateBarcode = (value: string) => {
-      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${config.barcodeFont}; letter-spacing: 0.2px; text-align: center; line-height: 1; margin: 0 auto; display: block;">${value}</div>`;
+      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${config.barcodeFont}; letter-spacing: 0.2px; text-align: center; line-height: 1;">${value}</div>`;
     };
 
     const labelsHTML = products.map(product => {
