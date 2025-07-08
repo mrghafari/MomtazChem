@@ -1653,49 +1653,7 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <FormLabel>Product Catalog</FormLabel>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    {catalogPreview ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                          <FileText className="w-4 h-4" />
-                          <span className="text-sm truncate">Catalog uploaded</span>
-                        </div>
-                        <Button 
-                          type="button"
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setCatalogPreview(null)}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-2">
-                          <label htmlFor="catalog-upload" className="cursor-pointer">
-                            <span className="text-sm text-blue-600 hover:text-blue-500">
-                              {uploadingCatalog ? 'Uploading...' : 'Upload catalog'}
-                            </span>
-                            <input
-                              id="catalog-upload"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.doc,.docx"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleCatalogUpload(file);
-                              }}
-                              disabled={uploadingCatalog}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+
 
                 {/* MSDS Upload Section */}
                 <div className="space-y-2">
