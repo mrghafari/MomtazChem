@@ -234,10 +234,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Fetch wallet data for logged-in customers
   const { data: walletData } = useQuery({
-    queryKey: ['/api/customers/wallet'],
+    queryKey: ['/api/customer/wallet'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/customers/wallet', {
+        const response = await fetch('/api/customer/wallet', {
           credentials: 'include'
         });
         
