@@ -342,9 +342,9 @@ export default function ProductsPage() {
         : [],
       // Handle specifications - try to parse as JSON if possible, otherwise keep as string
       specifications: (() => {
-        if (!data.specifications || typeof data.specifications !== 'string') return null;
+        if (!data.specifications || typeof data.specifications !== 'string') return {};
         const trimmed = data.specifications.trim();
-        if (!trimmed) return null;
+        if (!trimmed) return {};
         
         try {
           return JSON.parse(trimmed);
@@ -492,7 +492,7 @@ export default function ProductsPage() {
       shortDescription: product.shortDescription || "",
       features: Array.isArray(product.features) ? product.features.join('\n') : (product.features || ""),
       applications: Array.isArray(product.applications) ? product.applications.join('\n') : (product.applications || ""),
-      specifications: typeof product.specifications === 'object' ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
+      specifications: typeof product.specifications === 'object' && product.specifications !== null ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
       stockQuantity: Number(product.stockQuantity) ?? 0,
@@ -1153,7 +1153,7 @@ export default function ProductsPage() {
                               placeholder="0.00" 
                               {...field}
                               value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
+                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
                             />
                           </FormControl>
                           <FormMessage />

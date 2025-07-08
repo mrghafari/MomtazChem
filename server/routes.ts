@@ -1261,7 +1261,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products = await shopStorage.getShopProducts();
       }
       
-      res.json(products);
+      // Map database fields to frontend expected fields
+      const mappedProducts = products.map(product => ({
+        ...product,
+        unitPrice: product.price, // Map price field to unitPrice for frontend
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit, // Default to IQD
+        // Handle imageUrls (JSON array) to imageUrl (single string) mapping
+        imageUrl: Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+          ? product.imageUrls[0] 
+          : (typeof product.imageUrls === 'string' ? product.imageUrls : null)
+      }));
+      
+      res.json(mappedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ 
@@ -1290,7 +1301,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      res.json(product);
+      // Map database fields to frontend expected fields
+      const mappedProduct = {
+        ...product,
+        unitPrice: product.price, // Map price field to unitPrice for frontend
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit, // Default to IQD
+        // Handle imageUrls (JSON array) to imageUrl (single string) mapping
+        imageUrl: Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+          ? product.imageUrls[0] 
+          : (typeof product.imageUrls === 'string' ? product.imageUrls : null)
+      };
+
+      res.json(mappedProduct);
     } catch (error) {
       res.status(500).json({ 
         success: false, 
@@ -1311,7 +1333,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = req.body;
-      const product = await shopStorage.updateShopProduct(id, productData);
+      
+      // Map frontend fields to backend fields for update
+      const mappedData = {
+        ...productData,
+        price: productData.unitPrice || productData.price,
+        priceUnit: productData.currency || productData.priceUnit || 'IQD',
+        imageUrls: productData.imageUrl ? [productData.imageUrl] : (productData.imageUrls || [])
+      };
+      
+      const product = await shopStorage.updateShopProduct(id, mappedData);
       res.json(product);
     } catch (error) {
       console.error("Error updating product:", error);
@@ -1345,11 +1376,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const productData = req.body;
       console.log(`📝 Updating product ${id} with data:`, productData);
       
+      // Map frontend fields to database fields
+      const shopData: any = { ...productData };
+      if (productData.unitPrice !== undefined) {
+        shopData.price = productData.unitPrice;
+        delete shopData.unitPrice; // Remove the frontend field name
+      }
+      if (productData.currency !== undefined) {
+        shopData.priceUnit = productData.currency;
+        delete shopData.currency; // Remove the frontend field name
+      }
+      
       // Update shop product (unified product table)
-      const shopProduct = await shopStorage.updateShopProduct(id, productData);
+      const shopProduct = await shopStorage.updateShopProduct(id, shopData);
       console.log(`✅ Updated product:`, shopProduct.name);
       
-      res.json(shopProduct);
+      // Map database fields to frontend expected fields for response
+      const mappedProduct = {
+        ...shopProduct,
+        unitPrice: shopProduct.price, // Map price field to unitPrice for frontend
+        currency: (shopProduct.priceUnit === 'IQD' || !shopProduct.priceUnit || shopProduct.priceUnit === 'unit') ? 'IQD' : shopProduct.priceUnit // Default to IQD
+      };
+      
+      res.json(mappedProduct);
     } catch (error) {
       console.error("Error updating product:", error);
       if (error instanceof z.ZodError) {
