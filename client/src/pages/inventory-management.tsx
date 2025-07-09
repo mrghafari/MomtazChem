@@ -330,14 +330,10 @@ export default function InventoryManagement() {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             نمای کلی
-          </TabsTrigger>
-          <TabsTrigger value="products" className="flex items-center gap-2">
-            <Database className="w-4 h-4" />
-            مدیریت محصولات
           </TabsTrigger>
           <TabsTrigger value="transit" className="flex items-center gap-2">
             <Truck className="w-4 h-4" />
@@ -350,18 +346,6 @@ export default function InventoryManagement() {
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
             تنظیمات
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            آنالیز
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="flex items-center gap-2">
-            <Archive className="w-4 h-4" />
-            گزارشات
-          </TabsTrigger>
-          <TabsTrigger value="automation" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            اتوماسیون
           </TabsTrigger>
         </TabsList>
 
@@ -441,19 +425,10 @@ export default function InventoryManagement() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start gap-2"
-                  onClick={() => setActiveTab("analytics")}
+                  onClick={() => setActiveTab("transit")}
                 >
-                  <TrendingUp className="w-4 h-4" />
-                  گزارش عملکرد
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start gap-2"
-                  onClick={() => setActiveTab("reports")}
-                >
-                  <Archive className="w-4 h-4" />
-                  دانلود گزارشات
+                  <Truck className="w-4 h-4" />
+                  کالاهای در راه
                 </Button>
               </CardContent>
             </Card>
@@ -497,171 +472,7 @@ export default function InventoryManagement() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="products" className="space-y-6">
-          <div className="space-y-6">
-            {/* Search and Filters */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex gap-4 items-center">
-                  <div className="flex-1">
-                    <Label htmlFor="search">جستجوی محصولات</Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                      <Input
-                        id="search"
-                        placeholder="جستجو بر اساس نام یا دسته‌بندی..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <Package className="w-3 h-3" />
-                      {filteredProducts.length} محصول
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Unified Products Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="w-5 h-5" />
-                  مدیریت یکپارچه محصولات
-                </CardTitle>
-                <CardDescription>
-                  مدیریت موجودی تمامی محصولات از یک مکان واحد
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {productsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader className="w-6 h-6 animate-spin text-gray-500" />
-                    <span className="ml-2 text-gray-500">در حال بارگیری محصولات...</span>
-                  </div>
-                ) : filteredProducts.length > 0 ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                      {filteredProducts.map((product: UnifiedProduct) => (
-                        <Card key={product.id} className="border-2">
-                          <CardContent className="p-4">
-                            <div className="space-y-3">
-                              {/* Product Header */}
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h3 className="font-medium text-lg text-gray-900 mb-1">
-                                    {product.name}
-                                  </h3>
-                                  <Badge variant="outline" className="text-xs">
-                                    {product.category}
-                                  </Badge>
-                                </div>
-                                <Badge variant={product.inStock ? 'default' : 'destructive'}>
-                                  {product.inStock ? 'موجود' : 'ناموجود'}
-                                </Badge>
-                              </div>
-
-                              {/* Inventory Info */}
-                              <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div className="bg-blue-50 p-2 rounded">
-                                  <p className="text-blue-600 font-medium">موجودی فعلی</p>
-                                  <p className="text-lg font-bold text-blue-800">
-                                    {editingProduct === product.name ? (
-                                      <div className="flex items-center gap-2">
-                                        <Input
-                                          type="number"
-                                          value={editingQuantity}
-                                          onChange={(e) => setEditingQuantity(parseInt(e.target.value) || 0)}
-                                          className="w-16 h-8 text-sm"
-                                          min="0"
-                                        />
-                                        <Button 
-                                          size="sm" 
-                                          onClick={() => handleSaveEdit(product.name)}
-                                          disabled={updateInventoryMutation.isPending}
-                                        >
-                                          <Save className="w-3 h-3" />
-                                        </Button>
-                                        <Button 
-                                          size="sm" 
-                                          variant="outline"
-                                          onClick={cancelEdit}
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center gap-2">
-                                        {product.stockQuantity}
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => startEdit(product)}
-                                          className="p-1 h-6 w-6"
-                                        >
-                                          <Edit2 className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </p>
-                                </div>
-                                <div className="bg-orange-50 p-2 rounded">
-                                  <p className="text-orange-600 font-medium">حد کمینه</p>
-                                  <p className="text-lg font-bold text-orange-800">
-                                    {product.minStockLevel}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Status Indicators */}
-                              <div className="flex gap-2">
-                                {product.stockQuantity <= product.minStockLevel && product.stockQuantity > 0 && (
-                                  <Badge variant="destructive" className="text-xs">
-                                    <AlertTriangle className="w-3 h-3 mr-1" />
-                                    حد بحرانی
-                                  </Badge>
-                                )}
-                                {product.stockQuantity <= product.lowStockThreshold && product.stockQuantity > product.minStockLevel && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    <Bell className="w-3 h-3 mr-1" />
-                                    موجودی کم
-                                  </Badge>
-                                )}
-                                {product.stockQuantity > product.lowStockThreshold && (
-                                  <Badge variant="outline" className="text-xs">
-                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                    موجودی کافی
-                                  </Badge>
-                                )}
-                              </div>
-
-                              {/* Shop Integration Info */}
-                              {product.shopPrice && (
-                                <div className="text-xs text-gray-500 border-t pt-2">
-                                  <p>قیمت فروش: {product.shopPrice?.toLocaleString()} دینار</p>
-                                  {product.shopSku && <p>کد فروشگاه: {product.shopSku}</p>}
-                                </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>هیچ محصولی یافت نشد</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
 
         <TabsContent value="transit" className="space-y-6">
           <div className="space-y-6">
@@ -797,59 +608,7 @@ export default function InventoryManagement() {
           <InventoryNotificationSettings />
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>آنالیز عملکرد موجودی</CardTitle>
-              <CardDescription>
-                تحلیل روند موجودی و هشدارها
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center py-12">
-              <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-4">در حال توسعه</p>
-              <p className="text-sm text-gray-500">
-                آنالیز دقیق روند موجودی، الگوهای مصرف و پیش‌بینی نیاز
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="reports" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>گزارشات موجودی</CardTitle>
-              <CardDescription>
-                دانلود گزارشات تفصیلی موجودی
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center py-12">
-              <Archive className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-4">در حال توسعه</p>
-              <p className="text-sm text-gray-500">
-                گزارشات کامل موجودی، تاریخچه تغییرات و آمار عملکرد
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="automation" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>اتوماسیون موجودی</CardTitle>
-              <CardDescription>
-                تنظیمات خودکارسازی فرآیندها
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center py-12">
-              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-4">در حال توسعه</p>
-              <p className="text-sm text-gray-500">
-                خودکارسازی سفارش‌گیری، تخصیص موجودی و بازسازی انبار
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
