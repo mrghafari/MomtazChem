@@ -1131,25 +1131,25 @@ const Shop = () => {
                           {/* Modern Discount Card */}
                           <div className="mb-3 h-24 overflow-hidden">
                             {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
-                              <div className="relative h-full bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 rounded-2xl overflow-hidden shadow-xl">
+                              <div className="relative h-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-2xl overflow-hidden shadow-md border border-purple-200">
                                 {/* Animated Background */}
                                 <div className="absolute inset-0">
-                                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-white/20 rounded-full animate-pulse"></div>
-                                  <div className="absolute -bottom-2 -left-2 w-12 h-12 bg-yellow-300/30 rounded-full animate-bounce"></div>
-                                  <div className="absolute top-1/2 left-1/3 w-8 h-8 bg-pink-300/25 rounded-full animate-ping"></div>
+                                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-purple-100/30 rounded-full animate-pulse"></div>
+                                  <div className="absolute -bottom-2 -left-2 w-12 h-12 bg-yellow-100/40 rounded-full animate-bounce"></div>
+                                  <div className="absolute top-1/2 left-1/3 w-8 h-8 bg-pink-100/30 rounded-full animate-ping"></div>
                                 </div>
                                 
                                 {/* Glassmorphism Overlay */}
-                                <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+                                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm"></div>
                                 
-                                <div className="relative z-20 p-3 h-full flex flex-col justify-between text-white">
+                                <div className="relative z-20 p-3 h-full flex flex-col justify-between text-gray-700">
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                       <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg animate-pulse"></div>
-                                      <span className="text-xs font-black uppercase tracking-wider">Volume Deals</span>
+                                      <span className="text-xs font-semibold uppercase tracking-wider">Volume Deals</span>
                                     </div>
-                                    <div className="bg-white/20 backdrop-blur-sm rounded-full px-2 py-1">
-                                      <span className="text-xs font-bold">
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-full px-2 py-1">
+                                      <span className="text-xs font-medium">
                                         {product.quantityDiscounts.length} Tiers
                                       </span>
                                     </div>
@@ -1183,22 +1183,22 @@ const Shop = () => {
                                         
                                         {/* Status Display */}
                                         {currentDiscount ? (
-                                          <div className="bg-green-500/80 backdrop-blur-sm rounded-lg p-2 border border-green-300/50">
+                                          <div className="bg-green-50 backdrop-blur-sm rounded-lg p-2 border border-green-100">
                                             <div className="flex items-center justify-between text-xs">
                                               <div className="flex items-center gap-1">
-                                                <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
-                                                <span className="font-black text-green-100">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
                                               </div>
-                                              <span className="font-black text-green-100">
+                                              <span className="font-semibold text-green-700">
                                                 ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} OFF
                                               </span>
                                             </div>
                                           </div>
                                         ) : nextDiscount ? (
-                                          <div className="bg-orange-500/80 backdrop-blur-sm rounded-lg p-2 border border-orange-300/50">
+                                          <div className="bg-orange-50 backdrop-blur-sm rounded-lg p-2 border border-orange-100">
                                             <div className="flex items-center gap-1 text-xs">
-                                              <div className="w-2 h-2 bg-orange-200 rounded-full animate-bounce"></div>
-                                              <span className="font-black text-orange-100">
+                                              <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                                              <span className="font-semibold text-orange-700">
                                                 +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
                                               </span>
                                             </div>
@@ -1333,23 +1333,23 @@ const Shop = () => {
                               {/* Modern Discount Card - List View */}
                               <div className="mb-4 h-20">
                                 {product.quantityDiscounts && Array.isArray(product.quantityDiscounts) && product.quantityDiscounts.length > 0 ? (
-                                  <div className="relative h-full bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 rounded-2xl overflow-hidden shadow-xl">
+                                  <div className="relative h-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-2xl overflow-hidden shadow-md border border-purple-200">
                                     {/* Animated Background */}
                                     <div className="absolute inset-0">
-                                      <div className="absolute -top-2 -right-2 w-12 h-12 bg-white/20 rounded-full animate-pulse"></div>
-                                      <div className="absolute -bottom-1 -left-1 w-8 h-8 bg-yellow-300/30 rounded-full animate-bounce"></div>
-                                      <div className="absolute top-1/3 left-1/4 w-6 h-6 bg-pink-300/25 rounded-full animate-ping"></div>
+                                      <div className="absolute -top-2 -right-2 w-12 h-12 bg-purple-100/30 rounded-full animate-pulse"></div>
+                                      <div className="absolute -bottom-1 -left-1 w-8 h-8 bg-yellow-100/40 rounded-full animate-bounce"></div>
+                                      <div className="absolute top-1/3 left-1/4 w-6 h-6 bg-pink-100/30 rounded-full animate-ping"></div>
                                     </div>
                                     
                                     {/* Glassmorphism Overlay */}
-                                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+                                    <div className="absolute inset-0 bg-white/50 backdrop-blur-sm"></div>
                                     
-                                    <div className="relative z-20 p-3 h-full text-white">
+                                    <div className="relative z-20 p-3 h-full text-gray-700">
                                       <div className="flex items-center justify-between h-full">
                                         <div className="flex items-center gap-3">
                                           <div className="flex items-center gap-2">
                                             <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg animate-pulse"></div>
-                                            <span className="text-sm font-black uppercase tracking-wider">Volume Deals</span>
+                                            <span className="text-sm font-semibold uppercase tracking-wider">Volume Deals</span>
                                           </div>
                                           
                                           {/* Progress Bar */}
@@ -1383,22 +1383,22 @@ const Shop = () => {
                                             <div className="flex-1 ml-4">
                                               {/* Status Display */}
                                               {currentDiscount ? (
-                                                <div className="bg-green-500/80 backdrop-blur-sm rounded-lg p-2 border border-green-300/50">
+                                                <div className="bg-green-50 backdrop-blur-sm rounded-lg p-2 border border-green-100">
                                                   <div className="flex items-center justify-between text-sm">
                                                     <div className="flex items-center gap-1">
-                                                      <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
-                                                      <span className="font-black text-green-100">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                      <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
                                                     </div>
-                                                    <span className="font-black text-green-100">
+                                                    <span className="font-semibold text-green-700">
                                                       ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} OFF
                                                     </span>
                                                   </div>
                                                 </div>
                                               ) : nextDiscount ? (
-                                                <div className="bg-orange-500/80 backdrop-blur-sm rounded-lg p-2 border border-orange-300/50">
+                                                <div className="bg-orange-50 backdrop-blur-sm rounded-lg p-2 border border-orange-100">
                                                   <div className="flex items-center gap-1 text-sm">
-                                                    <div className="w-2 h-2 bg-orange-200 rounded-full animate-bounce"></div>
-                                                    <span className="font-black text-orange-100">
+                                                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                                                    <span className="font-semibold text-orange-700">
                                                       +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
                                                     </span>
                                                   </div>
