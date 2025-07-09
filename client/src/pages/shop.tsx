@@ -117,21 +117,18 @@ const Shop = () => {
   const availableFilters = searchResults?.data?.filters;
   const totalPages = Math.ceil(totalResults / itemsPerPage);
 
-  // Update price range when search results change
+  // Initialize price range only once when first loaded
   useEffect(() => {
-    if (availableFilters?.priceRange) {
+    if (availableFilters?.priceRange && priceRange[0] === 0 && priceRange[1] === 0) {
       const { min, max } = availableFilters.priceRange;
       // Convert string values to numbers for the slider
       const minNum = typeof min === 'string' ? parseFloat(min) : min;
       const maxNum = typeof max === 'string' ? parseFloat(max) : max;
       
-
-      
-      if (minNum !== priceRange[0] || maxNum !== priceRange[1]) {
-        setPriceRange([minNum, maxNum]);
-        if (!filters.priceMin && !filters.priceMax) {
-          setFilters(prev => ({ ...prev, priceMin: minNum, priceMax: maxNum }));
-        }
+      setPriceRange([minNum, maxNum]);
+      // Only set initial filter values if they're not already set
+      if (filters.priceMin === undefined && filters.priceMax === undefined) {
+        setFilters(prev => ({ ...prev, priceMin: minNum, priceMax: maxNum }));
       }
     }
   }, [availableFilters?.priceRange]);

@@ -35,7 +35,7 @@ const RangeSlider = React.forwardRef<
       // Set new timeout for debounced update
       timeoutRef.current = setTimeout(() => {
         onValueChange([newValue[0], newValue[1]]);
-      }, 300);
+      }, 150);
     }
   };
 
