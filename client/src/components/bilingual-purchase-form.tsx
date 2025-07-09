@@ -328,7 +328,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Fetch shipping rates
   const { data: shippingRatesData, isLoading: shippingRatesLoading } = useQuery({
-    queryKey: ["/api/logistics/shipping-rates"],
+    queryKey: ["/api/shipping-rates"],
   });
 
   const shippingRates = shippingRatesData?.data || [];

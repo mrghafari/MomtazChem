@@ -64,7 +64,7 @@ export default function ShoppingCartModal({
 
   // Fetch shipping rates from API
   const { data: shippingRatesData, isLoading: shippingRatesLoading } = useQuery({
-    queryKey: ["/api/logistics/shipping-rates"],
+    queryKey: ["/api/shipping-rates"],
     enabled: isOpen, // Only fetch when modal is open
   });
 

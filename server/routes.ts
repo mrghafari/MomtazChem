@@ -10413,7 +10413,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // SHIPPING RATES MANAGEMENT (LOGISTICS DEPARTMENT)
   // ============================================================================
 
-  // Get all shipping rates
+  // Get all shipping rates (for logistics admin)
   app.get('/api/logistics/shipping-rates', requireDepartmentAuth('logistics'), async (req, res) => {
     try {
       const rates = await db
@@ -10424,6 +10424,22 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       res.json({ success: true, data: rates });
     } catch (error) {
       console.error('Error fetching shipping rates:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تعرفه‌های ارسال" });
+    }
+  });
+
+  // Get active shipping rates (for customer checkout - no auth required)
+  app.get('/api/shipping-rates', async (req, res) => {
+    try {
+      const rates = await db
+        .select()
+        .from(shippingRates)
+        .where(eq(shippingRates.isActive, true))
+        .orderBy(shippingRates.deliveryMethod, shippingRates.transportationType);
+      
+      res.json({ success: true, data: rates });
+    } catch (error) {
+      console.error('Error fetching active shipping rates:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت تعرفه‌های ارسال" });
     }
   });
