@@ -4097,13 +4097,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         remainingAmount = parseFloat(orderData.remainingAmount || totalAmount);
         
         if (walletAmountUsed > 0) {
-          // TODO: Deduct from customer wallet and log transaction
-          console.log(`Wallet payment: ${walletAmountUsed} IQD used, ${remainingAmount} IQD remaining`);
-          
-          if (remainingAmount === 0) {
-            finalPaymentStatus = "paid"; // Fully paid by wallet
-          } else {
-            finalPaymentStatus = "partial"; // Partially paid by wallet
+          try {
+            // Use walletStorage.debitWallet which handles all the logic
+            const transaction = await walletStorage.debitWallet(
+              finalCustomerId,
+              walletAmountUsed,
+              `پرداخت سفارش ${orderNumber}`,
+              'order',
+              undefined, // reference ID will be set after order creation
+              undefined  // no admin processing this
+            );
+            
+            console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
+            
+            if (remainingAmount === 0) {
+              finalPaymentStatus = "paid"; // Fully paid by wallet
+            } else {
+              finalPaymentStatus = "partial"; // Partially paid by wallet
+            }
+          } catch (walletError) {
+            console.log(`❌ Wallet payment failed:`, walletError);
+            return res.status(400).json({
+              success: false,
+              message: "موجودی کیف پول کافی نیست یا خطا در پردازش"
+            });
           }
         }
       }
