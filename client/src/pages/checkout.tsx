@@ -579,34 +579,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 
                 <Separator />
                 
-                {/* Shipping Method Selection */}
-                <div className="space-y-3">
-                  <FormField
-                    control={form.control}
-                    name="shippingMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Shipping Method *</FormLabel>
-                        <FormControl>
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select shipping method" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="standard">Standard Shipping (5-7 days) - $50</SelectItem>
-                              <SelectItem value="express">Express Shipping (2-3 days) - $100</SelectItem>
-                              <SelectItem value="overnight">Overnight Shipping - $200</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <Separator />
-                
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
