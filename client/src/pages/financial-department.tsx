@@ -119,13 +119,13 @@ export default function FinancialDepartment() {
   // Process order mutation
   const processOrderMutation = useMutation({
     mutationFn: async (data: { orderId: number; action: "approve" | "reject"; notes: string }) => {
-      return apiRequest(`/api/financial/orders/${data.orderId}/process`, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: data.action,
-          notes: data.notes,
-          reviewerId: user?.id
-        })
+      const endpoint = data.action === 'approve' 
+        ? `/api/finance/orders/${data.orderId}/approve`
+        : `/api/finance/orders/${data.orderId}/reject`;
+      
+      return apiRequest(endpoint, 'POST', {
+        notes: data.notes,
+        reviewerId: user?.id
       });
     },
     onSuccess: () => {
