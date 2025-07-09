@@ -29,6 +29,7 @@ interface ShippingRate {
   insuranceAvailable: boolean;
   insuranceRate: string;
   isActive: boolean;
+  smsVerificationEnabled: boolean;
   description?: string;
   internalNotes?: string;
   createdAt: string;
@@ -51,6 +52,7 @@ interface ShippingRateForm {
   insuranceAvailable: boolean;
   insuranceRate: string;
   isActive: boolean;
+  smsVerificationEnabled: boolean;
   description?: string;
   internalNotes?: string;
 }
@@ -109,6 +111,7 @@ export default function ShippingRatesManagement() {
     insuranceAvailable: false,
     insuranceRate: '0',
     isActive: true,
+    smsVerificationEnabled: true,
     description: '',
     internalNotes: ''
   });
@@ -183,6 +186,7 @@ export default function ShippingRatesManagement() {
       insuranceAvailable: false,
       insuranceRate: '0',
       isActive: true,
+      smsVerificationEnabled: true,
       description: '',
       internalNotes: ''
     });
@@ -193,7 +197,7 @@ export default function ShippingRatesManagement() {
   const handleEdit = (rate: ShippingRate) => {
     setFormData({
       deliveryMethod: rate.deliveryMethod,
-      transportationType: rate.transportationType || '',
+      transportationType: rate.transportationType || 'motorcycle',
       cityName: rate.cityName || '',
       provinceName: rate.provinceName || '',
       minWeight: rate.minWeight,
@@ -207,6 +211,7 @@ export default function ShippingRatesManagement() {
       insuranceAvailable: rate.insuranceAvailable,
       insuranceRate: rate.insuranceRate,
       isActive: rate.isActive,
+      smsVerificationEnabled: rate.smsVerificationEnabled || false,
       description: rate.description || '',
       internalNotes: rate.internalNotes || ''
     });
@@ -295,7 +300,7 @@ export default function ShippingRatesManagement() {
                       </SelectTrigger>
                       <SelectContent>
                         {transportationTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>
+                          <SelectItem key={type.value} value={type.value || 'motorcycle'}>
                             {type.label}
                           </SelectItem>
                         ))}
@@ -441,6 +446,14 @@ export default function ShippingRatesManagement() {
                   />
                   <Label>فعال</Label>
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={formData.smsVerificationEnabled}
+                    onCheckedChange={(checked) => setFormData({...formData, smsVerificationEnabled: checked})}
+                  />
+                  <Label>تأیید پیامکی</Label>
+                </div>
               </div>
 
               {/* Description */}
@@ -537,6 +550,9 @@ export default function ShippingRatesManagement() {
                     )}
                     {rate.insuranceAvailable && (
                       <Badge variant="outline" className="text-xs">بیمه</Badge>
+                    )}
+                    {rate.smsVerificationEnabled && (
+                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">تأیید پیامکی</Badge>
                     )}
                   </div>
                 </div>

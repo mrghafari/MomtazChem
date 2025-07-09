@@ -192,6 +192,7 @@ export const shippingRates = pgTable("shipping_rates", {
   
   // Status and management
   isActive: boolean("is_active").default(true),
+  smsVerificationEnabled: boolean("sms_verification_enabled").default(true), // SMS verification for delivery
   description: text("description"), // Service description for customers
   internalNotes: text("internal_notes"), // Admin notes
   

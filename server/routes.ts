@@ -40,6 +40,8 @@ import { orderManagement, shippingRates, vatSettings } from "@shared/order-manag
 import nodemailer from "nodemailer";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
+import { deliveryVerificationStorage } from "./delivery-verification-storage";
+import { smsService } from "./sms-service";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -10484,6 +10486,120 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error deleting shipping rate:', error);
       res.status(500).json({ success: false, message: "خطا در حذف تعرفه ارسال" });
+    }
+  });
+
+  // ============================================================================
+  // SMS VERIFICATION SYSTEM FOR DELIVERY
+  // ============================================================================
+
+  // Generate SMS verification code for order
+  app.post('/api/logistics/orders/:orderId/generate-sms-code', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      // Get order details
+      const [order] = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.id, orderId))
+        .limit(1);
+
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
+      }
+
+      // Generate verification code
+      const verificationCode = await deliveryVerificationStorage.generateVerificationCode(
+        order.id, // Using order ID as orderManagementId for now
+        orderId,
+        order.phone || order.customerPhone || ''
+      );
+
+      // Send SMS
+      const smsResult = await smsService.sendDeliveryVerificationSms(
+        order.phone || order.customerPhone || '',
+        verificationCode.verificationCode,
+        order.firstName || 'مشتری',
+        verificationCode.id
+      );
+
+      res.json({
+        success: true,
+        message: 'کد تأیید پیامک شد',
+        verificationCode: verificationCode.verificationCode,
+        smsSent: smsResult.success
+      });
+    } catch (error) {
+      console.error('Error generating SMS verification code:', error);
+      res.status(500).json({ success: false, message: 'خطا در تولید کد تأیید' });
+    }
+  });
+
+  // Verify delivery code
+  app.post('/api/logistics/verify-delivery', async (req, res) => {
+    try {
+      const { verificationCode, customerOrderId, courierName, verificationNotes } = req.body;
+
+      const result = await deliveryVerificationStorage.verifyDeliveryCode({
+        verificationCode,
+        customerOrderId,
+        courierName,
+        verificationNotes
+      });
+
+      if (result.success) {
+        // Update order status to delivered
+        await db
+          .update(orders)
+          .set({
+            status: 'delivered',
+            deliveredAt: new Date(),
+            deliveryNotes: verificationNotes || 'تحویل با کد تأیید پیامک'
+          })
+          .where(eq(orders.id, customerOrderId));
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error verifying delivery code:', error);
+      res.status(500).json({ success: false, message: 'خطا در تأیید کد تحویل' });
+    }
+  });
+
+  // Get delivery verification history for order
+  app.get('/api/logistics/orders/:orderId/verification-history', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const history = await deliveryVerificationStorage.getVerificationHistory(orderId);
+      res.json({ success: true, history });
+    } catch (error) {
+      console.error('Error fetching verification history:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت تاریخچه تأیید' });
+    }
+  });
+
+  // Get daily SMS statistics
+  app.get('/api/logistics/sms-stats/:date', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const date = req.params.date;
+      const stats = await deliveryVerificationStorage.getDailyStats(date);
+      res.json({ success: true, stats });
+    } catch (error) {
+      console.error('Error fetching SMS stats:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت آمار پیامک' });
+    }
+  });
+
+  // Increment delivery attempts
+  app.post('/api/logistics/orders/:orderId/increment-attempts', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      await deliveryVerificationStorage.incrementDeliveryAttempts(orderId);
+      res.json({ success: true, message: 'تلاش تحویل افزایش یافت' });
+    } catch (error) {
+      console.error('Error incrementing delivery attempts:', error);
+      res.status(500).json({ success: false, message: 'خطا در افزایش تلاش تحویل' });
     }
   });
 
