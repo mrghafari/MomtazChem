@@ -103,10 +103,11 @@ export interface IOrderManagementStorage {
   }>;
 
   // Shipping rates management
-  getShippingRates(): Promise<ShippingRate[]>;
+  getShippingRates(filters?: { cityName?: string; isActive?: boolean }): Promise<ShippingRate[]>;
   createShippingRate(rateData: InsertShippingRate): Promise<ShippingRate>;
   updateShippingRate(id: number, updateData: Partial<InsertShippingRate>): Promise<ShippingRate>;
   deleteShippingRate(id: number): Promise<void>;
+  getShippingRateByMethod(deliveryMethod: string, city?: string): Promise<ShippingRate | undefined>;
   getAvailableShippingMethods(criteria: {
     city?: string;
     province?: string;
@@ -569,11 +570,26 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   // SHIPPING RATES MANAGEMENT
   // =============================================================================
 
-  async getShippingRates(): Promise<ShippingRate[]> {
-    return db
-      .select()
-      .from(shippingRates)
-      .orderBy(asc(shippingRates.deliveryMethod), asc(shippingRates.createdAt));
+  async getShippingRates(filters?: { cityName?: string; isActive?: boolean }): Promise<ShippingRate[]> {
+    let query = db.select().from(shippingRates);
+
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.cityName) {
+        conditions.push(eq(shippingRates.cityName, filters.cityName));
+      }
+      
+      if (filters.isActive !== undefined) {
+        conditions.push(eq(shippingRates.isActive, filters.isActive));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+
+    return query.orderBy(asc(shippingRates.deliveryMethod), asc(shippingRates.createdAt));
   }
 
   async createShippingRate(rateData: InsertShippingRate): Promise<ShippingRate> {
@@ -604,6 +620,25 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     await db
       .delete(shippingRates)
       .where(eq(shippingRates.id, id));
+  }
+
+  async getShippingRateByMethod(deliveryMethod: string, city?: string): Promise<ShippingRate | undefined> {
+    let query = db
+      .select()
+      .from(shippingRates)
+      .where(
+        and(
+          eq(shippingRates.deliveryMethod, deliveryMethod),
+          eq(shippingRates.isActive, true)
+        )
+      );
+
+    if (city) {
+      query = query.where(eq(shippingRates.cityName, city));
+    }
+
+    const [rate] = await query.limit(1);
+    return rate;
   }
 
   async getAvailableShippingMethods(criteria: {

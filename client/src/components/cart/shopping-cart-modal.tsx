@@ -1,11 +1,27 @@
-import { useState } from "react";
-import { Plus, Minus, Trash2, ShoppingCart, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Minus, Trash2, ShoppingCart, X, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+
+interface ShippingRate {
+  id: number;
+  deliveryMethod: string;
+  transportationType?: string;
+  description?: string;
+  estimatedDays?: number;
+  trackingAvailable: boolean;
+  insuranceAvailable: boolean;
+  shippingCost: number;
+  basePrice: string;
+  pricePerKg?: string;
+  freeShippingThreshold?: string;
+}
 
 interface ShoppingCartModalProps {
   isOpen: boolean;
@@ -32,12 +48,63 @@ export default function ShoppingCartModal({
   getTotalPrice,
   getTotalSavings
 }: ShoppingCartModalProps) {
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("");
+  const [shippingCost, setShippingCost] = useState<number>(0);
+
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
     return { product, quantity };
   }).filter(item => item.product && item.quantity > 0);
 
   const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+  const totalWeight = cartItems.reduce((sum, item) => {
+    const weight = parseFloat(item.product.weight || '1');
+    return sum + (weight * item.quantity);
+  }, 0);
+
+  // Mock shipping rates for now - in a real app this would come from API
+  const mockShippingRates: ShippingRate[] = [
+    {
+      id: 1,
+      deliveryMethod: "motorcycle_courier",
+      transportationType: "motorcycle",
+      description: "تحویل سریع با موتورسیکلت در شهر بغداد",
+      estimatedDays: 1,
+      trackingAvailable: true,
+      insuranceAvailable: false,
+      shippingCost: 5000,
+      basePrice: "5000",
+      pricePerKg: "1000",
+    },
+    {
+      id: 2,
+      deliveryMethod: "postal_service", 
+      transportationType: "ground",
+      description: "ارسال پستی سراسری با امکان رهگیری",
+      estimatedDays: 3,
+      trackingAvailable: true,
+      insuranceAvailable: true,
+      shippingCost: 8000,
+      basePrice: "8000",
+      pricePerKg: "2000",
+    }
+  ];
+
+  // Calculate shipping cost when method changes
+  useEffect(() => {
+    if (selectedShippingMethod) {
+      const rate = mockShippingRates.find(r => r.deliveryMethod === selectedShippingMethod);
+      if (rate) {
+        let cost = parseFloat(rate.basePrice);
+        if (rate.pricePerKg && totalWeight > 0) {
+          cost += totalWeight * parseFloat(rate.pricePerKg);
+        }
+        setShippingCost(cost);
+      }
+    } else {
+      setShippingCost(0);
+    }
+  }, [selectedShippingMethod, totalWeight]);
 
   if (cartItems.length === 0) {
     return (
@@ -200,6 +267,34 @@ export default function ShoppingCartModal({
 
         <Separator />
 
+        {/* Shipping Method Selection */}
+        <div className="space-y-3 border rounded-lg p-4 bg-gray-50">
+          <div className="flex items-center gap-2 mb-2">
+            <Truck className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-medium">روش ارسال</span>
+            <span className="text-xs text-gray-500">(وزن کل: {totalWeight.toFixed(1)} کیلوگرم)</span>
+          </div>
+          
+          <Select value={selectedShippingMethod} onValueChange={setSelectedShippingMethod}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="انتخاب روش ارسال..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">بدون انتخاب روش ارسال</SelectItem>
+              {mockShippingRates.map((rate) => (
+                <SelectItem key={rate.id} value={rate.deliveryMethod}>
+                  <div className="flex flex-col">
+                    <span>{rate.description}</span>
+                    <span className="text-xs text-gray-500">
+                      {rate.basePrice} د.ع + {rate.pricePerKg} د.ع/کیلو - {rate.estimatedDays} روز
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Cart Summary */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -214,11 +309,22 @@ export default function ShoppingCartModal({
             </div>
           )}
           
+          {/* Shipping Cost */}
+          {selectedShippingMethod && shippingCost > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600 flex items-center gap-1">
+                <Truck className="w-3 h-3" />
+                هزینه ارسال
+              </span>
+              <span className="font-medium">{shippingCost.toLocaleString()} د.ع</span>
+            </div>
+          )}
+          
           <Separator />
           
           <div className="flex items-center justify-between text-lg font-bold">
             <span>Total</span>
-            <span>${getTotalPrice().toFixed(2)}</span>
+            <span>${getTotalPrice().toFixed(2)} {shippingCost > 0 && `+ ${shippingCost.toLocaleString()} د.ع`}</span>
           </div>
         </div>
 

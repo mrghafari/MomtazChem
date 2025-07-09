@@ -16952,6 +16952,97 @@ momtazchem.com
     }
   });
 
+  // Get shipping rates for customer checkout
+  app.get("/api/shipping/rates", async (req, res) => {
+    try {
+      const { city, totalWeight } = req.query;
+
+      const rates = await orderManagementStorage.getShippingRates({
+        cityName: city as string,
+        isActive: true
+      });
+
+      // Calculate shipping costs based on rates and order details
+      const calculatedRates = rates.map(rate => {
+        let shippingCost = parseFloat(rate.basePrice || '0');
+        
+        if (totalWeight && rate.pricePerKg) {
+          const weight = parseFloat(totalWeight as string);
+          shippingCost += weight * parseFloat(rate.pricePerKg);
+        }
+
+        return {
+          id: rate.id,
+          deliveryMethod: rate.deliveryMethod,
+          transportationType: rate.transportationType,
+          description: rate.description,
+          estimatedDays: rate.estimatedDays,
+          trackingAvailable: rate.trackingAvailable,
+          insuranceAvailable: rate.insuranceAvailable,
+          shippingCost: shippingCost,
+          basePrice: rate.basePrice,
+          pricePerKg: rate.pricePerKg,
+          freeShippingThreshold: rate.freeShippingThreshold
+        };
+      });
+
+      res.json({
+        success: true,
+        data: calculatedRates
+      });
+    } catch (error) {
+      console.error("Error fetching shipping rates:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch shipping rates"
+      });
+    }
+  });
+
+  // Calculate shipping cost for specific delivery method
+  app.post("/api/shipping/calculate", async (req, res) => {
+    try {
+      const { deliveryMethod, city, totalWeight, orderValue } = req.body;
+
+      const rate = await orderManagementStorage.getShippingRateByMethod(deliveryMethod, city);
+      
+      if (!rate) {
+        return res.status(404).json({
+          success: false,
+          message: "Shipping method not available for your location"
+        });
+      }
+
+      let shippingCost = parseFloat(rate.basePrice || '0');
+      
+      if (totalWeight && rate.pricePerKg) {
+        shippingCost += totalWeight * parseFloat(rate.pricePerKg);
+      }
+
+      // Check for free shipping threshold
+      if (rate.freeShippingThreshold && orderValue >= parseFloat(rate.freeShippingThreshold)) {
+        shippingCost = 0;
+      }
+
+      res.json({
+        success: true,
+        data: {
+          deliveryMethod: rate.deliveryMethod,
+          shippingCost,
+          isFreeShipping: shippingCost === 0,
+          estimatedDays: rate.estimatedDays,
+          trackingAvailable: rate.trackingAvailable
+        }
+      });
+    } catch (error) {
+      console.error("Error calculating shipping cost:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to calculate shipping cost"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
