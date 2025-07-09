@@ -34,27 +34,13 @@ interface Product {
   currency?: string;
 }
 
-interface InventoryTransaction {
-  id: number;
-  productId: number;
-  transactionType: string;
-  quantity: number;
-  previousStock: number;
-  newStock: number;
-  reason: string;
-  reference?: string;
-  scannedBarcode?: string;
-  createdAt: string;
-}
+
 
 export default function BarcodeInventory() {
   const [, setLocation] = useLocation();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
-  const [selectedTransactionType, setSelectedTransactionType] = useState<string>('');
-  const [transactionQuantity, setTransactionQuantity] = useState<number>(0);
-  const [transactionReason, setTransactionReason] = useState<string>('');
-  const [transactionReference, setTransactionReference] = useState<string>('');
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -66,8 +52,7 @@ export default function BarcodeInventory() {
     includeWebsite: true,
     size: 'standard'
   });
-  const [productToUpdate, setProductToUpdate] = useState<Product | null>(null);
-  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -92,44 +77,9 @@ export default function BarcodeInventory() {
     queryKey: ["/api/products"],
   });
 
-  // Fetch inventory transactions
-  const { data: transactions, isLoading: transactionsLoading } = useQuery<InventoryTransaction[]>({
-    queryKey: ["/api/inventory/transactions"],
-    queryFn: async () => {
-      const response = await fetch('/api/inventory/transactions');
-      if (!response.ok) return [];
-      return response.json();
-    }
-  });
 
-  // Inventory update mutation
-  const inventoryUpdateMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await fetch('/api/inventory/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to update inventory');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/transactions"] });
-      setShowUpdateDialog(false);
-      toast({
-        title: "موفق",
-        description: "موجودی با موفقیت به‌روزرسانی شد",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا",
-        description: error.message || "خطا در به‌روزرسانی موجودی",
-        variant: "destructive"
-      });
-    }
-  });
+
+
 
   // Iraq format barcode generation mutation
   const iraqBarcodeGeneration = useMutation({
@@ -211,30 +161,6 @@ export default function BarcodeInventory() {
 
   const handleProductScan = (product: Product) => {
     setSelectedProduct(product);
-    setProductToUpdate(product);
-    setShowUpdateDialog(true);
-  };
-
-  const handleUpdateInventory = () => {
-    if (!productToUpdate || !selectedTransactionType || transactionQuantity <= 0) {
-      toast({
-        title: "داده‌های ناکافی",
-        description: "لطفاً تمام فیلدهای مورد نیاز را پر کنید",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const data = {
-      productId: productToUpdate.id,
-      transactionType: selectedTransactionType,
-      quantity: transactionQuantity,
-      reason: transactionReason,
-      reference: transactionReference,
-      scannedBarcode: productToUpdate.barcode
-    };
-
-    inventoryUpdateMutation.mutate(data);
   };
 
   const handleSelectProduct = (productId: number) => {
@@ -402,7 +328,7 @@ export default function BarcodeInventory() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Inventory Operations</CardTitle>
+                <CardTitle>Product Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {selectedProduct ? (
@@ -414,61 +340,24 @@ export default function BarcodeInventory() {
                     </div>
                     
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">نوع تراکنش</label>
-                      <Select value={selectedTransactionType} onValueChange={setSelectedTransactionType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="انتخاب نوع تراکنش" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="in">ورود کالا</SelectItem>
-                          <SelectItem value="out">خروج کالا</SelectItem>
-                          <SelectItem value="adjust">تعدیل موجودی</SelectItem>
-                          <SelectItem value="transfer">انتقال</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-600">
+                          <strong>SKU:</strong> {selectedProduct.sku || 'تعریف نشده'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <strong>بارکد:</strong> {selectedProduct.barcode || 'ندارد'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <strong>حداقل موجودی:</strong> {selectedProduct.minStockLevel || 5} {selectedProduct.stockUnit}
+                        </p>
+                      </div>
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">مقدار</label>
-                      <Input
-                        type="number"
-                        value={transactionQuantity}
-                        onChange={(e) => setTransactionQuantity(parseInt(e.target.value))}
-                        placeholder="مقدار"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">دلیل</label>
-                      <Input
-                        value={transactionReason}
-                        onChange={(e) => setTransactionReason(e.target.value)}
-                        placeholder="دلیل تراکنش"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">مرجع</label>
-                      <Input
-                        value={transactionReference}
-                        onChange={(e) => setTransactionReference(e.target.value)}
-                        placeholder="شماره مرجع"
-                      />
-                    </div>
-
-                    <Button 
-                      onClick={handleUpdateInventory}
-                      disabled={inventoryUpdateMutation.isPending}
-                      className="w-full"
-                    >
-                      {inventoryUpdateMutation.isPending ? 'در حال پردازش...' : 'به‌روزرسانی موجودی'}
-                    </Button>
                   </div>
                 ) : (
                   <div className="text-center py-12">
                     <Scan className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-600 mb-2">Scan a Product</h3>
-                    <p className="text-gray-500">Use the scanner to select a product for inventory operations</p>
+                    <p className="text-gray-500">Use the scanner to view detailed product information</p>
                   </div>
                 )}
               </CardContent>
