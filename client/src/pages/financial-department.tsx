@@ -268,11 +268,18 @@ export default function FinancialDepartment() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-2">اطلاعات مشتری</h4>
-                          <p className="text-sm text-gray-600">
-                            {order.customer?.firstName} {order.customer?.lastName}
+                          <p className="text-sm text-gray-600 font-medium">
+                            {order.customer?.firstName && order.customer?.lastName 
+                              ? `${order.customer.firstName} ${order.customer.lastName}`
+                              : 'نام مشتری ناشناس'
+                            }
                           </p>
-                          <p className="text-sm text-gray-600">{order.customer?.email}</p>
-                          <p className="text-sm text-gray-600">{order.customer?.phone}</p>
+                          <p className="text-sm text-gray-600">
+                            {order.customer?.email || 'ایمیل ثبت نشده'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {order.customer?.phone || 'شماره تلفن ثبت نشده'}
+                          </p>
                         </div>
                         
                         <div>
@@ -342,7 +349,16 @@ export default function FinancialDepartment() {
                   <div>
                     <span className="text-gray-600">مشتری:</span>
                     <span className="font-medium ml-2">
-                      {selectedOrder.customer?.firstName} {selectedOrder.customer?.lastName}
+                      {selectedOrder.customer?.firstName && selectedOrder.customer?.lastName 
+                        ? `${selectedOrder.customer.firstName} ${selectedOrder.customer.lastName}`
+                        : 'نام مشتری ناشناس'
+                      }
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">تلفن:</span>
+                    <span className="font-medium ml-2">
+                      {selectedOrder.customer?.phone || 'شماره تلفن ثبت نشده'}
                     </span>
                   </div>
                   <div>
