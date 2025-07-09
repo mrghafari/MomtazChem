@@ -8,6 +8,7 @@ import {
   boolean,
   varchar,
   index,
+  json,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -163,6 +164,82 @@ export const deliveryCodes = pgTable("delivery_codes", {
   index("idx_delivery_codes_order").on(table.orderManagementId),
 ]);
 
+// Shipping rates table - pricing for different delivery methods
+export const shippingRates = pgTable("shipping_rates", {
+  id: serial("id").primaryKey(),
+  deliveryMethod: varchar("delivery_method", { length: 50 }).notNull(), // post, courier, truck, personal_pickup
+  transportationType: varchar("transportation_type", { length: 50 }), // motorcycle, car, truck, van
+  
+  // Geographic coverage
+  cityName: text("city_name"), // null means national/all cities
+  provinceName: text("province_name"), // null means all provinces
+  
+  // Weight and size limits
+  minWeight: decimal("min_weight", { precision: 8, scale: 2 }).default("0"), // kg
+  maxWeight: decimal("max_weight", { precision: 8, scale: 2 }), // kg (null = no limit)
+  maxDimensions: text("max_dimensions"), // "length x width x height cm"
+  
+  // Pricing structure
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(), // Base shipping cost
+  pricePerKg: decimal("price_per_kg", { precision: 8, scale: 2 }).default("0"), // Additional cost per kg
+  freeShippingThreshold: decimal("free_shipping_threshold", { precision: 10, scale: 2 }), // Order value for free shipping
+  
+  // Service details
+  estimatedDays: integer("estimated_days"), // Delivery time in days
+  trackingAvailable: boolean("tracking_available").default(false),
+  insuranceAvailable: boolean("insurance_available").default(false),
+  insuranceRate: decimal("insurance_rate", { precision: 5, scale: 4 }).default("0"), // % of order value
+  
+  // Status and management
+  isActive: boolean("is_active").default(true),
+  description: text("description"), // Service description for customers
+  internalNotes: text("internal_notes"), // Admin notes
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("shipping_rates_method_idx").on(table.deliveryMethod),
+  index("shipping_rates_city_idx").on(table.cityName),
+  index("shipping_rates_active_idx").on(table.isActive),
+]);
+
+// VAT (Value Added Tax) settings table - for financial management
+export const vatSettings = pgTable("vat_settings", {
+  id: serial("id").primaryKey(),
+  
+  // VAT configuration
+  vatRate: decimal("vat_rate", { precision: 5, scale: 2 }).notNull().default("0"), // VAT percentage (e.g., 9.00 for 9%)
+  vatEnabled: boolean("vat_enabled").default(false), // Enable/disable VAT calculation
+  
+  // Product category exemptions
+  exemptCategories: json("exempt_categories"), // Array of product categories exempt from VAT
+  exemptProductIds: json("exempt_product_ids"), // Array of specific product IDs exempt from VAT
+  
+  // Geographic settings
+  applicableRegions: json("applicable_regions"), // Array of regions where VAT applies
+  defaultRegion: text("default_region").default("Iraq"), // Default region for VAT calculation
+  
+  // Billing and display settings
+  vatIncludedInPrice: boolean("vat_included_in_price").default(false), // Whether displayed prices include VAT
+  vatDisplayName: text("vat_display_name").default("مالیات بر ارزش افزوده"), // Display name for VAT on invoices
+  vatNumber: text("vat_number"), // Company VAT registration number
+  
+  // Special rules
+  shippingTaxable: boolean("shipping_taxable").default(false), // Whether shipping costs are taxable (usually false)
+  minimumTaxableAmount: decimal("minimum_taxable_amount", { precision: 10, scale: 2 }), // Minimum order amount for VAT
+  
+  // Administrative settings
+  isActive: boolean("is_active").default(true),
+  effectiveDate: timestamp("effective_date").defaultNow(), // When this VAT setting becomes effective
+  notes: text("notes"), // Administrative notes about VAT settings
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("vat_settings_active_idx").on(table.isActive),
+  index("vat_settings_effective_idx").on(table.effectiveDate),
+]);
+
 // Insert schemas
 export const insertOrderManagementSchema = createInsertSchema(orderManagement).omit({
   id: true,
@@ -190,6 +267,18 @@ export const insertDeliveryCodeSchema = createInsertSchema(deliveryCodes).omit({
   createdAt: true,
 });
 
+export const insertShippingRateSchema = createInsertSchema(shippingRates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVatSettingSchema = createInsertSchema(vatSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type OrderManagement = typeof orderManagement.$inferSelect;
 export type InsertOrderManagement = z.infer<typeof insertOrderManagementSchema>;
@@ -205,6 +294,12 @@ export type InsertPaymentReceipt = z.infer<typeof insertPaymentReceiptSchema>;
 
 export type DeliveryCode = typeof deliveryCodes.$inferSelect;
 export type InsertDeliveryCode = z.infer<typeof insertDeliveryCodeSchema>;
+
+export type ShippingRate = typeof shippingRates.$inferSelect;
+export type InsertShippingRate = z.infer<typeof insertShippingRateSchema>;
+
+export type VatSetting = typeof vatSettings.$inferSelect;
+export type InsertVatSetting = z.infer<typeof insertVatSettingSchema>;
 
 // Helper types
 export type OrderStatus = typeof orderStatuses[keyof typeof orderStatuses];

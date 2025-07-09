@@ -36,7 +36,7 @@ import puppeteer from "puppeteer";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
-import { orderManagement } from "@shared/order-management-schema";
+import { orderManagement, shippingRates, vatSettings } from "@shared/order-management-schema";
 import nodemailer from "nodemailer";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
@@ -10184,6 +10184,392 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error processing logistics order:', error);
       res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
+    }
+  });
+
+  // ============================================================================
+  // SHIPPING RATES MANAGEMENT (LOGISTICS DEPARTMENT)
+  // ============================================================================
+
+  // Get all shipping rates
+  app.get('/api/logistics/shipping-rates', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const rates = await db
+        .select()
+        .from(shippingRates)
+        .orderBy(shippingRates.deliveryMethod, shippingRates.transportationType);
+      
+      res.json({ success: true, rates });
+    } catch (error) {
+      console.error('Error fetching shipping rates:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تعرفه‌های ارسال" });
+    }
+  });
+
+  // Create new shipping rate
+  app.post('/api/logistics/shipping-rates', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const rateData = req.body;
+      
+      const [newRate] = await db
+        .insert(shippingRates)
+        .values(rateData)
+        .returning();
+      
+      res.json({ success: true, rate: newRate, message: "تعرفه ارسال جدید ایجاد شد" });
+    } catch (error) {
+      console.error('Error creating shipping rate:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد تعرفه ارسال" });
+    }
+  });
+
+  // Update shipping rate
+  app.put('/api/logistics/shipping-rates/:id', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const rateId = parseInt(req.params.id);
+      const updateData = req.body;
+      
+      const [updatedRate] = await db
+        .update(shippingRates)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(shippingRates.id, rateId))
+        .returning();
+      
+      if (!updatedRate) {
+        return res.status(404).json({ success: false, message: "تعرفه ارسال یافت نشد" });
+      }
+      
+      res.json({ success: true, rate: updatedRate, message: "تعرفه ارسال به‌روزرسانی شد" });
+    } catch (error) {
+      console.error('Error updating shipping rate:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی تعرفه ارسال" });
+    }
+  });
+
+  // Delete shipping rate
+  app.delete('/api/logistics/shipping-rates/:id', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const rateId = parseInt(req.params.id);
+      
+      const [deletedRate] = await db
+        .delete(shippingRates)
+        .where(eq(shippingRates.id, rateId))
+        .returning();
+      
+      if (!deletedRate) {
+        return res.status(404).json({ success: false, message: "تعرفه ارسال یافت نشد" });
+      }
+      
+      res.json({ success: true, message: "تعرفه ارسال حذف شد" });
+    } catch (error) {
+      console.error('Error deleting shipping rate:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف تعرفه ارسال" });
+    }
+  });
+
+  // ============================================================================
+  // CUSTOMER SHIPPING COST CALCULATION
+  // ============================================================================
+
+  // Calculate shipping cost for customer checkout
+  app.post('/api/shipping/calculate', async (req, res) => {
+    try {
+      const { deliveryMethod, transportationType, customerCity, orderTotal, totalWeight } = req.body;
+      
+      // Find applicable shipping rate
+      const applicableRates = await db
+        .select()
+        .from(shippingRates)
+        .where(and(
+          eq(shippingRates.deliveryMethod, deliveryMethod),
+          transportationType ? eq(shippingRates.transportationType, transportationType) : sql`1=1`,
+          eq(shippingRates.isActive, true),
+          or(
+            isNull(shippingRates.cityName), // National shipping
+            eq(shippingRates.cityName, customerCity) // City-specific
+          ),
+          or(
+            isNull(shippingRates.maxWeight), // No weight limit
+            sql`${totalWeight} <= ${shippingRates.maxWeight}` // Within weight limit
+          ),
+          sql`${totalWeight} >= ${shippingRates.minWeight}` // Above minimum weight
+        ))
+        .orderBy(shippingRates.cityName); // City-specific rates first
+      
+      if (applicableRates.length === 0) {
+        return res.json({ 
+          success: false, 
+          message: "روش ارسال انتخابی برای منطقه شما در دسترس نیست" 
+        });
+      }
+      
+      const rate = applicableRates[0]; // Use most specific rate (city-specific if available)
+      
+      // Check for free shipping threshold
+      if (rate.freeShippingThreshold && orderTotal >= parseFloat(rate.freeShippingThreshold)) {
+        return res.json({
+          success: true,
+          shippingCost: 0,
+          isFreeShipping: true,
+          rate: {
+            id: rate.id,
+            deliveryMethod: rate.deliveryMethod,
+            transportationType: rate.transportationType,
+            description: rate.description,
+            estimatedDays: rate.estimatedDays,
+            trackingAvailable: rate.trackingAvailable
+          }
+        });
+      }
+      
+      // Calculate shipping cost
+      const basePrice = parseFloat(rate.basePrice);
+      const weightCost = totalWeight * parseFloat(rate.pricePerKg || "0");
+      const insuranceCost = rate.insuranceAvailable && rate.insuranceRate ? 
+        orderTotal * parseFloat(rate.insuranceRate) : 0;
+      
+      const totalShippingCost = basePrice + weightCost + insuranceCost;
+      
+      res.json({
+        success: true,
+        shippingCost: totalShippingCost,
+        isFreeShipping: false,
+        breakdown: {
+          basePrice,
+          weightCost,
+          insuranceCost,
+          totalWeight
+        },
+        rate: {
+          id: rate.id,
+          deliveryMethod: rate.deliveryMethod,
+          transportationType: rate.transportationType,
+          description: rate.description,
+          estimatedDays: rate.estimatedDays,
+          trackingAvailable: rate.trackingAvailable,
+          insuranceAvailable: rate.insuranceAvailable
+        }
+      });
+    } catch (error) {
+      console.error('Error calculating shipping cost:', error);
+      res.status(500).json({ success: false, message: "خطا در محاسبه هزینه ارسال" });
+    }
+  });
+
+  // Get available shipping methods for customer location
+  app.get('/api/shipping/methods', async (req, res) => {
+    try {
+      const { city, orderTotal, totalWeight } = req.query;
+      
+      const availableMethods = await db
+        .selectDistinct({
+          deliveryMethod: shippingRates.deliveryMethod,
+          transportationType: shippingRates.transportationType,
+          description: shippingRates.description,
+          estimatedDays: shippingRates.estimatedDays,
+          trackingAvailable: shippingRates.trackingAvailable,
+          basePrice: shippingRates.basePrice,
+          freeShippingThreshold: shippingRates.freeShippingThreshold
+        })
+        .from(shippingRates)
+        .where(and(
+          eq(shippingRates.isActive, true),
+          or(
+            isNull(shippingRates.cityName), // National shipping
+            eq(shippingRates.cityName, city as string) // City-specific
+          ),
+          or(
+            isNull(shippingRates.maxWeight), // No weight limit
+            sql`${totalWeight} <= ${shippingRates.maxWeight}` // Within weight limit
+          ),
+          sql`${totalWeight || 0} >= ${shippingRates.minWeight}` // Above minimum weight
+        ))
+        .orderBy(shippingRates.basePrice);
+      
+      res.json({ success: true, methods: availableMethods });
+    } catch (error) {
+      console.error('Error fetching shipping methods:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت روش‌های ارسال" });
+    }
+  });
+
+  // ============================================================================
+  // VAT MANAGEMENT (FINANCIAL DEPARTMENT)
+  // ============================================================================
+
+  // Get current VAT settings
+  app.get('/api/financial/vat-settings', requireDepartmentAuth('financial'), async (req, res) => {
+    try {
+      const [currentVat] = await db
+        .select()
+        .from(vatSettings)
+        .where(eq(vatSettings.isActive, true))
+        .orderBy(desc(vatSettings.effectiveDate))
+        .limit(1);
+      
+      res.json({ success: true, vatSettings: currentVat || null });
+    } catch (error) {
+      console.error('Error fetching VAT settings:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات مالیات" });
+    }
+  });
+
+  // Update VAT settings
+  app.put('/api/financial/vat-settings', requireDepartmentAuth('financial'), async (req, res) => {
+    try {
+      const vatData = req.body;
+      
+      // Deactivate current VAT settings
+      await db
+        .update(vatSettings)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(vatSettings.isActive, true));
+      
+      // Create new VAT settings
+      const [newVatSettings] = await db
+        .insert(vatSettings)
+        .values({
+          ...vatData,
+          isActive: true,
+          effectiveDate: new Date()
+        })
+        .returning();
+      
+      res.json({ 
+        success: true, 
+        vatSettings: newVatSettings, 
+        message: "تنظیمات مالیات به‌روزرسانی شد" 
+      });
+    } catch (error) {
+      console.error('Error updating VAT settings:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی تنظیمات مالیات" });
+    }
+  });
+
+  // Calculate VAT for order (for checkout)
+  app.post('/api/financial/calculate-vat', async (req, res) => {
+    try {
+      const { orderItems, orderTotal, shippingCost, customerRegion } = req.body;
+      
+      // Get current VAT settings
+      const [currentVat] = await db
+        .select()
+        .from(vatSettings)
+        .where(and(
+          eq(vatSettings.isActive, true),
+          eq(vatSettings.vatEnabled, true)
+        ))
+        .orderBy(desc(vatSettings.effectiveDate))
+        .limit(1);
+      
+      if (!currentVat) {
+        return res.json({
+          success: true,
+          vatAmount: 0,
+          vatRate: 0,
+          taxableAmount: 0,
+          totalWithVat: orderTotal + (shippingCost || 0),
+          breakdown: {
+            productVat: 0,
+            shippingVat: 0,
+            exemptAmount: orderTotal
+          }
+        });
+      }
+      
+      // Check if VAT applies to customer region
+      const applicableRegions = currentVat.applicableRegions as string[] || [];
+      if (applicableRegions.length > 0 && !applicableRegions.includes(customerRegion)) {
+        return res.json({
+          success: true,
+          vatAmount: 0,
+          vatRate: parseFloat(currentVat.vatRate),
+          taxableAmount: 0,
+          totalWithVat: orderTotal + (shippingCost || 0),
+          breakdown: {
+            productVat: 0,
+            shippingVat: 0,
+            exemptAmount: orderTotal
+          }
+        });
+      }
+      
+      // Calculate VAT for products
+      const exemptCategories = currentVat.exemptCategories as string[] || [];
+      const exemptProductIds = currentVat.exemptProductIds as number[] || [];
+      
+      let taxableAmount = 0;
+      let exemptAmount = 0;
+      
+      for (const item of orderItems) {
+        const isExempt = exemptCategories.includes(item.category) || 
+                        exemptProductIds.includes(item.productId);
+        
+        if (isExempt) {
+          exemptAmount += item.totalPrice;
+        } else {
+          taxableAmount += item.totalPrice;
+        }
+      }
+      
+      // Check minimum taxable amount
+      if (currentVat.minimumTaxableAmount && 
+          taxableAmount < parseFloat(currentVat.minimumTaxableAmount)) {
+        taxableAmount = 0;
+        exemptAmount = orderTotal;
+      }
+      
+      // Calculate VAT amounts
+      const vatRate = parseFloat(currentVat.vatRate) / 100;
+      const productVat = taxableAmount * vatRate;
+      
+      // Shipping is typically VAT-exempt in Iraq
+      const shippingVat = currentVat.shippingTaxable ? (shippingCost || 0) * vatRate : 0;
+      
+      const totalVat = productVat + shippingVat;
+      const totalWithVat = orderTotal + (shippingCost || 0) + totalVat;
+      
+      res.json({
+        success: true,
+        vatAmount: totalVat,
+        vatRate: parseFloat(currentVat.vatRate),
+        taxableAmount,
+        totalWithVat,
+        breakdown: {
+          productVat,
+          shippingVat,
+          exemptAmount,
+          taxableProductAmount: taxableAmount,
+          vatDisplayName: currentVat.vatDisplayName,
+          vatNumber: currentVat.vatNumber
+        }
+      });
+    } catch (error) {
+      console.error('Error calculating VAT:', error);
+      res.status(500).json({ success: false, message: "خطا در محاسبه مالیات" });
+    }
+  });
+
+  // Get VAT-exempt categories and products (for admin reference)
+  app.get('/api/financial/vat-exemptions', requireDepartmentAuth('financial'), async (req, res) => {
+    try {
+      const [currentVat] = await db
+        .select({
+          exemptCategories: vatSettings.exemptCategories,
+          exemptProductIds: vatSettings.exemptProductIds
+        })
+        .from(vatSettings)
+        .where(eq(vatSettings.isActive, true))
+        .orderBy(desc(vatSettings.effectiveDate))
+        .limit(1);
+      
+      res.json({ 
+        success: true, 
+        exemptions: currentVat || { exemptCategories: [], exemptProductIds: [] }
+      });
+    } catch (error) {
+      console.error('Error fetching VAT exemptions:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت معافیت‌های مالیاتی" });
     }
   });
 

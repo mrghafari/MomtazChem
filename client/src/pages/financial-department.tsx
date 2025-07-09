@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
-import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, X } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, X, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
+import VatManagement from "@/components/VatManagement";
 
 interface OrderManagement {
   id: number;
@@ -193,7 +195,7 @@ export default function FinancialDepartment() {
               بخش مالی
             </h1>
             <p className="text-lg text-gray-600 mt-2">
-              بررسی و تایید پرداخت‌های مشتریان
+              بررسی و تایید پرداخت‌های مشتریان و مدیریت مالیات
             </p>
           </div>
           
@@ -213,62 +215,78 @@ export default function FinancialDepartment() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">سفارشات در انتظار</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{orders.length}</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">تایید شده امروز</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-l-4 border-l-red-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">رد شده امروز</CardTitle>
-              <XCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Tabs for Financial Operations */}
+        <Tabs defaultValue="orders" className="mb-6" dir="rtl">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              سفارشات
+            </TabsTrigger>
+            <TabsTrigger value="vat" className="flex items-center gap-2">
+              <Calculator className="w-4 h-4" />
+              مدیریت مالیات (VAT)
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Refresh Control */}
-        <div className="mb-6">
-          <GlobalRefreshControl 
-            pageName="financial"
-            onRefresh={() => refetch()}
-            isLoading={isLoading}
-          />
-        </div>
+          {/* Orders Tab */}
+          <TabsContent value="orders" className="space-y-6">{/* Move orders content here */}
 
-        {/* Orders List */}
-        {isLoading ? (
-          <div className="text-center py-8">در حال بارگذاری...</div>
-        ) : orders.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">هیچ سفارشی در انتظار نیست</h3>
-              <p className="text-gray-500">تمام سفارشات مالی پردازش شده‌اند</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {orders.map((order: OrderManagement) => (
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Card className="border-l-4 border-l-blue-500">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">سفارشات در انتظار</CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{orders.length}</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-l-4 border-l-green-500">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">تایید شده امروز</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">0</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-l-4 border-l-red-500">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">رد شده امروز</CardTitle>
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">0</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Refresh Control */}
+            <div className="mb-6">
+              <GlobalRefreshControl 
+                pageName="financial"
+                onRefresh={() => refetch()}
+                isLoading={isLoading}
+              />
+            </div>
+
+            {/* Orders List */}
+            {isLoading ? (
+              <div className="text-center py-8">در حال بارگذاری...</div>
+            ) : orders.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">هیچ سفارشی در انتظار نیست</h3>
+                  <p className="text-gray-500">تمام سفارشات مالی پردازش شده‌اند</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {orders.map((order: OrderManagement) => (
               <Card key={order.id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -373,8 +391,15 @@ export default function FinancialDepartment() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        )}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* VAT Management Tab */}
+          <TabsContent value="vat">
+            <VatManagement />
+          </TabsContent>
+        </Tabs>
 
         {/* Process Order Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
