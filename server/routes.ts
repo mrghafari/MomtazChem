@@ -10016,6 +10016,134 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   }
 
   // ============================================================================
+  // LOGISTICS DEPARTMENT ROUTES
+  // ============================================================================
+
+  // Logistics login
+  app.post('/api/logistics/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Check if user exists and has logistics department access
+      const [user] = await db
+        .select()
+        .from(schema.users)
+        .where(and(
+          eq(schema.users.username, username),
+          eq(schema.users.department, 'logistics'),
+          eq(schema.users.isActive, true)
+        ));
+
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "نام کاربری یا رمز عبور اشتباه است" 
+        });
+      }
+
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "نام کاربری یا رمز عبور اشتباه است" 
+        });
+      }
+
+      // Update last login
+      await db
+        .update(schema.users)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(schema.users.id, user.id));
+
+      // Set session
+      req.session.departmentUser = {
+        id: user.id,
+        username: user.username,
+        department: user.department || 'logistics'
+      };
+
+      res.json({ 
+        success: true, 
+        message: "ورود موفق", 
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          department: user.department 
+        } 
+      });
+    } catch (error) {
+      console.error('Logistics login error:', error);
+      res.status(500).json({ success: false, message: "خطا در ورود" });
+    }
+  });
+
+  // Logistics logout
+  app.post('/api/logistics/logout', (req, res) => {
+    req.session.departmentUser = undefined;
+    res.json({ success: true, message: "خروج موفق" });
+  });
+
+  // Logistics auth check
+  app.get('/api/logistics/auth/me', requireDepartmentAuth('logistics'), (req: any, res) => {
+    res.json({ 
+      success: true, 
+      user: req.session.departmentUser 
+    });
+  });
+
+  // Get logistics pending orders - only warehouse_approved orders
+  app.get('/api/logistics/orders', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const orders = await orderManagementStorage.getLogisticsPendingOrders();
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error('Error fetching logistics orders:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
+    }
+  });
+
+  // Process logistics order
+  app.post('/api/logistics/orders/:id/process', requireDepartmentAuth('logistics'), async (req: any, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { action, notes, reviewerId, trackingNumber, estimatedDeliveryDate, deliveryPersonName, deliveryPersonPhone } = req.body;
+      
+      if (action === 'approve') {
+        await orderManagementStorage.updateOrderStatus(
+          orderId,
+          'logistics_approved',
+          reviewerId,
+          'logistics',
+          notes || 'تایید شده توسط بخش لجستیک'
+        );
+        
+        // Update delivery information
+        if (trackingNumber || estimatedDeliveryDate || deliveryPersonName || deliveryPersonPhone) {
+          await orderManagementStorage.updateDeliveryInfo(orderId, {
+            trackingNumber,
+            estimatedDeliveryDate: estimatedDeliveryDate ? new Date(estimatedDeliveryDate) : undefined,
+            deliveryPersonName,
+            deliveryPersonPhone
+          });
+        }
+      } else {
+        await orderManagementStorage.updateOrderStatus(
+          orderId,
+          'logistics_rejected',
+          reviewerId,
+          'logistics',
+          notes || 'رد شده توسط بخش لجستیک'
+        );
+      }
+
+      res.json({ success: true, message: "سفارش با موفقیت پردازش شد" });
+    } catch (error) {
+      console.error('Error processing logistics order:', error);
+      res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
+    }
+  });
+
+  // ============================================================================
   // FINANCIAL DEPARTMENT ROUTES
   // ============================================================================
 

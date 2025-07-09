@@ -40,6 +40,14 @@ export interface IOrderManagementStorage {
   getWarehousePendingOrders(): Promise<OrderManagement[]>;
   getLogisticsPendingOrders(): Promise<OrderManagement[]>;
   
+  // Delivery information
+  updateDeliveryInfo(orderId: number, deliveryData: {
+    trackingNumber?: string;
+    estimatedDeliveryDate?: Date;
+    deliveryPersonName?: string;
+    deliveryPersonPhone?: string;
+  }): Promise<void>;
+  
   // Payment receipts
   uploadPaymentReceipt(receiptData: InsertPaymentReceipt): Promise<PaymentReceipt>;
   getPaymentReceiptsByOrder(customerOrderId: number): Promise<PaymentReceipt[]>;
@@ -377,6 +385,35 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   
   async getLogisticsPendingOrders(): Promise<OrderManagement[]> {
     return this.getOrdersByDepartment('logistics');
+  }
+  
+  async updateDeliveryInfo(orderId: number, deliveryData: {
+    trackingNumber?: string;
+    estimatedDeliveryDate?: Date;
+    deliveryPersonName?: string;
+    deliveryPersonPhone?: string;
+  }): Promise<void> {
+    const updateData: any = {};
+    
+    if (deliveryData.trackingNumber) {
+      updateData.trackingNumber = deliveryData.trackingNumber;
+    }
+    if (deliveryData.estimatedDeliveryDate) {
+      updateData.estimatedDeliveryDate = deliveryData.estimatedDeliveryDate;
+    }
+    if (deliveryData.deliveryPersonName) {
+      updateData.deliveryPersonName = deliveryData.deliveryPersonName;
+    }
+    if (deliveryData.deliveryPersonPhone) {
+      updateData.deliveryPersonPhone = deliveryData.deliveryPersonPhone;
+    }
+    
+    if (Object.keys(updateData).length > 0) {
+      await db
+        .update(orderManagement)
+        .set(updateData)
+        .where(eq(orderManagement.id, orderId));
+    }
   }
   
   async uploadPaymentReceipt(receiptData: InsertPaymentReceipt): Promise<PaymentReceipt> {

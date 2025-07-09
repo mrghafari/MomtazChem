@@ -1,153 +1,138 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Truck, Eye, EyeOff } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-
-const loginSchema = z.object({
-  username: z.string().min(1, "نام کاربری الزامی است"),
-  password: z.string().min(1, "رمز عبور الزامی است"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import { Truck, Eye, EyeOff } from "lucide-react";
 
 export default function LogisticsLogin() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
+    setError("");
+
     try {
       const response = await fetch('/api/logistics/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ username, password }),
       });
 
-      const result = await response.json();
+      const data = await response.json();
 
-      if (response.ok && result.success) {
+      if (response.ok && data.success) {
         toast({
           title: "ورود موفق",
           description: "به بخش لجستیک خوش آمدید",
         });
-        setLocation('/logistics');
+        setLocation('/logistics-department');
       } else {
-        toast({
-          title: "خطا در ورود",
-          description: result.message || "نام کاربری یا رمز عبور اشتباه است",
-          variant: "destructive",
-        });
+        setError(data.message || "خطا در ورود");
       }
     } catch (error) {
-      toast({
-        title: "خطا در اتصال",
-        description: "مشکل در برقراری ارتباط با سرور",
-        variant: "destructive",
-      });
+      setError("خطا در برقراری ارتباط با سرور");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-purple-100">
-            <Truck className="h-8 w-8 text-purple-600" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">بخش لجستیک</CardTitle>
-          <CardDescription className="text-gray-600">
-            ورود به سیستم مدیریت لجستیک
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>نام کاربری</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="نام کاربری خود را وارد کنید"
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <Card>
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                <Truck className="w-10 h-10 text-blue-600" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              ورود به بخش لجستیک
+            </CardTitle>
+            <CardDescription className="text-gray-600">
+              مدیریت ارسال و تحویل سفارشات
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
               
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رمز عبور</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          {...field}
-                          type={showPassword ? "text" : "password"}
-                          placeholder="رمز عبور خود را وارد کنید"
-                          disabled={isLoading}
-                          className="pr-10"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                          onClick={() => setShowPassword(!showPassword)}
-                          disabled={isLoading}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-400" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-gray-400" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="username">نام کاربری</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="نام کاربری خود را وارد کنید"
+                    disabled={isLoading}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="password">رمز عبور</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="رمز عبور خود را وارد کنید"
+                      disabled={isLoading}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isLoading}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
               <Button
                 type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-blue-600 hover:bg-blue-700"
                 disabled={isLoading}
               >
-                {isLoading ? "در حال ورود..." : "ورود به بخش لجستیک"}
+                {isLoading ? "در حال ورود..." : "ورود"}
               </Button>
             </form>
-          </Form>
-        </CardContent>
-      </Card>
+            
+            <div className="mt-6 text-center text-sm text-gray-600">
+              <p>در صورت مشکل در ورود، با مدیر سیستم تماس بگیرید</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
