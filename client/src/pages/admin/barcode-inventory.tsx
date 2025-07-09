@@ -50,6 +50,7 @@ export default function BarcodeInventory() {
     includePrice: true,
     includeSKU: true,
     includeWebsite: true,
+    websiteText: 'www.momtazchem.com',
     size: 'standard'
   });
 
@@ -242,9 +243,78 @@ export default function BarcodeInventory() {
     });
   };
 
+  const downloadCustomizedLabels = async () => {
+    const selectedProductsList = selectedProducts.length > 0 
+      ? products?.filter(p => selectedProducts.includes(p.id)) 
+      : products?.filter(p => p.barcode);
+
+    if (!selectedProductsList || selectedProductsList.length === 0) {
+      toast({
+        title: "محصولی یافت نشد",
+        description: "محصولی برای تولید برچسب انتخاب نشده",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/barcode/generate-custom-labels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          products: selectedProductsList,
+          options: labelOptions
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate labels');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `customized-labels-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "موفق",
+        description: "برچسب‌های سفارشی با موفقیت دانلود شد",
+      });
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در تولید برچسب‌های سفارشی",
+        variant: "destructive"
+      });
+    }
+  };
+
   const generateLabelZPLForProduct = (product: Product) => {
     const price = product.price || product.unitPrice || 0;
     const priceText = price > 0 ? `${Math.round(price).toLocaleString()} ${product.priceUnit || product.currency || 'IQD'}` : 'قیمت تعریف نشده';
+    
+    let yPosition = 220;
+    let optionalFields = '';
+    
+    // Add price if enabled
+    if (labelOptions.includePrice) {
+      optionalFields += `^FO50,${yPosition}^A0N,20,20^FD${priceText}^FS\n`;
+      yPosition += 30;
+    }
+    
+    // Add SKU if enabled
+    if (labelOptions.includeSKU && product.sku) {
+      optionalFields += `^FO50,${yPosition}^A0N,20,20^FDSKU: ${product.sku}^FS\n`;
+      yPosition += 30;
+    }
+    
+    // Add website if enabled
+    if (labelOptions.includeWebsite) {
+      optionalFields += `^FO50,${yPosition}^A0N,20,20^FD${labelOptions.websiteText}^FS\n`;
+    }
     
     return `
 ^XA
@@ -252,10 +322,7 @@ export default function BarcodeInventory() {
 ^FO50,100^BY2,3,47
 ^BCN,100,Y,N,N
 ^FD${product.barcode || ''}^FS
-^FO50,220^A0N,20,20^FD${priceText}^FS
-^FO50,250^A0N,20,20^FD${product.sku || ''}^FS
-^FO50,280^A0N,20,20^FDmomtazchem.com^FS
-^XZ`;
+${optionalFields}^XZ`;
   };
 
   const getStockStatusColor = (product: Product) => {
@@ -551,52 +618,171 @@ export default function BarcodeInventory() {
 
       {/* Label Preview Dialog */}
       <Dialog open={showLabelPreview} onOpenChange={setShowLabelPreview}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>پیش‌نمایش برچسب</DialogTitle>
+            <DialogTitle>تنظیمات و پیش‌نمایش برچسب</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="text-sm text-gray-600">
-              {selectedProducts.length} محصول انتخاب شده
-            </div>
+          <div className="space-y-6">
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-              {selectedProducts.map(productId => {
-                const product = products?.find(p => p.id === productId);
-                if (!product) return null;
-                
-                const price = product.price || product.unitPrice || 0;
-                const priceText = price > 0 ? `${Math.round(price).toLocaleString()} ${product.priceUnit || product.currency || 'IQD'}` : 'قیمت تعریف نشده';
-                
-                return (
-                  <div key={productId} className="border rounded-lg p-4 bg-white">
-                    <div className="text-sm font-medium truncate">{product.name}</div>
-                    <div className="flex justify-center my-2">
-                      <VisualBarcode 
-                        value={product.barcode || ''} 
-                        productName={product.name}
-                        sku={product.sku}
-                        price={price}
+            {/* Customization Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">تنظیمات برچسب</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  {/* Content Options */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900">محتوای برچسب</h4>
+                    
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <Checkbox
+                        id="includePrice"
+                        checked={labelOptions.includePrice}
+                        onCheckedChange={(checked) => 
+                          setLabelOptions(prev => ({ ...prev, includePrice: !!checked }))
+                        }
                       />
+                      <label htmlFor="includePrice" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        نمایش قیمت
+                      </label>
                     </div>
-                    <div className="text-xs text-gray-600">
-                      <div>{priceText}</div>
-                      <div>SKU: {product.sku || 'N/A'}</div>
-                      <div>momtazchem.com</div>
+                    
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <Checkbox
+                        id="includeSKU"
+                        checked={labelOptions.includeSKU}
+                        onCheckedChange={(checked) => 
+                          setLabelOptions(prev => ({ ...prev, includeSKU: !!checked }))
+                        }
+                      />
+                      <label htmlFor="includeSKU" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        نمایش SKU
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <Checkbox
+                        id="includeWebsite"
+                        checked={labelOptions.includeWebsite}
+                        onCheckedChange={(checked) => 
+                          setLabelOptions(prev => ({ ...prev, includeWebsite: !!checked }))
+                        }
+                      />
+                      <label htmlFor="includeWebsite" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        نمایش آدرس وب‌سایت
+                      </label>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                  
+                  {/* Website Text Edit */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900">تنظیمات وب‌سایت</h4>
+                    
+                    <div>
+                      <label htmlFor="websiteText" className="text-sm font-medium text-gray-700 block mb-1">
+                        متن آدرس وب‌سایت
+                      </label>
+                      <Input
+                        id="websiteText"
+                        value={labelOptions.websiteText}
+                        onChange={(e) => 
+                          setLabelOptions(prev => ({ ...prev, websiteText: e.target.value }))
+                        }
+                        placeholder="www.momtazchem.com"
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="labelSize" className="text-sm font-medium text-gray-700 block mb-1">
+                        اندازه برچسب
+                      </label>
+                      <Select
+                        value={labelOptions.size}
+                        onValueChange={(value) => 
+                          setLabelOptions(prev => ({ ...prev, size: value }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">کوچک</SelectItem>
+                          <SelectItem value="standard">استاندارد</SelectItem>
+                          <SelectItem value="large">بزرگ</SelectItem>
+                          <SelectItem value="roll">رول</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Preview Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  پیش‌نمایش برچسب‌ها ({selectedProducts.length} محصول انتخاب شده)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                  {selectedProducts.map(productId => {
+                    const product = products?.find(p => p.id === productId);
+                    if (!product) return null;
+                    
+                    const price = product.price || product.unitPrice || 0;
+                    const priceText = price > 0 ? `${Math.round(price).toLocaleString()} ${product.priceUnit || product.currency || 'IQD'}` : 'قیمت تعریف نشده';
+                    
+                    return (
+                      <div key={productId} className="border rounded-lg p-3 bg-white shadow-sm">
+                        <div className="text-sm font-medium truncate mb-2">{product.name}</div>
+                        <div className="flex justify-center my-3">
+                          <VisualBarcode 
+                            value={product.barcode || ''} 
+                            productName={product.name}
+                            sku={labelOptions.includeSKU ? product.sku : undefined}
+                            price={labelOptions.includePrice ? price : undefined}
+                            showPrice={labelOptions.includePrice}
+                            showWebsite={labelOptions.includeWebsite}
+                            websiteText={labelOptions.websiteText}
+                          />
+                        </div>
+                        <div className="text-xs text-gray-600 space-y-1">
+                          {labelOptions.includePrice && (
+                            <div className="font-medium text-green-600">{priceText}</div>
+                          )}
+                          {labelOptions.includeSKU && (
+                            <div>SKU: {product.sku || 'N/A'}</div>
+                          )}
+                          {labelOptions.includeWebsite && (
+                            <div className="text-blue-600">{labelOptions.websiteText}</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
             
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-between">
               <Button variant="outline" onClick={() => setShowLabelPreview(false)}>
                 بستن
               </Button>
-              <Button onClick={() => generateLabelZPL()}>
-                <Code className="h-4 w-4 mr-2" />
-                Generate ZPL
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => generateLabelZPL()}>
+                  <Code className="h-4 w-4 mr-2" />
+                  Generate ZPL
+                </Button>
+                <Button onClick={() => downloadCustomizedLabels()}>
+                  <Download className="h-4 w-4 mr-2" />
+                  دانلود برچسب‌های سفارشی
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>

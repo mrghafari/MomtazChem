@@ -1977,6 +1977,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     `;
   }
 
+  // Generate customized printable labels for products with user options
+  app.post("/api/barcode/generate-custom-labels", requireAuth, async (req, res) => {
+    try {
+      console.log('🏷️  [CUSTOM LABELS] Request received:', { 
+        productsCount: req.body.products?.length, 
+        options: req.body.options 
+      });
+      
+      const { products, options } = req.body;
+      
+      if (!products || !Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "محصولات برای تولید برچسب مورد نیاز است"
+        });
+      }
+
+      // Extract options with defaults
+      const {
+        includePrice = true,
+        includeWebsite = true,
+        includeSKU = true,
+        websiteText = "www.momtazchem.com",
+        labelSize = "standard"
+      } = options || {};
+
+      // Generate HTML for labels using the extracted options
+      const labelHTML = generateLabelHTML(products, {
+        showPrice: includePrice,
+        showWebsite: includeWebsite,
+        showSKU: includeSKU,
+        labelSize,
+        website: websiteText
+      });
+
+      // Return HTML directly for better compatibility and user control
+      console.log('🏷️  [CUSTOM LABELS] Generating HTML for custom labels');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="Custom_Product_Labels.html"');
+      res.send(labelHTML);
+
+      console.log(`✅ [CUSTOM LABELS] Generated custom labels for ${products.length} products`);
+    } catch (error) {
+      console.error("❌ [CUSTOM LABELS] Error generating custom labels:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تولید برچسب‌های سفارشی"
+      });
+    }
+  });
+
   // Generate printable labels for products
   app.post("/api/barcode/generate-labels", requireAuth, async (req, res) => {
     try {

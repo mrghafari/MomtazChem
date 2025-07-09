@@ -20,6 +20,7 @@ interface VisualBarcodeProps {
   showCopy?: boolean;
   showPrice?: boolean;
   showWebsite?: boolean;
+  websiteText?: string;
 }
 
 const VisualBarcode = ({
@@ -37,7 +38,8 @@ const VisualBarcode = ({
   showPrint = false,
   showCopy = false,
   showPrice = true,
-  showWebsite = true
+  showWebsite = true,
+  websiteText = "www.momtazchem.com"
 }: VisualBarcodeProps) => {
   const canvasRef = useRef<SVGSVGElement>(null);
   const printCanvasRef = useRef<SVGSVGElement>(null);
