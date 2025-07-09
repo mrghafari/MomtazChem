@@ -41,10 +41,8 @@ export default function Header() {
     staleTime: 30000, // 30 seconds
   });
 
-  // Debug wallet data
-  console.log('Header - Wallet data:', { walletData, isAuthenticated, customer, isError, error });
-  
-  const walletBalance = walletData?.data?.wallet?.balance || walletData?.wallet?.balance || 0;
+  const rawBalance = walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";
+  const walletBalance = typeof rawBalance === 'string' ? parseFloat(rawBalance) : rawBalance;
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -283,7 +281,7 @@ export default function Header() {
                     <div className="flex flex-col items-start">
                       <span className="text-xs text-gray-500 dark:text-gray-400">{t.wallet}</span>
                       <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                        {formatCurrency(parseFloat(walletBalance.toString()))}
+                        {new Intl.NumberFormat('en-US').format(walletBalance)} IQD
                       </span>
                     </div>
                   </Button>
@@ -415,16 +413,6 @@ export default function Header() {
                     className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4"
                   >
                     <div className="space-y-2">
-                      <Link href="/customer/profile">
-                        <motion.div
-                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <User className="h-4 w-4" />
-                          <span>{customer.firstName} {customer.lastName}</span>
-                        </motion.div>
-                      </Link>
                       <Link href="/customer/wallet">
                         <motion.div
                           className="flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -435,7 +423,7 @@ export default function Header() {
                           <div className="flex flex-col">
                             <span className="text-xs text-gray-500 dark:text-gray-400">{t.wallet}</span>
                             <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                              {formatCurrency(parseFloat(walletBalance.toString()))}
+                              {new Intl.NumberFormat('en-US').format(walletBalance)} IQD
                             </span>
                           </div>
                         </motion.div>
