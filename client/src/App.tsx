@@ -68,6 +68,7 @@ import AdminOrderManagement from "@/pages/admin-order-management";
 import FinancialDepartment from "@/pages/financial-department";
 import WarehouseDepartment from "@/pages/warehouse-department";
 import LogisticsDepartment from "@/pages/logistics-department";
+import LogisticsSimple from "@/pages/logistics-simple";
 import FinancialLogin from "@/pages/financial-login";
 import WarehouseLogin from "@/pages/warehouse-login";
 import LogisticsLogin from "@/pages/logistics-login";
@@ -90,6 +91,7 @@ import ContentManagement from "@/pages/content-management";
 import SecurityManagement from "@/pages/security-management-new";
 import UnifiedInventory from "@/pages/admin/unified-inventory";
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
+import TestLogistics from "@/pages/test-logistics";
 
 import NotFound from "@/pages/not-found";
 
@@ -172,8 +174,10 @@ function Router() {
           <Route path="/financial/login" component={FinancialLogin} />
           <Route path="/warehouse" component={WarehouseDepartment} />
           <Route path="/warehouse/login" component={WarehouseLogin} />
-          <Route path="/logistics" component={LogisticsDepartment} />
+          <Route path="/logistics-full" component={LogisticsDepartment} />
+          <Route path="/logistics" component={LogisticsSimple} />
           <Route path="/logistics/login" component={LogisticsLogin} />
+          <Route path="/test-logistics" component={TestLogistics} />
           <Route path="/super-admin/departments" component={SuperAdminDepartmentManagement} />
           <Route path="/super-admin/settings" component={SuperAdminSettings} />
           
