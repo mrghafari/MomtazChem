@@ -259,53 +259,51 @@ export default function BarcodeInventory() {
     }
 
     try {
-      // Get HTML content first
+      // Get HTML content with image format request
       const response = await fetch('/api/barcode/generate-custom-labels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           products: selectedProductsList,
           options: labelOptions,
-          format: 'html'
+          format: 'image'
         })
       });
 
       if (!response.ok) throw new Error('Failed to generate labels');
       
-      const htmlContent = await response.text();
+      // Check if we got an image or HTML
+      const contentType = response.headers.get('content-type');
       
-      // Create a temporary container
-      const tempContainer = document.createElement('div');
-      tempContainer.innerHTML = htmlContent;
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '-9999px';
-      tempContainer.style.width = '800px';
-      tempContainer.style.background = 'white';
-      tempContainer.style.padding = '20px';
-      document.body.appendChild(tempContainer);
-      
-      // Convert to canvas and download
-      const canvas = await html2canvas(tempContainer, {
-        backgroundColor: 'white',
-        scale: 2,
-        width: 800,
-        height: tempContainer.scrollHeight,
-        useCORS: true
-      });
-      
-      // Remove temporary container
-      document.body.removeChild(tempContainer);
-      
-      // Download the image
-      const link = document.createElement('a');
-      link.download = `customized-labels-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = canvas.toDataURL();
-      link.click();
+      if (contentType && contentType.includes('image')) {
+        // If we got an image, download it directly
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `customized-labels-${new Date().toISOString().split('T')[0]}.png`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        // If we got HTML, open it in a new window for manual screenshot
+        const htmlContent = await response.text();
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(htmlContent);
+          printWindow.document.close();
+          
+          toast({
+            title: "توجه",
+            description: "صفحه برچسب‌ها باز شد. می‌توانید آن را ذخیره کنید",
+          });
+        }
+      }
       
       toast({
         title: "موفق",
-        description: "برچسب‌های سفارشی به فرمت عکس دانلود شد",
+        description: "برچسب‌های سفارشی آماده دانلود است",
       });
     } catch (error) {
       console.error('Error generating image:', error);
