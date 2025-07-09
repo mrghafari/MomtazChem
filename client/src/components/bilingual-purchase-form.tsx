@@ -463,27 +463,36 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       return apiRequest("/api/customers/orders", "POST", orderData);
     },
     onSuccess: (response: any) => {
-      if (paymentMethod === 'online') {
-        // برای پرداخت آنلاین، به درگاه پرداخت redirect کنیم
-        const orderId = response.orderId;
-        const orderNumber = response.orderNumber;
-        
-        // ایجاد URL درگاه پرداخت
-        const paymentUrl = `/payment/${orderId}`;
-        
+      console.log('Order response:', response);
+      
+      // Check if payment gateway redirect is needed
+      if (response.redirectToPayment && response.paymentGatewayUrl) {
         toast({
           title: "انتقال به درگاه پرداخت",
-          description: "در حال انتقال شما به درگاه پرداخت بانکی..."
+          description: "در حال انتقال شما به درگاه پرداخت..."
         });
         
-        // Redirect به صفحه پرداخت
+        // Redirect to payment gateway
         setTimeout(() => {
-          window.location.href = paymentUrl;
+          window.location.href = response.paymentGatewayUrl;
         }, 1500);
-      } else {
+      } 
+      // Check if bank receipt upload is needed
+      else if (paymentMethod === 'bank_receipt') {
+        toast({
+          title: "سفارش ثبت شد",
+          description: "لطفاً فیش واریزی خود را آپلود کنید"
+        });
+        
+        // Redirect to bank receipt upload page
+        setTimeout(() => {
+          window.location.href = `/bank-receipt-upload/${response.orderId}`;
+        }, 1500);
+      }
+      else {
         toast({
           title: t.orderSubmitted,
-          description: "Your order has been received and will be processed."
+          description: "سفارش شما با موفقیت ثبت شد"
         });
         onOrderComplete();
       }
@@ -514,7 +523,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     } else if (paymentMethod === 'wallet_partial') {
       orderData.walletAmountUsed = walletAmount;
       orderData.remainingAmount = totalAmount - walletAmount;
-    } else if (paymentMethod === 'online') {
+    } else if (paymentMethod === 'online_payment') {
+      orderData.walletAmountUsed = 0;
+      orderData.remainingAmount = totalAmount;
+    } else if (paymentMethod === 'bank_receipt') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
     }

@@ -34,13 +34,16 @@ export default function Header() {
   const { customer, isAuthenticated, logout } = useCustomer();
 
   // Fetch wallet balance for authenticated customers
-  const { data: walletData } = useQuery({
+  const { data: walletData, isError, error } = useQuery({
     queryKey: ['/api/customer/wallet'],
     enabled: isAuthenticated && !!customer,
     retry: false,
     staleTime: 30000, // 30 seconds
   });
 
+  // Debug wallet data
+  console.log('Header - Wallet data:', { walletData, isAuthenticated, customer, isError, error });
+  
   const walletBalance = walletData?.data?.wallet?.balance || walletData?.wallet?.balance || 0;
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

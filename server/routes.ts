@@ -1139,6 +1139,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bank receipt upload endpoint
+  app.post("/api/payment/upload-receipt", requireCustomerAuth, (req, res) => {
+    const uploadReceipt = multer({
+      storage: receiptStorage,
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+      },
+      fileFilter: (req, file, cb) => {
+        // Accept images and PDFs
+        if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
+          cb(null, true);
+        } else {
+          cb(new Error('Only image and PDF files are allowed for receipt uploads'));
+        }
+      }
+    }).single('receipt');
+
+    uploadReceipt(req, res, async (err) => {
+      if (err) {
+        console.error('Receipt upload error:', err);
+        return res.status(400).json({ 
+          success: false, 
+          message: err.message 
+        });
+      }
+
+      try {
+        if (!req.file) {
+          return res.status(400).json({ 
+            success: false, 
+            message: "فایل فیش بانکی آپلود نشده است" 
+          });
+        }
+
+        const { orderId, notes } = req.body;
+        const customerId = (req.session as any)?.customerId;
+        const receiptUrl = `/uploads/receipts/${req.file.filename}`;
+
+        // Update order with receipt information
+        if (orderId) {
+          await shopStorage.updateOrder(parseInt(orderId), {
+            paymentStatus: 'receipt_uploaded',
+            receiptUrl: receiptUrl,
+            receiptUploadDate: new Date(),
+            receiptNotes: notes || null
+          });
+
+          // Log the receipt upload
+          console.log(`Receipt uploaded for order ${orderId} by customer ${customerId}`);
+        }
+
+        res.json({ 
+          success: true, 
+          message: "فیش بانکی با موفقیت آپلود شد",
+          data: {
+            receiptUrl: receiptUrl,
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            size: req.file.size,
+            uploadDate: new Date()
+          }
+        });
+      } catch (error) {
+        console.error('Error processing receipt upload:', error);
+        res.status(500).json({ 
+          success: false, 
+          message: "خطا در پردازش فیش بانکی" 
+        });
+      }
+    });
+  });
+
+  // Get receipt for order (customer can view their own receipt)
+  app.get("/api/payment/receipt/:orderId", requireCustomerAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const customerId = (req.session as any)?.customerId;
+
+      // Get order and verify it belongs to the customer
+      const order = await shopStorage.getOrderById(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "سفارش یافت نشد" 
+        });
+      }
+
+      // Verify customer owns this order
+      if (order.customerId !== customerId) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "دسترسی مجاز نیست" 
+        });
+      }
+
+      if (!order.receiptUrl) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "فیش بانکی برای این سفارش آپلود نشده است" 
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          receiptUrl: order.receiptUrl,
+          receiptUploadDate: order.receiptUploadDate,
+          receiptNotes: order.receiptNotes,
+          paymentStatus: order.paymentStatus
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching receipt:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت فیش بانکی" 
+      });
+    }
+  });
+
 
 
   // Helper function to get category email assignment
@@ -4120,11 +4241,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Handle wallet payment processing
+      // Handle payment method processing
       let finalPaymentStatus = "pending";
       let walletAmountUsed = 0;
       let remainingAmount = totalAmount;
+      let finalPaymentMethod = orderData.paymentMethod || "traditional";
 
+      // Handle wallet payments
       if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
         walletAmountUsed = parseFloat(orderData.walletAmountUsed || 0);
         remainingAmount = parseFloat(orderData.remainingAmount || totalAmount);
@@ -4157,13 +4280,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       }
+      
+      // Handle online payment method
+      else if (orderData.paymentMethod === 'online_payment') {
+        finalPaymentStatus = "pending";
+        finalPaymentMethod = "online_payment";
+        console.log("✅ Online payment method selected - order will redirect to payment gateway");
+      }
+      
+      // Handle bank receipt method
+      else if (orderData.paymentMethod === 'bank_receipt') {
+        finalPaymentStatus = "pending";
+        finalPaymentMethod = "bank_receipt";
+        console.log("✅ Bank receipt method selected - customer will upload receipt");
+      }
 
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
         orderNumber,
         status: "pending",
         paymentStatus: finalPaymentStatus,
-        paymentMethod: orderData.paymentMethod || "traditional",
+        paymentMethod: finalPaymentMethod,
         totalAmount: totalAmount.toString(),
         currency: orderData.currency || "IQD",
         notes: orderData.notes || "",
@@ -4185,7 +4322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }),
         trackingNumber: null,
         carrier: null,
-        paymentMethod: "cash_on_delivery",
+
       });
 
       // Create order items from cart
@@ -4284,12 +4421,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the order if CRM capture fails
       }
 
-      res.json({
+      // Prepare response based on payment method
+      let responseData = {
         success: true,
         message: "Order created successfully",
         orderId: order.id,
         orderNumber: order.orderNumber,
-      });
+        paymentMethod: finalPaymentMethod,
+        totalAmount: remainingAmount > 0 ? remainingAmount : totalAmount,
+        walletAmountUsed: walletAmountUsed,
+      };
+
+      // Add redirect URL for online payment
+      if (finalPaymentMethod === 'online_payment') {
+        responseData.redirectToPayment = true;
+        responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}`;
+        console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
+      }
+
+      res.json(responseData);
     } catch (error) {
       console.error("Error creating customer order:", error);
       res.status(500).json({

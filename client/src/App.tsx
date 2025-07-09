@@ -89,6 +89,7 @@ import InventoryManagement from "@/pages/inventory-management";
 import ContentManagement from "@/pages/content-management";
 import SecurityManagement from "@/pages/security-management-new";
 import UnifiedInventory from "@/pages/admin/unified-inventory";
+import BankReceiptUpload from "@/pages/bank-receipt-upload";
 
 import NotFound from "@/pages/not-found";
 
@@ -107,6 +108,7 @@ function Router() {
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
           <Route path="/payment/:orderId" component={Payment} />
           <Route path="/checkout/success/:orderId" component={CheckoutSuccess} />
+          <Route path="/bank-receipt-upload/:orderId" component={BankReceiptUpload} />
           <Route path="/shop-search" component={ShopSearch} />
           <Route path="/shop-admin" component={ShopAdmin} />
           <Route path="/admin" component={AdminPage} />

@@ -371,7 +371,7 @@ export class CrmStorage implements ICrmStorage {
           .set({
             totalOrders: metrics.totalOrders || 0,
             totalSpent: metrics.totalSpent?.toString() || "0",
-            lastOrderDate: metrics.lastOrderDate,
+            lastOrderDate: metrics.lastOrderDate ? new Date(metrics.lastOrderDate) : null,
             updatedAt: new Date(),
           })
           .where(eq(customers.id, customerId));
