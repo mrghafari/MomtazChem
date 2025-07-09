@@ -32,6 +32,10 @@ interface OrderManagement {
   currentStatus: string;
   deliveryCode: string | null;
   
+  // Order Details
+  totalAmount: number | string | null;
+  currency: string | null;
+  
   // Financial
   financialReviewerId: number | null;
   financialReviewedAt: string | null;
@@ -353,7 +357,18 @@ export default function AdminOrderManagement() {
                               <div>{formatDate(order.createdAt)}</div>
                             </div>
                             
-
+                            {/* مبلغ سفارش */}
+                            {order.totalAmount && (
+                              <div>
+                                <span className="text-muted-foreground">مبلغ سفارش:</span>
+                                <div className="font-bold text-blue-600">
+                                  {typeof order.totalAmount === 'number' 
+                                    ? order.totalAmount.toLocaleString('fa-IR')
+                                    : order.totalAmount
+                                  } {order.currency || 'IQD'}
+                                </div>
+                              </div>
+                            )}
                             
                             {dept === 'logistics' && order.trackingNumber && (
                               <div>
@@ -456,6 +471,39 @@ export default function AdminOrderManagement() {
               تمام تغییرات وضعیت و فعالیت‌های مربوط به این سفارش
             </DialogDescription>
           </DialogHeader>
+          
+          {/* Order Summary */}
+          {selectedOrder && (
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">شماره سفارش:</span>
+                  <span className="font-medium ml-2">#{selectedOrder.customerOrderId}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">تاریخ ایجاد:</span>
+                  <span className="font-medium ml-2">{formatDate(selectedOrder.createdAt)}</span>
+                </div>
+                {selectedOrder.totalAmount && (
+                  <div>
+                    <span className="text-gray-600">مبلغ سفارش:</span>
+                    <span className="font-bold text-blue-600 ml-2">
+                      {typeof selectedOrder.totalAmount === 'number' 
+                        ? selectedOrder.totalAmount.toLocaleString('fa-IR')
+                        : selectedOrder.totalAmount
+                      } {selectedOrder.currency || 'IQD'}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <span className="text-gray-600">وضعیت فعلی:</span>
+                  <Badge className={statusColors[selectedOrder.currentStatus] || 'bg-gray-100 text-gray-800'}>
+                    {statusLabels[selectedOrder.currentStatus] || selectedOrder.currentStatus}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div className="max-h-96 overflow-y-auto">
             {orderHistory && orderHistory.length > 0 ? (
