@@ -827,14 +827,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 </Select>
               </div>
               
-              {/* Shipping Cost */}
-              {shippingCost > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>{t.shippingCost}</span>
-                  <span>{shippingCost.toLocaleString()} د.ع</span>
-                </div>
-              )}
-              
               {/* Final Amount */}
               <div className="flex justify-between font-bold text-lg border-t pt-2 bg-yellow-300 px-2 py-2 rounded-lg">
                 <span>Final Amount</span>
