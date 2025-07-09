@@ -753,17 +753,26 @@ const Shop = () => {
               {/* Logged in Customer */}
               {!isLoadingCustomer && customer && (
                 <div className="flex items-center gap-2">
+                  {/* Profile Button */}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigate('/customer/profile')}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      {customer.firstName} {customer.lastName}
+                    </span>
+                  </Button>
+                  
+                  {/* Wallet Button */}
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => navigate('/customer/wallet')}
                     className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
                   >
-                    <User className="w-4 h-4" />
-                    <span className="text-sm font-medium">
-                      {customer.firstName} {customer.lastName}
-                    </span>
-                    <div className="h-4 w-px bg-gray-300" />
                     <Wallet className="w-4 h-4" />
                     <span className="text-sm">
                       {walletBalance.toLocaleString()} IQD
