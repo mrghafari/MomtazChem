@@ -491,38 +491,15 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   </CardContent>
                 </Card>
 
-                {/* Shipping & Payment */}
+                {/* Payment Method Only */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Truck className="w-5 h-5" />
-                      Shipping & Payment
+                      <CreditCard className="w-5 h-5" />
+                      Payment Method
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="shippingMethod"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Shipping Method *</FormLabel>
-                          <FormControl>
-                            <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select shipping method" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="standard">Standard Shipping (5-7 days) - $50</SelectItem>
-                                <SelectItem value="express">Express Shipping (2-3 days) - $100</SelectItem>
-                                <SelectItem value="overnight">Overnight Shipping - $200</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
                     <FormField
                       control={form.control}
                       name="paymentMethod"
@@ -599,6 +576,34 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     <span className="font-medium">${item.totalPrice.toFixed(2)}</span>
                   </div>
                 ))}
+                
+                <Separator />
+                
+                {/* Shipping Method Selection */}
+                <div className="space-y-3">
+                  <FormField
+                    control={form.control}
+                    name="shippingMethod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Shipping Method *</FormLabel>
+                        <FormControl>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select shipping method" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="standard">Standard Shipping (5-7 days) - $50</SelectItem>
+                              <SelectItem value="express">Express Shipping (2-3 days) - $100</SelectItem>
+                              <SelectItem value="overnight">Overnight Shipping - $200</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 
                 <Separator />
                 

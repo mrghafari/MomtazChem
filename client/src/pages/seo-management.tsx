@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target, Bot, Wand2, Brain, Lightbulb, Zap, FileText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,6 +138,21 @@ export default function SeoManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("fa");
+  
+  // AI SEO states
+  const [aiPageType, setAiPageType] = useState("");
+  const [aiLanguage, setAiLanguage] = useState("");
+  const [aiTargetKeywords, setAiTargetKeywords] = useState("");
+  const [aiBusinessContext, setAiBusinessContext] = useState("");
+  const [aiSeedKeywords, setAiSeedKeywords] = useState("");
+  const [aiIndustry, setAiIndustry] = useState("");
+  const [aiContentToOptimize, setAiContentToOptimize] = useState("");
+  const [aiOptimizeKeywords, setAiOptimizeKeywords] = useState("");
+  const [aiAnalyzeUrl, setAiAnalyzeUrl] = useState("");
+  const [aiAnalyzeKeywords, setAiAnalyzeKeywords] = useState("");
+  const [aiResults, setAiResults] = useState<any>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -307,6 +322,79 @@ export default function SeoManagement() {
     },
   });
 
+  // AI SEO mutations
+  const generateAiContent = useMutation({
+    mutationFn: (data: any) => apiRequest("/api/ai/seo/generate", "POST", data),
+    onSuccess: (result) => {
+      setAiResults({ type: 'generate', data: result.data });
+      toast({ 
+        title: "✨ AI Content Generated", 
+        description: "SEO content has been generated successfully" 
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error generating AI content",
+        description: error.message || "Failed to generate content",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const researchKeywords = useMutation({
+    mutationFn: (data: any) => apiRequest("/api/ai/seo/keywords", "POST", data),
+    onSuccess: (result) => {
+      setAiResults({ type: 'keywords', data: result.data });
+      toast({ 
+        title: "🔍 Keywords Researched", 
+        description: "Keyword suggestions have been generated" 
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error researching keywords",
+        description: error.message || "Failed to research keywords",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const optimizeContent = useMutation({
+    mutationFn: (data: any) => apiRequest("/api/ai/seo/optimize", "POST", data),
+    onSuccess: (result) => {
+      setAiResults({ type: 'optimize', data: result.data });
+      toast({ 
+        title: "⚡ Content Optimized", 
+        description: "Content has been optimized for SEO" 
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error optimizing content",
+        description: error.message || "Failed to optimize content",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const analyzePerformance = useMutation({
+    mutationFn: (data: any) => apiRequest("/api/ai/seo/analyze", "POST", data),
+    onSuccess: (result) => {
+      setAiResults({ type: 'analyze', data: result.data });
+      toast({ 
+        title: "📊 Analysis Complete", 
+        description: "SEO performance analysis completed" 
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error analyzing performance",
+        description: error.message || "Failed to analyze performance",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Handlers
   const handleCreateSeoSetting = (data: z.infer<typeof seoSettingFormSchema>) => {
     createSeoSetting.mutate(data);
@@ -344,6 +432,79 @@ export default function SeoManagement() {
     createRedirect.mutate(data);
   };
 
+  // AI SEO handlers
+  const handleGenerateAiContent = () => {
+    if (!aiPageType || !aiLanguage) {
+      toast({
+        title: "Missing required fields",
+        description: "Please select page type and language",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const keywords = aiTargetKeywords.split(',').map(k => k.trim()).filter(k => k);
+    generateAiContent.mutate({
+      pageType: aiPageType,
+      language: aiLanguage,
+      targetKeywords: keywords,
+      businessContext: aiBusinessContext,
+    });
+  };
+
+  const handleResearchKeywords = () => {
+    if (!aiSeedKeywords) {
+      toast({
+        title: "Missing seed keywords",
+        description: "Please enter seed keywords",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const keywords = aiSeedKeywords.split(',').map(k => k.trim()).filter(k => k);
+    researchKeywords.mutate({
+      seedKeywords: keywords,
+      language: aiLanguage || 'fa',
+      industry: aiIndustry || 'chemical',
+    });
+  };
+
+  const handleOptimizeContent = () => {
+    if (!aiContentToOptimize || !aiOptimizeKeywords) {
+      toast({
+        title: "Missing required fields",
+        description: "Please enter content and target keywords",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const keywords = aiOptimizeKeywords.split(',').map(k => k.trim()).filter(k => k);
+    optimizeContent.mutate({
+      content: aiContentToOptimize,
+      targetKeywords: keywords,
+      language: aiLanguage || 'fa',
+    });
+  };
+
+  const handleAnalyzePerformance = () => {
+    if (!aiAnalyzeUrl || !aiAnalyzeKeywords) {
+      toast({
+        title: "Missing required fields",
+        description: "Please enter URL and target keywords",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const keywords = aiAnalyzeKeywords.split(',').map(k => k.trim()).filter(k => k);
+    analyzePerformance.mutate({
+      url: aiAnalyzeUrl,
+      targetKeywords: keywords,
+    });
+  };
+
   const filteredSettings = Array.isArray(seoSettings) ? 
     seoSettings.filter((setting: SeoSetting) =>
       setting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -366,10 +527,14 @@ export default function SeoManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             SEO Settings
+          </TabsTrigger>
+          <TabsTrigger value="ai-seo" className="flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            AI SEO
           </TabsTrigger>
           <TabsTrigger value="languages" className="flex items-center gap-2">
             <Languages className="h-4 w-4" />
@@ -479,6 +644,242 @@ export default function SeoManagement() {
                   )}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ai-seo" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* AI SEO Content Generator */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wand2 className="h-5 w-5 text-purple-600" />
+                  AI Content Generator
+                </CardTitle>
+                <CardDescription>
+                  Generate optimized titles, descriptions, and keywords using AI
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="pageType">Page Type</Label>
+                    <Select value={aiPageType} onValueChange={setAiPageType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select page type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="home">Home Page</SelectItem>
+                        <SelectItem value="product">Product Page</SelectItem>
+                        <SelectItem value="category">Category Page</SelectItem>
+                        <SelectItem value="about">About Page</SelectItem>
+                        <SelectItem value="contact">Contact Page</SelectItem>
+                        <SelectItem value="blog">Blog Post</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="language">Language</Label>
+                    <Select value={aiLanguage} onValueChange={setAiLanguage}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fa">Persian</SelectItem>
+                        <SelectItem value="ar">Arabic</SelectItem>
+                        <SelectItem value="ku">Kurdish</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="targetKeywords">Target Keywords (comma-separated)</Label>
+                  <Input 
+                    placeholder="chemical products, water treatment, industrial solutions"
+                    value={aiTargetKeywords}
+                    onChange={(e) => setAiTargetKeywords(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="businessContext">Business Context (optional)</Label>
+                  <Textarea 
+                    placeholder="Brief description of your business, products, or services..."
+                    rows={3}
+                    value={aiBusinessContext}
+                    onChange={(e) => setAiBusinessContext(e.target.value)}
+                  />
+                </div>
+                
+                <Button 
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  onClick={handleGenerateAiContent}
+                  disabled={generateAiContent.isPending}
+                >
+                  <Brain className="h-4 w-4 mr-2" />
+                  {generateAiContent.isPending ? "Generating..." : "Generate AI Content"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Keyword Research */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-blue-600" />
+                  AI Keyword Research
+                </CardTitle>
+                <CardDescription>
+                  Discover high-performing keywords for your industry
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="seedKeywords">Seed Keywords</Label>
+                  <Input 
+                    placeholder="chemical, industrial, water treatment"
+                    value={aiSeedKeywords}
+                    onChange={(e) => setAiSeedKeywords(e.target.value)}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="industry">Industry</Label>
+                    <Select value={aiIndustry} onValueChange={setAiIndustry}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="chemical">Chemical Industry</SelectItem>
+                        <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                        <SelectItem value="agricultural">Agricultural</SelectItem>
+                        <SelectItem value="industrial">Industrial Supplies</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="keywordLanguage">Language</Label>
+                    <Select value={aiLanguage} onValueChange={setAiLanguage}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fa">Persian</SelectItem>
+                        <SelectItem value="ar">Arabic</SelectItem>
+                        <SelectItem value="ku">Kurdish</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={handleResearchKeywords}
+                  disabled={researchKeywords.isPending}
+                >
+                  <Lightbulb className="h-4 w-4 mr-2" />
+                  {researchKeywords.isPending ? "Researching..." : "Research Keywords"}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Content Optimizer */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-yellow-600" />
+                Content Optimizer
+              </CardTitle>
+              <CardDescription>
+                Optimize existing content for better SEO performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
+                  <Label htmlFor="content">Content to Optimize</Label>
+                  <Textarea 
+                    placeholder="Paste your content here to optimize for SEO..."
+                    rows={6}
+                    className="min-h-[150px]"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="optimizeKeywords">Target Keywords</Label>
+                    <Input placeholder="primary, secondary, keywords" />
+                  </div>
+                  <div>
+                    <Label htmlFor="contentLanguage">Language</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fa">Persian</SelectItem>
+                        <SelectItem value="ar">Arabic</SelectItem>
+                        <SelectItem value="ku">Kurdish</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button className="w-full bg-yellow-600 hover:bg-yellow-700">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Optimize Content
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* SEO Analysis */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-green-600" />
+                AI SEO Analysis
+              </CardTitle>
+              <CardDescription>
+                Analyze your pages for SEO performance and get recommendations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="analyzeUrl">Page URL</Label>
+                  <Input placeholder="https://example.com/page" />
+                </div>
+                <div>
+                  <Label htmlFor="analyzeKeywords">Target Keywords</Label>
+                  <Input placeholder="keyword1, keyword2, keyword3" />
+                </div>
+              </div>
+              
+              <Button className="w-full bg-green-600 hover:bg-green-700">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Analyze SEO Performance
+              </Button>
+              
+              {/* Results placeholder */}
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-semibold mb-2">Analysis Results</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Click "Analyze SEO Performance" to see detailed analysis results including:
+                </p>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 mt-2 space-y-1">
+                  <li>• Title optimization score</li>
+                  <li>• Meta description effectiveness</li>
+                  <li>• Keyword density analysis</li>
+                  <li>• Content structure recommendations</li>
+                  <li>• Technical SEO suggestions</li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
