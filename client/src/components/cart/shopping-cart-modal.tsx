@@ -211,7 +211,10 @@ export default function ShoppingCartModal({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Subtotal ({totalItems} items)</span>
-            <span className="font-medium">${(getTotalPrice() + getTotalSavings()).toFixed(2)}</span>
+            <span className="font-medium">${cartItems.reduce((sum, { product, quantity }) => {
+              const basePrice = parseFloat(product.price) || 0;
+              return sum + (basePrice * quantity);
+            }, 0).toFixed(2)}</span>
           </div>
           
           {getTotalSavings() > 0 && (
