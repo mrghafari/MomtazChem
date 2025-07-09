@@ -842,9 +842,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               )}
               
               {/* Final Amount */}
-              <div className="flex justify-between font-bold text-lg border-t pt-2 bg-blue-50 px-2 py-2 rounded-lg">
+              <div className="flex justify-between font-bold text-lg border-t pt-2 bg-yellow-300 px-2 py-2 rounded-lg">
                 <span>Final Amount</span>
-                <span className="text-blue-600">{formatCurrency(totalAmount)}</span>
+                <span className="text-gray-900">{formatCurrency(totalAmount)}</span>
               </div>
             </div>
           </div>
