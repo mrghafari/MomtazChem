@@ -9898,6 +9898,236 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // =============================================================================
+  // LOGISTICS DEPARTMENT API ROUTES
+  // =============================================================================
+
+  // Logistics authentication check
+  app.get('/api/logistics/auth/me', async (req, res) => {
+    try {
+      // For now, allow access without specific logistics authentication
+      // In production, implement proper logistics user verification
+      res.json({ success: true, authenticated: true });
+    } catch (error) {
+      res.status(401).json({ success: false, message: 'احراز هویت ناموفق' });
+    }
+  });
+
+  // Shipping rates management endpoints
+  app.get('/api/logistics/shipping-rates', async (req, res) => {
+    try {
+      const shippingRates = await orderManagementStorage.getShippingRates();
+      res.json({ success: true, data: shippingRates });
+    } catch (error) {
+      console.error('Error fetching shipping rates:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت تعرفه‌های حمل و نقل' });
+    }
+  });
+
+  app.post('/api/logistics/shipping-rates', async (req, res) => {
+    try {
+      const newRate = await orderManagementStorage.createShippingRate(req.body);
+      res.json({ success: true, data: newRate });
+    } catch (error) {
+      console.error('Error creating shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد تعرفه حمل و نقل' });
+    }
+  });
+
+  app.put('/api/logistics/shipping-rates/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedRate = await orderManagementStorage.updateShippingRate(
+        parseInt(id),
+        req.body
+      );
+      res.json({ success: true, data: updatedRate });
+    } catch (error) {
+      console.error('Error updating shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی تعرفه حمل و نقل' });
+    }
+  });
+
+  app.delete('/api/logistics/shipping-rates/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await orderManagementStorage.deleteShippingRate(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف تعرفه حمل و نقل' });
+    }
+  });
+
+  // Shipping cost calculation endpoint
+  app.post('/api/logistics/calculate-shipping', async (req, res) => {
+    try {
+      const { deliveryMethod, city, province, orderTotal, weight } = req.body;
+      const shippingCost = await orderManagementStorage.calculateShippingCost({
+        deliveryMethod,
+        city,
+        province,
+        orderTotal: parseFloat(orderTotal) || 0,
+        weight: parseFloat(weight) || 0,
+      });
+      res.json({ success: true, data: { shippingCost } });
+    } catch (error) {
+      console.error('Error calculating shipping cost:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error.message || 'خطا در محاسبه هزینه حمل و نقل' 
+      });
+    }
+  });
+
+  // Get available shipping methods for location/order
+  app.post('/api/logistics/available-methods', async (req, res) => {
+    try {
+      const { city, province, orderTotal } = req.body;
+      const availableMethods = await orderManagementStorage.getAvailableShippingMethods({
+        city,
+        province,
+        orderTotal: parseFloat(orderTotal) || 0,
+      });
+      res.json({ success: true, data: availableMethods });
+    } catch (error) {
+      console.error('Error fetching available shipping methods:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت روش‌های حمل و نقل موجود' });
+    }
+  });
+
+  // Update order delivery information (enhanced logistics details)
+  app.post('/api/logistics/orders/:orderId/delivery-info', async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const updatedOrder = await orderManagementStorage.updateDeliveryInfo(
+        parseInt(orderId),
+        req.body
+      );
+      res.json({ success: true, data: updatedOrder });
+    } catch (error) {
+      console.error('Error updating delivery info:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی اطلاعات تحویل' });
+    }
+  });
+
+  // Update delivery information for an order
+  app.put('/api/logistics/orders/:id/delivery-info', async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const deliveryInfo = req.body;
+      
+      const updatedOrder = await orderManagementStorage.updateDeliveryInfo(orderId, deliveryInfo);
+      res.json({ success: true, order: updatedOrder });
+    } catch (error) {
+      console.error('Error updating delivery info:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی اطلاعات ارسال' });
+    }
+  });
+
+  // Complete delivery for an order
+  app.post('/api/logistics/orders/:id/complete', async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const adminId = req.session?.adminId || 1; // Default for logistics operations
+      
+      const updatedOrder = await orderManagementStorage.updateOrderStatus(
+        orderId,
+        'logistics_delivered',
+        adminId,
+        'logistics',
+        'Order delivered successfully'
+      );
+      
+      res.json({ success: true, order: updatedOrder });
+    } catch (error) {
+      console.error('Error completing delivery:', error);
+      res.status(500).json({ success: false, message: 'خطا در تکمیل تحویل' });
+    }
+  });
+
+  // Get all shipping rates
+  app.get('/api/logistics/shipping-rates', async (req, res) => {
+    try {
+      const rates = await orderManagementStorage.getShippingRates();
+      res.json({ success: true, rates });
+    } catch (error) {
+      console.error('Error fetching shipping rates:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت نرخ‌های ارسال' });
+    }
+  });
+
+  // Create new shipping rate
+  app.post('/api/logistics/shipping-rates', async (req, res) => {
+    try {
+      const rateData = req.body;
+      const newRate = await orderManagementStorage.createShippingRate(rateData);
+      res.json({ success: true, rate: newRate });
+    } catch (error) {
+      console.error('Error creating shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد نرخ ارسال' });
+    }
+  });
+
+  // Update shipping rate
+  app.put('/api/logistics/shipping-rates/:id', async (req, res) => {
+    try {
+      const rateId = parseInt(req.params.id);
+      const rateData = req.body;
+      const updatedRate = await orderManagementStorage.updateShippingRate(rateId, rateData);
+      res.json({ success: true, rate: updatedRate });
+    } catch (error) {
+      console.error('Error updating shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی نرخ ارسال' });
+    }
+  });
+
+  // Delete shipping rate
+  app.delete('/api/logistics/shipping-rates/:id', async (req, res) => {
+    try {
+      const rateId = parseInt(req.params.id);
+      await orderManagementStorage.deleteShippingRate(rateId);
+      res.json({ success: true, message: 'نرخ ارسال حذف شد' });
+    } catch (error) {
+      console.error('Error deleting shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف نرخ ارسال' });
+    }
+  });
+
+  // Get available shipping methods for checkout
+  app.get('/api/shipping/methods', async (req, res) => {
+    try {
+      const { city, province, orderTotal } = req.query;
+      const methods = await orderManagementStorage.getAvailableShippingMethods({
+        city: city as string,
+        province: province as string,
+        orderTotal: orderTotal ? parseFloat(orderTotal as string) : 0
+      });
+      res.json({ success: true, methods });
+    } catch (error) {
+      console.error('Error fetching shipping methods:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت روش‌های ارسال' });
+    }
+  });
+
+  // Calculate shipping cost
+  app.post('/api/shipping/calculate', async (req, res) => {
+    try {
+      const { deliveryMethod, city, province, orderTotal, weight } = req.body;
+      const cost = await orderManagementStorage.calculateShippingCost({
+        deliveryMethod,
+        city,
+        province,
+        orderTotal: parseFloat(orderTotal),
+        weight: weight ? parseFloat(weight) : 1
+      });
+      res.json({ success: true, cost });
+    } catch (error) {
+      console.error('Error calculating shipping cost:', error);
+      res.status(500).json({ success: false, message: 'خطا در محاسبه هزینه ارسال' });
+    }
+  });
+
   // Upload payment receipt (customer action)
   app.post('/api/order-management/:customerOrderId/payment-receipt', upload.single('receipt'), async (req, res) => {
     try {

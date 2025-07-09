@@ -4,6 +4,7 @@ import {
   departmentAssignments,
   paymentReceipts,
   deliveryCodes,
+  shippingRates,
   type OrderManagement,
   type InsertOrderManagement,
   type OrderStatusHistory,
@@ -14,6 +15,8 @@ import {
   type InsertPaymentReceipt,
   type DeliveryCode,
   type InsertDeliveryCode,
+  type ShippingRate,
+  type InsertShippingRate,
   type OrderStatus,
   type Department,
   orderStatuses
@@ -43,7 +46,7 @@ export interface IOrderManagementStorage {
   // Delivery information
   updateDeliveryInfo(orderId: number, deliveryData: {
     trackingNumber?: string;
-    estimatedDeliveryDate?: Date;
+    estimatedDeliveryDate?: string;
     deliveryPersonName?: string;
     deliveryPersonPhone?: string;
     deliveryMethod?: string;
@@ -63,7 +66,7 @@ export interface IOrderManagementStorage {
     deliveryCompanyName?: string;
     deliveryCompanyPhone?: string;
     deliveryCompanyAddress?: string;
-  }): Promise<void>;
+  }): Promise<OrderManagement>;
   
   // Payment receipts
   uploadPaymentReceipt(receiptData: InsertPaymentReceipt): Promise<PaymentReceipt>;
@@ -98,6 +101,24 @@ export interface IOrderManagementStorage {
     completedToday: number;
     cancelledToday: number;
   }>;
+
+  // Shipping rates management
+  getShippingRates(): Promise<ShippingRate[]>;
+  createShippingRate(rateData: InsertShippingRate): Promise<ShippingRate>;
+  updateShippingRate(id: number, updateData: Partial<InsertShippingRate>): Promise<ShippingRate>;
+  deleteShippingRate(id: number): Promise<void>;
+  getAvailableShippingMethods(criteria: {
+    city?: string;
+    province?: string;
+    orderTotal: number;
+  }): Promise<ShippingRate[]>;
+  calculateShippingCost(criteria: {
+    deliveryMethod: string;
+    city?: string;
+    province?: string;
+    orderTotal: number;
+    weight: number;
+  }): Promise<number>;
 }
 
 export class OrderManagementStorage implements IOrderManagementStorage {
@@ -404,69 +425,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     return this.getOrdersByDepartment('logistics');
   }
   
-  async updateDeliveryInfo(orderId: number, deliveryData: {
-    trackingNumber?: string;
-    estimatedDeliveryDate?: Date;
-    deliveryPersonName?: string;
-    deliveryPersonPhone?: string;
-    deliveryMethod?: string;
-    transportationType?: string;
-    postalServiceName?: string;
-    postalTrackingCode?: string;
-    postalWeight?: string;
-    postalPrice?: string;
-    postalInsurance?: boolean;
-    vehicleType?: string;
-    vehiclePlate?: string;
-    vehicleModel?: string;
-    vehicleColor?: string;
-    driverName?: string;
-    driverPhone?: string;
-    driverLicense?: string;
-    deliveryCompanyName?: string;
-    deliveryCompanyPhone?: string;
-    deliveryCompanyAddress?: string;
-  }): Promise<void> {
-    const updateData: any = {};
-    
-    // Basic delivery fields
-    if (deliveryData.trackingNumber) updateData.trackingNumber = deliveryData.trackingNumber;
-    if (deliveryData.estimatedDeliveryDate) updateData.estimatedDeliveryDate = deliveryData.estimatedDeliveryDate;
-    if (deliveryData.deliveryPersonName) updateData.deliveryPersonName = deliveryData.deliveryPersonName;
-    if (deliveryData.deliveryPersonPhone) updateData.deliveryPersonPhone = deliveryData.deliveryPersonPhone;
-    
-    // Delivery method and transportation details
-    if (deliveryData.deliveryMethod) updateData.deliveryMethod = deliveryData.deliveryMethod;
-    if (deliveryData.transportationType) updateData.transportationType = deliveryData.transportationType;
-    
-    // Postal service details
-    if (deliveryData.postalServiceName) updateData.postalServiceName = deliveryData.postalServiceName;
-    if (deliveryData.postalTrackingCode) updateData.postalTrackingCode = deliveryData.postalTrackingCode;
-    if (deliveryData.postalWeight) updateData.postalWeight = deliveryData.postalWeight;
-    if (deliveryData.postalPrice) updateData.postalPrice = deliveryData.postalPrice;
-    if (deliveryData.postalInsurance !== undefined) updateData.postalInsurance = deliveryData.postalInsurance;
-    
-    // Vehicle details
-    if (deliveryData.vehicleType) updateData.vehicleType = deliveryData.vehicleType;
-    if (deliveryData.vehiclePlate) updateData.vehiclePlate = deliveryData.vehiclePlate;
-    if (deliveryData.vehicleModel) updateData.vehicleModel = deliveryData.vehicleModel;
-    if (deliveryData.vehicleColor) updateData.vehicleColor = deliveryData.vehicleColor;
-    if (deliveryData.driverName) updateData.driverName = deliveryData.driverName;
-    if (deliveryData.driverPhone) updateData.driverPhone = deliveryData.driverPhone;
-    if (deliveryData.driverLicense) updateData.driverLicense = deliveryData.driverLicense;
-    
-    // Delivery company details
-    if (deliveryData.deliveryCompanyName) updateData.deliveryCompanyName = deliveryData.deliveryCompanyName;
-    if (deliveryData.deliveryCompanyPhone) updateData.deliveryCompanyPhone = deliveryData.deliveryCompanyPhone;
-    if (deliveryData.deliveryCompanyAddress) updateData.deliveryCompanyAddress = deliveryData.deliveryCompanyAddress;
-    
-    if (Object.keys(updateData).length > 0) {
-      await db
-        .update(orderManagement)
-        .set(updateData)
-        .where(eq(orderManagement.id, orderId));
-    }
-  }
+
   
   async uploadPaymentReceipt(receiptData: InsertPaymentReceipt): Promise<PaymentReceipt> {
     const [receipt] = await db
@@ -604,6 +563,174 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       completedToday: 0,
       cancelledToday: 0,
     };
+  }
+
+  // =============================================================================
+  // SHIPPING RATES MANAGEMENT
+  // =============================================================================
+
+  async getShippingRates(): Promise<ShippingRate[]> {
+    return db
+      .select()
+      .from(shippingRates)
+      .orderBy(asc(shippingRates.deliveryMethod), asc(shippingRates.createdAt));
+  }
+
+  async createShippingRate(rateData: InsertShippingRate): Promise<ShippingRate> {
+    const [newRate] = await db
+      .insert(shippingRates)
+      .values({
+        ...rateData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return newRate;
+  }
+
+  async updateShippingRate(id: number, updateData: Partial<InsertShippingRate>): Promise<ShippingRate> {
+    const [updatedRate] = await db
+      .update(shippingRates)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(eq(shippingRates.id, id))
+      .returning();
+    return updatedRate;
+  }
+
+  async deleteShippingRate(id: number): Promise<void> {
+    await db
+      .delete(shippingRates)
+      .where(eq(shippingRates.id, id));
+  }
+
+  async getAvailableShippingMethods(criteria: {
+    city?: string;
+    province?: string;
+    orderTotal: number;
+  }): Promise<ShippingRate[]> {
+    let query = db
+      .select()
+      .from(shippingRates)
+      .where(eq(shippingRates.isActive, true));
+
+    // Filter by city if specified
+    if (criteria.city) {
+      query = query.where(
+        eq(shippingRates.cityName, criteria.city)
+      );
+    }
+
+    // Filter by province if specified
+    if (criteria.province) {
+      query = query.where(
+        eq(shippingRates.provinceName, criteria.province)
+      );
+    }
+
+    const availableMethods = await query.orderBy(asc(shippingRates.basePrice));
+
+    // Filter methods that qualify for free shipping
+    return availableMethods.filter(method => {
+      if (!method.freeShippingThreshold) return true;
+      const threshold = parseFloat(method.freeShippingThreshold);
+      return criteria.orderTotal < threshold; // Only show if not qualifying for free shipping
+    });
+  }
+
+  async calculateShippingCost(criteria: {
+    deliveryMethod: string;
+    city?: string;
+    province?: string;
+    orderTotal: number;
+    weight: number;
+  }): Promise<number> {
+    // Find matching shipping rate
+    let query = db
+      .select()
+      .from(shippingRates)
+      .where(
+        and(
+          eq(shippingRates.deliveryMethod, criteria.deliveryMethod),
+          eq(shippingRates.isActive, true)
+        )
+      );
+
+    // Add location filters if specified
+    if (criteria.city) {
+      query = query.where(eq(shippingRates.cityName, criteria.city));
+    }
+    if (criteria.province) {
+      query = query.where(eq(shippingRates.provinceName, criteria.province));
+    }
+
+    const [shippingRate] = await query.limit(1);
+    
+    if (!shippingRate) {
+      throw new Error('Shipping method not available for this location');
+    }
+
+    // Check for free shipping threshold
+    if (shippingRate.freeShippingThreshold) {
+      const threshold = parseFloat(shippingRate.freeShippingThreshold);
+      if (criteria.orderTotal >= threshold) {
+        return 0; // Free shipping
+      }
+    }
+
+    // Calculate base cost
+    let totalCost = parseFloat(shippingRate.basePrice);
+
+    // Add weight-based cost if applicable
+    if (shippingRate.pricePerKg && criteria.weight > 0) {
+      const weightCost = parseFloat(shippingRate.pricePerKg) * criteria.weight;
+      totalCost += weightCost;
+    }
+
+    return Math.round(totalCost);
+  }
+
+  // Enhanced updateDeliveryInfo method
+  async updateDeliveryInfo(orderId: number, deliveryData: {
+    trackingNumber?: string;
+    estimatedDeliveryDate?: string;
+    deliveryPersonName?: string;
+    deliveryPersonPhone?: string;
+    deliveryMethod?: string;
+    transportationType?: string;
+    postalServiceName?: string;
+    postalTrackingCode?: string;
+    postalWeight?: string;
+    postalPrice?: string;
+    postalInsurance?: boolean;
+    vehicleType?: string;
+    vehiclePlate?: string;
+    vehicleModel?: string;
+    vehicleColor?: string;
+    driverName?: string;
+    driverPhone?: string;
+    driverLicense?: string;
+    deliveryCompanyName?: string;
+    deliveryCompanyPhone?: string;
+    deliveryCompanyAddress?: string;
+  }): Promise<OrderManagement> {
+    const updateData: Partial<OrderManagement> = {
+      ...deliveryData,
+      estimatedDeliveryDate: deliveryData.estimatedDeliveryDate ? new Date(deliveryData.estimatedDeliveryDate) : undefined,
+      postalWeight: deliveryData.postalWeight ? deliveryData.postalWeight : undefined,
+      postalPrice: deliveryData.postalPrice ? deliveryData.postalPrice : undefined,
+      updatedAt: new Date(),
+    };
+
+    const [updatedOrder] = await db
+      .update(orderManagement)
+      .set(updateData)
+      .where(eq(orderManagement.id, orderId))
+      .returning();
+
+    return updatedOrder;
   }
 }
 
