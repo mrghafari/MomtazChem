@@ -82,13 +82,7 @@ const translations = {
     remainingAmount: "Remaining amount",
     insufficientWallet: "Insufficient wallet balance",
     discountApplied: "Discount Applied",
-    
-    // Shipping method
-    shippingMethod: "Shipping Method",
-    selectShippingMethod: "Select shipping method...",
-    shippingCost: "Shipping Cost",
-    freeShipping: "Free Shipping",
-    estimatedDelivery: "Estimated Delivery"
+
   },
   ar: {
     // Form titles
@@ -149,14 +143,7 @@ const translations = {
     walletAmount: "المبلغ من المحفظة",
     remainingAmount: "المبلغ المتبقي",
     insufficientWallet: "رصيد المحفظة غير كافي",
-    discountApplied: "تم تطبيق الخصم",
-    
-    // Shipping method
-    shippingMethod: "روش ارسال",
-    selectShippingMethod: "انتخاب روش ارسال...",
-    shippingCost: "هزینه ارسال",
-    freeShipping: "ارسال رایگان",
-    estimatedDelivery: "زمان تحویل تقریبی"
+    discountApplied: "تم تطبيق الخصم"
   }
 };
 
@@ -218,8 +205,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("");
-  const [shippingCost, setShippingCost] = useState<number>(0);
+
 
   // Fetch current customer data
   const { data: customerData, isLoading: isLoadingCustomer } = useQuery({
@@ -326,12 +312,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
-  // Fetch shipping rates
-  const { data: shippingRatesData, isLoading: shippingRatesLoading } = useQuery({
-    queryKey: ["/api/shipping-rates"],
-  });
 
-  const shippingRates = shippingRatesData?.data || [];
 
   // Dynamic form based on current language
   const form = useForm({
@@ -411,30 +392,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const t = translations[language] || translations['en']; // fallback to English
   const isRTL = direction === 'rtl';
 
-  // Calculate total weight of cart
-  const calculateTotalWeight = () => {
-    return Object.entries(cart).reduce((totalWeight, [productId, quantity]) => {
-      const product = products.find(p => p.id === parseInt(productId));
-      const weight = parseFloat(product?.weight || '0');
-      return totalWeight + (weight * quantity);
-    }, 0);
-  };
 
-  // Calculate shipping cost based on selected method
-  useEffect(() => {
-    if (selectedShippingMethod && selectedShippingMethod !== 'none' && selectedShippingMethod !== 'loading' && shippingRates.length > 0) {
-      const selectedRate = shippingRates.find(rate => rate.deliveryMethod === selectedShippingMethod);
-      if (selectedRate) {
-        const totalWeight = calculateTotalWeight();
-        const basePrice = parseFloat(selectedRate.basePrice) || 0;
-        const pricePerKg = parseFloat(selectedRate.pricePerKg) || 0;
-        const calculatedCost = basePrice + (totalWeight * pricePerKg);
-        setShippingCost(calculatedCost);
-      }
-    } else {
-      setShippingCost(0);
-    }
-  }, [selectedShippingMethod, cart, products, shippingRates]);
 
   // Calculate discounted price based on quantity
   const getDiscountedPrice = (product: any, quantity: number) => {
@@ -490,8 +448,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') / 100 : 0;
   const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
   
-  // Calculate total amount (subtotal + VAT + shipping cost)
-  const totalAmount = subtotalAmount + vatAmount + shippingCost;
+  // Calculate total amount (subtotal + VAT)
+  const totalAmount = subtotalAmount + vatAmount;
 
   // Calculate wallet payment amounts
   const walletBalance = walletData?.data?.wallet ? parseFloat(walletData.data.wallet.balance) : 
@@ -792,39 +750,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               <div className="flex justify-between font-semibold text-base border-t pt-2">
                 <span>Total</span>
                 <span className="text-primary">{formatCurrency(subtotalAmount + vatAmount)}</span>
-              </div>
-              
-              {/* Shipping Method Selection */}
-              <div className="space-y-3 border-t pt-3">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium">{t.shippingMethod}</label>
-                  <span className="text-xs text-gray-500">(وزن کل: {calculateTotalWeight().toFixed(1)} کیلوگرم)</span>
-                </div>
-                
-                <Select value={selectedShippingMethod} onValueChange={setSelectedShippingMethod}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t.selectShippingMethod} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t.selectShippingMethod}</SelectItem>
-                    {shippingRatesLoading ? (
-                      <SelectItem value="loading" disabled>در حال بارگذاری...</SelectItem>
-                    ) : (
-                      shippingRates.map((rate) => (
-                        <SelectItem key={rate.id} value={rate.deliveryMethod}>
-                          <div className="flex flex-col">
-                            <span>{rate.description || rate.deliveryMethod}</span>
-                            <span className="text-xs text-gray-500">
-                              {parseFloat(rate.basePrice).toLocaleString()} د.ع
-                              {rate.pricePerKg && ` + ${parseFloat(rate.pricePerKg).toLocaleString()} د.ع/کیلو`}
-                              {rate.estimatedDays && ` - ${rate.estimatedDays} روز`}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
               </div>
               
               {/* Final Amount */}
