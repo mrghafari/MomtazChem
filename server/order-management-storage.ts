@@ -18,6 +18,7 @@ import {
   type Department,
   orderStatuses
 } from "@shared/order-management-schema";
+import { customerOrders, customers } from "@shared/customer-schema";
 import { db } from "./db";
 import { eq, and, desc, asc, inArray } from "drizzle-orm";
 
@@ -260,8 +261,33 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     });
   }
   
-  async getOrdersByDepartment(department: Department, statuses?: OrderStatus[]): Promise<OrderManagement[]> {
-    let query = db.select().from(orderManagement);
+  async getOrdersByDepartment(department: Department, statuses?: OrderStatus[]): Promise<any[]> {
+    let query = db.select({
+      // Order Management fields
+      id: orderManagement.id,
+      customerOrderId: orderManagement.customerOrderId,
+      currentStatus: orderManagement.currentStatus,
+      deliveryCode: orderManagement.deliveryCode,
+      financialReviewerId: orderManagement.financialReviewerId,
+      financialReviewedAt: orderManagement.financialReviewedAt,
+      financialNotes: orderManagement.financialNotes,
+      paymentReceiptUrl: orderManagement.paymentReceiptUrl,
+      createdAt: orderManagement.createdAt,
+      updatedAt: orderManagement.updatedAt,
+      
+      // Customer Order fields - مبلغ و کارنسی
+      totalAmount: customerOrders.totalAmount,
+      currency: customerOrders.currency,
+      
+      // Customer info
+      customerFirstName: customers.firstName,
+      customerLastName: customers.lastName,
+      customerEmail: customers.email,
+      customerPhone: customers.phone,
+    })
+    .from(orderManagement)
+    .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+    .leftJoin(customers, eq(customerOrders.customerId, customers.id));
     
     if (department === 'financial') {
       // بخش مالی فقط سفارشات با رسید پرداخت آپلود شده را می‌بیند
@@ -289,7 +315,29 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       query = query.where(inArray(orderManagement.currentStatus, logisticsStatuses));
     }
     
-    return await query.orderBy(asc(orderManagement.createdAt));
+    const results = await query.orderBy(asc(orderManagement.createdAt));
+    
+    // Transform results to include customer info in nested structure
+    return results.map(row => ({
+      id: row.id,
+      customerOrderId: row.customerOrderId,
+      currentStatus: row.currentStatus,
+      deliveryCode: row.deliveryCode,
+      totalAmount: row.totalAmount,
+      currency: row.currency,
+      financialReviewerId: row.financialReviewerId,
+      financialReviewedAt: row.financialReviewedAt,
+      financialNotes: row.financialNotes,
+      paymentReceiptUrl: row.paymentReceiptUrl,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      customer: {
+        firstName: row.customerFirstName,
+        lastName: row.customerLastName,
+        email: row.customerEmail,
+        phone: row.customerPhone,
+      }
+    }));
   }
   
   async getFinancialPendingOrders(): Promise<OrderManagement[]> {

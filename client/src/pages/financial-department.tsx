@@ -19,6 +19,10 @@ interface OrderManagement {
   currentStatus: string;
   deliveryCode: string | null;
   
+  // Order Details
+  totalAmount: number | string | null;
+  currency: string | null;
+  
   // Financial
   financialReviewerId: number | null;
   financialReviewedAt: string | null;
@@ -273,12 +277,23 @@ export default function FinancialDepartment() {
                         
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-2">اطلاعات سفارش</h4>
-                          <p className="text-sm text-gray-600">
-                            مبلغ کل: {order.order?.totalAmount?.toLocaleString()} تومان
-                          </p>
+                          {/* مبلغ سفارش */}
+                          {order.totalAmount && (
+                            <p className="text-sm text-gray-600 font-bold">
+                              مبلغ کل: {typeof order.totalAmount === 'number' 
+                                ? order.totalAmount.toLocaleString('fa-IR')
+                                : order.totalAmount
+                              } {order.currency || 'IQD'}
+                            </p>
+                          )}
                           <p className="text-sm text-gray-600">
                             تاریخ ثبت: {new Date(order.createdAt).toLocaleDateString('fa-IR')}
                           </p>
+                          {order.paymentReceiptUrl && (
+                            <p className="text-sm text-green-600 font-medium">
+                              ✓ فیش پرداخت آپلود شده
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -319,6 +334,52 @@ export default function FinancialDepartment() {
             <DialogHeader>
               <DialogTitle>بررسی سفارش #{selectedOrder?.customerOrderId}</DialogTitle>
             </DialogHeader>
+            
+            {/* Order Summary */}
+            {selectedOrder && (
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">مشتری:</span>
+                    <span className="font-medium ml-2">
+                      {selectedOrder.customer?.firstName} {selectedOrder.customer?.lastName}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">تاریخ ثبت:</span>
+                    <span className="font-medium ml-2">
+                      {new Date(selectedOrder.createdAt).toLocaleDateString('fa-IR')}
+                    </span>
+                  </div>
+                  {selectedOrder.totalAmount && (
+                    <div>
+                      <span className="text-gray-600">مبلغ سفارش:</span>
+                      <span className="font-bold text-blue-600 ml-2">
+                        {typeof selectedOrder.totalAmount === 'number' 
+                          ? selectedOrder.totalAmount.toLocaleString('fa-IR')
+                          : selectedOrder.totalAmount
+                        } {selectedOrder.currency || 'IQD'}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-gray-600">فیش پرداخت:</span>
+                    {selectedOrder.paymentReceiptUrl ? (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => window.open(selectedOrder.paymentReceiptUrl!, '_blank')}
+                        className="text-green-600 hover:text-green-700 p-0 h-auto font-medium"
+                      >
+                        مشاهده فیش ارسالی
+                      </Button>
+                    ) : (
+                      <span className="text-red-600 ml-2">فیش ارسال نشده</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleProcessOrder)} className="space-y-4">
