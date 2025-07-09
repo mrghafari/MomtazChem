@@ -9905,10 +9905,13 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // Warehouse orders - Get orders approved by financial department
   app.get('/api/order-management/warehouse', requireAuth, async (req, res) => {
     try {
+      console.log('📦 [WAREHOUSE] Fetching warehouse orders...');
       const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
+      console.log('📦 [WAREHOUSE] Found orders:', orders.length);
+      console.log('📦 [WAREHOUSE] Orders data:', JSON.stringify(orders, null, 2));
       res.json({ success: true, orders });
     } catch (error) {
-      console.error('Error fetching warehouse orders:', error);
+      console.error('❌ [WAREHOUSE] Error fetching warehouse orders:', error);
       res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات انبار' });
     }
   });
