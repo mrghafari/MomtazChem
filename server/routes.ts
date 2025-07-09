@@ -10008,7 +10008,18 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // Department authentication middleware
   function requireDepartmentAuth(department: string) {
     return (req: any, res: any, next: any) => {
+      console.log(`Auth check for ${department}:`, {
+        sessionExists: !!req.session,
+        departmentUser: req.session?.departmentUser,
+        sessionId: req.sessionID
+      });
+      
       if (!req.session?.departmentUser || req.session.departmentUser.department !== department) {
+        console.log(`Authentication failed for ${department}:`, {
+          hasDepartmentUser: !!req.session?.departmentUser,
+          userDepartment: req.session?.departmentUser?.department,
+          expectedDepartment: department
+        });
         return res.status(401).json({ success: false, message: "احراز هویت نشده" });
       }
       next();
