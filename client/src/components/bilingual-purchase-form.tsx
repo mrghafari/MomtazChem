@@ -460,24 +460,33 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Submit order mutation
   const submitOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      return apiRequest("/api/customers/orders", "POST", {
-        ...orderData,
-        cart,
-        totalAmount,
-        currency: 'IQD',
-        paymentMethod: paymentMethod,
-        walletAmountUsed: paymentMethod === 'wallet_full' ? totalAmount : 
-                         paymentMethod === 'wallet_partial' ? walletAmount : 0,
-        remainingAmount: paymentMethod === 'wallet_full' ? 0 : 
-                        paymentMethod === 'wallet_partial' ? totalAmount - walletAmount : totalAmount
-      });
+      return apiRequest("/api/customers/orders", "POST", orderData);
     },
-    onSuccess: () => {
-      toast({
-        title: t.orderSubmitted,
-        description: "Your order has been received and will be processed."
-      });
-      onOrderComplete();
+    onSuccess: (response: any) => {
+      if (paymentMethod === 'online') {
+        // برای پرداخت آنلاین، به درگاه پرداخت redirect کنیم
+        const orderId = response.orderId;
+        const orderNumber = response.orderNumber;
+        
+        // ایجاد URL درگاه پرداخت
+        const paymentUrl = `/payment/${orderId}`;
+        
+        toast({
+          title: "انتقال به درگاه پرداخت",
+          description: "در حال انتقال شما به درگاه پرداخت بانکی..."
+        });
+        
+        // Redirect به صفحه پرداخت
+        setTimeout(() => {
+          window.location.href = paymentUrl;
+        }, 1500);
+      } else {
+        toast({
+          title: t.orderSubmitted,
+          description: "Your order has been received and will be processed."
+        });
+        onOrderComplete();
+      }
     },
     onError: () => {
       toast({
@@ -488,7 +497,25 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   });
 
   const onSubmit = (data: any) => {
-    submitOrderMutation.mutate(data);
+    // برای پرداخت آنلاین، ابتدا سفارش ایجاد کنیم سپس به درگاه پرداخت بریم
+    if (paymentMethod === 'online') {
+      // ایجاد سفارش با وضعیت pending
+      const orderData = {
+        ...data,
+        cart,
+        totalAmount,
+        currency: 'IQD',
+        paymentMethod: 'online',
+        walletAmountUsed: 0,
+        remainingAmount: totalAmount
+      };
+      
+      // Redirect to payment gateway after order creation
+      submitOrderMutation.mutate(orderData);
+    } else {
+      // سایر روش‌های پرداخت
+      submitOrderMutation.mutate(data);
+    }
   };
 
 

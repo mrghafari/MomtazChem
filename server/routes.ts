@@ -60,8 +60,9 @@ const uploadsDir = path.join(process.cwd(), 'uploads');
 const imagesDir = path.join(uploadsDir, 'images');
 const catalogsDir = path.join(uploadsDir, 'catalogs');
 const documentsDir = path.join(uploadsDir, 'documents');
+const receiptsDir = path.join(uploadsDir, 'receipts');
 
-[uploadsDir, imagesDir, catalogsDir, documentsDir].forEach(dir => {
+[uploadsDir, imagesDir, catalogsDir, documentsDir, receiptsDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -163,6 +164,38 @@ const documentStorage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+// Receipt upload configuration
+const receiptStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, receiptsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `receipt-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const uploadReceipt = multer({
+  storage: receiptStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit for receipts
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg', 
+      'image/png',
+      'application/pdf'
+    ];
+    
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG, and PDF files are allowed for receipt uploads'));
+    }
   }
 });
 
@@ -11768,6 +11801,86 @@ momtazchem.com
     } catch (error) {
       console.error('Error verifying bank transfer:', error);
       res.status(500).json({ success: false, message: 'Failed to verify bank transfer' });
+    }
+  });
+
+  // Upload bank receipt
+  app.post('/api/payment/upload-receipt', uploadReceipt.single('receipt'), async (req, res) => {
+    try {
+      const { orderId } = req.body;
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'فایلی آپلود نشده است' 
+        });
+      }
+
+      if (!orderId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'شناسه سفارش ضروری است' 
+        });
+      }
+
+      // بررسی وجود سفارش
+      const order = await shopStorage.getOrderById(parseInt(orderId));
+      if (!order) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'سفارش یافت نشد' 
+        });
+      }
+
+      // ایجاد مسیر نسبی برای ذخیره در دیتابیس
+      const filePath = `/uploads/receipts/${file.filename}`;
+
+      // به‌روزرسانی سفارش با مسیر فیش بانکی
+      await shopStorage.updateOrder(parseInt(orderId), {
+        receiptPath: filePath,
+        paymentStatus: 'receipt_uploaded'
+      });
+
+      // ثبت فعالیت در سیستم مالی
+      await shopStorage.createFinancialTransaction({
+        type: 'receipt_uploaded',
+        orderId: order.id,
+        amount: order.totalAmount,
+        description: `فیش بانکی آپلود شد - ${file.originalname}`,
+        referenceNumber: order.orderNumber,
+        status: 'pending_review',
+        processingDate: new Date(),
+        metadata: { 
+          receiptPath: filePath,
+          fileName: file.originalname,
+          fileSize: file.size,
+          mimeType: file.mimetype
+        }
+      });
+
+      console.log(`Receipt uploaded for order ${orderId}:`, {
+        fileName: file.originalname,
+        filePath,
+        fileSize: file.size
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'فیش بانکی با موفقیت آپلود شد',
+        data: { 
+          filePath,
+          fileName: file.originalname,
+          orderId: parseInt(orderId)
+        }
+      });
+
+    } catch (error) {
+      console.error('Error uploading bank receipt:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در آپلود فیش بانکی' 
+      });
     }
   });
 

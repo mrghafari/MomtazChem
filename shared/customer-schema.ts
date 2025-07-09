@@ -140,6 +140,7 @@ export const customerOrders = pgTable("customer_orders", {
   deliveredAt: timestamp("delivered_at"),
   trackingNumber: text("tracking_number"),
   carrier: text("carrier"), // DHL, FedEx, UPS, etc.
+  receiptPath: text("receipt_path"), // Path to uploaded bank receipt
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

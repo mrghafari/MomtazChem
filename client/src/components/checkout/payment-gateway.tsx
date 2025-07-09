@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CreditCard, Building2, Wallet, CheckCircle } from "lucide-react";
+import { AlertCircle, CreditCard, Building2, Wallet, CheckCircle, Upload, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface PaymentGatewayProps {
   paymentMethod: string;
@@ -26,6 +27,9 @@ const PaymentGateway = ({
 }: PaymentGatewayProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState<any>({});
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
@@ -37,6 +41,77 @@ const PaymentGateway = ({
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // بررسی نوع فایل
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "نوع فایل نامعتبر",
+        description: "لطفاً فقط فایل‌های JPG, PNG یا PDF آپلود کنید",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // بررسی حجم فایل (حداکثر 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "حجم فایل زیاد",
+        description: "حجم فایل نباید از 5 مگابایت بیشتر باشد",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadedFile(file);
+    setIsProcessing(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('receipt', file);
+      formData.append('orderId', orderId);
+
+      // شبیه‌سازی پیشرفت آپلود
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
+      const response = await apiRequest('/api/payment/upload-receipt', 'POST', formData);
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
+      toast({
+        title: "فیش بانکی آپلود شد",
+        description: "فیش بانکی شما با موفقیت آپلود شد و در انتظار بررسی است"
+      });
+
+      // ذخیره مسیر فایل در فرم دیتا
+      handleInputChange('receiptPath', response.filePath);
+      
+    } catch (error) {
+      toast({
+        title: "خطا در آپلود",
+        description: "آپلود فیش بانکی با مشکل مواجه شد. دوباره تلاش کنید",
+        variant: "destructive"
+      });
+      setUploadedFile(null);
+    } finally {
+      setIsProcessing(false);
+      setUploadProgress(0);
+    }
   };
 
   const simulatePaymentProcessing = async () => {
@@ -114,6 +189,67 @@ const PaymentGateway = ({
             placeholder="Any additional information about the transfer..."
             onChange={(e) => handleInputChange('transferNotes', e.target.value)}
           />
+        </div>
+
+        {/* بخش آپلود فیش بانکی */}
+        <div className="border-t pt-4">
+          <Label className="text-base font-semibold mb-3 block">
+            <FileText className="w-4 h-4 inline mr-2" />
+            آپلود فیش بانکی (Bank Receipt Upload)
+          </Label>
+          
+          <div className="space-y-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,.pdf"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isProcessing}
+              className="w-full h-16 border-dashed border-2 hover:bg-gray-50"
+            >
+              <div className="flex flex-col items-center gap-2">
+                <Upload className="w-6 h-6 text-gray-400" />
+                <span className="text-sm">
+                  {uploadedFile ? `انتخاب شده: ${uploadedFile.name}` : 'انتخاب فیش بانکی'}
+                </span>
+                <span className="text-xs text-gray-500">
+                  JPG, PNG یا PDF - حداکثر 5MB
+                </span>
+              </div>
+            </Button>
+
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+
+            {uploadedFile && uploadProgress === 100 && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium text-green-800">
+                      فیش بانکی آپلود شد
+                    </p>
+                    <p className="text-xs text-green-600">
+                      {uploadedFile.name} - {(uploadedFile.size / 1024).toFixed(1)} KB
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="bg-amber-50 p-3 rounded-lg flex items-start">
