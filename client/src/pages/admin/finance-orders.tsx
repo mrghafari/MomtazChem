@@ -26,23 +26,25 @@ import { formatCurrency } from "@/lib/utils";
 interface Order {
   id: number;
   customerOrderId: number;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  orderTotal: number;
-  paymentMethod: string;
-  paymentGatewayId: number;
   currentStatus: string;
   paymentReceiptUrl?: string;
   financialNotes?: string;
   financialReviewedAt?: string;
-  orderDate: string;
-  orderItems: Array<{
-    productName: string;
-    quantity: number;
-    unitPrice: number;
-    totalPrice: number;
-  }>;
+  createdAt: string;
+  updatedAt: string;
+  deliveryCode?: string;
+  financialReviewerId?: number;
+  warehouseAssigneeId?: number;
+  warehouseProcessedAt?: string;
+  warehouseNotes?: string;
+  logisticsAssigneeId?: number;
+  logisticsProcessedAt?: string;
+  logisticsNotes?: string;
+  trackingNumber?: string;
+  estimatedDeliveryDate?: string;
+  actualDeliveryDate?: string;
+  deliveryPersonName?: string;
+  deliveryPersonPhone?: string;
 }
 
 export default function FinanceOrders() {
@@ -55,10 +57,12 @@ export default function FinanceOrders() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Get pending orders for financial review
-  const { data: orders = [], isLoading, refetch } = useQuery({
-    queryKey: ['/api/finance/orders'],
-    queryFn: () => fetch('/api/finance/orders', { credentials: 'include' }).then(res => res.json())
+  const { data: ordersResponse, isLoading, refetch } = useQuery({
+    queryKey: ['/api/order-management/financial'],
+    queryFn: () => fetch('/api/order-management/financial', { credentials: 'include' }).then(res => res.json())
   });
+
+  const orders = ordersResponse?.orders || [];
 
   // Auto-refresh controlled by global settings
   useEffect(() => {
@@ -274,9 +278,9 @@ export default function FinanceOrders() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">ارزش کل پرداخت‌ها</p>
+                <p className="text-sm font-medium text-gray-600">سفارشات تکمیل شده</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {formatCurrency(orders.reduce((sum, order) => sum + order.orderTotal, 0), 'IQD')}
+                  {orders.filter(order => order.currentStatus === 'financial_approved').length}
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-green-600" />
@@ -291,7 +295,7 @@ export default function FinanceOrders() {
                 <p className="text-sm font-medium text-gray-600">اولویت بالا</p>
                 <p className="text-2xl font-bold text-red-600">
                   {orders.filter(order => 
-                    new Date(order.orderDate) < new Date(Date.now() - 24 * 60 * 60 * 1000)
+                    new Date(order.createdAt) < new Date(Date.now() - 24 * 60 * 60 * 1000)
                   ).length}
                 </p>
               </div>
@@ -324,49 +328,53 @@ export default function FinanceOrders() {
                     <div className="flex items-center gap-4">
                       <div>
                         <h3 className="font-medium text-lg">سفارش #{order.customerOrderId}</h3>
-                        <p className="text-sm text-gray-600">{order.customerName}</p>
+                        <p className="text-sm text-gray-600">مشتری #{order.customerOrderId}</p>
                       </div>
                       {getStatusBadge(order.currentStatus)}
                     </div>
                     <div className="text-left">
                       <p className="font-bold text-lg text-green-600">
-                        {formatCurrency(order.orderTotal, 'IQD')}
+                        {/* Order total will be loaded from customer orders */}
+                        سفارش #{order.customerOrderId}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {new Date(order.orderDate).toLocaleDateString('fa-IR')}
+                        {new Date(order.createdAt).toLocaleDateString('fa-IR')}
                       </p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
-                      <p className="text-sm text-gray-600">ایمیل مشتری</p>
-                      <p className="font-medium">{order.customerEmail}</p>
+                      <p className="text-sm text-gray-600">وضعیت سفارش</p>
+                      <p className="font-medium">{order.currentStatus}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">تلفن</p>
-                      <p className="font-medium">{order.customerPhone}</p>
+                      <p className="text-sm text-gray-600">تاریخ ایجاد</p>
+                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('fa-IR')}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">روش پرداخت</p>
-                      <p className="font-medium">{order.paymentMethod}</p>
+                      <p className="text-sm text-gray-600">آخرین بروزرسانی</p>
+                      <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('fa-IR')}</p>
                     </div>
                   </div>
 
-                  {/* Order Items Summary */}
+                  {/* Order Details Summary */}
                   <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <h4 className="font-medium mb-2">آیتم‌های سفارش:</h4>
-                    <div className="space-y-1">
-                      {order.orderItems.slice(0, 3).map((item, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <span>{item.productName} × {item.quantity}</span>
-                          <span>{formatCurrency(item.totalPrice, 'IQD')}</span>
+                    <h4 className="font-medium mb-2">جزئیات سفارش:</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">شماره سفارش:</span>
+                        <span className="font-medium ml-2">#{order.customerOrderId}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">تاریخ ایجاد:</span>
+                        <span className="font-medium ml-2">{new Date(order.createdAt).toLocaleDateString('fa-IR')}</span>
+                      </div>
+                      {order.financialNotes && (
+                        <div className="col-span-2">
+                          <span className="text-gray-600">یادداشت مالی:</span>
+                          <span className="font-medium ml-2">{order.financialNotes}</span>
                         </div>
-                      ))}
-                      {order.orderItems.length > 3 && (
-                        <p className="text-sm text-gray-500">
-                          و {order.orderItems.length - 3} آیتم دیگر...
-                        </p>
                       )}
                     </div>
                   </div>
