@@ -303,35 +303,6 @@ export default function FinancialDepartment() {
                           <p className="text-sm text-gray-600">
                             {order.customer?.phone || 'شماره تلفن ثبت نشده'}
                           </p>
-                          
-                          {/* Receipt Thumbnail */}
-                          {(order.receipt?.url || order.paymentReceiptUrl) && (
-                            <div className="mt-3">
-                              <h5 className="text-xs font-medium text-gray-700 mb-2">فیش پرداخت:</h5>
-                              {isImageUrl(order.receipt?.url || order.paymentReceiptUrl!, order.receipt?.mimeType) ? (
-                                <div 
-                                  className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors"
-                                  onClick={() => openImageModal(order.receipt?.url || order.paymentReceiptUrl!)}
-                                >
-                                  <img 
-                                    src={order.receipt?.url || order.paymentReceiptUrl!}
-                                    alt="فیش پرداخت"
-                                    className="w-full h-full object-cover"
-                                  />
-                                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-opacity flex items-center justify-center">
-                                    <ZoomIn className="w-4 h-4 text-white opacity-0 hover:opacity-100 transition-opacity" />
-                                  </div>
-                                </div>
-                              ) : (
-                                <div 
-                                  className="w-20 h-20 rounded-lg border border-gray-200 flex items-center justify-center cursor-pointer hover:border-blue-400 bg-gray-50"
-                                  onClick={() => window.open(order.receipt?.url || order.paymentReceiptUrl!, '_blank')}
-                                >
-                                  <FileText className="w-6 h-6 text-gray-400" />
-                                </div>
-                              )}
-                            </div>
-                          )}
                         </div>
                         
                         <div>
@@ -357,7 +328,36 @@ export default function FinancialDepartment() {
                       </div>
                     </div>
                     
-                    <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-4">
+                      {/* Receipt Thumbnail */}
+                      {(order.receipt?.url || order.paymentReceiptUrl) && (
+                        <div className="flex flex-col items-center gap-2">
+                          <h5 className="text-xs font-medium text-gray-700">فیش پرداخت</h5>
+                          {isImageUrl(order.receipt?.url || order.paymentReceiptUrl!, order.receipt?.mimeType) ? (
+                            <div 
+                              className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors"
+                              onClick={() => openImageModal(order.receipt?.url || order.paymentReceiptUrl!)}
+                            >
+                              <img 
+                                src={order.receipt?.url || order.paymentReceiptUrl!}
+                                alt="فیش پرداخت"
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                                <ZoomIn className="w-4 h-4 text-white opacity-0 hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                          ) : (
+                            <div 
+                              className="w-16 h-16 rounded-lg border border-gray-200 flex items-center justify-center cursor-pointer hover:border-blue-400 bg-gray-50"
+                              onClick={() => window.open(order.receipt?.url || order.paymentReceiptUrl!, '_blank')}
+                            >
+                              <FileText className="w-4 h-4 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
                       <Button
                         onClick={() => {
                           setSelectedOrder(order);
@@ -368,17 +368,6 @@ export default function FinancialDepartment() {
                         <Eye className="w-4 h-4 mr-2" />
                         بررسی
                       </Button>
-                      
-                      {order.paymentReceiptUrl && (
-                        <Button
-                          variant="outline"
-                          onClick={() => window.open(order.paymentReceiptUrl!, '_blank')}
-                          className="border-green-300 text-green-600 hover:bg-green-50"
-                        >
-                          <FileText className="w-4 h-4 mr-2" />
-                          مشاهده رسید
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -457,14 +446,7 @@ export default function FinancialDepartment() {
                             <FileText className="w-4 h-4 text-gray-400" />
                           </div>
                         )}
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => window.open(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, '_blank')}
-                          className="text-green-600 hover:text-green-700 p-0 h-auto font-medium"
-                        >
-                          مشاهده فیش ارسالی
-                        </Button>
+
                       </div>
                     ) : (
                       <span className="text-red-600 ml-2">فیش ارسال نشده</span>
