@@ -198,12 +198,12 @@
   --card-foreground: hsl(20, 14.3%, 4.1%);
   --border: hsl(20, 5.9%, 90%);
   --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(120, 40%, 35%);
-  --secondary-foreground: hsl(60, 9.1%, 97.8%);
-  --accent: hsl(38, 100%, 50%);
-  --accent-foreground: hsl(60, 9.1%, 97.8%);
+  --primary: hsl(210, 40%, 65%);
+  --primary-foreground: hsl(210, 100%, 98%);
+  --secondary: hsl(150, 25%, 60%);
+  --secondary-foreground: hsl(150, 10%, 15%);
+  --accent: hsl(35, 60%, 70%);
+  --accent-foreground: hsl(35, 20%, 20%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(20, 14.3%, 4.1%);
@@ -221,11 +221,11 @@
   --card-foreground: hsl(0, 0%, 98%);
   --border: hsl(240, 3.7%, 15.9%);
   --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(120, 40%, 35%);
+  --primary: hsl(210, 35%, 55%);
+  --primary-foreground: hsl(210, 100%, 98%);
+  --secondary: hsl(150, 20%, 50%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(38, 100%, 50%);
+  --accent: hsl(35, 50%, 60%);
   --accent-foreground: hsl(0, 0%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
@@ -246,7 +246,34 @@
 
 /* Custom styles for Momtazchem */
 .primary-blue {
-  color: hsl(207, 90%, 54%);
+  color: hsl(210, 40%, 65%);
+}
+
+/* Soft color palette for UI elements */
+.soft-primary {
+  background-color: hsl(210, 40%, 65%);
+  color: hsl(210, 100%, 98%);
+}
+
+.soft-secondary {
+  background-color: hsl(150, 25%, 60%);
+  color: hsl(150, 10%, 15%);
+}
+
+.soft-accent {
+  background-color: hsl(35, 60%, 70%);
+  color: hsl(35, 20%, 20%);
+}
+
+.soft-neutral {
+  background-color: hsl(220, 15%, 85%);
+  color: hsl(220, 30%, 25%);
+}
+
+.soft-hover:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
 }
 
 .primary-green {
