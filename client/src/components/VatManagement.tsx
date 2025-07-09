@@ -100,7 +100,9 @@ export default function VatManagement() {
     mutationFn: (data: VatForm) => apiRequest('/api/financial/vat-settings', 'PUT', {
       ...data,
       exemptProductIds: data.exemptProductIds ? 
-        data.exemptProductIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : []
+        data.exemptProductIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : [],
+      vatNumber: data.vatNumber.trim() || null,
+      minimumTaxableAmount: data.minimumTaxableAmount.trim() || null
     }),
     onSuccess: () => {
       toast({ title: "موفق", description: "تنظیمات مالیات به‌روزرسانی شد" });
