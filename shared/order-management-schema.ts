@@ -70,6 +70,31 @@ export const orderManagement = pgTable("order_management", {
   deliveryPersonName: text("delivery_person_name"),
   deliveryPersonPhone: text("delivery_person_phone"),
   
+  // Delivery method and transportation details
+  deliveryMethod: varchar("delivery_method", { length: 50 }).default("courier"), // post, courier, truck, personal_pickup
+  transportationType: varchar("transportation_type", { length: 50 }), // motorcycle, car, truck, van
+  
+  // Postal service details (for post delivery)
+  postalServiceName: text("postal_service_name"), // Iran Post, Pishtaz, etc.
+  postalTrackingCode: varchar("postal_tracking_code", { length: 100 }),
+  postalWeight: decimal("postal_weight", { precision: 8, scale: 2 }),
+  postalPrice: decimal("postal_price", { precision: 10, scale: 2 }),
+  postalInsurance: boolean("postal_insurance").default(false),
+  
+  // Vehicle details (for courier/truck delivery)
+  vehicleType: varchar("vehicle_type", { length: 50 }), // motorcycle, car, truck, van
+  vehiclePlate: varchar("vehicle_plate", { length: 20 }),
+  vehicleModel: text("vehicle_model"),
+  vehicleColor: text("vehicle_color"),
+  driverName: text("driver_name"),
+  driverPhone: text("driver_phone"),
+  driverLicense: varchar("driver_license", { length: 50 }),
+  
+  // Company delivery details
+  deliveryCompanyName: text("delivery_company_name"), // Tipax, Mahex, etc.
+  deliveryCompanyPhone: text("delivery_company_phone"),
+  deliveryCompanyAddress: text("delivery_company_address"),
+  
   // Timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

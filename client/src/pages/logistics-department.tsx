@@ -1,28 +1,21 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import DeliveryDetailsForm from "@/components/DeliveryDetailsForm";
 import { 
   Truck, 
   Package, 
   User, 
   LogOut, 
   Eye, 
-  CheckCircle, 
-  XCircle, 
   Calendar,
   Phone,
-  MapPin,
-  Clock,
   RefreshCw
 } from "lucide-react";
 
@@ -54,6 +47,32 @@ interface OrderManagement {
   actualDeliveryDate: string | null;
   deliveryPersonName: string | null;
   deliveryPersonPhone: string | null;
+  
+  // Delivery method and transportation details
+  deliveryMethod: string | null;
+  transportationType: string | null;
+  
+  // Postal service details
+  postalServiceName: string | null;
+  postalTrackingCode: string | null;
+  postalWeight: string | null;
+  postalPrice: string | null;
+  postalInsurance: boolean | null;
+  
+  // Vehicle details
+  vehicleType: string | null;
+  vehiclePlate: string | null;
+  vehicleModel: string | null;
+  vehicleColor: string | null;
+  driverName: string | null;
+  driverPhone: string | null;
+  driverLicense: string | null;
+  
+  // Delivery company details
+  deliveryCompanyName: string | null;
+  deliveryCompanyPhone: string | null;
+  deliveryCompanyAddress: string | null;
+  
   createdAt: string;
   updatedAt: string;
   customer: {
@@ -61,6 +80,8 @@ interface OrderManagement {
     lastName: string | null;
     email: string | null;
     phone: string | null;
+    deliveryMethod: string | null;
+    deliveryNotes: string | null;
   } | null;
 }
 
@@ -71,16 +92,7 @@ export default function LogisticsDepartment() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const form = useForm({
-    defaultValues: {
-      notes: "",
-      trackingNumber: "",
-      estimatedDeliveryDate: "",
-      deliveryPersonName: "",
-      deliveryPersonPhone: "",
-      action: "approve" as "approve" | "reject"
-    }
-  });
+
 
   // Check authentication and user department
   useEffect(() => {
@@ -117,24 +129,11 @@ export default function LogisticsDepartment() {
 
   // Process order mutation
   const processOrderMutation = useMutation({
-    mutationFn: async (data: { 
-      orderId: number; 
-      action: "approve" | "reject"; 
-      notes: string;
-      trackingNumber?: string;
-      estimatedDeliveryDate?: string;
-      deliveryPersonName?: string;
-      deliveryPersonPhone?: string;
-    }) => {
-      return apiRequest(`/api/logistics/orders/${data.orderId}/process`, {
+    mutationFn: async (data: any) => {
+      return apiRequest(`/api/logistics/orders/${selectedOrder?.id}/process`, {
         method: 'POST',
         body: JSON.stringify({
-          action: data.action,
-          notes: data.notes,
-          trackingNumber: data.trackingNumber,
-          estimatedDeliveryDate: data.estimatedDeliveryDate,
-          deliveryPersonName: data.deliveryPersonName,
-          deliveryPersonPhone: data.deliveryPersonPhone,
+          ...data,
           reviewerId: user?.id
         })
       });
@@ -143,7 +142,6 @@ export default function LogisticsDepartment() {
       queryClient.invalidateQueries({ queryKey: ["/api/logistics/orders"] });
       setDialogOpen(false);
       setSelectedOrder(null);
-      form.reset();
       toast({
         title: "موفق",
         description: "سفارش با موفقیت پردازش شد",
@@ -158,25 +156,10 @@ export default function LogisticsDepartment() {
     }
   });
 
-  const handleProcessOrder = (values: { 
-    notes: string; 
-    action: "approve" | "reject";
-    trackingNumber: string;
-    estimatedDeliveryDate: string;
-    deliveryPersonName: string;
-    deliveryPersonPhone: string;
-  }) => {
+  const handleProcessOrder = (data: any) => {
     if (!selectedOrder) return;
     
-    processOrderMutation.mutate({
-      orderId: selectedOrder.id,
-      action: values.action,
-      notes: values.notes,
-      trackingNumber: values.trackingNumber,
-      estimatedDeliveryDate: values.estimatedDeliveryDate,
-      deliveryPersonName: values.deliveryPersonName,
-      deliveryPersonPhone: values.deliveryPersonPhone
-    });
+    processOrderMutation.mutate(data);
   };
 
   const logout = async () => {
@@ -424,6 +407,29 @@ export default function LogisticsDepartment() {
                       </span>
                     </div>
                   )}
+                  
+                  {/* Customer Selected Delivery Method */}
+                  <div className="col-span-2 mt-4">
+                    <div className="flex items-center gap-2">
+                      <Truck className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600">روش ارسال انتخابی مشتری:</span>
+                      <Badge variant="outline" className="mr-2">
+                        {selectedOrder.customer?.deliveryMethod === 'post' && 'ارسال پستی'}
+                        {selectedOrder.customer?.deliveryMethod === 'courier' && 'پیک موتوری'}
+                        {selectedOrder.customer?.deliveryMethod === 'truck' && 'حمل با کامیون'}
+                        {selectedOrder.customer?.deliveryMethod === 'personal_pickup' && 'تحویل حضوری'}
+                        {!selectedOrder.customer?.deliveryMethod && 'تعریف نشده'}
+                      </Badge>
+                    </div>
+                    {selectedOrder.customer?.deliveryNotes && (
+                      <div className="mt-2 p-3 bg-yellow-50 rounded-lg">
+                        <p className="text-sm text-yellow-800">
+                          <strong>توضیحات ارسال مشتری:</strong> {selectedOrder.customer.deliveryNotes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  
                   {selectedOrder.warehouseNotes && (
                     <div className="col-span-2">
                       <span className="text-gray-600">یادداشت انبار:</span>
@@ -436,134 +442,11 @@ export default function LogisticsDepartment() {
               </div>
             )}
             
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleProcessOrder)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    type="button"
-                    variant={form.watch("action") === "approve" ? "default" : "outline"}
-                    onClick={() => form.setValue("action", "approve")}
-                    className="h-16"
-                  >
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    تایید ارسال
-                  </Button>
-                  
-                  <Button
-                    type="button"
-                    variant={form.watch("action") === "reject" ? "destructive" : "outline"}
-                    onClick={() => form.setValue("action", "reject")}
-                    className="h-16"
-                  >
-                    <XCircle className="w-5 h-5 mr-2" />
-                    رد ارسال
-                  </Button>
-                </div>
-                
-                {form.watch("action") === "approve" && (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="trackingNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>کد رهگیری</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="کد رهگیری مرسوله را وارد کنید"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="estimatedDeliveryDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>تاریخ تحویل تقریبی</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="date"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="deliveryPersonName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>نام پیک</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="نام پیک مسئول تحویل"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="deliveryPersonPhone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>تلفن پیک</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="شماره تلفن پیک"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </>
-                )}
-                
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>یادداشت (اختیاری)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="توضیحات مربوط به ارسال یا دلیل رد..."
-                          rows={4}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    انصراف
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={processOrderMutation.isPending}
-                    className={form.watch("action") === "approve" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
-                  >
-                    {processOrderMutation.isPending ? "در حال پردازش..." : 
-                     form.watch("action") === "approve" ? "تایید نهایی ارسال" : "رد نهایی ارسال"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
+            <DeliveryDetailsForm
+              customerDeliveryMethod={selectedOrder.customer?.deliveryMethod || 'courier'}
+              onSubmit={handleProcessOrder}
+              isLoading={processOrderMutation.isPending}
+            />
           </DialogContent>
         </Dialog>
       </div>

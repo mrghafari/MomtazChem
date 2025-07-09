@@ -46,6 +46,23 @@ export interface IOrderManagementStorage {
     estimatedDeliveryDate?: Date;
     deliveryPersonName?: string;
     deliveryPersonPhone?: string;
+    deliveryMethod?: string;
+    transportationType?: string;
+    postalServiceName?: string;
+    postalTrackingCode?: string;
+    postalWeight?: string;
+    postalPrice?: string;
+    postalInsurance?: boolean;
+    vehicleType?: string;
+    vehiclePlate?: string;
+    vehicleModel?: string;
+    vehicleColor?: string;
+    driverName?: string;
+    driverPhone?: string;
+    driverLicense?: string;
+    deliveryCompanyName?: string;
+    deliveryCompanyPhone?: string;
+    deliveryCompanyAddress?: string;
   }): Promise<void>;
   
   // Payment receipts
@@ -392,21 +409,56 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     estimatedDeliveryDate?: Date;
     deliveryPersonName?: string;
     deliveryPersonPhone?: string;
+    deliveryMethod?: string;
+    transportationType?: string;
+    postalServiceName?: string;
+    postalTrackingCode?: string;
+    postalWeight?: string;
+    postalPrice?: string;
+    postalInsurance?: boolean;
+    vehicleType?: string;
+    vehiclePlate?: string;
+    vehicleModel?: string;
+    vehicleColor?: string;
+    driverName?: string;
+    driverPhone?: string;
+    driverLicense?: string;
+    deliveryCompanyName?: string;
+    deliveryCompanyPhone?: string;
+    deliveryCompanyAddress?: string;
   }): Promise<void> {
     const updateData: any = {};
     
-    if (deliveryData.trackingNumber) {
-      updateData.trackingNumber = deliveryData.trackingNumber;
-    }
-    if (deliveryData.estimatedDeliveryDate) {
-      updateData.estimatedDeliveryDate = deliveryData.estimatedDeliveryDate;
-    }
-    if (deliveryData.deliveryPersonName) {
-      updateData.deliveryPersonName = deliveryData.deliveryPersonName;
-    }
-    if (deliveryData.deliveryPersonPhone) {
-      updateData.deliveryPersonPhone = deliveryData.deliveryPersonPhone;
-    }
+    // Basic delivery fields
+    if (deliveryData.trackingNumber) updateData.trackingNumber = deliveryData.trackingNumber;
+    if (deliveryData.estimatedDeliveryDate) updateData.estimatedDeliveryDate = deliveryData.estimatedDeliveryDate;
+    if (deliveryData.deliveryPersonName) updateData.deliveryPersonName = deliveryData.deliveryPersonName;
+    if (deliveryData.deliveryPersonPhone) updateData.deliveryPersonPhone = deliveryData.deliveryPersonPhone;
+    
+    // Delivery method and transportation details
+    if (deliveryData.deliveryMethod) updateData.deliveryMethod = deliveryData.deliveryMethod;
+    if (deliveryData.transportationType) updateData.transportationType = deliveryData.transportationType;
+    
+    // Postal service details
+    if (deliveryData.postalServiceName) updateData.postalServiceName = deliveryData.postalServiceName;
+    if (deliveryData.postalTrackingCode) updateData.postalTrackingCode = deliveryData.postalTrackingCode;
+    if (deliveryData.postalWeight) updateData.postalWeight = deliveryData.postalWeight;
+    if (deliveryData.postalPrice) updateData.postalPrice = deliveryData.postalPrice;
+    if (deliveryData.postalInsurance !== undefined) updateData.postalInsurance = deliveryData.postalInsurance;
+    
+    // Vehicle details
+    if (deliveryData.vehicleType) updateData.vehicleType = deliveryData.vehicleType;
+    if (deliveryData.vehiclePlate) updateData.vehiclePlate = deliveryData.vehiclePlate;
+    if (deliveryData.vehicleModel) updateData.vehicleModel = deliveryData.vehicleModel;
+    if (deliveryData.vehicleColor) updateData.vehicleColor = deliveryData.vehicleColor;
+    if (deliveryData.driverName) updateData.driverName = deliveryData.driverName;
+    if (deliveryData.driverPhone) updateData.driverPhone = deliveryData.driverPhone;
+    if (deliveryData.driverLicense) updateData.driverLicense = deliveryData.driverLicense;
+    
+    // Delivery company details
+    if (deliveryData.deliveryCompanyName) updateData.deliveryCompanyName = deliveryData.deliveryCompanyName;
+    if (deliveryData.deliveryCompanyPhone) updateData.deliveryCompanyPhone = deliveryData.deliveryCompanyPhone;
+    if (deliveryData.deliveryCompanyAddress) updateData.deliveryCompanyAddress = deliveryData.deliveryCompanyAddress;
     
     if (Object.keys(updateData).length > 0) {
       await db

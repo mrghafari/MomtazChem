@@ -141,6 +141,10 @@ export const customerOrders = pgTable("customer_orders", {
   trackingNumber: text("tracking_number"),
   carrier: text("carrier"), // DHL, FedEx, UPS, etc.
   receiptPath: text("receipt_path"), // Path to uploaded bank receipt
+  
+  // Delivery method selected by customer during checkout
+  deliveryMethod: text("delivery_method").default("courier"), // post, courier, truck, personal_pickup
+  deliveryNotes: text("delivery_notes"), // Special delivery instructions from customer
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

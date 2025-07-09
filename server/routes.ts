@@ -10106,7 +10106,36 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   app.post('/api/logistics/orders/:id/process', requireDepartmentAuth('logistics'), async (req: any, res) => {
     try {
       const orderId = parseInt(req.params.id);
-      const { action, notes, reviewerId, trackingNumber, estimatedDeliveryDate, deliveryPersonName, deliveryPersonPhone } = req.body;
+      const { 
+        action, 
+        notes, 
+        reviewerId, 
+        trackingNumber, 
+        estimatedDeliveryDate, 
+        deliveryPersonName, 
+        deliveryPersonPhone,
+        // Delivery method and transportation details
+        deliveryMethod,
+        transportationType,
+        // Postal service details
+        postalServiceName,
+        postalTrackingCode,
+        postalWeight,
+        postalPrice,
+        postalInsurance,
+        // Vehicle details
+        vehicleType,
+        vehiclePlate,
+        vehicleModel,
+        vehicleColor,
+        driverName,
+        driverPhone,
+        driverLicense,
+        // Delivery company details
+        deliveryCompanyName,
+        deliveryCompanyPhone,
+        deliveryCompanyAddress
+      } = req.body;
       
       if (action === 'approve') {
         await orderManagementStorage.updateOrderStatus(
@@ -10117,15 +10146,30 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           notes || 'تایید شده توسط بخش لجستیک'
         );
         
-        // Update delivery information
-        if (trackingNumber || estimatedDeliveryDate || deliveryPersonName || deliveryPersonPhone) {
-          await orderManagementStorage.updateDeliveryInfo(orderId, {
-            trackingNumber,
-            estimatedDeliveryDate: estimatedDeliveryDate ? new Date(estimatedDeliveryDate) : undefined,
-            deliveryPersonName,
-            deliveryPersonPhone
-          });
-        }
+        // Update comprehensive delivery information
+        await orderManagementStorage.updateDeliveryInfo(orderId, {
+          trackingNumber,
+          estimatedDeliveryDate: estimatedDeliveryDate ? new Date(estimatedDeliveryDate) : undefined,
+          deliveryPersonName,
+          deliveryPersonPhone,
+          deliveryMethod,
+          transportationType,
+          postalServiceName,
+          postalTrackingCode,
+          postalWeight,
+          postalPrice,
+          postalInsurance,
+          vehicleType,
+          vehiclePlate,
+          vehicleModel,
+          vehicleColor,
+          driverName,
+          driverPhone,
+          driverLicense,
+          deliveryCompanyName,
+          deliveryCompanyPhone,
+          deliveryCompanyAddress
+        });
       } else {
         await orderManagementStorage.updateOrderStatus(
           orderId,
@@ -10436,144 +10480,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // ============================================================================
-  // LOGISTICS DEPARTMENT ROUTES
-  // ============================================================================
 
-  // Logistics login
-  app.post('/api/logistics/login', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      const [user] = await db
-        .select()
-        .from(schema.users)
-        .where(and(
-          eq(schema.users.username, username),
-          eq(schema.users.department, 'logistics'),
-          eq(schema.users.isActive, true)
-        ));
 
-      if (!user) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "نام کاربری یا رمز عبور اشتباه است" 
-        });
-      }
 
-      const isValid = await bcrypt.compare(password, user.passwordHash);
-      if (!isValid) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "نام کاربری یا رمز عبور اشتباه است" 
-        });
-      }
-
-      await db
-        .update(users)
-        .set({ lastLoginAt: new Date() })
-        .where(eq(users.id, user.id));
-
-      req.session.departmentUser = {
-        id: user.id,
-        username: user.username,
-        department: user.department
-      };
-
-      res.json({ 
-        success: true, 
-        message: "ورود موفق", 
-        user: { 
-          id: user.id, 
-          username: user.username, 
-          department: user.department 
-        } 
-      });
-    } catch (error) {
-      console.error('Logistics login error:', error);
-      res.status(500).json({ success: false, message: "خطا در ورود" });
-    }
-  });
-
-  // Logistics logout
-  app.post('/api/logistics/logout', (req, res) => {
-    req.session.departmentUser = undefined;
-    res.json({ success: true, message: "خروج موفق" });
-  });
-
-  // Logistics auth check
-  app.get('/api/logistics/auth/me', requireDepartmentAuth('logistics'), (req: any, res) => {
-    res.json({ 
-      success: true, 
-      user: req.session.departmentUser 
-    });
-  });
-
-  // Get logistics pending orders
-  app.get('/api/logistics/orders', requireDepartmentAuth('logistics'), async (req, res) => {
-    try {
-      const orders = await orderManagementStorage.getLogisticsPendingOrders();
-      res.json({ success: true, orders });
-    } catch (error) {
-      console.error('Error fetching logistics orders:', error);
-      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
-    }
-  });
-
-  // Process logistics order
-  app.post('/api/logistics/orders/:id/process', requireDepartmentAuth('logistics'), async (req: any, res) => {
-    try {
-      const orderId = parseInt(req.params.id);
-      const { action, trackingNumber, estimatedDeliveryDate, deliveryPersonName, deliveryPersonPhone, notes, assigneeId } = req.body;
-      
-      let status = '';
-      let message = '';
-      
-      if (action === 'assign') {
-        status = 'logistics_assigned';
-        message = 'پیک تخصیص داده شد';
-      } else if (action === 'dispatch') {
-        status = 'logistics_dispatched';
-        message = 'کالا ارسال شد';
-      } else if (action === 'deliver') {
-        status = 'delivered';
-        message = 'تحویل نهایی انجام شد';
-        
-        // Generate delivery code for final delivery
-        const deliveryCode = Math.random().toString().substr(2, 6);
-        await orderManagementStorage.generateDeliveryCode(orderId);
-      }
-      
-      // Update order with logistics info
-      await db
-        .update(orderManagement)
-        .set({
-          logisticsAssigneeId: assigneeId,
-          logisticsProcessedAt: new Date(),
-          logisticsNotes: notes,
-          trackingNumber,
-          estimatedDeliveryDate: estimatedDeliveryDate ? new Date(estimatedDeliveryDate) : null,
-          deliveryPersonName,
-          deliveryPersonPhone,
-          currentStatus: status
-        })
-        .where(eq(orderManagement.id, orderId));
-
-      // Log status change
-      await orderManagementStorage.updateOrderStatus(
-        orderId,
-        status as any,
-        assigneeId,
-        'logistics',
-        notes || message
-      );
-
-      res.json({ success: true, message: "سفارش با موفقیت پردازش شد" });
-    } catch (error) {
-      console.error('Error processing logistics order:', error);
-      res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
-    }
-  });
 
   // ============================================================================
   // SUPER ADMIN VERIFICATION SYSTEM
