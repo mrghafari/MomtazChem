@@ -794,6 +794,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 </div>
               )}
               
+              {/* Total (without shipping) */}
+              <div className="flex justify-between font-semibold text-base border-t pt-2">
+                <span>Total</span>
+                <span className="text-primary">{formatCurrency(subtotalAmount + vatAmount)}</span>
+              </div>
+              
               {/* Shipping Cost */}
               {shippingCost > 0 && (
                 <div className="flex justify-between text-sm">
@@ -802,10 +808,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 </div>
               )}
               
-              {/* Total */}
-              <div className="flex justify-between font-semibold text-lg border-t pt-2">
-                <span>{t.totalAmount}</span>
-                <span className="text-primary">{formatCurrency(totalAmount - shippingCost)} {shippingCost > 0 && `+ ${shippingCost.toLocaleString()} د.ع`}</span>
+              {/* Final Amount */}
+              <div className="flex justify-between font-bold text-lg border-t pt-2 bg-blue-50 px-2 py-2 rounded-lg">
+                <span>Final Amount</span>
+                <span className="text-blue-600">{formatCurrency(totalAmount)}</span>
               </div>
             </div>
           </div>
