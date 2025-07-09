@@ -88,6 +88,13 @@ export default function SiteManagement() {
       className: "border-purple-300 text-purple-600 hover:bg-purple-50"
     },
     {
+      id: "warehouse",
+      label: "Warehouse",
+      icon: Package,
+      onClick: () => setLocation("/warehouse"),
+      className: "border-amber-300 text-amber-600 hover:bg-amber-50"
+    },
+    {
       id: "logistics",
       label: "Logistics",
       icon: Truck,

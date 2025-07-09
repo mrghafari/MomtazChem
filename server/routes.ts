@@ -9899,6 +9899,43 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // =============================================================================
+  // WAREHOUSE DEPARTMENT API ROUTES
+  // =============================================================================
+
+  // Warehouse orders - Get orders approved by financial department
+  app.get('/api/order-management/warehouse', async (req, res) => {
+    try {
+      const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
+      res.json(orders);
+    } catch (error) {
+      console.error('Error fetching warehouse orders:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات انبار' });
+    }
+  });
+
+  // Process warehouse order
+  app.patch('/api/order-management/warehouse/:id/process', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, notes } = req.body;
+      const adminId = req.session?.adminId || 1; // Default admin ID for warehouse operations
+      
+      const order = await orderManagementStorage.updateOrderStatus(
+        parseInt(id), 
+        status, 
+        adminId,
+        'warehouse',
+        notes
+      );
+      
+      res.json({ success: true, data: order });
+    } catch (error) {
+      console.error('Error processing warehouse order:', error);
+      res.status(500).json({ success: false, message: 'خطا در پردازش سفارش' });
+    }
+  });
+
+  // =============================================================================
   // LOGISTICS DEPARTMENT API ROUTES
   // =============================================================================
 
