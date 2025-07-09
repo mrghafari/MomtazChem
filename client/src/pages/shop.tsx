@@ -360,10 +360,10 @@ const Shop = () => {
       description: `${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, redirect to checkout, otherwise to profile
+    // If user had items in cart, show checkout modal, otherwise to profile
     setTimeout(() => {
       if (hasCartItems) {
-        navigate("/checkout");
+        setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
           description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
@@ -393,10 +393,10 @@ const Shop = () => {
       description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, redirect to checkout, otherwise to profile
+    // If user had items in cart, show checkout modal, otherwise to profile
     setTimeout(() => {
       if (hasCartItems) {
-        navigate("/checkout");
+        setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
           description: "کالاهای انتخابی شما آماده پرداخت است",
