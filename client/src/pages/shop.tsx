@@ -698,13 +698,8 @@ const Shop = () => {
   const handleCartClick = () => {
     if (getTotalItems() === 0) return;
     
-    // If customer is already logged in, go directly to checkout
-    if (customer) {
-      setShowCheckout(true);
-    } else {
-      // Show pre-checkout modal to ask login/register/guest
-      setShowPreCheckout(true);
-    }
+    // Show cart modal to allow shipping method selection
+    setShowCartModal(true);
   };
 
   const handleLoginChoice = () => {
@@ -1623,6 +1618,64 @@ const Shop = () => {
       />
 
 
+
+      {/* Shopping Cart Modal */}
+      <ShoppingCartModal
+        isOpen={showCartModal}
+        onClose={() => setShowCartModal(false)}
+        cart={cart}
+        products={currentProducts}
+        onUpdateQuantity={(productId, newQuantity) => {
+          if (newQuantity <= 0) {
+            const { [productId]: removed, ...newCart } = cart;
+            setCart(newCart);
+            saveCartToStorage(newCart);
+          } else {
+            const newCart = { ...cart, [productId]: newQuantity };
+            setCart(newCart);
+            saveCartToStorage(newCart);
+          }
+        }}
+        onRemoveItem={(productId) => {
+          const { [productId]: removed, ...newCart } = cart;
+          setCart(newCart);
+          saveCartToStorage(newCart);
+        }}
+        onClearCart={() => {
+          setCart({});
+          saveCartToStorage({});
+        }}
+        onCheckout={() => {
+          setShowCartModal(false);
+          if (customer) {
+            setShowCheckout(true);
+          } else {
+            setShowPreCheckout(true);
+          }
+        }}
+        getTotalPrice={() => {
+          const total = Object.entries(cart).reduce((sum, [productId, quantity]) => {
+            const product = currentProducts.find(p => p.id === parseInt(productId));
+            if (product) {
+              const price = parseFloat(product.price) || 0;
+              return sum + (price * quantity);
+            }
+            return sum;
+          }, 0);
+          return total;
+        }}
+        getTotalSavings={() => {
+          return Object.entries(cart).reduce((totalSavings, [productId, quantity]) => {
+            const product = currentProducts.find(p => p.id === parseInt(productId));
+            if (product && product.quantityDiscounts) {
+              const originalPrice = parseFloat(product.price) || 0;
+              const { discountedPrice, savings } = getDiscountedPrice(originalPrice, quantity, product.quantityDiscounts);
+              return totalSavings + (savings * quantity);
+            }
+            return totalSavings;
+          }, 0);
+        }}
+      />
 
       {/* Auth Dialog */}
       <CustomerAuth 

@@ -62,49 +62,36 @@ export default function ShoppingCartModal({
     return sum + (weight * item.quantity);
   }, 0);
 
-  // Mock shipping rates for now - in a real app this would come from API
-  const mockShippingRates: ShippingRate[] = [
-    {
-      id: 1,
-      deliveryMethod: "motorcycle_courier",
-      transportationType: "motorcycle",
-      description: "تحویل سریع با موتورسیکلت در شهر بغداد",
-      estimatedDays: 1,
-      trackingAvailable: true,
-      insuranceAvailable: false,
-      shippingCost: 5000,
-      basePrice: "5000",
-      pricePerKg: "1000",
-    },
-    {
-      id: 2,
-      deliveryMethod: "postal_service", 
-      transportationType: "ground",
-      description: "ارسال پستی سراسری با امکان رهگیری",
-      estimatedDays: 3,
-      trackingAvailable: true,
-      insuranceAvailable: true,
-      shippingCost: 8000,
-      basePrice: "8000",
-      pricePerKg: "2000",
-    }
-  ];
+  // Fetch shipping rates from API
+  const { data: shippingRatesData, isLoading: shippingRatesLoading } = useQuery({
+    queryKey: ["/api/logistics/shipping-rates"],
+    enabled: isOpen, // Only fetch when modal is open
+  });
+
+  const shippingRates = shippingRatesData?.data || [];
 
   // Calculate shipping cost when method changes
   useEffect(() => {
-    if (selectedShippingMethod) {
-      const rate = mockShippingRates.find(r => r.deliveryMethod === selectedShippingMethod);
+    if (selectedShippingMethod && shippingRates.length > 0) {
+      const rate = shippingRates.find(r => r.deliveryMethod === selectedShippingMethod);
       if (rate) {
         let cost = parseFloat(rate.basePrice);
         if (rate.pricePerKg && totalWeight > 0) {
           cost += totalWeight * parseFloat(rate.pricePerKg);
         }
+        
+        // Check for free shipping threshold
+        const orderTotal = getTotalPrice();
+        if (rate.freeShippingThreshold && orderTotal >= parseFloat(rate.freeShippingThreshold)) {
+          cost = 0;
+        }
+        
         setShippingCost(cost);
       }
     } else {
       setShippingCost(0);
     }
-  }, [selectedShippingMethod, totalWeight]);
+  }, [selectedShippingMethod, totalWeight, shippingRates, getTotalPrice]);
 
   if (cartItems.length === 0) {
     return (
@@ -281,16 +268,22 @@ export default function ShoppingCartModal({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">بدون انتخاب روش ارسال</SelectItem>
-              {mockShippingRates.map((rate) => (
-                <SelectItem key={rate.id} value={rate.deliveryMethod}>
-                  <div className="flex flex-col">
-                    <span>{rate.description}</span>
-                    <span className="text-xs text-gray-500">
-                      {rate.basePrice} د.ع + {rate.pricePerKg} د.ع/کیلو - {rate.estimatedDays} روز
-                    </span>
-                  </div>
-                </SelectItem>
-              ))}
+              {shippingRatesLoading ? (
+                <SelectItem value="" disabled>در حال بارگذاری...</SelectItem>
+              ) : (
+                shippingRates.map((rate) => (
+                  <SelectItem key={rate.id} value={rate.deliveryMethod}>
+                    <div className="flex flex-col">
+                      <span>{rate.description || rate.deliveryMethod}</span>
+                      <span className="text-xs text-gray-500">
+                        {parseFloat(rate.basePrice).toLocaleString()} د.ع
+                        {rate.pricePerKg && ` + ${parseFloat(rate.pricePerKg).toLocaleString()} د.ع/کیلو`}
+                        {rate.estimatedDays && ` - ${rate.estimatedDays} روز`}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>
