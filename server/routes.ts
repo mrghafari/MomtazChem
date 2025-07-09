@@ -1982,10 +1982,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('🏷️  [CUSTOM LABELS] Request received:', { 
         productsCount: req.body.products?.length, 
-        options: req.body.options 
+        options: req.body.options,
+        format: req.body.format 
       });
       
-      const { products, options } = req.body;
+      const { products, options, format = 'html' } = req.body;
       
       if (!products || !Array.isArray(products) || products.length === 0) {
         return res.status(400).json({
@@ -2011,6 +2012,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         labelSize,
         website: websiteText
       });
+
+      // Return as image if requested
+      if (format === 'image') {
+        try {
+          const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+          });
+          
+          const page = await browser.newPage();
+          await page.setContent(labelHTML, { waitUntil: 'networkidle0' });
+          
+          // Set viewport for better image quality
+          await page.setViewport({ width: 800, height: 600 });
+          
+          const screenshot = await page.screenshot({
+            type: 'png',
+            fullPage: true,
+            omitBackground: false
+          });
+          
+          await browser.close();
+
+          res.setHeader('Content-Type', 'image/png');
+          res.setHeader('Content-Disposition', `attachment; filename="Custom_Labels_${new Date().toISOString().split('T')[0]}.png"`);
+          res.send(screenshot);
+          
+          console.log(`✅ [CUSTOM LABELS] Generated custom labels image for ${products.length} products`);
+          return;
+        } catch (imageError) {
+          console.log('Image generation failed, falling back to HTML:', imageError.message);
+        }
+      }
 
       // Return HTML directly for better compatibility and user control
       console.log('🏷️  [CUSTOM LABELS] Generating HTML for custom labels');

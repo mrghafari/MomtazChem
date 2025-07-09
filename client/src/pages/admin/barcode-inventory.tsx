@@ -263,7 +263,8 @@ export default function BarcodeInventory() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           products: selectedProductsList,
-          options: labelOptions
+          options: labelOptions,
+          format: 'image'
         })
       });
 
@@ -273,7 +274,7 @@ export default function BarcodeInventory() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `customized-labels-${new Date().toISOString().split('T')[0]}.html`;
+      a.download = `customized-labels-${new Date().toISOString().split('T')[0]}.png`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -281,12 +282,70 @@ export default function BarcodeInventory() {
       
       toast({
         title: "موفق",
-        description: "برچسب‌های سفارشی با موفقیت دانلود شد",
+        description: "برچسب‌های سفارشی به فرمت عکس دانلود شد",
       });
     } catch (error) {
       toast({
         title: "خطا",
         description: "خطا در تولید برچسب‌های سفارشی",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const printCustomizedLabels = async () => {
+    const selectedProductsList = selectedProducts.length > 0 
+      ? products?.filter(p => selectedProducts.includes(p.id)) 
+      : products?.filter(p => p.barcode);
+
+    if (!selectedProductsList || selectedProductsList.length === 0) {
+      toast({
+        title: "محصولی یافت نشد",
+        description: "محصولی برای پرینت برچسب انتخاب نشده",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/barcode/generate-custom-labels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          products: selectedProductsList,
+          options: labelOptions,
+          format: 'html'
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate labels');
+      
+      const htmlText = await response.text();
+      
+      // باز کردن HTML در پنجره جدید برای پرینت
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(htmlText);
+        printWindow.document.close();
+        
+        // انتظار برای لود شدن محتوا و سپس پرینت
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
+        };
+        
+        toast({
+          title: "موفق",
+          description: "صفحه پرینت برچسب‌های سفارشی باز شد",
+        });
+      } else {
+        throw new Error('Could not open print window');
+      }
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در باز کردن صفحه پرینت برچسب‌ها",
         variant: "destructive"
       });
     }
@@ -780,7 +839,11 @@ ${optionalFields}^XZ`;
                 </Button>
                 <Button onClick={() => downloadCustomizedLabels()}>
                   <Download className="h-4 w-4 mr-2" />
-                  دانلود برچسب‌های سفارشی
+                  دانلود عکس برچسب‌ها
+                </Button>
+                <Button variant="outline" onClick={() => printCustomizedLabels()}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  پرینت برچسب‌ها
                 </Button>
               </div>
             </div>
