@@ -438,9 +438,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     return sum;
   }, 0);
 
-  // Calculate VAT amount
+  // Calculate VAT amount (only on product subtotal, not shipping)
   const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') / 100 : 0;
-  const vatAmount = subtotalAmount * vatRate;
+  const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
   
   // Calculate total amount (subtotal + VAT)
   const totalAmount = subtotalAmount + vatAmount;
