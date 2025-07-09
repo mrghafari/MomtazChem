@@ -121,10 +121,16 @@ const Shop = () => {
   useEffect(() => {
     if (availableFilters?.priceRange) {
       const { min, max } = availableFilters.priceRange;
-      if (min !== priceRange[0] || max !== priceRange[1]) {
-        setPriceRange([min, max]);
+      // Convert string values to numbers for the slider
+      const minNum = typeof min === 'string' ? parseFloat(min) : min;
+      const maxNum = typeof max === 'string' ? parseFloat(max) : max;
+      
+      console.log('Price range from API:', { min, max, minNum, maxNum, currentPriceRange: priceRange });
+      
+      if (minNum !== priceRange[0] || maxNum !== priceRange[1]) {
+        setPriceRange([minNum, maxNum]);
         if (!filters.priceMin && !filters.priceMax) {
-          setFilters(prev => ({ ...prev, priceMin: min, priceMax: max }));
+          setFilters(prev => ({ ...prev, priceMin: minNum, priceMax: maxNum }));
         }
       }
     }
@@ -156,7 +162,10 @@ const Shop = () => {
     setCurrentPage(0);
     if (availableFilters?.priceRange) {
       const { min, max } = availableFilters.priceRange;
-      setPriceRange([min, max]);
+      // Convert string values to numbers for the slider
+      const minNum = typeof min === 'string' ? parseFloat(min) : min;
+      const maxNum = typeof max === 'string' ? parseFloat(max) : max;
+      setPriceRange([minNum, maxNum]);
     }
   };
 
@@ -913,17 +922,21 @@ const Shop = () => {
                   <>
                     <div>
                       <label className="text-sm font-medium text-gray-700 mb-2 block">
-                        Price Range: ${priceRange[0]} - ${priceRange[1]}
+                        Price Range: {priceRange[0]} - {priceRange[1]} IQD
                       </label>
                       <div className="mt-2">
                         <Slider
                           value={priceRange}
                           onValueChange={handlePriceRangeChange}
-                          max={availableFilters.priceRange.max}
-                          min={availableFilters.priceRange.min}
-                          step={10}
+                          max={typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max}
+                          min={typeof availableFilters.priceRange.min === 'string' ? parseFloat(availableFilters.priceRange.min) : availableFilters.priceRange.min}
+                          step={5}
                           className="w-full"
                         />
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>{typeof availableFilters.priceRange.min === 'string' ? parseFloat(availableFilters.priceRange.min) : availableFilters.priceRange.min} IQD</span>
+                        <span>{typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max} IQD</span>
                       </div>
                     </div>
                     <Separator />
