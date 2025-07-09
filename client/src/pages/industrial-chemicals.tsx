@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { useLocation } from 'wouter';
 import { Factory, Beaker, Shield, Cog, Zap, Cpu } from 'lucide-react';
 
 interface ContentItem {
@@ -14,6 +16,8 @@ interface ContentItem {
 }
 
 export default function IndustrialChemicalsPage() {
+  const [, setLocation] = useLocation();
+
   const { data: contentItems = [], isLoading } = useQuery<ContentItem[]>({
     queryKey: ['/api/content-management/items'],
     queryFn: async () => {
@@ -174,12 +178,18 @@ export default function IndustrialChemicalsPage() {
             Our chemical engineers are ready to provide specialized solutions for your industrial processes and manufacturing requirements.
           </p>
           <div className="space-x-4">
-            <button className="bg-white text-emerald-600 px-8 py-3 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
+            <Button 
+              onClick={() => setLocation('/contact')}
+              className="bg-white text-emerald-600 px-8 py-3 rounded-lg font-semibold hover:bg-emerald-50 transition-colors"
+            >
               Consult Engineers
-            </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors">
+            </Button>
+            <Button 
+              onClick={() => setLocation('/shop')}
+              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
+            >
               Browse Chemicals
-            </button>
+            </Button>
           </div>
         </div>
       </div>

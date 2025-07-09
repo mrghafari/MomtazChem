@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { useLocation } from 'wouter';
 import { Palette, Droplets, Car, Building, Shield, Brush } from 'lucide-react';
 
 interface ContentItem {
@@ -14,6 +16,8 @@ interface ContentItem {
 }
 
 export default function PaintSolventsPage() {
+  const [, setLocation] = useLocation();
+
   const { data: contentItems = [], isLoading } = useQuery<ContentItem[]>({
     queryKey: ['/api/content-management/items'],
     queryFn: async () => {
@@ -175,12 +179,18 @@ export default function PaintSolventsPage() {
             Contact our technical experts for personalized paint and solvent recommendations tailored to your specific requirements.
           </p>
           <div className="space-x-4">
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+            <Button 
+              onClick={() => setLocation('/contact')}
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+            >
               Contact Experts
-            </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+            </Button>
+            <Button 
+              onClick={() => setLocation('/shop')}
+              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+            >
               View Products
-            </button>
+            </Button>
           </div>
         </div>
       </div>

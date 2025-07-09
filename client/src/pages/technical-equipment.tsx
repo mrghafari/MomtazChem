@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { useLocation } from 'wouter';
 import { Microscope, Settings, Gauge, Zap, GitMerge, Filter, Thermometer, Shield } from 'lucide-react';
 
 interface ContentItem {
@@ -14,6 +16,8 @@ interface ContentItem {
 }
 
 export default function TechnicalEquipmentPage() {
+  const [, setLocation] = useLocation();
+
   const { data: contentItems = [], isLoading } = useQuery<ContentItem[]>({
     queryKey: ['/api/content-management/items'],
     queryFn: async () => {
@@ -188,12 +192,18 @@ export default function TechnicalEquipmentPage() {
             Connect with our technical specialists to find the perfect instrumentation and equipment solutions for your specific requirements.
           </p>
           <div className="space-x-4">
-            <button className="bg-white text-slate-700 px-8 py-3 rounded-lg font-semibold hover:bg-slate-50 transition-colors">
+            <Button 
+              onClick={() => setLocation('/contact')}
+              className="bg-white text-slate-700 px-8 py-3 rounded-lg font-semibold hover:bg-slate-50 transition-colors"
+            >
               Technical Consultation
-            </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-slate-700 transition-colors">
+            </Button>
+            <Button 
+              onClick={() => setLocation('/shop')}
+              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-slate-700 transition-colors"
+            >
               Equipment Catalog
-            </button>
+            </Button>
           </div>
         </div>
       </div>
