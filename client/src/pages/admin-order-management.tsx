@@ -107,7 +107,8 @@ const statusColors: Record<string, string> = {
 export default function AdminOrderManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedDepartment, setSelectedDepartment] = useState<'financial' | 'warehouse' | 'logistics' | 'delivered' | 'finance-review'>('financial');
+  const [selectedDepartment, setSelectedDepartment] = useState<'financial' | 'warehouse' | 'logistics' | 'delivered'>('financial');
+  const [selectedFinancialTab, setSelectedFinancialTab] = useState<'review' | 'management'>('review');
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
@@ -120,14 +121,18 @@ export default function AdminOrderManagement() {
 
   // Fetch orders for selected department
   const { data: orders, isLoading } = useQuery({
-    queryKey: ['orders', selectedDepartment],
+    queryKey: ['orders', selectedDepartment, selectedFinancialTab],
     queryFn: async () => {
       let apiUrl: string;
       
       if (selectedDepartment === 'delivered') {
         apiUrl = '/api/delivered/orders';
-      } else if (selectedDepartment === 'finance-review') {
-        apiUrl = '/api/order-management/financial';
+      } else if (selectedDepartment === 'financial') {
+        if (selectedFinancialTab === 'review') {
+          apiUrl = '/api/order-management/financial';
+        } else {
+          apiUrl = '/api/order-management/financial';
+        }
       } else {
         apiUrl = `/api/order-management/${selectedDepartment}`;
       }
@@ -173,7 +178,7 @@ export default function AdminOrderManagement() {
         credentials: 'include',
         body: JSON.stringify({
           newStatus,
-          department: selectedDepartment === 'finance-review' ? 'financial' : selectedDepartment,
+          department: selectedDepartment,
           notes
         })
       });
@@ -224,7 +229,7 @@ export default function AdminOrderManagement() {
       return response.json();
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['orders', selectedDepartment] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       setReviewDialogOpen(false);
       setReviewNotes('');
       setSelectedOrder(null);
@@ -255,19 +260,20 @@ export default function AdminOrderManagement() {
   const getValidStatuses = (currentStatus: string) => {
     switch (selectedDepartment) {
       case 'financial':
-        if (currentStatus === 'payment_uploaded') {
-          return ['financial_reviewing', 'financial_rejected'];
-        }
-        if (currentStatus === 'financial_reviewing') {
-          return ['financial_approved', 'financial_rejected'];
-        }
-        break;
-      case 'finance-review':
-        if (currentStatus === 'payment_uploaded') {
-          return ['financial_reviewing', 'financial_rejected'];
-        }
-        if (currentStatus === 'financial_reviewing') {
-          return ['financial_approved', 'financial_rejected'];
+        if (selectedFinancialTab === 'review') {
+          if (currentStatus === 'payment_uploaded') {
+            return ['financial_reviewing', 'financial_rejected'];
+          }
+          if (currentStatus === 'financial_reviewing') {
+            return ['financial_approved', 'financial_rejected'];
+          }
+        } else {
+          if (currentStatus === 'payment_uploaded') {
+            return ['financial_reviewing', 'financial_rejected'];
+          }
+          if (currentStatus === 'financial_reviewing') {
+            return ['financial_approved', 'financial_rejected'];
+          }
         }
         break;
       case 'warehouse':
@@ -327,14 +333,10 @@ export default function AdminOrderManagement() {
       </div>
 
       <Tabs value={selectedDepartment} onValueChange={(value) => setSelectedDepartment(value as any)}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="financial" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
             بخش مالی
-          </TabsTrigger>
-          <TabsTrigger value="finance-review" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            بررسی واریزی‌ها
           </TabsTrigger>
           <TabsTrigger value="warehouse" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
@@ -350,22 +352,38 @@ export default function AdminOrderManagement() {
           </TabsTrigger>
         </TabsList>
 
-        {['financial', 'finance-review', 'warehouse', 'logistics', 'delivered'].map((dept) => (
+        {['financial', 'warehouse', 'logistics', 'delivered'].map((dept) => (
           <TabsContent key={dept} value={dept} className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {getDepartmentIcon(dept)}
-                  سفارشات بخش {dept === 'financial' ? 'مالی' : dept === 'finance-review' ? 'بررسی واریزی‌ها' : dept === 'warehouse' ? 'انبار' : dept === 'logistics' ? 'لجستیک' : 'تحویل شده'}
+                  سفارشات بخش {dept === 'financial' ? 'مالی' : dept === 'warehouse' ? 'انبار' : dept === 'logistics' ? 'لجستیک' : 'تحویل شده'}
                 </CardTitle>
                 <CardDescription>
                   {dept === 'financial' && 'بررسی و تایید واریزی‌های مشتریان'}
-                  {dept === 'finance-review' && 'بررسی و تایید واریزی‌های بانکی مشتریان'}
                   {dept === 'warehouse' && 'آماده‌سازی و تایید کالاهای سفارش'}
                   {dept === 'logistics' && 'ارسال و تحویل سفارشات به مشتریان'}
                   {dept === 'delivered' && 'سفارشات تحویل شده و تکمیل شده'}
                 </CardDescription>
               </CardHeader>
+              
+              {dept === 'financial' && (
+                <div className="px-6 pb-4">
+                  <Tabs value={selectedFinancialTab} onValueChange={(value) => setSelectedFinancialTab(value as any)}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="review" className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        بررسی واریزی‌ها
+                      </TabsTrigger>
+                      <TabsTrigger value="management" className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        مدیریت مالی
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              )}
               <CardContent>
                 {isLoading ? (
                   <div className="text-center py-8">در حال بارگذاری...</div>
@@ -400,7 +418,7 @@ export default function AdminOrderManagement() {
                                 تاریخچه
                               </Button>
                               
-                              {dept === 'finance-review' ? (
+                              {dept === 'financial' && selectedFinancialTab === 'review' ? (
                                 // دکمه‌های تایید/رد واریزی برای بخش بررسی واریزی‌ها
                                 order.currentStatus === 'payment_uploaded' || order.currentStatus === 'financial_reviewing' ? (
                                   <>
@@ -441,7 +459,7 @@ export default function AdminOrderManagement() {
                               <div>{formatDate(order.createdAt)}</div>
                             </div>
                             
-                            {(dept === 'financial' || dept === 'finance-review') && order.paymentReceiptUrl && (
+                            {dept === 'financial' && order.paymentReceiptUrl && (
                               <div>
                                 <span className="text-muted-foreground">رسید پرداخت:</span>
                                 <div>
