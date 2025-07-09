@@ -261,6 +261,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
+  
+  // Serve static files from uploads directory
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // ============================================
   // START: Documentation PDF Generation Routes

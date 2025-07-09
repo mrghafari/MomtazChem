@@ -346,7 +346,7 @@ export default function FinancialDepartment() {
                             </p>
                           )}
                           <p className="text-sm text-gray-600">
-                            تاریخ ثبت: {new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                            تاریخ ثبت: {new Date(order.createdAt).toLocaleDateString('en-US')}
                           </p>
                           {order.paymentReceiptUrl && (
                             <p className="text-sm text-green-600 font-medium">
@@ -416,7 +416,7 @@ export default function FinancialDepartment() {
                   <div>
                     <span className="text-gray-600">تاریخ ثبت:</span>
                     <span className="font-medium ml-2">
-                      {new Date(selectedOrder.createdAt).toLocaleDateString('fa-IR')}
+                      {new Date(selectedOrder.createdAt).toLocaleDateString('en-US')}
                     </span>
                   </div>
                   {selectedOrder.totalAmount && (
