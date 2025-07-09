@@ -139,7 +139,7 @@ export default function LogisticsDepartment() {
     resolver: zodResolver(shippingRateSchema),
     defaultValues: {
       deliveryMethod: "",
-      transportationType: "",
+      transportationType: undefined,
       cityName: "",
       provinceName: "",
       basePrice: "",
@@ -815,7 +815,7 @@ export default function LogisticsDepartment() {
                       <FormItem>
                         <FormLabel>روش ارسال</FormLabel>
                         <FormControl>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value || undefined}>
                             <SelectTrigger>
                               <SelectValue placeholder="انتخاب روش ارسال" />
                             </SelectTrigger>
@@ -839,7 +839,7 @@ export default function LogisticsDepartment() {
                       <FormItem>
                         <FormLabel>نوع وسیله نقلیه</FormLabel>
                         <FormControl>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value || undefined}>
                             <SelectTrigger>
                               <SelectValue placeholder="انتخاب وسیله" />
                             </SelectTrigger>
