@@ -174,6 +174,7 @@ function Router() {
           <Route path="/financial/login" component={FinancialLogin} />
           <Route path="/warehouse" component={WarehouseDepartment} />
           <Route path="/warehouse/login" component={WarehouseLogin} />
+          <Route path="/logistics-department" component={LogisticsDepartment} />
           <Route path="/logistics-full" component={LogisticsDepartment} />
           <Route path="/logistics" component={LogisticsSimple} />
           <Route path="/logistics/login" component={LogisticsLogin} />
