@@ -27,6 +27,7 @@ export interface IOrderManagementStorage {
   createOrderManagement(orderData: InsertOrderManagement): Promise<OrderManagement>;
   getOrderManagementById(id: number): Promise<OrderManagement | undefined>;
   getOrderManagementByCustomerOrderId(customerOrderId: number): Promise<OrderManagement | undefined>;
+  updateOrderManagement(id: number, updateData: Partial<InsertOrderManagement>): Promise<OrderManagement>;
   updateOrderStatus(id: number, newStatus: OrderStatus, changedBy: number, department: Department, notes?: string): Promise<OrderManagement>;
   
   // Workflow sequence validation
@@ -102,6 +103,21 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       .from(orderManagement)
       .where(eq(orderManagement.customerOrderId, customerOrderId));
     return order;
+  }
+  
+  async updateOrderManagement(id: number, updateData: Partial<InsertOrderManagement>): Promise<OrderManagement> {
+    const dataWithTimestamp = {
+      ...updateData,
+      updatedAt: new Date()
+    };
+    
+    const [updatedOrder] = await db
+      .update(orderManagement)
+      .set(dataWithTimestamp)
+      .where(eq(orderManagement.id, id))
+      .returning();
+    
+    return updatedOrder;
   }
   
   async updateOrderStatus(
@@ -321,7 +337,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       query = query.where(inArray(orderManagement.currentStatus, logisticsStatuses));
     }
     
-    const results = await query.orderBy(asc(orderManagement.createdAt));
+    const results = await query.orderBy(desc(orderManagement.createdAt));
     
     // Transform results to include customer info and receipt info in nested structure
     return results.map(row => ({
