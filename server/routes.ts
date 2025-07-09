@@ -1186,6 +1186,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
             receiptNotes: notes || null
           });
 
+          // Also store in payment_receipts table for order management system
+          await orderManagementStorage.uploadPaymentReceipt({
+            customerOrderId: parseInt(orderId),
+            customerId: customerId,
+            receiptUrl: receiptUrl,
+            originalFileName: req.file.originalname,
+            fileSize: req.file.size,
+            mimeType: req.file.mimetype,
+            notes: notes || null
+          });
+
+          // Update order_management table if it exists
+          const orderMgmt = await orderManagementStorage.getOrderManagementByCustomerOrderId(parseInt(orderId));
+          if (orderMgmt) {
+            await db.update(orderManagement)
+              .set({ 
+                paymentReceiptUrl: receiptUrl,
+                currentStatus: 'payment_uploaded'
+              })
+              .where(eq(orderManagement.customerOrderId, parseInt(orderId)));
+          }
+
           // Log the receipt upload
           console.log(`Receipt uploaded for order ${orderId} by customer ${customerId}`);
         }

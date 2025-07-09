@@ -284,10 +284,16 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       customerLastName: customers.lastName,
       customerEmail: customers.email,
       customerPhone: customers.phone,
+      
+      // Payment Receipt info
+      receiptUrl: paymentReceipts.receiptUrl,
+      receiptFileName: paymentReceipts.originalFileName,
+      receiptMimeType: paymentReceipts.mimeType,
     })
     .from(orderManagement)
     .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-    .leftJoin(customers, eq(customerOrders.customerId, customers.id));
+    .leftJoin(customers, eq(customerOrders.customerId, customers.id))
+    .leftJoin(paymentReceipts, eq(paymentReceipts.customerOrderId, customerOrders.id));
     
     if (department === 'financial') {
       // بخش مالی فقط سفارشات با رسید پرداخت آپلود شده را می‌بیند
@@ -317,7 +323,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     
     const results = await query.orderBy(asc(orderManagement.createdAt));
     
-    // Transform results to include customer info in nested structure
+    // Transform results to include customer info and receipt info in nested structure
     return results.map(row => ({
       id: row.id,
       customerOrderId: row.customerOrderId,
@@ -328,7 +334,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       financialReviewerId: row.financialReviewerId,
       financialReviewedAt: row.financialReviewedAt,
       financialNotes: row.financialNotes,
-      paymentReceiptUrl: row.paymentReceiptUrl,
+      paymentReceiptUrl: row.paymentReceiptUrl || row.receiptUrl, // Use receipt from payment_receipts if available
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       customer: {
@@ -336,7 +342,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         lastName: row.customerLastName,
         email: row.customerEmail,
         phone: row.customerPhone,
-      }
+      },
+      receipt: row.receiptUrl ? {
+        url: row.receiptUrl,
+        fileName: row.receiptFileName,
+        mimeType: row.receiptMimeType,
+      } : null
     }));
   }
   

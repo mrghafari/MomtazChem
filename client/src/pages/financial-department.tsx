@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
-import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -40,6 +40,13 @@ interface OrderManagement {
     phone: string;
   };
   
+  // Receipt info
+  receipt?: {
+    url: string;
+    fileName?: string;
+    mimeType?: string;
+  };
+  
   // Order info
   order?: {
     totalAmount: number;
@@ -61,6 +68,8 @@ interface FinancialUser {
 export default function FinancialDepartment() {
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
   const [user, setUser] = useState<FinancialUser | null>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -153,6 +162,20 @@ export default function FinancialDepartment() {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  // Function to open image modal
+  const openImageModal = (imageUrl: string) => {
+    setSelectedImageUrl(imageUrl);
+    setImageModalOpen(true);
+  };
+
+  // Function to determine if URL is an image
+  const isImageUrl = (url: string, mimeType?: string) => {
+    if (mimeType) {
+      return mimeType.startsWith('image/');
+    }
+    return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
   };
 
   if (!user) {
@@ -280,6 +303,35 @@ export default function FinancialDepartment() {
                           <p className="text-sm text-gray-600">
                             {order.customer?.phone || 'شماره تلفن ثبت نشده'}
                           </p>
+                          
+                          {/* Receipt Thumbnail */}
+                          {(order.receipt?.url || order.paymentReceiptUrl) && (
+                            <div className="mt-3">
+                              <h5 className="text-xs font-medium text-gray-700 mb-2">فیش پرداخت:</h5>
+                              {isImageUrl(order.receipt?.url || order.paymentReceiptUrl!, order.receipt?.mimeType) ? (
+                                <div 
+                                  className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors"
+                                  onClick={() => openImageModal(order.receipt?.url || order.paymentReceiptUrl!)}
+                                >
+                                  <img 
+                                    src={order.receipt?.url || order.paymentReceiptUrl!}
+                                    alt="فیش پرداخت"
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                                    <ZoomIn className="w-4 h-4 text-white opacity-0 hover:opacity-100 transition-opacity" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div 
+                                  className="w-20 h-20 rounded-lg border border-gray-200 flex items-center justify-center cursor-pointer hover:border-blue-400 bg-gray-50"
+                                  onClick={() => window.open(order.receipt?.url || order.paymentReceiptUrl!, '_blank')}
+                                >
+                                  <FileText className="w-6 h-6 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                         
                         <div>
@@ -380,15 +432,40 @@ export default function FinancialDepartment() {
                   )}
                   <div>
                     <span className="text-gray-600">فیش پرداخت:</span>
-                    {selectedOrder.paymentReceiptUrl ? (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        onClick={() => window.open(selectedOrder.paymentReceiptUrl!, '_blank')}
-                        className="text-green-600 hover:text-green-700 p-0 h-auto font-medium"
-                      >
-                        مشاهده فیش ارسالی
-                      </Button>
+                    {(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl) ? (
+                      <div className="flex items-center gap-3 mt-2">
+                        {/* Receipt Thumbnail in Modal */}
+                        {isImageUrl(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, selectedOrder.receipt?.mimeType) ? (
+                          <div 
+                            className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors"
+                            onClick={() => openImageModal(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!)}
+                          >
+                            <img 
+                              src={selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!}
+                              alt="فیش پرداخت"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                              <ZoomIn className="w-3 h-3 text-white opacity-0 hover:opacity-100 transition-opacity" />
+                            </div>
+                          </div>
+                        ) : (
+                          <div 
+                            className="w-16 h-16 rounded-lg border border-gray-200 flex items-center justify-center cursor-pointer hover:border-blue-400 bg-gray-50"
+                            onClick={() => window.open(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, '_blank')}
+                          >
+                            <FileText className="w-4 h-4 text-gray-400" />
+                          </div>
+                        )}
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={() => window.open(selectedOrder.receipt?.url || selectedOrder.paymentReceiptUrl!, '_blank')}
+                          className="text-green-600 hover:text-green-700 p-0 h-auto font-medium"
+                        >
+                          مشاهده فیش ارسالی
+                        </Button>
+                      </div>
                     ) : (
                       <span className="text-red-600 ml-2">فیش ارسال نشده</span>
                     )}
@@ -453,6 +530,34 @@ export default function FinancialDepartment() {
                 </div>
               </form>
             </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Image Modal for Receipt Viewing */}
+        <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+            <DialogHeader className="p-4 pb-2">
+              <DialogTitle className="flex items-center justify-between">
+                <span>مشاهده فیش پرداخت</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setImageModalOpen(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex items-center justify-center p-4">
+              {selectedImageUrl && (
+                <img
+                  src={selectedImageUrl}
+                  alt="فیش پرداخت"
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                />
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>
