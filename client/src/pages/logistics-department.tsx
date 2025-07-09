@@ -180,7 +180,7 @@ export default function LogisticsDepartment() {
   });
 
   const orders = ordersData?.orders || [];
-  const shippingRates = shippingRatesData?.rates || [];
+  const shippingRates = shippingRatesData?.data || [];
 
   // Update delivery info mutation
   const updateDeliveryMutation = useMutation({

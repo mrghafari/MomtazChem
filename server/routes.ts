@@ -9953,51 +9953,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Shipping rates management endpoints
-  app.get('/api/logistics/shipping-rates', async (req, res) => {
-    try {
-      const shippingRates = await orderManagementStorage.getShippingRates();
-      res.json({ success: true, data: shippingRates });
-    } catch (error) {
-      console.error('Error fetching shipping rates:', error);
-      res.status(500).json({ success: false, message: 'خطا در دریافت تعرفه‌های حمل و نقل' });
-    }
-  });
-
-  app.post('/api/logistics/shipping-rates', async (req, res) => {
-    try {
-      const newRate = await orderManagementStorage.createShippingRate(req.body);
-      res.json({ success: true, data: newRate });
-    } catch (error) {
-      console.error('Error creating shipping rate:', error);
-      res.status(500).json({ success: false, message: 'خطا در ایجاد تعرفه حمل و نقل' });
-    }
-  });
-
-  app.put('/api/logistics/shipping-rates/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const updatedRate = await orderManagementStorage.updateShippingRate(
-        parseInt(id),
-        req.body
-      );
-      res.json({ success: true, data: updatedRate });
-    } catch (error) {
-      console.error('Error updating shipping rate:', error);
-      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی تعرفه حمل و نقل' });
-    }
-  });
-
-  app.delete('/api/logistics/shipping-rates/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      await orderManagementStorage.deleteShippingRate(parseInt(id));
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting shipping rate:', error);
-      res.status(500).json({ success: false, message: 'خطا در حذف تعرفه حمل و نقل' });
-    }
-  });
+  // Shipping rates management endpoints (removed duplicates)
 
   // Shipping cost calculation endpoint
   app.post('/api/logistics/calculate-shipping', async (req, res) => {
@@ -10086,53 +10042,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Get all shipping rates
-  app.get('/api/logistics/shipping-rates', async (req, res) => {
-    try {
-      const rates = await orderManagementStorage.getShippingRates();
-      res.json({ success: true, rates });
-    } catch (error) {
-      console.error('Error fetching shipping rates:', error);
-      res.status(500).json({ success: false, message: 'خطا در دریافت نرخ‌های ارسال' });
-    }
-  });
-
-  // Create new shipping rate
-  app.post('/api/logistics/shipping-rates', async (req, res) => {
-    try {
-      const rateData = req.body;
-      const newRate = await orderManagementStorage.createShippingRate(rateData);
-      res.json({ success: true, rate: newRate });
-    } catch (error) {
-      console.error('Error creating shipping rate:', error);
-      res.status(500).json({ success: false, message: 'خطا در ایجاد نرخ ارسال' });
-    }
-  });
-
-  // Update shipping rate
-  app.put('/api/logistics/shipping-rates/:id', async (req, res) => {
-    try {
-      const rateId = parseInt(req.params.id);
-      const rateData = req.body;
-      const updatedRate = await orderManagementStorage.updateShippingRate(rateId, rateData);
-      res.json({ success: true, rate: updatedRate });
-    } catch (error) {
-      console.error('Error updating shipping rate:', error);
-      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی نرخ ارسال' });
-    }
-  });
-
-  // Delete shipping rate
-  app.delete('/api/logistics/shipping-rates/:id', async (req, res) => {
-    try {
-      const rateId = parseInt(req.params.id);
-      await orderManagementStorage.deleteShippingRate(rateId);
-      res.json({ success: true, message: 'نرخ ارسال حذف شد' });
-    } catch (error) {
-      console.error('Error deleting shipping rate:', error);
-      res.status(500).json({ success: false, message: 'خطا در حذف نرخ ارسال' });
-    }
-  });
+  // Second set of duplicate shipping rate endpoints removed
 
   // Get available shipping methods for checkout
   app.get('/api/shipping/methods', async (req, res) => {
@@ -10491,7 +10401,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         .from(shippingRates)
         .orderBy(shippingRates.deliveryMethod, shippingRates.transportationType);
       
-      res.json({ success: true, rates });
+      res.json({ success: true, data: rates });
     } catch (error) {
       console.error('Error fetching shipping rates:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت تعرفه‌های ارسال" });
@@ -10508,7 +10418,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         .values(rateData)
         .returning();
       
-      res.json({ success: true, rate: newRate, message: "تعرفه ارسال جدید ایجاد شد" });
+      res.json({ success: true, data: newRate, message: "تعرفه ارسال جدید ایجاد شد" });
     } catch (error) {
       console.error('Error creating shipping rate:', error);
       res.status(500).json({ success: false, message: "خطا در ایجاد تعرفه ارسال" });
