@@ -9903,10 +9903,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // =============================================================================
 
   // Warehouse orders - Get orders approved by financial department
-  app.get('/api/order-management/warehouse', async (req, res) => {
+  app.get('/api/order-management/warehouse', requireAuth, async (req, res) => {
     try {
       const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
-      res.json(orders);
+      res.json({ success: true, orders });
     } catch (error) {
       console.error('Error fetching warehouse orders:', error);
       res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات انبار' });
@@ -9914,7 +9914,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Process warehouse order
-  app.patch('/api/order-management/warehouse/:id/process', async (req, res) => {
+  app.patch('/api/order-management/warehouse/:id/process', requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const { status, notes } = req.body;

@@ -31,22 +31,26 @@ export default function WarehouseDepartment() {
   const { toast } = useToast();
 
   // Fetch orders approved by financial department
-  const { data: orders = [], isLoading, refetch } = useQuery({
+  const { data: response, isLoading, refetch } = useQuery({
     queryKey: ['/api/order-management/warehouse'],
     refetchInterval: 30000
   });
 
+  // Extract orders from response
+  const orders = response?.orders || response || [];
+  
   // Add some debug logging to check the data structure
-  console.log('Warehouse orders data:', orders);
+  console.log('Warehouse response:', response);
+  console.log('Warehouse orders:', orders);
 
   // Filter orders based on search
-  const filteredOrders = orders.filter((order: any) =>
+  const filteredOrders = Array.isArray(orders) ? orders.filter((order: any) =>
     order.customer?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.customer?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.customerOrderId?.toString().includes(searchTerm) ||
     order.id?.toString().includes(searchTerm)
-  );
+  ) : [];
 
   // Process order mutation
   const processOrderMutation = useMutation({
