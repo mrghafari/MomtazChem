@@ -465,14 +465,14 @@ export default function CategoryManagement() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t.parentCategory}</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} value={field.value?.toString()}>
+                        <Select onValueChange={(value) => field.onChange(value === 'none' ? undefined : parseInt(value))} value={field.value?.toString() || "none"}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder={t.selectParent} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">{t.none}</SelectItem>
+                            <SelectItem value="none">{t.none}</SelectItem>
                             {parentCategories.map((category: Category) => (
                               <SelectItem key={category.id} value={category.id.toString()}>
                                 {category.name}

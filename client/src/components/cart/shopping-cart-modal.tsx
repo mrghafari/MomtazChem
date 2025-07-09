@@ -72,7 +72,7 @@ export default function ShoppingCartModal({
 
   // Calculate shipping cost when method changes
   useEffect(() => {
-    if (selectedShippingMethod && shippingRates.length > 0) {
+    if (selectedShippingMethod && selectedShippingMethod !== 'none' && selectedShippingMethod !== 'loading' && shippingRates.length > 0) {
       const rate = shippingRates.find(r => r.deliveryMethod === selectedShippingMethod);
       if (rate) {
         let cost = parseFloat(rate.basePrice);
@@ -267,9 +267,9 @@ export default function ShoppingCartModal({
               <SelectValue placeholder="انتخاب روش ارسال..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">بدون انتخاب روش ارسال</SelectItem>
+              <SelectItem value="none">بدون انتخاب روش ارسال</SelectItem>
               {shippingRatesLoading ? (
-                <SelectItem value="" disabled>در حال بارگذاری...</SelectItem>
+                <SelectItem value="loading" disabled>در حال بارگذاری...</SelectItem>
               ) : (
                 shippingRates.map((rate) => (
                   <SelectItem key={rate.id} value={rate.deliveryMethod}>

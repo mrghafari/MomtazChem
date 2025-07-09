@@ -422,7 +422,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Calculate shipping cost based on selected method
   useEffect(() => {
-    if (selectedShippingMethod && shippingRates.length > 0) {
+    if (selectedShippingMethod && selectedShippingMethod !== 'none' && selectedShippingMethod !== 'loading' && shippingRates.length > 0) {
       const selectedRate = shippingRates.find(rate => rate.deliveryMethod === selectedShippingMethod);
       if (selectedRate) {
         const totalWeight = calculateTotalWeight();
@@ -1141,9 +1141,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       <SelectValue placeholder={t.selectShippingMethod} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t.selectShippingMethod}</SelectItem>
+                      <SelectItem value="none">{t.selectShippingMethod}</SelectItem>
                       {shippingRatesLoading ? (
-                        <SelectItem value="" disabled>در حال بارگذاری...</SelectItem>
+                        <SelectItem value="loading" disabled>در حال بارگذاری...</SelectItem>
                       ) : (
                         shippingRates.map((rate) => (
                           <SelectItem key={rate.id} value={rate.deliveryMethod}>
