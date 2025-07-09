@@ -13678,11 +13678,28 @@ momtazchem.com
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { crmCustomers } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
       
       const orderId = parseInt(req.params.orderId);
       const { notes } = req.body;
       const adminId = req.session.adminId;
+
+      // Get customer information for notification
+      const [customerInfo] = await db
+        .select({
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          customerName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName,
+          orderNumber: customerOrders.orderNumber,
+          total: customerOrders.total
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(orderManagement.customerOrderId, orderId));
 
       // Update order status to financial_approved
       await db
@@ -13705,7 +13722,32 @@ momtazchem.com
         notes: notes
       });
 
-      res.json({ success: true, message: "پرداخت تایید شد" });
+      // Send approval notification to customer
+      if (customerInfo) {
+        try {
+          // Send email notification
+          const { customerCommunicationStorage } = await import("./customer-communication-storage");
+          await customerCommunicationStorage.sendMessage({
+            categoryId: 2, // Order Updates category
+            customerEmail: customerInfo.customerEmail,
+            subject: `تایید پرداخت سفارش ${customerInfo.orderNumber}`,
+            message: `سلام ${customerInfo.customerName} ${customerInfo.customerLastName}،\n\nپرداخت سفارش شماره ${customerInfo.orderNumber} به مبلغ ${customerInfo.total} دینار با موفقیت تایید شد.\n\nسفارش شما اکنون به مرحله آماده‌سازی انبار ارسال شده است.\n\n${notes ? 'یادداشت: ' + notes : ''}\n\nبا تشکر،\nتیم ممتازشیمی`,
+            messageType: 'outbound',
+            priority: 'high',
+            messageSource: 'system'
+          });
+
+          // Send SMS notification
+          console.log(`📱 SMS Notification: Payment approved for order ${customerInfo.orderNumber} to ${customerInfo.customerPhone}`);
+          console.log(`SMS Content: سفارش ${customerInfo.orderNumber} شما تایید شد و به مرحله آماده‌سازی ارسال شده است. ممتازشیمی`);
+          
+        } catch (notificationError) {
+          console.error("Error sending approval notifications:", notificationError);
+          // Don't fail the approval if notification fails
+        }
+      }
+
+      res.json({ success: true, message: "پرداخت تایید شد و اطلاع‌رسانی ارسال شد" });
     } catch (error) {
       console.error("Error approving finance order:", error);
       res.status(500).json({
@@ -13721,11 +13763,28 @@ momtazchem.com
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { crmCustomers } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
       
       const orderId = parseInt(req.params.orderId);
       const { notes } = req.body;
       const adminId = req.session.adminId;
+
+      // Get customer information for notification
+      const [customerInfo] = await db
+        .select({
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          customerName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName,
+          orderNumber: customerOrders.orderNumber,
+          total: customerOrders.total
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(orderManagement.customerOrderId, orderId));
 
       // Update order status to financial_rejected
       await db
@@ -13748,7 +13807,32 @@ momtazchem.com
         notes: notes
       });
 
-      res.json({ success: true, message: "پرداخت رد شد" });
+      // Send rejection notification to customer
+      if (customerInfo) {
+        try {
+          // Send email notification
+          const { customerCommunicationStorage } = await import("./customer-communication-storage");
+          await customerCommunicationStorage.sendMessage({
+            categoryId: 2, // Order Updates category
+            customerEmail: customerInfo.customerEmail,
+            subject: `عدم تایید پرداخت سفارش ${customerInfo.orderNumber}`,
+            message: `سلام ${customerInfo.customerName} ${customerInfo.customerLastName}،\n\nمتأسفانه پرداخت سفارش شماره ${customerInfo.orderNumber} به مبلغ ${customerInfo.total} دینار تایید نشد.\n\nدلیل عدم تایید: ${notes || 'اطلاعات پرداخت کافی نیست'}\n\nلطفاً برای اصلاح مشکل با ما تماس بگیرید یا فیش واریزی صحیح را ارسال نمایید.\n\nبا تشکر،\nتیم ممتازشیمی`,
+            messageType: 'outbound',
+            priority: 'high',
+            messageSource: 'system'
+          });
+
+          // Send SMS notification
+          console.log(`📱 SMS Notification: Payment rejected for order ${customerInfo.orderNumber} to ${customerInfo.customerPhone}`);
+          console.log(`SMS Content: پرداخت سفارش ${customerInfo.orderNumber} تایید نشد. لطفاً با ما تماس بگیرید. ممتازشیمی`);
+          
+        } catch (notificationError) {
+          console.error("Error sending rejection notifications:", notificationError);
+          // Don't fail the rejection if notification fails
+        }
+      }
+
+      res.json({ success: true, message: "پرداخت رد شد و اطلاع‌رسانی ارسال شد" });
     } catch (error) {
       console.error("Error rejecting finance order:", error);
       res.status(500).json({

@@ -105,8 +105,8 @@ export default function FinanceOrders() {
     },
     onSuccess: () => {
       toast({
-        title: "سفارش تایید شد",
-        description: "سفارش به واحد انبار ارسال شد"
+        title: "✅ فیش بانکی تایید شد",
+        description: "پرداخت تایید شد، ایمیل و SMS به مشتری ارسال شد و سفارش به واحد انبار منتقل شد"
       });
       queryClient.invalidateQueries({ queryKey: ['/api/finance/orders'] });
       setIsDialogOpen(false);
@@ -131,8 +131,9 @@ export default function FinanceOrders() {
     },
     onSuccess: () => {
       toast({
-        title: "سفارش رد شد",
-        description: "سفارش رد شده و به مشتری اطلاع داده خواهد شد"
+        title: "❌ فیش بانکی رد شد",
+        description: "پرداخت رد شد، ایمیل و SMS اطلاع‌رسانی به مشتری ارسال شد",
+        variant: "destructive"
       });
       queryClient.invalidateQueries({ queryKey: ['/api/finance/orders'] });
       setIsDialogOpen(false);
@@ -370,16 +371,51 @@ export default function FinanceOrders() {
                     </div>
                   </div>
 
+                  {/* Bank Receipt Display Section */}
+                  {order.paymentReceiptUrl && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <FileText className="h-5 w-5 text-blue-600" />
+                        <h5 className="font-medium text-blue-900">فیش بانکی ارسال شده</h5>
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                          نیاز به تایید
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <p className="text-sm text-blue-700 mb-1">فیش واریزی توسط مشتری ارسال شده است</p>
+                          <p className="text-xs text-blue-600">
+                            بررسی فیش بانکی و تایید یا رد پرداخت ضروری است
+                          </p>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" asChild className="border-blue-300 hover:bg-blue-50">
+                            <a href={order.paymentReceiptUrl} target="_blank" rel="noopener noreferrer">
+                              <Eye className="h-4 w-4 mr-1" />
+                              مشاهده فیش
+                            </a>
+                          </Button>
+                          
+                          {order.paymentReceiptUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
+                            <div className="relative group">
+                              <img 
+                                src={order.paymentReceiptUrl} 
+                                alt="Bank Receipt Preview"
+                                className="w-16 h-16 object-cover rounded border border-blue-200 cursor-pointer hover:scale-105 transition-transform"
+                                onClick={() => window.open(order.paymentReceiptUrl, '_blank')}
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded transition-colors"></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center">
                     <div className="flex gap-2">
-                      {order.paymentReceiptUrl && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={order.paymentReceiptUrl} target="_blank" rel="noopener noreferrer">
-                            <Eye className="h-4 w-4 mr-1" />
-                            مشاهده رسید
-                          </a>
-                        </Button>
-                      )}
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -389,9 +425,12 @@ export default function FinanceOrders() {
                         ردیابی کالا
                       </Button>
                     </div>
-                    <Button onClick={() => handleOrderReview(order)}>
+                    <Button 
+                      onClick={() => handleOrderReview(order)}
+                      className={order.paymentReceiptUrl ? "bg-blue-600 hover:bg-blue-700" : ""}
+                    >
                       <CreditCard className="h-4 w-4 mr-2" />
-                      بررسی پرداخت
+                      {order.paymentReceiptUrl ? "بررسی فیش بانکی" : "بررسی پرداخت"}
                     </Button>
                   </div>
                 </div>
@@ -435,14 +474,39 @@ export default function FinanceOrders() {
 
               {/* Payment Receipt */}
               {selectedOrder.paymentReceiptUrl && (
-                <div>
-                  <h4 className="font-medium mb-2">رسید پرداخت</h4>
-                  <Button variant="outline" asChild className="w-full">
-                    <a href={selectedOrder.paymentReceiptUrl} target="_blank" rel="noopener noreferrer">
-                      <Eye className="h-4 w-4 mr-2" />
-                      مشاهده رسید پرداخت
-                    </a>
-                  </Button>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    <h4 className="font-medium text-blue-900">فیش بانکی ارسال شده</h4>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                      نیاز به تایید
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    {selectedOrder.paymentReceiptUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
+                      <div className="flex-shrink-0">
+                        <img 
+                          src={selectedOrder.paymentReceiptUrl} 
+                          alt="Bank Receipt"
+                          className="w-24 h-24 object-cover rounded border border-blue-200 cursor-pointer hover:scale-105 transition-transform"
+                          onClick={() => window.open(selectedOrder.paymentReceiptUrl, '_blank')}
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex-1">
+                      <p className="text-sm text-blue-700 mb-2">
+                        فیش واریزی توسط مشتری ارسال شده است. لطفاً مطابقت مبلغ و صحت اطلاعات را بررسی کنید.
+                      </p>
+                      <Button variant="outline" asChild className="border-blue-300 hover:bg-blue-50">
+                        <a href={selectedOrder.paymentReceiptUrl} target="_blank" rel="noopener noreferrer">
+                          <Eye className="h-4 w-4 mr-2" />
+                          مشاهده فیش در تب جدید
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -461,22 +525,38 @@ export default function FinanceOrders() {
               <div className="flex gap-4">
                 <Button 
                   onClick={handleApprove}
-                  disabled={approveMutation.isPending}
-                  className="flex-1"
+                  disabled={approveMutation.isPending || rejectMutation.isPending}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  تایید پرداخت
+                  {approveMutation.isPending ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                  )}
+                  ✅ تایید فیش بانکی
                 </Button>
                 <Button 
                   variant="destructive"
                   onClick={handleReject}
-                  disabled={rejectMutation.isPending}
-                  className="flex-1"
+                  disabled={approveMutation.isPending || rejectMutation.isPending}
+                  className="flex-1 bg-red-600 hover:bg-red-700"
                 >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  رد پرداخت
+                  {rejectMutation.isPending ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <XCircle className="h-4 w-4 mr-2" />
+                  )}
+                  ❌ رد فیش بانکی
                 </Button>
               </div>
+              
+              {selectedOrder.paymentReceiptUrl && (
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">
+                    💡 پس از تایید یا رد، ایمیل و SMS اطلاع‌رسانی به مشتری ارسال خواهد شد
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
