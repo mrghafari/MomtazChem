@@ -1200,12 +1200,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Update order_management table if it exists
           const orderMgmt = await orderManagementStorage.getOrderManagementByCustomerOrderId(parseInt(orderId));
           if (orderMgmt) {
-            await db.update(orderManagement)
-              .set({ 
-                paymentReceiptUrl: receiptUrl,
-                currentStatus: 'payment_uploaded'
-              })
-              .where(eq(orderManagement.customerOrderId, parseInt(orderId)));
+            await orderManagementStorage.updateOrderManagement(orderMgmt.id, {
+              paymentReceiptUrl: receiptUrl,
+              currentStatus: 'payment_uploaded',
+              currentDepartment: 'finance',
+              updatedAt: new Date()
+            });
+            console.log(`✅ Order management updated for order ${orderId} - moved to finance department`);
+          } else {
+            console.log(`⚠️ Order management record not found for order ${orderId}`);
           }
 
           // Log the receipt upload
@@ -4441,6 +4444,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (crmError) {
         console.error("❌ Error auto-capturing customer in CRM:", crmError);
         // Don't fail the order if CRM capture fails
+      }
+
+      // Create order_management record for financial department workflow
+      try {
+        await orderManagementStorage.createOrderManagement({
+          customerOrderId: order.id,
+          customerId: finalCustomerId,
+          currentStatus: 'pending',
+          currentDepartment: 'customer',
+          totalAmount: totalAmount.toString(),
+          currency: orderData.currency || "IQD",
+          notes: orderData.notes || "",
+        });
+        console.log(`✅ Order management record created for order ${orderNumber}`);
+      } catch (orderMgmtError) {
+        console.error("❌ Error creating order management record:", orderMgmtError);
+        // Don't fail the order if order management creation fails
       }
 
       // Prepare response based on payment method
