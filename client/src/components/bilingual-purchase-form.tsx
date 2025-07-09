@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -201,7 +201,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'traditional' | 'wallet_full' | 'wallet_partial'>('traditional');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'bank_receipt'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
 
   // Fetch current customer data
@@ -417,7 +417,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                        walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
   const canUseWallet = walletBalance > 0 && customerData?.success;
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
-  const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
+  // Remove partial wallet logic
   
   console.log('Wallet Debug:', { walletData, walletBalance, canUseWallet, totalAmount });
 
@@ -466,9 +466,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         totalAmount,
         currency: 'IQD',
         paymentMethod: paymentMethod,
-        walletAmountUsed: paymentMethod === 'wallet_full' ? totalAmount : 
-                         paymentMethod === 'wallet_partial' ? walletAmount : 0,
-        remainingAmount: remainingAfterWallet
+        walletAmountUsed: paymentMethod === 'wallet_full' ? totalAmount : 0,
+        remainingAmount: paymentMethod === 'wallet_full' ? 0 : totalAmount
       });
     },
     onSuccess: () => {
@@ -625,71 +624,51 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
               {/* Payment Options */}
               <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
+                {/* اولویت اول: پرداخت آنلاین */}
                 <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="traditional" id="traditional" />
-                  <Label htmlFor="traditional" className="flex items-center gap-2 cursor-pointer">
-                    <CreditCard className="w-4 h-4" />
-                    {t.traditionalPayment}
+                  <RadioGroupItem value="online_payment" id="online_payment" />
+                  <Label htmlFor="online_payment" className="flex items-center gap-2 cursor-pointer">
+                    <CreditCard className="w-4 h-4 text-blue-600" />
+                    <span className="font-semibold">پرداخت آنلاین (کارت بانکی)</span>
                   </Label>
                 </div>
                 
+                {/* دوم: پرداخت از والت */}
                 {walletBalance >= totalAmount && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_full" id="wallet_full" />
                     <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-green-600" />
-                      {t.useWalletFull} ({formatCurrency(totalAmount)})
+                      پرداخت از والت ({formatCurrency(totalAmount)})
                     </Label>
                   </div>
                 )}
                 
+                {/* سوم: ارسال فیش واریزی بانکی */}
                 <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="wallet_partial" id="wallet_partial" />
-                  <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
-                    <Wallet className="w-4 h-4 text-orange-600" />
-                    {t.useWalletPartial}
+                  <RadioGroupItem value="bank_receipt" id="bank_receipt" />
+                  <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
+                    <Upload className="w-4 h-4 text-purple-600" />
+                    ارسال فیش واریزی بانکی
                   </Label>
                 </div>
               </RadioGroup>
 
-              {/* Partial Payment Amount Input */}
-              {paymentMethod === 'wallet_partial' && (
-                <div className="space-y-2">
-                  <Label htmlFor="walletAmount">{t.walletAmount}</Label>
-                  <Input
-                    id="walletAmount"
-                    type="number"
-                    min="0"
-                    max={maxWalletAmount}
-                    value={walletAmount || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      setWalletAmount(Math.min(value, maxWalletAmount));
-                    }}
-                    placeholder="0"
-                    className={isRTL ? 'text-right' : 'text-left'}
-                  />
-                  <div className="text-sm text-muted-foreground">
-                    {t.remainingAmount}: {formatCurrency(remainingAfterWallet)}
-                  </div>
-                </div>
-              )}
-
-              {/* Payment Summary */}
-              {paymentMethod !== 'traditional' && (
+              {/* Payment Summary - فقط برای والت */}
+              {paymentMethod === 'wallet_full' && (
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
-                      <span>{t.totalAmount}:</span>
+                      <span>مبلغ کل:</span>
                       <span>{formatCurrency(totalAmount)}</span>
                     </div>
                     <div className="flex justify-between text-green-600">
-                      <span>{t.walletAmount}:</span>
-                      <span>-{formatCurrency(paymentMethod === 'wallet_full' ? totalAmount : walletAmount)}</span>
+                      <span>پرداخت از والت:</span>
+                      <span>-{formatCurrency(totalAmount)}</span>
                     </div>
                     <div className="flex justify-between font-medium border-t pt-1">
-                      <span>{t.remainingAmount}:</span>
-                      <span>{formatCurrency(remainingAfterWallet)}</span>
+                      <span>مبلغ باقیمانده:</span>
+                      <span>{formatCurrency(0)}</span>
                     </div>
                   </div>
                 </div>
