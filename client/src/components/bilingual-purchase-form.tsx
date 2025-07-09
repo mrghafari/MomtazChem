@@ -285,6 +285,31 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
+  // Fetch VAT settings
+  const { data: vatData } = useQuery({
+    queryKey: ['/api/financial/vat-settings'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/financial/vat-settings', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('VAT API response:', result);
+          if (result.success) {
+            return result.vatSettings;
+          }
+        }
+        return null;
+      } catch (error) {
+        console.log('Error fetching VAT settings:', error);
+        return null;
+      }
+    },
+    retry: false,
+  });
+
   // Dynamic form based on current language
   const form = useForm({
     resolver: zodResolver(createPurchaseSchema(language)),
@@ -403,8 +428,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
 
-  // Calculate total amount with discounts
-  const totalAmount = Object.entries(cart).reduce((sum, [productId, quantity]) => {
+  // Calculate subtotal with discounts
+  const subtotalAmount = Object.entries(cart).reduce((sum, [productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
     if (product && product.price) {
       const discountedPrice = getDiscountedPrice(product, quantity);
@@ -412,6 +437,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
     return sum;
   }, 0);
+
+  // Calculate VAT amount
+  const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') / 100 : 0;
+  const vatAmount = subtotalAmount * vatRate;
+  
+  // Calculate total amount (subtotal + VAT)
+  const totalAmount = subtotalAmount + vatAmount;
 
   // Calculate wallet payment amounts
   const walletBalance = walletData?.data?.wallet ? parseFloat(walletData.data.wallet.balance) : 
@@ -696,10 +728,27 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               })}
             </div>
             
-            {/* Cart Total */}
-            <div className="border-t mt-3 pt-3 flex justify-between font-semibold text-lg">
-              <span>{t.totalAmount}</span>
-              <span className="text-primary">{formatCurrency(totalAmount)}</span>
+            {/* Cart Summary */}
+            <div className="border-t mt-3 pt-3 space-y-2">
+              {/* Subtotal */}
+              <div className="flex justify-between text-sm">
+                <span>{t.subtotal}</span>
+                <span>{formatCurrency(subtotalAmount)}</span>
+              </div>
+              
+              {/* VAT */}
+              {vatData?.vatEnabled && vatAmount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span>{vatData.vatDisplayName || 'VAT'} ({(vatRate * 100).toFixed(0)}%)</span>
+                  <span>{formatCurrency(vatAmount)}</span>
+                </div>
+              )}
+              
+              {/* Total */}
+              <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                <span>{t.totalAmount}</span>
+                <span className="text-primary">{formatCurrency(totalAmount)}</span>
+              </div>
             </div>
           </div>
 

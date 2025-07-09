@@ -92,18 +92,15 @@ export default function VatManagement() {
   // Fetch current VAT settings
   const { data: vatData, isLoading } = useQuery({
     queryKey: ['/api/financial/vat-settings'],
-    queryFn: () => apiRequest('/api/financial/vat-settings')
+    queryFn: () => apiRequest('/api/financial/vat-settings', 'GET')
   });
 
   // Update VAT settings mutation
   const updateVatMutation = useMutation({
-    mutationFn: (data: VatForm) => apiRequest('/api/financial/vat-settings', {
-      method: 'PUT',
-      body: JSON.stringify({
-        ...data,
-        exemptProductIds: data.exemptProductIds ? 
-          data.exemptProductIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : []
-      })
+    mutationFn: (data: VatForm) => apiRequest('/api/financial/vat-settings', 'PUT', {
+      ...data,
+      exemptProductIds: data.exemptProductIds ? 
+        data.exemptProductIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : []
     }),
     onSuccess: () => {
       toast({ title: "موفق", description: "تنظیمات مالیات به‌روزرسانی شد" });

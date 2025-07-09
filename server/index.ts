@@ -37,7 +37,8 @@ app.use(session({
     secure: false, // Set to true in production with HTTPS
     httpOnly: false, // Allow frontend access for debugging
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax'
+    sameSite: 'lax',
+    path: '/'
   },
   name: 'momtazchem.sid'
 }));
