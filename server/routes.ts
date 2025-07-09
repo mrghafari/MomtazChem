@@ -9945,9 +9945,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // Logistics authentication check
   app.get('/api/logistics/auth/me', async (req, res) => {
     try {
-      // For now, allow access without specific logistics authentication
-      // In production, implement proper logistics user verification
-      res.json({ success: true, authenticated: true });
+      // Check if user is authenticated as admin (temporary solution)
+      if (req.session?.adminId || req.session?.isAuthenticated) {
+        res.json({ success: true, authenticated: true });
+      } else {
+        res.status(401).json({ success: false, message: 'احراز هویت ناموفق' });
+      }
     } catch (error) {
       res.status(401).json({ success: false, message: 'احراز هویت ناموفق' });
     }
@@ -10194,6 +10197,21 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           id: 1,
           username: 'financial_temp',
           department: 'financial'
+        };
+        req.session.departmentUser = tempUser;
+        return next();
+      }
+      
+      // Temporary workaround for logistics department - allow admin access
+      if (department === 'logistics' && (req.session?.adminId || req.session?.isAuthenticated)) {
+        console.log('✅ Logistics auth: Admin access granted', {
+          adminId: req.session.adminId,
+          isAuthenticated: req.session.isAuthenticated
+        });
+        const tempUser = {
+          id: req.session.adminId || 1,
+          username: 'logistics_admin',
+          department: 'logistics'
         };
         req.session.departmentUser = tempUser;
         return next();

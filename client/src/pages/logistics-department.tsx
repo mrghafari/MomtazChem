@@ -101,6 +101,7 @@ const shippingRateSchema = z.object({
   trackingAvailable: z.boolean().default(false),
   insuranceAvailable: z.boolean().default(false),
   description: z.string().optional(),
+  isActive: z.boolean().default(true),
 });
 
 export default function LogisticsDepartment() {
@@ -148,6 +149,7 @@ export default function LogisticsDepartment() {
       trackingAvailable: false,
       insuranceAvailable: false,
       description: "",
+      isActive: true,
     }
   });
 
