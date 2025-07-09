@@ -20,7 +20,7 @@ export function useCustomer() {
   });
 
   const customer = (data as any)?.success ? (data as any).customer : null;
-  const isAuthenticated = !!((data as any)?.success && (data as any)?.customer) && !error;
+  const isAuthenticated = !!(customer && !error);
 
   return {
     customer,
