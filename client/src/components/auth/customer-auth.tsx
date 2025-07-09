@@ -51,11 +51,12 @@ interface CustomerAuthProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onLoginSuccess: (customer: any) => void;
+  onRegisterSuccess?: (customer: any) => void;
   initialMode?: 'login' | 'register';
   existingCustomer?: any; // For pre-filling data during profile completion
 }
 
-export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initialMode = 'login', existingCustomer }: CustomerAuthProps) {
+export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onRegisterSuccess, initialMode = 'login', existingCustomer }: CustomerAuthProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialMode);
@@ -223,7 +224,12 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, initi
           title: "Registration Successful",
           description: "Your account has been created and you're now logged in",
         });
-        onLoginSuccess(result.customer);
+        // Use onRegisterSuccess if available, otherwise fallback to onLoginSuccess
+        if (onRegisterSuccess) {
+          onRegisterSuccess(result.customer);
+        } else {
+          onLoginSuccess(result.customer);
+        }
         onOpenChange(false);
         registerForm.reset();
         setEmailExists(false);

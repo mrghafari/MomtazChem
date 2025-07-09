@@ -345,6 +345,9 @@ const Shop = () => {
     setCustomer(customerData);
     fetchWalletBalance();
     
+    // Check if user has items in cart before migration
+    const hasCartItems = Object.keys(cart).length > 0;
+    
     // Migrate guest cart to user cart
     migrateGuestCartToUser();
     
@@ -353,9 +356,46 @@ const Shop = () => {
       description: `${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // Redirect to customer profile after successful login
+    // If user had items in cart, redirect to checkout, otherwise to profile
     setTimeout(() => {
-      navigate("/customer/profile");
+      if (hasCartItems) {
+        navigate("/checkout");
+        toast({
+          title: "آماده پرداخت",
+          description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
+        });
+      } else {
+        navigate("/customer/profile");
+      }
+    }, 1000);
+  };
+
+  const handleRegisterSuccess = (customerData: any) => {
+    setCustomer(customerData);
+    fetchWalletBalance();
+    
+    // Check if user has items in cart before migration
+    const hasCartItems = Object.keys(cart).length > 0;
+    
+    // Migrate guest cart to user cart
+    migrateGuestCartToUser();
+    
+    toast({
+      title: "ثبت‌نام موفق",
+      description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
+    });
+    
+    // If user had items in cart, redirect to checkout, otherwise to profile
+    setTimeout(() => {
+      if (hasCartItems) {
+        navigate("/checkout");
+        toast({
+          title: "آماده پرداخت",
+          description: "کالاهای انتخابی شما آماده پرداخت است",
+        });
+      } else {
+        navigate("/customer/profile");
+      }
     }, 1000);
   };
 
@@ -1580,7 +1620,8 @@ const Shop = () => {
       <CustomerAuth 
         open={showAuth}
         onOpenChange={setShowAuth}
-        onLoginSuccess={handleAuthSuccess}
+        onLoginSuccess={handleLoginSuccess}
+        onRegisterSuccess={handleRegisterSuccess}
         initialMode={authMode}
         existingCustomer={authMode === 'register' ? customer : undefined}
       />
