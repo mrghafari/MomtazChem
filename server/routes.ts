@@ -9815,40 +9815,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Process financial order (approve/reject) - unified endpoint
-  app.post('/api/financial/orders/:id/process', async (req: Request, res: Response) => {
-    try {
-      const orderId = parseInt(req.params.id);
-      const { action, notes, reviewerId } = req.body;
-      const adminId = reviewerId || 1; // Use provided reviewerId or default
 
-      let newStatus: string;
-      let message: string;
-
-      if (action === 'approve') {
-        newStatus = 'financial_approved';
-        message = 'پرداخت تایید شد';
-      } else if (action === 'reject') {
-        newStatus = 'cancelled';
-        message = 'پرداخت رد شد';
-      } else {
-        return res.status(400).json({ success: false, message: 'عملیات نامعتبر' });
-      }
-
-      const updatedOrder = await orderManagementStorage.updateOrderStatus(
-        orderId, 
-        newStatus as any, 
-        adminId, 
-        'financial', 
-        notes || `Payment ${action}ed by financial department`
-      );
-
-      res.json({ success: true, order: updatedOrder, message });
-    } catch (error) {
-      console.error('Error processing financial order:', error);
-      res.status(500).json({ success: false, message: 'خطا در پردازش سفارش' });
-    }
-  });
 
   // =============================================================================
   // ORDER MANAGEMENT API ROUTES (3-Department System)
