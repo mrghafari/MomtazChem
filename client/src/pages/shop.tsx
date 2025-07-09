@@ -142,9 +142,11 @@ const Shop = () => {
   };
 
   const handlePriceRangeChange = (value: [number, number]) => {
-    // Ensure proper range handling
+    // Ensure proper range handling with immediate display update
     if (Array.isArray(value) && value.length === 2 && !isNaN(value[0]) && !isNaN(value[1])) {
+      // Update display immediately
       setPriceRange(value);
+      // Update filters and trigger API call
       setFilters(prev => ({ ...prev, priceMin: value[0], priceMax: value[1] }));
       setCurrentPage(0);
     }

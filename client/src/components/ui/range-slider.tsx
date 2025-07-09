@@ -16,12 +16,37 @@ const RangeSlider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   RangeSliderProps
 >(({ className, value, onValueChange, min, max, step = 1, disabled, ...props }, ref) => {
+  const [localValue, setLocalValue] = React.useState<[number, number]>(value);
+  const timeoutRef = React.useRef<NodeJS.Timeout>();
+
+  React.useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
   const handleValueChange = (newValue: number[]) => {
-    // Ensure we always have exactly 2 values for range
     if (newValue.length === 2) {
-      onValueChange([newValue[0], newValue[1]]);
+      setLocalValue([newValue[0], newValue[1]]);
+      
+      // Clear existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      // Set new timeout for debounced update
+      timeoutRef.current = setTimeout(() => {
+        onValueChange([newValue[0], newValue[1]]);
+      }, 300);
     }
   };
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
 
 
@@ -32,7 +57,7 @@ const RangeSlider = React.forwardRef<
         "relative flex w-full touch-none select-none items-center",
         className
       )}
-      value={value}
+      value={localValue}
       onValueChange={handleValueChange}
 
       min={min}
