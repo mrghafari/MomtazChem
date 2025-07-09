@@ -20,8 +20,7 @@ import {
   Calendar,
   MapPin,
   Phone,
-  User,
-  DollarSign
+  User
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -107,32 +106,24 @@ const statusColors: Record<string, string> = {
 export default function AdminOrderManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedDepartment, setSelectedDepartment] = useState<'financial' | 'warehouse' | 'logistics' | 'delivered'>('financial');
-  const [selectedFinancialTab, setSelectedFinancialTab] = useState<'review' | 'management'>('review');
+  const [selectedDepartment, setSelectedDepartment] = useState<'warehouse' | 'logistics' | 'delivered'>('warehouse');
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
   const [newStatus, setNewStatus] = useState('');
   const [notes, setNotes] = useState('');
-  const [reviewNotes, setReviewNotes] = useState('');
-  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+
 
 
 
   // Fetch orders for selected department
   const { data: orders, isLoading } = useQuery({
-    queryKey: ['orders', selectedDepartment, selectedFinancialTab],
+    queryKey: ['orders', selectedDepartment],
     queryFn: async () => {
       let apiUrl: string;
       
       if (selectedDepartment === 'delivered') {
         apiUrl = '/api/delivered/orders';
-      } else if (selectedDepartment === 'financial') {
-        if (selectedFinancialTab === 'review') {
-          apiUrl = '/api/order-management/financial';
-        } else {
-          apiUrl = '/api/order-management/financial';
-        }
       } else {
         apiUrl = `/api/order-management/${selectedDepartment}`;
       }
@@ -209,43 +200,7 @@ export default function AdminOrderManagement() {
     }
   });
 
-  // Financial review mutation (for approve/reject actions)
-  const financialReviewMutation = useMutation({
-    mutationFn: async ({ orderId, action, notes }: { orderId: number; action: 'approve' | 'reject'; notes: string }) => {
-      const response = await fetch(`/api/finance/orders/${orderId}/${action}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ notes }),
-      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `خطا در ${action === 'approve' ? 'تایید' : 'رد'} واریزی`);
-      }
-
-      return response.json();
-    },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-      setReviewDialogOpen(false);
-      setReviewNotes('');
-      setSelectedOrder(null);
-      toast({
-        title: "موفق",
-        description: variables.action === 'approve' ? "واریزی تایید شد و به انبار اعلام شد" : "واریزی رد شد",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا",
-        description: error.message || "خطا در پردازش درخواست",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleStatusUpdate = () => {
     if (!selectedOrder || !newStatus) return;
@@ -259,23 +214,6 @@ export default function AdminOrderManagement() {
 
   const getValidStatuses = (currentStatus: string) => {
     switch (selectedDepartment) {
-      case 'financial':
-        if (selectedFinancialTab === 'review') {
-          if (currentStatus === 'payment_uploaded') {
-            return ['financial_reviewing', 'financial_rejected'];
-          }
-          if (currentStatus === 'financial_reviewing') {
-            return ['financial_approved', 'financial_rejected'];
-          }
-        } else {
-          if (currentStatus === 'payment_uploaded') {
-            return ['financial_reviewing', 'financial_rejected'];
-          }
-          if (currentStatus === 'financial_reviewing') {
-            return ['financial_approved', 'financial_rejected'];
-          }
-        }
-        break;
       case 'warehouse':
         if (currentStatus === 'financial_approved') {
           return ['warehouse_notified', 'warehouse_processing'];
@@ -307,8 +245,6 @@ export default function AdminOrderManagement() {
 
   const getDepartmentIcon = (department: string) => {
     switch (department) {
-      case 'financial': return <CreditCard className="h-4 w-4" />;
-      case 'finance-review': return <DollarSign className="h-4 w-4" />;
       case 'warehouse': return <Package className="h-4 w-4" />;
       case 'logistics': return <Truck className="h-4 w-4" />;
       case 'delivered': return <CheckCircle className="h-4 w-4" />;
@@ -325,19 +261,15 @@ export default function AdminOrderManagement() {
     <div className="container mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">مدیریت سفارشات سه‌بخشی</h1>
+          <h1 className="text-3xl font-bold">مدیریت سفارشات</h1>
           <p className="text-muted-foreground">
-            مدیریت فرآیند سفارشات از طریق بخش‌های مالی، انبار و لجستیک
+            مدیریت فرآیند سفارشات از طریق بخش‌های انبار و لجستیک
           </p>
         </div>
       </div>
 
       <Tabs value={selectedDepartment} onValueChange={(value) => setSelectedDepartment(value as any)}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="financial" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            بخش مالی
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="warehouse" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             انبار
@@ -352,38 +284,22 @@ export default function AdminOrderManagement() {
           </TabsTrigger>
         </TabsList>
 
-        {['financial', 'warehouse', 'logistics', 'delivered'].map((dept) => (
+        {['warehouse', 'logistics', 'delivered'].map((dept) => (
           <TabsContent key={dept} value={dept} className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {getDepartmentIcon(dept)}
-                  سفارشات بخش {dept === 'financial' ? 'مالی' : dept === 'warehouse' ? 'انبار' : dept === 'logistics' ? 'لجستیک' : 'تحویل شده'}
+                  سفارشات بخش {dept === 'warehouse' ? 'انبار' : dept === 'logistics' ? 'لجستیک' : 'تحویل شده'}
                 </CardTitle>
                 <CardDescription>
-                  {dept === 'financial' && 'بررسی و تایید واریزی‌های مشتریان'}
                   {dept === 'warehouse' && 'آماده‌سازی و تایید کالاهای سفارش'}
                   {dept === 'logistics' && 'ارسال و تحویل سفارشات به مشتریان'}
                   {dept === 'delivered' && 'سفارشات تحویل شده و تکمیل شده'}
                 </CardDescription>
               </CardHeader>
               
-              {dept === 'financial' && (
-                <div className="px-6 pb-4">
-                  <Tabs value={selectedFinancialTab} onValueChange={(value) => setSelectedFinancialTab(value as any)}>
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="review" className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        بررسی واریزی‌ها
-                      </TabsTrigger>
-                      <TabsTrigger value="management" className="flex items-center gap-2">
-                        <CreditCard className="h-4 w-4" />
-                        مدیریت مالی
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-              )}
+
               <CardContent>
                 {isLoading ? (
                   <div className="text-center py-8">در حال بارگذاری...</div>
@@ -418,38 +334,16 @@ export default function AdminOrderManagement() {
                                 تاریخچه
                               </Button>
                               
-                              {dept === 'financial' && selectedFinancialTab === 'review' ? (
-                                // دکمه‌های تایید/رد واریزی برای بخش بررسی واریزی‌ها
-                                order.currentStatus === 'payment_uploaded' || order.currentStatus === 'financial_reviewing' ? (
-                                  <>
-                                    <Button
-                                      size="sm"
-                                      className="bg-green-600 hover:bg-green-700"
-                                      onClick={() => {
-                                        setSelectedOrder(order);
-                                        setReviewDialogOpen(true);
-                                      }}
-                                    >
-                                      <CheckCircle className="h-4 w-4 mr-1" />
-                                      بررسی واریزی
-                                    </Button>
-                                  </>
-                                ) : (
-                                  <Badge variant="outline">پردازش شده</Badge>
-                                )
-                              ) : (
-                                // دکمه بروزرسانی وضعیت برای سایر بخش‌ها
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedOrder(order);
-                                    setStatusDialogOpen(true);
-                                  }}
-                                  disabled={getValidStatuses(order.currentStatus).length === 0}
-                                >
-                                  بروزرسانی وضعیت
-                                </Button>
-                              )}
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setStatusDialogOpen(true);
+                                }}
+                                disabled={getValidStatuses(order.currentStatus).length === 0}
+                              >
+                                بروزرسانی وضعیت
+                              </Button>
                             </div>
                           </div>
 
@@ -459,21 +353,7 @@ export default function AdminOrderManagement() {
                               <div>{formatDate(order.createdAt)}</div>
                             </div>
                             
-                            {dept === 'financial' && order.paymentReceiptUrl && (
-                              <div>
-                                <span className="text-muted-foreground">رسید پرداخت:</span>
-                                <div>
-                                  <a 
-                                    href={order.paymentReceiptUrl} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
-                                  >
-                                    مشاهده رسید
-                                  </a>
-                                </div>
-                              </div>
-                            )}
+
                             
                             {dept === 'logistics' && order.trackingNumber && (
                               <div>
@@ -492,12 +372,7 @@ export default function AdminOrderManagement() {
                             )}
                           </div>
 
-                          {/* Department-specific notes */}
-                          {dept === 'financial' && order.financialNotes && (
-                            <div className="mt-3 p-2 bg-blue-50 rounded text-sm">
-                              <strong>یادداشت مالی:</strong> {order.financialNotes}
-                            </div>
-                          )}
+
                           {dept === 'warehouse' && order.warehouseNotes && (
                             <div className="mt-3 p-2 bg-green-50 rounded text-sm">
                               <strong>یادداشت انبار:</strong> {order.warehouseNotes}
@@ -630,113 +505,7 @@ export default function AdminOrderManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Financial Review Dialog */}
-      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>بررسی واریزی سفارش #{selectedOrder?.customerOrderId}</DialogTitle>
-            <DialogDescription>
-              بررسی و تایید/رد واریزی بانکی مشتری
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {/* Order Details */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">جزئیات سفارش:</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">شماره سفارش:</span>
-                  <span className="font-medium ml-2">#{selectedOrder?.customerOrderId}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">تاریخ ایجاد:</span>
-                  <span className="font-medium ml-2">{selectedOrder && formatDate(selectedOrder.createdAt)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">وضعیت فعلی:</span>
-                  <Badge className={selectedOrder ? statusColors[selectedOrder.currentStatus] || 'bg-gray-100 text-gray-800' : ''}>
-                    {selectedOrder ? statusLabels[selectedOrder.currentStatus] || selectedOrder.currentStatus : ''}
-                  </Badge>
-                </div>
-                {selectedOrder?.paymentReceiptUrl && (
-                  <div>
-                    <span className="text-gray-600">رسید پرداخت:</span>
-                    <div>
-                      <a 
-                        href={selectedOrder.paymentReceiptUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        مشاهده رسید
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
 
-            {/* Review Notes */}
-            <div>
-              <Label htmlFor="reviewNotes">یادداشت بررسی (اختیاری)</Label>
-              <Textarea
-                id="reviewNotes"
-                value={reviewNotes}
-                onChange={(e) => setReviewNotes(e.target.value)}
-                placeholder="توضیحات در مورد تایید یا رد واریزی..."
-                rows={3}
-              />
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-2 pt-4">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setReviewDialogOpen(false);
-                  setReviewNotes('');
-                  setSelectedOrder(null);
-                }}
-              >
-                لغو
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  if (selectedOrder) {
-                    financialReviewMutation.mutate({
-                      orderId: selectedOrder.id,
-                      action: 'reject',
-                      notes: reviewNotes
-                    });
-                  }
-                }}
-                disabled={financialReviewMutation.isPending}
-              >
-                <XCircle className="h-4 w-4 mr-1" />
-                رد واریزی
-              </Button>
-              <Button
-                className="bg-green-600 hover:bg-green-700"
-                onClick={() => {
-                  if (selectedOrder) {
-                    financialReviewMutation.mutate({
-                      orderId: selectedOrder.id,
-                      action: 'approve',
-                      notes: reviewNotes
-                    });
-                  }
-                }}
-                disabled={financialReviewMutation.isPending}
-              >
-                <CheckCircle className="h-4 w-4 mr-1" />
-                {financialReviewMutation.isPending ? 'در حال پردازش...' : 'تایید واریزی'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
