@@ -497,25 +497,37 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   });
 
   const onSubmit = (data: any) => {
-    // برای پرداخت آنلاین، ابتدا سفارش ایجاد کنیم سپس به درگاه پرداخت بریم
-    if (paymentMethod === 'online') {
-      // ایجاد سفارش با وضعیت pending
-      const orderData = {
-        ...data,
-        cart,
-        totalAmount,
-        currency: 'IQD',
-        paymentMethod: 'online',
-        walletAmountUsed: 0,
-        remainingAmount: totalAmount
-      };
-      
-      // Redirect to payment gateway after order creation
-      submitOrderMutation.mutate(orderData);
-    } else {
-      // سایر روش‌های پرداخت
-      submitOrderMutation.mutate(data);
+    let orderData = {
+      ...data,
+      cart,
+      totalAmount,
+      currency: 'IQD',
+      paymentMethod,
+      walletAmountUsed: 0,
+      remainingAmount: totalAmount
+    };
+
+    // Handle wallet payment calculations
+    if (paymentMethod === 'wallet_full') {
+      orderData.walletAmountUsed = totalAmount;
+      orderData.remainingAmount = 0;
+    } else if (paymentMethod === 'wallet_partial') {
+      orderData.walletAmountUsed = walletAmount;
+      orderData.remainingAmount = totalAmount - walletAmount;
+    } else if (paymentMethod === 'online') {
+      orderData.walletAmountUsed = 0;
+      orderData.remainingAmount = totalAmount;
     }
+
+    console.log('Submitting order with wallet data:', {
+      paymentMethod,
+      totalAmount,
+      walletAmountUsed: orderData.walletAmountUsed,
+      remainingAmount: orderData.remainingAmount,
+      walletBalance
+    });
+
+    submitOrderMutation.mutate(orderData);
   };
 
 

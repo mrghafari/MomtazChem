@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useCustomer } from '@/hooks/useCustomer';
+import { useQuery } from '@tanstack/react-query';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +32,24 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, direction } = useLanguage();
   const { customer, isAuthenticated, logout } = useCustomer();
+
+  // Fetch wallet balance for authenticated customers
+  const { data: walletData } = useQuery({
+    queryKey: ['/api/customer/wallet'],
+    enabled: isAuthenticated && !!customer,
+    retry: false,
+    staleTime: 30000, // 30 seconds
+  });
+
+  const walletBalance = walletData?.data?.wallet?.balance || walletData?.wallet?.balance || 0;
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'IQD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
 
   const navigation = [
     { href: '/', label: t.home },
@@ -257,10 +276,13 @@ export default function Header() {
                 <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
                 <Link href="/customer/wallet">
                   <Button variant="ghost" className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {t.wallet}
-                    </span>
+                    <Wallet className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{t.wallet}</span>
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                        {formatCurrency(parseFloat(walletBalance.toString()))}
+                      </span>
+                    </div>
                   </Button>
                 </Link>
                 <Button 
@@ -402,12 +424,17 @@ export default function Header() {
                       </Link>
                       <Link href="/customer/wallet">
                         <motion.div
-                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                          className="flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
                           whileTap={{ scale: 0.98 }}
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          <Wallet className="h-4 w-4" />
-                          <span>{t.wallet}</span>
+                          <Wallet className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{t.wallet}</span>
+                            <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                              {formatCurrency(parseFloat(walletBalance.toString()))}
+                            </span>
+                          </div>
                         </motion.div>
                       </Link>
                       <motion.div
