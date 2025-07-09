@@ -780,12 +780,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             
             {/* Cart Summary */}
             <div className="border-t mt-3 pt-3 space-y-2">
-              {/* Subtotal */}
-              <div className="flex justify-between text-sm">
-                <span>{t.subtotal}</span>
-                <span>{formatCurrency(subtotalAmount)}</span>
-              </div>
-              
               {/* VAT */}
               {vatData?.vatEnabled && vatAmount > 0 && (
                 <div className="flex justify-between text-sm">
