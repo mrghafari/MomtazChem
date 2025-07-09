@@ -800,6 +800,39 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 <span className="text-primary">{formatCurrency(subtotalAmount + vatAmount)}</span>
               </div>
               
+              {/* Shipping Method Selection */}
+              <div className="space-y-3 border-t pt-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">{t.shippingMethod}</label>
+                  <span className="text-xs text-gray-500">(وزن کل: {calculateTotalWeight().toFixed(1)} کیلوگرم)</span>
+                </div>
+                
+                <Select value={selectedShippingMethod} onValueChange={setSelectedShippingMethod}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t.selectShippingMethod} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t.selectShippingMethod}</SelectItem>
+                    {shippingRatesLoading ? (
+                      <SelectItem value="loading" disabled>در حال بارگذاری...</SelectItem>
+                    ) : (
+                      shippingRates.map((rate) => (
+                        <SelectItem key={rate.id} value={rate.deliveryMethod}>
+                          <div className="flex flex-col">
+                            <span>{rate.description || rate.deliveryMethod}</span>
+                            <span className="text-xs text-gray-500">
+                              {parseFloat(rate.basePrice).toLocaleString()} د.ع
+                              {rate.pricePerKg && ` + ${parseFloat(rate.pricePerKg).toLocaleString()} د.ع/کیلو`}
+                              {rate.estimatedDays && ` - ${rate.estimatedDays} روز`}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              
               {/* Shipping Cost */}
               {shippingCost > 0 && (
                 <div className="flex justify-between text-sm">
@@ -1135,45 +1168,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
 
-                {/* Shipping Method */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium">{t.shippingMethod}</label>
-                    <span className="text-xs text-gray-500">(وزن کل: {calculateTotalWeight().toFixed(1)} کیلوگرم)</span>
-                  </div>
-                  
-                  <Select value={selectedShippingMethod} onValueChange={setSelectedShippingMethod}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t.selectShippingMethod} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">{t.selectShippingMethod}</SelectItem>
-                      {shippingRatesLoading ? (
-                        <SelectItem value="loading" disabled>در حال بارگذاری...</SelectItem>
-                      ) : (
-                        shippingRates.map((rate) => (
-                          <SelectItem key={rate.id} value={rate.deliveryMethod}>
-                            <div className="flex flex-col">
-                              <span>{rate.description || rate.deliveryMethod}</span>
-                              <span className="text-xs text-gray-500">
-                                {parseFloat(rate.basePrice).toLocaleString()} د.ع
-                                {rate.pricePerKg && ` + ${parseFloat(rate.pricePerKg).toLocaleString()} د.ع/کیلو`}
-                                {rate.estimatedDays && ` - ${rate.estimatedDays} روز`}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  
-                  {shippingCost > 0 && (
-                    <div className="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
-                      <span className="text-sm font-medium text-blue-800">{t.shippingCost}:</span>
-                      <span className="text-sm font-bold text-blue-600">{shippingCost.toLocaleString()} د.ع</span>
-                    </div>
-                  )}
-                </div>
+
 
                 {/* Order Notes */}
                 <FormField
