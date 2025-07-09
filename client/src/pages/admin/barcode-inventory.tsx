@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Barcode, Scan, Download, Printer, Code, Plus, ArrowLeft, Settings, CheckCircle, AlertTriangle, Search, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
+import html2canvas from 'html2canvas';
 import BarcodeGenerator from "@/components/ui/barcode-generator";
 import VisualBarcode from "@/components/ui/visual-barcode";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -258,33 +259,56 @@ export default function BarcodeInventory() {
     }
 
     try {
+      // Get HTML content first
       const response = await fetch('/api/barcode/generate-custom-labels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           products: selectedProductsList,
           options: labelOptions,
-          format: 'image'
+          format: 'html'
         })
       });
 
       if (!response.ok) throw new Error('Failed to generate labels');
       
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `customized-labels-${new Date().toISOString().split('T')[0]}.png`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const htmlContent = await response.text();
+      
+      // Create a temporary container
+      const tempContainer = document.createElement('div');
+      tempContainer.innerHTML = htmlContent;
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '-9999px';
+      tempContainer.style.width = '800px';
+      tempContainer.style.background = 'white';
+      tempContainer.style.padding = '20px';
+      document.body.appendChild(tempContainer);
+      
+      // Convert to canvas and download
+      const canvas = await html2canvas(tempContainer, {
+        backgroundColor: 'white',
+        scale: 2,
+        width: 800,
+        height: tempContainer.scrollHeight,
+        useCORS: true
+      });
+      
+      // Remove temporary container
+      document.body.removeChild(tempContainer);
+      
+      // Download the image
+      const link = document.createElement('a');
+      link.download = `customized-labels-${new Date().toISOString().split('T')[0]}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
       
       toast({
         title: "موفق",
         description: "برچسب‌های سفارشی به فرمت عکس دانلود شد",
       });
     } catch (error) {
+      console.error('Error generating image:', error);
       toast({
         title: "خطا",
         description: "خطا در تولید برچسب‌های سفارشی",

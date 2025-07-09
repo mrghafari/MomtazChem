@@ -2017,8 +2017,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (format === 'image') {
         try {
           const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            headless: 'new',
+            args: [
+              '--no-sandbox', 
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--single-process',
+              '--disable-gpu'
+            ],
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
           });
           
           const page = await browser.newPage();
@@ -2042,7 +2052,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`✅ [CUSTOM LABELS] Generated custom labels image for ${products.length} products`);
           return;
         } catch (imageError) {
-          console.log('Image generation failed, falling back to HTML:', imageError.message);
+          console.log('Puppeteer image generation failed, trying alternative method:', imageError.message);
+          
+          // Alternative: Return as base64 encoded image using canvas
+          try {
+            // For now, we'll create a simple HTML response that can be converted to image on client side
+            const imageHTML = `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="UTF-8">
+                <title>Product Labels</title>
+                <style>
+                  body { 
+                    margin: 0; 
+                    padding: 20px; 
+                    font-family: Arial, sans-serif;
+                    background: white;
+                    width: 800px;
+                    height: auto;
+                  }
+                  .convert-to-image { display: block; }
+                </style>
+                <script>
+                  window.addEventListener('load', function() {
+                    // This script will help convert HTML to canvas/image on client side
+                    if (window.html2canvas) {
+                      html2canvas(document.body).then(function(canvas) {
+                        const link = document.createElement('a');
+                        link.download = 'custom-labels.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                      });
+                    }
+                  });
+                </script>
+              </head>
+              <body class="convert-to-image">
+                ${labelHTML.replace('<!DOCTYPE html>', '').replace(/<html[^>]*>/, '').replace('</html>', '').replace(/<head[^>]*>[\s\S]*?<\/head>/, '').replace(/<body[^>]*>/, '').replace('</body>', '')}
+              </body>
+              </html>
+            `;
+            
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="Custom_Labels_For_Image_${new Date().toISOString().split('T')[0]}.html"`);
+            res.send(imageHTML);
+            
+            console.log(`✅ [CUSTOM LABELS] Generated HTML for image conversion for ${products.length} products`);
+            return;
+          } catch (htmlError) {
+            console.log('HTML image generation also failed, falling back to standard HTML:', htmlError.message);
+          }
         }
       }
 
