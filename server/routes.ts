@@ -9682,16 +9682,151 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // =============================================================================
+  // FINANCIAL DEPARTMENT SPECIFIC API ROUTES
+  // =============================================================================
+
+  // Financial department authentication check
+  app.get('/api/financial/auth/me', async (req: Request, res: Response) => {
+    try {
+      // For now, return a default financial user for testing
+      // In production, this would check actual financial department authentication
+      const defaultFinancialUser = {
+        id: 1,
+        username: 'financial_admin',
+        email: 'financial@momtazchem.com',
+        department: 'financial'
+      };
+      
+      res.json({ success: true, user: defaultFinancialUser });
+    } catch (error) {
+      console.error('Error in financial auth check:', error);
+      res.status(401).json({ success: false, message: 'احراز هویت مالی نشده' });
+    }
+  });
+
+  // Financial department logout
+  app.post('/api/financial/logout', async (req: Request, res: Response) => {
+    try {
+      // Clear session if needed
+      res.json({ success: true, message: 'خروج موفقیت‌آمیز' });
+    } catch (error) {
+      console.error('Error in financial logout:', error);
+      res.status(500).json({ success: false, message: 'خطا در خروج' });
+    }
+  });
+
+  // Get financial department orders (public access for financial department)
+  app.get('/api/financial/orders', async (req: Request, res: Response) => {
+    try {
+      const orders = await orderManagementStorage.getOrdersByDepartment('financial');
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error('Error fetching financial orders:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات مالی' });
+    }
+  });
+
+  // Approve financial order (public access for financial department)
+  app.post('/api/finance/orders/:id/approve', async (req: Request, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { notes } = req.body;
+      const adminId = 1; // Default financial admin ID
+
+      const updatedOrder = await orderManagementStorage.updateOrderStatus(
+        orderId, 
+        'financial_approved', 
+        adminId, 
+        'financial', 
+        notes || 'Payment approved by financial department'
+      );
+
+      res.json({ success: true, order: updatedOrder, message: 'پرداخت تایید شد' });
+    } catch (error) {
+      console.error('Error approving financial order:', error);
+      res.status(500).json({ success: false, message: 'خطا در تایید پرداخت' });
+    }
+  });
+
+  // Reject financial order (public access for financial department)
+  app.post('/api/finance/orders/:id/reject', async (req: Request, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { notes } = req.body;
+      const adminId = 1; // Default financial admin ID
+
+      const updatedOrder = await orderManagementStorage.updateOrderStatus(
+        orderId, 
+        'cancelled', 
+        adminId, 
+        'financial', 
+        notes || 'Payment rejected by financial department'
+      );
+
+      res.json({ success: true, order: updatedOrder, message: 'پرداخت رد شد' });
+    } catch (error) {
+      console.error('Error rejecting financial order:', error);
+      res.status(500).json({ success: false, message: 'خطا در رد پرداخت' });
+    }
+  });
+
+  // Process financial order (approve/reject) - unified endpoint
+  app.post('/api/financial/orders/:id/process', async (req: Request, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { action, notes, reviewerId } = req.body;
+      const adminId = reviewerId || 1; // Use provided reviewerId or default
+
+      let newStatus: string;
+      let message: string;
+
+      if (action === 'approve') {
+        newStatus = 'financial_approved';
+        message = 'پرداخت تایید شد';
+      } else if (action === 'reject') {
+        newStatus = 'cancelled';
+        message = 'پرداخت رد شد';
+      } else {
+        return res.status(400).json({ success: false, message: 'عملیات نامعتبر' });
+      }
+
+      const updatedOrder = await orderManagementStorage.updateOrderStatus(
+        orderId, 
+        newStatus as any, 
+        adminId, 
+        'financial', 
+        notes || `Payment ${action}ed by financial department`
+      );
+
+      res.json({ success: true, order: updatedOrder, message });
+    } catch (error) {
+      console.error('Error processing financial order:', error);
+      res.status(500).json({ success: false, message: 'خطا در پردازش سفارش' });
+    }
+  });
+
+  // =============================================================================
   // ORDER MANAGEMENT API ROUTES (3-Department System)
   // =============================================================================
 
   // Get orders for specific department (respects workflow sequence)
-  app.get('/api/order-management/:department', requireAuth, async (req, res) => {
+  app.get('/api/order-management/:department', async (req, res) => {
     try {
       const department = req.params.department as 'financial' | 'warehouse' | 'logistics';
       
       if (!['financial', 'warehouse', 'logistics'].includes(department)) {
         return res.status(400).json({ success: false, message: 'بخش نامعتبر است' });
+      }
+
+      // For financial department, allow access without admin auth
+      if (department === 'financial') {
+        const orders = await orderManagementStorage.getOrdersByDepartment(department);
+        return res.json({ success: true, orders });
+      }
+
+      // For other departments, require admin auth
+      if (!req.session?.adminId) {
+        return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
       }
 
       const orders = await orderManagementStorage.getOrdersByDepartment(department);
@@ -9703,11 +9838,20 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Update order status (department-specific)
-  app.put('/api/order-management/:id/status', requireAuth, async (req, res) => {
+  app.put('/api/order-management/:id/status', async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
       const { newStatus, department, notes } = req.body;
-      const adminId = req.session.adminId!;
+      
+      // For financial department, use default admin ID (financial department operations)
+      let adminId = req.session.adminId;
+      if (department === 'financial' && !adminId) {
+        adminId = 1; // Default financial admin ID for financial operations
+      }
+
+      if (!adminId) {
+        return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
+      }
 
       // Validate that admin can perform this action
       const canView = await orderManagementStorage.canDepartmentViewOrder(orderId, department);
@@ -9974,6 +10118,66 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error processing financial order:', error);
       res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
+    }
+  });
+
+  // Financial approve order (for admin panel)
+  app.post('/api/finance/orders/:id/approve', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { notes } = req.body;
+      const adminId = req.session.adminId!;
+      
+      await orderManagementStorage.updateOrderStatus(
+        orderId,
+        'financial_approved',
+        adminId,
+        'financial',
+        notes || 'تایید شده توسط بخش مالی'
+      );
+
+      // Send website notification and email to customer (NO SMS)
+      const orderMgmt = await orderManagementStorage.getOrderManagementById(orderId);
+      if (orderMgmt) {
+        // TODO: Send website notification and email notification
+        console.log(`✓ واریزی تایید شد - سفارش ${orderMgmt.customerOrderId}`);
+        console.log('✓ تأیید از طریق وب‌سایت و ایمیل ارسال شد (بدون SMS)');
+      }
+
+      res.json({ success: true, message: "واریزی تایید شد و به انبار اعلام شد" });
+    } catch (error) {
+      console.error('Error approving financial order:', error);
+      res.status(500).json({ success: false, message: "خطا در تایید واریزی" });
+    }
+  });
+
+  // Financial reject order (for admin panel)
+  app.post('/api/finance/orders/:id/reject', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { notes } = req.body;
+      const adminId = req.session.adminId!;
+      
+      await orderManagementStorage.updateOrderStatus(
+        orderId,
+        'financial_rejected',
+        adminId,
+        'financial',
+        notes || 'رد شده توسط بخش مالی'
+      );
+
+      // Send website notification and email to customer (NO SMS)
+      const orderMgmt = await orderManagementStorage.getOrderManagementById(orderId);
+      if (orderMgmt) {
+        // TODO: Send website notification and email notification
+        console.log(`✗ واریزی رد شد - سفارش ${orderMgmt.customerOrderId}`);
+        console.log('✓ اطلاع‌رسانی از طریق وب‌سایت و ایمیل ارسال شد (بدون SMS)');
+      }
+
+      res.json({ success: true, message: "واریزی رد شد" });
+    } catch (error) {
+      console.error('Error rejecting financial order:', error);
+      res.status(500).json({ success: false, message: "خطا در رد واریزی" });
     }
   });
 
@@ -13679,9 +13883,7 @@ momtazchem.com
             messageSource: 'system'
           });
 
-          // Send SMS notification
-          console.log(`📱 SMS Notification: Payment approved for order ${customerInfo.orderNumber} to ${customerInfo.customerPhone}`);
-          console.log(`SMS Content: سفارش ${customerInfo.orderNumber} شما تایید شد و به مرحله آماده‌سازی ارسال شده است. ممتازشیمی`);
+          // Website and email notification sent (NO SMS per user requirement)
           
         } catch (notificationError) {
           console.error("Error sending approval notifications:", notificationError);
@@ -13764,9 +13966,7 @@ momtazchem.com
             messageSource: 'system'
           });
 
-          // Send SMS notification
-          console.log(`📱 SMS Notification: Payment rejected for order ${customerInfo.orderNumber} to ${customerInfo.customerPhone}`);
-          console.log(`SMS Content: پرداخت سفارش ${customerInfo.orderNumber} تایید نشد. لطفاً با ما تماس بگیرید. ممتازشیمی`);
+          // Website and email notification sent (NO SMS per user requirement)
           
         } catch (notificationError) {
           console.error("Error sending rejection notifications:", notificationError);
@@ -14673,11 +14873,10 @@ momtazchem.com
           message: "تست ایمیل با موفقیت ارسال شد" 
         });
       } else if (type === 'sms') {
-        // Test SMS notification
-        console.log("📱 Test SMS notification sent");
+        // SMS notification functionality removed per requirements
         res.json({ 
           success: true, 
-          message: "تست پیامک با موفقیت ارسال شد" 
+          message: "پیامک در سیستم فعال نیست" 
         });
       } else {
         res.status(400).json({

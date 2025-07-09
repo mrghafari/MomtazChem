@@ -93,11 +93,13 @@ export default function FinancialDepartment() {
   }, [setLocation]);
 
   // Fetch financial pending orders - only orders needing financial review
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: ordersData, isLoading, refetch } = useQuery({
     queryKey: ["/api/financial/orders"],
     enabled: !!user,
     refetchInterval: 300000, // Auto-refresh every 5 minutes
   });
+
+  const orders = ordersData?.orders || [];
 
   // Process order mutation
   const processOrderMutation = useMutation({
