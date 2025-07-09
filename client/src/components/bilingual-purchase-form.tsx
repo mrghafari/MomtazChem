@@ -201,7 +201,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'bank_receipt'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
 
   // Fetch current customer data
@@ -417,7 +417,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                        walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
   const canUseWallet = walletBalance > 0 && customerData?.success;
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
-  // Remove partial wallet logic
+  const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
   
   console.log('Wallet Debug:', { walletData, walletBalance, canUseWallet, totalAmount });
 
@@ -466,8 +466,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         totalAmount,
         currency: 'IQD',
         paymentMethod: paymentMethod,
-        walletAmountUsed: paymentMethod === 'wallet_full' ? totalAmount : 0,
-        remainingAmount: paymentMethod === 'wallet_full' ? 0 : totalAmount
+        walletAmountUsed: paymentMethod === 'wallet_full' ? totalAmount : 
+                         paymentMethod === 'wallet_partial' ? walletAmount : 0,
+        remainingAmount: paymentMethod === 'wallet_full' ? 0 : 
+                        paymentMethod === 'wallet_partial' ? totalAmount - walletAmount : totalAmount
       });
     },
     onSuccess: () => {
@@ -644,7 +646,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
                 
-                {/* سوم: ارسال فیش واریزی بانکی */}
+                {/* سوم: پرداخت ترکیبی (والت + آنلاین) */}
+                {walletBalance > 0 && walletBalance < totalAmount && (
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <RadioGroupItem value="wallet_partial" id="wallet_partial" />
+                    <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
+                      <Wallet className="w-4 h-4 text-orange-600" />
+                      پرداخت ترکیبی (والت + آنلاین)
+                    </Label>
+                  </div>
+                )}
+                
+                {/* چهارم: ارسال فیش واریزی بانکی */}
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <RadioGroupItem value="bank_receipt" id="bank_receipt" />
                   <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
@@ -654,8 +667,31 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 </div>
               </RadioGroup>
 
-              {/* Payment Summary - فقط برای والت */}
-              {paymentMethod === 'wallet_full' && (
+              {/* Partial Payment Amount Input */}
+              {paymentMethod === 'wallet_partial' && (
+                <div className="space-y-2">
+                  <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatCurrency(walletBalance)})</Label>
+                  <Input
+                    id="walletAmount"
+                    type="number"
+                    min="0"
+                    max={walletBalance}
+                    value={walletAmount || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      setWalletAmount(Math.min(value, walletBalance));
+                    }}
+                    placeholder="مبلغ از والت"
+                    className="text-right"
+                  />
+                  <div className="text-sm text-muted-foreground">
+                    مبلغ باقیمانده (آنلاین): {formatCurrency(totalAmount - walletAmount)}
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Summary */}
+              {(paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial') && (
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
@@ -664,11 +700,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     </div>
                     <div className="flex justify-between text-green-600">
                       <span>پرداخت از والت:</span>
-                      <span>-{formatCurrency(totalAmount)}</span>
+                      <span>-{formatCurrency(paymentMethod === 'wallet_full' ? totalAmount : walletAmount)}</span>
                     </div>
                     <div className="flex justify-between font-medium border-t pt-1">
                       <span>مبلغ باقیمانده:</span>
-                      <span>{formatCurrency(0)}</span>
+                      <span>{formatCurrency(paymentMethod === 'wallet_full' ? 0 : totalAmount - walletAmount)}</span>
                     </div>
                   </div>
                 </div>
