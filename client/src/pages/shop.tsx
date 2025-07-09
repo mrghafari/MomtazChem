@@ -142,8 +142,8 @@ const Shop = () => {
   };
 
   const handlePriceRangeChange = (value: [number, number]) => {
-    // Prevent page refresh
-    if (Array.isArray(value) && value.length === 2) {
+    // Ensure proper range handling
+    if (Array.isArray(value) && value.length === 2 && !isNaN(value[0]) && !isNaN(value[1])) {
       setPriceRange(value);
       setFilters(prev => ({ ...prev, priceMin: value[0], priceMax: value[1] }));
       setCurrentPage(0);

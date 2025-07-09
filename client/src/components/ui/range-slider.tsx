@@ -16,12 +16,14 @@ const RangeSlider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   RangeSliderProps
 >(({ className, value, onValueChange, min, max, step = 1, disabled, ...props }, ref) => {
-  const handleValueChange = React.useCallback((newValue: number[]) => {
+  const handleValueChange = (newValue: number[]) => {
     // Ensure we always have exactly 2 values for range
     if (newValue.length === 2) {
       onValueChange([newValue[0], newValue[1]]);
     }
-  }, [onValueChange]);
+  };
+
+
 
   return (
     <SliderPrimitive.Root
@@ -32,6 +34,7 @@ const RangeSlider = React.forwardRef<
       )}
       value={value}
       onValueChange={handleValueChange}
+
       min={min}
       max={max}
       step={step}
