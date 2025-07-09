@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+import { RangeSlider } from "@/components/ui/range-slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -125,7 +125,7 @@ const Shop = () => {
       const minNum = typeof min === 'string' ? parseFloat(min) : min;
       const maxNum = typeof max === 'string' ? parseFloat(max) : max;
       
-      console.log('Price range from API:', { min, max, minNum, maxNum, currentPriceRange: priceRange });
+
       
       if (minNum !== priceRange[0] || maxNum !== priceRange[1]) {
         setPriceRange([minNum, maxNum]);
@@ -142,9 +142,12 @@ const Shop = () => {
   };
 
   const handlePriceRangeChange = (value: [number, number]) => {
-    setPriceRange(value);
-    setFilters(prev => ({ ...prev, priceMin: value[0], priceMax: value[1] }));
-    setCurrentPage(0);
+    // Prevent page refresh
+    if (Array.isArray(value) && value.length === 2) {
+      setPriceRange(value);
+      setFilters(prev => ({ ...prev, priceMin: value[0], priceMax: value[1] }));
+      setCurrentPage(0);
+    }
   };
 
 
@@ -925,7 +928,7 @@ const Shop = () => {
                         Price Range: {priceRange[0]} - {priceRange[1]} IQD
                       </label>
                       <div className="mt-2">
-                        <Slider
+                        <RangeSlider
                           value={priceRange}
                           onValueChange={handlePriceRangeChange}
                           max={typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max}
