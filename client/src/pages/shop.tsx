@@ -345,6 +345,10 @@ const Shop = () => {
     setCustomer(customerData);
     fetchWalletBalance();
     
+    // Invalidate cache to refresh header
+    queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
+    
     // Check if user has items in cart before migration
     const hasCartItems = Object.keys(cart).length > 0;
     
@@ -373,6 +377,10 @@ const Shop = () => {
   const handleRegisterSuccess = (customerData: any) => {
     setCustomer(customerData);
     fetchWalletBalance();
+    
+    // Invalidate cache to refresh header
+    queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
     
     // Check if user has items in cart before migration
     const hasCartItems = Object.keys(cart).length > 0;
