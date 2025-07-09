@@ -763,7 +763,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     {/* Item Total with discount info */}
                     <div className="mt-2 pt-2 border-t space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">{t.subtotal}</span>
+                        <span className="text-sm text-muted-foreground">Item Total</span>
                         <span className="font-medium">{formatCurrency(itemTotal)}</span>
                       </div>
                       {discountedPrice < basePrice && (
