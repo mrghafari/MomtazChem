@@ -965,7 +965,7 @@ export default function ProductsPage() {
                             variant={product.syncWithShop ? "default" : "destructive"} 
                             className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}
                           >
-                            {product.syncWithShop ? '🔄 Sync ON' : '❌ Sync OFF'}
+                            {product.syncWithShop ? '✓ Sync ON' : '⨯ Sync OFF'}
                           </Badge>
                         </div>
                       </div>
@@ -979,7 +979,7 @@ export default function ProductsPage() {
                           className={`h-8 w-8 p-0 ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600' : 'hover:bg-green-50 hover:text-green-600'}`}
                           title={product.syncWithShop ? 'غیرفعال کردن سینک' : 'فعال کردن سینک'}
                         >
-                          {product.syncWithShop ? '🔄' : '❌'}
+                          {product.syncWithShop ? '✓' : '⨯'}
                         </Button>
                         <Button
                           variant="ghost"
@@ -1410,9 +1410,9 @@ export default function ProductsPage() {
                               </FormLabel>
                               <div className="text-xs text-blue-700 mt-1">
                                 {field.value ? (
-                                  "✅ این محصول در sync با فروشگاه شرکت خواهد کرد"
+                                  "✓ این محصول در sync با فروشگاه شرکت خواهد کرد"
                                 ) : (
-                                  "❌ این محصول در sync با فروشگاه شرکت نخواهد کرد"
+                                  "⨯ این محصول در sync با فروشگاه شرکت نخواهد کرد"
                                 )}
                               </div>
                             </div>

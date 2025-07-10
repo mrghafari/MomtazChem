@@ -202,8 +202,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(showcaseProducts.id, id))
       .returning();
     
-    // Auto-sync to shop after updating showcase product
-    await this.syncProductToShop(product);
+    // Only auto-sync to shop if syncWithShop is enabled
+    if (product.syncWithShop) {
+      await this.syncProductToShop(product);
+    }
     
     return product;
   }
@@ -215,6 +217,12 @@ export class DatabaseStorage implements IStorage {
   // Product synchronization methods
   async syncProductToShop(showcaseProduct: ShowcaseProduct): Promise<void> {
     try {
+      // Only sync if syncWithShop is enabled
+      if (!showcaseProduct.syncWithShop) {
+        console.log(`⚠️ Skipping sync for ${showcaseProduct.name} - syncWithShop is disabled`);
+        return;
+      }
+
       // Generate SKU from name if not available
       const productSku = `SP-${showcaseProduct.id}-${showcaseProduct.name.replace(/\s+/g, '-').toUpperCase().substring(0, 10)}`;
       
