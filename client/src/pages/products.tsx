@@ -965,7 +965,7 @@ export default function ProductsPage() {
                             variant={product.syncWithShop ? "default" : "destructive"} 
                             className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}
                           >
-                            {product.syncWithShop ? 'ON' : 'OFF'}
+                            {product.syncWithShop ? 'Sync ON' : 'Sync OFF'}
                           </Badge>
                         </div>
                       </div>
