@@ -1030,8 +1030,8 @@ export default function ProductsPage() {
                       {product.stockQuantity !== undefined && product.stockQuantity !== null && (
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                            <span>Stock: {product.stockQuantity}</span>
-                            {product.maxStockLevel && <span>Max: {product.maxStockLevel}</span>}
+                            <span className="break-words">Stock: {product.stockQuantity.toLocaleString()}</span>
+                            {product.maxStockLevel && <span className="break-words">Max: {product.maxStockLevel.toLocaleString()}</span>}
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
