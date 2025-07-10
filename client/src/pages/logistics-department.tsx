@@ -29,6 +29,11 @@ interface LogisticsOrder {
   currency: string;
   deliveryMethod: string;
   transportationType?: string;
+  
+  // Weight information for shipping calculations
+  totalWeight?: string;
+  weightUnit?: string;
+  
   trackingNumber?: string;
   estimatedDeliveryDate?: string;
   actualDeliveryDate?: string;
@@ -405,6 +410,20 @@ export default function LogisticsDepartment() {
                             
                             <div>
                               <h4 className="font-semibold text-gray-900 mb-2">اطلاعات ارسال</h4>
+                              
+                              {/* Total Weight Display */}
+                              <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="flex items-center gap-2">
+                                  <Package className="w-4 h-4 text-blue-600" />
+                                  <span className="text-sm font-medium text-blue-800">
+                                    وزن کل: {order.totalWeight ? `${order.totalWeight} ${order.weightUnit || 'kg'}` : 'محاسبه نشده'}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-blue-600 mt-1">
+                                  برای انتخاب وسیله حمل مناسب از این وزن استفاده کنید
+                                </p>
+                              </div>
+                              
                               {order.trackingNumber && (
                                 <p className="text-sm text-gray-600">کد رهگیری: {order.trackingNumber}</p>
                               )}

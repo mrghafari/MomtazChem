@@ -21,7 +21,8 @@ import {
   type Department,
   orderStatuses
 } from "@shared/order-management-schema";
-import { customerOrders, customers } from "@shared/customer-schema";
+import { customerOrders, customers, orderItems } from "@shared/customer-schema";
+import { showcaseProducts } from "@shared/showcase-schema";
 import { db } from "./db";
 import { eq, and, desc, asc, inArray } from "drizzle-orm";
 
@@ -338,6 +339,27 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       createdAt: orderManagement.createdAt,
       updatedAt: orderManagement.updatedAt,
       
+      // Weight and delivery information
+      totalWeight: orderManagement.totalWeight,
+      weightUnit: orderManagement.weightUnit,
+      deliveryMethod: orderManagement.deliveryMethod,
+      transportationType: orderManagement.transportationType,
+      trackingNumber: orderManagement.trackingNumber,
+      estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
+      actualDeliveryDate: orderManagement.actualDeliveryDate,
+      deliveryPersonName: orderManagement.deliveryPersonName,
+      deliveryPersonPhone: orderManagement.deliveryPersonPhone,
+      postalServiceName: orderManagement.postalServiceName,
+      postalTrackingCode: orderManagement.postalTrackingCode,
+      vehicleType: orderManagement.vehicleType,
+      vehiclePlate: orderManagement.vehiclePlate,
+      vehicleModel: orderManagement.vehicleModel,
+      vehicleColor: orderManagement.vehicleColor,
+      driverName: orderManagement.driverName,
+      driverPhone: orderManagement.driverPhone,
+      deliveryCompanyName: orderManagement.deliveryCompanyName,
+      deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
+      
       // Customer Order fields - مبلغ و کارنسی
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
@@ -394,6 +416,28 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCode: row.deliveryCode,
       totalAmount: row.totalAmount,
       currency: row.currency,
+      
+      // Weight and delivery information
+      totalWeight: row.totalWeight,
+      weightUnit: row.weightUnit,
+      deliveryMethod: row.deliveryMethod,
+      transportationType: row.transportationType,
+      trackingNumber: row.trackingNumber,
+      estimatedDeliveryDate: row.estimatedDeliveryDate,
+      actualDeliveryDate: row.actualDeliveryDate,
+      deliveryPersonName: row.deliveryPersonName,
+      deliveryPersonPhone: row.deliveryPersonPhone,
+      postalServiceName: row.postalServiceName,
+      postalTrackingCode: row.postalTrackingCode,
+      vehicleType: row.vehicleType,
+      vehiclePlate: row.vehiclePlate,
+      vehicleModel: row.vehicleModel,
+      vehicleColor: row.vehicleColor,
+      driverName: row.driverName,
+      driverPhone: row.driverPhone,
+      deliveryCompanyName: row.deliveryCompanyName,
+      deliveryCompanyPhone: row.deliveryCompanyPhone,
+      
       financialReviewerId: row.financialReviewerId,
       financialReviewedAt: row.financialReviewedAt,
       financialNotes: row.financialNotes,
@@ -423,7 +467,86 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   }
   
   async getLogisticsPendingOrders(): Promise<OrderManagement[]> {
-    return this.getOrdersByDepartment('logistics');
+    const orders = await this.getOrdersByDepartment('logistics');
+    
+    // Calculate total weight for each order if not already calculated
+    for (const order of orders) {
+      if (!order.totalWeight) {
+        await this.calculateAndUpdateOrderWeight(order.customerOrderId);
+        // Refresh order data after weight calculation
+        const updatedOrders = await this.getOrdersByDepartment('logistics');
+        const updatedOrder = updatedOrders.find(o => o.customerOrderId === order.customerOrderId);
+        if (updatedOrder) {
+          order.totalWeight = updatedOrder.totalWeight;
+          order.weightUnit = updatedOrder.weightUnit;
+        }
+      }
+    }
+    
+    return orders;
+  }
+  
+  async calculateAndUpdateOrderWeight(customerOrderId: number): Promise<void> {
+    try {
+      // Get all order items for this order
+      const orderItemsData = await db
+        .select({
+          productId: orderItems.productId,
+          quantity: orderItems.quantity,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, customerOrderId));
+      
+      if (orderItemsData.length === 0) {
+        return;
+      }
+      
+      let totalWeightKg = 0;
+      
+      // Calculate total weight from all products in the order
+      for (const item of orderItemsData) {
+        if (item.productId) {
+          // Get product weight from showcaseProducts table
+          const productWeight = await db
+            .select({
+              weight: showcaseProducts.weight,
+              weightUnit: showcaseProducts.weightUnit,
+            })
+            .from(showcaseProducts)
+            .where(eq(showcaseProducts.id, item.productId))
+            .limit(1);
+          
+          if (productWeight.length > 0 && productWeight[0].weight) {
+            const weight = parseFloat(productWeight[0].weight);
+            const unit = productWeight[0].weightUnit || 'kg';
+            const quantity = parseFloat(item.quantity);
+            
+            // Convert weight to kg if needed
+            let weightInKg = weight;
+            if (unit === 'g' || unit === 'gram') {
+              weightInKg = weight / 1000;
+            } else if (unit === 'ton') {
+              weightInKg = weight * 1000;
+            }
+            
+            totalWeightKg += weightInKg * quantity;
+          }
+        }
+      }
+      
+      // Update order management with calculated weight
+      if (totalWeightKg > 0) {
+        await db
+          .update(orderManagement)
+          .set({
+            totalWeight: totalWeightKg.toFixed(3),
+            weightUnit: 'kg',
+          })
+          .where(eq(orderManagement.customerOrderId, customerOrderId));
+      }
+    } catch (error) {
+      console.error('Error calculating order weight:', error);
+    }
   }
   
 

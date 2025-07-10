@@ -271,6 +271,27 @@ export default function ProductsPage() {
     }
   };
 
+  // Quick sync toggle mutation
+  const { mutate: toggleSync } = useMutation({
+    mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) =>
+      apiRequest(`/api/products/${id}`, "PUT", { syncWithShop }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setRefreshKey(prev => prev + 1);
+      toast({
+        title: "به‌روزرسانی موفقیت‌آمیز",
+        description: "وضعیت سینک با فروشگاه به‌روزرسانی شد",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error.message || "خطا در به‌روزرسانی وضعیت سینک",
+        variant: "destructive",
+      });
+    },
+  });
+
   // AI SKU Generation Mutation
   const generateSKUMutation = useMutation({
     mutationFn: (productData: any) => apiRequest("/api/products/generate-sku", "POST", productData),
@@ -951,6 +972,15 @@ export default function ProductsPage() {
 
                       {/* Action Buttons */}
                       <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
+                          className={`h-8 w-8 p-0 ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600' : 'hover:bg-green-50 hover:text-green-600'}`}
+                          title={product.syncWithShop ? 'غیرفعال کردن سینک' : 'فعال کردن سینک'}
+                        >
+                          {product.syncWithShop ? '🔄' : '❌'}
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"

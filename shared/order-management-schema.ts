@@ -75,6 +75,10 @@ export const orderManagement = pgTable("order_management", {
   deliveryMethod: varchar("delivery_method", { length: 50 }).default("courier"), // post, courier, truck, personal_pickup
   transportationType: varchar("transportation_type", { length: 50 }), // motorcycle, car, truck, van
   
+  // Total weight calculation for entire order
+  totalWeight: decimal("total_weight", { precision: 10, scale: 3 }), // Total weight of all order items in kg
+  weightUnit: varchar("weight_unit", { length: 10 }).default("kg"), // kg, ton, gram
+  
   // Postal service details (for post delivery)
   postalServiceName: text("postal_service_name"), // Iran Post, Pishtaz, etc.
   postalTrackingCode: varchar("postal_tracking_code", { length: 100 }),
