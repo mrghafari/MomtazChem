@@ -328,26 +328,34 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   });
 
   // Fetch active shipping rates
-  const { data: shippingRatesData } = useQuery({
+  const { data: shippingRatesData, isLoading: isLoadingShippingRates, error: shippingRatesError } = useQuery({
     queryKey: ['/api/shipping-rates'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/shipping-rates');
+        console.log('Fetching shipping rates...');
+        const response = await fetch('/api/shipping-rates', {
+          credentials: 'include'
+        });
         
         if (response.ok) {
           const result = await response.json();
           console.log('Shipping rates API response:', result);
-          if (result.success) {
+          if (result.success && result.data) {
+            console.log('Successfully loaded shipping rates:', result.data.length, 'methods');
             return result.data;
           }
         }
+        console.log('Failed to load shipping rates');
         return [];
       } catch (error) {
         console.log('Error fetching shipping rates:', error);
         return [];
       }
     },
-    retry: false,
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
   });
 
 
@@ -484,21 +492,35 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Calculate shipping cost based on selected method
   useEffect(() => {
+    console.log('Shipping cost calculation:', { selectedShippingMethod, shippingRatesData, subtotalAmount });
     if (selectedShippingMethod && shippingRatesData) {
       const selectedRate = shippingRatesData.find((rate: any) => rate.id === selectedShippingMethod);
       if (selectedRate) {
         // Check if order qualifies for free shipping
         const freeShippingThreshold = parseFloat(selectedRate.freeShippingThreshold || '0');
         if (freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold) {
+          console.log('Free shipping applied! Threshold:', freeShippingThreshold, 'Order amount:', subtotalAmount);
           setShippingCost(0);
         } else {
-          setShippingCost(parseFloat(selectedRate.basePrice || '0'));
+          const cost = parseFloat(selectedRate.basePrice || '0');
+          console.log('Regular shipping cost applied:', cost);
+          setShippingCost(cost);
         }
       }
     } else {
       setShippingCost(0);
     }
   }, [selectedShippingMethod, shippingRatesData, subtotalAmount]);
+
+  // Debug shipping rates loading
+  useEffect(() => {
+    console.log('Shipping rates state:', { 
+      isLoadingShippingRates, 
+      shippingRatesError, 
+      dataLength: shippingRatesData?.length || 0,
+      data: shippingRatesData 
+    });
+  }, [isLoadingShippingRates, shippingRatesError, shippingRatesData]);
 
   // Calculate VAT amount (only on product subtotal, not shipping)
   const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') / 100 : 0;
@@ -813,7 +835,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* Delivery Method Selection */}
               <div className="space-y-3 border-t pt-3">
                 <label className="text-sm font-medium">{t.deliveryMethod}</label>
-                {shippingRatesData && shippingRatesData.length > 0 ? (
+                {isLoadingShippingRates ? (
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    {language === 'en' ? 'Loading shipping methods...' : language === 'ar' ? 'جارٍ تحميل طرق الشحن...' : 'جارٍ تحميل طرق الشحن...'}
+                  </div>
+                ) : shippingRatesError ? (
+                  <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg p-2 border border-red-200 dark:border-red-800">
+                    {language === 'en' ? 'Failed to load shipping methods. Please refresh page.' : language === 'ar' ? 'فشل تحميل طرق الشحن. يرجى إعادة تحميل الصفحة.' : 'فشل تحميل طرق الشحن. يرجى إعادة تحميل الصفحة.'}
+                  </div>
+                ) : shippingRatesData && shippingRatesData.length > 0 ? (
                   <div className="space-y-2">
                     <select
                       value={selectedShippingMethod || ''}
@@ -828,8 +859,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         
                         return (
                           <option key={rate.id} value={rate.id}>
-                            {rate.name} - {qualifiesForFreeShipping ? t.freeShipping : formatCurrency(parseFloat(rate.basePrice || '0'))}
-                            {rate.estimatedDays && ` (${rate.estimatedDays} days)`}
+                            {rate.deliveryMethod || rate.name} - {qualifiesForFreeShipping ? t.freeShipping : formatCurrency(parseFloat(rate.basePrice || '0'))}
+                            {rate.estimatedDays && ` (${rate.estimatedDays} ${language === 'en' ? 'days' : language === 'ar' ? 'أيام' : 'أيام'})`}
                           </option>
                         );
                       })}
@@ -860,8 +891,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     )}
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">
-                    {language === 'en' ? 'Loading shipping methods...' : language === 'ar' ? 'جارٍ تحميل طرق الشحن...' : 'جارٍ تحميل طرق الشحن...'}
+                  <div className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2 border border-amber-200 dark:border-amber-800">
+                    {language === 'en' ? 'No shipping methods available at the moment.' : language === 'ar' ? 'لا توجد طرق شحن متاحة في الوقت الحالي.' : 'لا توجد طرق شحن متاحة في الوقت الحالي.'}
                   </div>
                 )}
               </div>
