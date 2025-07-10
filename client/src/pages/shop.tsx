@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,6 +30,27 @@ import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 const Shop = () => {
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
+
+  // Sync toggle mutation
+  const { mutate: toggleSync } = useMutation({
+    mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) =>
+      apiRequest(`/api/shop/products/${id}`, "PUT", { syncWithShop }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ['shopSearch'] });
+      toast({
+        title: "موفقیت‌آمیز",
+        description: "وضعیت سینک تغییر کرد",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error.message || "مشکل در تغییر sync",
+        variant: "destructive",
+      });
+    },
+  });
   const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -1192,6 +1213,24 @@ const Shop = () => {
                               <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                 {product.inStock ? "In Stock" : "Out of Stock"}
                               </Badge>
+                              {/* Shop Sync Toggle */}
+                              <div className="flex items-center gap-1">
+                                <Badge 
+                                  variant={product.syncWithShop ? "default" : "destructive"} 
+                                  className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}
+                                >
+                                  {product.syncWithShop ? 'Sync ON' : 'Sync OFF'}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
+                                  className={`h-6 w-10 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-red-50 text-red-700'}`}
+                                  title={product.syncWithShop ? 'غیرفعال کردن سینک' : 'فعال کردن سینک'}
+                                >
+                                  {product.syncWithShop ? 'OFF' : 'ON'}
+                                </Button>
+                              </div>
                             </div>
                           </div>
                           
@@ -1461,6 +1500,24 @@ const Shop = () => {
                                   <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                     {product.inStock ? "In Stock" : "Out of Stock"}
                                   </Badge>
+                                  {/* Shop Sync Toggle - List View */}
+                                  <div className="flex items-center gap-1">
+                                    <Badge 
+                                      variant={product.syncWithShop ? "default" : "destructive"} 
+                                      className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}
+                                    >
+                                      {product.syncWithShop ? 'Sync ON' : 'Sync OFF'}
+                                    </Badge>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
+                                      className={`h-6 w-10 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-red-50 text-red-700'}`}
+                                      title={product.syncWithShop ? 'غیرفعال کردن سینک' : 'فعال کردن سینک'}
+                                    >
+                                      {product.syncWithShop ? 'OFF' : 'ON'}
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                               
