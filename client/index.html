@@ -20,6 +20,23 @@
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    
+    // تنظیم موقعیت چپ برای ویجت چت
+    Tawk_API.customStyle = {
+      visibility : {
+        desktop : {
+          position : 'bl', // bottom-left (bl) به جای bottom-right (br)
+          xOffset : 20,
+          yOffset : 20
+        },
+        mobile : {
+          position : 'bl', // bottom-left (bl) به جای bottom-right (br)
+          xOffset : 10,
+          yOffset : 10
+        }
+      }
+    };
+    
     (function(){
     var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
     s1.async=true;
