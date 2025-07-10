@@ -47,6 +47,8 @@ const formSchema = insertShowcaseProductSchema.extend({
   pdfCatalogUrl: z.string().optional(),
   catalogFileName: z.string().optional(),
   showCatalogToCustomers: z.boolean().optional(),
+  // Shop sync control
+  syncWithShop: z.boolean().default(true),
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -562,6 +564,7 @@ export default function ProductsPage() {
       showMsdsToCustomers: product.showMsdsToCustomers || false,
       catalogFileName: product.catalogFileName || "",
       showCatalogToCustomers: product.showCatalogToCustomers || false,
+      syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       isActive: product.isActive !== false,
     });
     setDialogOpen(true);
@@ -936,6 +939,13 @@ export default function ProductsPage() {
                               Variant: {product.variantValue}
                             </Badge>
                           )}
+                          {/* Shop Sync Status */}
+                          <Badge 
+                            variant={product.syncWithShop ? "default" : "destructive"} 
+                            className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}
+                          >
+                            {product.syncWithShop ? '🔄 Sync ON' : '❌ Sync OFF'}
+                          </Badge>
                         </div>
                       </div>
 
@@ -1344,6 +1354,43 @@ export default function ProductsPage() {
                             </SelectContent>
                           </Select>
                           <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Shop Sync Control */}
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <FormField
+                      control={form.control}
+                      name="syncWithShop"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <div className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="h-5 w-5"
+                              />
+                            </FormControl>
+                            <div className="flex flex-col">
+                              <FormLabel className="text-sm font-medium text-blue-900">
+                                🔄 Sync with Shop (شرکت در فرآیند sync با فروشگاه)
+                              </FormLabel>
+                              <div className="text-xs text-blue-700 mt-1">
+                                {field.value ? (
+                                  "✅ این محصول در sync با فروشگاه شرکت خواهد کرد"
+                                ) : (
+                                  "❌ این محصول در sync با فروشگاه شرکت نخواهد کرد"
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-600 bg-white p-2 rounded border-l-2 border-blue-400">
+                            <strong>توضیح:</strong> با فعال بودن این گزینه، محصول به صورت خودکار در فروشگاه آنلاین نمایش داده می‌شود. 
+                            اگر غیرفعال باشد، محصول فقط در کاردکس نمایشی خواهد بود.
+                          </div>
                         </FormItem>
                       )}
                     />
