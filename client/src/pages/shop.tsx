@@ -331,12 +331,9 @@ const Shop = () => {
       
       if (response.ok) {
         const result = await response.json();
-        console.log('Wallet balance response:', result);
         if (result.success) {
           setWalletBalance(result.balance || 0);
         }
-      } else {
-        console.log('Failed to fetch wallet balance:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error fetching wallet balance:', error);

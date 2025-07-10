@@ -39,6 +39,12 @@ export default function Header() {
     enabled: isAuthenticated && !!customer,
     retry: false,
     staleTime: 30000, // 30 seconds
+    onError: (error) => {
+      // Suppress 401 errors as they're expected when not authenticated
+      if (!error.message?.includes('401:')) {
+        console.error('Wallet balance error:', error);
+      }
+    },
   });
 
   const rawBalance = walletData?.balance || walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";

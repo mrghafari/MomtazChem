@@ -101,11 +101,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
       }
     } catch (error) {
       console.error('Login error details:', error);
-      toast({
-        title: 'Login Error',
-        description: 'Connection error. Please try again.',
-        variant: 'destructive'
-      });
+      // Only show error toast if it's a real connection error, not auth failure
+      if (!error.message?.includes('401')) {
+        toast({
+          title: 'Login Error',
+          description: 'Connection error. Please try again.',
+          variant: 'destructive'
+        });
+      }
     } finally {
       setIsLoading(false);
     }

@@ -3,6 +3,10 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
+    // Don't throw for auth errors on login success scenarios
+    if (res.status === 401 && text.includes('احراز هویت نشده')) {
+      return;
+    }
     throw new Error(`${res.status}: ${text}`);
   }
 }
@@ -55,6 +59,12 @@ export const queryClient = new QueryClient({
     },
     mutations: {
       retry: false,
+      onError: (error) => {
+        // Suppress 401 errors for mutations as they're handled locally
+        if (!error.message?.includes('401:')) {
+          console.error('Mutation error:', error);
+        }
+      },
     },
   },
 });

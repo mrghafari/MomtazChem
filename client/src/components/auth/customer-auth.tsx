@@ -150,11 +150,14 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An error occurred while logging in",
-      });
+      // Only show error toast if it's a real connection error
+      if (!error.message?.includes('401')) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "An error occurred while logging in",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
