@@ -1131,10 +1131,9 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Overlay for Rating, Reviews and Specs */}
-                          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
-                            {/* Product Rating */}
-                            {productStats?.[product.id] && (
+                          {/* Star Rating - Left side */}
+                          {productStats?.[product.id] && (
+                            <div className="absolute bottom-2 left-2 flex items-center bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -1147,8 +1146,11 @@ const Shop = () => {
                                   showNumber={false}
                                 />
                               </Button>
-                            )}
-                            
+                            </div>
+                          )}
+                          
+                          {/* Reviews and Specs - Right side */}
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
                             {/* Reviews Button */}
                             <Button
                               variant="ghost"
@@ -1391,10 +1393,9 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Overlay for Rating, Reviews and Specs - List View */}
-                          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
-                            {/* Product Rating */}
-                            {productStats?.[product.id] && (
+                          {/* Star Rating - Left side - List View */}
+                          {productStats?.[product.id] && (
+                            <div className="absolute bottom-2 left-2 flex items-center bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -1407,8 +1408,11 @@ const Shop = () => {
                                   showNumber={false}
                                 />
                               </Button>
-                            )}
-                            
+                            </div>
+                          )}
+                          
+                          {/* Reviews and Specs - Right side - List View */}
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
                             {/* Reviews Button */}
                             <Button
                               variant="ghost"
