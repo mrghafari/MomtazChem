@@ -1133,11 +1133,11 @@ const Shop = () => {
                           
                           {/* Star Rating - Left side */}
                           {productStats?.[product.id] && (
-                            <div className="absolute bottom-2 left-2 flex items-center bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+                            <div className="absolute bottom-2 left-2 flex items-center">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="p-1 h-7 w-7 hover:bg-yellow-50"
+                                className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
                                 onClick={() => navigate(`/product-reviews/${product.id}`)}
                               >
                                 <StarRating
@@ -1395,11 +1395,11 @@ const Shop = () => {
                           
                           {/* Star Rating - Left side - List View */}
                           {productStats?.[product.id] && (
-                            <div className="absolute bottom-2 left-2 flex items-center bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+                            <div className="absolute bottom-2 left-2 flex items-center">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="p-1 h-7 w-7 hover:bg-yellow-50"
+                                className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
                                 onClick={() => navigate(`/product-reviews/${product.id}`)}
                               >
                                 <StarRating
