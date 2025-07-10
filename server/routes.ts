@@ -1724,48 +1724,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = req.body;
-      console.log(`📝 Updating product ${id} with data:`, productData);
+      console.log(`📝 Updating showcase product ${id} with data:`, productData);
       
-      // Map frontend fields to database fields
-      const shopData: any = { ...productData };
-      if (productData.unitPrice !== undefined) {
-        shopData.price = productData.unitPrice;
-        delete shopData.unitPrice; // Remove the frontend field name
-      }
-      if (productData.currency !== undefined) {
-        shopData.priceUnit = productData.currency;
-        delete shopData.currency; // Remove the frontend field name
-      }
-      // Handle image URL mapping - convert single imageUrl to imageUrls array
-      if (productData.imageUrl !== undefined) {
-        shopData.imageUrls = productData.imageUrl ? [productData.imageUrl] : [];
-        delete shopData.imageUrl; // Remove the frontend field name
-      }
-      // Handle catalog fields mapping
-      if (productData.catalogFileName !== undefined) {
-        shopData.catalogFileName = productData.catalogFileName;
-      }
-      if (productData.showCatalogToCustomers !== undefined) {
-        shopData.showCatalogToCustomers = productData.showCatalogToCustomers;
-      }
+      // Update showcase product directly (this handles syncWithShop field properly)
+      const showcaseProduct = await storage.updateProduct(id, productData);
+      console.log(`✅ Updated showcase product:`, showcaseProduct.name);
       
-      // Update shop product (unified product table)
-      const shopProduct = await shopStorage.updateShopProduct(id, shopData);
-      console.log(`✅ Updated product:`, shopProduct.name);
-      
-      // Map database fields to frontend expected fields for response
-      const mappedProduct = {
-        ...shopProduct,
-        unitPrice: shopProduct.price, // Map price field to unitPrice for frontend
-        currency: (shopProduct.priceUnit === 'IQD' || !shopProduct.priceUnit || shopProduct.priceUnit === 'unit') ? 'IQD' : shopProduct.priceUnit, // Default to IQD
-        imageUrl: shopProduct.imageUrls && shopProduct.imageUrls.length > 0 ? shopProduct.imageUrls[0] : null, // Map first image from array to single imageUrl for frontend
-        catalogFileName: shopProduct.catalogFileName,
-        showCatalogToCustomers: shopProduct.showCatalogToCustomers
-      };
-      
-      res.json(mappedProduct);
+      res.json(showcaseProduct);
     } catch (error) {
-      console.error("Error updating product:", error);
+      console.error("Error updating showcase product:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ 
           success: false, 
