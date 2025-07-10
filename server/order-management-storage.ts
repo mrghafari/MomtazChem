@@ -22,7 +22,7 @@ import {
   orderStatuses
 } from "@shared/order-management-schema";
 import { customerOrders, customers, orderItems } from "@shared/customer-schema";
-import { showcaseProducts } from "@shared/showcase-schema";
+import { showcaseProducts as products } from "@shared/showcase-schema";
 import { db } from "./db";
 import { eq, and, desc, asc, inArray } from "drizzle-orm";
 
@@ -506,18 +506,26 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       // Calculate total weight from all products in the order
       for (const item of orderItemsData) {
         if (item.productId) {
-          // Get product weight from showcaseProducts table
+          // Get product weight from products table
           const productWeight = await db
             .select({
-              weight: showcaseProducts.weight,
-              weightUnit: showcaseProducts.weightUnit,
+              weight: products.weight,
+              weightUnit: products.weightUnit,
             })
-            .from(showcaseProducts)
-            .where(eq(showcaseProducts.id, item.productId))
+            .from(products)
+            .where(eq(products.id, item.productId))
             .limit(1);
           
-          if (productWeight.length > 0 && productWeight[0].weight) {
-            const weight = parseFloat(productWeight[0].weight);
+          if (productWeight.length > 0 && productWeight[0].weight && productWeight[0].weight !== '') {
+            const weightValue = productWeight[0].weight;
+            const parsedWeight = parseFloat(weightValue);
+            
+            // Skip if weight is not a valid number
+            if (isNaN(parsedWeight) || parsedWeight <= 0) {
+              continue;
+            }
+            
+            const weight = parsedWeight;
             const unit = productWeight[0].weightUnit || 'kg';
             const quantity = parseFloat(item.quantity);
             

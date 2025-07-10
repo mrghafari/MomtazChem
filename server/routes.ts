@@ -18241,6 +18241,70 @@ momtazchem.com
     }
   }
 
+  // =============================================================================
+  // WEIGHT CALCULATION ENDPOINTS
+  // =============================================================================
+
+  // Calculate weight for a specific order
+  app.post('/api/orders/:orderId/calculate-weight', async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: 'ID سفارش نامعتبر است' });
+      }
+
+      await orderManagementStorage.calculateAndUpdateOrderWeight(orderId);
+      
+      // Get updated order to return the new weight
+      const updatedOrder = await orderManagementStorage.getOrderById(orderId);
+      
+      res.json({ 
+        success: true, 
+        message: 'وزن سفارش محاسبه شد',
+        totalWeight: updatedOrder?.totalWeight,
+        weightUnit: updatedOrder?.weightUnit
+      });
+    } catch (error) {
+      console.error('Error calculating order weight:', error);
+      res.status(500).json({ success: false, message: 'خطا در محاسبه وزن سفارش' });
+    }
+  });
+
+  // Calculate weights for all orders with null weight
+  app.post('/api/orders/calculate-all-weights', async (req, res) => {
+    try {
+      // Get all orders with null or empty weight
+      const ordersWithoutWeight = await db
+        .select({ customerOrderId: orderManagement.customerOrderId })
+        .from(orderManagement)
+        .where(isNull(orderManagement.totalWeight));
+
+      let updatedCount = 0;
+      let errors = 0;
+
+      for (const order of ordersWithoutWeight) {
+        try {
+          await orderManagementStorage.calculateAndUpdateOrderWeight(order.customerOrderId);
+          updatedCount++;
+        } catch (error) {
+          console.error(`Error calculating weight for order ${order.customerOrderId}:`, error);
+          errors++;
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `وزن ${updatedCount} سفارش محاسبه شد`,
+        updatedCount,
+        errors,
+        totalProcessed: ordersWithoutWeight.length
+      });
+    } catch (error) {
+      console.error('Error calculating weights for all orders:', error);
+      res.status(500).json({ success: false, message: 'خطا در محاسبه وزن سفارشات' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
