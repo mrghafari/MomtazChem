@@ -490,24 +490,43 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     return sum;
   }, 0);
 
-  // Calculate shipping cost based on selected method
+  // Calculate shipping cost based on selected method - Real-time update
   useEffect(() => {
-    console.log('Shipping cost calculation:', { selectedShippingMethod, shippingRatesData, subtotalAmount });
-    if (selectedShippingMethod && shippingRatesData) {
+    console.log('🚚 Shipping cost calculation:', { 
+      selectedShippingMethod, 
+      hasShippingData: !!shippingRatesData, 
+      subtotalAmount: subtotalAmount.toFixed(2)
+    });
+    
+    if (selectedShippingMethod && shippingRatesData && shippingRatesData.length > 0) {
       const selectedRate = shippingRatesData.find((rate: any) => rate.id === selectedShippingMethod);
+      console.log('📦 Selected shipping rate:', selectedRate);
+      
       if (selectedRate) {
-        // Check if order qualifies for free shipping
+        // Parse threshold carefully
         const freeShippingThreshold = parseFloat(selectedRate.freeShippingThreshold || '0');
+        const basePrice = parseFloat(selectedRate.basePrice || '0');
+        
+        console.log('💰 Free shipping check:', {
+          threshold: freeShippingThreshold,
+          orderAmount: subtotalAmount,
+          qualifies: subtotalAmount >= freeShippingThreshold && freeShippingThreshold > 0
+        });
+        
+        // Real-time free shipping check
         if (freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold) {
-          console.log('Free shipping applied! Threshold:', freeShippingThreshold, 'Order amount:', subtotalAmount);
+          console.log('✅ FREE SHIPPING APPLIED! Threshold:', freeShippingThreshold, 'Order:', subtotalAmount);
           setShippingCost(0);
         } else {
-          const cost = parseFloat(selectedRate.basePrice || '0');
-          console.log('Regular shipping cost applied:', cost);
-          setShippingCost(cost);
+          console.log('💳 Regular shipping cost applied:', basePrice);
+          setShippingCost(basePrice);
         }
+      } else {
+        console.log('⚠️ Selected rate not found, resetting shipping cost');
+        setShippingCost(0);
       }
     } else {
+      console.log('🔄 No shipping method selected or no data, resetting cost');
       setShippingCost(0);
     }
   }, [selectedShippingMethod, shippingRatesData, subtotalAmount]);
