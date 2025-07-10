@@ -219,7 +219,7 @@ export default function ProductRating({
                         </span>
                       </div>
                       <StarRating rating={review.rating} size="sm" />
-                      <p className="mt-2 text-gray-700">{review.comment}</p>
+                      <p className="mt-2 text-gray-700">{review.review || review.comment}</p>
                     </div>
                   </div>
                 </div>

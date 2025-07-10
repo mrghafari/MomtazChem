@@ -23,17 +23,17 @@ export default function ProductReviews() {
     enabled: !!id,
   });
 
-  // Get product stats
-  const { data: productStats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['/api/products', id, 'stats'],
-    enabled: !!id,
-  });
+  // Get product stats from the reviews response
+  const productStats = reviewsData?.data?.stats || { averageRating: 0, totalReviews: 0 };
 
   // Get product reviews
-  const { data: reviews = [], isLoading: isLoadingReviews } = useQuery({
+  const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
     queryKey: ['/api/products', id, 'reviews'],
     enabled: !!id,
   });
+
+  // Extract reviews from the response data
+  const reviews = reviewsData?.data?.reviews || [];
 
   // Add review mutation
   const addReviewMutation = useMutation({
@@ -50,8 +50,7 @@ export default function ProductReviews() {
       return await apiRequest(`/api/products/${id}/reviews`, 'POST', payload);
     },
     onSuccess: () => {
-      // Invalidate and refetch product stats and reviews
-      queryClient.invalidateQueries({ queryKey: ['/api/products', id, 'stats'] });
+      // Invalidate and refetch product reviews (which includes stats)
       queryClient.invalidateQueries({ queryKey: ['/api/products', id, 'reviews'] });
       toast({
         title: t.reviewSubmitted,
@@ -71,7 +70,7 @@ export default function ProductReviews() {
     await addReviewMutation.mutateAsync(reviewData);
   };
 
-  if (isLoadingProduct || isLoadingStats || isLoadingReviews) {
+  if (isLoadingProduct || isLoadingReviews) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
