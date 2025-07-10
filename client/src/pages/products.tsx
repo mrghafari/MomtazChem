@@ -1978,8 +1978,21 @@ export default function ProductsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>تأیید حذف محصول</AlertDialogTitle>
-            <AlertDialogDescription>
-              آیا از حذف محصول "{deletingProduct?.name}" مطمئن هستید؟ این عمل قابل بازگشت نیست.
+            <AlertDialogDescription className="space-y-3">
+              <div>
+                آیا از حذف محصول "<strong>{deletingProduct?.name}</strong>" مطمئن هستید؟
+              </div>
+              <div className="text-sm bg-blue-50 p-3 rounded">
+                <strong>ℹ️ اطمینان:</strong> حذف این محصول تأثیری بر سوابق خرید مشتریان نخواهد داشت. 
+                تمام سفارشات قبلی و اطلاعات فروش حفظ خواهد شد.
+              </div>
+              <div className="text-sm text-gray-600">
+                SKU: {deletingProduct?.sku || "تعریف نشده"} | 
+                موجودی: {deletingProduct?.stockQuantity || 0} عدد
+              </div>
+              <div className="text-sm text-red-600 font-semibold">
+                ⚠️ این عمل قابل بازگشت نیست.
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
