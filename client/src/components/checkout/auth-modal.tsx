@@ -83,13 +83,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         body: JSON.stringify(loginData)
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok && data.success) {
         toast({
           title: 'Welcome Back',
           description: 'Successfully logged in'
@@ -104,7 +100,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         });
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error details:', error);
       toast({
         title: 'Login Error',
         description: 'Connection error. Please try again.',

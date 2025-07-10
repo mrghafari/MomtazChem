@@ -265,7 +265,8 @@ export default function AuthCheckout({ cart, products, onOrderComplete, onClose 
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("/api/customers/login", "POST", data);
+      const result = await apiRequest("/api/customers/login", "POST", data);
+      return result;
     },
     onSuccess: async (data: any) => {
       if (data.success) {

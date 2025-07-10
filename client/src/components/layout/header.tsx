@@ -35,13 +35,13 @@ export default function Header() {
 
   // Fetch wallet balance for authenticated customers
   const { data: walletData, isError, error } = useQuery({
-    queryKey: ['/api/customer/wallet'],
+    queryKey: ['/api/customers/wallet/balance'],
     enabled: isAuthenticated && !!customer,
     retry: false,
     staleTime: 30000, // 30 seconds
   });
 
-  const rawBalance = walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";
+  const rawBalance = walletData?.balance || walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";
   const walletBalance = typeof rawBalance === 'string' ? parseFloat(rawBalance) : rawBalance;
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
