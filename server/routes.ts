@@ -17814,6 +17814,34 @@ momtazchem.com
   // PRODUCT REVIEWS & RATINGS ENDPOINTS - نظرسنجی و امتیازدهی محصولات
   // =============================================================================
 
+  // Get all product stats for shop display
+  app.get("/api/shop/product-stats", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          product_id,
+          total_reviews,
+          average_rating
+        FROM product_stats
+        WHERE total_reviews > 0
+      `);
+
+      const statsMap = {};
+      result.rows.forEach(row => {
+        statsMap[row.product_id] = {
+          totalReviews: row.total_reviews,
+          averageRating: parseFloat(row.average_rating)
+        };
+      });
+
+      res.json(statsMap);
+    } catch (error) {
+      console.error("Error fetching product stats:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Get reviews for a specific product
   app.get("/api/products/:id/reviews", async (req, res) => {
     try {
@@ -17968,11 +17996,7 @@ momtazchem.com
       const result = await pool.query(`
         SELECT 
           total_reviews,
-          average_rating,
-          rating_distribution,
-          total_views,
-          total_purchases,
-          last_review_date
+          average_rating
         FROM product_stats 
         WHERE product_id = $1
       `, [productId]);
@@ -17980,31 +18004,20 @@ momtazchem.com
       if (result.rows.length === 0) {
         // Create initial stats record if it doesn't exist
         await pool.query(`
-          INSERT INTO product_stats (product_id, total_reviews, average_rating, rating_distribution)
-          VALUES ($1, 0, 0, '{"1":0,"2":0,"3":0,"4":0,"5":0}')
+          INSERT INTO product_stats (product_id, total_reviews, average_rating)
+          VALUES ($1, 0, 0)
         `, [productId]);
         
         return res.json({
-          success: true,
-          data: {
-            totalReviews: 0,
-            averageRating: 0,
-            ratingDistribution: {"1":0,"2":0,"3":0,"4":0,"5":0},
-            totalViews: 0,
-            totalPurchases: 0,
-            lastReviewDate: null
-          }
+          totalReviews: 0,
+          averageRating: 0
         });
       }
 
       const stats = result.rows[0];
       res.json({
         totalReviews: stats.total_reviews,
-        averageRating: parseFloat(stats.average_rating),
-        ratingDistribution: stats.rating_distribution,
-        totalViews: stats.total_views,
-        totalPurchases: stats.total_purchases,
-        lastReviewDate: stats.last_review_date
+        averageRating: parseFloat(stats.average_rating)
       });
     } catch (error) {
       console.error("Error fetching product stats:", error);

@@ -125,24 +125,10 @@ const Shop = () => {
 
 
 
-  // Fetch product stats for reviews
+  // Fetch product stats for ratings
   const { data: productStats } = useQuery({
-    queryKey: ['/api/products/stats'],
-    queryFn: async () => {
-      const statsPromises = currentProducts.map(product => 
-        fetch(`/api/products/${product.id}/stats`)
-          .then(res => res.ok ? res.json() : null)
-          .catch(() => null)
-      );
-      const results = await Promise.all(statsPromises);
-      return currentProducts.reduce((acc, product, index) => {
-        if (results[index]?.success) {
-          acc[product.id] = results[index].data;
-        }
-        return acc;
-      }, {} as Record<number, any>);
-    },
-    enabled: currentProducts.length > 0
+    queryKey: ["/api/shop/product-stats"],
+    retry: false,
   });
 
   // Initialize price range only once when first loaded
