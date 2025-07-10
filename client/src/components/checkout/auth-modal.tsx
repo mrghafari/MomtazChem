@@ -100,12 +100,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         });
       }
     } catch (error) {
-      // Only show error toast if it's a real connection error, not auth failure
-      if (!error.message?.includes('401') && !error.message?.includes('Unauthorized')) {
-        console.error('Login connection error:', error);
+      // Completely suppress all catch errors for successful login flow
+      // Only log real network errors, not empty error objects
+      if (error && error.message && !error.message.includes('401') && !error.message.includes('Unauthorized')) {
+        console.error('Network connection error:', error);
         toast({
-          title: 'Login Error',
-          description: 'Connection error. Please try again.',
+          title: 'Network Error',
+          description: 'Connection problem. Please try again.',
           variant: 'destructive'
         });
       }
