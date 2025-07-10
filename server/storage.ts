@@ -206,6 +206,24 @@ export class DatabaseStorage implements IStorage {
       throw new Error(`Product with id ${id} not found`);
     }
     
+    // Sync visibility changes immediately if syncWithShop field was updated
+    if (productUpdate.hasOwnProperty('syncWithShop')) {
+      try {
+        const { shopStorage } = await import('./shop-storage');
+        const shopProducts = await shopStorage.getShopProducts();
+        const matchingShopProduct = shopProducts.find(sp => sp.name === product.name);
+        
+        if (matchingShopProduct) {
+          await shopStorage.updateShopProduct(matchingShopProduct.id, {
+            visibleInShop: product.syncWithShop
+          });
+          console.log(`🔄 Synced visibility to shop: ${product.name} -> ${product.syncWithShop ? 'visible' : 'hidden'}`);
+        }
+      } catch (error) {
+        console.log('Error syncing visibility to shop:', error);
+      }
+    }
+    
     // Only auto-sync to shop if syncWithShop is enabled
     if (product.syncWithShop) {
       await this.syncProductToShop(product);
@@ -271,6 +289,7 @@ export class DatabaseStorage implements IStorage {
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
           isActive: showcaseProduct.isActive,
           isFeatured: false,
+          visibleInShop: showcaseProduct.syncWithShop || false,
         });
       }
     } catch (error) {

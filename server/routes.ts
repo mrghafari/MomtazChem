@@ -1604,23 +1604,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category } = req.query;
       let products;
       
-      // Use shop_products table for main products interface (both shop and showcase use same table)
+      // Use showcase_products table for admin products interface
       if (category && typeof category === 'string') {
-        products = await shopStorage.getShopProductsByCategory(category);
+        products = await storage.getProductsByCategory(category);
       } else {
-        products = await shopStorage.getShopProducts();
+        products = await storage.getProducts();
       }
       
-      // Map database fields to frontend expected fields
-      const mappedProducts = products.map(product => ({
-        ...product,
-        unitPrice: product.price, // Map price field to unitPrice for frontend
-        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit, // Default to IQD
-        // Handle imageUrls (JSON array) to imageUrl (single string) mapping
-        imageUrl: Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
-          ? product.imageUrls[0] 
-          : (typeof product.imageUrls === 'string' ? product.imageUrls : null)
-      }));
+      // Products from showcase_products are already in the correct format
+      const mappedProducts = products;
       
       res.json(mappedProducts);
     } catch (error) {
@@ -1643,7 +1635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const product = await shopStorage.getShopProductById(id);
+      const product = await storage.getProduct(id);
       if (!product) {
         return res.status(404).json({ 
           success: false, 
@@ -1651,18 +1643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Map database fields to frontend expected fields
-      const mappedProduct = {
-        ...product,
-        unitPrice: product.price, // Map price field to unitPrice for frontend
-        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit, // Default to IQD
-        // Handle imageUrls (JSON array) to imageUrl (single string) mapping
-        imageUrl: Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
-          ? product.imageUrls[0] 
-          : (typeof product.imageUrls === 'string' ? product.imageUrls : null)
-      };
-
-      res.json(mappedProduct);
+      res.json(product);
     } catch (error) {
       res.status(500).json({ 
         success: false, 
@@ -1726,44 +1707,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const productData = req.body;
       console.log(`📝 Updating shop product ${id} with data:`, productData);
       
-      // Since /api/products returns shop products, we update shop products here
-      // Check if shop product exists first
-      const existingShopProduct = await shopStorage.getShopProductById(id);
-      if (!existingShopProduct) {
-        return res.status(404).json({
-          success: false,
-          message: `Shop product with ID ${id} not found`
-        });
-      }
-      
-      // Map frontend fields to backend fields for shop product update
-      const mappedData = {
-        ...productData,
-        price: productData.unitPrice || productData.price,
-        priceUnit: productData.currency || productData.priceUnit || 'IQD',
-        imageUrls: productData.imageUrl ? [productData.imageUrl] : (productData.imageUrls || [])
-      };
-      
-      // Update shop product directly
-      const shopProduct = await shopStorage.updateShopProduct(id, mappedData);
-      console.log(`✅ Updated shop product:`, shopProduct.name);
+      // Update showcase product
+      const product = await storage.updateProduct(id, productData);
+      console.log(`✅ Updated product:`, product.name);
       
       // Shop visibility logic
-      if (productData.visibleInShop === true) {
-        console.log(`🏪 محصول در فروشگاه نمایش داده می‌شود: ${shopProduct.name}`);
-      } else if (productData.visibleInShop === false) {
-        console.log(`🔒 محصول از فروشگاه مخفی شد: ${shopProduct.name}`);
+      if (productData.syncWithShop === true) {
+        console.log(`🏪 محصول در فروشگاه نمایش داده می‌شود: ${product.name}`);
+      } else if (productData.syncWithShop === false) {
+        console.log(`🔒 محصول از فروشگاه مخفی شد: ${product.name}`);
       }
       
-      // Map the response back to frontend format
-      const responseProduct = {
-        ...shopProduct,
-        unitPrice: shopProduct.price,
-        currency: shopProduct.priceUnit || 'IQD',
-        imageUrl: Array.isArray(shopProduct.imageUrls) && shopProduct.imageUrls.length > 0 
-          ? shopProduct.imageUrls[0] 
-          : null
-      };
+      const responseProduct = product;
       
       res.json(responseProduct);
     } catch (error) {
