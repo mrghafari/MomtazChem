@@ -15,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 interface ShippingRate {
   id: number;
   deliveryMethod: string;
-  transportationType?: string;
   cityName?: string;
   provinceName?: string;
   minWeight: string;
@@ -38,7 +37,6 @@ interface ShippingRate {
 
 interface ShippingRateForm {
   deliveryMethod: string;
-  transportationType?: string;
   cityName?: string;
   provinceName?: string;
   minWeight: string;
@@ -58,24 +56,33 @@ interface ShippingRateForm {
 }
 
 const deliveryMethods = [
-  { value: 'post', label: 'پست' },
+  { value: 'post', label: 'پست عادی' },
   { value: 'courier', label: 'پیک موتوری' },
+  { value: 'van', label: 'وانت' },
   { value: 'truck', label: 'کامیون' },
+  { value: 'cod', label: 'پس کرایه' },
+  { value: 'zajel_express', label: 'Zajel Express' },
+  { value: 'tcs_iraq', label: 'TCS Iraq' },
+  { value: 'postex', label: 'Postex' },
+  { value: 'iq_express', label: 'IQ Express' },
+  { value: 'sandoog', label: 'Sandoog' },
   { value: 'personal_pickup', label: 'تحویل حضوری' }
 ];
 
-const transportationTypes = [
-  { value: 'motorcycle', label: 'موتور' },
-  { value: 'car', label: 'ماشین' },
-  { value: 'truck', label: 'کامیون' },
-  { value: 'van', label: 'ون' }
-];
+
 
 const getMethodIcon = (method: string) => {
   switch (method) {
     case 'post': return <Package className="h-4 w-4" />;
     case 'courier': return <Bike className="h-4 w-4" />;
+    case 'van': return <Car className="h-4 w-4" />;
     case 'truck': return <Truck className="h-4 w-4" />;
+    case 'cod': return <Package className="h-4 w-4" />;
+    case 'zajel_express':
+    case 'tcs_iraq':
+    case 'postex':
+    case 'iq_express':
+    case 'sandoog': return <Truck className="h-4 w-4" />;
     default: return <Car className="h-4 w-4" />;
   }
 };
@@ -84,7 +91,14 @@ const getMethodColor = (method: string) => {
   switch (method) {
     case 'post': return 'bg-blue-100 text-blue-800';
     case 'courier': return 'bg-green-100 text-green-800';
+    case 'van': return 'bg-yellow-100 text-yellow-800';
     case 'truck': return 'bg-orange-100 text-orange-800';
+    case 'cod': return 'bg-purple-100 text-purple-800';
+    case 'zajel_express': return 'bg-red-100 text-red-800';
+    case 'tcs_iraq': return 'bg-indigo-100 text-indigo-800';
+    case 'postex': return 'bg-pink-100 text-pink-800';
+    case 'iq_express': return 'bg-cyan-100 text-cyan-800';
+    case 'sandoog': return 'bg-emerald-100 text-emerald-800';
     default: return 'bg-gray-100 text-gray-800';
   }
 };
@@ -97,7 +111,6 @@ export default function ShippingRatesManagement() {
 
   const [formData, setFormData] = useState<ShippingRateForm>({
     deliveryMethod: 'courier',
-    transportationType: 'motorcycle',
     cityName: '',
     provinceName: '',
     minWeight: '0',
@@ -172,7 +185,6 @@ export default function ShippingRatesManagement() {
   const resetForm = () => {
     setFormData({
       deliveryMethod: 'courier',
-      transportationType: 'motorcycle',
       cityName: '',
       provinceName: '',
       minWeight: '0',
@@ -197,7 +209,6 @@ export default function ShippingRatesManagement() {
   const handleEdit = (rate: ShippingRate) => {
     setFormData({
       deliveryMethod: rate.deliveryMethod,
-      transportationType: rate.transportationType || 'motorcycle',
       cityName: rate.cityName || '',
       provinceName: rate.provinceName || '',
       minWeight: rate.minWeight,
@@ -287,27 +298,7 @@ export default function ShippingRatesManagement() {
                   </Select>
                 </div>
 
-                {/* Transportation Type */}
-                {formData.deliveryMethod === 'courier' && (
-                  <div>
-                    <Label>نوع وسیله نقلیه</Label>
-                    <Select 
-                      value={formData.transportationType} 
-                      onValueChange={(value) => setFormData({...formData, transportationType: value})}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {transportationTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value || 'motorcycle'}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+
 
                 {/* City Name */}
                 <div>
