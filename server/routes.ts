@@ -5677,7 +5677,9 @@ ${procedure.content}
         ...product,
         imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
         unitPrice: product.price,
-        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit,
+        weight: product.weight,
+        weightUnit: product.weightUnit
       }));
       
       res.json(mappedProducts);
@@ -5714,7 +5716,9 @@ ${procedure.content}
         ...product,
         imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
         unitPrice: product.price,
-        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit,
+        weight: product.weight,
+        weightUnit: product.weightUnit
       };
       
       res.json(mappedProduct);
@@ -5809,7 +5813,9 @@ ${procedure.content}
         ...product,
         imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
         unitPrice: product.price,
-        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit
+        currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit,
+        weight: product.weight,
+        weightUnit: product.weightUnit
       }));
       
       res.json({
