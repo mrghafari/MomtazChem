@@ -804,25 +804,26 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 </div>
               )}
               
-              {/* Shipping Cost */}
-              {shippingCost > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>{t.shippingCost}</span>
-                  <span>{formatCurrency(shippingCost)}</span>
-                </div>
-              )}
-              {selectedShippingMethod && shippingCost === 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>{t.shippingCost}</span>
-                  <span>{t.freeShipping}</span>
-                </div>
-              )}
-              
               {/* Total (without shipping) */}
               <div className="flex justify-between font-semibold text-base border-t pt-2">
                 <span>Total</span>
                 <span className="text-primary">{formatCurrency(subtotalAmount + vatAmount)}</span>
               </div>
+              
+              {/* Delivery Method & Shipping Cost */}
+              {selectedShippingMethod && (
+                <div className="flex justify-between text-sm">
+                  <span>
+                    {(() => {
+                      const selectedRate = shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod);
+                      return selectedRate?.name || t.deliveryMethod;
+                    })()}
+                  </span>
+                  <span>
+                    {shippingCost === 0 ? t.freeShipping : formatCurrency(shippingCost)}
+                  </span>
+                </div>
+              )}
               
               {/* Final Amount */}
               <div className="flex justify-between font-bold text-lg border-t pt-2 bg-yellow-300 px-2 py-2 rounded-lg">
