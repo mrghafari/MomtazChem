@@ -38,10 +38,16 @@ export default function ProductReviews() {
   // Add review mutation
   const addReviewMutation = useMutation({
     mutationFn: async (reviewData: { rating: number; comment: string; customerName: string }) => {
-      return await apiRequest(`/api/products/${id}/reviews`, {
-        method: 'POST',
-        body: JSON.stringify(reviewData),
-      });
+      const payload = {
+        rating: reviewData.rating,
+        review: reviewData.comment, // Map comment to review field
+        customerName: reviewData.customerName,
+        title: '', // Optional field
+        customerEmail: '', // Optional field
+        pros: [], // Optional field
+        cons: [] // Optional field
+      };
+      return await apiRequest(`/api/products/${id}/reviews`, 'POST', payload);
     },
     onSuccess: () => {
       // Invalidate and refetch product stats and reviews

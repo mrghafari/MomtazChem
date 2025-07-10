@@ -17957,6 +17957,9 @@ momtazchem.com
       if (!customerName || customerName.trim().length === 0) {
         return res.status(400).json({ success: false, message: "Customer name is required" });
       }
+      if (!review || review.trim().length === 0) {
+        return res.status(400).json({ success: false, message: "Review comment is required" });
+      }
 
       const customerId = req.session.customerId || null;
       
@@ -17994,8 +17997,8 @@ momtazchem.com
         RETURNING id, created_at
       `, [
         productId, customerId, customerName.trim(), customerEmail, rating,
-        title, review, JSON.stringify(pros || []), JSON.stringify(cons || []),
-        isVerifiedPurchase, false // Default to not approved - admin needs to approve
+        title, review.trim(), JSON.stringify(pros || []), JSON.stringify(cons || []),
+        isVerifiedPurchase, true // Auto-approve reviews for better UX
       ]);
 
       // Update product statistics
