@@ -202,6 +202,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(showcaseProducts.id, id))
       .returning();
     
+    if (!product) {
+      throw new Error(`Product with id ${id} not found`);
+    }
+    
     // Only auto-sync to shop if syncWithShop is enabled
     if (product.syncWithShop) {
       await this.syncProductToShop(product);

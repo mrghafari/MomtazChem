@@ -1724,13 +1724,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = req.body;
-      console.log(`📝 Updating showcase product ${id} with data:`, productData);
+      console.log(`📝 Updating shop product ${id} with data:`, productData);
       
-      // Update showcase product directly (this handles syncWithShop field properly)
-      const showcaseProduct = await storage.updateProduct(id, productData);
-      console.log(`✅ Updated showcase product:`, showcaseProduct.name);
+      // Since /api/products returns shop products, we update shop products here
+      // Check if shop product exists first
+      const existingShopProduct = await shopStorage.getShopProductById(id);
+      if (!existingShopProduct) {
+        return res.status(404).json({
+          success: false,
+          message: `Shop product with ID ${id} not found`
+        });
+      }
       
-      res.json(showcaseProduct);
+      // Map frontend fields to backend fields for shop product update
+      const mappedData = {
+        ...productData,
+        price: productData.unitPrice || productData.price,
+        priceUnit: productData.currency || productData.priceUnit || 'IQD',
+        imageUrls: productData.imageUrl ? [productData.imageUrl] : (productData.imageUrls || [])
+      };
+      
+      // Update shop product directly
+      const shopProduct = await shopStorage.updateShopProduct(id, mappedData);
+      console.log(`✅ Updated shop product:`, shopProduct.name);
+      
+      // Map the response back to frontend format
+      const responseProduct = {
+        ...shopProduct,
+        unitPrice: shopProduct.price,
+        currency: shopProduct.priceUnit || 'IQD',
+        imageUrl: Array.isArray(shopProduct.imageUrls) && shopProduct.imageUrls.length > 0 
+          ? shopProduct.imageUrls[0] 
+          : null
+      };
+      
+      res.json(responseProduct);
     } catch (error) {
       console.error("Error updating showcase product:", error);
       if (error instanceof z.ZodError) {
