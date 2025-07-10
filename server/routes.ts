@@ -1611,8 +1611,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products = await storage.getProducts();
       }
       
-      // Products from showcase_products are already in the correct format
-      const mappedProducts = products;
+      // Map showcase products to barcode inventory interface format
+      const mappedProducts = products.map(product => ({
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        stockQuantity: product.stockQuantity || 0,
+        minStockLevel: product.minStockLevel || 10,
+        barcode: product.barcode,
+        qrCode: product.qrCode,
+        sku: product.sku,
+        stockUnit: product.stockUnit || 'units',
+        warehouseLocation: product.warehouseLocation,
+        batchNumber: product.batchNumber,
+        // Map price fields properly for frontend interface
+        price: product.unitPrice ? parseFloat(product.unitPrice.toString()) : 0,
+        priceUnit: product.currency || 'IQD',
+        unitPrice: product.unitPrice ? parseFloat(product.unitPrice.toString()) : 0,
+        currency: product.currency || 'IQD'
+      }));
       
       res.json(mappedProducts);
     } catch (error) {
