@@ -280,13 +280,13 @@ export default function ProductsPage() {
       setRefreshKey(prev => prev + 1);
       toast({
         title: "به‌روزرسانی موفقیت‌آمیز",
-        description: "وضعیت سینک با فروشگاه به‌روزرسانی شد",
+        description: "وضعیت نمایش در فروشگاه به‌روزرسانی شد",
       });
     },
     onError: (error: any) => {
       toast({
         title: "خطا",
-        description: error.message || "خطا در به‌روزرسانی وضعیت سینک",
+        description: error.message || "خطا در به‌روزرسانی وضعیت نمایش",
         variant: "destructive",
       });
     },
@@ -960,12 +960,12 @@ export default function ProductsPage() {
                               Variant: {product.variantValue}
                             </Badge>
                           )}
-                          {/* Shop Sync Status */}
+                          {/* Shop Visibility Status */}
                           <Badge 
-                            variant={product.syncWithShop ? "default" : "destructive"} 
-                            className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}
+                            variant={product.syncWithShop ? "default" : "secondary"} 
+                            className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}
                           >
-                            {product.syncWithShop ? 'Sync ON' : 'Sync OFF'}
+                            {product.syncWithShop ? 'در فروشگاه' : 'مخفی'}
                           </Badge>
                         </div>
                       </div>
@@ -976,10 +976,10 @@ export default function ProductsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
-                          className={`h-8 w-12 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-red-50 text-red-700'}`}
-                          title={product.syncWithShop ? 'غیرفعال کردن سینک' : 'فعال کردن سینک'}
+                          className={`h-8 w-16 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
+                          title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
                         >
-                          {product.syncWithShop ? 'ON' : 'OFF'}
+                          {product.syncWithShop ? 'مخفی' : 'نمایش'}
                         </Button>
                         <Button
                           variant="ghost"
@@ -1406,20 +1406,20 @@ export default function ProductsPage() {
                             </FormControl>
                             <div className="flex flex-col">
                               <FormLabel className="text-sm font-medium text-blue-900">
-                                🔄 Sync with Shop (شرکت در فرآیند sync با فروشگاه)
+                                🏪 نمایش در فروشگاه (Shop Visibility)
                               </FormLabel>
                               <div className="text-xs text-blue-700 mt-1">
                                 {field.value ? (
-                                  "✓ این محصول در sync با فروشگاه شرکت خواهد کرد"
+                                  "✓ این محصول در فروشگاه آنلاین نمایش داده می‌شود"
                                 ) : (
-                                  "⨯ این محصول در sync با فروشگاه شرکت نخواهد کرد"
+                                  "⨯ این محصول در فروشگاه آنلاین مخفی است"
                                 )}
                               </div>
                             </div>
                           </div>
                           <div className="text-xs text-gray-600 bg-white p-2 rounded border-l-2 border-blue-400">
-                            <strong>توضیح:</strong> با فعال بودن این گزینه، محصول به صورت خودکار در فروشگاه آنلاین نمایش داده می‌شود. 
-                            اگر غیرفعال باشد، محصول فقط در کاردکس نمایشی خواهد بود.
+                            <strong>توضیح:</strong> با فعال بودن این گزینه، محصول در فروشگاه آنلاین قابل مشاهده و خرید خواهد بود. 
+                            اگر غیرفعال باشد، محصول فقط در کاردکس نمایشی موجود است و در فروشگاه نمایش داده نمی‌شود.
                           </div>
                         </FormItem>
                       )}

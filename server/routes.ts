@@ -1748,11 +1748,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const shopProduct = await shopStorage.updateShopProduct(id, mappedData);
       console.log(`✅ Updated shop product:`, shopProduct.name);
       
-      // Simple sync logic - just log the change for now
+      // Shop visibility logic
       if (productData.syncWithShop === true) {
-        console.log(`🔄 Sync enabled for shop product: ${shopProduct.name}`);
+        console.log(`🏪 محصول در فروشگاه نمایش داده می‌شود: ${shopProduct.name}`);
       } else if (productData.syncWithShop === false) {
-        console.log(`❌ Sync disabled for shop product: ${shopProduct.name}`);
+        console.log(`🔒 محصول از فروشگاه مخفی شد: ${shopProduct.name}`);
       }
       
       // Map the response back to frontend format
