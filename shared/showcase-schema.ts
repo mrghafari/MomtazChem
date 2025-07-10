@@ -60,6 +60,9 @@ export const showcaseProducts = pgTable("showcase_products", {
   warehouseLocation: text("warehouse_location"), // Storage location
   batchNumber: text("batch_number"), // Current batch tracking
   expiryDate: timestamp("expiry_date"), // For chemicals with expiration
+  // Weight fields
+  weight: text("weight"), // Product weight
+  weightUnit: text("weight_unit").default("kg"), // Weight unit (kg, g, lb, oz, t)
   // Barcode system fields
   barcode: text("barcode").unique(), // Main product barcode (EAN-13, UPC, etc.)
   qrCode: text("qr_code"), // QR code data for additional product information

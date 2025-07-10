@@ -553,6 +553,8 @@ export default function ProductsPage() {
       unitPrice: Number(product.unitPrice || 0),
       currency: product.currency || "IQD",
       priceRange: product.priceRange || "",
+      weight: product.weight || "",
+      weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
       msdsUrl: product.msdsUrl || "",
