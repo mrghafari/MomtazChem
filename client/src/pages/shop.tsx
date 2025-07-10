@@ -1136,7 +1136,7 @@ const Shop = () => {
                             <h3 className="font-semibold text-lg flex-1">{product.name}</h3>
                             <div className="flex items-center gap-1 ml-2">
                               {/* Product Rating */}
-                              {productStats?.[product.id] && productStats[product.id].averageRating > 0 && (
+                              {productStats?.[product.id] && (
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -1397,7 +1397,7 @@ const Shop = () => {
                                 <h3 className="font-semibold text-xl flex-1">{product.name}</h3>
                                 <div className="flex items-center gap-1 ml-2">
                                   {/* Product Rating */}
-                                  {productStats?.[product.id] && productStats[product.id].averageRating > 0 && (
+                                  {productStats?.[product.id] && (
                                     <Button
                                       variant="ghost"
                                       size="sm"
