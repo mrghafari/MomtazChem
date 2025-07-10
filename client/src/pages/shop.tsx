@@ -315,7 +315,10 @@ const Shop = () => {
         handleGuestCart();
       }
     } catch (error) {
-      console.error('Error checking customer auth:', error);
+      // Suppress auth errors as they're expected for guest users
+      if (!error.message?.includes('401') && !error.message?.includes('احراز هویت نشده')) {
+        console.error('Error checking customer auth:', error);
+      }
       // Handle as guest
       handleGuestCart();
     } finally {
@@ -336,7 +339,10 @@ const Shop = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching wallet balance:', error);
+      // Suppress wallet errors for guest users
+      if (!error.message?.includes('401') && !error.message?.includes('احراز هویت نشده')) {
+        console.error('Error fetching wallet balance:', error);
+      }
     }
   };
 
