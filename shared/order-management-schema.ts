@@ -248,8 +248,21 @@ export const deliveryMethods = pgTable("delivery_methods", {
   label: varchar("label", { length: 100 }).notNull(), // Display name (e.g., 'پس کرایه', 'ارسال اکسپرس')
   icon: varchar("icon", { length: 20 }).default("package"), // Icon name for UI
   color: varchar("color", { length: 20 }).default("blue"), // Color scheme for UI
+  
+  // Cost fields
+  baseCost: decimal("base_cost", { precision: 10, scale: 2 }).default("0"), // Base cost for this delivery method
+  costPerKg: decimal("cost_per_kg", { precision: 8, scale: 2 }).default("0"), // Additional cost per kg
+  minimumOrder: decimal("minimum_order", { precision: 10, scale: 2 }).default("0"), // Minimum order value for this method
+  freeShippingThreshold: decimal("free_shipping_threshold", { precision: 10, scale: 2 }), // Order value for free shipping
+  
+  // Time and availability
+  estimatedDays: integer("estimated_days").default(1), // Delivery time in days
+  maxDistance: integer("max_distance"), // Maximum delivery distance in km
+  availableAreas: json("available_areas"), // Array of available cities/areas
+  
   isActive: boolean("is_active").default(true), // Whether this method is available
   sortOrder: integer("sort_order").default(0), // Display order
+  description: text("description"), // Description for customers
   
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

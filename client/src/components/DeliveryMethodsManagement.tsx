@@ -18,6 +18,14 @@ interface DeliveryMethod {
   label: string;
   icon: string;
   color: string;
+  baseCost: string;
+  costPerKg: string;
+  minimumOrder: string;
+  freeShippingThreshold: string | null;
+  estimatedDays: number;
+  maxDistance: number | null;
+  availableAreas: string[] | null;
+  description: string | null;
   isActive: boolean;
   sortOrder: number;
   createdAt: string;
@@ -29,6 +37,14 @@ interface DeliveryMethodForm {
   label: string;
   icon: string;
   color: string;
+  baseCost: string;
+  costPerKg: string;
+  minimumOrder: string;
+  freeShippingThreshold: string;
+  estimatedDays: number;
+  maxDistance: string;
+  availableAreas: string;
+  description: string;
   isActive: boolean;
   sortOrder: number;
 }
@@ -67,6 +83,14 @@ export default function DeliveryMethodsManagement() {
     label: '',
     icon: 'package',
     color: 'blue',
+    baseCost: '0',
+    costPerKg: '0',
+    minimumOrder: '0',
+    freeShippingThreshold: '',
+    estimatedDays: 1,
+    maxDistance: '',
+    availableAreas: '',
+    description: '',
     isActive: true,
     sortOrder: 0
   });
@@ -131,6 +155,14 @@ export default function DeliveryMethodsManagement() {
       label: '',
       icon: 'package',
       color: 'blue',
+      baseCost: '0',
+      costPerKg: '0',
+      minimumOrder: '0',
+      freeShippingThreshold: '',
+      estimatedDays: 1,
+      maxDistance: '',
+      availableAreas: '',
+      description: '',
       isActive: true,
       sortOrder: 0
     });
@@ -144,6 +176,14 @@ export default function DeliveryMethodsManagement() {
       label: method.label,
       icon: method.icon,
       color: method.color,
+      baseCost: method.baseCost || '0',
+      costPerKg: method.costPerKg || '0',
+      minimumOrder: method.minimumOrder || '0',
+      freeShippingThreshold: method.freeShippingThreshold || '',
+      estimatedDays: method.estimatedDays || 1,
+      maxDistance: method.maxDistance?.toString() || '',
+      availableAreas: method.availableAreas?.join(', ') || '',
+      description: method.description || '',
       isActive: method.isActive,
       sortOrder: method.sortOrder
     });
@@ -281,6 +321,88 @@ export default function DeliveryMethodsManagement() {
                 </div>
 
                 <div>
+                  <Label>هزینه پایه (IQD)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.baseCost}
+                    onChange={(e) => setFormData({...formData, baseCost: e.target.value})}
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <Label>هزینه به ازای هر کیلوگرم (IQD)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.costPerKg}
+                    onChange={(e) => setFormData({...formData, costPerKg: e.target.value})}
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <Label>حداقل مبلغ سفارش (IQD)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.minimumOrder}
+                    onChange={(e) => setFormData({...formData, minimumOrder: e.target.value})}
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <Label>آستانه ارسال رایگان (IQD)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.freeShippingThreshold}
+                    onChange={(e) => setFormData({...formData, freeShippingThreshold: e.target.value})}
+                    placeholder="اختیاری - برای ارسال رایگان"
+                  />
+                </div>
+
+                <div>
+                  <Label>مدت زمان تحویل (روز)</Label>
+                  <Input
+                    type="number"
+                    value={formData.estimatedDays}
+                    onChange={(e) => setFormData({...formData, estimatedDays: parseInt(e.target.value) || 1})}
+                    placeholder="1"
+                  />
+                </div>
+
+                <div>
+                  <Label>حداکثر فاصله (کیلومتر)</Label>
+                  <Input
+                    type="number"
+                    value={formData.maxDistance}
+                    onChange={(e) => setFormData({...formData, maxDistance: e.target.value})}
+                    placeholder="اختیاری"
+                  />
+                </div>
+
+                <div>
+                  <Label>مناطق قابل ارسال</Label>
+                  <Input
+                    value={formData.availableAreas}
+                    onChange={(e) => setFormData({...formData, availableAreas: e.target.value})}
+                    placeholder="مثل: تهران، مشهد، اصفهان (با کاما جدا کنید)"
+                  />
+                </div>
+
+                <div>
+                  <Label>توضیحات</Label>
+                  <Input
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    placeholder="توضیحات برای مشتریان"
+                  />
+                </div>
+
+                <div>
                   <Label>ترتیب نمایش</Label>
                   <Input
                     type="number"
@@ -313,34 +435,75 @@ export default function DeliveryMethodsManagement() {
         <CardContent>
           <div className="space-y-4">
             {methods.map((method: DeliveryMethod) => (
-              <div key={method.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Badge className={getColorClass(method.color)}>
-                    <div className="flex items-center gap-1">
-                      {getIconComponent(method.icon)}
-                      {method.label}
+              <div key={method.id} className="p-4 border rounded-lg">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <Badge className={getColorClass(method.color)}>
+                      <div className="flex items-center gap-1">
+                        {getIconComponent(method.icon)}
+                        {method.label}
+                      </div>
+                    </Badge>
+                    <div className="text-sm text-muted-foreground">
+                      ({method.value})
                     </div>
-                  </Badge>
-                  <div className="text-sm text-muted-foreground">
-                    ({method.value})
+                    {!method.isActive && (
+                      <Badge variant="secondary">غیرفعال</Badge>
+                    )}
                   </div>
-                  {!method.isActive && (
-                    <Badge variant="secondary">غیرفعال</Badge>
-                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(method)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => deleteMutation.mutate(method.id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(method)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => deleteMutation.mutate(method.id)}
-                    disabled={deleteMutation.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                
+                {/* Cost Details */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">هزینه پایه:</span>
+                    <div className="font-medium">{parseFloat(method.baseCost || '0').toLocaleString()} IQD</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">هزینه/کیلو:</span>
+                    <div className="font-medium">{parseFloat(method.costPerKg || '0').toLocaleString()} IQD</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">حداقل سفارش:</span>
+                    <div className="font-medium">{parseFloat(method.minimumOrder || '0').toLocaleString()} IQD</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">ارسال رایگان از:</span>
+                    <div className="font-medium text-green-600">
+                      {method.freeShippingThreshold && parseFloat(method.freeShippingThreshold) > 0 
+                        ? `${parseFloat(method.freeShippingThreshold).toLocaleString()} IQD`
+                        : 'تعریف نشده'
+                      }
+                    </div>
+                  </div>
                 </div>
+                
+                {/* Additional Details */}
+                {(method.estimatedDays || method.description) && (
+                  <div className="mt-3 pt-3 border-t">
+                    <div className="flex gap-4 text-sm text-muted-foreground">
+                      {method.estimatedDays && (
+                        <span>⏱️ {method.estimatedDays} روز تحویل</span>
+                      )}
+                      {method.description && (
+                        <span>📝 {method.description}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
             

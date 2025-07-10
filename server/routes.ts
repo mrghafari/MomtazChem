@@ -10201,8 +10201,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // DELIVERY METHODS MANAGEMENT ENDPOINTS
   // =============================================================================
 
-  // Get all delivery methods
-  app.get('/api/delivery-methods', async (req, res) => {
+  // Get all delivery methods for logistics department
+  app.get('/api/logistics/delivery-methods', requireAuth, async (req, res) => {
     try {
       const { db } = await import('./db');
       const result = await db.select().from(deliveryMethods).orderBy(deliveryMethods.sortOrder);
@@ -10213,10 +10213,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Create new delivery method
-  app.post('/api/delivery-methods', async (req, res) => {
+  // Create new delivery method (logistics)
+  app.post('/api/logistics/delivery-methods', requireAuth, async (req, res) => {
     try {
-      const { value, label, icon, color, isActive, sortOrder } = req.body;
+      const { 
+        value, label, icon, color, isActive, sortOrder,
+        baseCost, costPerKg, minimumOrder, freeShippingThreshold,
+        estimatedDays, maxDistance, availableAreas, description
+      } = req.body;
       
       if (!value || !label) {
         return res.status(400).json({ 
@@ -10231,6 +10235,167 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         label,
         icon: icon || 'package',
         color: color || 'blue',
+        baseCost: baseCost ? parseFloat(baseCost) : 0,
+        costPerKg: costPerKg ? parseFloat(costPerKg) : 0,
+        minimumOrder: minimumOrder ? parseFloat(minimumOrder) : 0,
+        freeShippingThreshold: freeShippingThreshold ? parseFloat(freeShippingThreshold) : null,
+        estimatedDays: estimatedDays ? parseInt(estimatedDays) : 1,
+        maxDistance: maxDistance ? parseInt(maxDistance) : null,
+        availableAreas: availableAreas ? availableAreas.split(',').map((s: string) => s.trim()).filter(Boolean) : null,
+        description: description || null,
+        isActive: isActive !== undefined ? isActive : true,
+        sortOrder: sortOrder || 0
+      }).returning();
+
+      res.json({ success: true, data: result[0] });
+    } catch (error: any) {
+      console.error('Error creating delivery method:', error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: 'این روش ارسال قبلاً وجود دارد' });
+      } else {
+        res.status(500).json({ success: false, message: 'خطا در ایجاد روش ارسال' });
+      }
+    }
+  });
+
+  // Update delivery method (logistics)
+  app.put('/api/logistics/delivery-methods/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { 
+        value, label, icon, color, isActive, sortOrder,
+        baseCost, costPerKg, minimumOrder, freeShippingThreshold,
+        estimatedDays, maxDistance, availableAreas, description
+      } = req.body;
+      
+      if (!value || !label) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'مقدار و برچسب الزامی است' 
+        });
+      }
+
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const result = await db.update(deliveryMethods)
+        .set({
+          value,
+          label,
+          icon: icon || 'package',
+          color: color || 'blue',
+          baseCost: baseCost ? parseFloat(baseCost) : 0,
+          costPerKg: costPerKg ? parseFloat(costPerKg) : 0,
+          minimumOrder: minimumOrder ? parseFloat(minimumOrder) : 0,
+          freeShippingThreshold: freeShippingThreshold ? parseFloat(freeShippingThreshold) : null,
+          estimatedDays: estimatedDays ? parseInt(estimatedDays) : 1,
+          maxDistance: maxDistance ? parseInt(maxDistance) : null,
+          availableAreas: availableAreas ? availableAreas.split(',').map((s: string) => s.trim()).filter(Boolean) : null,
+          description: description || null,
+          isActive: isActive !== undefined ? isActive : true,
+          sortOrder: sortOrder || 0,
+          updatedAt: new Date()
+        })
+        .where(eq(deliveryMethods.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({ success: false, message: 'روش ارسال یافت نشد' });
+      }
+
+      res.json({ success: true, data: result[0] });
+    } catch (error: any) {
+      console.error('Error updating delivery method:', error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: 'این روش ارسال قبلاً وجود دارد' });
+      } else {
+        res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی روش ارسال' });
+      }
+    }
+  });
+
+  // Delete delivery method (logistics)
+  app.delete('/api/logistics/delivery-methods/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const result = await db.delete(deliveryMethods)
+        .where(eq(deliveryMethods.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({ success: false, message: 'روش ارسال یافت نشد' });
+      }
+
+      res.json({ success: true, message: 'روش ارسال حذف شد' });
+    } catch (error) {
+      console.error('Error deleting delivery method:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف روش ارسال' });
+    }
+  });
+
+  // Get all delivery methods (public endpoint)
+  app.get('/api/delivery-methods', async (req, res) => {
+    try {
+      const { db } = await import('./db');
+      const result = await db.select().from(deliveryMethods).orderBy(deliveryMethods.sortOrder);
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching delivery methods:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگذاری روش‌های ارسال' });
+    }
+  });
+
+  // Get active delivery methods for customer checkout
+  app.get('/api/checkout/delivery-methods', async (req, res) => {
+    try {
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const result = await db.select().from(deliveryMethods)
+        .where(eq(deliveryMethods.isActive, true))
+        .orderBy(deliveryMethods.sortOrder);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching active delivery methods:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگذاری روش‌های ارسال' });
+    }
+  });
+
+  // Create new delivery method
+  app.post('/api/delivery-methods', async (req, res) => {
+    try {
+      const { 
+        value, label, icon, color, isActive, sortOrder,
+        baseCost, costPerKg, minimumOrder, freeShippingThreshold,
+        estimatedDays, maxDistance, availableAreas, description
+      } = req.body;
+      
+      if (!value || !label) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'مقدار و برچسب الزامی است' 
+        });
+      }
+
+      const { db } = await import('./db');
+      const result = await db.insert(deliveryMethods).values({
+        value,
+        label,
+        icon: icon || 'package',
+        color: color || 'blue',
+        baseCost: baseCost ? parseFloat(baseCost) : 0,
+        costPerKg: costPerKg ? parseFloat(costPerKg) : 0,
+        minimumOrder: minimumOrder ? parseFloat(minimumOrder) : 0,
+        freeShippingThreshold: freeShippingThreshold ? parseFloat(freeShippingThreshold) : null,
+        estimatedDays: estimatedDays ? parseInt(estimatedDays) : 1,
+        maxDistance: maxDistance ? parseInt(maxDistance) : null,
+        availableAreas: availableAreas ? availableAreas.split(',').map((s: string) => s.trim()).filter(Boolean) : null,
+        description: description || null,
         isActive: isActive !== undefined ? isActive : true,
         sortOrder: sortOrder || 0
       }).returning();
@@ -10250,7 +10415,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   app.put('/api/delivery-methods/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const { value, label, icon, color, isActive, sortOrder } = req.body;
+      const { 
+        value, label, icon, color, isActive, sortOrder,
+        baseCost, costPerKg, minimumOrder, freeShippingThreshold,
+        estimatedDays, maxDistance, availableAreas, description
+      } = req.body;
       
       if (!value || !label) {
         return res.status(400).json({ 
@@ -10268,6 +10437,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           label,
           icon: icon || 'package',
           color: color || 'blue',
+          baseCost: baseCost ? parseFloat(baseCost) : 0,
+          costPerKg: costPerKg ? parseFloat(costPerKg) : 0,
+          minimumOrder: minimumOrder ? parseFloat(minimumOrder) : 0,
+          freeShippingThreshold: freeShippingThreshold ? parseFloat(freeShippingThreshold) : null,
+          estimatedDays: estimatedDays ? parseInt(estimatedDays) : 1,
+          maxDistance: maxDistance ? parseInt(maxDistance) : null,
+          availableAreas: availableAreas ? availableAreas.split(',').map((s: string) => s.trim()).filter(Boolean) : null,
+          description: description || null,
           isActive: isActive !== undefined ? isActive : true,
           sortOrder: sortOrder || 0,
           updatedAt: new Date()

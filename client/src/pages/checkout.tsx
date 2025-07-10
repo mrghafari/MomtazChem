@@ -75,6 +75,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     retry: false,
   });
 
+  // Get available delivery methods
+  const { data: deliveryMethods = [] } = useQuery({
+    queryKey: ['/api/checkout/delivery-methods']
+  });
+
   // Determine if user is logged in first
   const isUserLoggedIn = customerData?.success && customerData.customer;
   
@@ -145,7 +150,27 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   }).filter(Boolean);
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-  const shippingCost = subtotal > 1000 ? 0 : 50; // Free shipping over $1000
+  
+  // Calculate shipping cost based on selected delivery method
+  const selectedMethod = deliveryMethods.find(method => method.id.toString() === form.watch('shippingMethod'));
+  let shippingCost = 0;
+  
+  if (selectedMethod) {
+    const baseCost = parseFloat(selectedMethod.baseCost || '0');
+    const freeShippingThreshold = parseFloat(selectedMethod.freeShippingThreshold || '0');
+    
+    if (freeShippingThreshold > 0 && subtotal >= freeShippingThreshold) {
+      shippingCost = 0; // Free shipping
+    } else {
+      shippingCost = baseCost;
+      // Add weight-based cost if available
+      if (selectedMethod.costPerKg) {
+        const totalWeight = cartItems.reduce((sum, item) => sum + (parseFloat(item.weight || '1') * item.quantity), 0);
+        shippingCost += parseFloat(selectedMethod.costPerKg) * totalWeight;
+      }
+    }
+  }
+  
   const taxRate = 0.09; // 9% tax
   const taxAmount = subtotal * taxRate;
   const totalAmount = subtotal + shippingCost + taxAmount;
@@ -491,12 +516,87 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   </CardContent>
                 </Card>
 
-                {/* Payment Method Only */}
+                {/* Delivery Method */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Truck className="w-5 h-5" />
+                      روش ارسال
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="shippingMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>انتخاب روش ارسال *</FormLabel>
+                          <FormControl>
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="روش ارسال را انتخاب کنید" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {deliveryMethods.map((method: any) => {
+                                  const freeShippingThreshold = parseFloat(method.freeShippingThreshold || '0');
+                                  const qualifiesForFreeShipping = freeShippingThreshold > 0 && subtotal >= freeShippingThreshold;
+                                  const baseCost = parseFloat(method.baseCost || '0');
+                                  
+                                  return (
+                                    <SelectItem key={method.id} value={method.id.toString()}>
+                                      <div className="flex items-center justify-between w-full">
+                                        <span>{method.label}</span>
+                                        <span className="ml-2 text-sm">
+                                          {qualifiesForFreeShipping ? 'رایگان' : `${baseCost.toLocaleString()} IQD`}
+                                          {method.estimatedDays && ` (${method.estimatedDays} روز)`}
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {/* Show delivery details */}
+                    {selectedMethod && (
+                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between items-center">
+                            <span>هزینه ارسال:</span>
+                            <span className="font-medium">
+                              {shippingCost === 0 ? 'رایگان' : `${shippingCost.toLocaleString()} IQD`}
+                            </span>
+                          </div>
+                          {selectedMethod.freeShippingThreshold && parseFloat(selectedMethod.freeShippingThreshold) > 0 && (
+                            <div className="text-xs text-green-600 dark:text-green-400">
+                              {subtotal >= parseFloat(selectedMethod.freeShippingThreshold) 
+                                ? `✓ ارسال رایگان برای خریدهای بالای ${parseFloat(selectedMethod.freeShippingThreshold).toLocaleString()} IQD`
+                                : `برای ارسال رایگان ${(parseFloat(selectedMethod.freeShippingThreshold) - subtotal).toLocaleString()} IQD بیشتر خرید کنید`
+                              }
+                            </div>
+                          )}
+                          {selectedMethod.description && (
+                            <div className="text-xs text-muted-foreground">
+                              {selectedMethod.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Payment Method */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CreditCard className="w-5 h-5" />
-                      Payment Method
+                      روش پرداخت
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -505,19 +605,19 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       name="paymentMethod"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Payment Method *</FormLabel>
+                          <FormLabel>انتخاب روش پرداخت *</FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select payment method" />
+                                <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="iraqi_bank">Iraqi Bank Transfer (محول بانکی عراقی)</SelectItem>
-                                <SelectItem value="credit_card">Credit/Debit Card (کارت ائتمانی/نقدی)</SelectItem>
-                                <SelectItem value="bank_transfer">International Bank Transfer</SelectItem>
-                                <SelectItem value="digital_wallet">Digital Wallet (PayPal, etc.)</SelectItem>
-                                <SelectItem value="cash_on_delivery">Cash on Delivery (پرداخت نقدی هنگام تحویل)</SelectItem>
-                                <SelectItem value="company_credit">Company Credit Account</SelectItem>
+                                <SelectItem value="iraqi_bank">انتقال بانکی عراقی (Iraqi Bank Transfer)</SelectItem>
+                                <SelectItem value="credit_card">کارت اعتباری/نقدی (Credit/Debit Card)</SelectItem>
+                                <SelectItem value="bank_transfer">انتقال بانکی بین‌المللی (International Bank Transfer)</SelectItem>
+                                <SelectItem value="digital_wallet">کیف پول دیجیتال (Digital Wallet)</SelectItem>
+                                <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل (Cash on Delivery)</SelectItem>
+                                <SelectItem value="company_credit">حساب اعتباری شرکت (Company Credit)</SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>
