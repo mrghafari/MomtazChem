@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -31,27 +30,7 @@ const Shop = () => {
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
 
-  // Sync toggle mutation
-  const { mutate: toggleSync } = useMutation({
-    mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) =>
-      apiRequest(`/api/products/${id}`, "PUT", { syncWithShop }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
-      queryClient.invalidateQueries({ queryKey: ['shopSearch'] });
-      // Don't reload page - rely on cache invalidation
-      toast({
-        title: "موفقیت‌آمیز",
-        description: "وضعیت نمایش محصول در فروشگاه تغییر کرد",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا",
-        description: error.message || "مشکل در تغییر وضعیت نمایش",
-        variant: "destructive",
-      });
-    },
-  });
+
   const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -1214,24 +1193,7 @@ const Shop = () => {
                               <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                 {product.inStock ? "In Stock" : "Out of Stock"}
                               </Badge>
-                              {/* Shop Visibility Control */}
-                              <div className="flex items-center gap-1">
-                                <Badge 
-                                  variant={product.syncWithShop ? "default" : "secondary"} 
-                                  className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}
-                                >
-                                  {product.syncWithShop ? 'در فروشگاه' : 'مخفی'}
-                                </Badge>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
-                                  className={`h-6 w-16 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
-                                  title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
-                                >
-                                  {product.syncWithShop ? 'مخفی' : 'نمایش'}
-                                </Button>
-                              </div>
+
                             </div>
                           </div>
                           
@@ -1501,24 +1463,7 @@ const Shop = () => {
                                   <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                     {product.inStock ? "In Stock" : "Out of Stock"}
                                   </Badge>
-                                  {/* Shop Visibility Control - List View */}
-                                  <div className="flex items-center gap-1">
-                                    <Badge 
-                                      variant={product.syncWithShop ? "default" : "secondary"} 
-                                      className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}
-                                    >
-                                      {product.syncWithShop ? 'در فروشگاه' : 'مخفی'}
-                                    </Badge>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
-                                      className={`h-6 w-16 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
-                                      title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
-                                    >
-                                      {product.syncWithShop ? 'مخفی' : 'نمایش'}
-                                    </Button>
-                                  </div>
+
                                 </div>
                               </div>
                               
