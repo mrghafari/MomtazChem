@@ -1131,9 +1131,9 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating - Center */}
+                          {/* Star Rating - Left of center */}
                           {productStats?.[product.id] && (
-                            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center">
+                            <div className="absolute bottom-2 left-1/2 transform -translate-x-full flex items-center">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -1393,9 +1393,9 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating - Center - List View */}
+                          {/* Star Rating - Left of center - List View */}
                           {productStats?.[product.id] && (
-                            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center">
+                            <div className="absolute bottom-2 left-1/2 transform -translate-x-full flex items-center">
                               <Button
                                 variant="ghost"
                                 size="sm"
