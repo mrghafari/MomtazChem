@@ -8,12 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { useMultilingualToast } from '@/hooks/use-multilingual-toast';
 import { apiRequest } from '@/lib/queryClient';
 import ProductRating from '@/components/ProductRating';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ProductReviews() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useMultilingualToast();
   const queryClient = useQueryClient();
+  const { t, direction } = useLanguage();
 
   // Get product details
   const { data: product, isLoading: isLoadingProduct } = useQuery({
@@ -46,14 +48,14 @@ export default function ProductReviews() {
       queryClient.invalidateQueries({ queryKey: ['/api/products', id, 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products', id, 'reviews'] });
       toast({
-        title: 'موفق',
-        description: 'نظر شما با موفقیت ثبت شد',
+        title: t.reviewSubmitted,
+        description: t.reviewSubmittedDesc,
       });
     },
     onError: (error) => {
       toast({
-        title: 'خطا',
-        description: 'خطا در ثبت نظر',
+        title: t.reviewError,
+        description: t.reviewErrorDesc,
         variant: 'destructive',
       });
     },
@@ -79,14 +81,14 @@ export default function ProductReviews() {
 
   if (!product) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" dir={direction}>
         <div className="max-w-4xl mx-auto text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">محصول یافت نشد</h1>
-          <p className="text-gray-600 mb-4">محصول مورد نظر یافت نشد یا ممکن است حذف شده باشد.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t.productNotFound}</h1>
+          <p className="text-gray-600 mb-4">{t.noReviewsDesc}</p>
           <Button onClick={() => navigate('/shop')} variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            بازگشت به فروشگاه
+            <ArrowLeft className={`w-4 h-4 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+            {t.backToShop}
           </Button>
         </div>
       </div>
@@ -94,7 +96,7 @@ export default function ProductReviews() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8" dir={direction}>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -103,8 +105,8 @@ export default function ProductReviews() {
             onClick={() => navigate('/shop')}
             className="mb-4"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            بازگشت به فروشگاه
+            <ArrowLeft className={`w-4 h-4 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+            {t.backToShop}
           </Button>
         </div>
 
@@ -138,7 +140,7 @@ export default function ProductReviews() {
                     </span>
                   </div>
                   <Badge variant={product.inStock ? "secondary" : "destructive"}>
-                    {product.inStock ? "موجود" : "ناموجود"}
+                    {product.inStock ? t.inStock : t.outOfStock}
                   </Badge>
                 </div>
               </div>

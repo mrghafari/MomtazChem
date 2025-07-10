@@ -182,6 +182,28 @@ export interface Translation {
   paintThinner: string;
   agriculturalFertilizers: string;
   
+  // Product Reviews
+  productReviews: string;
+  customerReviews: string;
+  addYourReview: string;
+  writeReview: string;
+  rating: string;
+  comment: string;
+  customerName: string;
+  submitReview: string;
+  reviewSubmitted: string;
+  reviewSubmittedDesc: string;
+  reviewError: string;
+  reviewErrorDesc: string;
+  backToShop: string;
+  averageRating: string;
+  totalReviews: string;
+  noReviewsYet: string;
+  noReviewsDesc: string;
+  specifications: string;
+  reviewsAndRatings: string;
+  customerFeedback: string;
+  
   // Footer
   aboutCompany: string;
   contactInfo: string;
@@ -409,6 +431,28 @@ export const translations: Record<Language, Translation> = {
     paintThinner: 'Paint & Thinner',
     agriculturalFertilizers: 'Agricultural Fertilizers',
     
+    // Product Reviews
+    productReviews: 'Product Reviews',
+    customerReviews: 'Customer Reviews',
+    addYourReview: 'Add Your Review',
+    writeReview: 'Write Review',
+    rating: 'Rating',
+    comment: 'Comment',
+    customerName: 'Customer Name',
+    submitReview: 'Submit Review',
+    reviewSubmitted: 'Success',
+    reviewSubmittedDesc: 'Your review has been submitted successfully',
+    reviewError: 'Error',
+    reviewErrorDesc: 'Error submitting review',
+    backToShop: 'Back to Shop',
+    averageRating: 'Average Rating',
+    totalReviews: 'Total Reviews',
+    noReviewsYet: 'No Reviews Yet',
+    noReviewsDesc: 'Be the first to review this product',
+    specifications: 'Specifications',
+    reviewsAndRatings: 'Reviews & Ratings',
+    customerFeedback: 'Customer Feedback',
+    
     // Footer
     aboutCompany: 'About Company',
     contactInfo: 'Contact Information',
@@ -634,6 +678,28 @@ export const translations: Record<Language, Translation> = {
     paintThinner: 'الدهان والمذيبات',
     agriculturalFertilizers: 'الأسمدة الزراعية',
     
+    // Product Reviews
+    productReviews: 'مراجعات المنتج',
+    customerReviews: 'آراء العملاء',
+    addYourReview: 'أضف مراجعتك',
+    writeReview: 'اكتب مراجعة',
+    rating: 'التقييم',
+    comment: 'التعليق',
+    customerName: 'اسم العميل',
+    submitReview: 'إرسال المراجعة',
+    reviewSubmitted: 'نجح',
+    reviewSubmittedDesc: 'تم إرسال مراجعتك بنجاح',
+    reviewError: 'خطأ',
+    reviewErrorDesc: 'خطأ في إرسال المراجعة',
+    backToShop: 'العودة للمتجر',
+    averageRating: 'متوسط التقييم',
+    totalReviews: 'إجمالي المراجعات',
+    noReviewsYet: 'لا توجد مراجعات بعد',
+    noReviewsDesc: 'كن أول من يراجع هذا المنتج',
+    specifications: 'المواصفات',
+    reviewsAndRatings: 'المراجعات والتقييمات',
+    customerFeedback: 'ملاحظات العملاء',
+    
     // Footer
     aboutCompany: 'حول الشركة',
     contactInfo: 'معلومات الاتصال',
@@ -858,6 +924,28 @@ export const translations: Record<Language, Translation> = {
     fuelAdditives: 'زیادکەرەکانی سووتەمەنی',
     paintThinner: 'بۆیە و تیننەر',
     agriculturalFertilizers: 'پەینی کشتوکاڵی',
+    
+    // Product Reviews
+    productReviews: 'نرخاندنی بەرهەم',
+    customerReviews: 'ڕاى کڕیاران',
+    addYourReview: 'نرخاندنەکەت زیاد بکە',
+    writeReview: 'نرخاندن بنووسە',
+    rating: 'نرخاندن',
+    comment: 'لێدوان',
+    customerName: 'ناوی کڕیار',
+    submitReview: 'نرخاندن بنێرە',
+    reviewSubmitted: 'سەرکەوتن',
+    reviewSubmittedDesc: 'نرخاندنەکەت بە سەرکەوتووی نێردرا',
+    reviewError: 'هەڵە',
+    reviewErrorDesc: 'هەڵە لە ناردنی نرخاندن',
+    backToShop: 'گەڕانەوە بۆ فرۆشگا',
+    averageRating: 'تێکڕای نرخاندن',
+    totalReviews: 'کۆی نرخاندنەکان',
+    noReviewsYet: 'هێشتا نرخاندنێک نییە',
+    noReviewsDesc: 'یەکەم کەس بە کە نرخاندنی ئەم بەرهەمە بکات',
+    specifications: 'تایبەتمەندیەکان',
+    reviewsAndRatings: 'نرخاندن و پلەبەندی',
+    customerFeedback: 'ڕاى کڕیاران',
     
     // Footer
     aboutCompany: 'دەربارەی کۆمپانیا',

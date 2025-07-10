@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { User, MessageSquare } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Review {
   id: number;
@@ -34,6 +35,7 @@ export default function ProductRating({
   onAddReview
 }: ProductRatingProps) {
   const { toast } = useToast();
+  const { t, direction } = useLanguage();
   const [newRating, setNewRating] = React.useState(0);
   const [newComment, setNewComment] = React.useState('');
   const [customerName, setCustomerName] = React.useState('');
@@ -44,8 +46,8 @@ export default function ProductRating({
     
     if (newRating === 0) {
       toast({
-        title: "خطا",
-        description: "لطفاً امتیاز محصول را انتخاب کنید",
+        title: t.error,
+        description: t.rating,
         variant: "destructive"
       });
       return;
@@ -53,8 +55,8 @@ export default function ProductRating({
     
     if (!newComment.trim()) {
       toast({
-        title: "خطا", 
-        description: "لطفاً نظر خود را بنویسید",
+        title: t.error, 
+        description: t.comment,
         variant: "destructive"
       });
       return;
@@ -62,8 +64,8 @@ export default function ProductRating({
     
     if (!customerName.trim()) {
       toast({
-        title: "خطا",
-        description: "لطفاً نام خود را وارد کنید",
+        title: t.error,
+        description: t.customerName,
         variant: "destructive"
       });
       return;
@@ -86,13 +88,13 @@ export default function ProductRating({
       setCustomerName('');
       
       toast({
-        title: "موفق",
-        description: "نظر شما با موفقیت ثبت شد"
+        title: t.reviewSubmitted,
+        description: t.reviewSubmittedDesc
       });
     } catch (error) {
       toast({
-        title: "خطا",
-        description: "خطا در ثبت نظر",
+        title: t.reviewError,
+        description: t.reviewErrorDesc,
         variant: "destructive"
       });
     } finally {
@@ -105,13 +107,13 @@ export default function ProductRating({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={direction}>
       {/* Product Rating Summary */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            نظرات محصول: {productName}
+            {t.productReviews}: {productName}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -123,8 +125,8 @@ export default function ProductRating({
               <StarRating rating={averageRating} size="lg" />
             </div>
             <div className="text-gray-600">
-              <div className="text-lg font-semibold">{totalReviews} نظر</div>
-              <div className="text-sm">از کاربران</div>
+              <div className="text-lg font-semibold">{totalReviews} {t.totalReviews}</div>
+              <div className="text-sm">{t.customerFeedback}</div>
             </div>
           </div>
         </CardContent>
@@ -133,23 +135,23 @@ export default function ProductRating({
       {/* Add New Review */}
       <Card>
         <CardHeader>
-          <CardTitle>نظر جدید</CardTitle>
+          <CardTitle>{t.addYourReview}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmitReview} className="space-y-4">
             <div>
-              <Label htmlFor="customerName">نام شما</Label>
+              <Label htmlFor="customerName">{t.customerName}</Label>
               <Input
                 id="customerName"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="نام خود را وارد کنید"
+                placeholder={t.customerName}
                 className="mt-1"
               />
             </div>
 
             <div>
-              <Label>امتیاز محصول</Label>
+              <Label>{t.rating}</Label>
               <div className="mt-2">
                 <StarRating
                   rating={newRating}
@@ -161,12 +163,12 @@ export default function ProductRating({
             </div>
 
             <div>
-              <Label htmlFor="comment">نظر شما</Label>
+              <Label htmlFor="comment">{t.comment}</Label>
               <Textarea
                 id="comment"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="نظر خود را در مورد این محصول بنویسید..."
+                placeholder={t.writeReview}
                 className="mt-1"
                 rows={4}
               />
@@ -177,7 +179,7 @@ export default function ProductRating({
               disabled={isSubmitting}
               className="w-full"
             >
-              {isSubmitting ? 'در حال ثبت...' : 'ثبت نظر'}
+              {isSubmitting ? t.loading : t.submitReview}
             </Button>
           </form>
         </CardContent>
@@ -186,14 +188,14 @@ export default function ProductRating({
       {/* Reviews List */}
       <Card>
         <CardHeader>
-          <CardTitle>نظرات کاربران</CardTitle>
+          <CardTitle>{t.customerReviews}</CardTitle>
         </CardHeader>
         <CardContent>
           {reviews.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p>هنوز نظری ثبت نشده است</p>
-              <p className="text-sm">اولین نفری باشید که نظر می‌دهید</p>
+              <p>{t.noReviewsYet}</p>
+              <p className="text-sm">{t.noReviewsDesc}</p>
             </div>
           ) : (
             <div className="space-y-4">
