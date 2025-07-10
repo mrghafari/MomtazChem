@@ -76,11 +76,14 @@ const Shop = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 12;
 
-  // Debounce search term
+  // Debounce search term - only search with 3+ characters
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(searchTerm);
-      setCurrentPage(0);
+      // Only set debounced query if searchTerm has 3+ characters or is empty
+      if (searchTerm.length >= 3 || searchTerm.length === 0) {
+        setDebouncedQuery(searchTerm);
+        setCurrentPage(0);
+      }
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
@@ -96,6 +99,11 @@ const Shop = () => {
         sortBy: filters.sortBy,
         sortOrder: filters.sortOrder
       });
+      
+      // Only perform search if query is empty or has 3+ characters
+      if (debouncedQuery.length > 0 && debouncedQuery.length < 3) {
+        return null; // Don't search with less than 3 characters
+      }
 
       if (filters.category) params.append('category', filters.category);
       if (filters.priceMin !== undefined) params.append('priceMin', filters.priceMin.toString());
@@ -114,7 +122,7 @@ const Shop = () => {
   // Fetch shop products (fallback)
   const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
-    enabled: !searchResults
+    enabled: !searchResults || (searchTerm.length > 0 && searchTerm.length < 3)
   });
 
   // Get data from search results or fallback to regular products
@@ -919,11 +927,17 @@ const Shop = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
-                      placeholder="Search products, SKU, specifications..."
+                      placeholder="Search products... (minimum 3 characters)"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-10"
                     />
+                    {/* Search hint */}
+                    {searchTerm.length > 0 && searchTerm.length < 3 && (
+                      <div className="absolute top-full left-0 right-0 bg-yellow-50 border border-yellow-200 rounded-b-lg px-3 py-2 text-xs text-yellow-700 z-10">
+                        Type at least 3 characters to search
+                      </div>
+                    )}
                   </div>
                 </div>
 
