@@ -18149,16 +18149,17 @@ momtazchem.com
   app.post("/api/products/:id/reviews", async (req, res) => {
     try {
       const productId = parseInt(req.params.id);
-      const { rating, comment, customerName } = req.body;
+      const { rating, review, comment, customerName, title, customerEmail, pros, cons } = req.body;
 
       if (isNaN(productId)) {
         return res.status(400).json({ success: false, message: "Invalid product ID" });
       }
 
-      if (!rating || !comment || !customerName) {
+      const reviewText = review || comment; // Support both field names
+      if (!rating || !reviewText || !customerName) {
         return res.status(400).json({
           success: false,
-          message: "Rating, comment, and customer name are required"
+          message: "Rating, review, and customer name are required"
         });
       }
 
@@ -18171,26 +18172,29 @@ momtazchem.com
 
       const { pool } = await import('./db');
 
-      // Insert review
+      // Insert review with auto-approval for immediate display
       const reviewResult = await pool.query(`
-        INSERT INTO product_reviews (product_id, customer_name, rating, comment)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, customer_name, rating, comment, created_at
-      `, [productId, customerName, rating, comment]);
+        INSERT INTO product_reviews (
+          product_id, customer_name, customer_email, rating, title, review, 
+          pros, cons, is_approved, created_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, NOW())
+        RETURNING id, customer_name, rating, review, created_at
+      `, [
+        productId, 
+        customerName, 
+        customerEmail || '', 
+        rating, 
+        title || '', 
+        reviewText,
+        JSON.stringify(pros || []),
+        JSON.stringify(cons || [])
+      ]);
 
       const newReview = reviewResult.rows[0];
 
-      // Update product stats
-      await pool.query(`
-        INSERT INTO product_stats (product_id, total_reviews, average_rating)
-        VALUES ($1, 1, $2)
-        ON CONFLICT (product_id) DO UPDATE SET
-          total_reviews = product_stats.total_reviews + 1,
-          average_rating = (
-            (product_stats.average_rating * product_stats.total_reviews + $2) / 
-            (product_stats.total_reviews + 1)
-          )
-      `, [productId, rating]);
+      // Update product stats using the helper function
+      await updateProductStats(productId);
 
       res.json({
         success: true,
@@ -18198,12 +18202,170 @@ momtazchem.com
           id: newReview.id,
           customerName: newReview.customer_name,
           rating: newReview.rating,
-          comment: newReview.comment,
+          review: newReview.review,
+          comment: newReview.review, // For compatibility
           createdAt: newReview.created_at
         }
       });
     } catch (error) {
       console.error("Error adding product review:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Add shop product review (for shop-specific products)
+  app.post("/api/shop/products/:id/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const { rating, review, comment, customerName, title, customerEmail, pros, cons } = req.body;
+
+      console.log('Shop review submission:', { productId, rating, review, comment, customerName });
+
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+
+      const reviewText = review || comment; // Support both field names
+      if (!rating || !reviewText || !customerName) {
+        return res.status(400).json({
+          success: false,
+          message: "Rating, review, and customer name are required"
+        });
+      }
+
+      if (rating < 1 || rating > 5) {
+        return res.status(400).json({
+          success: false,
+          message: "Rating must be between 1 and 5"
+        });
+      }
+
+      const { pool } = await import('./db');
+
+      // Insert review with auto-approval for immediate display
+      const reviewResult = await pool.query(`
+        INSERT INTO product_reviews (
+          product_id, customer_name, customer_email, rating, title, review, 
+          pros, cons, is_approved, created_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, NOW())
+        RETURNING id, customer_name, rating, review, created_at
+      `, [
+        productId, 
+        customerName, 
+        customerEmail || '', 
+        rating, 
+        title || '', 
+        reviewText,
+        JSON.stringify(pros || []),
+        JSON.stringify(cons || [])
+      ]);
+
+      const newReview = reviewResult.rows[0];
+
+      // Update product stats using the helper function
+      await updateProductStats(productId);
+
+      console.log('Shop review created successfully:', newReview);
+
+      res.json({
+        success: true,
+        review: {
+          id: newReview.id,
+          customerName: newReview.customer_name,
+          rating: newReview.rating,
+          review: newReview.review,
+          comment: newReview.review, // For compatibility
+          createdAt: newReview.created_at
+        }
+      });
+    } catch (error) {
+      console.error("Error adding shop product review:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get shop product reviews
+  app.get("/api/shop/products/:id/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Get reviews with approved filter
+      const reviewsResult = await pool.query(`
+        SELECT 
+          id,
+          product_id,
+          customer_id,
+          customer_name,
+          rating,
+          title,
+          review,
+          pros,
+          cons,
+          is_verified_purchase,
+          helpful_votes,
+          not_helpful_votes,
+          admin_response,
+          admin_response_date,
+          created_at
+        FROM product_reviews 
+        WHERE product_id = $1 AND is_approved = true
+        ORDER BY created_at DESC
+      `, [productId]);
+
+      // Get product stats
+      const statsResult = await pool.query(`
+        SELECT 
+          total_reviews,
+          average_rating,
+          rating_distribution
+        FROM product_stats 
+        WHERE product_id = $1
+      `, [productId]);
+
+      const reviews = reviewsResult.rows.map(row => ({
+        id: row.id,
+        productId: row.product_id,
+        customerId: row.customer_id,
+        customerName: row.customer_name,
+        rating: row.rating,
+        title: row.title || '',
+        review: row.review || '',
+        comment: row.review || '', // For compatibility
+        pros: row.pros || [],
+        cons: row.cons || [],
+        isVerifiedPurchase: row.is_verified_purchase,
+        helpfulVotes: row.helpful_votes,
+        notHelpfulVotes: row.not_helpful_votes,
+        adminResponse: row.admin_response,
+        adminResponseDate: row.admin_response_date,
+        createdAt: row.created_at
+      }));
+
+      const stats = statsResult.rows[0] || {
+        total_reviews: 0,
+        average_rating: "0",
+        rating_distribution: {}
+      };
+
+      res.json({
+        success: true,
+        data: {
+          reviews,
+          stats: {
+            averageRating: parseFloat(stats.average_rating) || 0,
+            totalReviews: stats.total_reviews || 0,
+            ratingDistribution: stats.rating_distribution || {}
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching shop product reviews:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });

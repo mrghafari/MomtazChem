@@ -1144,7 +1144,7 @@ const Shop = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
-                                onClick={() => navigate(`/product-reviews/${product.id}`)}
+                                onClick={() => navigate(`/shop/product-reviews/${product.id}`)}
                               >
                                 <StarRating
                                   rating={productStats[product.id].averageRating}
@@ -1162,7 +1162,7 @@ const Shop = () => {
                               variant="ghost"
                               size="sm"
                               className="p-1 h-7 w-7 hover:bg-green-50"
-                              onClick={() => navigate(`/product-reviews/${product.id}`)}
+                              onClick={() => navigate(`/shop/product-reviews/${product.id}`)}
                             >
                               <MessageSquare className="w-3 h-3 text-green-600" />
                             </Button>
@@ -1406,7 +1406,7 @@ const Shop = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
-                                onClick={() => navigate(`/product-reviews/${product.id}`)}
+                                onClick={() => navigate(`/shop/product-reviews/${product.id}`)}
                               >
                                 <StarRating
                                   rating={productStats[product.id].averageRating}
@@ -1424,7 +1424,7 @@ const Shop = () => {
                               variant="ghost"
                               size="sm"
                               className="p-1 h-7 w-7 hover:bg-green-50"
-                              onClick={() => navigate(`/product-reviews/${product.id}`)}
+                              onClick={() => navigate(`/shop/product-reviews/${product.id}`)}
                             >
                               <MessageSquare className="w-3 h-3 text-green-600" />
                             </Button>
