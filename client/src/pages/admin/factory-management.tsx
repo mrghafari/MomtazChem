@@ -621,7 +621,11 @@ export default function FactoryManagement() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {new Date(order.plannedEndDate).toLocaleDateString('fa-IR')}
+                            {new Date(order.plannedEndDate).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -684,7 +688,11 @@ export default function FactoryManagement() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {new Date(maintenance.scheduledDate).toLocaleDateString('fa-IR')}
+                          {new Date(maintenance.scheduledDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
                         </TableCell>
                         <TableCell>{maintenance.technicianName}</TableCell>
                         <TableCell className="max-w-xs truncate">

@@ -299,7 +299,11 @@ export default function CheckoutSuccess() {
                 <div>
                   <p className="font-semibold">شماره فاکتور: {invoiceData.invoiceNumber}</p>
                   <p className="text-sm text-gray-600">
-                    تاریخ صدور: {new Date(invoiceData.createdAt).toLocaleDateString('fa-IR')}
+                    تاریخ صدور: {new Date(invoiceData.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
                   </p>
                 </div>
                 <Badge variant={invoiceData.status === 'paid' ? 'default' : 'secondary'}>

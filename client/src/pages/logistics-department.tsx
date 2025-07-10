@@ -429,7 +429,11 @@ export default function LogisticsDepartment() {
                               )}
                               {order.estimatedDeliveryDate && (
                                 <p className="text-sm text-gray-600">
-                                  تاریخ تحویل: {new Date(order.estimatedDeliveryDate).toLocaleDateString('fa-IR')}
+                                  تاریخ تحویل: {new Date(order.estimatedDeliveryDate).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
                                 </p>
                               )}
                               {order.deliveryPersonName && (

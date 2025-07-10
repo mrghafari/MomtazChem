@@ -338,7 +338,11 @@ export default function FinanceOrders() {
                         سفارش #{order.customerOrderId}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                        {new Date(order.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
                       </p>
                     </div>
                   </div>
@@ -350,11 +354,19 @@ export default function FinanceOrders() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">تاریخ ایجاد</p>
-                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('fa-IR')}</p>
+                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">آخرین بروزرسانی</p>
-                      <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('fa-IR')}</p>
+                      <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}</p>
                     </div>
                   </div>
 
@@ -368,7 +380,11 @@ export default function FinanceOrders() {
                       </div>
                       <div>
                         <span className="text-gray-600">تاریخ ایجاد:</span>
-                        <span className="font-medium ml-2">{new Date(order.createdAt).toLocaleDateString('fa-IR')}</span>
+                        <span className="font-medium ml-2">{new Date(order.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}</span>
                       </div>
                       {order.financialNotes && (
                         <div className="col-span-2">
@@ -475,7 +491,11 @@ export default function FinanceOrders() {
                   </div>
                   <div>
                     <span className="text-gray-600">تاریخ سفارش:</span>
-                    <span className="font-medium mr-2">{new Date(selectedOrder.orderDate).toLocaleDateString('fa-IR')}</span>
+                    <span className="font-medium mr-2">{new Date(selectedOrder.orderDate).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}</span>
                   </div>
                 </div>
               </div>

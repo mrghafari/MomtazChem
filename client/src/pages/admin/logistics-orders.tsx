@@ -318,7 +318,11 @@ export default function LogisticsOrders() {
                         {formatCurrency(order.orderTotal, 'IQD')}
                       </p>
                       <p className="text-sm text-gray-500">
-                        آماده: {new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR')}
+                        آماده: {new Date(order.warehouseProcessedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
                       </p>
                     </div>
                   </div>

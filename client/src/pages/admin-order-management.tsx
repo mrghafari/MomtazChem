@@ -258,7 +258,11 @@ export default function AdminOrderManagement() {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('fa-IR');
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   return (

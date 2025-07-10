@@ -286,7 +286,11 @@ export default function WarehouseOrders() {
                         {formatCurrency(order.orderTotal, 'IQD')}
                       </p>
                       <p className="text-sm text-gray-500">
-                        تایید: {new Date(order.financialReviewedAt).toLocaleDateString('fa-IR')}
+                        تایید: {new Date(order.financialReviewedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
                       </p>
                     </div>
                   </div>

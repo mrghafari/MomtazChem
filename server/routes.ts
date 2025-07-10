@@ -2056,7 +2056,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           escapeCsvField((product.stockQuantity && product.stockQuantity > 0) ? 'موجود' : 'ناموجود'),
           escapeCsvField(product.minStockLevel || 0),
           escapeCsvField(product.lowStockThreshold || 10),
-          escapeCsvField(product.createdAt ? new Date(product.createdAt).toLocaleDateString('fa-IR') : '')
+          escapeCsvField(product.createdAt ? new Date(product.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }) : '')
         ].join(',');
       }).join('\n');
       
@@ -5084,7 +5088,11 @@ ${procedure.description || 'ندارد'}
 محتوا:
 ${procedure.content}
 
-تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')}
+تاریخ تولید: ${new Date().toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric'
+})}
 `;
 
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -9349,7 +9357,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         smsEnabled: customer.smsEnabled === true, // Explicit boolean check
         customerStatus: customer.customerStatus,
         totalOrders: customer.totalOrdersCount || 0,
-        lastOrderDate: customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString('fa-IR') : null
+        lastOrderDate: customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        }) : null
       }));
       
       res.json({ success: true, data: customerSmsData });
@@ -14294,7 +14306,11 @@ momtazchem.com
         <body>
           <div class="header">
             <h1>گزارش توزیع جغرافیایی مشتریان</h1>
-            <p>تاریخ تولید گزارش: ${new Date().toLocaleDateString('fa-IR')}</p>
+            <p>تاریخ تولید گزارش: ${new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}</p>
           </div>
           
           <div class="stats">

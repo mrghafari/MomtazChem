@@ -325,7 +325,11 @@ export default function DepartmentUsers() {
                                 {getUserName(assignment.adminUserId)}
                               </p>
                               <p className="text-sm text-gray-500">
-                                تخصیص: {new Date(assignment.assignedAt).toLocaleDateString('fa-IR')}
+                                تخصیص: {new Date(assignment.assignedAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
                               </p>
                             </div>
                           </div>

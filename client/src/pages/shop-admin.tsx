@@ -1344,7 +1344,11 @@ ${data.data.map((item: any) =>
                               <div>
                                 <h4 className="font-semibold">{transaction.description}</h4>
                                 <p className="text-sm text-gray-600">
-                                  {new Date(transaction.processingDate).toLocaleDateString('fa-IR')}
+                                  {new Date(transaction.processingDate).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
                                 </p>
                               </div>
                             </div>

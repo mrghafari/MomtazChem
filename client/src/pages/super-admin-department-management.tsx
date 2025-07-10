@@ -294,7 +294,11 @@ export default function SuperAdminDepartmentManagement() {
                           <h4 className="font-semibold text-gray-900 mb-2">اطلاعات کاربری</h4>
                           <p className="text-sm text-gray-600">ایمیل: {user.email}</p>
                           <p className="text-sm text-gray-600">
-                            تاریخ ایجاد: {new Date(user.createdAt).toLocaleDateString('fa-IR')}
+                            تاریخ ایجاد: {new Date(user.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
                           </p>
                         </div>
                         
@@ -302,7 +306,11 @@ export default function SuperAdminDepartmentManagement() {
                           <h4 className="font-semibold text-gray-900 mb-2">آخرین ورود</h4>
                           <p className="text-sm text-gray-600">
                             {user.lastLoginAt 
-                              ? new Date(user.lastLoginAt).toLocaleDateString('fa-IR')
+                              ? new Date(user.lastLoginAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })
                               : 'هرگز وارد نشده'
                             }
                           </p>

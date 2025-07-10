@@ -351,13 +351,21 @@ export default function DeliveredOrders() {
                     </div>
                     <div>
                       <span className="text-gray-500">تاریخ سفارش:</span>
-                      <p className="font-medium">{new Date(order.orderDate).toLocaleDateString('fa-IR')}</p>
+                      <p className="font-medium">{new Date(order.orderDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}</p>
                     </div>
                     <div>
                       <span className="text-gray-500">تاریخ ارسال:</span>
                       <p className="font-medium">
                         {order.logisticsProcessedAt 
-                          ? new Date(order.logisticsProcessedAt).toLocaleDateString('fa-IR')
+                          ? new Date(order.logisticsProcessedAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })
                           : 'نامشخص'
                         }
                       </p>

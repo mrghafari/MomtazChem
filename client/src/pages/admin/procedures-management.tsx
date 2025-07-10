@@ -963,7 +963,11 @@ export default function ProceduresManagement() {
                           </TableCell>
                           <TableCell>{procedure.viewCount}</TableCell>
                           <TableCell>
-                            {new Date(procedure.createdAt).toLocaleDateString('fa-IR')}
+                            {new Date(procedure.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">

@@ -1218,7 +1218,15 @@ function generateDocumentationHTML(data: DocumentationData, language: 'en' | 'fa
         <div class="header">
           <h1>${data.title}</h1>
           <div class="subtitle">
-            ${isRTL ? 'تاریخ تولید: ' + new Date().toLocaleDateString('fa-IR') : 'Generated on: ' + new Date().toLocaleDateString('en-US')}
+            ${isRTL ? 'تاریخ تولید: ' + new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) : 'Generated on: ' + new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
           </div>
         </div>
         

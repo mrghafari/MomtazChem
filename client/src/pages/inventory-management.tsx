@@ -562,7 +562,11 @@ export default function InventoryManagement() {
                                 <span className="font-medium">مبلغ کل:</span> {(item.totalAmount || 0).toLocaleString()} دینار
                               </div>
                               <div>
-                                <span className="font-medium">تاریخ:</span> {new Date(item.createdAt).toLocaleDateString('fa-IR')}
+                                <span className="font-medium">تاریخ:</span> {new Date(item.createdAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
                               </div>
                             </div>
                             {item.notes && (
