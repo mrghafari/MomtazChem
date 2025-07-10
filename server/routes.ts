@@ -17853,6 +17853,394 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // PRODUCT REVIEWS & RATINGS ENDPOINTS - نظرسنجی و امتیازدهی محصولات
+  // =============================================================================
+
+  // Get reviews for a specific product
+  app.get("/api/products/:id/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Get reviews with customer names
+      const reviewsResult = await pool.query(`
+        SELECT pr.*, ps.average_rating, ps.total_reviews
+        FROM product_reviews pr
+        LEFT JOIN product_stats ps ON pr.product_id = ps.product_id
+        WHERE pr.product_id = $1 AND pr.is_approved = true
+        ORDER BY pr.created_at DESC
+      `, [productId]);
+
+      // Get rating distribution
+      const statsResult = await pool.query(`
+        SELECT rating_distribution, average_rating, total_reviews
+        FROM product_stats 
+        WHERE product_id = $1
+      `, [productId]);
+
+      const reviews = reviewsResult.rows.map((row: any) => ({
+        id: row.id,
+        productId: row.product_id,
+        customerId: row.customer_id,
+        customerName: row.customer_name,
+        rating: row.rating,
+        title: row.title,
+        review: row.review,
+        pros: row.pros,
+        cons: row.cons,
+        isVerifiedPurchase: row.is_verified_purchase,
+        helpfulVotes: row.helpful_votes,
+        notHelpfulVotes: row.not_helpful_votes,
+        adminResponse: row.admin_response,
+        adminResponseDate: row.admin_response_date,
+        createdAt: row.created_at
+      }));
+
+      const stats = statsResult.rows[0] || {
+        rating_distribution: {},
+        average_rating: "0",
+        total_reviews: 0
+      };
+
+      res.json({
+        success: true,
+        data: {
+          reviews,
+          stats: {
+            averageRating: parseFloat(stats.average_rating),
+            totalReviews: stats.total_reviews,
+            ratingDistribution: stats.rating_distribution || {}
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching product reviews:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Submit a new review (guest or customer)
+  app.post("/api/products/:id/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+
+      const { rating, title, review, customerName, customerEmail, pros, cons } = req.body;
+      
+      // Validation
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ success: false, message: "Rating must be between 1 and 5" });
+      }
+      if (!customerName || customerName.trim().length === 0) {
+        return res.status(400).json({ success: false, message: "Customer name is required" });
+      }
+
+      const customerId = req.session.customerId || null;
+      
+      // Check if customer already reviewed this product
+      const { pool } = await import('./db');
+      if (customerId) {
+        const existingReview = await pool.query(`
+          SELECT id FROM product_reviews 
+          WHERE product_id = $1 AND customer_id = $2
+        `, [productId, customerId]);
+        
+        if (existingReview.rows.length > 0) {
+          return res.status(400).json({ success: false, message: "You have already reviewed this product" });
+        }
+      }
+
+      // Check if customer has purchased this product (for verified purchase)
+      let isVerifiedPurchase = false;
+      if (customerId) {
+        const purchaseCheck = await pool.query(`
+          SELECT o.id FROM orders o
+          JOIN order_items oi ON o.id = oi.order_id
+          WHERE o.customer_id = $1 AND oi.product_id = $2 AND o.payment_status = 'paid'
+        `, [customerId, productId]);
+        
+        isVerifiedPurchase = purchaseCheck.rows.length > 0;
+      }
+
+      // Insert new review
+      const reviewResult = await pool.query(`
+        INSERT INTO product_reviews (
+          product_id, customer_id, customer_name, customer_email, rating, 
+          title, review, pros, cons, is_verified_purchase, is_approved
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING id, created_at
+      `, [
+        productId, customerId, customerName.trim(), customerEmail, rating,
+        title, review, JSON.stringify(pros || []), JSON.stringify(cons || []),
+        isVerifiedPurchase, false // Default to not approved - admin needs to approve
+      ]);
+
+      // Update product statistics
+      await updateProductStats(productId);
+
+      res.json({
+        success: true,
+        message: "Review submitted successfully. It will be visible after admin approval.",
+        data: {
+          id: reviewResult.rows[0].id,
+          createdAt: reviewResult.rows[0].created_at
+        }
+      });
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get product statistics including reviews summary
+  app.get("/api/products/:id/stats", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          total_reviews,
+          average_rating,
+          rating_distribution,
+          total_views,
+          total_purchases,
+          last_review_date
+        FROM product_stats 
+        WHERE product_id = $1
+      `, [productId]);
+
+      if (result.rows.length === 0) {
+        // Create initial stats record if it doesn't exist
+        await pool.query(`
+          INSERT INTO product_stats (product_id, total_reviews, average_rating, rating_distribution)
+          VALUES ($1, 0, 0, '{"1":0,"2":0,"3":0,"4":0,"5":0}')
+        `, [productId]);
+        
+        return res.json({
+          success: true,
+          data: {
+            totalReviews: 0,
+            averageRating: 0,
+            ratingDistribution: {"1":0,"2":0,"3":0,"4":0,"5":0},
+            totalViews: 0,
+            totalPurchases: 0,
+            lastReviewDate: null
+          }
+        });
+      }
+
+      const stats = result.rows[0];
+      res.json({
+        success: true,
+        data: {
+          totalReviews: stats.total_reviews,
+          averageRating: parseFloat(stats.average_rating),
+          ratingDistribution: stats.rating_distribution,
+          totalViews: stats.total_views,
+          totalPurchases: stats.total_purchases,
+          lastReviewDate: stats.last_review_date
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching product stats:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Mark review as helpful/not helpful
+  app.post("/api/reviews/:id/helpful", async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.id);
+      const { isHelpful } = req.body;
+      
+      if (isNaN(reviewId)) {
+        return res.status(400).json({ success: false, message: "Invalid review ID" });
+      }
+      
+      if (typeof isHelpful !== 'boolean') {
+        return res.status(400).json({ success: false, message: "isHelpful must be a boolean" });
+      }
+
+      const customerId = req.session.customerId || null;
+      const customerIp = req.ip;
+      
+      // Check if user already voted on this review
+      const { pool } = await import('./db');
+      let existingVote;
+      if (customerId) {
+        existingVote = await pool.query(`
+          SELECT id FROM review_helpfulness 
+          WHERE review_id = $1 AND customer_id = $2
+        `, [reviewId, customerId]);
+      } else {
+        existingVote = await pool.query(`
+          SELECT id FROM review_helpfulness 
+          WHERE review_id = $1 AND customer_ip = $2
+        `, [reviewId, customerIp]);
+      }
+      
+      if (existingVote.rows.length > 0) {
+        return res.status(400).json({ success: false, message: "You have already voted on this review" });
+      }
+
+      // Record the vote
+      await pool.query(`
+        INSERT INTO review_helpfulness (review_id, customer_id, customer_ip, is_helpful)
+        VALUES ($1, $2, $3, $4)
+      `, [reviewId, customerId, customerIp, isHelpful]);
+
+      // Update the review's helpful votes count
+      const updateField = isHelpful ? 'helpful_votes' : 'not_helpful_votes';
+      await pool.query(`
+        UPDATE product_reviews 
+        SET ${updateField} = ${updateField} + 1 
+        WHERE id = $1
+      `, [reviewId]);
+
+      res.json({ success: true, message: "Vote recorded successfully" });
+    } catch (error) {
+      console.error("Error recording helpful vote:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin: Get all pending reviews for approval
+  app.get("/api/admin/reviews/pending", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT pr.*, sp.name as product_name
+        FROM product_reviews pr
+        JOIN shop_products sp ON pr.product_id = sp.id
+        WHERE pr.is_approved = false
+        ORDER BY pr.created_at DESC
+      `);
+
+      const reviews = result.rows.map((row: any) => ({
+        id: row.id,
+        productId: row.product_id,
+        productName: row.product_name,
+        customerId: row.customer_id,
+        customerName: row.customer_name,
+        customerEmail: row.customer_email,
+        rating: row.rating,
+        title: row.title,
+        review: row.review,
+        pros: row.pros,
+        cons: row.cons,
+        isVerifiedPurchase: row.is_verified_purchase,
+        createdAt: row.created_at
+      }));
+
+      res.json({ success: true, data: reviews });
+    } catch (error) {
+      console.error("Error fetching pending reviews:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin: Approve/reject review
+  app.patch("/api/admin/reviews/:id/approve", requireAuth, async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.id);
+      const { isApproved, adminResponse } = req.body;
+      
+      if (isNaN(reviewId)) {
+        return res.status(400).json({ success: false, message: "Invalid review ID" });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Update review approval status
+      const result = await pool.query(`
+        UPDATE product_reviews 
+        SET is_approved = $1, admin_response = $2, admin_response_date = NOW(), updated_at = NOW()
+        WHERE id = $3
+        RETURNING product_id
+      `, [isApproved, adminResponse, reviewId]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Review not found" });
+      }
+
+      // Update product statistics if approved
+      if (isApproved) {
+        await updateProductStats(result.rows[0].product_id);
+      }
+
+      res.json({ 
+        success: true, 
+        message: isApproved ? "Review approved successfully" : "Review rejected successfully" 
+      });
+    } catch (error) {
+      console.error("Error updating review approval:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Helper function to update product statistics
+  async function updateProductStats(productId: number) {
+    try {
+      const { pool } = await import('./db');
+      
+      // Calculate new statistics from approved reviews
+      const statsQuery = await pool.query(`
+        SELECT 
+          COUNT(*) as total_reviews,
+          AVG(rating) as average_rating,
+          COUNT(CASE WHEN rating = 1 THEN 1 END) as rating_1,
+          COUNT(CASE WHEN rating = 2 THEN 1 END) as rating_2,
+          COUNT(CASE WHEN rating = 3 THEN 1 END) as rating_3,
+          COUNT(CASE WHEN rating = 4 THEN 1 END) as rating_4,
+          COUNT(CASE WHEN rating = 5 THEN 1 END) as rating_5,
+          MAX(created_at) as last_review_date
+        FROM product_reviews 
+        WHERE product_id = $1 AND is_approved = true
+      `, [productId]);
+
+      const stats = statsQuery.rows[0];
+      const ratingDistribution = {
+        "1": parseInt(stats.rating_1),
+        "2": parseInt(stats.rating_2),
+        "3": parseInt(stats.rating_3),
+        "4": parseInt(stats.rating_4),
+        "5": parseInt(stats.rating_5)
+      };
+
+      // Update or insert product stats
+      await pool.query(`
+        INSERT INTO product_stats (
+          product_id, total_reviews, average_rating, rating_distribution, last_review_date, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, NOW())
+        ON CONFLICT (product_id) DO UPDATE SET
+          total_reviews = $2,
+          average_rating = $3,
+          rating_distribution = $4,
+          last_review_date = $5,
+          updated_at = NOW()
+      `, [
+        productId,
+        parseInt(stats.total_reviews),
+        parseFloat(stats.average_rating) || 0,
+        JSON.stringify(ratingDistribution),
+        stats.last_review_date
+      ]);
+    } catch (error) {
+      console.error("Error updating product stats:", error);
+    }
+  }
+
   const httpServer = createServer(app);
   return httpServer;
 }

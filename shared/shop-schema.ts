@@ -471,3 +471,77 @@ export const insertProductVariantOptionSchema = createInsertSchema(productVarian
 
 export type InsertProductVariantOption = z.infer<typeof insertProductVariantOptionSchema>;
 export type ProductVariantOption = typeof productVariantOptions.$inferSelect;
+
+// =============================================================================
+// PRODUCT REVIEWS & RATINGS SYSTEM - سیستم نظرسنجی و امتیازدهی
+// =============================================================================
+
+// Product Reviews and Ratings - نظرات و امتیازات محصولات
+export const productReviews = pgTable("product_reviews", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  customerId: integer("customer_id"), // Optional for guest reviews
+  customerName: text("customer_name").notNull(), // نام نمایش یافته
+  customerEmail: text("customer_email"), // Optional for verification
+  rating: integer("rating").notNull(), // 1-5 stars
+  title: text("title"), // عنوان نظر
+  review: text("review"), // متن نظر
+  pros: json("pros"), // نقاط مثبت به صورت آرایه
+  cons: json("cons"), // نقاط منفی به صورت آرایه
+  isVerifiedPurchase: boolean("is_verified_purchase").default(false), // خرید تایید شده
+  isApproved: boolean("is_approved").default(false), // تایید شده توسط ادمین
+  helpfulVotes: integer("helpful_votes").default(0), // رای مفید بودن
+  notHelpfulVotes: integer("not_helpful_votes").default(0), // رای مفید نبودن
+  adminResponse: text("admin_response"), // پاسخ ادمین
+  adminResponseDate: timestamp("admin_response_date"), // تاریخ پاسخ ادمین
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertProductReviewSchema = createInsertSchema(productReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProductReview = z.infer<typeof insertProductReviewSchema>;
+export type ProductReview = typeof productReviews.$inferSelect;
+
+// Product Statistics - آمار محصولات
+export const productStats = pgTable("product_stats", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().unique(),
+  totalReviews: integer("total_reviews").default(0),
+  averageRating: decimal("average_rating", { precision: 3, scale: 2 }).default("0"), // میانگین امتیاز
+  ratingDistribution: json("rating_distribution").default({}), // {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+  totalViews: integer("total_views").default(0), // بازدید کل
+  totalPurchases: integer("total_purchases").default(0), // خرید کل
+  lastReviewDate: timestamp("last_review_date"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertProductStatsSchema = createInsertSchema(productStats).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertProductStats = z.infer<typeof insertProductStatsSchema>;
+export type ProductStats = typeof productStats.$inferSelect;
+
+// Review Helpfulness - مفید بودن نظرات
+export const reviewHelpfulness = pgTable("review_helpfulness", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").notNull(),
+  customerId: integer("customer_id"), // کسی که رای داده
+  customerIp: text("customer_ip"), // برای مهمان‌ها
+  isHelpful: boolean("is_helpful").notNull(), // true = مفید، false = غیرمفید
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertReviewHelpfulnessSchema = createInsertSchema(reviewHelpfulness).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertReviewHelpfulness = z.infer<typeof insertReviewHelpfulnessSchema>;
+export type ReviewHelpfulness = typeof reviewHelpfulness.$inferSelect;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,8 @@ import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useMultilingualToast } from "@/hooks/use-multilingual-toast";
 import VisualBarcode from "@/components/ui/visual-barcode";
+import { ProductRating } from "@/components/ProductRating";
+import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 
 const Shop = () => {
   const { toast } = useMultilingualToast();
@@ -46,6 +48,8 @@ const Shop = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [selectedProductForSpecs, setSelectedProductForSpecs] = useState<any>(null);
+  const [showSpecsModal, setShowSpecsModal] = useState(false);
 
   const [productQuantities, setProductQuantities] = useState<{[key: number]: number}>({});
   const [displayStock, setDisplayStock] = useState<{[key: number]: number}>({});
@@ -117,6 +121,26 @@ const Shop = () => {
   const availableFilters = searchResults?.data?.filters;
   const totalPages = Math.ceil(totalResults / itemsPerPage);
 
+  // Fetch product stats for reviews
+  const { data: productStats } = useQuery({
+    queryKey: ['/api/products/stats'],
+    queryFn: async () => {
+      const statsPromises = currentProducts.map(product => 
+        fetch(`/api/products/${product.id}/stats`)
+          .then(res => res.ok ? res.json() : null)
+          .catch(() => null)
+      );
+      const results = await Promise.all(statsPromises);
+      return currentProducts.reduce((acc, product, index) => {
+        if (results[index]?.success) {
+          acc[product.id] = results[index].data;
+        }
+        return acc;
+      }, {} as Record<number, any>);
+    },
+    enabled: currentProducts.length > 0
+  });
+
   // Initialize price range only once when first loaded
   useEffect(() => {
     if (availableFilters?.priceRange && priceRange[0] === 0 && priceRange[1] === 0) {
@@ -169,6 +193,11 @@ const Shop = () => {
       const maxNum = typeof max === 'string' ? parseFloat(max) : max;
       setPriceRange([minNum, maxNum]);
     }
+  };
+
+  const handleShowSpecs = (product: any) => {
+    setSelectedProductForSpecs(product);
+    setShowSpecsModal(true);
   };
 
   // Fetch shop categories
@@ -1093,7 +1122,57 @@ const Shop = () => {
                           )}
                         </div>
                         <CardContent className="p-4">
-                          <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-semibold text-lg flex-1">{product.name}</h3>
+                            <div className="flex items-center gap-1 ml-2">
+                              {/* Product Rating */}
+                              {productStats?.[product.id] && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="p-1 h-8 w-8 hover:bg-yellow-50"
+                                  title={`${productStats[product.id].averageRating.toFixed(1)} stars (${productStats[product.id].totalReviews} reviews)`}
+                                  onClick={() => {
+                                    // Show reviews page for this product
+                                    console.log(`Showing reviews for product ${product.id}`);
+                                  }}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                    <span className="text-xs font-medium">
+                                      {productStats[product.id].averageRating.toFixed(1)}
+                                    </span>
+                                  </div>
+                                </Button>
+                              )}
+                              
+                              {/* Reviews Button */}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 h-8 w-8 hover:bg-green-50"
+                                title="View and Write Reviews"
+                                onClick={() => {
+                                  // Show reviews page for this product
+                                  console.log(`Showing reviews for product ${product.id}`);
+                                }}
+                              >
+                                <MessageSquare className="w-4 h-4 text-green-600" />
+                              </Button>
+                              
+                              {/* Product Specifications */}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 h-8 w-8 hover:bg-blue-50"
+                                onClick={() => handleShowSpecs(product)}
+                                title="View Product Specifications"
+                              >
+                                <Package className="w-4 h-4 text-blue-600" />
+                              </Button>
+                            </div>
+                          </div>
+                          
                           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                             {product.shortDescription || product.description}
                           </p>
@@ -1320,7 +1399,56 @@ const Shop = () => {
                         <CardContent className="p-6 flex-1">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
+                              <div className="flex items-start justify-between mb-2">
+                                <h3 className="font-semibold text-xl flex-1">{product.name}</h3>
+                                <div className="flex items-center gap-1 ml-2">
+                                  {/* Product Rating */}
+                                  {productStats?.[product.id] && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="p-1 h-8 w-8 hover:bg-yellow-50"
+                                      title={`${productStats[product.id].averageRating.toFixed(1)} stars (${productStats[product.id].totalReviews} reviews)`}
+                                      onClick={() => {
+                                        // Show reviews page for this product
+                                        console.log(`Showing reviews for product ${product.id}`);
+                                      }}
+                                    >
+                                      <div className="flex items-center gap-1">
+                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                        <span className="text-xs font-medium">
+                                          {productStats[product.id].averageRating.toFixed(1)}
+                                        </span>
+                                      </div>
+                                    </Button>
+                                  )}
+                                  
+                                  {/* Reviews Button */}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-1 h-8 w-8 hover:bg-green-50"
+                                    title="View and Write Reviews"
+                                    onClick={() => {
+                                      // Show reviews page for this product
+                                      console.log(`Showing reviews for product ${product.id}`);
+                                    }}
+                                  >
+                                    <MessageSquare className="w-4 h-4 text-green-600" />
+                                  </Button>
+                                  
+                                  {/* Product Specifications */}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-1 h-8 w-8 hover:bg-blue-50"
+                                    onClick={() => handleShowSpecs(product)}
+                                    title="View Product Specifications"
+                                  >
+                                    <Package className="w-4 h-4 text-blue-600" />
+                                  </Button>
+                                </div>
+                              </div>
                               <p className="text-gray-600 mb-4">
                                 {product.description}
                               </p>
@@ -1644,6 +1772,18 @@ const Shop = () => {
 
 
 
+
+      {/* Product Specifications Modal */}
+      {selectedProductForSpecs && (
+        <ProductSpecsModal
+          isOpen={showSpecsModal}
+          onClose={() => {
+            setShowSpecsModal(false);
+            setSelectedProductForSpecs(null);
+          }}
+          product={selectedProductForSpecs}
+        />
+      )}
 
       {/* Auth Dialog */}
       <CustomerAuth 
