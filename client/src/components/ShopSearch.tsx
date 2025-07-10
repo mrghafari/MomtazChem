@@ -365,7 +365,7 @@ export default function ShopSearch() {
               {isLoading ? (
                 'Searching...'
               ) : (
-                `${searchResults?.data?.total || 0} products found`
+                `${searchResults?.data?.total || 0} visible products found`
               )}
               {debouncedQuery && ` for "${debouncedQuery}"`}
             </div>

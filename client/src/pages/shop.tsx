@@ -1065,7 +1065,7 @@ const Shop = () => {
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-600">
-                Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+                Showing {searchResults?.total || 0} product{(searchResults?.total || 0) !== 1 ? 's' : ''}
               </p>
               <div className="flex items-center gap-2">
                 <Button
