@@ -25,9 +25,9 @@ export default function StarRating({
   const [hoverRating, setHoverRating] = React.useState(0);
   
   const sizeClasses = {
-    sm: 'w-1.5 h-1.5',
+    sm: 'w-2 h-2',
     md: 'w-2 h-2',
-    lg: 'w-2.5 h-2.5'
+    lg: 'w-2 h-2'
   };
   
   const textSizeClasses = {
@@ -66,9 +66,9 @@ export default function StarRating({
   };
   
   return (
-    <div className={`flex items-center gap-1 ${className}`}>
+    <div className={`flex items-center gap-0.5 ${className}`}>
       <div 
-        className="flex items-center gap-0.5"
+        className="flex items-center gap-0"
         onMouseLeave={handleMouseLeave}
       >
         {[...Array(maxStars)].map((_, index) => {
