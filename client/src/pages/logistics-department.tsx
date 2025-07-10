@@ -17,6 +17,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Truck, Package, Settings, Plus, Edit, Eye, MapPin, Phone, Car, Calendar, BarChart3 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import DeliveryMethodsManagement from "@/components/DeliveryMethodsManagement";
+import ShippingRatesManagement from "@/components/ShippingRatesManagement";
 
 // Types
 interface LogisticsOrder {
@@ -348,14 +350,18 @@ export default function LogisticsDepartment() {
         </div>
 
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               سفارشات
             </TabsTrigger>
+            <TabsTrigger value="delivery-methods" className="flex items-center gap-2">
+              <Truck className="w-4 h-4" />
+              انواع ارسال
+            </TabsTrigger>
             <TabsTrigger value="shipping-rates" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
-              نرخ‌های ارسال
+              تعرفه‌های ارسال
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -442,79 +448,14 @@ export default function LogisticsDepartment() {
             </div>
           </TabsContent>
 
+          {/* Delivery Methods Tab */}
+          <TabsContent value="delivery-methods">
+            <DeliveryMethodsManagement />
+          </TabsContent>
+
           {/* Shipping Rates Tab */}
           <TabsContent value="shipping-rates">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">مدیریت نرخ‌های ارسال</h2>
-                <Button onClick={handleShippingRateAdd} className="bg-green-600 hover:bg-green-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  نرخ جدید
-                </Button>
-              </div>
-
-              <div className="grid gap-4">
-                {shippingRates.map((rate: ShippingRate) => (
-                  <Card key={rate.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4 mb-2">
-                            <h3 className="text-lg font-semibold">{getDeliveryMethodLabel(rate.deliveryMethod)}</h3>
-                            {rate.transportationType && (
-                              <Badge variant="outline">{rate.transportationType}</Badge>
-                            )}
-                            <Badge variant={rate.isActive ? "default" : "secondary"}>
-                              {rate.isActive ? "فعال" : "غیرفعال"}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">قیمت پایه:</span>
-                              <span className="font-medium mr-2">{rate.basePrice} IQD</span>
-                            </div>
-                            {rate.cityName && (
-                              <div>
-                                <span className="text-gray-600">شهر:</span>
-                                <span className="font-medium mr-2">{rate.cityName}</span>
-                              </div>
-                            )}
-                            {rate.estimatedDays && (
-                              <div>
-                                <span className="text-gray-600">مدت تحویل:</span>
-                                <span className="font-medium mr-2">{rate.estimatedDays} روز</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {rate.description && (
-                            <p className="text-sm text-gray-600 mt-2">{rate.description}</p>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => handleShippingRateEdit(rate)}
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            ویرایش
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => deleteShippingRateMutation.mutate(rate.id)}
-                            disabled={deleteShippingRateMutation.isPending}
-                          >
-                            حذف
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <ShippingRatesManagement />
           </TabsContent>
 
           {/* Reports Tab */}

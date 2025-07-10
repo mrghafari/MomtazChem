@@ -241,6 +241,24 @@ export const vatSettings = pgTable("vat_settings", {
   index("vat_settings_effective_idx").on(table.effectiveDate),
 ]);
 
+// Delivery methods table - configurable delivery method types
+export const deliveryMethods = pgTable("delivery_methods", {
+  id: serial("id").primaryKey(),
+  value: varchar("value", { length: 50 }).unique().notNull(), // Unique identifier (e.g., 'cod', 'express')
+  label: varchar("label", { length: 100 }).notNull(), // Display name (e.g., 'پس کرایه', 'ارسال اکسپرس')
+  icon: varchar("icon", { length: 20 }).default("package"), // Icon name for UI
+  color: varchar("color", { length: 20 }).default("blue"), // Color scheme for UI
+  isActive: boolean("is_active").default(true), // Whether this method is available
+  sortOrder: integer("sort_order").default(0), // Display order
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("delivery_methods_value_idx").on(table.value),
+  index("delivery_methods_active_idx").on(table.isActive),
+  index("delivery_methods_sort_idx").on(table.sortOrder),
+]);
+
 // Insert schemas
 export const insertOrderManagementSchema = createInsertSchema(orderManagement).omit({
   id: true,
@@ -280,6 +298,12 @@ export const insertVatSettingSchema = createInsertSchema(vatSettings).omit({
   updatedAt: true,
 });
 
+export const insertDeliveryMethodSchema = createInsertSchema(deliveryMethods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type OrderManagement = typeof orderManagement.$inferSelect;
 export type InsertOrderManagement = z.infer<typeof insertOrderManagementSchema>;
@@ -301,6 +325,9 @@ export type InsertShippingRate = z.infer<typeof insertShippingRateSchema>;
 
 export type VatSetting = typeof vatSettings.$inferSelect;
 export type InsertVatSetting = z.infer<typeof insertVatSettingSchema>;
+
+export type DeliveryMethod = typeof deliveryMethods.$inferSelect;
+export type InsertDeliveryMethod = z.infer<typeof insertDeliveryMethodSchema>;
 
 // Helper types
 export type OrderStatus = typeof orderStatuses[keyof typeof orderStatuses];

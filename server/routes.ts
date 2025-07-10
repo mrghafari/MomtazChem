@@ -36,7 +36,7 @@ import puppeteer from "puppeteer";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
-import { orderManagement, shippingRates, vatSettings } from "@shared/order-management-schema";
+import { orderManagement, shippingRates, vatSettings, deliveryMethods } from "@shared/order-management-schema";
 import nodemailer from "nodemailer";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
@@ -10197,6 +10197,262 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // =============================================================================
+  // DELIVERY METHODS MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get all delivery methods
+  app.get('/api/delivery-methods', async (req, res) => {
+    try {
+      const { db } = await import('./db');
+      const result = await db.select().from(deliveryMethods).orderBy(deliveryMethods.sortOrder);
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching delivery methods:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگذاری روش‌های ارسال' });
+    }
+  });
+
+  // Create new delivery method
+  app.post('/api/delivery-methods', async (req, res) => {
+    try {
+      const { value, label, icon, color, isActive, sortOrder } = req.body;
+      
+      if (!value || !label) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'مقدار و برچسب الزامی است' 
+        });
+      }
+
+      const { db } = await import('./db');
+      const result = await db.insert(deliveryMethods).values({
+        value,
+        label,
+        icon: icon || 'package',
+        color: color || 'blue',
+        isActive: isActive !== undefined ? isActive : true,
+        sortOrder: sortOrder || 0
+      }).returning();
+
+      res.json({ success: true, data: result[0] });
+    } catch (error: any) {
+      console.error('Error creating delivery method:', error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: 'این روش ارسال قبلاً وجود دارد' });
+      } else {
+        res.status(500).json({ success: false, message: 'خطا در ایجاد روش ارسال' });
+      }
+    }
+  });
+
+  // Update delivery method
+  app.put('/api/delivery-methods/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { value, label, icon, color, isActive, sortOrder } = req.body;
+      
+      if (!value || !label) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'مقدار و برچسب الزامی است' 
+        });
+      }
+
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const result = await db.update(deliveryMethods)
+        .set({
+          value,
+          label,
+          icon: icon || 'package',
+          color: color || 'blue',
+          isActive: isActive !== undefined ? isActive : true,
+          sortOrder: sortOrder || 0,
+          updatedAt: new Date()
+        })
+        .where(eq(deliveryMethods.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({ success: false, message: 'روش ارسال یافت نشد' });
+      }
+
+      res.json({ success: true, data: result[0] });
+    } catch (error: any) {
+      console.error('Error updating delivery method:', error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: 'این روش ارسال قبلاً وجود دارد' });
+      } else {
+        res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی روش ارسال' });
+      }
+    }
+  });
+
+  // Delete delivery method
+  app.delete('/api/delivery-methods/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const result = await db.delete(deliveryMethods)
+        .where(eq(deliveryMethods.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({ success: false, message: 'روش ارسال یافت نشد' });
+      }
+
+      res.json({ success: true, message: 'روش ارسال حذف شد' });
+    } catch (error) {
+      console.error('Error deleting delivery method:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف روش ارسال' });
+    }
+  });
+
+  // =============================================================================
+  // SHIPPING RATES MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get all shipping rates
+  app.get('/api/logistics/shipping-rates', async (req, res) => {
+    try {
+      const { db } = await import('./db');
+      const result = await db.select().from(shippingRates).orderBy(shippingRates.deliveryMethod);
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching shipping rates:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگذاری تعرفه‌های ارسال' });
+    }
+  });
+
+  // Create new shipping rate
+  app.post('/api/logistics/shipping-rates', async (req, res) => {
+    try {
+      const {
+        deliveryMethod, cityName, provinceName, minWeight, maxWeight, maxDimensions,
+        basePrice, pricePerKg, freeShippingThreshold, estimatedDays, 
+        trackingAvailable, insuranceAvailable, insuranceRate, isActive,
+        smsVerificationEnabled, description, internalNotes
+      } = req.body;
+      
+      if (!deliveryMethod || !basePrice || !minWeight) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'روش ارسال، قیمت پایه و حداقل وزن الزامی است' 
+        });
+      }
+
+      const { db } = await import('./db');
+      const result = await db.insert(shippingRates).values({
+        deliveryMethod,
+        cityName: cityName || null,
+        provinceName: provinceName || null,
+        minWeight,
+        maxWeight: maxWeight || null,
+        maxDimensions: maxDimensions || null,
+        basePrice,
+        pricePerKg: pricePerKg || '0',
+        freeShippingThreshold: freeShippingThreshold || null,
+        estimatedDays: estimatedDays || null,
+        trackingAvailable: trackingAvailable || false,
+        insuranceAvailable: insuranceAvailable || false,
+        insuranceRate: insuranceRate || '0',
+        isActive: isActive !== undefined ? isActive : true,
+        smsVerificationEnabled: smsVerificationEnabled || false,
+        description: description || null,
+        internalNotes: internalNotes || null
+      }).returning();
+
+      res.json({ success: true, data: result[0] });
+    } catch (error) {
+      console.error('Error creating shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد تعرفه ارسال' });
+    }
+  });
+
+  // Update shipping rate
+  app.put('/api/logistics/shipping-rates/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const {
+        deliveryMethod, cityName, provinceName, minWeight, maxWeight, maxDimensions,
+        basePrice, pricePerKg, freeShippingThreshold, estimatedDays, 
+        trackingAvailable, insuranceAvailable, insuranceRate, isActive,
+        smsVerificationEnabled, description, internalNotes
+      } = req.body;
+      
+      if (!deliveryMethod || !basePrice || !minWeight) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'روش ارسال، قیمت پایه و حداقل وزن الزامی است' 
+        });
+      }
+
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const result = await db.update(shippingRates)
+        .set({
+          deliveryMethod,
+          cityName: cityName || null,
+          provinceName: provinceName || null,
+          minWeight,
+          maxWeight: maxWeight || null,
+          maxDimensions: maxDimensions || null,
+          basePrice,
+          pricePerKg: pricePerKg || '0',
+          freeShippingThreshold: freeShippingThreshold || null,
+          estimatedDays: estimatedDays || null,
+          trackingAvailable: trackingAvailable || false,
+          insuranceAvailable: insuranceAvailable || false,
+          insuranceRate: insuranceRate || '0',
+          isActive: isActive !== undefined ? isActive : true,
+          smsVerificationEnabled: smsVerificationEnabled || false,
+          description: description || null,
+          internalNotes: internalNotes || null,
+          updatedAt: new Date()
+        })
+        .where(eq(shippingRates.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({ success: false, message: 'تعرفه ارسال یافت نشد' });
+      }
+
+      res.json({ success: true, data: result[0] });
+    } catch (error) {
+      console.error('Error updating shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی تعرفه ارسال' });
+    }
+  });
+
+  // Delete shipping rate
+  app.delete('/api/logistics/shipping-rates/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const result = await db.delete(shippingRates)
+        .where(eq(shippingRates.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({ success: false, message: 'تعرفه ارسال یافت نشد' });
+      }
+
+      res.json({ success: true, message: 'تعرفه ارسال حذف شد' });
+    } catch (error) {
+      console.error('Error deleting shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف تعرفه ارسال' });
+    }
+  });
+
   // Second set of duplicate shipping rate endpoints removed
 
   // Get available shipping methods for checkout
@@ -10556,6 +10812,127 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error processing logistics order:', error);
       res.status(500).json({ success: false, message: "خطا در پردازش سفارش" });
+    }
+  });
+
+  // ============================================================================
+  // DELIVERY METHODS MANAGEMENT (LOGISTICS DEPARTMENT)
+  // ============================================================================
+
+  // Get all delivery methods (for logistics admin)
+  app.get('/api/logistics/delivery-methods', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const methods = await db
+        .select()
+        .from(deliveryMethods)
+        .orderBy(deliveryMethods.sortOrder, deliveryMethods.label);
+      
+      res.json(methods);
+    } catch (error) {
+      console.error('Error fetching delivery methods:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت روش‌های ارسال" });
+    }
+  });
+
+  // Get active delivery methods (for customer checkout - no auth required)
+  app.get('/api/delivery-methods', async (req, res) => {
+    try {
+      const methods = await db
+        .select()
+        .from(deliveryMethods)
+        .where(eq(deliveryMethods.isActive, true))
+        .orderBy(deliveryMethods.sortOrder, deliveryMethods.label);
+      
+      res.json(methods);
+    } catch (error) {
+      console.error('Error fetching active delivery methods:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت روش‌های ارسال" });
+    }
+  });
+
+  // Create new delivery method
+  app.post('/api/logistics/delivery-methods', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const methodData = req.body;
+      
+      const [newMethod] = await db
+        .insert(deliveryMethods)
+        .values({
+          ...methodData,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+      
+      res.json({ success: true, data: newMethod, message: "روش ارسال جدید ایجاد شد" });
+    } catch (error) {
+      console.error('Error creating delivery method:', error);
+      if (error.code === '23505') { // Unique constraint violation
+        res.status(400).json({ success: false, message: "این شناسه قبلاً استفاده شده است" });
+      } else {
+        res.status(500).json({ success: false, message: "خطا در ایجاد روش ارسال" });
+      }
+    }
+  });
+
+  // Update delivery method
+  app.put('/api/logistics/delivery-methods/:id', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const methodId = parseInt(req.params.id);
+      const updateData = req.body;
+      
+      const [updatedMethod] = await db
+        .update(deliveryMethods)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(deliveryMethods.id, methodId))
+        .returning();
+      
+      if (!updatedMethod) {
+        return res.status(404).json({ success: false, message: "روش ارسال یافت نشد" });
+      }
+      
+      res.json({ success: true, data: updatedMethod, message: "روش ارسال به‌روزرسانی شد" });
+    } catch (error) {
+      console.error('Error updating delivery method:', error);
+      if (error.code === '23505') { // Unique constraint violation
+        res.status(400).json({ success: false, message: "این شناسه قبلاً استفاده شده است" });
+      } else {
+        res.status(500).json({ success: false, message: "خطا در به‌روزرسانی روش ارسال" });
+      }
+    }
+  });
+
+  // Delete delivery method
+  app.delete('/api/logistics/delivery-methods/:id', requireDepartmentAuth('logistics'), async (req, res) => {
+    try {
+      const methodId = parseInt(req.params.id);
+      
+      // Check if this delivery method is used in shipping rates
+      const usedInShippingRates = await db
+        .select({ count: sql`count(*)` })
+        .from(shippingRates)
+        .where(eq(shippingRates.deliveryMethod, sql`(SELECT value FROM delivery_methods WHERE id = ${methodId})`));
+      
+      if (usedInShippingRates[0]?.count > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "این روش ارسال در تعرفه‌های ارسال استفاده شده و قابل حذف نیست" 
+        });
+      }
+      
+      const deletedRows = await db
+        .delete(deliveryMethods)
+        .where(eq(deliveryMethods.id, methodId))
+        .returning();
+      
+      if (deletedRows.length === 0) {
+        return res.status(404).json({ success: false, message: "روش ارسال یافت نشد" });
+      }
+      
+      res.json({ success: true, message: "روش ارسال حذف شد" });
+    } catch (error) {
+      console.error('Error deleting delivery method:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف روش ارسال" });
     }
   });
 

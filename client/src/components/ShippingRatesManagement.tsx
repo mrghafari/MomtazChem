@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit, Plus, Truck, Bike, Car, Package } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Trash2, Edit, Plus, DollarSign, MapPin, Clock, Truck } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -55,54 +56,6 @@ interface ShippingRateForm {
   internalNotes?: string;
 }
 
-const deliveryMethods = [
-  { value: 'post', label: 'پست عادی' },
-  { value: 'courier', label: 'پیک موتوری' },
-  { value: 'van', label: 'وانت' },
-  { value: 'truck', label: 'کامیون' },
-  { value: 'cod', label: 'پس کرایه' },
-  { value: 'zajel_express', label: 'Zajel Express' },
-  { value: 'tcs_iraq', label: 'TCS Iraq' },
-  { value: 'postex', label: 'Postex' },
-  { value: 'iq_express', label: 'IQ Express' },
-  { value: 'sandoog', label: 'Sandoog' },
-  { value: 'personal_pickup', label: 'تحویل حضوری' }
-];
-
-
-
-const getMethodIcon = (method: string) => {
-  switch (method) {
-    case 'post': return <Package className="h-4 w-4" />;
-    case 'courier': return <Bike className="h-4 w-4" />;
-    case 'van': return <Car className="h-4 w-4" />;
-    case 'truck': return <Truck className="h-4 w-4" />;
-    case 'cod': return <Package className="h-4 w-4" />;
-    case 'zajel_express':
-    case 'tcs_iraq':
-    case 'postex':
-    case 'iq_express':
-    case 'sandoog': return <Truck className="h-4 w-4" />;
-    default: return <Car className="h-4 w-4" />;
-  }
-};
-
-const getMethodColor = (method: string) => {
-  switch (method) {
-    case 'post': return 'bg-blue-100 text-blue-800';
-    case 'courier': return 'bg-green-100 text-green-800';
-    case 'van': return 'bg-yellow-100 text-yellow-800';
-    case 'truck': return 'bg-orange-100 text-orange-800';
-    case 'cod': return 'bg-purple-100 text-purple-800';
-    case 'zajel_express': return 'bg-red-100 text-red-800';
-    case 'tcs_iraq': return 'bg-indigo-100 text-indigo-800';
-    case 'postex': return 'bg-pink-100 text-pink-800';
-    case 'iq_express': return 'bg-cyan-100 text-cyan-800';
-    case 'sandoog': return 'bg-emerald-100 text-emerald-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
-
 export default function ShippingRatesManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<ShippingRate | null>(null);
@@ -110,7 +63,7 @@ export default function ShippingRatesManagement() {
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState<ShippingRateForm>({
-    deliveryMethod: 'courier',
+    deliveryMethod: '',
     cityName: '',
     provinceName: '',
     minWeight: '0',
@@ -130,37 +83,44 @@ export default function ShippingRatesManagement() {
   });
 
   // Fetch shipping rates
-  const { data: ratesData, isLoading } = useQuery({
+  const { data: rates = [], isLoading } = useQuery({
     queryKey: ['/api/logistics/shipping-rates'],
-    queryFn: () => apiRequest('/api/logistics/shipping-rates')
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // Create shipping rate mutation
-  const createRateMutation = useMutation({
+  // Fetch delivery methods for dropdown
+  const { data: deliveryMethods = [] } = useQuery({
+    queryKey: ['/api/delivery-methods'],
+    retry: 3
+  });
+
+  // Create shipping rate
+  const createMutation = useMutation({
     mutationFn: (data: ShippingRateForm) => apiRequest('/api/logistics/shipping-rates', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
     onSuccess: () => {
-      toast({ title: "موفق", description: "تعرفه ارسال جدید ایجاد شد" });
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/shipping-rates'] });
+      toast({ title: "موفقیت", description: "تعرفه ارسال جدید اضافه شد" });
       resetForm();
     },
     onError: () => {
-      toast({ title: "خطا", description: "خطا در ایجاد تعرفه ارسال", variant: "destructive" });
+      toast({ title: "خطا", description: "خطا در اضافه کردن تعرفه ارسال", variant: "destructive" });
     }
   });
 
-  // Update shipping rate mutation
-  const updateRateMutation = useMutation({
+  // Update shipping rate
+  const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: ShippingRateForm }) => 
       apiRequest(`/api/logistics/shipping-rates/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data)
       }),
     onSuccess: () => {
-      toast({ title: "موفق", description: "تعرفه ارسال به‌روزرسانی شد" });
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/shipping-rates'] });
+      toast({ title: "موفقیت", description: "تعرفه ارسال به‌روزرسانی شد" });
       resetForm();
     },
     onError: () => {
@@ -168,14 +128,14 @@ export default function ShippingRatesManagement() {
     }
   });
 
-  // Delete shipping rate mutation
-  const deleteRateMutation = useMutation({
+  // Delete shipping rate
+  const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest(`/api/logistics/shipping-rates/${id}`, {
       method: 'DELETE'
     }),
     onSuccess: () => {
-      toast({ title: "موفق", description: "تعرفه ارسال حذف شد" });
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/shipping-rates'] });
+      toast({ title: "موفقیت", description: "تعرفه ارسال حذف شد" });
     },
     onError: () => {
       toast({ title: "خطا", description: "خطا در حذف تعرفه ارسال", variant: "destructive" });
@@ -184,7 +144,7 @@ export default function ShippingRatesManagement() {
 
   const resetForm = () => {
     setFormData({
-      deliveryMethod: 'courier',
+      deliveryMethod: '',
       cityName: '',
       provinceName: '',
       minWeight: '0',
@@ -222,7 +182,7 @@ export default function ShippingRatesManagement() {
       insuranceAvailable: rate.insuranceAvailable,
       insuranceRate: rate.insuranceRate,
       isActive: rate.isActive,
-      smsVerificationEnabled: rate.smsVerificationEnabled || false,
+      smsVerificationEnabled: rate.smsVerificationEnabled,
       description: rate.description || '',
       internalNotes: rate.internalNotes || ''
     });
@@ -232,18 +192,26 @@ export default function ShippingRatesManagement() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.deliveryMethod.trim() || !formData.basePrice.trim()) {
+      toast({ 
+        title: "خطا", 
+        description: "لطفاً روش ارسال و قیمت پایه را وارد کنید", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
     if (editingRate) {
-      updateRateMutation.mutate({ id: editingRate.id, data: formData });
+      updateMutation.mutate({ id: editingRate.id, data: formData });
     } else {
-      createRateMutation.mutate(formData);
+      createMutation.mutate(formData);
     }
   };
 
   const formatPrice = (price: string) => {
-    return `${parseInt(price).toLocaleString('fa-IR')} دینار`;
+    return new Intl.NumberFormat('fa-IR').format(parseInt(price || '0'));
   };
-
-  const rates = ratesData?.rates || [];
 
   if (isLoading) {
     return (
@@ -256,331 +224,297 @@ export default function ShippingRatesManagement() {
   }
 
   return (
-    <div className="space-y-6" dir="rtl">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">مدیریت تعرفه‌های ارسال</h2>
-          <p className="text-gray-600">تنظیم هزینه‌های ارسال برای روش‌های مختلف</p>
-        </div>
-        <Button onClick={() => setIsFormOpen(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          تعرفه جدید
-        </Button>
-      </div>
-
-      {/* Form Modal */}
-      {isFormOpen && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{editingRate ? 'ویرایش تعرفه ارسال' : 'ایجاد تعرفه ارسال جدید'}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Delivery Method */}
-                <div>
-                  <Label>روش ارسال</Label>
-                  <Select 
-                    value={formData.deliveryMethod} 
-                    onValueChange={(value) => setFormData({...formData, deliveryMethod: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {deliveryMethods.map(method => (
-                        <SelectItem key={method.value} value={method.value}>
-                          {method.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-
-
-                {/* City Name */}
-                <div>
-                  <Label>شهر (اختیاری - برای همه شهرها خالی بگذارید)</Label>
-                  <Input
-                    value={formData.cityName}
-                    onChange={(e) => setFormData({...formData, cityName: e.target.value})}
-                    placeholder="نام شهر"
-                  />
-                </div>
-
-                {/* Province Name */}
-                <div>
-                  <Label>استان (اختیاری)</Label>
-                  <Input
-                    value={formData.provinceName}
-                    onChange={(e) => setFormData({...formData, provinceName: e.target.value})}
-                    placeholder="نام استان"
-                  />
-                </div>
-
-                {/* Base Price */}
-                <div>
-                  <Label>هزینه پایه (دینار)</Label>
-                  <Input
-                    type="number"
-                    value={formData.basePrice}
-                    onChange={(e) => setFormData({...formData, basePrice: e.target.value})}
-                    placeholder="0"
-                    required
-                  />
-                </div>
-
-                {/* Price Per Kg */}
-                <div>
-                  <Label>هزینه هر کیلوگرم (دینار)</Label>
-                  <Input
-                    type="number"
-                    value={formData.pricePerKg}
-                    onChange={(e) => setFormData({...formData, pricePerKg: e.target.value})}
-                    placeholder="0"
-                  />
-                </div>
-
-                {/* Min Weight */}
-                <div>
-                  <Label>حداقل وزن (کیلوگرم)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={formData.minWeight}
-                    onChange={(e) => setFormData({...formData, minWeight: e.target.value})}
-                    placeholder="0"
-                  />
-                </div>
-
-                {/* Max Weight */}
-                <div>
-                  <Label>حداکثر وزن (کیلوگرم - اختیاری)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={formData.maxWeight}
-                    onChange={(e) => setFormData({...formData, maxWeight: e.target.value})}
-                    placeholder="بدون محدودیت"
-                  />
-                </div>
-
-                {/* Free Shipping Threshold */}
-                <div>
-                  <Label>آستانه ارسال رایگان (دینار - اختیاری)</Label>
-                  <Input
-                    type="number"
-                    value={formData.freeShippingThreshold}
-                    onChange={(e) => setFormData({...formData, freeShippingThreshold: e.target.value})}
-                    placeholder="مبلغ برای ارسال رایگان"
-                  />
-                </div>
-
-                {/* Estimated Days */}
-                <div>
-                  <Label>زمان تحویل (روز)</Label>
-                  <Input
-                    type="number"
-                    value={formData.estimatedDays}
-                    onChange={(e) => setFormData({...formData, estimatedDays: parseInt(e.target.value)})}
-                    placeholder="1"
-                  />
-                </div>
-
-                {/* Insurance Rate */}
-                <div>
-                  <Label>نرخ بیمه (درصد)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.insuranceRate}
-                    onChange={(e) => setFormData({...formData, insuranceRate: e.target.value})}
-                    placeholder="0"
-                  />
-                </div>
-
-                {/* Max Dimensions */}
-                <div>
-                  <Label>حداکثر ابعاد (سانتی‌متر - اختیاری)</Label>
-                  <Input
-                    value={formData.maxDimensions}
-                    onChange={(e) => setFormData({...formData, maxDimensions: e.target.value})}
-                    placeholder="طول x عرض x ارتفاع"
-                  />
-                </div>
-              </div>
-
-              {/* Switches */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.trackingAvailable}
-                    onCheckedChange={(checked) => setFormData({...formData, trackingAvailable: checked})}
-                  />
-                  <Label>رهگیری موجود</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.insuranceAvailable}
-                    onCheckedChange={(checked) => setFormData({...formData, insuranceAvailable: checked})}
-                  />
-                  <Label>بیمه موجود</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
-                  />
-                  <Label>فعال</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.smsVerificationEnabled}
-                    onCheckedChange={(checked) => setFormData({...formData, smsVerificationEnabled: checked})}
-                  />
-                  <Label>تأیید پیامکی</Label>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <Label>توضیحات (برای مشتریان)</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="توضیحات روش ارسال برای نمایش به مشتریان"
-                  rows={2}
-                />
-              </div>
-
-              {/* Internal Notes */}
-              <div>
-                <Label>یادداشت‌های داخلی</Label>
-                <Textarea
-                  value={formData.internalNotes}
-                  onChange={(e) => setFormData({...formData, internalNotes: e.target.value})}
-                  placeholder="یادداشت‌های داخلی (فقط برای ادمین‌ها)"
-                  rows={2}
-                />
-              </div>
-
-              {/* Form Actions */}
-              <div className="flex gap-2 pt-4">
-                <Button 
-                  type="submit" 
-                  disabled={createRateMutation.isPending || updateRateMutation.isPending}
-                >
-                  {editingRate ? 'به‌روزرسانی' : 'ایجاد'}
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  انصراف
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Rates List */}
-      <div className="grid gap-4">
-        {rates.map((rate: ShippingRate) => (
-          <Card key={rate.id} className={`${!rate.isActive ? 'opacity-50' : ''}`}>
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    {getMethodIcon(rate.deliveryMethod)}
-                    <Badge className={getMethodColor(rate.deliveryMethod)}>
-                      {deliveryMethods.find(m => m.value === rate.deliveryMethod)?.label}
-                    </Badge>
-                    {rate.transportationType && (
-                      <Badge variant="outline">
-                        {transportationTypes.find(t => t.value === rate.transportationType)?.label}
-                      </Badge>
-                    )}
-                    {!rate.isActive && <Badge variant="secondary">غیرفعال</Badge>}
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">هزینه پایه:</span>
-                      <div className="font-medium">{formatPrice(rate.basePrice)}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">هر کیلوگرم:</span>
-                      <div className="font-medium">{formatPrice(rate.pricePerKg)}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">زمان تحویل:</span>
-                      <div className="font-medium">{rate.estimatedDays} روز</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">منطقه:</span>
-                      <div className="font-medium">{rate.cityName || 'سراسری'}</div>
-                    </div>
-                  </div>
-
-                  {rate.freeShippingThreshold && (
-                    <div className="mt-2 text-sm text-green-600">
-                      ارسال رایگان برای خرید بالای {formatPrice(rate.freeShippingThreshold)}
-                    </div>
-                  )}
-
-                  {rate.description && (
-                    <div className="mt-2 text-sm text-gray-600">{rate.description}</div>
-                  )}
-
-                  <div className="flex gap-2 mt-2">
-                    {rate.trackingAvailable && (
-                      <Badge variant="outline" className="text-xs">رهگیری</Badge>
-                    )}
-                    {rate.insuranceAvailable && (
-                      <Badge variant="outline" className="text-xs">بیمه</Badge>
-                    )}
-                    {rate.smsVerificationEnabled && (
-                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">تأیید پیامکی</Badge>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(rate)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => deleteRateMutation.mutate(rate.id)}
-                    disabled={deleteRateMutation.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {rates.length === 0 && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-gray-500">هنوز تعرفه ارسالی تعریف نشده است</p>
-              <Button onClick={() => setIsFormOpen(true)} className="mt-4">
-                ایجاد اولین تعرفه
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>مدیریت تعرفه‌های ارسال</CardTitle>
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setEditingRate(null)}>
+                <Plus className="h-4 w-4 mr-2" />
+                افزودن تعرفه جدید
               </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingRate ? 'ویرایش تعرفه ارسال' : 'افزودن تعرفه ارسال جدید'}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Left Column */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label>روش ارسال *</Label>
+                      <Select 
+                        value={formData.deliveryMethod} 
+                        onValueChange={(value) => setFormData({...formData, deliveryMethod: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="انتخاب روش ارسال" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {deliveryMethods.map((method: any) => (
+                            <SelectItem key={method.value} value={method.value}>
+                              {method.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>نام شهر</Label>
+                      <Input
+                        value={formData.cityName}
+                        onChange={(e) => setFormData({...formData, cityName: e.target.value})}
+                        placeholder="خالی = همه شهرها"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>نام استان</Label>
+                      <Input
+                        value={formData.provinceName}
+                        onChange={(e) => setFormData({...formData, provinceName: e.target.value})}
+                        placeholder="خالی = همه استان‌ها"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>حداقل وزن (کیلوگرم) *</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={formData.minWeight}
+                        onChange={(e) => setFormData({...formData, minWeight: e.target.value})}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label>حداکثر وزن (کیلوگرم)</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={formData.maxWeight}
+                        onChange={(e) => setFormData({...formData, maxWeight: e.target.value})}
+                        placeholder="خالی = بدون محدودیت"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>ابعاد حداکثر</Label>
+                      <Input
+                        value={formData.maxDimensions}
+                        onChange={(e) => setFormData({...formData, maxDimensions: e.target.value})}
+                        placeholder="طول × عرض × ارتفاع (سانتی‌متر)"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label>قیمت پایه (دینار) *</Label>
+                      <Input
+                        type="number"
+                        value={formData.basePrice}
+                        onChange={(e) => setFormData({...formData, basePrice: e.target.value})}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label>قیمت هر کیلوگرم (دینار)</Label>
+                      <Input
+                        type="number"
+                        value={formData.pricePerKg}
+                        onChange={(e) => setFormData({...formData, pricePerKg: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>آستانه ارسال رایگان (دینار)</Label>
+                      <Input
+                        type="number"
+                        value={formData.freeShippingThreshold}
+                        onChange={(e) => setFormData({...formData, freeShippingThreshold: e.target.value})}
+                        placeholder="خالی = بدون ارسال رایگان"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>مدت تحویل تخمینی (روز)</Label>
+                      <Input
+                        type="number"
+                        value={formData.estimatedDays}
+                        onChange={(e) => setFormData({...formData, estimatedDays: parseInt(e.target.value) || 1})}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>نرخ بیمه (%)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.insuranceRate}
+                        onChange={(e) => setFormData({...formData, insuranceRate: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={formData.trackingAvailable}
+                          onCheckedChange={(checked) => setFormData({...formData, trackingAvailable: checked})}
+                        />
+                        <Label>رهگیری در دسترس</Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={formData.insuranceAvailable}
+                          onCheckedChange={(checked) => setFormData({...formData, insuranceAvailable: checked})}
+                        />
+                        <Label>بیمه در دسترس</Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={formData.smsVerificationEnabled}
+                          onCheckedChange={(checked) => setFormData({...formData, smsVerificationEnabled: checked})}
+                        />
+                        <Label>تایید SMS</Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={formData.isActive}
+                          onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
+                        />
+                        <Label>فعال</Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>توضیحات (برای مشتریان)</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    placeholder="توضیحات نمایش داده شده به مشتریان"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label>یادداشت‌های داخلی</Label>
+                  <Textarea
+                    value={formData.internalNotes}
+                    onChange={(e) => setFormData({...formData, internalNotes: e.target.value})}
+                    placeholder="یادداشت‌های مخصوص ادمین"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                    {editingRate ? 'به‌روزرسانی' : 'افزودن'}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    انصراف
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {rates.map((rate: ShippingRate) => (
+              <div key={rate.id} className="p-4 border rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="secondary">
+                        <Truck className="h-3 w-3 mr-1" />
+                        {rate.deliveryMethod}
+                      </Badge>
+                      {rate.cityName && (
+                        <Badge variant="outline">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {rate.cityName}
+                        </Badge>
+                      )}
+                      {rate.estimatedDays && (
+                        <Badge variant="outline">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {rate.estimatedDays} روز
+                        </Badge>
+                      )}
+                      {!rate.isActive && (
+                        <Badge variant="destructive">غیرفعال</Badge>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">قیمت پایه:</span>
+                        <div className="font-medium">{formatPrice(rate.basePrice)} دینار</div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">هر کیلوگرم:</span>
+                        <div className="font-medium">{formatPrice(rate.pricePerKg)} دینار</div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">حداقل وزن:</span>
+                        <div className="font-medium">{rate.minWeight} کیلوگرم</div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">ویژگی‌ها:</span>
+                        <div className="flex gap-1">
+                          {rate.trackingAvailable && <Badge variant="outline" className="text-xs">رهگیری</Badge>}
+                          {rate.insuranceAvailable && <Badge variant="outline" className="text-xs">بیمه</Badge>}
+                          {rate.smsVerificationEnabled && <Badge variant="outline" className="text-xs">SMS</Badge>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {rate.description && (
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        {rate.description}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(rate)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => deleteMutation.mutate(rate.id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {rates.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                هیچ تعرفه ارسالی تعریف نشده است
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
