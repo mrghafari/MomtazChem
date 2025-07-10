@@ -965,7 +965,7 @@ export default function ProductsPage() {
                             variant={product.syncWithShop ? "default" : "destructive"} 
                             className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'}`}
                           >
-                            {product.syncWithShop ? '✓ Sync ON' : '⨯ Sync OFF'}
+                            {product.syncWithShop ? 'ON' : 'OFF'}
                           </Badge>
                         </div>
                       </div>
@@ -976,10 +976,10 @@ export default function ProductsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
-                          className={`h-8 w-8 p-0 ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600' : 'hover:bg-green-50 hover:text-green-600'}`}
+                          className={`h-8 w-12 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-red-50 text-red-700'}`}
                           title={product.syncWithShop ? 'غیرفعال کردن سینک' : 'فعال کردن سینک'}
                         >
-                          {product.syncWithShop ? '✓' : '⨯'}
+                          {product.syncWithShop ? 'ON' : 'OFF'}
                         </Button>
                         <Button
                           variant="ghost"
