@@ -24,6 +24,7 @@ import CustomerAuth from "@/components/auth/customer-auth";
 import { useMultilingualToast } from "@/hooks/use-multilingual-toast";
 import VisualBarcode from "@/components/ui/visual-barcode";
 import { ProductRating } from "@/components/ProductRating";
+import StarRating from "@/components/StarRating";
 import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 
 const Shop = () => {
@@ -1134,18 +1135,13 @@ const Shop = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="p-1 h-8 w-8 hover:bg-yellow-50"
-
-                                  onClick={() => {
-                                    // Show reviews page for this product
-                                    console.log(`Showing reviews for product ${product.id}`);
-                                  }}
+                                  onClick={() => navigate(`/product-reviews/${product.id}`)}
                                 >
-                                  <div className="flex items-center gap-1">
-                                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                    <span className="text-xs font-medium">
-                                      {productStats[product.id].averageRating.toFixed(1)}
-                                    </span>
-                                  </div>
+                                  <StarRating
+                                    rating={productStats[product.id].averageRating}
+                                    size="sm"
+                                    showNumber={true}
+                                  />
                                 </Button>
                               )}
                               
@@ -1400,18 +1396,13 @@ const Shop = () => {
                                       variant="ghost"
                                       size="sm"
                                       className="p-1 h-8 w-8 hover:bg-yellow-50"
-  
-                                      onClick={() => {
-                                        // Show reviews page for this product
-                                        console.log(`Showing reviews for product ${product.id}`);
-                                      }}
+                                      onClick={() => navigate(`/product-reviews/${product.id}`)}
                                     >
-                                      <div className="flex items-center gap-1">
-                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                        <span className="text-xs font-medium">
-                                          {productStats[product.id].averageRating.toFixed(1)}
-                                        </span>
-                                      </div>
+                                      <StarRating
+                                        rating={productStats[product.id].averageRating}
+                                        size="sm"
+                                        showNumber={true}
+                                      />
                                     </Button>
                                   )}
                                   

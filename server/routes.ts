@@ -17999,18 +17999,114 @@ momtazchem.com
 
       const stats = result.rows[0];
       res.json({
-        success: true,
-        data: {
-          totalReviews: stats.total_reviews,
-          averageRating: parseFloat(stats.average_rating),
-          ratingDistribution: stats.rating_distribution,
-          totalViews: stats.total_views,
-          totalPurchases: stats.total_purchases,
-          lastReviewDate: stats.last_review_date
-        }
+        totalReviews: stats.total_reviews,
+        averageRating: parseFloat(stats.average_rating),
+        ratingDistribution: stats.rating_distribution,
+        totalViews: stats.total_views,
+        totalPurchases: stats.total_purchases,
+        lastReviewDate: stats.last_review_date
       });
     } catch (error) {
       console.error("Error fetching product stats:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get product reviews
+  app.get("/api/products/:id/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          id,
+          customer_name,
+          rating,
+          comment,
+          created_at
+        FROM product_reviews 
+        WHERE product_id = $1
+        ORDER BY created_at DESC
+      `, [productId]);
+
+      const reviews = result.rows.map(row => ({
+        id: row.id,
+        customerName: row.customer_name,
+        rating: row.rating,
+        comment: row.comment,
+        createdAt: row.created_at
+      }));
+
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching product reviews:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Add product review
+  app.post("/api/products/:id/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const { rating, comment, customerName } = req.body;
+
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+
+      if (!rating || !comment || !customerName) {
+        return res.status(400).json({
+          success: false,
+          message: "Rating, comment, and customer name are required"
+        });
+      }
+
+      if (rating < 1 || rating > 5) {
+        return res.status(400).json({
+          success: false,
+          message: "Rating must be between 1 and 5"
+        });
+      }
+
+      const { pool } = await import('./db');
+
+      // Insert review
+      const reviewResult = await pool.query(`
+        INSERT INTO product_reviews (product_id, customer_name, rating, comment)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, customer_name, rating, comment, created_at
+      `, [productId, customerName, rating, comment]);
+
+      const newReview = reviewResult.rows[0];
+
+      // Update product stats
+      await pool.query(`
+        INSERT INTO product_stats (product_id, total_reviews, average_rating)
+        VALUES ($1, 1, $2)
+        ON CONFLICT (product_id) DO UPDATE SET
+          total_reviews = product_stats.total_reviews + 1,
+          average_rating = (
+            (product_stats.average_rating * product_stats.total_reviews + $2) / 
+            (product_stats.total_reviews + 1)
+          )
+      `, [productId, rating]);
+
+      res.json({
+        success: true,
+        review: {
+          id: newReview.id,
+          customerName: newReview.customer_name,
+          rating: newReview.rating,
+          comment: newReview.comment,
+          createdAt: newReview.created_at
+        }
+      });
+    } catch (error) {
+      console.error("Error adding product review:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });

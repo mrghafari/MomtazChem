@@ -48,6 +48,7 @@ import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import ProductRecommendations from "@/pages/product-recommendations";
+import ProductReviews from "@/pages/product-reviews";
 import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
@@ -193,6 +194,7 @@ function Router() {
           <Route path="/products/industrial-chemicals" component={IndustrialChemicals} />
           <Route path="/products/commercial-goods" component={CommercialGoods} />
           <Route path="/products/technical-equipment" component={TechnicalEquipment} />
+          <Route path="/product-reviews/:id" component={ProductReviews} />
           <Route path="/quote" component={QuotePage} />
           <Route path="/documentation" component={DocumentationPage} />
           <Route component={NotFound} />
