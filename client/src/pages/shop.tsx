@@ -89,7 +89,7 @@ const Shop = () => {
     queryKey: ['shopSearch', debouncedQuery, filters, currentPage],
     queryFn: async () => {
       const params = new URLSearchParams({
-        q: debouncedQuery,
+        q: debouncedQuery || '', // Always include query parameter, even if empty
         limit: itemsPerPage.toString(),
         offset: (currentPage * itemsPerPage).toString(),
         sortBy: filters.sortBy,
@@ -818,7 +818,7 @@ const Shop = () => {
                 variant="outline" 
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg"
                 onClick={() => navigate('/product-recommendations')}
-                title="AI Product Recommendations"
+
               >
                 <Sparkles className="w-5 h-5" />
                 <span className="hidden sm:inline">AI Recommendations</span>
@@ -1134,7 +1134,7 @@ const Shop = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="p-1 h-8 w-8 hover:bg-yellow-50"
-                                  title={`${productStats[product.id].averageRating.toFixed(1)} stars (${productStats[product.id].totalReviews} reviews)`}
+
                                   onClick={() => {
                                     // Show reviews page for this product
                                     console.log(`Showing reviews for product ${product.id}`);
@@ -1154,11 +1154,7 @@ const Shop = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 h-8 w-8 hover:bg-green-50"
-                                title="View and Write Reviews"
-                                onClick={() => {
-                                  // Show reviews page for this product
-                                  console.log(`Showing reviews for product ${product.id}`);
-                                }}
+                                onClick={() => navigate(`/product-reviews/${product.id}`)}
                               >
                                 <MessageSquare className="w-4 h-4 text-green-600" />
                               </Button>
@@ -1169,7 +1165,7 @@ const Shop = () => {
                                 size="sm"
                                 className="p-1 h-8 w-8 hover:bg-blue-50"
                                 onClick={() => handleShowSpecs(product)}
-                                title="View Product Specifications"
+
                               >
                                 <Package className="w-4 h-4 text-blue-600" />
                               </Button>
@@ -1404,7 +1400,7 @@ const Shop = () => {
                                       variant="ghost"
                                       size="sm"
                                       className="p-1 h-8 w-8 hover:bg-yellow-50"
-                                      title={`${productStats[product.id].averageRating.toFixed(1)} stars (${productStats[product.id].totalReviews} reviews)`}
+  
                                       onClick={() => {
                                         // Show reviews page for this product
                                         console.log(`Showing reviews for product ${product.id}`);
@@ -1424,11 +1420,7 @@ const Shop = () => {
                                     variant="ghost"
                                     size="sm"
                                     className="p-1 h-8 w-8 hover:bg-green-50"
-                                    title="View and Write Reviews"
-                                    onClick={() => {
-                                      // Show reviews page for this product
-                                      console.log(`Showing reviews for product ${product.id}`);
-                                    }}
+                                    onClick={() => navigate(`/product-reviews/${product.id}`)}
                                   >
                                     <MessageSquare className="w-4 h-4 text-green-600" />
                                   </Button>
@@ -1439,7 +1431,7 @@ const Shop = () => {
                                     size="sm"
                                     className="p-1 h-8 w-8 hover:bg-blue-50"
                                     onClick={() => handleShowSpecs(product)}
-                                    title="View Product Specifications"
+
                                   >
                                     <Package className="w-4 h-4 text-blue-600" />
                                   </Button>
