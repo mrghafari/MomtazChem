@@ -18059,7 +18059,7 @@ momtazchem.com
     }
   });
 
-  // Get product reviews
+  // Get product reviews (Updated version)
   app.get("/api/products/:id/reviews", async (req, res) => {
     try {
       const productId = parseInt(req.params.id);
@@ -18068,27 +18068,77 @@ momtazchem.com
       }
 
       const { pool } = await import('./db');
-      const result = await pool.query(`
+      
+      // Get reviews with approved filter
+      const reviewsResult = await pool.query(`
         SELECT 
           id,
+          product_id,
+          customer_id,
           customer_name,
           rating,
+          title,
+          review,
           comment,
+          pros,
+          cons,
+          is_verified_purchase,
+          helpful_votes,
+          not_helpful_votes,
+          admin_response,
+          admin_response_date,
           created_at
         FROM product_reviews 
-        WHERE product_id = $1
+        WHERE product_id = $1 AND is_approved = true
         ORDER BY created_at DESC
       `, [productId]);
 
-      const reviews = result.rows.map(row => ({
+      // Get product stats
+      const statsResult = await pool.query(`
+        SELECT 
+          total_reviews,
+          average_rating,
+          rating_distribution
+        FROM product_stats 
+        WHERE product_id = $1
+      `, [productId]);
+
+      const reviews = reviewsResult.rows.map(row => ({
         id: row.id,
+        productId: row.product_id,
+        customerId: row.customer_id,
         customerName: row.customer_name,
         rating: row.rating,
-        comment: row.comment,
+        title: row.title || '',
+        review: row.review || row.comment || '', // Use review field first, fallback to comment
+        comment: row.review || row.comment || '', // For compatibility
+        pros: row.pros || [],
+        cons: row.cons || [],
+        isVerifiedPurchase: row.is_verified_purchase,
+        helpfulVotes: row.helpful_votes,
+        notHelpfulVotes: row.not_helpful_votes,
+        adminResponse: row.admin_response,
+        adminResponseDate: row.admin_response_date,
         createdAt: row.created_at
       }));
 
-      res.json(reviews);
+      const stats = statsResult.rows[0] || {
+        total_reviews: 0,
+        average_rating: 0,
+        rating_distribution: {}
+      };
+
+      res.json({
+        success: true,
+        data: {
+          reviews,
+          stats: {
+            averageRating: parseFloat(stats.average_rating) || 0,
+            totalReviews: parseInt(stats.total_reviews) || 0,
+            ratingDistribution: stats.rating_distribution || {}
+          }
+        }
+      });
     } catch (error) {
       console.error("Error fetching product reviews:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
