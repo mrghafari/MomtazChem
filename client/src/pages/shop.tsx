@@ -119,7 +119,13 @@ const Shop = () => {
 
   // Get data from search results or fallback to regular products
   const currentProducts = searchResults?.data?.products || products;
-  const totalResults = searchResults?.data?.total || products.length;
+  
+  // Calculate filtered products that are actually visible in shop
+  const filteredProducts = currentProducts.filter((product: any) => {
+    return product.visibleInShop === true || product.visibleInShop === 1;
+  });
+  
+  const totalResults = searchResults?.data?.total || filteredProducts.length;
   const availableFilters = searchResults?.data?.filters;
   const totalPages = Math.ceil(totalResults / itemsPerPage);
 
@@ -451,8 +457,8 @@ const Shop = () => {
     }
   };
 
-  // Filter and sort products
-  const filteredProducts = products
+  // Legacy filter and sort products
+  const legacyFilteredProducts = products
     .filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -1052,7 +1058,7 @@ const Shop = () => {
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-600">
-                Showing {searchResults?.total || 0} product{(searchResults?.total || 0) !== 1 ? 's' : ''}
+                Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -1082,7 +1088,7 @@ const Shop = () => {
                 Array.from({ length: 6 }).map((_, index) => (
                   <ProductCardSkeleton key={index} viewMode={viewMode} />
                 ))
-              ) : filteredProducts.length === 0 ? (
+              ) : (filteredProducts.length === 0) ? (
                 <div className="col-span-full text-center py-12">
                   <div className="mb-4">
                     <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -1094,7 +1100,7 @@ const Shop = () => {
                   </Button>
                 </div>
               ) : (
-                currentProducts.map((product: any) => (
+                filteredProducts.map((product: any) => (
                   <Card key={product.id} className={viewMode === "list" ? "flex" : ""}>
                     {viewMode === "grid" ? (
                       <>
