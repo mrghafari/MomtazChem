@@ -25,15 +25,15 @@ export default function StarRating({
   const [hoverRating, setHoverRating] = React.useState(0);
   
   const sizeClasses = {
-    sm: 'w-2 h-2',
-    md: 'w-3 h-3',
-    lg: 'w-4 h-4'
+    sm: 'w-1.5 h-1.5',
+    md: 'w-2 h-2',
+    lg: 'w-2.5 h-2.5'
   };
   
   const textSizeClasses = {
     sm: 'text-xs',
     md: 'text-xs',
-    lg: 'text-sm'
+    lg: 'text-xs'
   };
   
   const starSize = sizeClasses[size];
