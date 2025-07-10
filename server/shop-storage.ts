@@ -238,7 +238,10 @@ export class ShopStorage implements IShopStorage {
     const products = await shopDb
       .select()
       .from(shopProducts)
-      .where(eq(shopProducts.isActive, true))
+      .where(and(
+        eq(shopProducts.isActive, true),
+        eq(shopProducts.visibleInShop, true)
+      ))
       .orderBy(shopProducts.name);
 
     // Get active discount settings
@@ -361,8 +364,11 @@ export class ShopStorage implements IShopStorage {
       offset = 0
     } = filters;
 
-    // Build WHERE conditions
-    const whereConditions = [eq(shopProducts.isActive, true)];
+    // Build WHERE conditions - only visible products
+    const whereConditions = [
+      eq(shopProducts.isActive, true),
+      eq(shopProducts.visibleInShop, true)
+    ];
 
     // Text search in multiple fields
     if (query && query.trim()) {
@@ -468,7 +474,10 @@ export class ShopStorage implements IShopStorage {
         count: count()
       })
       .from(shopProducts)
-      .where(eq(shopProducts.isActive, true))
+      .where(and(
+        eq(shopProducts.isActive, true),
+        eq(shopProducts.visibleInShop, true)
+      ))
       .groupBy(shopProducts.category);
 
     const priceRangeResult = await shopDb

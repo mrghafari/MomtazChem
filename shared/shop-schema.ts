@@ -75,6 +75,7 @@ export const shopProducts = pgTable("shop_products", {
   quantityDiscounts: json("quantity_discounts"), // [{minQty: 10, discount: 0.05}, {minQty: 50, discount: 0.10}]
   isActive: boolean("is_active").default(true),
   isFeatured: boolean("is_featured").default(false),
+  visibleInShop: boolean("visible_in_shop").default(true), // کنترل نمایش در فروشگاه
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
   // MSDS (Material Safety Data Sheet) fields

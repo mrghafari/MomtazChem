@@ -271,10 +271,10 @@ export default function ProductsPage() {
     }
   };
 
-  // Quick sync toggle mutation
+  // Quick visibility toggle mutation
   const { mutate: toggleSync } = useMutation({
-    mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) =>
-      apiRequest(`/api/products/${id}`, "PUT", { syncWithShop }),
+    mutationFn: ({ id, visibleInShop }: { id: number; visibleInShop: boolean }) =>
+      apiRequest(`/api/products/${id}`, "PUT", { visibleInShop }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1);
@@ -962,10 +962,10 @@ export default function ProductsPage() {
                           )}
                           {/* Shop Visibility Status */}
                           <Badge 
-                            variant={product.syncWithShop ? "default" : "secondary"} 
-                            className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                            variant={product.visibleInShop ? "default" : "secondary"} 
+                            className={`text-xs ${product.visibleInShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}
                           >
-                            {product.syncWithShop ? 'در فروشگاه' : 'مخفی'}
+                            {product.visibleInShop ? 'در فروشگاه' : 'مخفی'}
                           </Badge>
                         </div>
                       </div>
@@ -975,11 +975,11 @@ export default function ProductsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
-                          className={`h-8 w-16 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
-                          title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
+                          onClick={() => toggleSync({ id: product.id, visibleInShop: !product.visibleInShop })}
+                          className={`h-8 w-16 p-0 text-xs font-medium ${product.visibleInShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
+                          title={product.visibleInShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
                         >
-                          {product.syncWithShop ? 'مخفی' : 'نمایش'}
+                          {product.visibleInShop ? 'مخفی' : 'نمایش'}
                         </Button>
                         <Button
                           variant="ghost"

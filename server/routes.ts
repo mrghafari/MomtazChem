@@ -1749,9 +1749,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ Updated shop product:`, shopProduct.name);
       
       // Shop visibility logic
-      if (productData.syncWithShop === true) {
+      if (productData.visibleInShop === true) {
         console.log(`🏪 محصول در فروشگاه نمایش داده می‌شود: ${shopProduct.name}`);
-      } else if (productData.syncWithShop === false) {
+      } else if (productData.visibleInShop === false) {
         console.log(`🔒 محصول از فروشگاه مخفی شد: ${shopProduct.name}`);
       }
       
