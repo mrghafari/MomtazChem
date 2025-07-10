@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,9 @@ const formSchema = insertShowcaseProductSchema.extend({
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
+  // Weight fields
+  weight: z.string().optional(),
+  weightUnit: z.string().default("kg"),
   // Text fields for array handling
   features: z.string().optional(),
   applications: z.string().optional(),
@@ -133,6 +137,7 @@ export default function ProductsPage() {
   const [uploadingMsds, setUploadingMsds] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
@@ -236,19 +241,33 @@ export default function ProductsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
+      setDeletingProduct(null); // Close the confirmation dialog
       toast({
-        title: "Success",
-        description: "Product deleted successfully",
+        title: "موفقیت",
+        description: "محصول با موفقیت حذف شد",
       });
     },
     onError: (error: any) => {
+      setDeletingProduct(null); // Close the confirmation dialog
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete product",
+        title: "خطا",
+        description: error.message || "حذف محصول ناموفق بود",
         variant: "destructive",
       });
     },
   });
+
+  // Handle delete product with confirmation
+  const handleDeleteProduct = (product: ShowcaseProduct) => {
+    setDeletingProduct(product);
+  };
+
+  // Confirm delete product
+  const confirmDeleteProduct = () => {
+    if (deletingProduct) {
+      deleteProduct(deletingProduct.id);
+    }
+  };
 
   // AI SKU Generation Mutation
   const generateSKUMutation = useMutation({
@@ -931,7 +950,7 @@ export default function ProductsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteProduct(product.id)}
+                          onClick={() => handleDeleteProduct(product)}
                           className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -990,6 +1009,16 @@ export default function ProductsPage() {
                               }}
                             />
                           </div>
+                        </div>
+                      )}
+
+                      {/* Product Weight */}
+                      {product.weight && parseFloat(product.weight) > 0 && (
+                        <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">وزن:</span>
+                          <span>
+                            {parseFloat(product.weight).toFixed(1)} {product.weightUnit || 'kg'}
+                          </span>
                         </div>
                       )}
 
@@ -1261,6 +1290,55 @@ export default function ProductsPage() {
                               <SelectItem value="IQD">IQD</SelectItem>
                               <SelectItem value="USD">USD</SelectItem>
                               <SelectItem value="EUR">EUR</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Weight Fields */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="weight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Weight</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0.00" 
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="weightUnit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Weight Unit</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value || "kg"}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select weight unit" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="kg">kg</SelectItem>
+                              <SelectItem value="g">g</SelectItem>
+                              <SelectItem value="lb">lb</SelectItem>
+                              <SelectItem value="oz">oz</SelectItem>
+                              <SelectItem value="t">Ton</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1892,6 +1970,27 @@ export default function ProductsPage() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingProduct} onOpenChange={() => setDeletingProduct(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأیید حذف محصول</AlertDialogTitle>
+            <AlertDialogDescription>
+              آیا از حذف محصول "{deletingProduct?.name}" مطمئن هستید؟ این عمل قابل بازگشت نیست.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>لغو</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteProduct}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              حذف محصول
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

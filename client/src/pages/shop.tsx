@@ -1195,15 +1195,7 @@ const Shop = () => {
                             </div>
                           </div>
                           
-                          {/* Product weight display */}
-                          {product.weight && parseFloat(product.weight) > 0 && (
-                            <div className="flex items-center gap-1 mb-3 text-sm text-gray-600">
-                              <span className="font-medium">وزن:</span>
-                              <span>
-                                {parseFloat(product.weight).toFixed(1)} {product.weightUnit || 'kg'}
-                              </span>
-                            </div>
-                          )}
+
 
                           {/* Low Stock Warning */}
                           {product.inStock && displayStock[product.id] && product.lowStockThreshold && 
@@ -1464,14 +1456,7 @@ const Shop = () => {
                                     / {product.priceUnit || 'unit'}
                                   </span>
                                 </div>
-                                {product.weight && parseFloat(product.weight) > 0 && (
-                                  <div className="flex items-center gap-1 text-sm text-gray-600">
-                                    <span className="font-medium">وزن:</span>
-                                    <span>
-                                      {parseFloat(product.weight).toFixed(1)} {product.weightUnit || 'kg'}
-                                    </span>
-                                  </div>
-                                )}
+
                                 <div className="flex flex-col gap-1">
                                   <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                     {product.inStock ? "In Stock" : "Out of Stock"}
