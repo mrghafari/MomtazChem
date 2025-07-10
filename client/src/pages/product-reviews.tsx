@@ -23,17 +23,15 @@ export default function ProductReviews() {
     enabled: !!id,
   });
 
-  // Get product stats from the reviews response
-  const productStats = reviewsData?.data?.stats || { averageRating: 0, totalReviews: 0 };
-
-  // Get product reviews
+  // Get product reviews data
   const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
     queryKey: ['/api/products', id, 'reviews'],
     enabled: !!id,
   });
 
-  // Extract reviews from the response data
+  // Extract reviews and stats from the response data
   const reviews = reviewsData?.data?.reviews || [];
+  const productStats = reviewsData?.data?.stats || { averageRating: 0, totalReviews: 0 };
 
   // Add review mutation
   const addReviewMutation = useMutation({
