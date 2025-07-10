@@ -149,13 +149,13 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         });
       }
     } catch (error) {
-      // Only show error toast if it's a real connection error
-      if (!error.message?.includes('401') && !error.message?.includes('Unauthorized')) {
-        console.error('Login connection error:', error);
+      // Completely suppress authentication errors - they are handled by response checking
+      // Only show actual network connection errors
+      if (error && typeof error === 'object' && error.name === 'TypeError' && error.message?.includes('fetch')) {
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "An error occurred while logging in",
+          title: "Network Error",
+          description: "Connection problem. Please try again.",
         });
       }
     } finally {
@@ -258,12 +258,15 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         }
       }
     } catch (error) {
-      console.error('Register error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An error occurred during registration",
-      });
+      // Suppress registration errors - they are handled by response checking
+      // Only show actual network connection errors
+      if (error && typeof error === 'object' && error.name === 'TypeError' && error.message?.includes('fetch')) {
+        toast({
+          variant: "destructive",
+          title: "Network Error",
+          description: "Connection problem. Please try again.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
