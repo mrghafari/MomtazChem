@@ -121,6 +121,8 @@ const Shop = () => {
   const availableFilters = searchResults?.data?.filters;
   const totalPages = Math.ceil(totalResults / itemsPerPage);
 
+
+
   // Fetch product stats for reviews
   const { data: productStats } = useQuery({
     queryKey: ['/api/products/stats'],
@@ -1194,7 +1196,7 @@ const Shop = () => {
                           </div>
                           
                           {/* Product weight display */}
-                          {product.weight && (
+                          {product.weight && parseFloat(product.weight) > 0 && (
                             <div className="flex items-center gap-1 mb-3 text-sm text-gray-600">
                               <span className="font-medium">وزن:</span>
                               <span>
@@ -1462,7 +1464,7 @@ const Shop = () => {
                                     / {product.priceUnit || 'unit'}
                                   </span>
                                 </div>
-                                {product.weight && (
+                                {product.weight && parseFloat(product.weight) > 0 && (
                                   <div className="flex items-center gap-1 text-sm text-gray-600">
                                     <span className="font-medium">وزن:</span>
                                     <span>
