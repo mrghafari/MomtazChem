@@ -82,6 +82,12 @@ const translations = {
     remainingAmount: "Remaining amount",
     insufficientWallet: "Insufficient wallet balance",
     discountApplied: "Discount Applied",
+    
+    // Shipping options
+    deliveryMethod: "Delivery Method",
+    selectDeliveryMethod: "Select delivery method",
+    shippingCost: "Shipping Cost",
+    freeShipping: "Free Shipping",
 
   },
   ar: {
@@ -143,7 +149,13 @@ const translations = {
     walletAmount: "المبلغ من المحفظة",
     remainingAmount: "المبلغ المتبقي",
     insufficientWallet: "رصيد المحفظة غير كافي",
-    discountApplied: "تم تطبيق الخصم"
+    discountApplied: "تم تطبيق الخصم",
+    
+    // Shipping options
+    deliveryMethod: "طريقة التوصيل",
+    selectDeliveryMethod: "اختر طريقة التوصيل",
+    shippingCost: "تكلفة الشحن",
+    freeShipping: "شحن مجاني",
   }
 };
 
@@ -205,6 +217,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
+  const [shippingCost, setShippingCost] = useState<number>(0);
 
 
 
@@ -308,6 +322,29 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       } catch (error) {
         console.log('Error fetching VAT settings:', error);
         return null;
+      }
+    },
+    retry: false,
+  });
+
+  // Fetch active shipping rates
+  const { data: shippingRatesData } = useQuery({
+    queryKey: ['/api/shipping-rates'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/shipping-rates');
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Shipping rates API response:', result);
+          if (result.success) {
+            return result.data;
+          }
+        }
+        return [];
+      } catch (error) {
+        console.log('Error fetching shipping rates:', error);
+        return [];
       }
     },
     retry: false,
@@ -445,12 +482,30 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     return sum;
   }, 0);
 
+  // Calculate shipping cost based on selected method
+  useEffect(() => {
+    if (selectedShippingMethod && shippingRatesData) {
+      const selectedRate = shippingRatesData.find((rate: any) => rate.id === selectedShippingMethod);
+      if (selectedRate) {
+        // Check if order qualifies for free shipping
+        const freeShippingThreshold = parseFloat(selectedRate.freeShippingThreshold || '0');
+        if (freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold) {
+          setShippingCost(0);
+        } else {
+          setShippingCost(parseFloat(selectedRate.basePrice || '0'));
+        }
+      }
+    } else {
+      setShippingCost(0);
+    }
+  }, [selectedShippingMethod, shippingRatesData, subtotalAmount]);
+
   // Calculate VAT amount (only on product subtotal, not shipping)
   const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') / 100 : 0;
   const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
   
-  // Calculate total amount (subtotal + VAT)
-  const totalAmount = subtotalAmount + vatAmount;
+  // Calculate total amount (subtotal + VAT + shipping)
+  const totalAmount = subtotalAmount + vatAmount + shippingCost;
 
   // Calculate wallet payment amounts
   const walletBalance = walletData?.data?.wallet ? parseFloat(walletData.data.wallet.balance) : 
@@ -593,11 +648,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       ...data,
       cart,
       totalAmount,
+      subtotalAmount,
+      shippingCost,
+      vatAmount,
+      selectedShippingMethod,
       currency: 'IQD',
       paymentMethod,
       walletAmountUsed: 0,
       remainingAmount: totalAmount,
-
     };
 
     // Handle wallet payment calculations
@@ -743,6 +801,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 <div className="flex justify-between text-sm">
                   <span>{vatData.vatDisplayName || 'VAT'} ({(vatRate * 100).toFixed(0)}%)</span>
                   <span>{formatCurrency(vatAmount)}</span>
+                </div>
+              )}
+              
+              {/* Shipping Cost */}
+              {shippingCost > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span>{t.shippingCost}</span>
+                  <span>{formatCurrency(shippingCost)}</span>
+                </div>
+              )}
+              {selectedShippingMethod && shippingCost === 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>{t.shippingCost}</span>
+                  <span>{t.freeShipping}</span>
                 </div>
               )}
               
@@ -967,7 +1039,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         <Input 
                           {...field} 
                           placeholder={t.namePlaceholder}
-                          className={isRTL ? 'text-right' : 'text-left'}
+                          className={`${isRTL ? 'text-right' : 'text-left'} bg-gray-100 dark:bg-gray-700`}
+                          readOnly={!!(customerData?.success && customerData.customer)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -987,7 +1060,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {...field} 
                           type="tel"
                           placeholder={t.phonePlaceholder}
-                          className={isRTL ? 'text-right' : 'text-left'}
+                          className={`${isRTL ? 'text-right' : 'text-left'} bg-gray-100 dark:bg-gray-700`}
+                          readOnly={!!(customerData?.success && customerData.customer)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1074,6 +1148,62 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <Badge variant="secondary" className="text-xs">
                       Lat: {locationData.latitude.toFixed(6)}, Lng: {locationData.longitude.toFixed(6)}
                     </Badge>
+                  )}
+                </div>
+
+                {/* Delivery Method Selection */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium">{t.deliveryMethod}</label>
+                  {shippingRatesData && shippingRatesData.length > 0 ? (
+                    <div className="space-y-2">
+                      <select
+                        value={selectedShippingMethod || ''}
+                        onChange={(e) => setSelectedShippingMethod(parseInt(e.target.value) || null)}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm"
+                        required
+                      >
+                        <option value="">{t.selectDeliveryMethod}</option>
+                        {shippingRatesData.map((rate: any) => {
+                          const freeShippingThreshold = parseFloat(rate.freeShippingThreshold || '0');
+                          const qualifiesForFreeShipping = freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold;
+                          
+                          return (
+                            <option key={rate.id} value={rate.id}>
+                              {rate.name} - {qualifiesForFreeShipping ? t.freeShipping : formatCurrency(parseFloat(rate.basePrice || '0'))}
+                              {rate.estimatedDays && ` (${rate.estimatedDays} days)`}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      
+                      {/* Show shipping cost details */}
+                      {selectedShippingMethod && (
+                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                          <div className="flex justify-between items-center text-sm">
+                            <span>{t.shippingCost}:</span>
+                            <span className="font-medium">
+                              {shippingCost === 0 ? t.freeShipping : formatCurrency(shippingCost)}
+                            </span>
+                          </div>
+                          {(() => {
+                            const selectedRate = shippingRatesData.find((rate: any) => rate.id === selectedShippingMethod);
+                            const freeShippingThreshold = parseFloat(selectedRate?.freeShippingThreshold || '0');
+                            if (freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold) {
+                              return (
+                                <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                  ✓ {language === 'en' ? 'Free shipping for orders over' : language === 'ar' ? 'شحن مجاني للطلبات فوق' : 'شحن مجاني للطلبات فوق'} {formatCurrency(freeShippingThreshold)}
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      {language === 'en' ? 'Loading shipping methods...' : language === 'ar' ? 'جارٍ تحميل طرق الشحن...' : 'جارٍ تحميل طرق الشحن...'}
+                    </div>
                   )}
                 </div>
 
