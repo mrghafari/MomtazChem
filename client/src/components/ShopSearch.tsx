@@ -455,6 +455,16 @@ export default function ShopSearch() {
                         </div>
                       </div>
 
+                      {/* Product weight display */}
+                      {product.weight && (
+                        <div className="flex items-center gap-1 mb-3 text-xs text-gray-600">
+                          <span className="font-medium">وزن:</span>
+                          <span>
+                            {parseFloat(product.weight).toFixed(1)} {product.weightUnit || 'kg'}
+                          </span>
+                        </div>
+                      )}
+
                       {product.tags && product.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-3">
                           {product.tags.slice(0, 3).map(tag => (
