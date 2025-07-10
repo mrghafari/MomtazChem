@@ -21,6 +21,13 @@ interface VisualBarcodeProps {
   showPrice?: boolean;
   showWebsite?: boolean;
   websiteText?: string;
+  showBrandName?: boolean;
+  brandText?: string;
+  includeCategory?: boolean;
+  category?: string;
+  customPriceText?: string;
+  customFooterText?: string;
+  labelSize?: string;
 }
 
 const VisualBarcode = ({
@@ -39,7 +46,14 @@ const VisualBarcode = ({
   showCopy = false,
   showPrice = true,
   showWebsite = true,
-  websiteText = "www.momtazchem.com"
+  websiteText = "www.momtazchem.com",
+  showBrandName = false,
+  brandText = "ممتاز کیمیا",
+  includeCategory = false,
+  category = "",
+  customPriceText = "",
+  customFooterText = "",
+  labelSize = "standard"
 }: VisualBarcodeProps) => {
   const canvasRef = useRef<SVGSVGElement>(null);
   const printCanvasRef = useRef<SVGSVGElement>(null);

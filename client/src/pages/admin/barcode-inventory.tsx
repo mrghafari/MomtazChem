@@ -52,6 +52,11 @@ export default function BarcodeInventory() {
     includeSKU: true,
     includeWebsite: true,
     websiteText: 'www.momtazchem.com',
+    customPriceText: '',
+    showBrandName: true,
+    brandText: 'ممتاز کیمیا',
+    includeCategory: false,
+    customFooterText: '',
     size: 'standard'
   });
 
@@ -739,7 +744,7 @@ ${optionalFields}^XZ`;
                         }
                       />
                       <label htmlFor="includeSKU" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        نمایش SKU
+                        نمایش کد SKU
                       </label>
                     </div>
                     
@@ -755,11 +760,37 @@ ${optionalFields}^XZ`;
                         نمایش آدرس وب‌سایت
                       </label>
                     </div>
+
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <Checkbox
+                        id="showBrandName"
+                        checked={labelOptions.showBrandName}
+                        onCheckedChange={(checked) => 
+                          setLabelOptions(prev => ({ ...prev, showBrandName: !!checked }))
+                        }
+                      />
+                      <label htmlFor="showBrandName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        نمایش نام برند
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <Checkbox
+                        id="includeCategory"
+                        checked={labelOptions.includeCategory}
+                        onCheckedChange={(checked) => 
+                          setLabelOptions(prev => ({ ...prev, includeCategory: !!checked }))
+                        }
+                      />
+                      <label htmlFor="includeCategory" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        نمایش دسته‌بندی
+                      </label>
+                    </div>
                   </div>
                   
-                  {/* Website Text Edit */}
+                  {/* Custom Text Options */}
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-900">تنظیمات وب‌سایت</h4>
+                    <h4 className="font-medium text-gray-900">تنظیمات متن سفارشی</h4>
                     
                     <div>
                       <label htmlFor="websiteText" className="text-sm font-medium text-gray-700 block mb-1">
@@ -772,6 +803,51 @@ ${optionalFields}^XZ`;
                           setLabelOptions(prev => ({ ...prev, websiteText: e.target.value }))
                         }
                         placeholder="www.momtazchem.com"
+                        className="text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="brandText" className="text-sm font-medium text-gray-700 block mb-1">
+                        متن نام برند
+                      </label>
+                      <Input
+                        id="brandText"
+                        value={labelOptions.brandText}
+                        onChange={(e) => 
+                          setLabelOptions(prev => ({ ...prev, brandText: e.target.value }))
+                        }
+                        placeholder="ممتاز کیمیا"
+                        className="text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="customPriceText" className="text-sm font-medium text-gray-700 block mb-1">
+                        متن سفارشی قیمت (اختیاری)
+                      </label>
+                      <Input
+                        id="customPriceText"
+                        value={labelOptions.customPriceText}
+                        onChange={(e) => 
+                          setLabelOptions(prev => ({ ...prev, customPriceText: e.target.value }))
+                        }
+                        placeholder="قیمت: X دینار"
+                        className="text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="customFooterText" className="text-sm font-medium text-gray-700 block mb-1">
+                        متن پاورقی (اختیاری)
+                      </label>
+                      <Input
+                        id="customFooterText"
+                        value={labelOptions.customFooterText}
+                        onChange={(e) => 
+                          setLabelOptions(prev => ({ ...prev, customFooterText: e.target.value }))
+                        }
+                        placeholder="کیفیت مطمئن - قیمت مناسب"
                         className="text-sm"
                       />
                     </div>
@@ -790,10 +866,10 @@ ${optionalFields}^XZ`;
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="small">کوچک</SelectItem>
-                          <SelectItem value="standard">استاندارد</SelectItem>
-                          <SelectItem value="large">بزرگ</SelectItem>
-                          <SelectItem value="roll">رول</SelectItem>
+                          <SelectItem value="small">کوچک (5×3 سانتی)</SelectItem>
+                          <SelectItem value="standard">استاندارد (7×5 سانتی)</SelectItem>
+                          <SelectItem value="large">بزرگ (10×7 سانتی)</SelectItem>
+                          <SelectItem value="roll">رول پرینتر (4×6 سانتی)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -830,17 +906,38 @@ ${optionalFields}^XZ`;
                             showPrice={labelOptions.includePrice}
                             showWebsite={labelOptions.includeWebsite}
                             websiteText={labelOptions.websiteText}
+                            showBrandName={labelOptions.showBrandName}
+                            brandText={labelOptions.brandText}
+                            includeCategory={labelOptions.includeCategory}
+                            category={product.category}
+                            customPriceText={labelOptions.customPriceText}
+                            customFooterText={labelOptions.customFooterText}
+                            labelSize={labelOptions.size}
                           />
                         </div>
                         <div className="text-xs text-gray-600 space-y-1">
+                          {labelOptions.showBrandName && (
+                            <div className="font-bold text-gray-800">{labelOptions.brandText}</div>
+                          )}
+                          {labelOptions.includeCategory && (
+                            <div className="text-gray-500">{product.category}</div>
+                          )}
                           {labelOptions.includePrice && (
-                            <div className="font-medium text-green-600">{priceText}</div>
+                            <div className="font-medium text-green-600">
+                              {labelOptions.customPriceText 
+                                ? labelOptions.customPriceText.replace('X', Math.round(price).toLocaleString())
+                                : priceText
+                              }
+                            </div>
                           )}
                           {labelOptions.includeSKU && (
                             <div>SKU: {product.sku || 'N/A'}</div>
                           )}
                           {labelOptions.includeWebsite && (
                             <div className="text-blue-600">{labelOptions.websiteText}</div>
+                          )}
+                          {labelOptions.customFooterText && (
+                            <div className="text-gray-500 italic text-xs">{labelOptions.customFooterText}</div>
                           )}
                         </div>
                       </div>

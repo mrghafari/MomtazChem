@@ -2100,7 +2100,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to generate label HTML with fixed grid layout
   function generateLabelHTML(products: any[], options: any) {
-    const { showPrice, showWebsite, showSKU, labelSize, website } = options;
+    const { 
+      showPrice, showWebsite, showSKU, labelSize, website, 
+      showBrandName, brandText, includeCategory, customPriceText, customFooterText 
+    } = options;
     
     // Fixed label dimensions matching frontend design
     const labelConfigs = {
@@ -2164,15 +2167,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         overflow: hidden;
         position: relative;
       ">
-        <!-- Fixed 4-row grid layout -->
+        <!-- Enhanced 5-row grid layout -->
         <div style="
           height: 100%; 
           display: grid; 
-          grid-template-rows: 1fr 1fr 1fr 1fr; 
-          gap: 1mm;
+          grid-template-rows: ${showBrandName ? '0.5fr' : '0fr'} 1fr ${includeCategory ? '0.3fr' : '0fr'} 1fr 1fr; 
+          gap: 0.5mm;
           text-align: center;
         ">
-          <!-- Row 1: Product Name (always shown) -->
+          <!-- Row 1: Brand Name (if enabled) -->
+          ${showBrandName ? `
+            <div style="
+              display: flex; 
+              align-items: center; 
+              justify-content: center;
+              font-weight: bold; 
+              font-size: ${config.brandFont || config.nameFont}; 
+              color: #2563eb;
+              overflow: hidden;
+              padding: 0 1mm;
+            ">
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
+                ${brandText}
+              </span>
+            </div>
+          ` : '<div style="display: none;"></div>'}
+
+          <!-- Row 2: Product Name (always shown) -->
           <div style="
             display: flex; 
             align-items: center; 
@@ -2188,12 +2209,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
             </span>
           </div>
 
-          <!-- Row 2: SKU (if enabled) -->
+          <!-- Row 3: Category (if enabled) -->
+          ${includeCategory && product.category ? `
+            <div style="
+              display: flex; 
+              align-items: center; 
+              justify-content: center;
+              font-size: ${config.categoryFont || config.skuFont}; 
+              color: #6b7280;
+              overflow: hidden;
+              padding: 0 1mm;
+            ">
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
+                ${product.category}
+              </span>
+            </div>
+          ` : '<div style="display: none;"></div>'}
+
+          <!-- Row 4: Barcode (always shown) -->
           <div style="
             display: flex; 
             align-items: center; 
             justify-content: center;
             min-height: 0;
+          ">
+            ${generateBarcode(product.barcode)}
+          </div>
+
+          <!-- Row 5: Dynamic Content (SKU, Price, Website, Footer) -->
+          <div style="
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            gap: 0.3mm;
+            min-height: 0;
+            padding: 0 1mm;
           ">
             ${showSKU && product.sku ? `
               <span style="
@@ -2207,28 +2258,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ">
                 SKU: ${displaySku}
               </span>
-            ` : '<div style="height: 100%;"></div>'}
-          </div>
+            ` : ''}
 
-          <!-- Row 3: Barcode (always shown) -->
-          <div style="
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            min-height: 0;
-          ">
-            ${generateBarcode(product.barcode)}
-          </div>
-
-          <!-- Row 4: Price and Website -->
-          <div style="
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center;
-            gap: 0.5mm;
-            min-height: 0;
-          ">
             ${showPrice && product.price ? `
               <span style="
                 font-weight: bold; 
@@ -2239,7 +2270,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 white-space: nowrap;
                 max-width: 100%;
               ">
-                ${formatPrice(product)}
+                ${customPriceText 
+                  ? customPriceText.replace('X', Math.round(product.price).toLocaleString())
+                  : formatPrice(product)
+                }
               </span>
             ` : ''}
             
@@ -2252,7 +2286,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 white-space: nowrap;
                 max-width: 100%;
               ">
-                momtazchem.com
+                ${website || 'momtazchem.com'}
+              </span>
+            ` : ''}
+
+            ${customFooterText ? `
+              <span style="
+                color: #6b7280; 
+                font-size: ${config.footerFont || config.websiteFont}; 
+                font-style: italic;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 100%;
+                margin-top: 0.2mm;
+              ">
+                ${customFooterText}
               </span>
             ` : ''}
           </div>
@@ -2313,7 +2362,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         includeWebsite = true,
         includeSKU = true,
         websiteText = "www.momtazchem.com",
-        labelSize = "standard"
+        labelSize = "standard",
+        showBrandName = false,
+        brandText = "ممتاز کیمیا",
+        includeCategory = false,
+        customPriceText = "",
+        customFooterText = ""
       } = options || {};
 
       // Generate HTML for labels using the extracted options
@@ -2322,7 +2376,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         showWebsite: includeWebsite,
         showSKU: includeSKU,
         labelSize,
-        website: websiteText
+        website: websiteText,
+        showBrandName,
+        brandText,
+        includeCategory,
+        customPriceText,
+        customFooterText
       });
 
       // Return as image if requested
