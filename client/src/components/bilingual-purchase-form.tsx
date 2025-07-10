@@ -82,7 +82,6 @@ const translations = {
     remainingAmount: "Remaining amount",
     insufficientWallet: "Insufficient wallet balance",
     discountApplied: "Discount Applied",
-    shippingMethod: "Shipping Method",
 
   },
   ar: {
@@ -144,8 +143,7 @@ const translations = {
     walletAmount: "المبلغ من المحفظة",
     remainingAmount: "المبلغ المتبقي",
     insufficientWallet: "رصيد المحفظة غير كافي",
-    discountApplied: "تم تطبيق الخصم",
-    shippingMethod: "طريقة الشحن"
+    discountApplied: "تم تطبيق الخصم"
   }
 };
 
@@ -207,8 +205,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>('');
-  const [shippingCost, setShippingCost] = useState<number>(0);
+
 
 
   // Fetch current customer data
@@ -600,8 +597,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       paymentMethod,
       walletAmountUsed: 0,
       remainingAmount: totalAmount,
-      shippingMethod: selectedShippingMethod,
-      shippingCost: shippingCost
+
     };
 
     // Handle wallet payment calculations
@@ -756,42 +752,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 <span className="text-primary">{formatCurrency(subtotalAmount + vatAmount)}</span>
               </div>
               
-              {/* Shipping Method Selection */}
-              <div className="border-t pt-3">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    {t.shippingMethod || 'روش حمل'} *
-                  </label>
-                  <select
-                    value={selectedShippingMethod}
-                    onChange={(e) => {
-                      setSelectedShippingMethod(e.target.value);
-                      // Update shipping cost based on selected method
-                      const costs = { standard: 25, express: 50, overnight: 100 };
-                      setShippingCost(costs[e.target.value as keyof typeof costs] || 0);
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="">انتخاب روش حمل</option>
-                    <option value="standard">حمل استاندارد (5-7 روز) - {formatCurrency(25)}</option>
-                    <option value="express">حمل سریع (2-3 روز) - {formatCurrency(50)}</option>
-                    <option value="overnight">حمل فوری (24 ساعت) - {formatCurrency(100)}</option>
-                  </select>
-                </div>
-                
-                {/* Shipping Cost Display */}
-                {selectedShippingMethod && (
-                  <div className="flex justify-between text-sm mt-2 pt-2 border-t">
-                    <span>هزینه حمل:</span>
-                    <span className="font-medium">{formatCurrency(shippingCost)}</span>
-                  </div>
-                )}
-              </div>
-              
               {/* Final Amount */}
               <div className="flex justify-between font-bold text-lg border-t pt-2 bg-yellow-300 px-2 py-2 rounded-lg">
                 <span>Final Amount</span>
-                <span className="text-gray-900">{formatCurrency(totalAmount + shippingCost)}</span>
+                <span className="text-gray-900">{formatCurrency(totalAmount)}</span>
               </div>
             </div>
           </div>
