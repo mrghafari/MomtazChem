@@ -1118,7 +1118,7 @@ const Shop = () => {
                   <Card key={product.id} className={viewMode === "list" ? "flex" : ""}>
                     {viewMode === "grid" ? (
                       <>
-                        <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+                        <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative">
                           {product.imageUrl ? (
                             <img 
                               src={product.imageUrl} 
@@ -1130,48 +1130,49 @@ const Shop = () => {
                               No Image
                             </div>
                           )}
-                        </div>
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-semibold text-lg flex-1">{product.name}</h3>
-                            <div className="flex items-center gap-1 ml-2">
-                              {/* Product Rating */}
-                              {productStats?.[product.id] && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="p-1 h-8 w-8 hover:bg-yellow-50"
-                                  onClick={() => navigate(`/product-reviews/${product.id}`)}
-                                >
-                                  <StarRating
-                                    rating={productStats[product.id].averageRating}
-                                    size="sm"
-                                    showNumber={true}
-                                  />
-                                </Button>
-                              )}
-                              
-                              {/* Reviews Button */}
+                          
+                          {/* Overlay for Rating, Reviews and Specs */}
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+                            {/* Product Rating */}
+                            {productStats?.[product.id] && (
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="p-1 h-8 w-8 hover:bg-green-50"
+                                className="p-1 h-7 w-7 hover:bg-yellow-50"
                                 onClick={() => navigate(`/product-reviews/${product.id}`)}
                               >
-                                <MessageSquare className="w-4 h-4 text-green-600" />
+                                <StarRating
+                                  rating={productStats[product.id].averageRating}
+                                  size="sm"
+                                  showNumber={false}
+                                />
                               </Button>
-                              
-                              {/* Product Specifications */}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="p-1 h-8 w-8 hover:bg-blue-50"
-                                onClick={() => handleShowSpecs(product)}
-
-                              >
-                                <Package className="w-4 h-4 text-blue-600" />
-                              </Button>
-                            </div>
+                            )}
+                            
+                            {/* Reviews Button */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-1 h-7 w-7 hover:bg-green-50"
+                              onClick={() => navigate(`/product-reviews/${product.id}`)}
+                            >
+                              <MessageSquare className="w-3 h-3 text-green-600" />
+                            </Button>
+                            
+                            {/* Product Specifications */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-1 h-7 w-7 hover:bg-blue-50"
+                              onClick={() => handleShowSpecs(product)}
+                            >
+                              <Package className="w-3 h-3 text-blue-600" />
+                            </Button>
+                          </div>
+                        </div>
+                        <CardContent className="p-4">
+                          <div className="mb-2">
+                            <h3 className="font-semibold text-lg">{product.name}</h3>
                           </div>
                           
                           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
@@ -1377,7 +1378,7 @@ const Shop = () => {
                       </>
                     ) : (
                       <div className="flex">
-                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0">
+                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative">
                           {product.imageUrl ? (
                             <img 
                               src={product.imageUrl} 
@@ -1389,50 +1390,51 @@ const Shop = () => {
                               No Image
                             </div>
                           )}
+                          
+                          {/* Overlay for Rating, Reviews and Specs - List View */}
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+                            {/* Product Rating */}
+                            {productStats?.[product.id] && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 h-7 w-7 hover:bg-yellow-50"
+                                onClick={() => navigate(`/product-reviews/${product.id}`)}
+                              >
+                                <StarRating
+                                  rating={productStats[product.id].averageRating}
+                                  size="sm"
+                                  showNumber={false}
+                                />
+                              </Button>
+                            )}
+                            
+                            {/* Reviews Button */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-1 h-7 w-7 hover:bg-green-50"
+                              onClick={() => navigate(`/product-reviews/${product.id}`)}
+                            >
+                              <MessageSquare className="w-3 h-3 text-green-600" />
+                            </Button>
+                            
+                            {/* Product Specifications */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-1 h-7 w-7 hover:bg-blue-50"
+                              onClick={() => handleShowSpecs(product)}
+                            >
+                              <Package className="w-3 h-3 text-blue-600" />
+                            </Button>
+                          </div>
                         </div>
                         <CardContent className="p-6 flex-1">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <div className="flex items-start justify-between mb-2">
-                                <h3 className="font-semibold text-xl flex-1">{product.name}</h3>
-                                <div className="flex items-center gap-1 ml-2">
-                                  {/* Product Rating */}
-                                  {productStats?.[product.id] && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="p-1 h-8 w-8 hover:bg-yellow-50"
-                                      onClick={() => navigate(`/product-reviews/${product.id}`)}
-                                    >
-                                      <StarRating
-                                        rating={productStats[product.id].averageRating}
-                                        size="sm"
-                                        showNumber={true}
-                                      />
-                                    </Button>
-                                  )}
-                                  
-                                  {/* Reviews Button */}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="p-1 h-8 w-8 hover:bg-green-50"
-                                    onClick={() => navigate(`/product-reviews/${product.id}`)}
-                                  >
-                                    <MessageSquare className="w-4 h-4 text-green-600" />
-                                  </Button>
-                                  
-                                  {/* Product Specifications */}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="p-1 h-8 w-8 hover:bg-blue-50"
-                                    onClick={() => handleShowSpecs(product)}
-
-                                  >
-                                    <Package className="w-4 h-4 text-blue-600" />
-                                  </Button>
-                                </div>
+                              <div className="mb-2">
+                                <h3 className="font-semibold text-xl">{product.name}</h3>
                               </div>
                               <p className="text-gray-600 mb-4">
                                 {product.description}
