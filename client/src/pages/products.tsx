@@ -1028,12 +1028,12 @@ export default function ProductsPage() {
 
                       {/* Stock Level Indicator */}
                       {product.stockQuantity !== undefined && product.stockQuantity !== null && (
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                            <span className="break-words">Stock: {product.stockQuantity.toLocaleString()}</span>
-                            {product.maxStockLevel && <span className="break-words">Max: {product.maxStockLevel.toLocaleString()}</span>}
+                        <div className="space-y-1 w-full">
+                          <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 min-w-0">
+                            <span className="break-words truncate">Stock: {product.stockQuantity.toLocaleString()}</span>
+                            {product.maxStockLevel && <span className="break-words truncate ml-2">Max: {product.maxStockLevel.toLocaleString()}</span>}
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                             <div 
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 getStockLevelIndicator(
@@ -1043,11 +1043,11 @@ export default function ProductsPage() {
                                 ).color
                               }`}
                               style={{ 
-                                width: `${getStockLevelIndicator(
+                                width: `${Math.min(100, getStockLevelIndicator(
                                   product.stockQuantity, 
                                   product.minStockLevel || 0, 
                                   product.maxStockLevel || 1000
-                                ).width}%` 
+                                ).width)}%` 
                               }}
                             />
                           </div>
