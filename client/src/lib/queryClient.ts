@@ -56,15 +56,15 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 5 minutes
       retry: false,
+      onError: (error: any) => {
+        // Suppress 401 auth errors globally - they're expected 
+        if (!error.message?.includes('401:') && !error.message?.includes('احراز هویت نشده')) {
+          console.error('Query error:', error);
+        }
+      },
     },
     mutations: {
       retry: false,
-      onError: (error) => {
-        // Suppress 401 errors for mutations as they're handled locally
-        if (!error.message?.includes('401:')) {
-          console.error('Mutation error:', error);
-        }
-      },
     },
   },
 });

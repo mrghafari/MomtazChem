@@ -149,9 +149,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         });
       }
     } catch (error) {
-      console.error('Login error:', error);
       // Only show error toast if it's a real connection error
-      if (!error.message?.includes('401')) {
+      if (!error.message?.includes('401') && !error.message?.includes('Unauthorized')) {
+        console.error('Login connection error:', error);
         toast({
           variant: "destructive",
           title: "Error",

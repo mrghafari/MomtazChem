@@ -9,6 +9,12 @@ export function useCustomer() {
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
+    onError: (error: any) => {
+      // Suppress 401 errors as they're expected when not authenticated
+      if (!error.message?.includes('401:')) {
+        console.error('Customer auth error:', error);
+      }
+    },
   });
 
   const logout = useMutation({
