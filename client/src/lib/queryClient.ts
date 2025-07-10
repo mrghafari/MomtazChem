@@ -3,9 +3,9 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    // Don't throw for auth errors on login success scenarios
-    if (res.status === 401 && text.includes('احراز هویت نشده')) {
-      return;
+    // Completely suppress 401 errors - they're expected for guest users
+    if (res.status === 401) {
+      return { success: false, message: 'Unauthorized' };
     }
     throw new Error(`${res.status}: ${text}`);
   }

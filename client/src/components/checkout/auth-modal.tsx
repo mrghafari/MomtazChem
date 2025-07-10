@@ -100,10 +100,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         });
       }
     } catch (error) {
-      // Completely suppress all catch errors for successful login flow
-      // Only log real network errors, not empty error objects
-      if (error && error.message && !error.message.includes('401') && !error.message.includes('Unauthorized')) {
-        console.error('Network connection error:', error);
+      // Completely suppress errors during authentication flow
+      // Only show toast for actual network connectivity issues
+      if (error && typeof error === 'object' && error.name === 'TypeError' && error.message?.includes('fetch')) {
         toast({
           title: 'Network Error',
           description: 'Connection problem. Please try again.',
