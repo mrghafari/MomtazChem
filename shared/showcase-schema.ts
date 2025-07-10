@@ -37,8 +37,8 @@ export const showcaseProducts = pgTable("showcase_products", {
   imageUrl: text("image_url"),
   pdfCatalogUrl: text("pdf_catalog_url"),
   specifications: json("specifications"), // Technical specifications for display
-  features: text("features").array(), // Product features array
-  applications: text("applications").array(), // Applications array
+  features: json("features"), // Product features array
+  applications: json("applications"), // Applications array
   technicalDataSheet: text("technical_data_sheet_url"),
   safetyDataSheet: text("safety_data_sheet_url"),
   // MSDS (Material Safety Data Sheet) fields

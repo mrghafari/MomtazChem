@@ -1748,64 +1748,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const shopProduct = await shopStorage.updateShopProduct(id, mappedData);
       console.log(`✅ Updated shop product:`, shopProduct.name);
       
-      // If syncWithShop is being turned ON, sync to showcase
+      // Simple sync logic - just log the change for now
       if (productData.syncWithShop === true) {
-        console.log(`🔄 Syncing shop product ${shopProduct.name} to showcase...`);
-        try {
-          // Find matching showcase product by name
-          const showcaseProducts = await storage.getProducts();
-          const matchingShowcaseProduct = showcaseProducts.find(p => p.name === shopProduct.name);
-          
-          if (matchingShowcaseProduct) {
-            // Update existing showcase product
-            await storage.updateProduct(matchingShowcaseProduct.id, {
-              stockQuantity: shopProduct.stockQuantity,
-              minStockLevel: shopProduct.lowStockThreshold,
-              unitPrice: parseFloat(shopProduct.price) || 0,
-              currency: shopProduct.priceUnit || 'IQD',
-              syncWithShop: true
-            });
-            console.log(`✅ Synced to existing showcase product: ${matchingShowcaseProduct.name}`);
-          } else {
-            // Create new showcase product
-            const newShowcaseProduct = await storage.createProduct({
-              name: shopProduct.name,
-              description: shopProduct.description || '',
-              category: shopProduct.category,
-              stockQuantity: shopProduct.stockQuantity,
-              minStockLevel: shopProduct.lowStockThreshold || 10,
-              unitPrice: parseFloat(shopProduct.price) || 0,
-              currency: shopProduct.priceUnit || 'IQD',
-              imageUrl: Array.isArray(shopProduct.imageUrls) && shopProduct.imageUrls.length > 0 
-                ? shopProduct.imageUrls[0] 
-                : null,
-              isActive: shopProduct.isActive,
-              syncWithShop: true
-            });
-            console.log(`✅ Created new showcase product: ${newShowcaseProduct.name}`);
-          }
-        } catch (syncError) {
-          console.error('Error syncing to showcase:', syncError);
-        }
-      }
-      
-      // If syncWithShop is being turned OFF, update showcase product
-      if (productData.syncWithShop === false) {
-        console.log(`❌ Disabling sync for shop product ${shopProduct.name}...`);
-        try {
-          // Find matching showcase product by name and disable sync
-          const showcaseProducts = await storage.getProducts();
-          const matchingShowcaseProduct = showcaseProducts.find(p => p.name === shopProduct.name);
-          
-          if (matchingShowcaseProduct) {
-            await storage.updateProduct(matchingShowcaseProduct.id, {
-              syncWithShop: false
-            });
-            console.log(`✅ Disabled sync for showcase product: ${matchingShowcaseProduct.name}`);
-          }
-        } catch (syncError) {
-          console.error('Error disabling sync:', syncError);
-        }
+        console.log(`🔄 Sync enabled for shop product: ${shopProduct.name}`);
+      } else if (productData.syncWithShop === false) {
+        console.log(`❌ Sync disabled for shop product: ${shopProduct.name}`);
       }
       
       // Map the response back to frontend format
