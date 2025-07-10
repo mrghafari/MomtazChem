@@ -34,10 +34,12 @@ const Shop = () => {
   // Sync toggle mutation
   const { mutate: toggleSync } = useMutation({
     mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) =>
-      apiRequest(`/api/shop/products/${id}`, "PUT", { syncWithShop }),
+      apiRequest(`/api/products/${id}`, "PUT", { syncWithShop }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
       queryClient.invalidateQueries({ queryKey: ['shopSearch'] });
+      // Force refetch of current data
+      window.location.reload();
       toast({
         title: "موفقیت‌آمیز",
         description: "وضعیت سینک تغییر کرد",
