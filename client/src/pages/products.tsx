@@ -1440,7 +1440,7 @@ export default function ProductsPage() {
                       <Input 
                         type="number" 
                         placeholder="0" 
-                        value={editingProduct?.maxStockLevel || 100}
+                        defaultValue={editingProduct?.maxStockLevel || 100}
                         onChange={(e) => {
                           console.log("MaxStockLevel onChange triggered:", e.target.value);
                           form.setValue("maxStockLevel", e.target.value ? Number(e.target.value) : 0);
@@ -1505,7 +1505,7 @@ export default function ProductsPage() {
                         type="number" 
                         step="0.01"
                         placeholder="0.00" 
-                        value={editingProduct?.weight || "1"}
+                        defaultValue={editingProduct?.weight || "1"}
                         onChange={(e) => {
                           console.log("Weight onChange triggered:", e.target.value);
                           form.setValue("weight", e.target.value);
