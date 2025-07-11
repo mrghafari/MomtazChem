@@ -42,6 +42,7 @@ import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBar
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { smsService } from "./sms-service";
+import { tbiPaymentService } from "./tbi-payment-service";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -4537,9 +4538,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (needsOnlinePayment) {
         try {
-          // Import TBI Payment Service
-          const { TBIPaymentService } = await import('./tbi-payment-service');
-          const tbiService = new TBIPaymentService();
+          // Use TBI Payment Service instance
+          const tbiService = tbiPaymentService;
 
           // Prepare payment data for TBI Bank POS
           const paymentAmount = orderData.paymentMethod === 'wallet_partial' ? remainingAmount : totalAmount;

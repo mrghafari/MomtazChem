@@ -296,4 +296,5 @@ class TBIPaymentService {
   }
 }
 
+export default TBIPaymentService;
 export const tbiPaymentService = new TBIPaymentService();
