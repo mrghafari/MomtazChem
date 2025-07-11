@@ -7,8 +7,8 @@ export function useCustomer() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/customers/me"],
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 1000, // 1 second - allow quick refresh after login
+    refetchOnWindowFocus: true, // Enable refetch on focus for better UX
   });
 
   const logout = useMutation({

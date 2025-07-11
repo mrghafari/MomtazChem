@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, ArrowLeft, UserPlus, LogIn } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode }: AuthModalProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useState<'choice' | 'login' | 'register'>(initialMode || 'choice');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,6 +92,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
           title: 'Welcome Back',
           description: 'Successfully logged in'
         });
+        
+        // Invalidate customer cache to refresh UI
+        queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
+        
         resetModal();
         onAuthSuccess();
       } else {
@@ -177,6 +184,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
           title: 'Registration Successful',
           description: 'Account created and logged in successfully'
         });
+        
+        // Invalidate customer cache to refresh UI
+        queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
+        
         resetModal();
         onAuthSuccess();
       } else {
