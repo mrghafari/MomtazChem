@@ -22,7 +22,7 @@ export default function SiteManagement() {
   const { toast } = useToast();
 
   // Fetch active users data - removed automatic refresh
-  const { data: activeUsersData, isLoading: isLoadingActiveUsers, refetch: refetchActiveUsers } = useQuery({
+  const { data: activeUsersData, isLoading: isLoadingActiveUsers, refetch: refetchActiveUsers, error } = useQuery({
     queryKey: ['/api/active-users'],
     enabled: false, // Don't auto-fetch on mount
   });
@@ -302,12 +302,14 @@ export default function SiteManagement() {
                 <div className="text-2xl font-bold">
                   {isLoadingActiveUsers ? (
                     <div className="animate-pulse bg-gray-200 rounded w-8 h-8"></div>
+                  ) : error ? (
+                    "Login required"
                   ) : (
                     activeUsersData?.data?.activeUsersCount || "Click to check"
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {activeUsersData?.data ? "Currently online (last 30 min)" : "Click to get exact count"}
+                  {error ? "Login as admin first" : activeUsersData?.data ? "Currently online (last 30 min)" : "Click to get exact count"}
                 </p>
                 {activeUsersData?.data?.activeUsers && activeUsersData.data.activeUsers.length > 0 && (
                   <div className="mt-2 space-y-1">
