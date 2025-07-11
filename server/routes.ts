@@ -6688,11 +6688,27 @@ ${procedure.content}
   // Product synchronization endpoint
   app.post("/api/sync-products", requireAuth, async (req, res) => {
     try {
-      // No sync needed - unified table approach
+      await storage.syncAllProductsToShop();
       res.json({ success: true, message: "All products synchronized successfully" });
     } catch (error) {
       console.error("Error syncing products:", error);
       res.status(500).json({ success: false, message: "Failed to sync products" });
+    }
+  });
+
+  // Force sync all showcase products to shop (no auth needed for testing)
+  app.post("/api/products/force-sync-all", async (req, res) => {
+    try {
+      await storage.syncAllProductsToShop();
+      const shopProductsCount = await shopStorage.getShopProducts();
+      res.json({ 
+        success: true, 
+        message: "All products force synchronized successfully",
+        shopProductsCount: shopProductsCount.length
+      });
+    } catch (error) {
+      console.error("Error force syncing products:", error);
+      res.status(500).json({ success: false, message: "Failed to force sync products" });
     }
   });
 
