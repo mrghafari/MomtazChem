@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, Send, User, Mail } from "lucide-react";
+import { Star, Send, User, Mail, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ReviewFormProps {
@@ -18,13 +18,17 @@ export function ReviewForm({ productId, productName, onSuccess }: ReviewFormProp
   const [hoveredRating, setHoveredRating] = useState(0);
   const [title, setTitle] = useState("");
   const [review, setReview] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
   const [pros, setPros] = useState("");
   const [cons, setCons] = useState("");
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check if user is authenticated
+  const { data: customer, isLoading: isLoadingCustomer } = useQuery({
+    queryKey: ['/api/customers/me'],
+    enabled: true
+  });
 
   const submitReviewMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -44,8 +48,6 @@ export function ReviewForm({ productId, productName, onSuccess }: ReviewFormProp
       setRating(0);
       setTitle("");
       setReview("");
-      setCustomerName("");
-      setCustomerEmail("");
       setPros("");
       setCons("");
       
@@ -57,9 +59,10 @@ export function ReviewForm({ productId, productName, onSuccess }: ReviewFormProp
       onSuccess?.();
     },
     onError: (error: any) => {
+      const errorMessage = error.message || "لطفاً دوباره تلاش کنید";
       toast({
         title: "خطا در ارسال نظر",
-        description: error.message || "لطفاً دوباره تلاش کنید",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -77,14 +80,6 @@ export function ReviewForm({ productId, productName, onSuccess }: ReviewFormProp
       return;
     }
     
-    if (!customerName.trim()) {
-      toast({
-        title: "لطفاً نام خود را وارد کنید",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const prosArray = pros.split('\n').filter(p => p.trim().length > 0);
     const consArray = cons.split('\n').filter(c => c.trim().length > 0);
 
@@ -92,18 +87,62 @@ export function ReviewForm({ productId, productName, onSuccess }: ReviewFormProp
       rating,
       title: title.trim(),
       review: review.trim(),
-      customerName: customerName.trim(),
-      customerEmail: customerEmail.trim(),
       pros: prosArray,
       cons: consArray
     });
   };
+
+  // If loading customer data, show loading state
+  if (isLoadingCustomer) {
+    return (
+      <div className="bg-white rounded-lg border p-6 space-y-4">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="h-20 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is not authenticated, show login prompt
+  if (!customer) {
+    return (
+      <div className="bg-white rounded-lg border p-6 space-y-4">
+        <div className="text-center">
+          <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            برای ثبت نظر ابتدا وارد شوید
+          </h3>
+          <p className="text-gray-600 mb-4">
+            جهت ثبت نظر و امتیاز دادن به محصولات، ابتدا باید وارد حساب کاربری خود شوید
+          </p>
+          <div className="flex gap-2 justify-center">
+            <Button 
+              onClick={() => window.location.href = '/auth/login'}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              ورود
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => window.location.href = '/auth/register'}
+            >
+              ثبت نام
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg border p-6 space-y-4">
       <h3 className="text-lg font-semibold text-gray-800">
         نظر شما درباره {productName}
       </h3>
+      <p className="text-sm text-gray-600">
+        ثبت نظر به نام: {customer.firstName} {customer.lastName}
+      </p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Rating Stars */}
@@ -140,42 +179,6 @@ export function ReviewForm({ productId, productName, onSuccess }: ReviewFormProp
                 {rating === 5 && "عالی"}
               </span>
             )}
-          </div>
-        </div>
-
-        {/* Customer Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              نام شما *
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-              <Input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="نام و نام خانوادگی"
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              ایمیل (اختیاری)
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-              <Input
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="example@email.com"
-                className="pl-10"
-              />
-            </div>
           </div>
         </div>
 
