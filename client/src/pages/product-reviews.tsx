@@ -26,9 +26,9 @@ export default function ProductReviews() {
   // Find the specific product
   const product = products?.find((p: any) => p.id === parseInt(id || '0'));
 
-  // Get product reviews data
+  // Get product reviews data - using proper shop products endpoint
   const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
-    queryKey: ['/api/products', id, 'reviews'],
+    queryKey: [`/api/products/${id}/reviews`],
     enabled: !!id,
   });
 
@@ -37,11 +37,23 @@ export default function ProductReviews() {
   const productStats = reviewsData?.data?.stats || { averageRating: 0, totalReviews: 0 };
 
   // Debug logging
+  console.log('🔍 DEBUGGING REVIEWS ISSUE:');
   console.log('Product ID:', id);
-  console.log('Reviews Data:', reviewsData);
-  console.log('Reviews:', reviews);
+  console.log('Reviews Data Full:', JSON.stringify(reviewsData, null, 2));
+  console.log('Reviews Array Length:', reviews.length);
+  console.log('Reviews Array:', reviews);
   console.log('Product Stats:', productStats);
   console.log('Product:', product);
+  
+  // Check if reviewsData structure is correct
+  if (reviewsData) {
+    console.log('ReviewsData type:', typeof reviewsData);
+    console.log('ReviewsData keys:', Object.keys(reviewsData));
+    if (reviewsData.data) {
+      console.log('ReviewsData.data keys:', Object.keys(reviewsData.data));
+      console.log('ReviewsData.data.reviews:', reviewsData.data.reviews);
+    }
+  }
 
   // Add review mutation
   const addReviewMutation = useMutation({
@@ -59,7 +71,7 @@ export default function ProductReviews() {
     },
     onSuccess: () => {
       // Invalidate and refetch product reviews (which includes stats)
-      queryClient.invalidateQueries({ queryKey: ['/api/products', id, 'reviews'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/products/${id}/reviews`] });
       toast({
         title: t.reviewSubmitted,
         description: t.reviewSubmittedDesc,
@@ -162,14 +174,16 @@ export default function ProductReviews() {
         </Card>
 
         {/* Rating Component */}
-        <ProductRating
-          productId={parseInt(id || '0')}
-          productName={product.name}
-          averageRating={productStats?.averageRating || 0}
-          totalReviews={productStats?.totalReviews || 0}
-          reviews={reviews}
-          onAddReview={handleAddReview}
-        />
+        {product && (
+          <ProductRating
+            productId={parseInt(id || '0')}
+            productName={product.name}
+            averageRating={productStats?.averageRating || 0}
+            totalReviews={productStats?.totalReviews || 0}
+            reviews={reviews}
+            onAddReview={handleAddReview}
+          />
+        )}
       </div>
     </div>
   );
