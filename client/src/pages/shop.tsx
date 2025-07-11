@@ -119,10 +119,9 @@ const Shop = () => {
     }
   });
 
-  // Fetch shop products (fallback)
+  // Fetch all shop products for total count
   const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
-    enabled: !searchResults || (searchTerm.length > 0 && searchTerm.length < 3)
   });
 
   // Get data from search results or fallback to regular products
@@ -131,7 +130,7 @@ const Shop = () => {
   // Shop products are all visible by default (no visibleInShop field needed)
   const filteredProducts = currentProducts;
   
-  const totalResults = searchResults?.data?.total || filteredProducts.length;
+  const totalResults = searchResults?.data?.total || products.length;
   const availableFilters = searchResults?.data?.filters;
   const totalPages = Math.ceil(totalResults / itemsPerPage);
 
@@ -1076,7 +1075,7 @@ const Shop = () => {
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-600">
-                Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+                Showing {totalResults} product{totalResults !== 1 ? 's' : ''} {currentPage > 0 ? `(page ${currentPage + 1} of ${totalPages})` : ''}
               </p>
               <div className="flex items-center gap-2">
                 <Button
