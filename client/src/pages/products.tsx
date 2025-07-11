@@ -395,7 +395,7 @@ export default function ProductsPage() {
   
   // Required fields in order of priority
   const requiredFields = [
-    'name', 'category', 'description', 'unitPrice', 'stockQuantity', 
+    'name', 'category', 'shortDescription', 'description', 'unitPrice', 'stockQuantity', 
     'weight', 'barcode', 'sku'
   ];
 
@@ -657,6 +657,7 @@ export default function ProductsPage() {
       showMsdsToCustomers: product.showMsdsToCustomers || false,
       catalogFileName: product.catalogFileName || "",
       showCatalogToCustomers: product.showCatalogToCustomers || false,
+      tags: product.tags || "",
       syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       isActive: product.isActive !== false,
     };
@@ -1343,13 +1344,39 @@ export default function ProductsPage() {
 
                   <FormField
                     control={form.control}
+                    name="shortDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Short Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Enter a brief product summary (2-3 lines)" 
+                            className="min-h-[60px]"
+                            value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e.target.value);
+                            }}
+                            ref={(el) => { 
+                              fieldRefs.current.shortDescription = el; 
+                              field.ref(el);
+                            }}
+                            onKeyDown={(e) => handleKeyNavigation(e, 'shortDescription')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Description *</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Enter product description" 
+                            placeholder="Enter detailed product description" 
                             className="min-h-[100px]"
                             value={field.value || ""}
                             onChange={(e) => {
@@ -1470,6 +1497,27 @@ export default function ProductsPage() {
                       )}
                     />
                   </div>
+
+                  {/* Price Range Field */}
+                  <FormField
+                    control={form.control}
+                    name="priceRange"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price Range (Display Only)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., 25-30 USD per liter" 
+                            {...field}
+                          />
+                        </FormControl>
+                        <div className="text-xs text-muted-foreground">
+                          Optional: Add a price range for display purposes (e.g., "25-30 USD per liter")
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Weight Fields */}
                   <div className="grid grid-cols-2 gap-4">

@@ -1546,6 +1546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category: productData.category,
         description: productData.description || "",
         shortDescription: productData.shortDescription || "",
+        priceRange: productData.priceRange || "",
         imageUrl: productData.imageUrl || null,
         pdfCatalogUrl: productData.pdfCatalogUrl || null,
         catalogFileName: productData.catalogFileName || null,
@@ -1558,6 +1559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                  (typeof productData.features === 'string' ? productData.features.split('\n').filter(f => f.trim()) : []),
         applications: Array.isArray(productData.applications) ? productData.applications :
                      (typeof productData.applications === 'string' ? productData.applications.split('\n').filter(a => a.trim()) : []),
+        tags: productData.tags || null,
         stockQuantity: parseInt(productData.stockQuantity) || 0,
         minStockLevel: parseInt(productData.minStockLevel) || 5,
         maxStockLevel: parseInt(productData.maxStockLevel) || 100,
@@ -1572,8 +1574,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isVariant: productData.isVariant || false,
         parentProductId: productData.parentProductId || null,
         variantType: productData.variantType || null,
-        variantValue: productData.variantValue || null,
-        priceRange: productData.priceRange || ""
+        variantValue: productData.variantValue || null
       };
       
       console.log("Final showcase product data:", showcaseProductData);

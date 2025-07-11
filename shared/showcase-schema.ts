@@ -47,6 +47,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   msdsFileName: text("msds_file_name"), // Original filename for display
   msdsUploadDate: timestamp("msds_upload_date"), // When MSDS was uploaded
   certifications: json("certifications"), // Array of certifications
+  tags: text("tags"), // Product tags for search and filtering
   // Inventory management fields
   stockQuantity: integer("stock_quantity").default(0), // Current stock level
   minStockLevel: integer("min_stock_level").default(10), // Minimum stock threshold
