@@ -414,11 +414,13 @@ export default function ProductsPage() {
   }, [navigateToNextEmptyField]);
 
   const onSubmit = (data: InsertShowcaseProduct) => {
-    // Convert numeric fields to strings for API compatibility
+    console.log("Form data before processing:", data);
+    
+    // Convert numeric fields to strings for API compatibility  
     const processedData = {
       ...data,
       unitPrice: data.unitPrice ? data.unitPrice.toString() : "0",
-      weight: data.weight ? data.weight.toString() : "",
+      weight: data.weight || "",
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
       maxStockLevel: Number(data.maxStockLevel) || 0,
@@ -443,6 +445,8 @@ export default function ProductsPage() {
         }
       })(),
     };
+    
+    console.log("Processed data for API:", processedData);
     
     if (editingProduct) {
       updateProduct({ id: editingProduct.id, data: processedData });
