@@ -19317,6 +19317,10 @@ momtazchem.com
     }
   });
 
+  // Register ticket routes
+  const { registerTicketRoutes } = await import("./ticket-routes");
+  registerTicketRoutes(app);
+
   const httpServer = createServer(app);
   return httpServer;
 }

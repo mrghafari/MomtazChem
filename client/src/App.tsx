@@ -96,6 +96,7 @@ import SecurityManagement from "@/pages/security-management-new";
 import UnifiedInventory from "@/pages/admin/unified-inventory";
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
+import TicketsPage from "@/pages/admin/tickets";
 
 import NotFound from "@/pages/not-found";
 
@@ -173,6 +174,7 @@ function Router() {
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           <Route path="/admin/inventory-management" component={InventoryManagement} />
           <Route path="/admin/unified-inventory" component={UnifiedInventory} />
+          <Route path="/admin/tickets" component={TicketsPage} />
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/security-management" component={SecurityManagement} />
 
