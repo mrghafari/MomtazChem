@@ -876,57 +876,71 @@ export default function ProductsPage() {
 
       {/* Inventory Dashboard Summary */}
       {products && products.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('in_stock')}>
-            <CardContent className="p-4">
+            <CardContent className="p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">In Stock</p>
-                  <p className="text-2xl font-bold text-green-800">
+                  <p className="text-xs font-medium text-green-600">In Stock</p>
+                  <p className="text-lg font-bold text-green-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'in_stock').length}
                   </p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-green-600" />
+                <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('low_stock')}>
-            <CardContent className="p-4">
+            <CardContent className="p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-yellow-600">Low Stock</p>
-                  <p className="text-2xl font-bold text-yellow-800">
+                  <p className="text-xs font-medium text-yellow-600">Low Stock</p>
+                  <p className="text-lg font-bold text-yellow-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'low_stock').length}
                   </p>
                 </div>
-                <AlertTriangle className="w-8 h-8 text-yellow-600" />
+                <AlertTriangle className="w-5 h-5 text-yellow-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('out_of_stock')}>
-            <CardContent className="p-4">
+            <CardContent className="p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-red-600">Out of Stock</p>
-                  <p className="text-2xl font-bold text-red-800">
+                  <p className="text-xs font-medium text-red-600">Out of Stock</p>
+                  <p className="text-lg font-bold text-red-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'out_of_stock').length}
                   </p>
                 </div>
-                <XCircle className="w-8 h-8 text-red-600" />
+                <XCircle className="w-5 h-5 text-red-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setVisibilityFilter('hidden')}>
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-600">Hidden</p>
+                  <p className="text-lg font-bold text-gray-800">
+                    {products.filter(p => p.syncWithShop !== true).length}
+                  </p>
+                </div>
+                <XCircle className="w-5 h-5 text-gray-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('all')}>
-            <CardContent className="p-4">
+            <CardContent className="p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Total Products</p>
-                  <p className="text-2xl font-bold text-blue-800">{products.length}</p>
+                  <p className="text-xs font-medium text-blue-600">Total Products</p>
+                  <p className="text-lg font-bold text-blue-800">{products.length}</p>
                 </div>
-                <Package className="w-8 h-8 text-blue-600" />
+                <Package className="w-5 h-5 text-blue-600" />
               </div>
             </CardContent>
           </Card>
