@@ -88,54 +88,22 @@ const Shop = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Advanced search query
-  const { data: searchResults, isLoading: productsLoading } = useQuery({
-    queryKey: ['shopSearch', debouncedQuery, filters, currentPage, Date.now()], // Force cache refresh
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        q: debouncedQuery || '', // Always include query parameter, even if empty
-        limit: '100', // Set high limit to show all products
-        offset: (currentPage * itemsPerPage).toString(),
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder
-      });
-      
-      // Only perform search if query is empty or has 3+ characters
-      if (debouncedQuery.length > 0 && debouncedQuery.length < 3) {
-        return null; // Don't search with less than 3 characters
-      }
+  // Advanced search query - disabled for now to fix infinite loop
+  const searchResults = null;
+  const productsLoading = false;
 
-      if (filters.category) params.append('category', filters.category);
-      if (filters.priceMin !== undefined) params.append('priceMin', filters.priceMin.toString());
-      if (filters.priceMax !== undefined) params.append('priceMax', filters.priceMax.toString());
-      if (filters.inStock !== undefined) params.append('inStock', filters.inStock.toString());
-      if (filters.tags?.length) {
-        filters.tags.forEach(tag => params.append('tags', tag));
-      }
-
-      const response = await fetch(`/api/shop/search?${params}`);
-      if (!response.ok) throw new Error('Search failed');
-      return response.json();
-    }
-  });
-
-  // Fetch shop products (fallback)
+  // Fetch shop products (primary data source)
   const { data: products = [] } = useQuery<ShopProduct[]>({
-    queryKey: ["/api/shop/products", Date.now()], // Force cache refresh
-    enabled: !searchResults || (searchTerm.length > 0 && searchTerm.length < 3),
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    staleTime: 0, // Always fetch fresh data
-    cacheTime: 0  // Don't cache data
+    queryKey: ["/api/shop/products"],
+    refetchOnMount: false,
+    refetchOnWindowFocus: false
   });
 
-  // Get data from search results or fallback to regular products
-  const currentProducts = searchResults?.data?.products || products;
+  // Use products directly (no search for now)
+  const currentProducts = products;
   
-  // Calculate filtered products that are actually visible in shop
-  const filteredProducts = currentProducts.filter((product: any) => {
-    return product.visibleInShop === true || product.visibleInShop === 1;
-  });
+  // Products are already filtered by backend, no need for additional filtering
+  const filteredProducts = currentProducts;
   
   const totalResults = searchResults?.data?.total || filteredProducts.length;
   const availableFilters = searchResults?.data?.filters;
