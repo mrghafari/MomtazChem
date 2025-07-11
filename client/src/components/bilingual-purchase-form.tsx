@@ -981,12 +981,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 )}
                 
                 {/* سوم: پرداخت ترکیبی (والت + آنلاین) */}
-                {walletBalance > 0 && walletBalance < totalAmount && (
+                {walletBalance > 0 && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت ترکیبی (والت + آنلاین)
+                      پرداخت ترکیبی (والت + آنلاین) - مقدار دلخواه
                     </Label>
                   </div>
                 )}
