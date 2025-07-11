@@ -635,6 +635,10 @@ export default function ProductsPage() {
     
     setEditingProduct(product);
     setImagePreview(product.imageUrl || null);
+    
+    // Debug catalog and MSDS URLs
+    console.log("Setting catalog preview:", product.pdfCatalogUrl);
+    console.log("Setting MSDS preview:", product.msdsUrl);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
     
@@ -706,10 +710,19 @@ export default function ProductsPage() {
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
-      msdsUrl: product.msdsUrl || "",
-      msdsFileName: product.msdsFileName || "",
+      msdsUrl: (() => {
+        console.log("Raw msdsUrl:", product.msdsUrl, typeof product.msdsUrl);
+        return product.msdsUrl || "";
+      })(),
+      msdsFileName: (() => {
+        console.log("Raw msdsFileName:", product.msdsFileName, typeof product.msdsFileName);
+        return product.msdsFileName || "";
+      })(),
       showMsdsToCustomers: product.showMsdsToCustomers || false,
-      catalogFileName: product.catalogFileName || "",
+      catalogFileName: (() => {
+        console.log("Raw catalogFileName:", product.catalogFileName, typeof product.catalogFileName);
+        return product.catalogFileName || "";
+      })(),
       showCatalogToCustomers: product.showCatalogToCustomers || false,
       tags: (() => {
         console.log("Raw tags:", product.tags, typeof product.tags);
