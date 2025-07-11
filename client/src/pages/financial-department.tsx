@@ -183,19 +183,23 @@ export default function FinancialDepartment() {
   });
 
   // Wallet Management Queries
-  const { data: walletStatsData, isLoading: walletStatsLoading } = useQuery<{ success: boolean; data: WalletStats }>({
+  const { data: walletStatsData, isLoading: walletStatsLoading, refetch: refetchWalletStats } = useQuery<{ success: boolean; data: WalletStats }>({
     queryKey: ['/api/financial/wallet/stats'],
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refresh when needed
     onError: (error) => {
       console.error('Error fetching wallet stats:', error);
     }
   });
 
-  const { data: walletRequestsData, isLoading: walletRequestsLoading } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
+  const { data: walletRequestsData, isLoading: walletRequestsLoading, refetch: refetchWalletRequests } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
     queryKey: ['/api/financial/wallet/recharge-requests'],
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refresh when needed
     onError: (error) => {
       console.error('Error fetching wallet requests:', error);
     },
@@ -216,13 +220,23 @@ export default function FinancialDepartment() {
         rejectionReason: data.rejectionReason
       });
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch wallet queries
       queryClient.invalidateQueries({ queryKey: ['/api/financial/wallet/recharge-requests'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/wallet/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/customers/wallet/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
+      
+      // Manually refetch to ensure immediate update
+      refetchWalletStats();
+      refetchWalletRequests();
+      
       toast({
         title: "موفق",
-        description: "درخواست شارژ کیف پول با موفقیت پردازش شد",
+        description: "درخواست شارژ کیف پول با موفقیت پردازش شد. موجودی کیف پول مشتری به‌روزرسانی شد.",
       });
+      
+      console.log('🔄 Wallet request processed, all wallet data refreshed');
     },
     onError: (error) => {
       toast({
@@ -358,8 +372,13 @@ export default function FinancialDepartment() {
             <div className="mb-6">
               <GlobalRefreshControl 
                 pageName="financial"
-                onRefresh={() => refetch()}
-                isLoading={isLoading}
+                onRefresh={() => {
+                  refetch();
+                  refetchWalletStats();
+                  refetchWalletRequests();
+                  console.log('🔄 Financial department refreshed: orders, wallet stats, and recharge requests');
+                }}
+                isLoading={isLoading || walletStatsLoading || walletRequestsLoading}
               />
             </div>
 
@@ -536,6 +555,19 @@ export default function FinancialDepartment() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Wallet Refresh Control */}
+            <div className="mb-6">
+              <GlobalRefreshControl 
+                pageName="financial-wallet"
+                onRefresh={() => {
+                  refetchWalletStats();
+                  refetchWalletRequests();
+                  console.log('🔄 Wallet management refreshed: stats and recharge requests');
+                }}
+                isLoading={walletStatsLoading || walletRequestsLoading}
+              />
             </div>
 
             {/* Pending Recharge Requests */}

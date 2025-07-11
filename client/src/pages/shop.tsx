@@ -299,25 +299,43 @@ const Shop = () => {
     }
   };
 
-  const fetchWalletBalance = async () => {
-    try {
-      const response = await fetch('/api/customers/wallet/balance', {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setWalletBalance(result.balance || 0);
+  // Fetch wallet balance with useQuery for automatic refresh
+  const { data: walletData, refetch: refetchWallet } = useQuery({
+    queryKey: ['/api/customers/wallet/balance'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/customers/wallet/balance', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            return result.balance || 0;
+          }
         }
+        return 0;
+      } catch (error) {
+        // Suppress wallet errors for guest users
+        if (!error.message?.includes('401') && !error.message?.includes('احراز هویت نشده')) {
+          console.error('Error fetching wallet balance:', error);
+        }
+        return 0;
       }
-    } catch (error) {
-      // Suppress wallet errors for guest users
-      if (!error.message?.includes('401') && !error.message?.includes('احراز هویت نشده')) {
-        console.error('Error fetching wallet balance:', error);
-      }
+    },
+    enabled: !!customer,
+    retry: false,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refresh when needed
+  });
+
+  // Update local wallet balance when query data changes
+  useEffect(() => {
+    if (walletData !== undefined) {
+      setWalletBalance(walletData);
+      console.log('🔄 Shop wallet balance updated:', walletData);
     }
-  };
+  }, [walletData]);
 
   const migrateGuestCartToUser = () => {
     // Since guest cart is only in memory, get current cart state

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, AlertTriangle, CheckCircle } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -276,8 +276,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
-  // Fetch wallet data for logged-in customers
-  const { data: walletData } = useQuery({
+  // Fetch wallet data for logged-in customers with automatic refresh
+  const { data: walletData, refetch: refetchWallet } = useQuery({
     queryKey: ['/api/customer/wallet'],
     queryFn: async () => {
       try {
@@ -287,7 +287,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         
         if (response.ok) {
           const result = await response.json();
-          console.log('Wallet API response:', result);
+          console.log('Wallet API response (refreshed):', result);
           if (result.success) {
             return result;
           }
@@ -300,7 +300,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     },
     enabled: !!(customerData?.success && customerData.customer),
     retry: false,
+    refetchOnWindowFocus: true, // Refresh when window gains focus
+    staleTime: 0, // Always refresh when needed
   });
+
+  // Refresh wallet data when purchase form opens
+  useEffect(() => {
+    if (customerData?.success && customerData.customer) {
+      console.log('🔄 Refreshing wallet balance for purchase form...');
+      refetchWallet();
+    }
+  }, [customerData, refetchWallet]);
 
   // Fetch VAT settings
   const { data: vatData } = useQuery({
@@ -956,7 +966,28 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{t.walletBalance}:</span>
-                  <span className="font-semibold text-green-600">{formatCurrency(walletBalance)}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-green-600">{formatCurrency(walletBalance)}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => {
+                        console.log('🔄 Manual wallet refresh requested...');
+                        refetchWallet();
+                        toast({
+                          title: language === 'ar' ? 'تم تحديث رصيد المحفظة' : 'موجودی کیف پول به‌روزرسانی شد',
+                          description: language === 'ar' ? 'تم تحديث رصيد محفظتك' : 'رصید جدید کیف پول دریافت شد'
+                        });
+                      }}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                    </Button>
+                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                      {language === 'ar' ? 'تحديث تلقائي' : 'ریفرش شده'}
+                    </Badge>
+                  </div>
                 </div>
               </div>
 
