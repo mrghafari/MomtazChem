@@ -4741,11 +4741,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseData.paymentGatewayUrl = paymentGatewayResponse.url;
         responseData.tbiCreditApplicationId = paymentGatewayResponse.creditApplicationId;
         console.log(`✅ Order ${orderNumber} created - redirecting to TBI Bank POS for ${paymentGatewayResponse.totalAmount || (remainingAmount > 0 ? remainingAmount : totalAmount)} IQD`);
-      } else if (finalPaymentMethod === 'online_payment') {
-        // Fallback to local payment page if TBI Bank integration fails
+      } else if (needsOnlinePayment) {
+        // Fallback to local payment page if TBI Bank integration fails for online_payment OR wallet_partial
         responseData.redirectToPayment = true;
         responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}`;
-        console.log(`✅ Order ${orderNumber} created - redirecting to local payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
+        console.log(`✅ Order ${orderNumber} created - redirecting to local payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD (${orderData.paymentMethod})`);
       }
 
       res.json(responseData);

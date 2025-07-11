@@ -721,6 +721,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     } else if (paymentMethod === 'wallet_partial') {
       orderData.walletAmountUsed = walletAmount;
       orderData.remainingAmount = totalAmount - walletAmount;
+      console.log('🔄 Wallet partial payment:', {
+        walletAmount,
+        totalAmount,
+        remainingAmount: totalAmount - walletAmount,
+        paymentMethod
+      });
     } else if (paymentMethod === 'online_payment') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
