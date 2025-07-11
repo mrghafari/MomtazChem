@@ -651,15 +651,36 @@ export default function ProductsPage() {
     
     setEditingProduct(product);
     
-    // Set preview states for files FIRST
-    console.log("Setting previews:");
+    // Force set preview states IMMEDIATELY
+    console.log("Setting previews IMMEDIATELY:");
     console.log("- Image preview:", product.imageUrl);
     console.log("- Catalog preview:", product.pdfCatalogUrl);
     console.log("- MSDS preview:", product.msdsUrl);
     
-    setImagePreview(product.imageUrl || null);
-    setCatalogPreview(product.pdfCatalogUrl || null);
-    setMsdsPreview(product.msdsUrl || null);
+    // Force state updates
+    if (product.imageUrl) {
+      setImagePreview(product.imageUrl);
+      console.log("✓ Image preview set to:", product.imageUrl);
+    } else {
+      setImagePreview(null);
+      console.log("✓ Image preview cleared");
+    }
+    
+    if (product.pdfCatalogUrl) {
+      setCatalogPreview(product.pdfCatalogUrl);
+      console.log("✓ Catalog preview set to:", product.pdfCatalogUrl);
+    } else {
+      setCatalogPreview(null);
+      console.log("✓ Catalog preview cleared");
+    }
+    
+    if (product.msdsUrl) {
+      setMsdsPreview(product.msdsUrl);
+      console.log("✓ MSDS preview set to:", product.msdsUrl);
+    } else {
+      setMsdsPreview(null);
+      console.log("✓ MSDS preview cleared");
+    }
     
     // Process form data
     const processText = (value: any): string => {
@@ -729,18 +750,6 @@ export default function ProductsPage() {
     
     // Use form.reset to properly populate all fields
     form.reset(formData);
-    
-    // Set preview states AFTER form reset to ensure they persist
-    setTimeout(() => {
-      console.log("=== SETTING PREVIEW STATES AFTER FORM RESET ===");
-      setImagePreview(product.imageUrl || null);
-      setCatalogPreview(product.pdfCatalogUrl || null);
-      setMsdsPreview(product.msdsUrl || null);
-      console.log("Final preview states set:");
-      console.log("- Image preview:", product.imageUrl);
-      console.log("- Catalog preview:", product.pdfCatalogUrl); 
-      console.log("- MSDS preview:", product.msdsUrl);
-    }, 100);
     
     setDialogOpen(true);
     
