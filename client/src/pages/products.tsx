@@ -1320,24 +1320,19 @@ export default function ProductsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Basic Information</h3>
                   
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product Name *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter product name" 
-                            {...field}
-                            ref={(el) => { fieldRefs.current.name = el; }}
-                            onKeyDown={(e) => handleKeyNavigation(e, 'name')}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Product Name *</label>
+                    <Input 
+                      placeholder="Enter product name" 
+                      defaultValue={editingProduct?.name || ""}
+                      onChange={(e) => {
+                        console.log("Name onChange triggered:", e.target.value);
+                        form.setValue("name", e.target.value);
+                      }}
+                      ref={(el) => { fieldRefs.current.name = el; }}
+                      onKeyDown={(e) => handleKeyNavigation(e, 'name')}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
@@ -1367,25 +1362,20 @@ export default function ProductsPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description *</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Enter product description" 
-                            className="min-h-[100px]"
-                            {...field}
-                            ref={(el) => { fieldRefs.current.description = el; }}
-                            onKeyDown={(e) => handleKeyNavigation(e, 'description')}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Description *</label>
+                    <Textarea 
+                      placeholder="Enter product description" 
+                      className="min-h-[100px]"
+                      defaultValue={editingProduct?.description || ""}
+                      onChange={(e) => {
+                        console.log("Description onChange triggered:", e.target.value);
+                        form.setValue("description", e.target.value);
+                      }}
+                      ref={(el) => { fieldRefs.current.description = el; }}
+                      onKeyDown={(e) => handleKeyNavigation(e, 'description')}
+                    />
+                  </div>
                 </div>
 
                 {/* Inventory & Pricing */}
