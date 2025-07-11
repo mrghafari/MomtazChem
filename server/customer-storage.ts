@@ -34,8 +34,10 @@ export interface ICustomerStorage {
   // Customer orders
   createOrder(order: InsertCustomerOrder): Promise<CustomerOrder>;
   getOrderById(id: number): Promise<CustomerOrder | undefined>;
+  getOrderByNumber(orderNumber: string): Promise<CustomerOrder | undefined>;
   getOrdersByCustomer(customerId: number): Promise<CustomerOrder[]>;
   updateOrder(id: number, order: Partial<InsertCustomerOrder>): Promise<CustomerOrder>;
+  updateOrderPaymentStatus(id: number, paymentStatus: string): Promise<CustomerOrder>;
   getAllOrders(): Promise<CustomerOrder[]>;
   
   // Order items
@@ -169,6 +171,14 @@ export class CustomerStorage implements ICustomerStorage {
     return order;
   }
 
+  async getOrderByNumber(orderNumber: string): Promise<CustomerOrder | undefined> {
+    const [order] = await customerDb
+      .select()
+      .from(customerOrders)
+      .where(eq(customerOrders.orderNumber, orderNumber));
+    return order;
+  }
+
   async getOrdersByCustomer(customerId: number): Promise<CustomerOrder[]> {
     return await customerDb
       .select()
@@ -182,6 +192,18 @@ export class CustomerStorage implements ICustomerStorage {
       .update(customerOrders)
       .set({
         ...orderUpdate,
+        updatedAt: new Date(),
+      })
+      .where(eq(customerOrders.id, id))
+      .returning();
+    return order;
+  }
+
+  async updateOrderPaymentStatus(id: number, paymentStatus: string): Promise<CustomerOrder> {
+    const [order] = await customerDb
+      .update(customerOrders)
+      .set({
+        paymentStatus,
         updatedAt: new Date(),
       })
       .where(eq(customerOrders.id, id))

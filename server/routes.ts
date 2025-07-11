@@ -4803,6 +4803,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (order) {
             await customerStorage.updateOrderPaymentStatus(order.id, 'failed');
             console.log(`❌ Order ${orderId} payment status updated to 'failed'`);
+            
+            // Check if this was a hybrid payment (wallet_partial) and refund wallet amount
+            if (order.paymentMethod === 'wallet_partial' && order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0) {
+              const walletAmount = parseFloat(order.walletAmountUsed);
+              const reason = status === 'CANCELLED' ? 'انصراف مشتری از پرداخت' : 'پرداخت آنلاین ناموفق';
+              
+              try {
+                await walletStorage.refundWalletAmount(
+                  order.customerId,
+                  walletAmount,
+                  order.orderNumber,
+                  reason
+                );
+                console.log(`💰 Wallet refund processed: ${walletAmount} IQD returned for failed payment ${orderId}`);
+              } catch (refundError) {
+                console.error('❌ Error processing wallet refund:', refundError);
+              }
+            }
           }
         } catch (updateError) {
           console.error('❌ Error updating failed order status:', updateError);
@@ -4822,6 +4840,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Error processing payment callback"
+      });
+    }
+  });
+
+  // Manual Wallet Refund Endpoint for Failed Payments
+  app.post("/api/payment/refund-wallet", async (req, res) => {
+    try {
+      const { orderNumber, customerId, amount, reason } = req.body;
+      
+      if (!orderNumber || !customerId || !amount) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields: orderNumber, customerId, amount"
+        });
+      }
+
+      console.log(`💰 Manual wallet refund requested: ${amount} IQD for customer ${customerId}, order ${orderNumber}`);
+      
+      const transaction = await walletStorage.refundWalletAmount(
+        customerId,
+        parseFloat(amount),
+        orderNumber,
+        reason || 'بازگشت دستی وجه کیف پول'
+      );
+
+      res.json({
+        success: true,
+        message: "Wallet refund processed successfully",
+        transactionId: transaction.id,
+        newBalance: transaction.balanceAfter
+      });
+      
+    } catch (error) {
+      console.error('❌ Error processing manual wallet refund:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to process wallet refund: " + error.message
+      });
+    }
+  });
+
+  // Payment Cancellation Endpoint for Customer Withdrawal
+  app.post("/api/payment/cancel", async (req, res) => {
+    try {
+      const { orderNumber } = req.body;
+      
+      if (!orderNumber) {
+        return res.status(400).json({
+          success: false,
+          message: "Order number is required"
+        });
+      }
+
+      console.log(`🚫 Payment cancellation requested for order: ${orderNumber}`);
+      
+      const order = await customerStorage.getOrderByNumber(orderNumber);
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "Order not found"
+        });
+      }
+
+      // Update order status to cancelled
+      await customerStorage.updateOrderPaymentStatus(order.id, 'cancelled');
+      console.log(`🚫 Order ${orderNumber} payment status updated to 'cancelled'`);
+      
+      // Check if this was a hybrid payment and refund wallet amount
+      if (order.paymentMethod === 'wallet_partial' && order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0) {
+        const walletAmount = parseFloat(order.walletAmountUsed);
+        
+        try {
+          const transaction = await walletStorage.refundWalletAmount(
+            order.customerId,
+            walletAmount,
+            order.orderNumber,
+            'انصراف مشتری از پرداخت'
+          );
+          
+          res.json({
+            success: true,
+            message: "Payment cancelled and wallet amount refunded",
+            refundAmount: walletAmount,
+            transactionId: transaction.id,
+            newWalletBalance: transaction.balanceAfter
+          });
+        } catch (refundError) {
+          console.error('❌ Error processing wallet refund on cancellation:', refundError);
+          res.json({
+            success: true,
+            message: "Payment cancelled but wallet refund failed",
+            refundAmount: 0,
+            error: "Refund processing error"
+          });
+        }
+      } else {
+        res.json({
+          success: true,
+          message: "Payment cancelled successfully",
+          refundAmount: 0
+        });
+      }
+      
+    } catch (error) {
+      console.error('❌ Error cancelling payment:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to cancel payment: " + error.message
       });
     }
   });
@@ -4846,7 +4972,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderId: order.orderNumber,
         paymentStatus: order.paymentStatus,
         totalAmount: order.totalAmount,
-        currency: order.currency
+        currency: order.currency,
+        paymentMethod: order.paymentMethod,
+        walletAmountUsed: order.walletAmountUsed
       });
       
     } catch (error) {
