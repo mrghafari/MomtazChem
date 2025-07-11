@@ -1450,28 +1450,21 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="unitPrice"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Unit Price *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              step="0.01"
-                              placeholder="0.00" 
-                              {...field}
-                              value={field.value !== undefined && field.value !== null ? field.value : ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
-                              ref={(el) => { fieldRefs.current.unitPrice = el; }}
-                              onKeyDown={(e) => handleKeyNavigation(e, 'unitPrice')}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Unit Price *</label>
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        placeholder="0.00" 
+                        defaultValue={editingProduct?.unitPrice || "0"}
+                        onChange={(e) => {
+                          console.log("UnitPrice onChange triggered:", e.target.value);
+                          form.setValue("unitPrice", e.target.value);
+                        }}
+                        ref={(el) => { fieldRefs.current.unitPrice = el; }}
+                        onKeyDown={(e) => handleKeyNavigation(e, 'unitPrice')}
+                      />
+                    </div>
 
                     <FormField
                       control={form.control}
