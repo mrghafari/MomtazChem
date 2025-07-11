@@ -210,15 +210,45 @@ export default function ProductsPage() {
   const { mutate: updateProduct } = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
       apiRequest(`/api/products/${id}`, "PUT", data),
-    onSuccess: () => {
+    onSuccess: (result) => {
       // Clear and refresh data completely
       queryClient.removeQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.refetchQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
       
-      // Keep the form values to show updated data
-      // Don't reset form or close dialog immediately
+      // Update form with the returned data to show updated values
+      if (result && editingProduct) {
+        const updatedProduct = { ...editingProduct, ...result };
+        form.reset({
+          name: updatedProduct.name,
+          description: updatedProduct.description || "",
+          category: updatedProduct.category,
+          shortDescription: updatedProduct.shortDescription || "",
+          features: Array.isArray(updatedProduct.features) ? updatedProduct.features.join('\n') : (updatedProduct.features || ""),
+          applications: Array.isArray(updatedProduct.applications) ? updatedProduct.applications.join('\n') : (updatedProduct.applications || ""),
+          specifications: typeof updatedProduct.specifications === 'object' && updatedProduct.specifications !== null ? JSON.stringify(updatedProduct.specifications, null, 2) : (updatedProduct.specifications || ""),
+          barcode: updatedProduct.barcode || "",
+          sku: updatedProduct.sku || "",
+          stockQuantity: Number(updatedProduct.stockQuantity) ?? 0,
+          minStockLevel: Number(updatedProduct.minStockLevel) ?? 0,
+          maxStockLevel: Number(updatedProduct.maxStockLevel) || 100,
+          unitPrice: updatedProduct.unitPrice ? String(updatedProduct.unitPrice) : "0",
+          currency: updatedProduct.currency || "IQD",
+          priceRange: updatedProduct.priceRange || "",
+          weight: updatedProduct.weight ? String(updatedProduct.weight) : "1",
+          weightUnit: updatedProduct.weightUnit || "kg",
+          imageUrl: updatedProduct.imageUrl || "",
+          pdfCatalogUrl: updatedProduct.pdfCatalogUrl || "",
+          msdsUrl: updatedProduct.msdsUrl || "",
+          msdsFileName: updatedProduct.msdsFileName || "",
+          showMsdsToCustomers: updatedProduct.showMsdsToCustomers || false,
+          catalogFileName: updatedProduct.catalogFileName || "",
+          showCatalogToCustomers: updatedProduct.showCatalogToCustomers || false,
+          syncWithShop: updatedProduct.syncWithShop !== undefined ? updatedProduct.syncWithShop : true,
+          isActive: updatedProduct.isActive !== false,
+        });
+      }
       
       setTimeout(() => {
         setDialogOpen(false);
@@ -226,7 +256,7 @@ export default function ProductsPage() {
         setImagePreview(null);
         setCatalogPreview(null);
         setMsdsPreview(null);
-      }, 1000); // Allow user to see the updated values for 1 second
+      }, 1500); // Allow user to see the updated values for 1.5 seconds
       toast({
         title: "Success",
         description: "Product updated successfully",
@@ -605,11 +635,16 @@ export default function ProductsPage() {
   };
 
   const openEditDialog = (product: ShowcaseProduct) => {
+    console.log("Opening edit dialog for product:", product);
+    console.log("Product weight value:", product.weight, "Type:", typeof product.weight);
+    console.log("Product maxStockLevel value:", product.maxStockLevel, "Type:", typeof product.maxStockLevel);
+    
     setEditingProduct(product);
     setImagePreview(product.imageUrl || null);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
-    form.reset({
+    
+    const formData = {
       name: product.name,
       description: product.description || "",
       category: product.category,
@@ -625,7 +660,7 @@ export default function ProductsPage() {
       unitPrice: product.unitPrice ? String(product.unitPrice) : "0",
       currency: product.currency || "IQD",
       priceRange: product.priceRange || "",
-      weight: product.weight && product.weight !== "0" ? String(product.weight) : "",
+      weight: String(product.weight || "1"),
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
@@ -636,7 +671,12 @@ export default function ProductsPage() {
       showCatalogToCustomers: product.showCatalogToCustomers || false,
       syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       isActive: product.isActive !== false,
-    });
+    };
+    
+    console.log("Form data being set:", formData);
+    console.log("Weight in form data:", formData.weight, "MaxStockLevel in form data:", formData.maxStockLevel);
+    
+    form.reset(formData);
     setDialogOpen(true);
     
     // Focus first empty field when editing
