@@ -221,8 +221,8 @@ export default function CustomerWallet() {
     );
   }
 
-  // Show login prompt if not authenticated
-  if (!isAuthenticated) {
+  // Show login prompt if not authenticated (only if we're sure user is not authenticated)
+  if (!authLoading && (!customer || !isAuthenticated)) {
     return (
       <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${isRTL ? 'rtl' : 'ltr'}`}>
         <Card className="w-full max-w-md">
@@ -235,9 +235,16 @@ export default function CustomerWallet() {
               {t.loginToAccessWallet}
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center">
+          <CardContent className="text-center space-y-3">
             <Button onClick={() => window.location.href = '/shop'} className="w-full">
               {t.goToLogin}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()} 
+              className="w-full"
+            >
+              تازه‌سازی صفحه
             </Button>
           </CardContent>
         </Card>
