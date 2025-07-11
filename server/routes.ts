@@ -13969,7 +13969,7 @@ momtazchem.com
       // Handle file upload for bank receipt
       let attachmentUrl = null;
       if (req.file) {
-        attachmentUrl = `/uploads/${req.file.filename}`;
+        attachmentUrl = `/uploads/receipts/${req.file.filename}`;
         console.log('Bank receipt uploaded:', attachmentUrl);
       }
 
