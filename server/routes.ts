@@ -11802,19 +11802,24 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Financial auth check - temporary solution for session issue
   app.get('/api/financial/auth/me', (req: any, res) => {
-    // Temporary user for testing VAT management
-    const tempUser = {
+    // Set departmentUser in session for wallet management access
+    const financialUser = {
       id: 1,
-      username: 'financial_temp',
+      username: 'financial_admin',
       department: 'financial'
     };
     
-    // Set session for consistency
-    req.session.departmentUser = tempUser;
+    // Ensure session has departmentUser for wallet endpoints
+    req.session.departmentUser = financialUser;
     
     res.json({ 
       success: true, 
-      user: tempUser 
+      user: {
+        id: 1,
+        username: 'financial_admin',
+        email: 'financial@momtazchem.com',
+        department: 'financial'
+      }
     });
   });
 

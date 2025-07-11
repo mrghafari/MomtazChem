@@ -557,7 +557,7 @@ export default function FinancialDepartment() {
                                   </span>
                                 </div>
                                 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-3 gap-4">
                                   <div>
                                     <p className="text-sm font-medium">مشتری:</p>
                                     <p className="text-sm text-gray-600">
@@ -572,6 +572,14 @@ export default function FinancialDepartment() {
                                       {parseInt(request.amount).toLocaleString()} {request.currency}
                                     </p>
                                     <p className="text-xs text-gray-500">روش پرداخت: {request.paymentMethod}</p>
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="text-sm font-medium">کد واریز:</p>
+                                    <p className="text-sm text-gray-600 font-mono bg-gray-100 px-2 py-1 rounded">
+                                      {request.paymentReference || 'ندارد'}
+                                    </p>
+                                    <p className="text-xs text-gray-500">شماره مرجع پرداخت</p>
                                   </div>
                                 </div>
                                 
@@ -669,6 +677,7 @@ export default function FinancialDepartment() {
                           <p className="text-sm text-gray-600">
                             {request.customer?.firstName} {request.customer?.lastName} - 
                             {parseInt(request.amount).toLocaleString()} {request.currency}
+                            {request.paymentReference && ` - کد واریز: ${request.paymentReference}`}
                           </p>
                           <p className="text-xs text-gray-500">
                             {new Date(request.createdAt).toLocaleDateString('fa-IR')}
