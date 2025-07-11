@@ -1565,40 +1565,48 @@ export default function ProductsPage() {
 
               {/* Product Codes */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="sku"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SKU *</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter SKU" 
-                            {...field}
-                            ref={(el) => { fieldRefs.current.sku = el; }}
-                            onKeyDown={(e) => handleKeyNavigation(e, 'sku')}
-                          />
-                        </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={generateSmartSKU}
-                          disabled={generateSKUMutation.isPending}
-                          className="whitespace-nowrap"
-                        >
-                          {generateSKUMutation.isPending ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          ) : (
-                            "🤖 AI SKU"
-                          )}
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    SKU {editingProduct ? "(محافظت شده)" : "(Auto-generated)"}
+                  </label>
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder={editingProduct ? "SKU cannot be changed" : "Enter SKU"} 
+                      defaultValue={editingProduct?.sku || ""}
+                      readOnly={!!editingProduct}
+                      disabled={!!editingProduct}
+                      className={editingProduct ? "bg-gray-100 cursor-not-allowed" : ""}
+                      onChange={(e) => {
+                        if (!editingProduct) {
+                          form.setValue("sku", e.target.value);
+                        }
+                      }}
+                      ref={(el) => { fieldRefs.current.sku = el; }}
+                      onKeyDown={(e) => handleKeyNavigation(e, 'sku')}
+                    />
+                    {!editingProduct && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={generateSmartSKU}
+                        disabled={generateSKUMutation.isPending}
+                        className="whitespace-nowrap"
+                      >
+                        {generateSKUMutation.isPending ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        ) : (
+                          "🤖 AI SKU"
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                  {editingProduct && (
+                    <div className="text-xs text-amber-600 font-medium">
+                      ⚠️ SKU محافظت شده - پس از تولید قابل تغییر نیست
+                    </div>
                   )}
-                />
+                </div>
 
                 <FormField
                   control={form.control}
