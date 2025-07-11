@@ -21,10 +21,10 @@ export default function SiteManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  // Fetch active users data
-  const { data: activeUsersData, isLoading: isLoadingActiveUsers } = useQuery({
+  // Fetch active users data - removed automatic refresh
+  const { data: activeUsersData, isLoading: isLoadingActiveUsers, refetch: refetchActiveUsers } = useQuery({
     queryKey: ['/api/active-users'],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    enabled: false, // Don't auto-fetch on mount
   });
 
   // Initial button configuration
@@ -290,7 +290,10 @@ export default function SiteManagement() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => refetchActiveUsers()}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Users</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
@@ -300,11 +303,11 @@ export default function SiteManagement() {
                   {isLoadingActiveUsers ? (
                     <div className="animate-pulse bg-gray-200 rounded w-8 h-8"></div>
                   ) : (
-                    activeUsersData?.data?.activeUsersCount || 0
+                    activeUsersData?.data?.activeUsersCount || "Click to check"
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Currently online (last 30 min)
+                  {activeUsersData?.data ? "Currently online (last 30 min)" : "Click to get exact count"}
                 </p>
                 {activeUsersData?.data?.activeUsers && activeUsersData.data.activeUsers.length > 0 && (
                   <div className="mt-2 space-y-1">
