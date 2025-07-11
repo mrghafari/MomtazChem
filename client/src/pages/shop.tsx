@@ -74,7 +74,7 @@ const Shop = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 12;
+  const itemsPerPage = 50; // Increase to show more products per page
 
   // Debounce search term - only search with 3+ characters
   useEffect(() => {
@@ -90,11 +90,11 @@ const Shop = () => {
 
   // Advanced search query
   const { data: searchResults, isLoading: productsLoading } = useQuery({
-    queryKey: ['shopSearch', debouncedQuery, filters, currentPage],
+    queryKey: ['shopSearch', debouncedQuery, filters, currentPage, Date.now()], // Force cache refresh
     queryFn: async () => {
       const params = new URLSearchParams({
         q: debouncedQuery || '', // Always include query parameter, even if empty
-        limit: itemsPerPage.toString(),
+        limit: '100', // Set high limit to show all products
         offset: (currentPage * itemsPerPage).toString(),
         sortBy: filters.sortBy,
         sortOrder: filters.sortOrder
@@ -121,8 +121,12 @@ const Shop = () => {
 
   // Fetch shop products (fallback)
   const { data: products = [] } = useQuery<ShopProduct[]>({
-    queryKey: ["/api/shop/products"],
-    enabled: !searchResults || (searchTerm.length > 0 && searchTerm.length < 3)
+    queryKey: ["/api/shop/products", Date.now()], // Force cache refresh
+    enabled: !searchResults || (searchTerm.length > 0 && searchTerm.length < 3),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0  // Don't cache data
   });
 
   // Get data from search results or fallback to regular products
