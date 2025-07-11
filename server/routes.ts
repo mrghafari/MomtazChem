@@ -13937,8 +13937,8 @@ momtazchem.com
     }
   });
 
-  // Create wallet recharge request
-  app.post('/api/customer/wallet/recharge', async (req, res) => {
+  // Create wallet recharge request (with file upload)
+  app.post('/api/customer/wallet/recharge', uploadReceipt.single('file'), async (req, res) => {
     try {
       if (!req.session.customerId) {
         return res.status(401).json({ success: false, message: "Customer authentication required" });
@@ -13961,6 +13961,13 @@ momtazchem.com
         });
       }
 
+      // Handle file upload for bank receipt
+      let attachmentUrl = null;
+      if (req.file) {
+        attachmentUrl = `/uploads/${req.file.filename}`;
+        console.log('Bank receipt uploaded:', attachmentUrl);
+      }
+
       const rechargeRequest = await walletStorage.createRechargeRequest({
         customerId: req.session.customerId,
         walletId: wallet.id,
@@ -13968,7 +13975,8 @@ momtazchem.com
         currency: currency || "IQD",
         paymentMethod,
         paymentReference,
-        customerNotes
+        customerNotes,
+        attachmentUrl
       });
 
       res.json({ success: true, data: rechargeRequest });
@@ -14006,6 +14014,103 @@ momtazchem.com
     } catch (error) {
       console.error('Error fetching wallet transactions:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch wallet transactions' });
+    }
+  });
+
+  // =====================================================================
+  // FINANCIAL DEPARTMENT - WALLET MANAGEMENT ENDPOINTS
+  // =====================================================================
+
+  // Get all pending wallet recharge requests (financial department)
+  app.get('/api/financial/wallet/recharge-requests', async (req, res) => {
+    try {
+      // Check if user is authenticated as financial department
+      if (!req.session.departmentUser || req.session.departmentUser.department !== 'financial') {
+        return res.status(401).json({ success: false, message: "احراز هویت بخش مالی مورد نیاز است" });
+      }
+
+      const requests = await walletStorage.getAllRechargeRequests();
+      
+      // Get customer details for each request
+      const requestsWithCustomers = await Promise.all(
+        requests.map(async (request) => {
+          const customer = await crmStorage.getCrmCustomerById(request.customerId);
+          return { ...request, customer };
+        })
+      );
+
+      res.json({ success: true, data: requestsWithCustomers });
+    } catch (error) {
+      console.error('Error fetching recharge requests:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch recharge requests' });
+    }
+  });
+
+  // Approve wallet recharge request (financial department)
+  app.post('/api/financial/wallet/recharge-requests/:id/approve', async (req, res) => {
+    try {
+      // Check if user is authenticated as financial department
+      if (!req.session.departmentUser || req.session.departmentUser.department !== 'financial') {
+        return res.status(401).json({ success: false, message: "احراز هویت بخش مالی مورد نیاز است" });
+      }
+
+      const requestId = parseInt(req.params.id);
+      const { adminNotes } = req.body;
+      const financialUserId = req.session.departmentUser.id;
+
+      const result = await walletStorage.processRechargeRequest(requestId, financialUserId);
+      
+      // Update with admin notes if provided
+      if (adminNotes) {
+        await walletStorage.updateRechargeRequestStatus(requestId, "completed", adminNotes, financialUserId);
+      }
+
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error('Error approving recharge request:', error);
+      res.status(500).json({ success: false, message: 'Failed to approve recharge request' });
+    }
+  });
+
+  // Reject wallet recharge request (financial department)
+  app.post('/api/financial/wallet/recharge-requests/:id/reject', async (req, res) => {
+    try {
+      // Check if user is authenticated as financial department
+      if (!req.session.departmentUser || req.session.departmentUser.department !== 'financial') {
+        return res.status(401).json({ success: false, message: "احراز هویت بخش مالی مورد نیاز است" });
+      }
+
+      const requestId = parseInt(req.params.id);
+      const { rejectionReason, adminNotes } = req.body;
+      const financialUserId = req.session.departmentUser.id;
+
+      const updatedRequest = await walletStorage.updateRechargeRequestStatus(
+        requestId,
+        "rejected",
+        adminNotes || rejectionReason || "Request rejected by financial department",
+        financialUserId
+      );
+
+      res.json({ success: true, data: updatedRequest });
+    } catch (error) {
+      console.error('Error rejecting recharge request:', error);
+      res.status(500).json({ success: false, message: 'Failed to reject recharge request' });
+    }
+  });
+
+  // Get wallet statistics for financial dashboard
+  app.get('/api/financial/wallet/stats', async (req, res) => {
+    try {
+      // Check if user is authenticated as financial department
+      if (!req.session.departmentUser || req.session.departmentUser.department !== 'financial') {
+        return res.status(401).json({ success: false, message: "احراز هویت بخش مالی مورد نیاز است" });
+      }
+
+      const stats = await walletStorage.getWalletStatistics();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error('Error fetching wallet statistics:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch wallet statistics' });
     }
   });
 

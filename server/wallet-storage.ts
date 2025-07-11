@@ -44,6 +44,9 @@ export interface IWalletStorage {
     totalBalance: number;
     activeWallets: number;
     pendingRecharges: number;
+    completedRecharges: number;
+    totalRechargeAmount: number;
+    averageWalletBalance: number;
     totalTransactions: number;
   }>;
   
@@ -327,6 +330,9 @@ export class WalletStorage implements IWalletStorage {
     totalBalance: number;
     activeWallets: number;
     pendingRecharges: number;
+    completedRecharges: number;
+    totalRechargeAmount: number;
+    averageWalletBalance: number;
     totalTransactions: number;
   }> {
     const [walletsCount] = await customerDb
@@ -347,15 +353,32 @@ export class WalletStorage implements IWalletStorage {
       .from(walletRechargeRequests)
       .where(eq(walletRechargeRequests.status, "pending"));
 
+    const [completedRechargesCount] = await customerDb
+      .select({ count: sum(walletRechargeRequests.id) })
+      .from(walletRechargeRequests)
+      .where(eq(walletRechargeRequests.status, "completed"));
+
+    const [totalRechargeResult] = await customerDb
+      .select({ total: sum(walletRechargeRequests.amount) })
+      .from(walletRechargeRequests)
+      .where(eq(walletRechargeRequests.status, "completed"));
+
     const [transactionsCount] = await customerDb
       .select({ count: sum(walletTransactions.id) })
       .from(walletTransactions);
 
+    const totalWalletsNum = Number(walletsCount?.count || 0);
+    const totalBalance = parseFloat(totalBalanceResult?.total || "0");
+    const averageWalletBalance = totalWalletsNum > 0 ? totalBalance / totalWalletsNum : 0;
+
     return {
-      totalWallets: Number(walletsCount?.count || 0),
-      totalBalance: parseFloat(totalBalanceResult?.total || "0"),
+      totalWallets: totalWalletsNum,
+      totalBalance: totalBalance,
       activeWallets: Number(activeWalletsCount?.count || 0),
       pendingRecharges: Number(pendingRechargesCount?.count || 0),
+      completedRecharges: Number(completedRechargesCount?.count || 0),
+      totalRechargeAmount: parseFloat(totalRechargeResult?.total || "0"),
+      averageWalletBalance: averageWalletBalance,
       totalTransactions: Number(transactionsCount?.count || 0)
     };
   }

@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote } from "lucide-react";
+import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote, Upload, Paperclip } from "lucide-react";
 
 interface WalletSummary {
   wallet?: {
@@ -71,6 +71,7 @@ export default function CustomerWallet() {
     paymentReference: "",
     customerNotes: ""
   });
+  const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
 
   // Authentication
   const { customer, isAuthenticated, isLoading: authLoading } = useCustomer();
@@ -102,7 +103,25 @@ export default function CustomerWallet() {
 
   // Create recharge request mutation
   const createRechargeMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/customer/wallet/recharge', 'POST', data),
+    mutationFn: async (data: any) => {
+      if (selectedReceiptFile) {
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('file', selectedReceiptFile);
+        formData.append('amount', data.amount);
+        formData.append('currency', data.currency);
+        formData.append('paymentMethod', data.paymentMethod);
+        formData.append('paymentReference', data.paymentReference || '');
+        formData.append('customerNotes', data.customerNotes || '');
+        
+        return fetch('/api/customer/wallet/recharge', {
+          method: 'POST',
+          body: formData
+        }).then(res => res.json());
+      } else {
+        return apiRequest('/api/customer/wallet/recharge', 'POST', data);
+      }
+    },
     onSuccess: () => {
       toast({
         title: t.rechargeSuccess,
@@ -116,6 +135,7 @@ export default function CustomerWallet() {
         paymentReference: "",
         customerNotes: ""
       });
+      setSelectedReceiptFile(null);
       queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
       queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet/recharge-requests'] });
     },
@@ -407,6 +427,77 @@ export default function CustomerWallet() {
                           placeholder={t.enterNotes}
                           rows={3}
                         />
+                      </div>
+
+                      {/* Bank Receipt Upload */}
+                      <div>
+                        <Label htmlFor="bankReceipt">فیش واریزی بانکی ({t.optional})</Label>
+                        <div className="space-y-2">
+                          <input
+                            id="bankReceipt"
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                // Validate file type
+                                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+                                if (!allowedTypes.includes(file.type)) {
+                                  toast({
+                                    title: "نوع فایل نامعتبر",
+                                    description: "لطفاً فایل JPG، PNG، WebP یا PDF انتخاب کنید",
+                                    variant: "destructive",
+                                  });
+                                  return;
+                                }
+                                
+                                // Validate file size (10MB max)
+                                if (file.size > 10 * 1024 * 1024) {
+                                  toast({
+                                    title: "حجم فایل زیاد است",
+                                    description: "حداکثر حجم مجاز فایل 10 مگابایت است",
+                                    variant: "destructive",
+                                  });
+                                  return;
+                                }
+                                
+                                setSelectedReceiptFile(file);
+                                toast({
+                                  title: "✅ فیش بانکی انتخاب شد",
+                                  description: `فایل ${file.name} آماده آپلود است`,
+                                });
+                              }
+                            }}
+                            className="hidden"
+                          />
+                          
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => document.getElementById('bankReceipt')?.click()}
+                            className="w-full flex items-center gap-2"
+                          >
+                            <Upload className="w-4 h-4" />
+                            انتخاب فیش واریزی بانکی
+                          </Button>
+                          
+                          {selectedReceiptFile && (
+                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                              <div className="flex items-center gap-2 text-sm text-green-800 dark:text-green-200">
+                                <Paperclip className="w-4 h-4" />
+                                <span className="font-medium">فایل انتخاب شده:</span>
+                                <span className="text-green-600 dark:text-green-400">{selectedReceiptFile.name}</span>
+                              </div>
+                              <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                حجم: {(selectedReceiptFile.size / (1024 * 1024)).toFixed(2)} مگابایت
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="text-xs text-muted-foreground">
+                            فرمت های قابل قبول: JPG, PNG, WebP, PDF - حداکثر 10 مگابایت
+                          </div>
+                        </div>
                       </div>
 
                       <div className="flex justify-end space-x-2">
