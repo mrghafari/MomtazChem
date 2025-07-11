@@ -36,6 +36,8 @@ export const showcaseProducts = pgTable("showcase_products", {
   priceRange: text("price_range"), // "25-30 USD per liter" for display only
   imageUrl: text("image_url"),
   pdfCatalogUrl: text("pdf_catalog_url"),
+  catalogFileName: text("catalog_file_name"), // Original catalog filename
+  showCatalogToCustomers: boolean("show_catalog_to_customers").default(false), // Checkbox to control catalog visibility
   specifications: json("specifications"), // Technical specifications for display
   features: json("features"), // Product features array
   applications: json("applications"), // Applications array

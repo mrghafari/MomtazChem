@@ -647,40 +647,32 @@ export default function ProductsPage() {
 
   const openEditDialog = (product: ShowcaseProduct) => {
     console.log("=== OPENING EDIT DIALOG ===");
-    console.log("Raw product data:", JSON.stringify(product, null, 2));
+    console.log("Raw product data:", product);
+    console.log("Image URL:", product.imageUrl);
+    console.log("Catalog URL:", product.pdfCatalogUrl);  
+    console.log("Catalog filename:", product.catalogFileName);
+    console.log("MSDS URL:", product.msdsUrl);
+    console.log("MSDS filename:", product.msdsFileName);
     
     setEditingProduct(product);
     
-    // Force set preview states IMMEDIATELY
-    console.log("Setting previews IMMEDIATELY:");
-    console.log("- Image preview:", product.imageUrl);
-    console.log("- Catalog preview:", product.pdfCatalogUrl);
-    console.log("- MSDS preview:", product.msdsUrl);
+    // CRITICAL: Force update preview states synchronously
+    console.log("=== SETTING PREVIEW STATES ===");
     
-    // Force state updates
-    if (product.imageUrl) {
-      setImagePreview(product.imageUrl);
-      console.log("✓ Image preview set to:", product.imageUrl);
-    } else {
-      setImagePreview(null);
-      console.log("✓ Image preview cleared");
-    }
+    // Image preview
+    const imageUrl = product.imageUrl || null;
+    setImagePreview(imageUrl);
+    console.log("Image preview state set to:", imageUrl);
     
-    if (product.pdfCatalogUrl) {
-      setCatalogPreview(product.pdfCatalogUrl);
-      console.log("✓ Catalog preview set to:", product.pdfCatalogUrl);
-    } else {
-      setCatalogPreview(null);
-      console.log("✓ Catalog preview cleared");
-    }
+    // Catalog preview  
+    const catalogUrl = product.pdfCatalogUrl || null;
+    setCatalogPreview(catalogUrl);
+    console.log("Catalog preview state set to:", catalogUrl);
     
-    if (product.msdsUrl) {
-      setMsdsPreview(product.msdsUrl);
-      console.log("✓ MSDS preview set to:", product.msdsUrl);
-    } else {
-      setMsdsPreview(null);
-      console.log("✓ MSDS preview cleared");
-    }
+    // MSDS preview
+    const msdsUrl = product.msdsUrl || null;
+    setMsdsPreview(msdsUrl);
+    console.log("MSDS preview state set to:", msdsUrl);
     
     // Process form data
     const processText = (value: any): string => {
