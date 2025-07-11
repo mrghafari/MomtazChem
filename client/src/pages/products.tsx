@@ -131,6 +131,7 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedInventoryStatus, setSelectedInventoryStatus] = useState<string>("all");
+  const [visibilityFilter, setVisibilityFilter] = useState<string>("all"); // all, visible, hidden
   const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -644,7 +645,7 @@ export default function ProductsPage() {
     }, 300);
   };
 
-  // Filter products based on category, inventory status, and search
+  // Filter products based on category, inventory status, visibility, and search
   const filteredProducts = (products || []).filter((product: ShowcaseProduct) => {
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = !searchQuery || 
@@ -656,7 +657,13 @@ export default function ProductsPage() {
     const inventoryStatus = getActualInventoryStatus(product.stockQuantity, product.minStockLevel);
     const matchesInventoryStatus = selectedInventoryStatus === "all" || inventoryStatus === selectedInventoryStatus;
     
-    return matchesCategory && matchesSearch && matchesInventoryStatus;
+    // Check visibility filter
+    const isVisible = product.syncWithShop === true;
+    const matchesVisibility = visibilityFilter === "all" || 
+      (visibilityFilter === "visible" && isVisible) ||
+      (visibilityFilter === "hidden" && !isVisible);
+    
+    return matchesCategory && matchesSearch && matchesInventoryStatus && matchesVisibility;
   });
 
   // Auto-generate barcode for new products when name and category are available
@@ -812,8 +819,45 @@ export default function ProductsPage() {
           </div>
         </div>
 
+        {/* Visibility Filter Tabs */}
+        <div className="mb-6 flex items-center gap-4">
+          <span className="text-sm font-medium text-gray-700">نمایش:</span>
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setVisibilityFilter("all")}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                visibilityFilter === "all"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              همه ({(products || []).length})
+            </button>
+            <button
+              onClick={() => setVisibilityFilter("visible")}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                visibilityFilter === "visible"
+                  ? "bg-white text-green-600 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              در فروشگاه ({(products || []).filter(p => p.syncWithShop === true).length})
+            </button>
+            <button
+              onClick={() => setVisibilityFilter("hidden")}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                visibilityFilter === "hidden"
+                  ? "bg-white text-gray-600 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              مخفی شده ({(products || []).filter(p => p.syncWithShop !== true).length})
+            </button>
+          </div>
+        </div>
+
         {/* Active Filters */}
-        {(selectedInventoryStatus !== "all" || selectedCategory !== "all" || searchQuery) && (
+        {(selectedInventoryStatus !== "all" || selectedCategory !== "all" || visibilityFilter !== "all" || searchQuery) && (
           <div className="mb-4 flex flex-wrap gap-2">
             <span className="text-sm font-medium text-gray-700">Active Filters:</span>
             {selectedInventoryStatus !== "all" && (
@@ -825,6 +869,12 @@ export default function ProductsPage() {
             {selectedCategory !== "all" && (
               <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedCategory("all")}>
                 Category: {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
+                <X className="w-3 h-3 ml-1" />
+              </Badge>
+            )}
+            {visibilityFilter !== "all" && (
+              <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setVisibilityFilter("all")}>
+                نمایش: {visibilityFilter === "visible" ? "در فروشگاه" : "مخفی شده"}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
@@ -840,6 +890,7 @@ export default function ProductsPage() {
               onClick={() => {
                 setSelectedInventoryStatus("all");
                 setSelectedCategory("all");
+                setVisibilityFilter("all");
                 setSearchQuery("");
               }}
               className="h-6 text-xs"
