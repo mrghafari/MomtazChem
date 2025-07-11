@@ -202,21 +202,21 @@ export class DatabaseStorage implements IStorage {
       updateData.certifications = Array.isArray(productUpdate.certifications) && productUpdate.certifications.length > 0 ? productUpdate.certifications : null;
     }
 
-    // Handle file upload fields explicitly
-    if (productUpdate.imageUrl !== undefined) {
-      updateData.imageUrl = productUpdate.imageUrl && productUpdate.imageUrl.trim() ? productUpdate.imageUrl.trim() : null;
+    // Handle file upload fields explicitly - ONLY update if value is explicitly provided and non-empty
+    if (productUpdate.imageUrl !== undefined && productUpdate.imageUrl && productUpdate.imageUrl.trim()) {
+      updateData.imageUrl = productUpdate.imageUrl.trim();
     }
-    if (productUpdate.msdsUrl !== undefined) {
-      updateData.msdsUrl = productUpdate.msdsUrl && productUpdate.msdsUrl.trim() ? productUpdate.msdsUrl.trim() : null;
+    if (productUpdate.msdsUrl !== undefined && productUpdate.msdsUrl && productUpdate.msdsUrl.trim()) {
+      updateData.msdsUrl = productUpdate.msdsUrl.trim();
     }
-    if (productUpdate.msdsFileName !== undefined) {
-      updateData.msdsFileName = productUpdate.msdsFileName && productUpdate.msdsFileName.trim() ? productUpdate.msdsFileName.trim() : null;
+    if (productUpdate.msdsFileName !== undefined && productUpdate.msdsFileName && productUpdate.msdsFileName.trim()) {
+      updateData.msdsFileName = productUpdate.msdsFileName.trim();
     }
-    if (productUpdate.pdfCatalogUrl !== undefined) {
-      updateData.pdfCatalogUrl = productUpdate.pdfCatalogUrl && productUpdate.pdfCatalogUrl.trim() ? productUpdate.pdfCatalogUrl.trim() : null;
+    if (productUpdate.pdfCatalogUrl !== undefined && productUpdate.pdfCatalogUrl && productUpdate.pdfCatalogUrl.trim()) {
+      updateData.pdfCatalogUrl = productUpdate.pdfCatalogUrl.trim();
     }
-    if (productUpdate.catalogFileName !== undefined) {
-      updateData.catalogFileName = productUpdate.catalogFileName && productUpdate.catalogFileName.trim() ? productUpdate.catalogFileName.trim() : null;
+    if (productUpdate.catalogFileName !== undefined && productUpdate.catalogFileName && productUpdate.catalogFileName.trim()) {
+      updateData.catalogFileName = productUpdate.catalogFileName.trim();
     }
     if (productUpdate.showMsdsToCustomers !== undefined) {
       updateData.showMsdsToCustomers = productUpdate.showMsdsToCustomers;
