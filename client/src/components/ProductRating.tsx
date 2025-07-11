@@ -110,6 +110,9 @@ export default function ProductRating({
     });
   };
 
+  // Debug logging
+  console.log('ProductRating Props:', { productId, productName, averageRating, totalReviews, reviews: reviews.length });
+
   return (
     <div className="space-y-6" dir={direction}>
       {/* Product Rating Summary */}
@@ -117,7 +120,7 @@ export default function ProductRating({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            {t.productReviews}: {productName}
+            نظرات محصول: {productName}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -129,8 +132,8 @@ export default function ProductRating({
               <StarRating rating={averageRating} size="lg" />
             </div>
             <div className="text-gray-600">
-              <div className="text-lg font-semibold">{totalReviews} {t.totalReviews}</div>
-              <div className="text-sm">{t.customerFeedback}</div>
+              <div className="text-lg font-semibold">{totalReviews} نظر کل</div>
+              <div className="text-sm">بازخورد مشتریان</div>
             </div>
           </div>
         </CardContent>
@@ -195,11 +198,14 @@ export default function ProductRating({
           <CardTitle>{t.customerReviews}</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 p-2 bg-gray-100 rounded text-sm">
+            DEBUG: تعداد نظرات: {reviews.length} | آیدی محصول: {productId}
+          </div>
           {reviews.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p>{t.noReviewsYet}</p>
-              <p className="text-sm">{t.noReviewsDesc}</p>
+              <p>هنوز نظری ثبت نشده</p>
+              <p className="text-sm">اولین نفری باشید که نظر می‌دهید</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -219,7 +225,7 @@ export default function ProductRating({
                         </span>
                       </div>
                       <StarRating rating={review.rating} size="sm" />
-                      <p className="mt-2 text-gray-700">{review.review || review.comment}</p>
+                      <p className="mt-2 text-gray-700">{review.review}</p>
                     </div>
                   </div>
                 </div>

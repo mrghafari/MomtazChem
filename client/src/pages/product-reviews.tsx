@@ -17,11 +17,14 @@ export default function ProductReviews() {
   const queryClient = useQueryClient();
   const { t, direction } = useLanguage();
 
-  // Get product details
-  const { data: product, isLoading: isLoadingProduct } = useQuery({
-    queryKey: ['/api/products', id],
+  // Get product details from shop products
+  const { data: products, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ['/api/shop/products'],
     enabled: !!id,
   });
+
+  // Find the specific product
+  const product = products?.find((p: any) => p.id === parseInt(id || '0'));
 
   // Get product reviews data
   const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
@@ -32,6 +35,13 @@ export default function ProductReviews() {
   // Extract reviews and stats from the response data
   const reviews = reviewsData?.data?.reviews || [];
   const productStats = reviewsData?.data?.stats || { averageRating: 0, totalReviews: 0 };
+
+  // Debug logging
+  console.log('Product ID:', id);
+  console.log('Reviews Data:', reviewsData);
+  console.log('Reviews:', reviews);
+  console.log('Product Stats:', productStats);
+  console.log('Product:', product);
 
   // Add review mutation
   const addReviewMutation = useMutation({
