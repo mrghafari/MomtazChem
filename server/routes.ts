@@ -228,7 +228,7 @@ const upload = multer({
 });
 
 // Admin authentication middleware
-const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   console.log('Auth check:', {
     isAuthenticated: req.session.isAuthenticated,
     adminId: req.session.adminId,
@@ -236,8 +236,21 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     sessionData: JSON.stringify(req.session)
   });
   
+  // Store session for session tracking
+  sessionStore.storeSession({
+    sessionId: req.sessionID,
+    sessionData: JSON.stringify(req.session)
+  });
+  
   // More robust authentication check
   if (req.session && req.session.isAuthenticated === true && req.session.adminId) {
+    // Update session activity for active tracking
+    try {
+      const { securityStorage } = await import('./security-storage');
+      await securityStorage.updateSessionActivity(req.sessionID);
+    } catch (error) {
+      console.error('Failed to update session activity:', error);
+    }
     next();
   } else {
     console.log('Authentication failed for:', req.path);
@@ -730,6 +743,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // API endpoint to get active users count
+  app.get("/api/active-users", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { securityStorage } = await import('./security-storage');
+      
+      // Get all active sessions from security system
+      const activeSessions = await securityStorage.getActiveSessions();
+      
+      // Filter sessions that are considered "active" (within last 30 minutes)
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      const activeUsers = activeSessions.filter(session => 
+        session.lastActivity && session.lastActivity > thirtyMinutesAgo
+      );
+      
+      // Get unique users (by userId or sessionId)
+      const uniqueActiveUsers = new Map();
+      activeUsers.forEach(session => {
+        const key = session.userId || session.sessionId;
+        if (!uniqueActiveUsers.has(key)) {
+          uniqueActiveUsers.set(key, {
+            id: session.userId,
+            username: session.username,
+            lastActivity: session.lastActivity,
+            ipAddress: session.ipAddress,
+            sessionId: session.sessionId
+          });
+        }
+      });
+      
+      const activeUsersList = Array.from(uniqueActiveUsers.values());
+      
+      res.json({
+        success: true,
+        data: {
+          totalActiveSessions: activeSessions.length,
+          activeUsersCount: activeUsersList.length,
+          activeUsers: activeUsersList,
+          lastUpdated: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching active users:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch active users",
+        data: {
+          totalActiveSessions: 0,
+          activeUsersCount: 0,
+          activeUsers: [],
+          lastUpdated: new Date().toISOString()
+        }
+      });
+    }
+  });
+
   // Admin authentication routes
   app.post("/api/admin/login", async (req, res) => {
     try {
@@ -762,6 +831,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set session
       req.session.adminId = user.id;
       req.session.isAuthenticated = true;
+
+      // Create security session tracking
+      try {
+        await securityStorage.createSecuritySession({
+          sessionId: req.sessionID,
+          userId: user.id,
+          username: user.username,
+          ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+          userAgent: req.get('User-Agent') || 'unknown'
+        });
+      } catch (error) {
+        console.error('Failed to create security session:', error);
+      }
 
       // Save session explicitly
       req.session.save((err) => {

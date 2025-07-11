@@ -21,6 +21,12 @@ export default function SiteManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // Fetch active users data
+  const { data: activeUsersData, isLoading: isLoadingActiveUsers } = useQuery({
+    queryKey: ['/api/active-users'],
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
   // Initial button configuration
   const getInitialButtons = (): QuickActionButton[] => [
     {
@@ -290,8 +296,31 @@ export default function SiteManagement() {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">Currently online</p>
+                <div className="text-2xl font-bold">
+                  {isLoadingActiveUsers ? (
+                    <div className="animate-pulse bg-gray-200 rounded w-8 h-8"></div>
+                  ) : (
+                    activeUsersData?.data?.activeUsersCount || 0
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Currently online (last 30 min)
+                </p>
+                {activeUsersData?.data?.activeUsers && activeUsersData.data.activeUsers.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {activeUsersData.data.activeUsers.slice(0, 3).map((user: any, index: number) => (
+                      <div key={index} className="text-xs text-gray-600 flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        {user.username || `User ${user.id || 'Anonymous'}`}
+                      </div>
+                    ))}
+                    {activeUsersData.data.activeUsers.length > 3 && (
+                      <div className="text-xs text-gray-500">
+                        +{activeUsersData.data.activeUsers.length - 3} more
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
