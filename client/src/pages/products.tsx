@@ -1435,33 +1435,18 @@ export default function ProductsPage() {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="maxStockLevel"
-                      render={({ field }) => {
-                        // Get the current product being edited to force display the correct value
-                        const currentMaxStock = editingProduct?.maxStockLevel || field.value || 100;
-                        console.log("MaxStockLevel field render - editing product maxStockLevel:", editingProduct?.maxStockLevel, "field value:", field.value, "current:", currentMaxStock);
-                        
-                        return (
-                          <FormItem>
-                          <FormLabel>Max Level</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="0" 
-                              value={String(currentMaxStock)}
-                              onChange={(e) => {
-                                console.log("MaxStockLevel onChange triggered:", e.target.value);
-                                field.onChange(e.target.value ? Number(e.target.value) : 0);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                        );
-                      }}
-                    />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Max Level</label>
+                      <Input 
+                        type="number" 
+                        placeholder="0" 
+                        value={editingProduct?.maxStockLevel || 100}
+                        onChange={(e) => {
+                          console.log("MaxStockLevel onChange triggered:", e.target.value);
+                          form.setValue("maxStockLevel", e.target.value ? Number(e.target.value) : 0);
+                        }}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -1514,36 +1499,21 @@ export default function ProductsPage() {
 
                   {/* Weight Fields */}
                   <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="weight"
-                      render={({ field }) => {
-                        // Get the current product being edited to force display the correct value
-                        const currentWeight = editingProduct?.weight || field.value || "1";
-                        console.log("Weight field render - editing product weight:", editingProduct?.weight, "field value:", field.value, "current:", currentWeight);
-                        
-                        return (
-                          <FormItem>
-                          <FormLabel>Weight *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              step="0.01"
-                              placeholder="0.00" 
-                              value={String(currentWeight)}
-                              onChange={(e) => {
-                                console.log("Weight onChange triggered:", e.target.value);
-                                field.onChange(e.target.value);
-                              }}
-                              ref={(el) => { fieldRefs.current.weight = el; }}
-                              onKeyDown={(e) => handleKeyNavigation(e, 'weight')}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                        );
-                      }}
-                    />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Weight *</label>
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        placeholder="0.00" 
+                        value={editingProduct?.weight || "1"}
+                        onChange={(e) => {
+                          console.log("Weight onChange triggered:", e.target.value);
+                          form.setValue("weight", e.target.value);
+                        }}
+                        ref={(el) => { fieldRefs.current.weight = el; }}
+                        onKeyDown={(e) => handleKeyNavigation(e, 'weight')}
+                      />
+                    </div>
 
                     <FormField
                       control={form.control}
