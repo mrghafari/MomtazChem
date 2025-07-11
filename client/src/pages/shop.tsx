@@ -128,10 +128,8 @@ const Shop = () => {
   // Get data from search results or fallback to regular products
   const currentProducts = searchResults?.data?.products || products;
   
-  // Calculate filtered products that are actually visible in shop
-  const filteredProducts = currentProducts.filter((product: any) => {
-    return product.visibleInShop === true || product.visibleInShop === 1;
-  });
+  // Shop products are all visible by default (no visibleInShop field needed)
+  const filteredProducts = currentProducts;
   
   const totalResults = searchResults?.data?.total || filteredProducts.length;
   const availableFilters = searchResults?.data?.filters;
