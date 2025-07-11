@@ -24,6 +24,7 @@ import VisualBarcode from "@/components/ui/visual-barcode";
 
 // Custom form schema that handles numeric inputs properly
 const formSchema = insertShowcaseProductSchema.extend({
+  description: z.string().min(1, "شرح محصول الزامی است"), // Required description field
   unitPrice: z.string().min(1, "قیمت محصول الزامی است"), // Keep as string like database
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
@@ -1362,20 +1363,32 @@ export default function ProductsPage() {
                     )}
                   />
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Description *</label>
-                    <Textarea 
-                      placeholder="Enter product description" 
-                      className="min-h-[100px]"
-                      defaultValue={editingProduct?.description || ""}
-                      onChange={(e) => {
-                        console.log("Description onChange triggered:", e.target.value);
-                        form.setValue("description", e.target.value);
-                      }}
-                      ref={(el) => { fieldRefs.current.description = el; }}
-                      onKeyDown={(e) => handleKeyNavigation(e, 'description')}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description *</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Enter product description" 
+                            className="min-h-[100px]"
+                            value={field.value || ""}
+                            onChange={(e) => {
+                              console.log("Description onChange triggered:", e.target.value);
+                              field.onChange(e.target.value);
+                            }}
+                            ref={(el) => { 
+                              fieldRefs.current.description = el; 
+                              field.ref(el);
+                            }}
+                            onKeyDown={(e) => handleKeyNavigation(e, 'description')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 {/* Inventory & Pricing */}
