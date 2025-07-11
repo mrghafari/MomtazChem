@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -341,6 +341,38 @@ export default function ProductsPage() {
     generateSKUMutation.mutate(productData);
   };
 
+  // Field refs for auto-navigation
+  const fieldRefs = useRef<{ [key: string]: HTMLInputElement | HTMLTextAreaElement | null }>({});
+  
+  // Required fields in order of priority
+  const requiredFields = [
+    'name', 'category', 'description', 'unitPrice', 'stockQuantity', 
+    'weight', 'barcode', 'sku'
+  ];
+
+  // Auto-navigation to next required empty field
+  const navigateToNextEmptyField = useCallback(() => {
+    const formValues = form.getValues();
+    
+    for (const fieldName of requiredFields) {
+      const value = formValues[fieldName as keyof typeof formValues];
+      const isEmpty = !value || value === "" || value === 0;
+      
+      if (isEmpty && fieldRefs.current[fieldName]) {
+        fieldRefs.current[fieldName]?.focus();
+        return;
+      }
+    }
+  }, [form]);
+
+  // Handle Tab/Enter key navigation
+  const handleKeyNavigation = useCallback((e: React.KeyboardEvent, currentField: string) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      e.preventDefault();
+      setTimeout(navigateToNextEmptyField, 100);
+    }
+  }, [navigateToNextEmptyField]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -360,6 +392,8 @@ export default function ProductsPage() {
       maxStockLevel: 0,
       unitPrice: "0",
       currency: "IQD",
+      weight: "",
+      weightUnit: "kg",
       isActive: true,
       // Variant fields
       isVariant: false,
@@ -374,6 +408,8 @@ export default function ProductsPage() {
       pdfCatalogUrl: "",
       catalogFileName: "",
       showCatalogToCustomers: false,
+      // Shop sync
+      syncWithShop: true,
     },
   });
 
@@ -555,6 +591,11 @@ export default function ProductsPage() {
     setMsdsPreview(null);
     form.reset();
     setDialogOpen(true);
+    
+    // Focus first field (name) when creating new product
+    setTimeout(() => {
+      fieldRefs.current.name?.focus();
+    }, 300);
   };
 
   const openEditDialog = (product: ShowcaseProduct) => {
@@ -591,6 +632,11 @@ export default function ProductsPage() {
       isActive: product.isActive !== false,
     });
     setDialogOpen(true);
+    
+    // Focus first empty field when editing
+    setTimeout(() => {
+      navigateToNextEmptyField();
+    }, 300);
   };
 
   // Filter products based on category, inventory status, and search
@@ -1174,9 +1220,14 @@ export default function ProductsPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Product Name</FormLabel>
+                        <FormLabel>Product Name *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter product name" {...field} />
+                          <Input 
+                            placeholder="Enter product name" 
+                            {...field}
+                            ref={(el) => { fieldRefs.current.name = el; }}
+                            onKeyDown={(e) => handleKeyNavigation(e, 'name')}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -1188,7 +1239,7 @@ export default function ProductsPage() {
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Category</FormLabel>
+                        <FormLabel>Category *</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -1216,12 +1267,14 @@ export default function ProductsPage() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>Description *</FormLabel>
                         <FormControl>
                           <Textarea 
                             placeholder="Enter product description" 
                             className="min-h-[100px]"
-                            {...field} 
+                            {...field}
+                            ref={(el) => { fieldRefs.current.description = el; }}
+                            onKeyDown={(e) => handleKeyNavigation(e, 'description')}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1240,7 +1293,7 @@ export default function ProductsPage() {
                       name="stockQuantity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Current Stock</FormLabel>
+                          <FormLabel>Current Stock *</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -1248,6 +1301,8 @@ export default function ProductsPage() {
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                              ref={(el) => { fieldRefs.current.stockQuantity = el; }}
+                              onKeyDown={(e) => handleKeyNavigation(e, 'stockQuantity')}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1302,7 +1357,7 @@ export default function ProductsPage() {
                       name="unitPrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Unit Price</FormLabel>
+                          <FormLabel>Unit Price *</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -1311,6 +1366,8 @@ export default function ProductsPage() {
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
+                              ref={(el) => { fieldRefs.current.unitPrice = el; }}
+                              onKeyDown={(e) => handleKeyNavigation(e, 'unitPrice')}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1349,7 +1406,7 @@ export default function ProductsPage() {
                       name="weight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Weight</FormLabel>
+                          <FormLabel>Weight *</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -1358,6 +1415,8 @@ export default function ProductsPage() {
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value)}
+                              ref={(el) => { fieldRefs.current.weight = el; }}
+                              onKeyDown={(e) => handleKeyNavigation(e, 'weight')}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1437,10 +1496,15 @@ export default function ProductsPage() {
                   name="sku"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>SKU</FormLabel>
+                      <FormLabel>SKU *</FormLabel>
                       <div className="flex gap-2">
                         <FormControl>
-                          <Input placeholder="Enter SKU" {...field} />
+                          <Input 
+                            placeholder="Enter SKU" 
+                            {...field}
+                            ref={(el) => { fieldRefs.current.sku = el; }}
+                            onKeyDown={(e) => handleKeyNavigation(e, 'sku')}
+                          />
                         </FormControl>
                         <Button
                           type="button"
@@ -1467,12 +1531,14 @@ export default function ProductsPage() {
                   name="barcode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Barcode (EAN-13)</FormLabel>
+                      <FormLabel>Barcode (EAN-13) *</FormLabel>
                       <div className="flex gap-2">
                         <FormControl>
                           <Input 
                             placeholder="Auto-generated or enter manually" 
                             {...field}
+                            ref={(el) => { fieldRefs.current.barcode = el; }}
+                            onKeyDown={(e) => handleKeyNavigation(e, 'barcode')}
                             onChange={async (e) => {
                               const newBarcode = e.target.value;
                               field.onChange(e);
