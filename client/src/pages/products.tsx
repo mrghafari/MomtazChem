@@ -1439,7 +1439,10 @@ export default function ProductsPage() {
                       control={form.control}
                       name="maxStockLevel"
                       render={({ field }) => {
-                        console.log("MaxStockLevel field render - value:", field.value, "type:", typeof field.value);
+                        // Get the current product being edited to force display the correct value
+                        const currentMaxStock = editingProduct?.maxStockLevel || field.value || 100;
+                        console.log("MaxStockLevel field render - editing product maxStockLevel:", editingProduct?.maxStockLevel, "field value:", field.value, "current:", currentMaxStock);
+                        
                         return (
                           <FormItem>
                           <FormLabel>Max Level</FormLabel>
@@ -1447,8 +1450,7 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               placeholder="0" 
-                              {...field}
-                              value={String(field.value ?? '')}
+                              value={String(currentMaxStock)}
                               onChange={(e) => {
                                 console.log("MaxStockLevel onChange triggered:", e.target.value);
                                 field.onChange(e.target.value ? Number(e.target.value) : 0);
@@ -1516,7 +1518,10 @@ export default function ProductsPage() {
                       control={form.control}
                       name="weight"
                       render={({ field }) => {
-                        console.log("Weight field render - value:", field.value, "type:", typeof field.value);
+                        // Get the current product being edited to force display the correct value
+                        const currentWeight = editingProduct?.weight || field.value || "1";
+                        console.log("Weight field render - editing product weight:", editingProduct?.weight, "field value:", field.value, "current:", currentWeight);
+                        
                         return (
                           <FormItem>
                           <FormLabel>Weight *</FormLabel>
@@ -1525,8 +1530,7 @@ export default function ProductsPage() {
                               type="number" 
                               step="0.01"
                               placeholder="0.00" 
-                              {...field}
-                              value={String(field.value ?? '')}
+                              value={String(currentWeight)}
                               onChange={(e) => {
                                 console.log("Weight onChange triggered:", e.target.value);
                                 field.onChange(e.target.value);
