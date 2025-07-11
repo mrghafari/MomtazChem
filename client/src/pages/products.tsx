@@ -374,6 +374,7 @@ export default function ProductsPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onChange", // Enable real-time validation and updates
     defaultValues: {
       name: "",
       description: "",
@@ -686,7 +687,18 @@ export default function ProductsPage() {
     console.log("formData.maxStockLevel:", formData.maxStockLevel, "type:", typeof formData.maxStockLevel);
     console.log("Complete form data:", JSON.stringify(formData, null, 2));
     
+    // Reset form and manually set problematic fields
     form.reset(formData);
+    
+    // Force set the problematic fields after a short delay
+    setTimeout(() => {
+      console.log("=== FORCE SETTING FIELDS ===");
+      form.setValue("weight", formData.weight, { shouldValidate: false, shouldDirty: false });
+      form.setValue("maxStockLevel", formData.maxStockLevel, { shouldValidate: false, shouldDirty: false });
+      console.log("Weight field after setValue:", form.getValues("weight"));
+      console.log("MaxStockLevel field after setValue:", form.getValues("maxStockLevel"));
+    }, 100);
+    
     setDialogOpen(true);
     
     // Focus first empty field when editing
@@ -1431,7 +1443,10 @@ export default function ProductsPage() {
                               placeholder="0" 
                               {...field}
                               value={String(field.value ?? '')}
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
+                              onChange={(e) => {
+                                console.log("MaxStockLevel onChange triggered:", e.target.value);
+                                field.onChange(e.target.value ? Number(e.target.value) : 0);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1506,7 +1521,10 @@ export default function ProductsPage() {
                               placeholder="0.00" 
                               {...field}
                               value={String(field.value ?? '')}
-                              onChange={(e) => field.onChange(e.target.value)}
+                              onChange={(e) => {
+                                console.log("Weight onChange triggered:", e.target.value);
+                                field.onChange(e.target.value);
+                              }}
                               ref={(el) => { fieldRefs.current.weight = el; }}
                               onKeyDown={(e) => handleKeyNavigation(e, 'weight')}
                             />
