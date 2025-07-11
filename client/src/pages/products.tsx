@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, EyeOff } from "lucide-react";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
 
@@ -129,6 +129,7 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedInventoryStatus, setSelectedInventoryStatus] = useState<string>("all");
+  const [selectedVisibilityFilter, setSelectedVisibilityFilter] = useState<string>("all");
   const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -591,7 +592,7 @@ export default function ProductsPage() {
     setDialogOpen(true);
   };
 
-  // Filter products based on category, inventory status, and search
+  // Filter products based on category, inventory status, visibility, and search
   const filteredProducts = (products || []).filter((product: ShowcaseProduct) => {
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = !searchQuery || 
@@ -603,7 +604,12 @@ export default function ProductsPage() {
     const inventoryStatus = getActualInventoryStatus(product.stockQuantity, product.minStockLevel);
     const matchesInventoryStatus = selectedInventoryStatus === "all" || inventoryStatus === selectedInventoryStatus;
     
-    return matchesCategory && matchesSearch && matchesInventoryStatus;
+    // Check visibility status
+    const matchesVisibility = selectedVisibilityFilter === "all" || 
+      (selectedVisibilityFilter === "hidden" && !product.syncWithShop) ||
+      (selectedVisibilityFilter === "visible" && product.syncWithShop);
+    
+    return matchesCategory && matchesSearch && matchesInventoryStatus && matchesVisibility;
   });
 
   // Auto-generate barcode for new products when name and category are available
@@ -760,7 +766,7 @@ export default function ProductsPage() {
         </div>
 
         {/* Active Filters */}
-        {(selectedInventoryStatus !== "all" || selectedCategory !== "all" || searchQuery) && (
+        {(selectedInventoryStatus !== "all" || selectedCategory !== "all" || selectedVisibilityFilter !== "all" || searchQuery) && (
           <div className="mb-4 flex flex-wrap gap-2">
             <span className="text-sm font-medium text-gray-700">Active Filters:</span>
             {selectedInventoryStatus !== "all" && (
@@ -772,6 +778,12 @@ export default function ProductsPage() {
             {selectedCategory !== "all" && (
               <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedCategory("all")}>
                 Category: {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
+                <X className="w-3 h-3 ml-1" />
+              </Badge>
+            )}
+            {selectedVisibilityFilter !== "all" && (
+              <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedVisibilityFilter("all")}>
+                Visibility: {selectedVisibilityFilter === "hidden" ? "Hidden Products" : "Visible Products"}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
@@ -787,6 +799,7 @@ export default function ProductsPage() {
               onClick={() => {
                 setSelectedInventoryStatus("all");
                 setSelectedCategory("all");
+                setSelectedVisibilityFilter("all");
                 setSearchQuery("");
               }}
               className="h-6 text-xs"
@@ -807,7 +820,7 @@ export default function ProductsPage() {
 
       {/* Inventory Dashboard Summary */}
       {products && products.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('in_stock')}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -846,6 +859,20 @@ export default function ProductsPage() {
                   </p>
                 </div>
                 <XCircle className="w-8 h-8 text-red-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedVisibilityFilter('hidden')}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Hidden Products</p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {products.filter(p => !p.syncWithShop).length}
+                  </p>
+                </div>
+                <EyeOff className="w-8 h-8 text-gray-600" />
               </div>
             </CardContent>
           </Card>
