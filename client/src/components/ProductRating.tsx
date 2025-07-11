@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
-import { User, MessageSquare } from 'lucide-react';
+import { User, MessageSquare, Lock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useQuery } from '@tanstack/react-query';
 
 interface Review {
   id: number;
@@ -23,7 +24,7 @@ interface ProductRatingProps {
   averageRating: number;
   totalReviews: number;
   reviews: Review[];
-  onAddReview?: (review: { rating: number; comment: string; customerName: string }) => void;
+  onAddReview?: (review: { rating: number; comment: string }) => void;
 }
 
 export default function ProductRating({
@@ -38,8 +39,13 @@ export default function ProductRating({
   const { t, direction } = useLanguage();
   const [newRating, setNewRating] = React.useState(0);
   const [newComment, setNewComment] = React.useState('');
-  const [customerName, setCustomerName] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  // Check if user is authenticated
+  const { data: customer, isLoading: isLoadingCustomer } = useQuery({
+    queryKey: ['/api/customers/me'],
+    enabled: true
+  });
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,30 +68,19 @@ export default function ProductRating({
       return;
     }
     
-    if (!customerName.trim()) {
-      toast({
-        title: t.error,
-        description: t.customerName,
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     
     try {
       if (onAddReview) {
         await onAddReview({
           rating: newRating,
-          comment: newComment.trim(),
-          customerName: customerName.trim()
+          comment: newComment.trim()
         });
       }
       
       // Reset form
       setNewRating(0);
       setNewComment('');
-      setCustomerName('');
       
       toast({
         title: t.reviewSubmitted,
@@ -145,50 +140,75 @@ export default function ProductRating({
           <CardTitle>{t.addYourReview}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmitReview} className="space-y-4">
-            <div>
-              <Label htmlFor="customerName">{t.customerName}</Label>
-              <Input
-                id="customerName"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder={t.customerName}
-                className="mt-1"
-              />
+          {isLoadingCustomer ? (
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+              <div className="h-20 bg-gray-200 rounded"></div>
             </div>
-
-            <div>
-              <Label>{t.rating}</Label>
-              <div className="mt-2">
-                <StarRating
-                  rating={newRating}
-                  size="lg"
-                  interactive={true}
-                  onRatingChange={setNewRating}
-                />
+          ) : !customer ? (
+            <div className="text-center py-8">
+              <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                برای ثبت نظر ابتدا وارد شوید
+              </h3>
+              <p className="text-gray-600 mb-4">
+                جهت ثبت نظر و امتیاز دادن به محصولات، ابتدا باید وارد حساب کاربری خود شوید
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button 
+                  onClick={() => window.location.href = '/auth/login'}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  ورود
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => window.location.href = '/auth/register'}
+                >
+                  ثبت نام
+                </Button>
               </div>
             </div>
+          ) : (
+            <>
+              <p className="text-sm text-gray-600 mb-4">
+                ثبت نظر به نام: {customer.firstName} {customer.lastName}
+              </p>
+              <form onSubmit={handleSubmitReview} className="space-y-4">
+                <div>
+                  <Label>{t.rating}</Label>
+                  <div className="mt-2">
+                    <StarRating
+                      rating={newRating}
+                      size="lg"
+                      interactive={true}
+                      onRatingChange={setNewRating}
+                    />
+                  </div>
+                </div>
 
-            <div>
-              <Label htmlFor="comment">{t.comment}</Label>
-              <Textarea
-                id="comment"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder={t.writeReview}
-                className="mt-1"
-                rows={4}
-              />
-            </div>
+                <div>
+                  <Label htmlFor="comment">{t.comment}</Label>
+                  <Textarea
+                    id="comment"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder={t.writeReview}
+                    className="mt-1"
+                    rows={4}
+                  />
+                </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full"
-            >
-              {isSubmitting ? t.loading : t.submitReview}
-            </Button>
-          </form>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting ? t.loading : t.submitReview}
+                </Button>
+              </form>
+            </>
+          )}
         </CardContent>
       </Card>
 
