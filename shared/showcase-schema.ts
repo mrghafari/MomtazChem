@@ -33,7 +33,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   category: text("category").notNull(), // fuel-additives, water-treatment, paint-thinner, agricultural-fertilizers
   description: text("description").notNull(),
   shortDescription: text("short_description"),
-  priceRange: text("price_range"), // "25-30 USD per liter" for display only
+
   imageUrl: text("image_url"),
   pdfCatalogUrl: text("pdf_catalog_url"),
   catalogFileName: text("catalog_file_name"), // Original catalog filename
@@ -53,7 +53,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   // Publication permissions for shop display
   publishShortDescription: boolean("publish_short_description").default(true),
   publishDescription: boolean("publish_description").default(true),
-  publishPriceRange: boolean("publish_price_range").default(true),
+
   publishSpecifications: boolean("publish_specifications").default(true),
   publishFeatures: boolean("publish_features").default(true),
   publishApplications: boolean("publish_applications").default(true),

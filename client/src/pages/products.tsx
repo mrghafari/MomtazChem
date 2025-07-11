@@ -357,7 +357,7 @@ export default function ProductsPage() {
       description: "",
       category: "",
       shortDescription: "",
-      priceRange: "",
+
       imageUrl: "",
       specifications: "",
       features: "",
@@ -390,7 +390,7 @@ export default function ProductsPage() {
       // Publication permissions
       publishShortDescription: true,
       publishDescription: true,
-      publishPriceRange: true,
+
       publishSpecifications: true,
       publishFeatures: true,
       publishApplications: true,
@@ -704,7 +704,7 @@ export default function ProductsPage() {
       maxStockLevel: Number(product.maxStockLevel) || 100,
       unitPrice: String(product.unitPrice || "0"),
       currency: product.currency || "IQD",
-      priceRange: product.priceRange || "",
+
       weight: String(product.weight || "1"),
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
@@ -725,7 +725,7 @@ export default function ProductsPage() {
       // Publication permissions
       publishShortDescription: product.publishShortDescription !== false,
       publishDescription: product.publishDescription !== false,
-      publishPriceRange: product.publishPriceRange !== false,
+
       publishSpecifications: product.publishSpecifications !== false,
       publishFeatures: product.publishFeatures !== false,
       publishApplications: product.publishApplications !== false,
@@ -1580,27 +1580,6 @@ export default function ProductsPage() {
                       )}
                     />
                   </div>
-
-                  {/* Price Range Field */}
-                  <FormField
-                    control={form.control}
-                    name="priceRange"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price Range (Display Only)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="e.g., 25-30 USD per liter" 
-                            {...field}
-                          />
-                        </FormControl>
-                        <div className="text-xs text-muted-foreground">
-                          Optional: Add a price range for display purposes (e.g., "25-30 USD per liter")
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   {/* Weight Fields */}
                   <div className="grid grid-cols-2 gap-4">
