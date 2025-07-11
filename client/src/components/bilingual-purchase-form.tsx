@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, AlertTriangle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -1072,7 +1072,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
               {/* Partial Payment Amount Input */}
               {paymentMethod === 'wallet_partial' && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatCurrency(walletBalance)})</Label>
                   <Input
                     id="walletAmount"
@@ -1087,9 +1087,43 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     placeholder="مبلغ از والت"
                     className="text-right"
                   />
-                  <div className="text-sm text-muted-foreground">
-                    مبلغ باقیمانده (آنلاین): {formatCurrency(totalAmount - walletAmount)}
-                  </div>
+                  
+                  {/* Smart Payment Confirmation */}
+                  {walletAmount > 0 && walletAmount < totalAmount && (
+                    <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                            تأیید پرداخت ترکیبی
+                          </p>
+                          <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                            مبلغ {formatCurrency(walletAmount)} از کیف پول شما کسر می‌شود.
+                            <br />
+                            مبلغ باقیمانده {formatCurrency(totalAmount - walletAmount)} از طریق درگاه بانکی پرداخت خواهد شد.
+                          </p>
+                          <div className="flex items-center gap-2 mt-2 text-sm">
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                            <span className="text-green-700 dark:text-green-300 font-medium">
+                              ✓ تأیید می‌کنم که مابقی را آنلاین پرداخت کنم
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {walletAmount === 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      لطفاً مبلغ مورد نظر از کیف پول را وارد کنید
+                    </div>
+                  )}
+                  
+                  {walletAmount > 0 && walletAmount >= totalAmount && (
+                    <div className="text-sm text-green-600 font-medium">
+                      ✓ پرداخت کامل از کیف پول انجام می‌شود
+                    </div>
+                  )}
                 </div>
               )}
 
