@@ -1336,8 +1336,8 @@ export default function ProductsPage() {
                               type="number" 
                               placeholder="0" 
                               {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                              value={field.value !== undefined && field.value !== null ? field.value : ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
                               ref={(el) => { fieldRefs.current.stockQuantity = el; }}
                               onKeyDown={(e) => handleKeyNavigation(e, 'stockQuantity')}
                             />
@@ -1358,8 +1358,8 @@ export default function ProductsPage() {
                               type="number" 
                               placeholder="0" 
                               {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                              value={field.value !== undefined && field.value !== null ? field.value : ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1378,8 +1378,8 @@ export default function ProductsPage() {
                               type="number" 
                               placeholder="0" 
                               {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                              value={field.value !== undefined && field.value !== null ? field.value : ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1401,7 +1401,7 @@ export default function ProductsPage() {
                               step="0.01"
                               placeholder="0.00" 
                               {...field}
-                              value={field.value || ''}
+                              value={field.value !== undefined && field.value !== null ? field.value : ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
                               ref={(el) => { fieldRefs.current.unitPrice = el; }}
                               onKeyDown={(e) => handleKeyNavigation(e, 'unitPrice')}
@@ -1450,7 +1450,7 @@ export default function ProductsPage() {
                               step="0.01"
                               placeholder="0.00" 
                               {...field}
-                              value={field.value || ''}
+                              value={field.value !== undefined && field.value !== null ? field.value : ''}
                               onChange={(e) => field.onChange(e.target.value)}
                               ref={(el) => { fieldRefs.current.weight = el; }}
                               onKeyDown={(e) => handleKeyNavigation(e, 'weight')}
