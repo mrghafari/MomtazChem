@@ -136,16 +136,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProducts(): Promise<ShowcaseProduct[]> {
-    // Return all products regardless of isActive status for barcode inventory management
     return await showcaseDb.select().from(showcaseProducts).orderBy(desc(showcaseProducts.createdAt));
   }
 
   async getProductById(id: number): Promise<ShowcaseProduct | undefined> {
-    const [product] = await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.id, id));
-    return product || undefined;
-  }
-
-  async getProduct(id: number): Promise<ShowcaseProduct | undefined> {
     const [product] = await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.id, id));
     return product || undefined;
   }
@@ -202,37 +196,6 @@ export class DatabaseStorage implements IStorage {
       updateData.certifications = Array.isArray(productUpdate.certifications) && productUpdate.certifications.length > 0 ? productUpdate.certifications : null;
     }
 
-    // Handle file upload fields explicitly - ONLY update if value is explicitly provided and non-empty
-    if (productUpdate.imageUrl !== undefined && productUpdate.imageUrl && productUpdate.imageUrl.trim()) {
-      updateData.imageUrl = productUpdate.imageUrl.trim();
-    }
-    if (productUpdate.msdsUrl !== undefined && productUpdate.msdsUrl && productUpdate.msdsUrl.trim()) {
-      updateData.msdsUrl = productUpdate.msdsUrl.trim();
-    }
-    if (productUpdate.msdsFileName !== undefined && productUpdate.msdsFileName && productUpdate.msdsFileName.trim()) {
-      updateData.msdsFileName = productUpdate.msdsFileName.trim();
-    }
-    if (productUpdate.pdfCatalogUrl !== undefined && productUpdate.pdfCatalogUrl && productUpdate.pdfCatalogUrl.trim()) {
-      updateData.pdfCatalogUrl = productUpdate.pdfCatalogUrl.trim();
-    }
-    if (productUpdate.catalogFileName !== undefined && productUpdate.catalogFileName && productUpdate.catalogFileName.trim()) {
-      updateData.catalogFileName = productUpdate.catalogFileName.trim();
-    }
-    if (productUpdate.showMsdsToCustomers !== undefined) {
-      updateData.showMsdsToCustomers = productUpdate.showMsdsToCustomers;
-    }
-    if (productUpdate.showCatalogToCustomers !== undefined) {
-      updateData.showCatalogToCustomers = productUpdate.showCatalogToCustomers;
-    }
-
-    console.log("📄 File fields being updated:", {
-      imageUrl: updateData.imageUrl,
-      msdsUrl: updateData.msdsUrl,
-      msdsFileName: updateData.msdsFileName,
-      pdfCatalogUrl: updateData.pdfCatalogUrl,
-      catalogFileName: updateData.catalogFileName
-    });
-
     const [product] = await showcaseDb
       .update(showcaseProducts)
       .set(updateData)
@@ -261,21 +224,9 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    // Only auto-sync to shop if syncWithShop is enabled and this is not a content update
-    // Skip sync for content fields (description, features, applications, etc.) as they belong only to showcase
-    const isContentUpdate = productUpdate.hasOwnProperty('description') || 
-                           productUpdate.hasOwnProperty('shortDescription') ||
-                           productUpdate.hasOwnProperty('features') ||
-                           productUpdate.hasOwnProperty('applications') ||
-                           productUpdate.hasOwnProperty('specifications') ||
-                           productUpdate.hasOwnProperty('tags') ||
-                           productUpdate.hasOwnProperty('msdsUrl') ||
-                           productUpdate.hasOwnProperty('pdfCatalogUrl');
-    
-    if (product.syncWithShop && !isContentUpdate) {
+    // Only auto-sync to shop if syncWithShop is enabled
+    if (product.syncWithShop) {
       await this.syncProductToShop(product);
-    } else if (isContentUpdate) {
-      console.log(`📝 Content update for showcase product - skipping shop sync: ${product.name}`);
     }
     
     return product;
@@ -313,17 +264,33 @@ export class DatabaseStorage implements IStorage {
       }
       
       if (existingShopProduct) {
-        // Only sync inventory/pricing data - NEVER content fields
+        // Update existing shop product with real inventory data
         await shopStorage.updateShopProduct(existingShopProduct.id, {
+          name: showcaseProduct.name,
+          description: showcaseProduct.description,
+          price: productPrice,
+          category: showcaseProduct.category,
           stockQuantity: showcaseProduct.stockQuantity || 0,
           lowStockThreshold: showcaseProduct.minStockLevel || 10,
-          price: productPrice,
+          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
           isActive: showcaseProduct.isActive,
-          visibleInShop: showcaseProduct.syncWithShop !== false
         });
-        console.log(`✅ Synced only inventory/pricing data to shop: ${showcaseProduct.name}`);
       } else {
-        console.log(`⚠️ Shop product doesn't exist for: ${showcaseProduct.name} - content updates stay in showcase only`);
+        // Create new shop product with real inventory data
+        await shopStorage.createShopProduct({
+          name: showcaseProduct.name,
+          sku: productSku,
+          description: showcaseProduct.description || '',
+          price: productPrice,
+          priceUnit: 'unit',
+          category: showcaseProduct.category,
+          stockQuantity: showcaseProduct.stockQuantity || 0,
+          lowStockThreshold: showcaseProduct.minStockLevel || 10,
+          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
+          isActive: showcaseProduct.isActive,
+          isFeatured: false,
+          visibleInShop: showcaseProduct.syncWithShop || false,
+        });
       }
     } catch (error) {
       console.error('Error syncing product to shop:', error);

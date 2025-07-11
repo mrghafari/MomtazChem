@@ -29,9 +29,6 @@ export interface IWalletStorage {
   creditWallet(customerId: number, amount: number, description: string, referenceType?: string, referenceId?: number, processedBy?: number): Promise<WalletTransaction>;
   debitWallet(customerId: number, amount: number, description: string, referenceType?: string, referenceId?: number, processedBy?: number): Promise<WalletTransaction>;
   
-  // Refund operations for failed payments
-  refundWalletAmount(customerId: number, amount: number, originalOrderNumber: string, reason: string): Promise<WalletTransaction>;
-  
   // Recharge requests
   createRechargeRequest(requestData: InsertWalletRechargeRequest): Promise<WalletRechargeRequest>;
   getRechargeRequestById(requestId: number): Promise<WalletRechargeRequest | undefined>;
@@ -47,9 +44,6 @@ export interface IWalletStorage {
     totalBalance: number;
     activeWallets: number;
     pendingRecharges: number;
-    completedRecharges: number;
-    totalRechargeAmount: number;
-    averageWalletBalance: number;
     totalTransactions: number;
   }>;
   
@@ -223,58 +217,6 @@ export class WalletStorage implements IWalletStorage {
     return transaction;
   }
 
-  // Refund operations for failed payments
-  async refundWalletAmount(
-    customerId: number, 
-    amount: number, 
-    reason: string, 
-    originalOrderNumber: string
-  ): Promise<{ success: boolean; transaction?: WalletTransaction; error?: string }> {
-    try {
-      console.log(`💰 Processing wallet refund: ${amount} IQD for customer ${customerId}, order ${reason}`);
-      
-      // Get or create wallet
-      let wallet = await this.getWalletByCustomerId(customerId);
-      if (!wallet) {
-        wallet = await this.createWallet({
-          customerId,
-          balance: "0",
-          currency: "IQD",
-          status: "active"
-        });
-      }
-
-      const currentBalance = parseFloat(wallet.balance);
-      const newBalance = currentBalance + amount;
-
-      // Create refund transaction record
-      const transaction = await this.createTransaction({
-        walletId: wallet.id,
-        customerId,
-        transactionType: "credit",
-        amount: amount.toString(),
-        currency: wallet.currency,
-        balanceBefore: currentBalance.toString(),
-        balanceAfter: newBalance.toString(),
-        description: `بازگشت وجه - ${reason}`,
-        referenceType: "refund",
-        referenceId: null,
-        status: "completed",
-        processedBy: null
-      });
-
-      // Update wallet balance
-      await this.updateWalletBalance(wallet.id, newBalance);
-
-      console.log(`✅ Wallet refund completed: ${amount} IQD returned to customer ${customerId}`);
-      return { success: true, transaction };
-      
-    } catch (error) {
-      console.error(`❌ Wallet refund failed for customer ${customerId}:`, error);
-      return { success: false, error: error.message };
-    }
-  }
-
   // Recharge requests
   async createRechargeRequest(requestData: InsertWalletRechargeRequest): Promise<WalletRechargeRequest> {
     // Generate unique request number
@@ -354,9 +296,8 @@ export class WalletStorage implements IWalletStorage {
       throw new Error("Recharge request not found");
     }
 
-    // Allow re-approval of rejected requests or processing of pending requests
-    if (request.status !== "pending" && request.status !== "rejected") {
-      throw new Error("Recharge request cannot be processed - status: " + request.status);
+    if (request.status !== "pending") {
+      throw new Error("Recharge request is not pending");
     }
 
     // Credit the wallet
@@ -386,9 +327,6 @@ export class WalletStorage implements IWalletStorage {
     totalBalance: number;
     activeWallets: number;
     pendingRecharges: number;
-    completedRecharges: number;
-    totalRechargeAmount: number;
-    averageWalletBalance: number;
     totalTransactions: number;
   }> {
     const [walletsCount] = await customerDb
@@ -409,32 +347,15 @@ export class WalletStorage implements IWalletStorage {
       .from(walletRechargeRequests)
       .where(eq(walletRechargeRequests.status, "pending"));
 
-    const [completedRechargesCount] = await customerDb
-      .select({ count: sum(walletRechargeRequests.id) })
-      .from(walletRechargeRequests)
-      .where(eq(walletRechargeRequests.status, "completed"));
-
-    const [totalRechargeResult] = await customerDb
-      .select({ total: sum(walletRechargeRequests.amount) })
-      .from(walletRechargeRequests)
-      .where(eq(walletRechargeRequests.status, "completed"));
-
     const [transactionsCount] = await customerDb
       .select({ count: sum(walletTransactions.id) })
       .from(walletTransactions);
 
-    const totalWalletsNum = Number(walletsCount?.count || 0);
-    const totalBalance = parseFloat(totalBalanceResult?.total || "0");
-    const averageWalletBalance = totalWalletsNum > 0 ? totalBalance / totalWalletsNum : 0;
-
     return {
-      totalWallets: totalWalletsNum,
-      totalBalance: totalBalance,
+      totalWallets: Number(walletsCount?.count || 0),
+      totalBalance: parseFloat(totalBalanceResult?.total || "0"),
       activeWallets: Number(activeWalletsCount?.count || 0),
       pendingRecharges: Number(pendingRechargesCount?.count || 0),
-      completedRecharges: Number(completedRechargesCount?.count || 0),
-      totalRechargeAmount: parseFloat(totalRechargeResult?.total || "0"),
-      averageWalletBalance: averageWalletBalance,
       totalTransactions: Number(transactionsCount?.count || 0)
     };
   }

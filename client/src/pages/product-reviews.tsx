@@ -17,18 +17,15 @@ export default function ProductReviews() {
   const queryClient = useQueryClient();
   const { t, direction } = useLanguage();
 
-  // Get product details from shop endpoint
-  const { data: shopProducts, isLoading: isLoadingProduct } = useQuery({
-    queryKey: ['/api/shop/products'],
+  // Get product details
+  const { data: product, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ['/api/products', id],
     enabled: !!id,
   });
 
-  // Find the specific product from the shop products list
-  const product = shopProducts?.find((p: any) => p.id === parseInt(id || '0'));
-
-  // Get product reviews data using shop endpoint
+  // Get product reviews data
   const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
-    queryKey: [`/api/shop/products/${id}/reviews`],
+    queryKey: ['/api/products', id, 'reviews'],
     enabled: !!id,
   });
 
@@ -36,7 +33,7 @@ export default function ProductReviews() {
   const reviews = reviewsData?.data?.reviews || [];
   const productStats = reviewsData?.data?.stats || { averageRating: 0, totalReviews: 0 };
 
-  // Add review mutation for shop products
+  // Add review mutation
   const addReviewMutation = useMutation({
     mutationFn: async (reviewData: { rating: number; comment: string; customerName: string }) => {
       const payload = {
@@ -48,20 +45,11 @@ export default function ProductReviews() {
         pros: [], // Optional field
         cons: [] // Optional field
       };
-      return await apiRequest(`/api/shop/products/${id}/reviews`, 'POST', payload);
+      return await apiRequest(`/api/products/${id}/reviews`, 'POST', payload);
     },
     onSuccess: () => {
-      // Force immediate refetch of reviews
-      queryClient.invalidateQueries({ queryKey: [`/api/shop/products/${id}/reviews`] });
-      
-      // Also invalidate shop products to update stats
-      queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
-      
-      // Force a complete page refresh to ensure latest data
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-      
+      // Invalidate and refetch product reviews (which includes stats)
+      queryClient.invalidateQueries({ queryKey: ['/api/products', id, 'reviews'] });
       toast({
         title: t.reviewSubmitted,
         description: t.reviewSubmittedDesc,
@@ -143,8 +131,8 @@ export default function ProductReviews() {
                 )}
               </div>
               <div className="flex-1">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">{product?.name || 'نام محصول'}</h1>
-                <p className="text-gray-600 mb-3">{product?.description || 'توضیحات محصول'}</p>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
+                <p className="text-gray-600 mb-3">{product.description}</p>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
                     <span className="text-xl font-bold text-green-600">
@@ -166,7 +154,7 @@ export default function ProductReviews() {
         {/* Rating Component */}
         <ProductRating
           productId={parseInt(id || '0')}
-          productName={product?.name || 'نام محصول'}
+          productName={product.name}
           averageRating={productStats?.averageRating || 0}
           totalReviews={productStats?.totalReviews || 0}
           reviews={reviews}

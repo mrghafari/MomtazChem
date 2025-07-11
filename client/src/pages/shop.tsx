@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -28,7 +28,6 @@ import StarRating from "@/components/StarRating";
 import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 
 const Shop = () => {
-  const queryClient = useQueryClient();
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
 
@@ -75,7 +74,7 @@ const Shop = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 50; // Increase to show more products per page
+  const itemsPerPage = 12;
 
   // Debounce search term - only search with 3+ characters
   useEffect(() => {
@@ -89,22 +88,50 @@ const Shop = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Advanced search query - disabled for now to fix infinite loop
-  const searchResults = null;
-  const productsLoading = false;
+  // Advanced search query
+  const { data: searchResults, isLoading: productsLoading } = useQuery({
+    queryKey: ['shopSearch', debouncedQuery, filters, currentPage],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        q: debouncedQuery || '', // Always include query parameter, even if empty
+        limit: itemsPerPage.toString(),
+        offset: (currentPage * itemsPerPage).toString(),
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder
+      });
+      
+      // Only perform search if query is empty or has 3+ characters
+      if (debouncedQuery.length > 0 && debouncedQuery.length < 3) {
+        return null; // Don't search with less than 3 characters
+      }
 
-  // Fetch shop products (primary data source)
-  const { data: products = [] } = useQuery<ShopProduct[]>({
-    queryKey: ["/api/shop/products"],
-    refetchOnMount: false,
-    refetchOnWindowFocus: false
+      if (filters.category) params.append('category', filters.category);
+      if (filters.priceMin !== undefined) params.append('priceMin', filters.priceMin.toString());
+      if (filters.priceMax !== undefined) params.append('priceMax', filters.priceMax.toString());
+      if (filters.inStock !== undefined) params.append('inStock', filters.inStock.toString());
+      if (filters.tags?.length) {
+        filters.tags.forEach(tag => params.append('tags', tag));
+      }
+
+      const response = await fetch(`/api/shop/search?${params}`);
+      if (!response.ok) throw new Error('Search failed');
+      return response.json();
+    }
   });
 
-  // Use products directly (no search for now)
-  const currentProducts = products;
+  // Fetch shop products (fallback)
+  const { data: products = [] } = useQuery<ShopProduct[]>({
+    queryKey: ["/api/shop/products"],
+    enabled: !searchResults || (searchTerm.length > 0 && searchTerm.length < 3)
+  });
+
+  // Get data from search results or fallback to regular products
+  const currentProducts = searchResults?.data?.products || products;
   
-  // Products are already filtered by backend, no need for additional filtering
-  const filteredProducts = currentProducts;
+  // Calculate filtered products that are actually visible in shop
+  const filteredProducts = currentProducts.filter((product: any) => {
+    return product.visibleInShop === true || product.visibleInShop === 1;
+  });
   
   const totalResults = searchResults?.data?.total || filteredProducts.length;
   const availableFilters = searchResults?.data?.filters;
@@ -299,53 +326,25 @@ const Shop = () => {
     }
   };
 
-  // Fetch wallet balance with useQuery for automatic refresh
-  const { data: walletData, refetch: refetchWallet } = useQuery({
-    queryKey: ['/api/customers/wallet/balance'],
-    queryFn: async () => {
-      try {
-        const response = await fetch('/api/customers/wallet/balance', {
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success) {
-            return result.balance || 0;
-          }
-        }
-        return 0;
-      } catch (error) {
-        // Suppress wallet errors for guest users
-        if (!error.message?.includes('401') && !error.message?.includes('احراز هویت نشده')) {
-          console.error('Error fetching wallet balance:', error);
-        }
-        return 0;
-      }
-    },
-    enabled: !!customer,
-    retry: false,
-    refetchOnWindowFocus: true,
-    staleTime: 0, // Always refresh when needed
-  });
-
-  // Update local wallet balance when query data changes
-  useEffect(() => {
-    if (walletData !== undefined) {
-      // Extract numeric value from wallet data object
-      let balanceValue = 0;
-      if (typeof walletData === 'number') {
-        balanceValue = walletData;
-      } else if (walletData && typeof walletData === 'object' && 'balance' in walletData) {
-        balanceValue = parseFloat(walletData.balance) || 0;
-      } else if (walletData && typeof walletData === 'object' && walletData.data && 'balance' in walletData.data) {
-        balanceValue = parseFloat(walletData.data.balance) || 0;
-      }
+  const fetchWalletBalance = async () => {
+    try {
+      const response = await fetch('/api/customers/wallet/balance', {
+        credentials: 'include'
+      });
       
-      setWalletBalance(balanceValue);
-      console.log('🔄 Shop wallet balance updated:', { walletData, balanceValue });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setWalletBalance(result.balance || 0);
+        }
+      }
+    } catch (error) {
+      // Suppress wallet errors for guest users
+      if (!error.message?.includes('401') && !error.message?.includes('احراز هویت نشده')) {
+        console.error('Error fetching wallet balance:', error);
+      }
     }
-  }, [walletData]);
+  };
 
   const migrateGuestCartToUser = () => {
     // Since guest cart is only in memory, get current cart state
@@ -385,9 +384,6 @@ const Shop = () => {
     setCustomer(customerData);
     fetchWalletBalance();
     
-    // Close the auth modal immediately
-    setShowAuth(false);
-    
     // Invalidate cache to refresh header
     queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
     queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
@@ -403,27 +399,23 @@ const Shop = () => {
       description: `${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, immediately show checkout modal with auto-online payment
-    if (hasCartItems) {
-      // Store flag to indicate this is a guest-to-customer conversion checkout
-      sessionStorage.setItem('guestToCustomerCheckout', 'true');
-      
-      setTimeout(() => {
+    // If user had items in cart, show checkout modal, otherwise to profile
+    setTimeout(() => {
+      if (hasCartItems) {
         setShowCheckout(true);
         toast({
-          title: "آماده پرداخت آنلاین",
-          description: "فرم پرداخت آنلاین برای شما باز شد",
+          title: "آماده پرداخت",
+          description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
         });
-      }, 500); // Reduced delay for faster UX
-    }
+      } else {
+        navigate("/customer/profile");
+      }
+    }, 1000);
   };
 
   const handleRegisterSuccess = (customerData: any) => {
     setCustomer(customerData);
     fetchWalletBalance();
-    
-    // Close the auth modal immediately
-    setShowAuth(false);
     
     // Invalidate cache to refresh header
     queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
@@ -440,19 +432,18 @@ const Shop = () => {
       description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, immediately show checkout modal with auto-online payment
-    if (hasCartItems) {
-      // Store flag to indicate this is a guest-to-customer conversion checkout
-      sessionStorage.setItem('guestToCustomerCheckout', 'true');
-      
-      setTimeout(() => {
+    // If user had items in cart, show checkout modal, otherwise to profile
+    setTimeout(() => {
+      if (hasCartItems) {
         setShowCheckout(true);
         toast({
-          title: "آماده پرداخت آنلاین",
-          description: "فرم پرداخت آنلاین برای شما باز شد",
+          title: "آماده پرداخت",
+          description: "کالاهای انتخابی شما آماده پرداخت است",
         });
-      }, 500); // Reduced delay for faster UX  
-    }
+      } else {
+        navigate("/customer/profile");
+      }
+    }, 1000);
   };
 
   const handleLogout = async () => {
@@ -883,7 +874,7 @@ const Shop = () => {
                   >
                     <Wallet className="w-4 h-4" />
                     <span className="text-sm">
-                      {(typeof walletBalance === 'number' ? walletBalance : 0).toLocaleString()} IQD
+                      {walletBalance.toLocaleString()} IQD
                     </span>
                   </Button>
                   <Button 
@@ -1153,7 +1144,7 @@ const Shop = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
-                                onClick={() => navigate(`/shop/product-reviews/${product.id}`)}
+                                onClick={() => navigate(`/product-reviews/${product.id}`)}
                               >
                                 <StarRating
                                   rating={productStats[product.id].averageRating}
@@ -1171,7 +1162,7 @@ const Shop = () => {
                               variant="ghost"
                               size="sm"
                               className="p-1 h-7 w-7 hover:bg-green-50"
-                              onClick={() => navigate(`/shop/product-reviews/${product.id}`)}
+                              onClick={() => navigate(`/product-reviews/${product.id}`)}
                             >
                               <MessageSquare className="w-3 h-3 text-green-600" />
                             </Button>
@@ -1415,7 +1406,7 @@ const Shop = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
-                                onClick={() => navigate(`/shop/product-reviews/${product.id}`)}
+                                onClick={() => navigate(`/product-reviews/${product.id}`)}
                               >
                                 <StarRating
                                   rating={productStats[product.id].averageRating}
@@ -1433,7 +1424,7 @@ const Shop = () => {
                               variant="ghost"
                               size="sm"
                               className="p-1 h-7 w-7 hover:bg-green-50"
-                              onClick={() => navigate(`/shop/product-reviews/${product.id}`)}
+                              onClick={() => navigate(`/product-reviews/${product.id}`)}
                             >
                               <MessageSquare className="w-3 h-3 text-green-600" />
                             </Button>

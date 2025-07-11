@@ -33,14 +33,12 @@ export default function Header() {
   const { t, direction } = useLanguage();
   const { customer, isAuthenticated, logout } = useCustomer();
 
-  // Fetch wallet balance for authenticated customers with auto-refresh
-  const { data: walletData, isError, error, refetch: refetchWalletBalance } = useQuery({
+  // Fetch wallet balance for authenticated customers
+  const { data: walletData, isError, error } = useQuery({
     queryKey: ['/api/customers/wallet/balance'],
     enabled: isAuthenticated && !!customer,
     retry: false,
-    staleTime: 0, // Always refresh when needed
-    refetchOnWindowFocus: true,
-    refetchInterval: 60000, // Refresh every minute
+    staleTime: 30000, // 30 seconds
   });
 
   const rawBalance = walletData?.balance || walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";

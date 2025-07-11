@@ -15,8 +15,6 @@ import Contact from "@/pages/contact";
 import Shop from "@/pages/shop";
 import Checkout from "@/pages/checkout";
 import Payment from "@/pages/payment";
-import PaymentPage from "@/pages/payment-page";
-import PaymentSuccess from "@/pages/payment-success";
 import CheckoutSuccess from "@/pages/checkout-success";
 import ShopAdmin from "@/pages/shop-admin";
 import InvoiceManagement from "@/pages/admin/invoice-management";
@@ -51,7 +49,6 @@ import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import ProductRecommendations from "@/pages/product-recommendations";
 import ProductReviews from "@/pages/product-reviews";
-import ShopProductReviews from "@/pages/shop-product-reviews";
 import FuelAdditives from "@/pages/products/fuel-additives";
 import WaterTreatment from "@/pages/products/water-treatment";
 import PaintThinner from "@/pages/products/paint-thinner";
@@ -96,7 +93,6 @@ import SecurityManagement from "@/pages/security-management-new";
 import UnifiedInventory from "@/pages/admin/unified-inventory";
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
-import TicketsPage from "@/pages/admin/tickets";
 
 import NotFound from "@/pages/not-found";
 
@@ -113,11 +109,7 @@ function Router() {
           <Route path="/shop" component={Shop} />
           <Route path="/product-recommendations" component={ProductRecommendations} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
-          <Route path="/payment" component={PaymentPage} />
           <Route path="/payment/:orderId" component={Payment} />
-          <Route path="/payment-success" component={PaymentSuccess} />
-          <Route path="/payment/success" component={PaymentSuccess} />
-          <Route path="/payment/callback" component={PaymentSuccess} />
           <Route path="/checkout/success/:orderId" component={CheckoutSuccess} />
           <Route path="/bank-receipt-upload/:orderId" component={BankReceiptUpload} />
           <Route path="/shop-search" component={ShopSearch} />
@@ -174,7 +166,6 @@ function Router() {
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           <Route path="/admin/inventory-management" component={InventoryManagement} />
           <Route path="/admin/unified-inventory" component={UnifiedInventory} />
-          <Route path="/admin/tickets" component={TicketsPage} />
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/security-management" component={SecurityManagement} />
 
@@ -204,7 +195,6 @@ function Router() {
           <Route path="/products/commercial-goods" component={CommercialGoods} />
           <Route path="/products/technical-equipment" component={TechnicalEquipment} />
           <Route path="/product-reviews/:id" component={ProductReviews} />
-          <Route path="/shop/product-reviews/:id" component={ShopProductReviews} />
           <Route path="/quote" component={QuotePage} />
           <Route path="/documentation" component={DocumentationPage} />
           <Route component={NotFound} />

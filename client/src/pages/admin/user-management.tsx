@@ -200,23 +200,20 @@ function UserManagement() {
   });
 
   // Fetch admin users
-  const { data: usersData, isLoading: usersLoading, refetch: refetchUsers, error: usersError } = useQuery({
+  const { data: usersData, isLoading: usersLoading, refetch: refetchUsers } = useQuery({
     queryKey: ["/api/admin/users"],
-    retry: false,
   });
   
   const users = Array.isArray(usersData) ? usersData : [];
 
   // Fetch admin roles
-  const { data: roles = [], isLoading: rolesLoading, error: rolesError } = useQuery<AdminRole[]>({
+  const { data: roles = [], isLoading: rolesLoading } = useQuery<AdminRole[]>({
     queryKey: ["/api/admin/roles"],
-    retry: false,
   });
 
   // Fetch admin permissions
-  const { data: permissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery<AdminPermission[]>({
+  const { data: permissions = [], isLoading: permissionsLoading } = useQuery<AdminPermission[]>({
     queryKey: ["/api/admin/permissions"],
-    retry: false,
   });
 
   // Create user mutation
@@ -634,18 +631,6 @@ function UserManagement() {
             <CardContent>
               {usersLoading ? (
                 <div className="text-center py-8">{t.loading}</div>
-              ) : usersError ? (
-                <div className="text-center py-8 text-red-600">
-                  <div className="text-lg font-semibold mb-2">Authentication Required</div>
-                  <div className="text-sm">Please log in with Super Admin credentials to access User Management</div>
-                  <Button 
-                    className="mt-4" 
-                    onClick={() => setLocation('/admin/login')}
-                    variant="outline"
-                  >
-                    Go to Login
-                  </Button>
-                </div>
               ) : (
                 <Table>
                   <TableHeader>

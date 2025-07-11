@@ -14,7 +14,6 @@ interface Review {
   customerName: string;
   rating: number;
   comment: string;
-  review: string;
   createdAt: string;
 }
 
@@ -25,7 +24,6 @@ interface ProductRatingProps {
   totalReviews: number;
   reviews: Review[];
   onAddReview?: (review: { rating: number; comment: string; customerName: string }) => void;
-  isShopProduct?: boolean; // Flag to determine if this is a shop product
 }
 
 export default function ProductRating({
@@ -34,8 +32,7 @@ export default function ProductRating({
   averageRating,
   totalReviews,
   reviews,
-  onAddReview,
-  isShopProduct = false
+  onAddReview
 }: ProductRatingProps) {
   const { toast } = useToast();
   const { t, direction } = useLanguage();

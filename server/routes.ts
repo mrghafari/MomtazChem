@@ -42,7 +42,6 @@ import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBar
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { smsService } from "./sms-service";
-import { tbiPaymentService } from "./tbi-payment-service";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -1223,19 +1222,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update product MSDS information (for showcase products)
+  // Update product MSDS information (for both shop and showcase products)
   app.put("/api/products/:id/msds", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const { msdsUrl, showMsdsToCustomers, msdsFileName } = req.body;
 
-      // Update showcase product MSDS
-      await storage.updateProduct(parseInt(id), {
+      // Update shop product MSDS
+      await storage.updateShopProduct(parseInt(id), {
         msdsUrl,
         showMsdsToCustomers,
         msdsFileName,
         msdsUploadDate: new Date()
       });
+
+      // Also update showcase product if it exists
+      try {
+        await storage.updateShowcaseProduct(parseInt(id), {
+          msdsUrl,
+          showMsdsToCustomers,
+          msdsFileName,
+          msdsUploadDate: new Date()
+        });
+      } catch (error) {
+        // Showcase product might not exist, continue with shop product only
+        console.log('Showcase product not found, updated shop product only');
+      }
 
       res.json({ 
         success: true, 
@@ -1525,62 +1537,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/products", requireAuth, async (req, res) => {
     try {
       const productData = req.body;
-      console.log("Creating product with data:", productData);
       
-      // Create product in showcase_products table (main products management)
-      const showcaseProductData = {
+      // Create product directly in unified shop_products table
+      const shopProductData = {
         name: productData.name,
         category: productData.category,
-        description: productData.description || "",
-        shortDescription: productData.shortDescription || "",
-        priceRange: productData.priceRange || "",
-        imageUrl: productData.imageUrl || null,
-        pdfCatalogUrl: productData.pdfCatalogUrl || null,
-        catalogFileName: productData.catalogFileName || null,
-        showCatalogToCustomers: productData.showCatalogToCustomers || false,
-        msdsUrl: productData.msdsUrl || null,
-        msdsFileName: productData.msdsFileName || null,
-        showMsdsToCustomers: productData.showMsdsToCustomers || false,
-        specifications: productData.specifications || {},
-        features: Array.isArray(productData.features) ? productData.features : 
-                 (typeof productData.features === 'string' ? productData.features.split('\n').filter(f => f.trim()) : []),
-        applications: Array.isArray(productData.applications) ? productData.applications :
-                     (typeof productData.applications === 'string' ? productData.applications.split('\n').filter(a => a.trim()) : []),
-        tags: productData.tags || null,
-        stockQuantity: parseInt(productData.stockQuantity) || 0,
-        minStockLevel: parseInt(productData.minStockLevel) || 5,
-        maxStockLevel: parseInt(productData.maxStockLevel) || 100,
-        unitPrice: parseFloat(productData.unitPrice) || 0,
-        currency: productData.currency || 'IQD',
-        weight: parseFloat(productData.weight) || 0,
-        weightUnit: productData.weightUnit || 'kg',
-        barcode: productData.barcode || null,
+        description: productData.description,
+        shortDescription: productData.shortDescription || null,
+        price: productData.unitPrice || productData.price || 0,
+        compareAtPrice: null,
+        priceUnit: productData.currency || 'IQD',
+        inStock: true,
+        stockQuantity: productData.stockQuantity || 0,
+        lowStockThreshold: 10,
         sku: productData.sku || `SKU-${Date.now()}`,
+        barcode: productData.barcode || null,
+        weight: null,
+        weightUnit: 'kg',
+        dimensions: null,
+        imageUrls: productData.imageUrl ? [productData.imageUrl] : [],
+        thumbnailUrl: productData.imageUrl || null,
+        specifications: productData.specifications || {},
+        features: productData.features || [],
+        applications: productData.applications || [],
+        tags: [],
+        minimumOrderQuantity: 1,
+        maximumOrderQuantity: null,
+        leadTime: null,
+        shippingClass: 'standard',
+        taxClass: 'standard',
         isActive: productData.isActive !== false,
-        syncWithShop: productData.syncWithShop !== false,
-        isVariant: productData.isVariant || false,
+        isFeatured: false,
+        metaTitle: productData.name,
+        metaDescription: productData.shortDescription,
+        quantityDiscounts: [],
         parentProductId: productData.parentProductId || null,
+        isVariant: productData.isVariant || false,
         variantType: productData.variantType || null,
         variantValue: productData.variantValue || null,
-        // Publication permissions
-        publishShortDescription: productData.publishShortDescription !== false,
-        publishDescription: productData.publishDescription !== false,
-        publishPriceRange: productData.publishPriceRange !== false,
-        publishSpecifications: productData.publishSpecifications !== false,
-        publishFeatures: productData.publishFeatures !== false,
-        publishApplications: productData.publishApplications !== false,
-        publishWeight: productData.publishWeight !== false,
-        publishTags: productData.publishTags !== false,
-        publishCertifications: productData.publishCertifications || false,
-        publishImage: productData.publishImage !== false,
-        publishMsds: productData.publishMsds || false,
-        publishCatalogPdf: productData.publishCatalogPdf || false
+        sortOrder: 0,
+        minStockLevel: productData.minStockLevel || 5
       };
       
-      console.log("Final showcase product data:", showcaseProductData);
-      const product = await storage.createProduct(showcaseProductData);
-      console.log("Created product:", product);
-      
+      const product = await shopStorage.createShopProduct(shopProductData);
       res.status(201).json(product);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -1612,29 +1611,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products = await storage.getProducts();
       }
       
-      // Map all products from inventory to barcode interface
-      const mappedProducts = products.map(product => ({
-        id: product.id,
-        name: product.name,
-        category: product.category,
-        stockQuantity: product.stockQuantity || 0,
-        minStockLevel: product.minStockLevel || 10,
-        maxStockLevel: product.maxStockLevel || 1000, // Add maxStockLevel field
-        barcode: product.barcode,
-        qrCode: product.qrCode,
-        sku: product.sku,
-        stockUnit: product.stockUnit || 'units',
-        warehouseLocation: product.warehouseLocation,
-        batchNumber: product.batchNumber,
-        // Map price fields properly for frontend interface
-        price: product.unitPrice ? parseFloat(product.unitPrice.toString()) : 0,
-        priceUnit: product.currency || 'IQD',
-        unitPrice: product.unitPrice ? product.unitPrice.toString() : "0", // Keep as string for form
-        currency: product.currency || 'IQD',
-        // Add weight fields
-        weight: product.weight || "1",
-        weightUnit: product.weightUnit || "kg"
-      }));
+      // Products from showcase_products are already in the correct format
+      const mappedProducts = products;
       
       res.json(mappedProducts);
     } catch (error) {
@@ -1665,18 +1643,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Map single product response to include all fields needed for edit form
-      const mappedProduct = {
-        ...product,
-        unitPrice: product.unitPrice ? product.unitPrice.toString() : "0", // Keep as string for form
-        maxStockLevel: product.maxStockLevel || 1000,
-        weight: product.weight || "1",
-        weightUnit: product.weightUnit || "kg"
-      };
-
-      res.json(mappedProduct);
+      res.json(product);
     } catch (error) {
-      console.error("Error in GET /api/products/:id:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -1738,7 +1706,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const productData = req.body;
       console.log(`📝 Updating shop product ${id} with data:`, productData);
-      console.log(`📝 Description value in request:`, productData.description);
       
       // Update showcase product
       const product = await storage.updateProduct(id, productData);
@@ -1750,12 +1717,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (productData.syncWithShop === false) {
         console.log(`🔒 محصول از فروشگاه مخفی شد: ${product.name}`);
       }
-      
-      console.log(`✅ Response product data:`, {
-        id: product.id,
-        name: product.name,
-        description: product.description
-      });
       
       const responseProduct = product;
       
@@ -1788,28 +1749,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Delete from showcase_products table (kardex) since that's what /api/products uses
-      await storage.deleteProduct(id);
-      
-      // Also delete from shop_products if exists (optional cleanup)
-      try {
-        const shopProducts = await shopStorage.getShopProducts();
-        const matchingShopProduct = shopProducts.find(sp => sp.showcaseProductId === id);
-        if (matchingShopProduct) {
-          await shopStorage.deleteShopProduct(matchingShopProduct.id);
-          console.log(`🗑️ Also removed corresponding shop product: ${matchingShopProduct.name}`);
-        }
-      } catch (error) {
-        console.log('Note: No corresponding shop product found for cleanup');
-      }
-      
+      await shopStorage.deleteShopProduct(id);
       res.json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
-      console.error("Error deleting product:", error);
       res.status(500).json({ 
         success: false, 
-        message: "Internal server error",
-        error: error instanceof Error ? error.message : String(error)
+        message: "Internal server error" 
       });
     }
   });
@@ -2138,10 +2083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to generate label HTML with fixed grid layout
   function generateLabelHTML(products: any[], options: any) {
-    const { 
-      showPrice, showWebsite, showSKU, labelSize, website, 
-      showBrandName, brandText, includeCategory, customPriceText, customFooterText 
-    } = options;
+    const { showPrice, showWebsite, showSKU, labelSize, website } = options;
     
     // Fixed label dimensions matching frontend design
     const labelConfigs = {
@@ -2205,33 +2147,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         overflow: hidden;
         position: relative;
       ">
-        <!-- Enhanced 5-row grid layout -->
+        <!-- Fixed 4-row grid layout -->
         <div style="
           height: 100%; 
           display: grid; 
-          grid-template-rows: ${showBrandName ? '0.5fr' : '0fr'} 1fr ${includeCategory ? '0.3fr' : '0fr'} 1fr 1fr; 
-          gap: 0.5mm;
+          grid-template-rows: 1fr 1fr 1fr 1fr; 
+          gap: 1mm;
           text-align: center;
         ">
-          <!-- Row 1: Brand Name (if enabled) -->
-          ${showBrandName ? `
-            <div style="
-              display: flex; 
-              align-items: center; 
-              justify-content: center;
-              font-weight: bold; 
-              font-size: ${config.brandFont || config.nameFont}; 
-              color: #2563eb;
-              overflow: hidden;
-              padding: 0 1mm;
-            ">
-              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
-                ${brandText}
-              </span>
-            </div>
-          ` : '<div style="display: none;"></div>'}
-
-          <!-- Row 2: Product Name (always shown) -->
+          <!-- Row 1: Product Name (always shown) -->
           <div style="
             display: flex; 
             align-items: center; 
@@ -2247,42 +2171,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             </span>
           </div>
 
-          <!-- Row 3: Category (if enabled) -->
-          ${includeCategory && product.category ? `
-            <div style="
-              display: flex; 
-              align-items: center; 
-              justify-content: center;
-              font-size: ${config.categoryFont || config.skuFont}; 
-              color: #6b7280;
-              overflow: hidden;
-              padding: 0 1mm;
-            ">
-              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
-                ${product.category}
-              </span>
-            </div>
-          ` : '<div style="display: none;"></div>'}
-
-          <!-- Row 4: Barcode (always shown) -->
+          <!-- Row 2: SKU (if enabled) -->
           <div style="
             display: flex; 
             align-items: center; 
             justify-content: center;
             min-height: 0;
-          ">
-            ${generateBarcode(product.barcode)}
-          </div>
-
-          <!-- Row 5: Dynamic Content (SKU, Price, Website, Footer) -->
-          <div style="
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center;
-            gap: 0.3mm;
-            min-height: 0;
-            padding: 0 1mm;
           ">
             ${showSKU && product.sku ? `
               <span style="
@@ -2296,8 +2190,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ">
                 SKU: ${displaySku}
               </span>
-            ` : ''}
+            ` : '<div style="height: 100%;"></div>'}
+          </div>
 
+          <!-- Row 3: Barcode (always shown) -->
+          <div style="
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            min-height: 0;
+          ">
+            ${generateBarcode(product.barcode)}
+          </div>
+
+          <!-- Row 4: Price and Website -->
+          <div style="
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            gap: 0.5mm;
+            min-height: 0;
+          ">
             ${showPrice && product.price ? `
               <span style="
                 font-weight: bold; 
@@ -2308,10 +2222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 white-space: nowrap;
                 max-width: 100%;
               ">
-                ${customPriceText 
-                  ? customPriceText.replace('X', Math.round(product.price).toLocaleString())
-                  : formatPrice(product)
-                }
+                ${formatPrice(product)}
               </span>
             ` : ''}
             
@@ -2324,22 +2235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 white-space: nowrap;
                 max-width: 100%;
               ">
-                ${website || 'momtazchem.com'}
-              </span>
-            ` : ''}
-
-            ${customFooterText ? `
-              <span style="
-                color: #6b7280; 
-                font-size: ${config.footerFont || config.websiteFont}; 
-                font-style: italic;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                max-width: 100%;
-                margin-top: 0.2mm;
-              ">
-                ${customFooterText}
+                momtazchem.com
               </span>
             ` : ''}
           </div>
@@ -2400,12 +2296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         includeWebsite = true,
         includeSKU = true,
         websiteText = "www.momtazchem.com",
-        labelSize = "standard",
-        showBrandName = false,
-        brandText = "ممتاز کیمیا",
-        includeCategory = false,
-        customPriceText = "",
-        customFooterText = ""
+        labelSize = "standard"
       } = options || {};
 
       // Generate HTML for labels using the extracted options
@@ -2414,12 +2305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         showWebsite: includeWebsite,
         showSKU: includeSKU,
         labelSize,
-        website: websiteText,
-        showBrandName,
-        brandText,
-        includeCategory,
-        customPriceText,
-        customFooterText
+        website: websiteText
       });
 
       // Return as image if requested
@@ -4550,58 +4436,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ Bank receipt method selected - customer will upload receipt");
       }
 
-      // Handle online payment and hybrid payment (wallet + online)
-      let paymentGatewayResponse = null;
-      const needsOnlinePayment = (
-        orderData.paymentMethod === 'online_payment' || 
-        (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0)
-      );
-
-      if (needsOnlinePayment) {
-        try {
-          // Use TBI Payment Service instance
-          const tbiService = tbiPaymentService;
-
-          // Prepare payment data for TBI Bank POS
-          const paymentAmount = orderData.paymentMethod === 'wallet_partial' ? remainingAmount : totalAmount;
-          
-          const tbiPaymentData = {
-            customerName: customerInfo.name,
-            customerAddress: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.country}`,
-            customerPhone: customerInfo.phone,
-            customerEmail: '', // Optional
-            orderId: orderNumber,
-            orderItems: Object.entries(orderData.cart || {}).map(([productId, quantity]) => ({
-              name: `Product ${productId}`,
-              quantity: Number(quantity),
-              price: paymentAmount / Object.values(orderData.cart || {}).reduce((sum, qty) => sum + Number(qty), 0),
-            })),
-            totalAmount: paymentAmount,
-            currency: 'IQD',
-            callbackUrl: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment/callback`,
-            statusUrl: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/api/payment/status`,
-            description: orderData.paymentMethod === 'wallet_partial' ? 
-              `پرداخت مابقی سفارش ${orderNumber} - کیف پول: ${walletAmountUsed} IQD استفاده شد` :
-              `پرداخت سفارش ${orderNumber}`
-          };
-
-          console.log('🏦 Registering payment with TBI Bank POS...', { 
-            orderId: orderNumber, 
-            amount: paymentAmount,
-            paymentType: orderData.paymentMethod
-          });
-
-          paymentGatewayResponse = await tbiService.registerPayment(tbiPaymentData);
-          
-          console.log('✅ TBI Bank POS payment registered:', paymentGatewayResponse);
-          
-        } catch (error) {
-          console.error('❌ TBI Bank POS registration failed:', error);
-          // Don't fail the order, just log the error
-          console.log('⚠️ Continuing without payment gateway integration');
-        }
-      }
-
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
         orderNumber,
@@ -4756,17 +4590,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         walletAmountUsed: walletAmountUsed,
       };
 
-      // Add redirect URL for online payment and hybrid payment (wallet + online)
-      if (needsOnlinePayment && paymentGatewayResponse) {
-        responseData.redirectToPayment = true;
-        responseData.paymentGatewayUrl = paymentGatewayResponse.url;
-        responseData.tbiCreditApplicationId = paymentGatewayResponse.creditApplicationId;
-        console.log(`✅ Order ${orderNumber} created - redirecting to TBI Bank POS for ${paymentGatewayResponse.totalAmount || (remainingAmount > 0 ? remainingAmount : totalAmount)} IQD`);
-      } else if (needsOnlinePayment) {
-        // Fallback to local payment page if TBI Bank integration fails for online_payment OR wallet_partial
+      // Add redirect URL for online payment
+      if (finalPaymentMethod === 'online_payment') {
         responseData.redirectToPayment = true;
         responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}`;
-        console.log(`✅ Order ${orderNumber} created - redirecting to local payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD (${orderData.paymentMethod})`);
+        console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
       }
 
       res.json(responseData);
@@ -4775,423 +4603,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Failed to create order"
-      });
-    }
-  });
-
-  // TBI Bank Payment Callback Handler
-  app.post("/api/payment/tbi-callback", async (req, res) => {
-    try {
-      const { orderId, creditApplicationId, status, transactionId, amount, timestamp } = req.body;
-      
-      console.log('🏦 TBI Bank payment callback received:', { 
-        orderId, 
-        creditApplicationId, 
-        status, 
-        transactionId, 
-        amount 
-      });
-
-      // Update order payment status based on callback
-      if (status === 'SUCCESS' || status === 'COMPLETED') {
-        console.log(`✅ Payment successful for order ${orderId}`);
-        
-        // Update customer order payment status
-        try {
-          const order = await customerStorage.getOrderByNumber(orderId);
-          if (order) {
-            await customerStorage.updateOrderPaymentStatus(order.id, 'paid');
-            console.log(`✅ Order ${orderId} payment status updated to 'paid'`);
-          }
-        } catch (updateError) {
-          console.error('❌ Error updating order payment status:', updateError);
-        }
-        
-        // Update order management status to move to financial department
-        try {
-          await orderManagementStorage.updateOrderStatus(orderId, 'paid', 'financial');
-          console.log(`✅ Order ${orderId} moved to financial department`);
-        } catch (omError) {
-          console.error('❌ Error updating order management status:', omError);
-        }
-        
-      } else if (status === 'FAILED' || status === 'CANCELLED') {
-        console.log(`❌ Payment failed for order ${orderId}: ${status}`);
-        
-        // Update order status to failed
-        try {
-          const order = await customerStorage.getOrderByNumber(orderId);
-          if (order) {
-            await customerStorage.updateOrderPaymentStatus(order.id, 'failed');
-            console.log(`❌ Order ${orderId} payment status updated to 'failed'`);
-            
-            // Check if this was a hybrid payment (wallet_partial) and refund wallet amount
-            if (order.paymentMethod === 'wallet_partial' && order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0) {
-              const walletAmount = parseFloat(order.walletAmountUsed);
-              const reason = status === 'CANCELLED' ? 'انصراف مشتری از پرداخت' : 'پرداخت آنلاین ناموفق';
-              
-              try {
-                await walletStorage.refundWalletAmount(
-                  order.customerId,
-                  walletAmount,
-                  order.orderNumber,
-                  reason
-                );
-                console.log(`💰 Wallet refund processed: ${walletAmount} IQD returned for failed payment ${orderId}`);
-              } catch (refundError) {
-                console.error('❌ Error processing wallet refund:', refundError);
-              }
-            }
-          }
-        } catch (updateError) {
-          console.error('❌ Error updating failed order status:', updateError);
-        }
-      }
-
-      // Return success response to TBI Bank
-      res.json({
-        success: true,
-        message: "Callback processed successfully",
-        orderId,
-        status
-      });
-      
-    } catch (error) {
-      console.error('❌ Error processing TBI Bank callback:', error);
-      res.status(500).json({
-        success: false,
-        message: "Error processing payment callback"
-      });
-    }
-  });
-
-  // Manual Wallet Refund Endpoint for Failed Payments
-  app.post("/api/payment/refund-wallet", async (req, res) => {
-    try {
-      const { orderNumber, customerId, amount, reason } = req.body;
-      
-      if (!orderNumber || !customerId || !amount) {
-        return res.status(400).json({
-          success: false,
-          message: "Missing required fields: orderNumber, customerId, amount"
-        });
-      }
-
-      console.log(`💰 Manual wallet refund requested: ${amount} IQD for customer ${customerId}, order ${orderNumber}`);
-      
-      const transaction = await walletStorage.refundWalletAmount(
-        customerId,
-        parseFloat(amount),
-        orderNumber,
-        reason || 'بازگشت دستی وجه کیف پول'
-      );
-
-      res.json({
-        success: true,
-        message: "Wallet refund processed successfully",
-        transactionId: transaction.id,
-        newBalance: transaction.balanceAfter
-      });
-      
-    } catch (error) {
-      console.error('❌ Error processing manual wallet refund:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to process wallet refund: " + error.message
-      });
-    }
-  });
-
-  // Payment Cancellation Endpoint for Customer Withdrawal
-  app.post("/api/payment/cancel", async (req, res) => {
-    try {
-      const { orderNumber } = req.body;
-      
-      if (!orderNumber) {
-        return res.status(400).json({
-          success: false,
-          message: "Order number is required"
-        });
-      }
-
-      console.log(`🚫 Payment cancellation requested for order: ${orderNumber}`);
-      
-      const order = await customerStorage.getOrderByNumber(orderNumber);
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: "Order not found"
-        });
-      }
-
-      // Update order status to cancelled
-      await customerStorage.updateOrderPaymentStatus(order.id, 'cancelled');
-      console.log(`🚫 Order ${orderNumber} payment status updated to 'cancelled'`);
-      
-      // Check if this was a hybrid payment and refund wallet amount
-      if (order.paymentMethod === 'wallet_partial' && order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0) {
-        const walletAmount = parseFloat(order.walletAmountUsed);
-        
-        try {
-          const transaction = await walletStorage.refundWalletAmount(
-            order.customerId,
-            walletAmount,
-            order.orderNumber,
-            'انصراف مشتری از پرداخت'
-          );
-          
-          res.json({
-            success: true,
-            message: "Payment cancelled and wallet amount refunded",
-            refundAmount: walletAmount,
-            transactionId: transaction.id,
-            newWalletBalance: transaction.balanceAfter
-          });
-        } catch (refundError) {
-          console.error('❌ Error processing wallet refund on cancellation:', refundError);
-          res.json({
-            success: true,
-            message: "Payment cancelled but wallet refund failed",
-            refundAmount: 0,
-            error: "Refund processing error"
-          });
-        }
-      } else {
-        res.json({
-          success: true,
-          message: "Payment cancelled successfully",
-          refundAmount: 0
-        });
-      }
-      
-    } catch (error) {
-      console.error('❌ Error cancelling payment:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to cancel payment: " + error.message
-      });
-    }
-  });
-
-  // Payment Status Check Endpoint
-  app.get("/api/payment/status/:orderId", async (req, res) => {
-    try {
-      const { orderId } = req.params;
-      
-      console.log(`🔍 Checking payment status for order: ${orderId}`);
-      
-      const order = await customerStorage.getOrderByNumber(orderId);
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: "Order not found"
-        });
-      }
-
-      res.json({
-        success: true,
-        orderId: order.orderNumber,
-        paymentStatus: order.paymentStatus,
-        totalAmount: order.totalAmount,
-        currency: order.currency,
-        paymentMethod: order.paymentMethod,
-        walletAmountUsed: order.walletAmountUsed
-      });
-      
-    } catch (error) {
-      console.error('❌ Error checking payment status:', error);
-      res.status(500).json({
-        success: false,
-        message: "Error checking payment status"
-      });
-    }
-  });
-
-  // Auto-refund failed transactions endpoint
-  app.post('/api/payment/auto-refund-failed', async (req, res) => {
-    try {
-      console.log('🔄 Starting auto-refund process for failed transactions...');
-      
-      // Get all pending orders older than 10 minutes (failed transactions)
-      const cutoffTime = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
-      const failedOrders = await customerStorage.getFailedOrders(cutoffTime);
-      
-      // همچنین بررسی تراکنش‌های wallet بدون سفارش متناظر
-      const orphanedTransactions = await customerStorage.getOrphanedWalletTransactions(cutoffTime);
-      
-      let refundedCount = 0;
-      const refundResults = [];
-      
-      for (const order of failedOrders) {
-        try {
-          // Check if order used wallet_partial payment and has wallet amount
-          if (order.paymentMethod === 'wallet_partial' && order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0) {
-            console.log(`💰 Auto-refunding wallet amount for failed order: ${order.orderNumber}`);
-            
-            const refundResult = await walletStorage.refundWalletAmount(
-              order.customerId,
-              parseFloat(order.walletAmountUsed),
-              `بازگشت خودکار وجه - تراکنش ناموفق ${order.orderNumber}`,
-              order.orderNumber
-            );
-            
-            if (refundResult.success) {
-              // Update order status to cancelled
-              await customerStorage.updateOrderPaymentStatus(order.id, 'cancelled');
-              
-              refundedCount++;
-              refundResults.push({
-                orderNumber: order.orderNumber,
-                customerId: order.customerId,
-                refundAmount: order.walletAmountUsed,
-                status: 'success'
-              });
-              
-              console.log(`✅ Auto-refund successful: ${order.walletAmountUsed} IQD returned to customer ${order.customerId}`);
-            } else {
-              refundResults.push({
-                orderNumber: order.orderNumber,
-                customerId: order.customerId,
-                refundAmount: order.walletAmountUsed,
-                status: 'failed',
-                error: refundResult.error
-              });
-              console.error(`❌ Auto-refund failed for order ${order.orderNumber}:`, refundResult.error);
-            }
-          }
-        } catch (orderError) {
-          console.error(`❌ Error processing order ${order.orderNumber}:`, orderError);
-          refundResults.push({
-            orderNumber: order.orderNumber,
-            customerId: order.customerId,
-            status: 'error',
-            error: orderError.message
-          });
-        }
-      }
-      
-      // پردازش orphaned wallet transactions
-      for (const transaction of orphanedTransactions) {
-        try {
-          console.log(`💰 Auto-refunding orphaned wallet transaction: ${transaction.orderNumber}`);
-          
-          const refundResult = await walletStorage.refundWalletAmount(
-            transaction.customerId,
-            parseFloat(transaction.amount),
-            `بازگشت خودکار وجه - تراکنش یتیم ${transaction.orderNumber}`,
-            transaction.orderNumber
-          );
-          
-          if (refundResult.success) {
-            refundedCount++;
-            refundResults.push({
-              orderNumber: transaction.orderNumber,
-              customerId: transaction.customerId,
-              refundAmount: transaction.amount,
-              status: 'success',
-              type: 'orphaned_transaction'
-            });
-            
-            console.log(`✅ Orphaned transaction refund successful: ${transaction.amount} IQD returned to customer ${transaction.customerId}`);
-          } else {
-            refundResults.push({
-              orderNumber: transaction.orderNumber,
-              customerId: transaction.customerId,
-              refundAmount: transaction.amount,
-              status: 'failed',
-              error: refundResult.error,
-              type: 'orphaned_transaction'
-            });
-            console.error(`❌ Orphaned transaction refund failed for ${transaction.orderNumber}:`, refundResult.error);
-          }
-        } catch (transactionError) {
-          console.error(`❌ Error processing orphaned transaction ${transaction.orderNumber}:`, transactionError);
-          refundResults.push({
-            orderNumber: transaction.orderNumber,
-            customerId: transaction.customerId,
-            status: 'error',
-            error: transactionError.message,
-            type: 'orphaned_transaction'
-          });
-        }
-      }
-      
-      console.log(`🏁 Auto-refund process completed: ${refundedCount} transactions refunded out of ${failedOrders.length} failed orders and ${orphanedTransactions.length} orphaned transactions`);
-      
-      res.json({
-        success: true,
-        message: `Auto-refund completed: ${refundedCount} transactions refunded`,
-        refundedCount,
-        totalOrders: failedOrders.length,
-        totalOrphanedTransactions: orphanedTransactions.length,
-        details: refundResults
-      });
-      
-    } catch (error) {
-      console.error('❌ Auto-refund process failed:', error);
-      res.status(500).json({
-        success: false,
-        message: "Auto-refund process failed",
-        error: error.message
-      });
-    }
-  });
-
-  // Auto-refund scheduler management endpoints
-  app.get('/api/payment/auto-refund-status', async (req, res) => {
-    try {
-      const { autoRefundScheduler } = await import('./auto-refund-scheduler');
-      const status = autoRefundScheduler.getStatus();
-      
-      res.json({
-        success: true,
-        scheduler: status,
-        message: status.isRunning ? "Auto-refund scheduler is running" : "Auto-refund scheduler is stopped"
-      });
-    } catch (error) {
-      console.error('❌ Error getting auto-refund status:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to get auto-refund status",
-        error: error.message
-      });
-    }
-  });
-
-  app.post('/api/payment/auto-refund-start', async (req, res) => {
-    try {
-      const { autoRefundScheduler } = await import('./auto-refund-scheduler');
-      autoRefundScheduler.start();
-      
-      res.json({
-        success: true,
-        message: "Auto-refund scheduler started successfully"
-      });
-    } catch (error) {
-      console.error('❌ Error starting auto-refund scheduler:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to start auto-refund scheduler",
-        error: error.message
-      });
-    }
-  });
-
-  app.post('/api/payment/auto-refund-stop', async (req, res) => {
-    try {
-      const { autoRefundScheduler } = await import('./auto-refund-scheduler');
-      autoRefundScheduler.stop();
-      
-      res.json({
-        success: true,
-        message: "Auto-refund scheduler stopped successfully"
-      });
-    } catch (error) {
-      console.error('❌ Error stopping auto-refund scheduler:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to stop auto-refund scheduler",
-        error: error.message
       });
     }
   });
@@ -7185,27 +6596,11 @@ ${procedure.content}
   // Product synchronization endpoint
   app.post("/api/sync-products", requireAuth, async (req, res) => {
     try {
-      await storage.syncAllProductsToShop();
+      // No sync needed - unified table approach
       res.json({ success: true, message: "All products synchronized successfully" });
     } catch (error) {
       console.error("Error syncing products:", error);
       res.status(500).json({ success: false, message: "Failed to sync products" });
-    }
-  });
-
-  // Force sync all showcase products to shop (no auth needed for testing)
-  app.post("/api/products/force-sync-all", async (req, res) => {
-    try {
-      await storage.syncAllProductsToShop();
-      const shopProductsCount = await shopStorage.getShopProducts();
-      res.json({ 
-        success: true, 
-        message: "All products force synchronized successfully",
-        shopProductsCount: shopProductsCount.length
-      });
-    } catch (error) {
-      console.error("Error force syncing products:", error);
-      res.status(500).json({ success: false, message: "Failed to force sync products" });
     }
   });
 
@@ -12299,24 +11694,19 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Financial auth check - temporary solution for session issue
   app.get('/api/financial/auth/me', (req: any, res) => {
-    // Set departmentUser in session for wallet management access
-    const financialUser = {
+    // Temporary user for testing VAT management
+    const tempUser = {
       id: 1,
-      username: 'financial_admin',
+      username: 'financial_temp',
       department: 'financial'
     };
     
-    // Ensure session has departmentUser for wallet endpoints
-    req.session.departmentUser = financialUser;
+    // Set session for consistency
+    req.session.departmentUser = tempUser;
     
     res.json({ 
       success: true, 
-      user: {
-        id: 1,
-        username: 'financial_admin',
-        email: 'financial@momtazchem.com',
-        department: 'financial'
-      }
+      user: tempUser 
     });
   });
 
@@ -14439,8 +13829,8 @@ momtazchem.com
     }
   });
 
-  // Create wallet recharge request (with file upload)
-  app.post('/api/customer/wallet/recharge', uploadReceipt.single('file'), async (req, res) => {
+  // Create wallet recharge request
+  app.post('/api/customer/wallet/recharge', async (req, res) => {
     try {
       if (!req.session.customerId) {
         return res.status(401).json({ success: false, message: "Customer authentication required" });
@@ -14463,13 +13853,6 @@ momtazchem.com
         });
       }
 
-      // Handle file upload for bank receipt
-      let attachmentUrl = null;
-      if (req.file) {
-        attachmentUrl = `/uploads/receipts/${req.file.filename}`;
-        console.log('Bank receipt uploaded:', attachmentUrl);
-      }
-
       const rechargeRequest = await walletStorage.createRechargeRequest({
         customerId: req.session.customerId,
         walletId: wallet.id,
@@ -14477,8 +13860,7 @@ momtazchem.com
         currency: currency || "IQD",
         paymentMethod,
         paymentReference,
-        customerNotes,
-        attachmentUrl
+        customerNotes
       });
 
       res.json({ success: true, data: rechargeRequest });
@@ -14516,109 +13898,6 @@ momtazchem.com
     } catch (error) {
       console.error('Error fetching wallet transactions:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch wallet transactions' });
-    }
-  });
-
-  // =====================================================================
-  // FINANCIAL DEPARTMENT - WALLET MANAGEMENT ENDPOINTS
-  // =====================================================================
-
-  // Get all pending wallet recharge requests (financial department)
-  app.get('/api/financial/wallet/recharge-requests', async (req, res) => {
-    try {
-      // Check authentication - simplified for admin users
-      if (!req.session.isAuthenticated && !req.session.departmentUser) {
-        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
-      }
-
-      const requests = await walletStorage.getAllRechargeRequests();
-      
-      // Get customer details for each request
-      const requestsWithCustomers = await Promise.all(
-        requests.map(async (request) => {
-          const customer = await crmStorage.getCrmCustomerById(request.customerId);
-          return { ...request, customer };
-        })
-      );
-
-      res.json({ success: true, data: requestsWithCustomers });
-    } catch (error) {
-      console.error('Error fetching recharge requests:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch recharge requests' });
-    }
-  });
-
-  // Approve wallet recharge request (financial department)
-  app.post('/api/financial/wallet/recharge-requests/:id/approve', async (req, res) => {
-    try {
-      // Check authentication - simplified for admin users
-      if (!req.session.isAuthenticated && !req.session.departmentUser) {
-        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
-      }
-
-      const requestId = parseInt(req.params.id);
-      const { adminNotes } = req.body;
-      const adminUserId = req.session.adminId || req.session.departmentUser?.id || 1;
-
-      console.log('Processing wallet recharge approval:', { requestId, adminUserId, adminNotes });
-
-      const result = await walletStorage.processRechargeRequest(requestId, adminUserId);
-      
-      // Update with admin notes if provided
-      if (adminNotes) {
-        await walletStorage.updateRechargeRequestStatus(requestId, "completed", adminNotes, adminUserId);
-      }
-
-      console.log('Wallet recharge request approved successfully:', result);
-      res.json({ success: true, data: result });
-    } catch (error) {
-      console.error('Error approving recharge request:', error);
-      res.status(500).json({ success: false, message: 'Failed to approve recharge request: ' + error.message });
-    }
-  });
-
-  // Reject wallet recharge request (financial department)
-  app.post('/api/financial/wallet/recharge-requests/:id/reject', async (req, res) => {
-    try {
-      // Check authentication - simplified for admin users
-      if (!req.session.isAuthenticated && !req.session.departmentUser) {
-        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
-      }
-
-      const requestId = parseInt(req.params.id);
-      const { rejectionReason, adminNotes } = req.body;
-      const adminUserId = req.session.adminId || req.session.departmentUser?.id || 1;
-
-      console.log('Processing wallet recharge rejection:', { requestId, adminUserId, rejectionReason });
-
-      const updatedRequest = await walletStorage.updateRechargeRequestStatus(
-        requestId,
-        "rejected",
-        adminNotes || rejectionReason || "Request rejected by financial department",
-        adminUserId
-      );
-
-      console.log('Wallet recharge request rejected successfully:', updatedRequest);
-      res.json({ success: true, data: updatedRequest });
-    } catch (error) {
-      console.error('Error rejecting recharge request:', error);
-      res.status(500).json({ success: false, message: 'Failed to reject recharge request: ' + error.message });
-    }
-  });
-
-  // Get wallet statistics for financial dashboard
-  app.get('/api/financial/wallet/stats', async (req, res) => {
-    try {
-      // Check authentication - simplified for admin users
-      if (!req.session.isAuthenticated && !req.session.departmentUser) {
-        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
-      }
-
-      const stats = await walletStorage.getWalletStatistics();
-      res.json({ success: true, data: stats });
-    } catch (error) {
-      console.error('Error fetching wallet statistics:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch wallet statistics' });
     }
   });
 
@@ -18870,17 +18149,16 @@ momtazchem.com
   app.post("/api/products/:id/reviews", async (req, res) => {
     try {
       const productId = parseInt(req.params.id);
-      const { rating, review, comment, customerName, title, customerEmail, pros, cons } = req.body;
+      const { rating, comment, customerName } = req.body;
 
       if (isNaN(productId)) {
         return res.status(400).json({ success: false, message: "Invalid product ID" });
       }
 
-      const reviewText = review || comment; // Support both field names
-      if (!rating || !reviewText || !customerName) {
+      if (!rating || !comment || !customerName) {
         return res.status(400).json({
           success: false,
-          message: "Rating, review, and customer name are required"
+          message: "Rating, comment, and customer name are required"
         });
       }
 
@@ -18893,29 +18171,26 @@ momtazchem.com
 
       const { pool } = await import('./db');
 
-      // Insert review with auto-approval for immediate display
+      // Insert review
       const reviewResult = await pool.query(`
-        INSERT INTO product_reviews (
-          product_id, customer_name, customer_email, rating, title, review, 
-          pros, cons, is_approved, created_at
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, NOW())
-        RETURNING id, customer_name, rating, review, created_at
-      `, [
-        productId, 
-        customerName, 
-        customerEmail || '', 
-        rating, 
-        title || '', 
-        reviewText,
-        JSON.stringify(pros || []),
-        JSON.stringify(cons || [])
-      ]);
+        INSERT INTO product_reviews (product_id, customer_name, rating, comment)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, customer_name, rating, comment, created_at
+      `, [productId, customerName, rating, comment]);
 
       const newReview = reviewResult.rows[0];
 
-      // Update product stats using the helper function
-      await updateProductStats(productId);
+      // Update product stats
+      await pool.query(`
+        INSERT INTO product_stats (product_id, total_reviews, average_rating)
+        VALUES ($1, 1, $2)
+        ON CONFLICT (product_id) DO UPDATE SET
+          total_reviews = product_stats.total_reviews + 1,
+          average_rating = (
+            (product_stats.average_rating * product_stats.total_reviews + $2) / 
+            (product_stats.total_reviews + 1)
+          )
+      `, [productId, rating]);
 
       res.json({
         success: true,
@@ -18923,170 +18198,12 @@ momtazchem.com
           id: newReview.id,
           customerName: newReview.customer_name,
           rating: newReview.rating,
-          review: newReview.review,
-          comment: newReview.review, // For compatibility
+          comment: newReview.comment,
           createdAt: newReview.created_at
         }
       });
     } catch (error) {
       console.error("Error adding product review:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
-    }
-  });
-
-  // Add shop product review (for shop-specific products)
-  app.post("/api/shop/products/:id/reviews", async (req, res) => {
-    try {
-      const productId = parseInt(req.params.id);
-      const { rating, review, comment, customerName, title, customerEmail, pros, cons } = req.body;
-
-      console.log('Shop review submission:', { productId, rating, review, comment, customerName });
-
-      if (isNaN(productId)) {
-        return res.status(400).json({ success: false, message: "Invalid product ID" });
-      }
-
-      const reviewText = review || comment; // Support both field names
-      if (!rating || !reviewText || !customerName) {
-        return res.status(400).json({
-          success: false,
-          message: "Rating, review, and customer name are required"
-        });
-      }
-
-      if (rating < 1 || rating > 5) {
-        return res.status(400).json({
-          success: false,
-          message: "Rating must be between 1 and 5"
-        });
-      }
-
-      const { pool } = await import('./db');
-
-      // Insert review with auto-approval for immediate display
-      const reviewResult = await pool.query(`
-        INSERT INTO product_reviews (
-          product_id, customer_name, customer_email, rating, title, review, 
-          pros, cons, is_approved, created_at
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, NOW())
-        RETURNING id, customer_name, rating, review, created_at
-      `, [
-        productId, 
-        customerName, 
-        customerEmail || '', 
-        rating, 
-        title || '', 
-        reviewText,
-        JSON.stringify(pros || []),
-        JSON.stringify(cons || [])
-      ]);
-
-      const newReview = reviewResult.rows[0];
-
-      // Update product stats using the helper function
-      await updateProductStats(productId);
-
-      console.log('Shop review created successfully:', newReview);
-
-      res.json({
-        success: true,
-        review: {
-          id: newReview.id,
-          customerName: newReview.customer_name,
-          rating: newReview.rating,
-          review: newReview.review,
-          comment: newReview.review, // For compatibility
-          createdAt: newReview.created_at
-        }
-      });
-    } catch (error) {
-      console.error("Error adding shop product review:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
-    }
-  });
-
-  // Get shop product reviews
-  app.get("/api/shop/products/:id/reviews", async (req, res) => {
-    try {
-      const productId = parseInt(req.params.id);
-      if (isNaN(productId)) {
-        return res.status(400).json({ success: false, message: "Invalid product ID" });
-      }
-
-      const { pool } = await import('./db');
-      
-      // Get reviews with approved filter
-      const reviewsResult = await pool.query(`
-        SELECT 
-          id,
-          product_id,
-          customer_id,
-          customer_name,
-          rating,
-          title,
-          review,
-          pros,
-          cons,
-          is_verified_purchase,
-          helpful_votes,
-          not_helpful_votes,
-          admin_response,
-          admin_response_date,
-          created_at
-        FROM product_reviews 
-        WHERE product_id = $1 AND is_approved = true
-        ORDER BY created_at DESC
-      `, [productId]);
-
-      // Get product stats
-      const statsResult = await pool.query(`
-        SELECT 
-          total_reviews,
-          average_rating,
-          rating_distribution
-        FROM product_stats 
-        WHERE product_id = $1
-      `, [productId]);
-
-      const reviews = reviewsResult.rows.map(row => ({
-        id: row.id,
-        productId: row.product_id,
-        customerId: row.customer_id,
-        customerName: row.customer_name,
-        rating: row.rating,
-        title: row.title || '',
-        review: row.review || '',
-        comment: row.review || '', // For compatibility
-        pros: row.pros || [],
-        cons: row.cons || [],
-        isVerifiedPurchase: row.is_verified_purchase,
-        helpfulVotes: row.helpful_votes,
-        notHelpfulVotes: row.not_helpful_votes,
-        adminResponse: row.admin_response,
-        adminResponseDate: row.admin_response_date,
-        createdAt: row.created_at
-      }));
-
-      const stats = statsResult.rows[0] || {
-        total_reviews: 0,
-        average_rating: "0",
-        rating_distribution: {}
-      };
-
-      res.json({
-        success: true,
-        data: {
-          reviews,
-          stats: {
-            averageRating: parseFloat(stats.average_rating) || 0,
-            totalReviews: stats.total_reviews || 0,
-            ratingDistribution: stats.rating_distribution || {}
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching shop product reviews:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
@@ -19337,10 +18454,6 @@ momtazchem.com
       res.status(500).json({ success: false, message: 'خطا در محاسبه وزن سفارشات' });
     }
   });
-
-  // Register ticket routes
-  const { registerTicketRoutes } = await import("./ticket-routes");
-  registerTicketRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;

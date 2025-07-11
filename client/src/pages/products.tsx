@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -24,16 +24,13 @@ import VisualBarcode from "@/components/ui/visual-barcode";
 
 // Custom form schema that handles numeric inputs properly
 const formSchema = insertShowcaseProductSchema.extend({
-  description: z.string().min(1, "شرح محصول الزامی است"), // Required description field
-  unitPrice: z.string().min(1, "قیمت محصول الزامی است"), // Keep as string like database
+  unitPrice: z.coerce.number().min(0),
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
-  // Weight fields - Keep as string to match database
-  weight: z.string().min(1, "وزن محصول الزامی است").refine((val) => !isNaN(Number(val)) && Number(val) > 0, "وزن باید عددی مثبت باشد"),
+  // Weight fields
+  weight: z.string().optional(),
   weightUnit: z.string().default("kg"),
-  // Barcode field - Required
-  barcode: z.string().min(1, "بارکد محصول الزامی است"),
   // Text fields for array handling
   features: z.string().optional(),
   applications: z.string().optional(),
@@ -132,7 +129,6 @@ const getStockLevelIndicator = (current: number, min: number, max: number) => {
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedInventoryStatus, setSelectedInventoryStatus] = useState<string>("all");
-  const [visibilityFilter, setVisibilityFilter] = useState<string>("all"); // all, visible, hidden
   const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -180,31 +176,23 @@ export default function ProductsPage() {
     { value: "commercial-goods", label: "Commercial Goods", icon: <Package className="w-4 h-4" /> },
   ];
 
-  const { data: products, isLoading, refetch } = useQuery<ShowcaseProduct[]>({
-    queryKey: ["/api/products", refreshKey],
-    staleTime: 0, // Always fetch fresh data
-    gcTime: 0, // Don't cache data
+  const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
+    queryKey: ["/api/products"],
   });
 
   const { mutate: createProduct } = useMutation({
     mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
-    onSuccess: (result) => {
-      console.log("✅ Product created successfully:", result);
-      
-      // Immediate cache refresh
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setRefreshKey(prev => prev + 1);
-      
-      // Close dialog and clear state  
+      setRefreshKey(prev => prev + 1); // Force component re-render
       setDialogOpen(false);
       setImagePreview(null);
       setCatalogPreview(null);
       setMsdsPreview(null);
       form.reset();
-      
       toast({
-        title: "موفقیت", 
-        description: "محصول با موفقیت در بخش تولید ایجاد شد",
+        title: "Success",
+        description: "Product created successfully",
       });
     },
     onError: (error: any) => {
@@ -219,24 +207,26 @@ export default function ProductsPage() {
   const { mutate: updateProduct } = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
       apiRequest(`/api/products/${id}`, "PUT", data),
-    onSuccess: (result) => {
-      console.log("✅ Update successful:", result);
-      
-      // Immediate cache refresh
+    onSuccess: () => {
+      // Clear and refresh data completely
+      queryClient.removeQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setRefreshKey(prev => prev + 1);
+      queryClient.refetchQueries({ queryKey: ["/api/products"] });
+      setRefreshKey(prev => prev + 1); // Force component re-render
       
-      // Close dialog and clear state
-      setDialogOpen(false);
-      setEditingProduct(null);
-      setImagePreview(null);
-      setCatalogPreview(null);
-      setMsdsPreview(null);
+      // Keep the form values to show updated data
+      // Don't reset form or close dialog immediately
       
-      // Show success message
+      setTimeout(() => {
+        setDialogOpen(false);
+        setEditingProduct(null);
+        setImagePreview(null);
+        setCatalogPreview(null);
+        setMsdsPreview(null);
+      }, 1000); // Allow user to see the updated values for 1 second
       toast({
-        title: "موفقیت",
-        description: "محصول با موفقیت به‌روزرسانی شد",
+        title: "Success",
+        description: "Product updated successfully",
       });
     },
     onError: (error: any) => {
@@ -283,12 +273,9 @@ export default function ProductsPage() {
 
   // Quick sync toggle mutation
   const { mutate: toggleSync } = useMutation({
-    mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) => {
-      console.log(`🔄 Toggling sync for product ${id}: ${syncWithShop}`);
-      return apiRequest(`/api/products/${id}`, "PUT", { syncWithShop });
-    },
-    onSuccess: (data) => {
-      console.log(`✅ Toggle sync successful:`, data);
+    mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) =>
+      apiRequest(`/api/products/${id}`, "PUT", { syncWithShop }),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1);
       toast({
@@ -297,7 +284,6 @@ export default function ProductsPage() {
       });
     },
     onError: (error: any) => {
-      console.error(`❌ Toggle sync failed:`, error);
       toast({
         title: "خطا",
         description: error.message || "خطا در به‌روزرسانی وضعیت نمایش",
@@ -355,13 +341,12 @@ export default function ProductsPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onChange", // Enable real-time validation and updates
     defaultValues: {
       name: "",
       description: "",
       category: "",
       shortDescription: "",
-
+      priceRange: "",
       imageUrl: "",
       specifications: "",
       features: "",
@@ -370,11 +355,9 @@ export default function ProductsPage() {
       sku: "",
       stockQuantity: 0,
       minStockLevel: 0,
-      maxStockLevel: 100,
+      maxStockLevel: 0,
       unitPrice: "0",
       currency: "IQD",
-      weight: "1",
-      weightUnit: "kg",
       isActive: true,
       // Variant fields
       isVariant: false,
@@ -389,78 +372,17 @@ export default function ProductsPage() {
       pdfCatalogUrl: "",
       catalogFileName: "",
       showCatalogToCustomers: false,
-      // Shop sync
-      syncWithShop: true,
-      // Publication permissions
-      publishShortDescription: true,
-      publishDescription: true,
-
-      publishSpecifications: true,
-      publishFeatures: true,
-      publishApplications: true,
-      publishWeight: true,
-      publishTags: true,
-      publishCertifications: false,
-      publishImage: true,
-      publishMsds: false,
-      publishCatalogPdf: false,
     },
   });
 
-  // Field refs for auto-navigation
-  const fieldRefs = useRef<{ [key: string]: HTMLInputElement | HTMLTextAreaElement | null }>({});
-  
-  // Required fields in order of priority
-  const requiredFields = [
-    'name', 'category', 'shortDescription', 'description', 'unitPrice', 'stockQuantity', 
-    'weight', 'barcode', 'sku'
-  ];
-
-  // Auto-navigation to next required empty field
-  const navigateToNextEmptyField = useCallback(() => {
-    const formValues = form.getValues();
-    
-    for (const fieldName of requiredFields) {
-      const value = formValues[fieldName as keyof typeof formValues];
-      const isEmpty = !value || value === "" || value === 0;
-      
-      if (isEmpty && fieldRefs.current[fieldName]) {
-        fieldRefs.current[fieldName]?.focus();
-        return;
-      }
-    }
-  }, [form]);
-
-  // Handle Tab/Enter key navigation
-  const handleKeyNavigation = useCallback((e: React.KeyboardEvent, currentField: string) => {
-    if (e.key === 'Tab' || e.key === 'Enter') {
-      e.preventDefault();
-      setTimeout(navigateToNextEmptyField, 100);
-    }
-  }, [navigateToNextEmptyField]);
-
   const onSubmit = (data: InsertShowcaseProduct) => {
-    console.log("Form data before processing:", data);
-    console.log("Description value from form:", data.description);
-    console.log("🔄 FILE UPLOAD FIELDS FROM FORM:", {
-      imageUrl: data.imageUrl,
-      msdsUrl: data.msdsUrl,
-      msdsFileName: data.msdsFileName,
-      pdfCatalogUrl: data.pdfCatalogUrl,
-      catalogFileName: data.catalogFileName,
-      showMsdsToCustomers: data.showMsdsToCustomers,
-      showCatalogToCustomers: data.showCatalogToCustomers
-    });
-    
-    // Convert fields for API compatibility  
+    // Convert numeric fields to strings for API compatibility
     const processedData = {
       ...data,
-      description: data.description && data.description.trim() ? data.description.trim() : "",
       unitPrice: data.unitPrice ? data.unitPrice.toString() : "0",
-      weight: data.weight && data.weight !== "" ? String(data.weight) : "1",
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
-      maxStockLevel: Number(data.maxStockLevel) || 100,
+      maxStockLevel: Number(data.maxStockLevel) || 0,
       // Convert string fields to arrays for backend compatibility
       features: typeof data.features === 'string' && data.features.trim() 
         ? data.features.split('\n').map(f => f.trim()).filter(f => f.length > 0)
@@ -482,17 +404,6 @@ export default function ProductsPage() {
         }
       })(),
     };
-    
-    console.log("Processed data for API:", processedData);
-    console.log("🔄 FILE UPLOAD FIELDS IN PROCESSED DATA:", {
-      imageUrl: processedData.imageUrl,
-      msdsUrl: processedData.msdsUrl,
-      msdsFileName: processedData.msdsFileName,
-      pdfCatalogUrl: processedData.pdfCatalogUrl,
-      catalogFileName: processedData.catalogFileName,
-      showMsdsToCustomers: processedData.showMsdsToCustomers,
-      showCatalogToCustomers: processedData.showCatalogToCustomers
-    });
     
     if (editingProduct) {
       updateProduct({ id: editingProduct.id, data: processedData });
@@ -642,120 +553,45 @@ export default function ProductsPage() {
     setMsdsPreview(null);
     form.reset();
     setDialogOpen(true);
-    
-    // Focus first field (name) when creating new product
-    setTimeout(() => {
-      fieldRefs.current.name?.focus();
-    }, 300);
   };
 
   const openEditDialog = (product: ShowcaseProduct) => {
-    console.log("=== OPENING EDIT DIALOG ===");
-    console.log("Raw product data:", product);
-    console.log("Image URL:", product.imageUrl);
-    console.log("Catalog URL:", product.pdfCatalogUrl);  
-    console.log("Catalog filename:", product.catalogFileName);
-    console.log("MSDS URL:", product.msdsUrl);
-    console.log("MSDS filename:", product.msdsFileName);
-    
     setEditingProduct(product);
-    
-    // CRITICAL: Force update preview states synchronously
-    console.log("=== SETTING PREVIEW STATES ===");
-    
-    // Image preview
-    const imageUrl = product.imageUrl || null;
-    setImagePreview(imageUrl);
-    console.log("Image preview state set to:", imageUrl);
-    
-    // Catalog preview  
-    const catalogUrl = product.pdfCatalogUrl || null;
-    setCatalogPreview(catalogUrl);
-    console.log("Catalog preview state set to:", catalogUrl);
-    
-    // MSDS preview
-    const msdsUrl = product.msdsUrl || null;
-    setMsdsPreview(msdsUrl);
-    console.log("MSDS preview state set to:", msdsUrl);
-    
-    // Process form data
-    const processText = (value: any): string => {
-      if (Array.isArray(value)) {
-        return value.join('\n');
-      } else if (typeof value === 'string') {
-        try {
-          const parsed = JSON.parse(value);
-          return Array.isArray(parsed) ? parsed.join('\n') : value;
-        } catch {
-          return value;
-        }
-      }
-      return value || "";
-    };
-    
-    const formData = {
-      name: product.name || "",
+    setImagePreview(product.imageUrl || null);
+    setCatalogPreview(product.pdfCatalogUrl || null);
+    setMsdsPreview(product.msdsUrl || null);
+    form.reset({
+      name: product.name,
       description: product.description || "",
-      category: product.category || "",
+      category: product.category,
       shortDescription: product.shortDescription || "",
-      features: processText(product.features),
-      applications: processText(product.applications),
-      specifications: product.specifications || "",
+      features: Array.isArray(product.features) ? product.features.join('\n') : (product.features || ""),
+      applications: Array.isArray(product.applications) ? product.applications.join('\n') : (product.applications || ""),
+      specifications: typeof product.specifications === 'object' && product.specifications !== null ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
-      stockQuantity: Number(product.stockQuantity) || 0,
-      minStockLevel: Number(product.minStockLevel) || 0,
-      maxStockLevel: Number(product.maxStockLevel) || 100,
-      unitPrice: String(product.unitPrice || "0"),
+      stockQuantity: Number(product.stockQuantity) ?? 0,
+      minStockLevel: Number(product.minStockLevel) ?? 0,
+      maxStockLevel: Number(product.maxStockLevel) ?? 0,
+      unitPrice: Number(product.unitPrice || 0),
       currency: product.currency || "IQD",
-
-      weight: String(product.weight || "1"),
+      priceRange: product.priceRange || "",
+      weight: product.weight || "",
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
       msdsUrl: product.msdsUrl || "",
       msdsFileName: product.msdsFileName || "",
-      showMsdsToCustomers: Boolean(product.showMsdsToCustomers),
+      showMsdsToCustomers: product.showMsdsToCustomers || false,
       catalogFileName: product.catalogFileName || "",
-      showCatalogToCustomers: Boolean(product.showCatalogToCustomers),
-      tags: typeof product.tags === 'string' ? product.tags : (Array.isArray(product.tags) ? product.tags.join(', ') : ""),
-      syncWithShop: product.syncWithShop !== false,
+      showCatalogToCustomers: product.showCatalogToCustomers || false,
+      syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       isActive: product.isActive !== false,
-      // Variant fields
-      isVariant: Boolean(product.isVariant),
-      parentProductId: product.parentProductId || undefined,
-      variantType: product.variantType || "",
-      variantValue: product.variantValue || "",
-      // Publication permissions
-      publishShortDescription: product.publishShortDescription !== false,
-      publishDescription: product.publishDescription !== false,
-
-      publishSpecifications: product.publishSpecifications !== false,
-      publishFeatures: product.publishFeatures !== false,
-      publishApplications: product.publishApplications !== false,
-      publishWeight: product.publishWeight !== false,
-      publishTags: product.publishTags !== false,
-      publishCertifications: Boolean(product.publishCertifications),
-      publishImage: product.publishImage !== false,
-      publishMsds: Boolean(product.publishMsds),
-      publishCatalogPdf: Boolean(product.publishCatalogPdf),
-    };
-    
-    console.log("=== SETTING FORM WITH RESET ===");
-    console.log("Processed form data:", formData);
-    
-    // Use form.reset to properly populate all fields
-    form.reset(formData);
-    
+    });
     setDialogOpen(true);
-    
-    // Focus first empty field when editing
-    setTimeout(() => {
-      navigateToNextEmptyField();
-    }, 300);
   };
 
-  // Filter products based on category, inventory status, visibility, and search
+  // Filter products based on category, inventory status, and search
   const filteredProducts = (products || []).filter((product: ShowcaseProduct) => {
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = !searchQuery || 
@@ -767,13 +603,7 @@ export default function ProductsPage() {
     const inventoryStatus = getActualInventoryStatus(product.stockQuantity, product.minStockLevel);
     const matchesInventoryStatus = selectedInventoryStatus === "all" || inventoryStatus === selectedInventoryStatus;
     
-    // Check visibility filter
-    const isVisible = product.syncWithShop === true;
-    const matchesVisibility = visibilityFilter === "all" || 
-      (visibilityFilter === "visible" && isVisible) ||
-      (visibilityFilter === "hidden" && !isVisible);
-    
-    return matchesCategory && matchesSearch && matchesInventoryStatus && matchesVisibility;
+    return matchesCategory && matchesSearch && matchesInventoryStatus;
   });
 
   // Auto-generate barcode for new products when name and category are available
@@ -853,38 +683,6 @@ export default function ProductsPage() {
     return () => clearTimeout(timer);
   }, [form.watch("barcode"), dialogOpen]); // Added dialogOpen dependency
 
-  // Update preview states when form values change (for edit mode)
-  // Only sync if dialog is open and we're not in the middle of form reset
-  useEffect(() => {
-    if (dialogOpen && !editingProduct) return; // Skip for new product creation
-    
-    const imageUrl = form.getValues('imageUrl');
-    if (imageUrl !== imagePreview) {
-      setImagePreview(imageUrl || null);
-      console.log("Image preview synced with form:", imageUrl);
-    }
-  }, [form.watch('imageUrl'), dialogOpen, editingProduct]);
-
-  useEffect(() => {
-    if (dialogOpen && !editingProduct) return; // Skip for new product creation
-    
-    const catalogUrl = form.getValues('pdfCatalogUrl');
-    if (catalogUrl !== catalogPreview) {
-      setCatalogPreview(catalogUrl || null);
-      console.log("Catalog preview synced with form:", catalogUrl);
-    }
-  }, [form.watch('pdfCatalogUrl'), dialogOpen, editingProduct]);
-
-  useEffect(() => {
-    if (dialogOpen && !editingProduct) return; // Skip for new product creation
-    
-    const msdsUrl = form.getValues('msdsUrl');
-    if (msdsUrl !== msdsPreview) {
-      setMsdsPreview(msdsUrl || null);
-      console.log("MSDS preview synced with form:", msdsUrl);
-    }
-  }, [form.watch('msdsUrl'), dialogOpen, editingProduct]);
-
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -961,10 +759,8 @@ export default function ProductsPage() {
           </div>
         </div>
 
-
-
         {/* Active Filters */}
-        {(selectedInventoryStatus !== "all" || selectedCategory !== "all" || visibilityFilter !== "all" || searchQuery) && (
+        {(selectedInventoryStatus !== "all" || selectedCategory !== "all" || searchQuery) && (
           <div className="mb-4 flex flex-wrap gap-2">
             <span className="text-sm font-medium text-gray-700">Active Filters:</span>
             {selectedInventoryStatus !== "all" && (
@@ -976,12 +772,6 @@ export default function ProductsPage() {
             {selectedCategory !== "all" && (
               <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setSelectedCategory("all")}>
                 Category: {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
-                <X className="w-3 h-3 ml-1" />
-              </Badge>
-            )}
-            {visibilityFilter !== "all" && (
-              <Badge variant="secondary" className="cursor-pointer hover:bg-gray-300" onClick={() => setVisibilityFilter("all")}>
-                نمایش: {visibilityFilter === "visible" ? "در فروشگاه" : "مخفی شده"}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
@@ -997,7 +787,6 @@ export default function ProductsPage() {
               onClick={() => {
                 setSelectedInventoryStatus("all");
                 setSelectedCategory("all");
-                setVisibilityFilter("all");
                 setSearchQuery("");
               }}
               className="h-6 text-xs"
@@ -1018,78 +807,62 @@ export default function ProductsPage() {
 
       {/* Inventory Dashboard Summary */}
       {products && products.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('in_stock')}>
-            <CardContent className="p-3">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-green-600">In Stock</p>
-                  <p className="text-lg font-bold text-green-800">
+                  <p className="text-sm font-medium text-green-600">In Stock</p>
+                  <p className="text-2xl font-bold text-green-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'in_stock').length}
                   </p>
                 </div>
-                <CheckCircle className="w-5 h-5 text-green-600" />
+                <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('low_stock')}>
-            <CardContent className="p-3">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-yellow-600">Low Stock</p>
-                  <p className="text-lg font-bold text-yellow-800">
+                  <p className="text-sm font-medium text-yellow-600">Low Stock</p>
+                  <p className="text-2xl font-bold text-yellow-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'low_stock').length}
                   </p>
                 </div>
-                <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                <AlertTriangle className="w-8 h-8 text-yellow-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('out_of_stock')}>
-            <CardContent className="p-3">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-red-600">Out of Stock</p>
-                  <p className="text-lg font-bold text-red-800">
+                  <p className="text-sm font-medium text-red-600">Out of Stock</p>
+                  <p className="text-2xl font-bold text-red-800">
                     {products.filter(p => getActualInventoryStatus(p.stockQuantity, p.minStockLevel) === 'out_of_stock').length}
                   </p>
                 </div>
-                <XCircle className="w-5 h-5 text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => { setVisibilityFilter('hidden'); setSelectedInventoryStatus('all'); }}>
-            <CardContent className="p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Hidden</p>
-                  <p className="text-lg font-bold text-gray-800">
-                    {products.filter(p => p.syncWithShop !== true).length}
-                  </p>
-                </div>
-                <XCircle className="w-5 h-5 text-gray-600" />
+                <XCircle className="w-8 h-8 text-red-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedInventoryStatus('all')}>
-            <CardContent className="p-3">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-blue-600">Total Products</p>
-                  <p className="text-lg font-bold text-blue-800">{products.length}</p>
+                  <p className="text-sm font-medium text-blue-600">Total Products</p>
+                  <p className="text-2xl font-bold text-blue-800">{products.length}</p>
                 </div>
-                <Package className="w-5 h-5 text-blue-600" />
+                <Package className="w-8 h-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
         </div>
       )}
-
-
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
         <TabsList className="flex flex-wrap w-full gap-1 h-auto min-h-[40px] p-1 bg-muted">
@@ -1394,26 +1167,26 @@ export default function ProductsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Basic Information</h3>
                   
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Product Name *</label>
-                    <Input 
-                      placeholder="Enter product name" 
-                      defaultValue={editingProduct?.name || ""}
-                      onChange={(e) => {
-                        console.log("Name onChange triggered:", e.target.value);
-                        form.setValue("name", e.target.value);
-                      }}
-                      ref={(el) => { fieldRefs.current.name = el; }}
-                      onKeyDown={(e) => handleKeyNavigation(e, 'name')}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter product name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Category *</FormLabel>
+                        <FormLabel>Category</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -1438,50 +1211,15 @@ export default function ProductsPage() {
 
                   <FormField
                     control={form.control}
-                    name="shortDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Short Description</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Enter a brief product summary (2-3 lines)" 
-                            className="min-h-[60px]"
-                            value={field.value || ""}
-                            onChange={(e) => {
-                              field.onChange(e.target.value);
-                            }}
-                            ref={(el) => { 
-                              fieldRefs.current.shortDescription = el; 
-                              field.ref(el);
-                            }}
-                            onKeyDown={(e) => handleKeyNavigation(e, 'shortDescription')}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description *</FormLabel>
+                        <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Enter detailed product description" 
+                            placeholder="Enter product description" 
                             className="min-h-[100px]"
-                            value={field.value || ""}
-                            onChange={(e) => {
-                              console.log("Description onChange triggered:", e.target.value);
-                              field.onChange(e.target.value);
-                            }}
-                            ref={(el) => { 
-                              fieldRefs.current.description = el; 
-                              field.ref(el);
-                            }}
-                            onKeyDown={(e) => handleKeyNavigation(e, 'description')}
+                            {...field} 
                           />
                         </FormControl>
                         <FormMessage />
@@ -1500,16 +1238,14 @@ export default function ProductsPage() {
                       name="stockQuantity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Current Stock *</FormLabel>
+                          <FormLabel>Current Stock</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
                               placeholder="0" 
                               {...field}
-                              value={field.value !== undefined && field.value !== null ? field.value : ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
-                              ref={(el) => { fieldRefs.current.stockQuantity = el; }}
-                              onKeyDown={(e) => handleKeyNavigation(e, 'stockQuantity')}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1528,8 +1264,8 @@ export default function ProductsPage() {
                               type="number" 
                               placeholder="0" 
                               {...field}
-                              value={field.value !== undefined && field.value !== null ? field.value : ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1537,36 +1273,48 @@ export default function ProductsPage() {
                       )}
                     />
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Max Level</label>
-                      <Input 
-                        type="number" 
-                        placeholder="0" 
-                        defaultValue={editingProduct?.maxStockLevel || 100}
-                        onChange={(e) => {
-                          console.log("MaxStockLevel onChange triggered:", e.target.value);
-                          form.setValue("maxStockLevel", e.target.value ? Number(e.target.value) : 0);
-                        }}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="maxStockLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Max Level</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Unit Price *</label>
-                      <Input 
-                        type="number" 
-                        step="0.01"
-                        placeholder="0.00" 
-                        defaultValue={editingProduct?.unitPrice || "0"}
-                        onChange={(e) => {
-                          console.log("UnitPrice onChange triggered:", e.target.value);
-                          form.setValue("unitPrice", e.target.value);
-                        }}
-                        ref={(el) => { fieldRefs.current.unitPrice = el; }}
-                        onKeyDown={(e) => handleKeyNavigation(e, 'unitPrice')}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="unitPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Unit Price</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0.00" 
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}
@@ -1574,7 +1322,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Currency</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value || "IQD"}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select currency" />
@@ -1594,21 +1342,26 @@ export default function ProductsPage() {
 
                   {/* Weight Fields */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Weight *</label>
-                      <Input 
-                        type="number" 
-                        step="0.01"
-                        placeholder="0.00" 
-                        defaultValue={editingProduct?.weight || "1"}
-                        onChange={(e) => {
-                          console.log("Weight onChange triggered:", e.target.value);
-                          form.setValue("weight", e.target.value);
-                        }}
-                        ref={(el) => { fieldRefs.current.weight = el; }}
-                        onKeyDown={(e) => handleKeyNavigation(e, 'weight')}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="weight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Weight</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0.00" 
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}
@@ -1616,7 +1369,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Weight Unit</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value || "kg"}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value || "kg"}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select weight unit" />
@@ -1677,61 +1430,47 @@ export default function ProductsPage() {
 
               {/* Product Codes */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    SKU {editingProduct ? "(محافظت شده)" : "(Auto-generated)"}
-                  </label>
-                  <div className="flex gap-2">
-                    <Input 
-                      placeholder={editingProduct ? "SKU cannot be changed" : "Enter SKU"} 
-                      defaultValue={editingProduct?.sku || ""}
-                      readOnly={!!editingProduct}
-                      disabled={!!editingProduct}
-                      className={editingProduct ? "bg-gray-100 cursor-not-allowed" : ""}
-                      onChange={(e) => {
-                        if (!editingProduct) {
-                          form.setValue("sku", e.target.value);
-                        }
-                      }}
-                      ref={(el) => { fieldRefs.current.sku = el; }}
-                      onKeyDown={(e) => handleKeyNavigation(e, 'sku')}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={generateSmartSKU}
-                      disabled={generateSKUMutation.isPending || !!editingProduct}
-                      className="whitespace-nowrap"
-                      title={editingProduct ? "SKU cannot be regenerated for existing products" : "Generate AI-powered SKU"}
-                    >
-                      {generateSKUMutation.isPending ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      ) : (
-                        "🤖 AI SKU"
-                      )}
-                    </Button>
-                  </div>
-                  {editingProduct && (
-                    <div className="text-xs text-amber-600 font-medium">
-                      ⚠️ SKU محافظت شده - پس از تولید قابل تغییر نیست
-                    </div>
+                <FormField
+                  control={form.control}
+                  name="sku"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SKU</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input placeholder="Enter SKU" {...field} />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={generateSmartSKU}
+                          disabled={generateSKUMutation.isPending}
+                          className="whitespace-nowrap"
+                        >
+                          {generateSKUMutation.isPending ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          ) : (
+                            "🤖 AI SKU"
+                          )}
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
+                />
 
                 <FormField
                   control={form.control}
                   name="barcode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Barcode (EAN-13) *</FormLabel>
+                      <FormLabel>Barcode (EAN-13)</FormLabel>
                       <div className="flex gap-2">
                         <FormControl>
                           <Input 
                             placeholder="Auto-generated or enter manually" 
                             {...field}
-                            ref={(el) => { fieldRefs.current.barcode = el; }}
-                            onKeyDown={(e) => handleKeyNavigation(e, 'barcode')}
                             onChange={async (e) => {
                               const newBarcode = e.target.value;
                               field.onChange(e);
@@ -2023,246 +1762,6 @@ export default function ProductsPage() {
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Publication Permissions Section */}
-              <div className="space-y-4 border-t pt-6">
-                <h3 className="text-lg font-semibold text-blue-900">🏪 مجوزهای انتشار در فروشگاه</h3>
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800 mb-4">
-                    مشخص کنید کدام اطلاعات محصول در کارت فروشگاه آنلاین نمایش داده شود:
-                  </p>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="publishShortDescription"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            توضیح کوتاه
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishDescription"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            توضیحات کامل
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishFeatures"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            ویژگی‌ها
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishApplications"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            کاربردها
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishSpecifications"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            مشخصات فنی
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishTags"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            برچسب‌ها
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishImage"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            تصویر محصول
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishMsds"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            برگه ایمنی (MSDS)
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishCatalogPdf"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            کاتالوگ PDF
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishPriceRange"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            محدوده قیمت
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishWeight"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            وزن محصول
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishCertifications"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            گواهینامه‌ها
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-green-600">✅</span>
-                      <strong className="text-green-800">فیلدهای کامل:</strong>
-                    </div>
-                    <p className="text-xs text-green-700 leading-relaxed">
-                      همه فیلدهای مورد نیاز شما الان در سیستم موجود است: Short Description, Description, Features, Applications, Specifications, Tags, Product Image, MSDS, Product Catalog PDF.
-                      <br />
-                      <strong>کنترل نمایش:</strong> با تیک زدن هر فیلد، آن اطلاعات در کارت فروشگاه آنلاین نمایش داده می‌شود.
-                    </p>
-                  </div>
-                </div>
               </div>
 
               {/* Additional Information */}

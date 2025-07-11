@@ -33,11 +33,9 @@ export const showcaseProducts = pgTable("showcase_products", {
   category: text("category").notNull(), // fuel-additives, water-treatment, paint-thinner, agricultural-fertilizers
   description: text("description").notNull(),
   shortDescription: text("short_description"),
-
+  priceRange: text("price_range"), // "25-30 USD per liter" for display only
   imageUrl: text("image_url"),
   pdfCatalogUrl: text("pdf_catalog_url"),
-  catalogFileName: text("catalog_file_name"), // Original catalog filename
-  showCatalogToCustomers: boolean("show_catalog_to_customers").default(false), // Checkbox to control catalog visibility
   specifications: json("specifications"), // Technical specifications for display
   features: json("features"), // Product features array
   applications: json("applications"), // Applications array
@@ -49,27 +47,13 @@ export const showcaseProducts = pgTable("showcase_products", {
   msdsFileName: text("msds_file_name"), // Original filename for display
   msdsUploadDate: timestamp("msds_upload_date"), // When MSDS was uploaded
   certifications: json("certifications"), // Array of certifications
-  tags: text("tags"), // Product tags for search and filtering
-  // Publication permissions for shop display
-  publishShortDescription: boolean("publish_short_description").default(true),
-  publishDescription: boolean("publish_description").default(true),
-
-  publishSpecifications: boolean("publish_specifications").default(true),
-  publishFeatures: boolean("publish_features").default(true),
-  publishApplications: boolean("publish_applications").default(true),
-  publishWeight: boolean("publish_weight").default(true),
-  publishTags: boolean("publish_tags").default(true),
-  publishCertifications: boolean("publish_certifications").default(false),
-  publishImage: boolean("publish_image").default(true),
-  publishMsds: boolean("publish_msds").default(false),
-  publishCatalogPdf: boolean("publish_catalog_pdf").default(false),
   // Inventory management fields
   stockQuantity: integer("stock_quantity").default(0), // Current stock level
   minStockLevel: integer("min_stock_level").default(10), // Minimum stock threshold
   maxStockLevel: integer("max_stock_level").default(1000), // Maximum stock capacity
   stockUnit: text("stock_unit").default("units"), // Unit of measurement (liters, kg, units, etc.)
   // Pricing fields
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(), // Individual unit price - Required
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).default("0.00"), // Individual unit price
   currency: text("currency").default("IQD"), // Currency code (USD, EUR, IQD)
   lastRestockDate: timestamp("last_restock_date"),
   supplier: text("supplier"), // Supplier information
@@ -77,10 +61,10 @@ export const showcaseProducts = pgTable("showcase_products", {
   batchNumber: text("batch_number"), // Current batch tracking
   expiryDate: timestamp("expiry_date"), // For chemicals with expiration
   // Weight fields
-  weight: text("weight").notNull(), // Product weight - Required
+  weight: text("weight"), // Product weight
   weightUnit: text("weight_unit").default("kg"), // Weight unit (kg, g, lb, oz, t)
   // Barcode system fields
-  barcode: text("barcode").unique().notNull(), // Main product barcode - Required
+  barcode: text("barcode").unique(), // Main product barcode (EAN-13, UPC, etc.)
   qrCode: text("qr_code"), // QR code data for additional product information
   sku: text("sku").unique(), // Stock Keeping Unit
   isActive: boolean("is_active").default(true),

@@ -34,13 +34,9 @@ export interface ICustomerStorage {
   // Customer orders
   createOrder(order: InsertCustomerOrder): Promise<CustomerOrder>;
   getOrderById(id: number): Promise<CustomerOrder | undefined>;
-  getOrderByNumber(orderNumber: string): Promise<CustomerOrder | undefined>;
   getOrdersByCustomer(customerId: number): Promise<CustomerOrder[]>;
   updateOrder(id: number, order: Partial<InsertCustomerOrder>): Promise<CustomerOrder>;
-  updateOrderPaymentStatus(id: number, paymentStatus: string): Promise<CustomerOrder>;
   getAllOrders(): Promise<CustomerOrder[]>;
-  getFailedOrders(cutoffTime: Date): Promise<CustomerOrder[]>;
-  getOrphanedWalletTransactions(cutoffTime: Date): Promise<any[]>;
   
   // Order items
   createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
@@ -173,14 +169,6 @@ export class CustomerStorage implements ICustomerStorage {
     return order;
   }
 
-  async getOrderByNumber(orderNumber: string): Promise<CustomerOrder | undefined> {
-    const [order] = await customerDb
-      .select()
-      .from(customerOrders)
-      .where(eq(customerOrders.orderNumber, orderNumber));
-    return order;
-  }
-
   async getOrdersByCustomer(customerId: number): Promise<CustomerOrder[]> {
     return await customerDb
       .select()
@@ -201,96 +189,11 @@ export class CustomerStorage implements ICustomerStorage {
     return order;
   }
 
-  async updateOrderPaymentStatus(id: number, paymentStatus: string): Promise<CustomerOrder> {
-    const [order] = await customerDb
-      .update(customerOrders)
-      .set({
-        paymentStatus,
-        updatedAt: new Date(),
-      })
-      .where(eq(customerOrders.id, id))
-      .returning();
-    return order;
-  }
-
   async getAllOrders(): Promise<CustomerOrder[]> {
     return await customerDb
       .select()
       .from(customerOrders)
       .orderBy(desc(customerOrders.createdAt));
-  }
-
-  async getFailedOrders(cutoffTime: Date): Promise<CustomerOrder[]> {
-    return await customerDb
-      .select()
-      .from(customerOrders)
-      .where(
-        and(
-          eq(customerOrders.paymentStatus, 'pending'),
-          sql`${customerOrders.createdAt} < ${cutoffTime}`,
-          or(
-            eq(customerOrders.paymentMethod, 'wallet_partial'),
-            eq(customerOrders.paymentMethod, 'online_payment')
-          )
-        )
-      )
-      .orderBy(desc(customerOrders.createdAt));
-  }
-
-  async getOrphanedWalletTransactions(cutoffTime: Date): Promise<any[]> {
-    // پیدا کردن تراکنش‌های wallet که order متناظرشان وجود ندارد
-    const { walletTransactions } = await import('../shared/customer-schema');
-    const { customerDb } = await import('./customer-db');
-    
-    // پیدا کردن تراکنش‌های debit که order شامل ندارند
-    const orphanedTransactions = await customerDb
-      .select({
-        id: walletTransactions.id,
-        walletId: walletTransactions.walletId,
-        customerId: walletTransactions.customerId,
-        amount: walletTransactions.amount,
-        currency: walletTransactions.currency,
-        description: walletTransactions.description,
-        createdAt: walletTransactions.createdAt,
-        referenceType: walletTransactions.referenceType,
-        transactionType: walletTransactions.transactionType
-      })
-      .from(walletTransactions)
-      .where(
-        and(
-          eq(walletTransactions.transactionType, 'debit'),
-          eq(walletTransactions.referenceType, 'order'),
-          sql`${walletTransactions.createdAt} < ${cutoffTime}`,
-          sql`${walletTransactions.description} LIKE 'پرداخت سفارش ORD-%'`
-        )
-      );
-
-    // بررسی اینکه آیا order متناظر هر تراکنش وجود دارد یا نه
-    const realOrphanedTransactions = [];
-    for (const transaction of orphanedTransactions) {
-      // استخراج شماره سفارش از description
-      const orderNumberMatch = transaction.description.match(/ORD-[A-Z0-9-]+/);
-      if (orderNumberMatch) {
-        const orderNumber = orderNumberMatch[0];
-        
-        // بررسی وجود سفارش
-        const existingOrder = await customerDb
-          .select()
-          .from(customerOrders)
-          .where(eq(customerOrders.orderNumber, orderNumber))
-          .limit(1);
-          
-        if (existingOrder.length === 0) {
-          // سفارش وجود ندارد - این یک orphaned transaction است
-          realOrphanedTransactions.push({
-            ...transaction,
-            orderNumber
-          });
-        }
-      }
-    }
-    
-    return realOrphanedTransactions;
   }
 
   // Helper method to update customer metrics after order creation

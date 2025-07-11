@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
-import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, X, Calculator, Wallet, CreditCard, TrendingUp, ArrowUpCircle, ArrowDownCircle, Download, Upload } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, X, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -67,39 +67,6 @@ interface FinancialUser {
   department: string;
 }
 
-interface WalletRechargeRequest {
-  id: number;
-  requestNumber: string;
-  customerId: number;
-  walletId: number;
-  amount: string;
-  currency: string;
-  paymentMethod: string;
-  paymentReference?: string;
-  status: string;
-  customerNotes?: string;
-  adminNotes?: string;
-  attachmentUrl?: string;
-  createdAt: string;
-  approvedAt?: string;
-  processedAt?: string;
-  customer?: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-  };
-}
-
-interface WalletStats {
-  totalWallets: number;
-  totalBalance: number;
-  pendingRecharges: number;
-  completedRecharges: number;
-  totalRechargeAmount: number;
-  averageWalletBalance: number;
-}
-
 export default function FinancialDepartment() {
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -123,10 +90,8 @@ export default function FinancialDepartment() {
         const response = await fetch('/api/financial/auth/me');
         if (response.ok) {
           const userData = await response.json();
-          console.log('Financial auth response:', userData);
-          if (userData.success && userData.user) {
-            // Accept any admin user for financial department
-            setUser({...userData.user, department: 'financial'});
+          if (userData.success && userData.user.department === 'financial') {
+            setUser(userData.user);
           } else {
             setLocation('/financial/login');
           }
@@ -177,71 +142,6 @@ export default function FinancialDepartment() {
       toast({
         title: "خطا",
         description: "خطا در پردازش سفارش",
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Wallet Management Queries
-  const { data: walletStatsData, isLoading: walletStatsLoading, refetch: refetchWalletStats } = useQuery<{ success: boolean; data: WalletStats }>({
-    queryKey: ['/api/financial/wallet/stats'],
-    enabled: !!user,
-    refetchInterval: 30000, // Refresh every 30 seconds
-    refetchOnWindowFocus: true,
-    staleTime: 0, // Always refresh when needed
-    onError: (error) => {
-      console.error('Error fetching wallet stats:', error);
-    }
-  });
-
-  const { data: walletRequestsData, isLoading: walletRequestsLoading, refetch: refetchWalletRequests } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
-    queryKey: ['/api/financial/wallet/recharge-requests'],
-    enabled: !!user,
-    refetchInterval: 30000, // Refresh every 30 seconds
-    refetchOnWindowFocus: true,
-    staleTime: 0, // Always refresh when needed
-    onError: (error) => {
-      console.error('Error fetching wallet requests:', error);
-    },
-    onSuccess: (data) => {
-      console.log('Wallet requests fetched successfully:', data);
-    }
-  });
-
-  // Wallet Recharge Request Processing
-  const processWalletRequestMutation = useMutation({
-    mutationFn: async (data: { requestId: number; action: "approve" | "reject"; notes?: string; rejectionReason?: string }) => {
-      const endpoint = data.action === 'approve' 
-        ? `/api/financial/wallet/recharge-requests/${data.requestId}/approve`
-        : `/api/financial/wallet/recharge-requests/${data.requestId}/reject`;
-      
-      return apiRequest(endpoint, 'POST', {
-        adminNotes: data.notes,
-        rejectionReason: data.rejectionReason
-      });
-    },
-    onSuccess: (data, variables) => {
-      // Invalidate and refetch wallet queries
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/wallet/recharge-requests'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/wallet/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/customers/wallet/balance'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
-      
-      // Manually refetch to ensure immediate update
-      refetchWalletStats();
-      refetchWalletRequests();
-      
-      toast({
-        title: "موفق",
-        description: "درخواست شارژ کیف پول با موفقیت پردازش شد. موجودی کیف پول مشتری به‌روزرسانی شد.",
-      });
-      
-      console.log('🔄 Wallet request processed, all wallet data refreshed');
-    },
-    onError: (error) => {
-      toast({
-        title: "خطا",
-        description: "خطا در پردازش درخواست شارژ کیف پول",
         variant: "destructive",
       });
     }
@@ -317,14 +217,10 @@ export default function FinancialDepartment() {
 
         {/* Tabs for Financial Operations */}
         <Tabs defaultValue="orders" className="mb-6" dir="rtl">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               سفارشات
-            </TabsTrigger>
-            <TabsTrigger value="wallet" className="flex items-center gap-2">
-              <Wallet className="w-4 h-4" />
-              مدیریت کیف پول
             </TabsTrigger>
             <TabsTrigger value="vat" className="flex items-center gap-2">
               <Calculator className="w-4 h-4" />
@@ -372,13 +268,8 @@ export default function FinancialDepartment() {
             <div className="mb-6">
               <GlobalRefreshControl 
                 pageName="financial"
-                onRefresh={() => {
-                  refetch();
-                  refetchWalletStats();
-                  refetchWalletRequests();
-                  console.log('🔄 Financial department refreshed: orders, wallet stats, and recharge requests');
-                }}
-                isLoading={isLoading || walletStatsLoading || walletRequestsLoading}
+                onRefresh={() => refetch()}
+                isLoading={isLoading}
               />
             </div>
 
@@ -502,299 +393,6 @@ export default function FinancialDepartment() {
             ))}
               </div>
             )}
-          </TabsContent>
-
-          {/* Wallet Management Tab */}
-          <TabsContent value="wallet" className="space-y-6">
-            {/* Wallet Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <Card className="border-l-4 border-l-blue-500">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">کل کیف پول‌ها</CardTitle>
-                  <Wallet className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {walletStatsLoading ? "..." : walletStatsData?.data?.totalWallets || 0}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-l-4 border-l-green-500">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">مجموع موجودی</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
-                    {walletStatsLoading ? "..." : `${walletStatsData?.data?.totalBalance?.toLocaleString() || 0} IQD`}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-l-4 border-l-orange-500">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">درخواست‌های معلق</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">
-                    {walletStatsLoading ? "..." : walletStatsData?.data?.pendingRecharges || 0}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-l-4 border-l-purple-500">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">کل شارژ‌ها</CardTitle>
-                  <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-purple-600">
-                    {walletStatsLoading ? "..." : `${walletStatsData?.data?.totalRechargeAmount?.toLocaleString() || 0} IQD`}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Wallet Refresh Control */}
-            <div className="mb-6">
-              <GlobalRefreshControl 
-                pageName="financial-wallet"
-                onRefresh={() => {
-                  refetchWalletStats();
-                  refetchWalletRequests();
-                  console.log('🔄 Wallet management refreshed: stats and recharge requests');
-                }}
-                isLoading={walletStatsLoading || walletRequestsLoading}
-              />
-            </div>
-
-            {/* Pending Recharge Requests */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  درخواست‌های شارژ کیف پول در انتظار تایید
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {walletRequestsLoading ? (
-                  <div className="text-center py-8">در حال بارگذاری...</div>
-                ) : (
-                  <div className="space-y-4">
-                    {walletRequestsData?.data?.filter(req => req.status === 'pending').length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        هیچ درخواست شارژ معلقی موجود نیست
-                      </div>
-                    ) : (
-                      walletRequestsData?.data?.filter(req => req.status === 'pending').map((request) => (
-                        <Card key={request.id} className="border border-gray-200">
-                          <CardContent className="p-4">
-                            <div className="flex justify-between items-start">
-                              <div className="space-y-2 flex-1">
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="secondary">#{request.requestNumber}</Badge>
-                                  <span className="text-sm text-gray-600">
-                                    {new Date(request.createdAt).toLocaleDateString('en-US')}
-                                  </span>
-                                  <Badge variant="outline" className="text-orange-600 border-orange-300">
-                                    در انتظار بررسی
-                                  </Badge>
-                                </div>
-                                
-                                <div className="grid grid-cols-3 gap-4">
-                                  <div>
-                                    <p className="text-sm font-medium">مشتری:</p>
-                                    <p className="text-sm text-gray-600">
-                                      {request.customer?.firstName} {request.customer?.lastName}
-                                    </p>
-                                    <p className="text-xs text-gray-500">{request.customer?.email}</p>
-                                  </div>
-                                  
-                                  <div>
-                                    <p className="text-sm font-medium">مبلغ:</p>
-                                    <p className="text-lg font-bold text-green-600">
-                                      {parseInt(request.amount).toLocaleString()} {request.currency}
-                                    </p>
-                                    <p className="text-xs text-gray-500">روش پرداخت: {request.paymentMethod}</p>
-                                  </div>
-                                  
-                                  <div>
-                                    <p className="text-sm font-medium">کد واریز:</p>
-                                    <p className="text-sm text-gray-600 font-mono bg-gray-100 px-2 py-1 rounded">
-                                      {request.paymentReference || 'ندارد'}
-                                    </p>
-                                    <p className="text-xs text-gray-500">شماره مرجع پرداخت</p>
-                                  </div>
-                                </div>
-                                
-                                {request.customerNotes && (
-                                  <div>
-                                    <p className="text-sm font-medium">یادداشت مشتری:</p>
-                                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                                      {request.customerNotes}
-                                    </p>
-                                  </div>
-                                )}
-                                
-                                {request.attachmentUrl && (
-                                  <div>
-                                    <p className="text-sm font-medium mb-2">فیش واریزی:</p>
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      onClick={() => window.open(request.attachmentUrl, '_blank')}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <Download className="w-4 h-4" />
-                                      مشاهده فیش
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <div className="flex gap-2 ml-4">
-                                <Button
-                                  size="sm"
-                                  onClick={() => processWalletRequestMutation.mutate({
-                                    requestId: request.id,
-                                    action: 'approve',
-                                    notes: 'تایید شده توسط بخش مالی'
-                                  })}
-                                  disabled={processWalletRequestMutation.isPending}
-                                  className="bg-green-600 hover:bg-green-700 text-white"
-                                >
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  تایید
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => processWalletRequestMutation.mutate({
-                                    requestId: request.id,
-                                    action: 'reject',
-                                    rejectionReason: 'رد شده توسط بخش مالی'
-                                  })}
-                                  disabled={processWalletRequestMutation.isPending}
-                                >
-                                  <XCircle className="w-4 h-4 mr-1" />
-                                  رد
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* All Recharge Requests History */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  تاریخچه کامل درخواست‌های شارژ
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {walletRequestsLoading ? (
-                  <div className="text-center py-8">در حال بارگذاری...</div>
-                ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {walletRequestsData?.data?.map((request) => (
-                      <div key={request.id} className="flex justify-between items-center p-3 border rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="secondary">#{request.requestNumber}</Badge>
-                            <Badge variant={
-                              request.status === 'completed' ? 'default' :
-                              request.status === 'pending' ? 'secondary' :
-                              request.status === 'rejected' ? 'destructive' : 'secondary'
-                            }>
-                              {request.status === 'completed' ? 'تایید شده' :
-                               request.status === 'pending' ? 'در انتظار' :
-                               request.status === 'rejected' ? 'رد شده' : request.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            {request.customer?.firstName} {request.customer?.lastName} - 
-                            {parseInt(request.amount).toLocaleString()} {request.currency}
-                            {request.paymentReference && ` - کد واریز: ${request.paymentReference}`}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {new Date(request.createdAt).toLocaleDateString('fa-IR')}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          {request.attachmentUrl && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => window.open(request.attachmentUrl, '_blank')}
-                            >
-                              <Download className="w-4 h-4" />
-                            </Button>
-                          )}
-                          
-                          {/* Action buttons for rejected requests */}
-                          {request.status === 'rejected' && (
-                            <Button
-                              size="sm"
-                              onClick={() => processWalletRequestMutation.mutate({
-                                requestId: request.id,
-                                action: 'approve',
-                                notes: 'تایید مجدد پس از بررسی'
-                              })}
-                              disabled={processWalletRequestMutation.isPending}
-                              className="bg-green-600 hover:bg-green-700 text-white"
-                            >
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              تایید مجدد
-                            </Button>
-                          )}
-                          
-                          {/* Action buttons for pending requests */}
-                          {request.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => processWalletRequestMutation.mutate({
-                                  requestId: request.id,
-                                  action: 'approve',
-                                  notes: 'تایید شده توسط بخش مالی'
-                                })}
-                                disabled={processWalletRequestMutation.isPending}
-                                className="bg-green-600 hover:bg-green-700 text-white"
-                              >
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                تایید
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => processWalletRequestMutation.mutate({
-                                  requestId: request.id,
-                                  action: 'reject',
-                                  rejectionReason: 'رد شده توسط بخش مالی'
-                                })}
-                                disabled={processWalletRequestMutation.isPending}
-                              >
-                                <XCircle className="w-3 h-3 mr-1" />
-                                رد
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </TabsContent>
 
           {/* VAT Management Tab */}

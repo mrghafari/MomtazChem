@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -214,8 +214,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  // Check if this is a guest-to-customer checkout conversion
-  const isGuestToCustomerCheckout = sessionStorage.getItem('guestToCustomerCheckout') === 'true';
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
@@ -278,8 +276,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
-  // Fetch wallet data for logged-in customers with automatic refresh
-  const { data: walletData, refetch: refetchWallet } = useQuery({
+  // Fetch wallet data for logged-in customers
+  const { data: walletData } = useQuery({
     queryKey: ['/api/customer/wallet'],
     queryFn: async () => {
       try {
@@ -289,7 +287,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         
         if (response.ok) {
           const result = await response.json();
-          console.log('Wallet API response (refreshed):', result);
+          console.log('Wallet API response:', result);
           if (result.success) {
             return result;
           }
@@ -302,17 +300,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     },
     enabled: !!(customerData?.success && customerData.customer),
     retry: false,
-    refetchOnWindowFocus: true, // Refresh when window gains focus
-    staleTime: 0, // Always refresh when needed
   });
-
-  // Refresh wallet data when purchase form opens
-  useEffect(() => {
-    if (customerData?.success && customerData.customer) {
-      console.log('🔄 Refreshing wallet balance for purchase form...');
-      refetchWallet();
-    }
-  }, [customerData, refetchWallet]);
 
   // Fetch VAT settings
   const { data: vatData } = useQuery({
@@ -338,8 +326,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     },
     retry: false,
   });
-
-
 
   // Fetch active shipping rates
   const { data: shippingRatesData, isLoading: isLoadingShippingRates, error: shippingRatesError } = useQuery({
@@ -571,35 +557,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   
   console.log('Wallet Debug:', { walletData, walletBalance, canUseWallet, totalAmount });
 
-  // Auto-submit form for guest-to-customer checkout with online payment
-  useEffect(() => {
-    if (isGuestToCustomerCheckout && customerData?.success && customerData.customer) {
-      console.log('🚀 Auto-submitting guest-to-customer checkout with online payment...');
-      
-      // Clear the session flag to prevent multiple submissions
-      sessionStorage.removeItem('guestToCustomerCheckout');
-      
-      // Automatically submit the form with online payment
-      setTimeout(() => {
-        if (Object.keys(cart).length > 0) {
-          const formValues = form.getValues();
-          console.log('Form values for auto-submit:', formValues);
-          
-          // Make sure we have minimum required fields
-          if (formValues.customerName && formValues.address && formValues.city) {
-            onSubmit(formValues);
-          } else {
-            console.log('⚠️ Missing required fields for auto-submit, showing form instead');
-            toast({
-              title: "لطفاً اطلاعات تحویل را تکمیل کنید",
-              description: "برای ادامه پرداخت، اطلاعات آدرس الزامی است"
-            });
-          }
-        }
-      }, 1000); // Give time for form to populate
-    }
-  }, [isGuestToCustomerCheckout, customerData, cart]);
-
 
 
   // Format currency in IQD by default
@@ -678,21 +635,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     onSuccess: (response: any) => {
       console.log('Order response:', response);
       
-      // Check if payment gateway redirect is needed for online payment or hybrid payment
+      // Check if payment gateway redirect is needed
       if (response.redirectToPayment && response.paymentGatewayUrl) {
         toast({
           title: "انتقال به درگاه پرداخت",
-          description: paymentMethod === 'wallet_partial' ? 
-            `کیف پول: ${formatCurrency(walletAmount)} کسر شد. در حال انتقال به درگاه برای مابقی...` :
-            "در حال انتقال شما به درگاه پرداخت..."
+          description: "در حال انتقال شما به درگاه پرداخت..."
         });
         
-        // Redirect to payment gateway (TBI Bank POS)
+        // Redirect to payment gateway
         setTimeout(() => {
           window.location.href = response.paymentGatewayUrl;
-        }, 2000);
+        }, 1500);
       } 
-
       // Check if bank receipt upload is needed
       else if (paymentMethod === 'bank_receipt') {
         if (selectedReceiptFile) {
@@ -745,19 +699,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       remainingAmount: totalAmount,
     };
 
-    // Handle different payment methods
+    // Handle wallet payment calculations
     if (paymentMethod === 'wallet_full') {
       orderData.walletAmountUsed = totalAmount;
       orderData.remainingAmount = 0;
     } else if (paymentMethod === 'wallet_partial') {
       orderData.walletAmountUsed = walletAmount;
       orderData.remainingAmount = totalAmount - walletAmount;
-      console.log('🔄 Wallet partial payment:', {
-        walletAmount,
-        totalAmount,
-        remainingAmount: totalAmount - walletAmount,
-        paymentMethod
-      });
     } else if (paymentMethod === 'online_payment') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
@@ -1003,28 +951,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{t.walletBalance}:</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-green-600">{formatCurrency(walletBalance)}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={() => {
-                        console.log('🔄 Manual wallet refresh requested...');
-                        refetchWallet();
-                        toast({
-                          title: language === 'ar' ? 'تم تحديث رصيد المحفظة' : 'موجودی کیف پول به‌روزرسانی شد',
-                          description: language === 'ar' ? 'تم تحديث رصيد محفظتك' : 'رصید جدید کیف پول دریافت شد'
-                        });
-                      }}
-                    >
-                      <RefreshCw className="h-3 w-3" />
-                    </Button>
-                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                      {language === 'ar' ? 'تحديث تلقائي' : 'ریفرش شده'}
-                    </Badge>
-                  </div>
+                  <span className="font-semibold text-green-600">{formatCurrency(walletBalance)}</span>
                 </div>
               </div>
 
@@ -1051,12 +978,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 )}
                 
                 {/* سوم: پرداخت ترکیبی (والت + آنلاین) */}
-                {walletBalance > 0 && (
+                {walletBalance > 0 && walletBalance < totalAmount && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت ترکیبی (والت + آنلاین) - مقدار دلخواه
+                      پرداخت ترکیبی (والت + آنلاین)
                     </Label>
                   </div>
                 )}
@@ -1142,7 +1069,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
               {/* Partial Payment Amount Input */}
               {paymentMethod === 'wallet_partial' && (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatCurrency(walletBalance)})</Label>
                   <Input
                     id="walletAmount"
@@ -1157,43 +1084,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     placeholder="مبلغ از والت"
                     className="text-right"
                   />
-                  
-                  {/* Smart Payment Confirmation */}
-                  {walletAmount > 0 && walletAmount < totalAmount && (
-                    <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200 dark:border-orange-800">
-                      <div className="flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
-                            تأیید پرداخت ترکیبی
-                          </p>
-                          <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                            مبلغ {formatCurrency(walletAmount)} از کیف پول شما کسر می‌شود.
-                            <br />
-                            مبلغ باقیمانده {formatCurrency(totalAmount - walletAmount)} از طریق درگاه بانکی پرداخت خواهد شد.
-                          </p>
-                          <div className="flex items-center gap-2 mt-2 text-sm">
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-green-700 dark:text-green-300 font-medium">
-                              ✓ تأیید می‌کنم که مابقی را آنلاین پرداخت کنم
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {walletAmount === 0 && (
-                    <div className="text-sm text-muted-foreground">
-                      لطفاً مبلغ مورد نظر از کیف پول را وارد کنید
-                    </div>
-                  )}
-                  
-                  {walletAmount > 0 && walletAmount >= totalAmount && (
-                    <div className="text-sm text-green-600 font-medium">
-                      ✓ پرداخت کامل از کیف پول انجام می‌شود
-                    </div>
-                  )}
+                  <div className="text-sm text-muted-foreground">
+                    مبلغ باقیمانده (آنلاین): {formatCurrency(totalAmount - walletAmount)}
+                  </div>
                 </div>
               )}
 
