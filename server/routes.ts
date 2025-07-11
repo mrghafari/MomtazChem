@@ -1538,49 +1538,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/products", requireAuth, async (req, res) => {
     try {
       const productData = req.body;
+      console.log("Creating product with data:", productData);
       
-      // Create product directly in unified shop_products table
-      const shopProductData = {
+      // Create product in showcase_products table (main products management)
+      const showcaseProductData = {
         name: productData.name,
         category: productData.category,
-        description: productData.description,
-        shortDescription: productData.shortDescription || null,
-        price: productData.unitPrice || productData.price || 0,
-        compareAtPrice: null,
-        priceUnit: productData.currency || 'IQD',
-        inStock: true,
-        stockQuantity: productData.stockQuantity || 0,
-        lowStockThreshold: 10,
-        sku: productData.sku || `SKU-${Date.now()}`,
-        barcode: productData.barcode || null,
-        weight: null,
-        weightUnit: 'kg',
-        dimensions: null,
-        imageUrls: productData.imageUrl ? [productData.imageUrl] : [],
-        thumbnailUrl: productData.imageUrl || null,
+        description: productData.description || "",
+        shortDescription: productData.shortDescription || "",
+        imageUrl: productData.imageUrl || null,
+        pdfCatalogUrl: productData.pdfCatalogUrl || null,
+        catalogFileName: productData.catalogFileName || null,
+        showCatalogToCustomers: productData.showCatalogToCustomers || false,
+        msdsUrl: productData.msdsUrl || null,
+        msdsFileName: productData.msdsFileName || null,
+        showMsdsToCustomers: productData.showMsdsToCustomers || false,
         specifications: productData.specifications || {},
-        features: productData.features || [],
-        applications: productData.applications || [],
-        tags: [],
-        minimumOrderQuantity: 1,
-        maximumOrderQuantity: null,
-        leadTime: null,
-        shippingClass: 'standard',
-        taxClass: 'standard',
+        features: Array.isArray(productData.features) ? productData.features : 
+                 (typeof productData.features === 'string' ? productData.features.split('\n').filter(f => f.trim()) : []),
+        applications: Array.isArray(productData.applications) ? productData.applications :
+                     (typeof productData.applications === 'string' ? productData.applications.split('\n').filter(a => a.trim()) : []),
+        stockQuantity: parseInt(productData.stockQuantity) || 0,
+        minStockLevel: parseInt(productData.minStockLevel) || 5,
+        maxStockLevel: parseInt(productData.maxStockLevel) || 100,
+        unitPrice: parseFloat(productData.unitPrice) || 0,
+        currency: productData.currency || 'IQD',
+        weight: parseFloat(productData.weight) || 0,
+        weightUnit: productData.weightUnit || 'kg',
+        barcode: productData.barcode || null,
+        sku: productData.sku || `SKU-${Date.now()}`,
         isActive: productData.isActive !== false,
-        isFeatured: false,
-        metaTitle: productData.name,
-        metaDescription: productData.shortDescription,
-        quantityDiscounts: [],
-        parentProductId: productData.parentProductId || null,
+        syncWithShop: productData.syncWithShop !== false,
         isVariant: productData.isVariant || false,
+        parentProductId: productData.parentProductId || null,
         variantType: productData.variantType || null,
         variantValue: productData.variantValue || null,
-        sortOrder: 0,
-        minStockLevel: productData.minStockLevel || 5
+        priceRange: productData.priceRange || ""
       };
       
-      const product = await shopStorage.createShopProduct(shopProductData);
+      console.log("Final showcase product data:", showcaseProductData);
+      const product = await storage.createProduct(showcaseProductData);
+      console.log("Created product:", product);
+      
       res.status(201).json(product);
     } catch (error) {
       console.error("Error creating product:", error);
