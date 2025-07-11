@@ -14,6 +14,7 @@ interface Review {
   customerName: string;
   rating: number;
   comment: string;
+  review: string;
   createdAt: string;
 }
 

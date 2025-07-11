@@ -53,7 +53,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   maxStockLevel: integer("max_stock_level").default(1000), // Maximum stock capacity
   stockUnit: text("stock_unit").default("units"), // Unit of measurement (liters, kg, units, etc.)
   // Pricing fields
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).default("0.00"), // Individual unit price
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(), // Individual unit price - Required
   currency: text("currency").default("IQD"), // Currency code (USD, EUR, IQD)
   lastRestockDate: timestamp("last_restock_date"),
   supplier: text("supplier"), // Supplier information
@@ -61,10 +61,10 @@ export const showcaseProducts = pgTable("showcase_products", {
   batchNumber: text("batch_number"), // Current batch tracking
   expiryDate: timestamp("expiry_date"), // For chemicals with expiration
   // Weight fields
-  weight: text("weight"), // Product weight
+  weight: text("weight").notNull(), // Product weight - Required
   weightUnit: text("weight_unit").default("kg"), // Weight unit (kg, g, lb, oz, t)
   // Barcode system fields
-  barcode: text("barcode").unique(), // Main product barcode (EAN-13, UPC, etc.)
+  barcode: text("barcode").unique().notNull(), // Main product barcode - Required
   qrCode: text("qr_code"), // QR code data for additional product information
   sku: text("sku").unique(), // Stock Keeping Unit
   isActive: boolean("is_active").default(true),

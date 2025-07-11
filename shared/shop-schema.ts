@@ -57,8 +57,8 @@ export const shopProducts = pgTable("shop_products", {
   lowStockThreshold: integer("low_stock_threshold").default(10), // آستانه برای نمایش هشدار به مشتری
   maxStockLevel: integer("max_stock_level").default(1000), // حداکثر موجودی مجاز
   sku: text("sku").unique().notNull(),
-  barcode: text("barcode"),
-  weight: decimal("weight", { precision: 8, scale: 2 }), // Product weight
+  barcode: text("barcode").notNull(), // Barcode is now required
+  weight: decimal("weight", { precision: 8, scale: 2 }).notNull(), // Weight is now required
   weightUnit: text("weight_unit").default("kg"),
   dimensions: json("dimensions"), // {length, width, height}
   imageUrls: json("image_urls"), // Array of product images

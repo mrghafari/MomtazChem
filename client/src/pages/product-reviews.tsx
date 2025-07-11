@@ -17,11 +17,14 @@ export default function ProductReviews() {
   const queryClient = useQueryClient();
   const { t, direction } = useLanguage();
 
-  // Get product details
-  const { data: product, isLoading: isLoadingProduct } = useQuery({
-    queryKey: ['/api/products', id],
+  // Get product details from shop endpoint
+  const { data: shopProducts, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ['/api/shop/products'],
     enabled: !!id,
   });
+
+  // Find the specific product from the shop products list
+  const product = shopProducts?.find((p: any) => p.id === parseInt(id || '0'));
 
   // Get product reviews data using shop endpoint
   const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({

@@ -24,13 +24,15 @@ import VisualBarcode from "@/components/ui/visual-barcode";
 
 // Custom form schema that handles numeric inputs properly
 const formSchema = insertShowcaseProductSchema.extend({
-  unitPrice: z.coerce.number().min(0),
+  unitPrice: z.coerce.number().min(0.01, "قیمت باید بیشتر از صفر باشد"),
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
-  // Weight fields
-  weight: z.string().optional(),
+  // Weight fields - Required
+  weight: z.string().min(1, "وزن محصول الزامی است"),
   weightUnit: z.string().default("kg"),
+  // Barcode field - Required
+  barcode: z.string().min(1, "بارکد محصول الزامی است"),
   // Text fields for array handling
   features: z.string().optional(),
   applications: z.string().optional(),
