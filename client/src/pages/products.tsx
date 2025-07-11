@@ -341,38 +341,6 @@ export default function ProductsPage() {
     generateSKUMutation.mutate(productData);
   };
 
-  // Field refs for auto-navigation
-  const fieldRefs = useRef<{ [key: string]: HTMLInputElement | HTMLTextAreaElement | null }>({});
-  
-  // Required fields in order of priority
-  const requiredFields = [
-    'name', 'category', 'description', 'unitPrice', 'stockQuantity', 
-    'weight', 'barcode', 'sku'
-  ];
-
-  // Auto-navigation to next required empty field
-  const navigateToNextEmptyField = useCallback(() => {
-    const formValues = form.getValues();
-    
-    for (const fieldName of requiredFields) {
-      const value = formValues[fieldName as keyof typeof formValues];
-      const isEmpty = !value || value === "" || value === 0;
-      
-      if (isEmpty && fieldRefs.current[fieldName]) {
-        fieldRefs.current[fieldName]?.focus();
-        return;
-      }
-    }
-  }, [form]);
-
-  // Handle Tab/Enter key navigation
-  const handleKeyNavigation = useCallback((e: React.KeyboardEvent, currentField: string) => {
-    if (e.key === 'Tab' || e.key === 'Enter') {
-      e.preventDefault();
-      setTimeout(navigateToNextEmptyField, 100);
-    }
-  }, [navigateToNextEmptyField]);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -412,6 +380,38 @@ export default function ProductsPage() {
       syncWithShop: true,
     },
   });
+
+  // Field refs for auto-navigation
+  const fieldRefs = useRef<{ [key: string]: HTMLInputElement | HTMLTextAreaElement | null }>({});
+  
+  // Required fields in order of priority
+  const requiredFields = [
+    'name', 'category', 'description', 'unitPrice', 'stockQuantity', 
+    'weight', 'barcode', 'sku'
+  ];
+
+  // Auto-navigation to next required empty field
+  const navigateToNextEmptyField = useCallback(() => {
+    const formValues = form.getValues();
+    
+    for (const fieldName of requiredFields) {
+      const value = formValues[fieldName as keyof typeof formValues];
+      const isEmpty = !value || value === "" || value === 0;
+      
+      if (isEmpty && fieldRefs.current[fieldName]) {
+        fieldRefs.current[fieldName]?.focus();
+        return;
+      }
+    }
+  }, [form]);
+
+  // Handle Tab/Enter key navigation
+  const handleKeyNavigation = useCallback((e: React.KeyboardEvent, currentField: string) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      e.preventDefault();
+      setTimeout(navigateToNextEmptyField, 100);
+    }
+  }, [navigateToNextEmptyField]);
 
   const onSubmit = (data: InsertShowcaseProduct) => {
     // Convert numeric fields to strings for API compatibility
