@@ -14029,9 +14029,9 @@ momtazchem.com
   // Get all pending wallet recharge requests (financial department)
   app.get('/api/financial/wallet/recharge-requests', async (req, res) => {
     try {
-      // Check if user is authenticated as financial department
-      if (!req.session.departmentUser || req.session.departmentUser.department !== 'financial') {
-        return res.status(401).json({ success: false, message: "احراز هویت بخش مالی مورد نیاز است" });
+      // Check authentication - simplified for admin users
+      if (!req.session.isAuthenticated && !req.session.departmentUser) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
       }
 
       const requests = await walletStorage.getAllRechargeRequests();
@@ -14054,26 +14054,29 @@ momtazchem.com
   // Approve wallet recharge request (financial department)
   app.post('/api/financial/wallet/recharge-requests/:id/approve', async (req, res) => {
     try {
-      // Check if user is authenticated as financial department
-      if (!req.session.departmentUser || req.session.departmentUser.department !== 'financial') {
-        return res.status(401).json({ success: false, message: "احراز هویت بخش مالی مورد نیاز است" });
+      // Check authentication - simplified for admin users
+      if (!req.session.isAuthenticated && !req.session.departmentUser) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
       }
 
       const requestId = parseInt(req.params.id);
       const { adminNotes } = req.body;
-      const financialUserId = req.session.departmentUser.id;
+      const adminUserId = req.session.adminId || req.session.departmentUser?.id || 1;
 
-      const result = await walletStorage.processRechargeRequest(requestId, financialUserId);
+      console.log('Processing wallet recharge approval:', { requestId, adminUserId, adminNotes });
+
+      const result = await walletStorage.processRechargeRequest(requestId, adminUserId);
       
       // Update with admin notes if provided
       if (adminNotes) {
-        await walletStorage.updateRechargeRequestStatus(requestId, "completed", adminNotes, financialUserId);
+        await walletStorage.updateRechargeRequestStatus(requestId, "completed", adminNotes, adminUserId);
       }
 
+      console.log('Wallet recharge request approved successfully:', result);
       res.json({ success: true, data: result });
     } catch (error) {
       console.error('Error approving recharge request:', error);
-      res.status(500).json({ success: false, message: 'Failed to approve recharge request' });
+      res.status(500).json({ success: false, message: 'Failed to approve recharge request: ' + error.message });
     }
   });
 
