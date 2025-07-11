@@ -238,7 +238,10 @@ export class ShopStorage implements IShopStorage {
     const products = await shopDb
       .select()
       .from(shopProducts)
-      .where(eq(shopProducts.isActive, true))
+      .where(and(
+        eq(shopProducts.isActive, true),
+        eq(shopProducts.visibleInShop, true)
+      ))
       .orderBy(shopProducts.name);
 
     // Get active discount settings
