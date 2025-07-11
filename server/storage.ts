@@ -145,6 +145,11 @@ export class DatabaseStorage implements IStorage {
     return product || undefined;
   }
 
+  async getProduct(id: number): Promise<ShowcaseProduct | undefined> {
+    const [product] = await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.id, id));
+    return product || undefined;
+  }
+
   async getProductsByCategory(category: string): Promise<ShowcaseProduct[]> {
     return await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.category, category));
   }
@@ -196,6 +201,37 @@ export class DatabaseStorage implements IStorage {
     if (productUpdate.certifications !== undefined) {
       updateData.certifications = Array.isArray(productUpdate.certifications) && productUpdate.certifications.length > 0 ? productUpdate.certifications : null;
     }
+
+    // Handle file upload fields explicitly
+    if (productUpdate.imageUrl !== undefined) {
+      updateData.imageUrl = productUpdate.imageUrl && productUpdate.imageUrl.trim() ? productUpdate.imageUrl.trim() : null;
+    }
+    if (productUpdate.msdsUrl !== undefined) {
+      updateData.msdsUrl = productUpdate.msdsUrl && productUpdate.msdsUrl.trim() ? productUpdate.msdsUrl.trim() : null;
+    }
+    if (productUpdate.msdsFileName !== undefined) {
+      updateData.msdsFileName = productUpdate.msdsFileName && productUpdate.msdsFileName.trim() ? productUpdate.msdsFileName.trim() : null;
+    }
+    if (productUpdate.pdfCatalogUrl !== undefined) {
+      updateData.pdfCatalogUrl = productUpdate.pdfCatalogUrl && productUpdate.pdfCatalogUrl.trim() ? productUpdate.pdfCatalogUrl.trim() : null;
+    }
+    if (productUpdate.catalogFileName !== undefined) {
+      updateData.catalogFileName = productUpdate.catalogFileName && productUpdate.catalogFileName.trim() ? productUpdate.catalogFileName.trim() : null;
+    }
+    if (productUpdate.showMsdsToCustomers !== undefined) {
+      updateData.showMsdsToCustomers = productUpdate.showMsdsToCustomers;
+    }
+    if (productUpdate.showCatalogToCustomers !== undefined) {
+      updateData.showCatalogToCustomers = productUpdate.showCatalogToCustomers;
+    }
+
+    console.log("📄 File fields being updated:", {
+      imageUrl: updateData.imageUrl,
+      msdsUrl: updateData.msdsUrl,
+      msdsFileName: updateData.msdsFileName,
+      pdfCatalogUrl: updateData.pdfCatalogUrl,
+      catalogFileName: updateData.catalogFileName
+    });
 
     const [product] = await showcaseDb
       .update(showcaseProducts)

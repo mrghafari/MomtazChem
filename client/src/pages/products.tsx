@@ -438,6 +438,15 @@ export default function ProductsPage() {
   const onSubmit = (data: InsertShowcaseProduct) => {
     console.log("Form data before processing:", data);
     console.log("Description value from form:", data.description);
+    console.log("🔄 FILE UPLOAD FIELDS FROM FORM:", {
+      imageUrl: data.imageUrl,
+      msdsUrl: data.msdsUrl,
+      msdsFileName: data.msdsFileName,
+      pdfCatalogUrl: data.pdfCatalogUrl,
+      catalogFileName: data.catalogFileName,
+      showMsdsToCustomers: data.showMsdsToCustomers,
+      showCatalogToCustomers: data.showCatalogToCustomers
+    });
     
     // Convert fields for API compatibility  
     const processedData = {
@@ -471,6 +480,15 @@ export default function ProductsPage() {
     };
     
     console.log("Processed data for API:", processedData);
+    console.log("🔄 FILE UPLOAD FIELDS IN PROCESSED DATA:", {
+      imageUrl: processedData.imageUrl,
+      msdsUrl: processedData.msdsUrl,
+      msdsFileName: processedData.msdsFileName,
+      pdfCatalogUrl: processedData.pdfCatalogUrl,
+      catalogFileName: processedData.catalogFileName,
+      showMsdsToCustomers: processedData.showMsdsToCustomers,
+      showCatalogToCustomers: processedData.showCatalogToCustomers
+    });
     
     if (editingProduct) {
       updateProduct({ id: editingProduct.id, data: processedData });

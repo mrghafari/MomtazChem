@@ -1223,32 +1223,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update product MSDS information (for both shop and showcase products)
+  // Update product MSDS information (for showcase products)
   app.put("/api/products/:id/msds", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const { msdsUrl, showMsdsToCustomers, msdsFileName } = req.body;
 
-      // Update shop product MSDS
-      await storage.updateShopProduct(parseInt(id), {
+      // Update showcase product MSDS
+      await storage.updateProduct(parseInt(id), {
         msdsUrl,
         showMsdsToCustomers,
         msdsFileName,
         msdsUploadDate: new Date()
       });
-
-      // Also update showcase product if it exists
-      try {
-        await storage.updateShowcaseProduct(parseInt(id), {
-          msdsUrl,
-          showMsdsToCustomers,
-          msdsFileName,
-          msdsUploadDate: new Date()
-        });
-      } catch (error) {
-        // Showcase product might not exist, continue with shop product only
-        console.log('Showcase product not found, updated shop product only');
-      }
 
       res.json({ 
         success: true, 
@@ -1689,6 +1676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(mappedProduct);
     } catch (error) {
+      console.error("Error in GET /api/products/:id:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
