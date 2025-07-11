@@ -29,7 +29,7 @@ const formSchema = insertShowcaseProductSchema.extend({
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
   // Weight fields - Required
-  weight: z.string().refine((val) => val !== "" && !isNaN(Number(val)) && Number(val) > 0, "وزن محصول الزامی است و باید عددی مثبت باشد"),
+  weight: z.string().min(1, "وزن محصول الزامی است").refine((val) => !isNaN(Number(val)) && Number(val) > 0, "وزن باید عددی مثبت باشد"),
   weightUnit: z.string().default("kg"),
   // Barcode field - Required
   barcode: z.string().min(1, "بارکد محصول الزامی است"),
@@ -361,7 +361,7 @@ export default function ProductsPage() {
       maxStockLevel: 100,
       unitPrice: "0",
       currency: "IQD",
-      weight: "",
+      weight: "1",
       weightUnit: "kg",
       isActive: true,
       // Variant fields
@@ -421,7 +421,7 @@ export default function ProductsPage() {
     const processedData = {
       ...data,
       unitPrice: data.unitPrice ? data.unitPrice.toString() : "0",
-      weight: data.weight || "0",
+      weight: data.weight && data.weight !== "" ? String(data.weight) : "1",
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
       maxStockLevel: Number(data.maxStockLevel) || 100,
@@ -622,10 +622,10 @@ export default function ProductsPage() {
       stockQuantity: Number(product.stockQuantity) ?? 0,
       minStockLevel: Number(product.minStockLevel) ?? 0,
       maxStockLevel: Number(product.maxStockLevel) || 100,
-      unitPrice: product.unitPrice ? product.unitPrice.toString() : "0",
+      unitPrice: product.unitPrice ? String(product.unitPrice) : "0",
       currency: product.currency || "IQD",
       priceRange: product.priceRange || "",
-      weight: product.weight ? String(product.weight) : "0",
+      weight: product.weight && product.weight !== "0" ? String(product.weight) : "",
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
@@ -1450,7 +1450,7 @@ export default function ProductsPage() {
                               step="0.01"
                               placeholder="0.00" 
                               {...field}
-                              value={field.value !== undefined && field.value !== null ? field.value : ''}
+                              value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value)}
                               ref={(el) => { fieldRefs.current.weight = el; }}
                               onKeyDown={(e) => handleKeyNavigation(e, 'weight')}
