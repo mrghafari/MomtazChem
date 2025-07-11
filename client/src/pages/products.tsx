@@ -1410,21 +1410,24 @@ export default function ProductsPage() {
                     <FormField
                       control={form.control}
                       name="maxStockLevel"
-                      render={({ field }) => (
-                        <FormItem>
+                      render={({ field }) => {
+                        console.log("MaxStockLevel field render - value:", field.value, "type:", typeof field.value);
+                        return (
+                          <FormItem>
                           <FormLabel>Max Level</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
                               placeholder="0" 
                               {...field}
-                              value={field.value !== undefined && field.value !== null ? field.value : ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+                              value={String(field.value ?? '')}
+                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
+                        );
+                      }}
                     />
                   </div>
 
@@ -1481,8 +1484,10 @@ export default function ProductsPage() {
                     <FormField
                       control={form.control}
                       name="weight"
-                      render={({ field }) => (
-                        <FormItem>
+                      render={({ field }) => {
+                        console.log("Weight field render - value:", field.value, "type:", typeof field.value);
+                        return (
+                          <FormItem>
                           <FormLabel>Weight *</FormLabel>
                           <FormControl>
                             <Input 
@@ -1490,7 +1495,7 @@ export default function ProductsPage() {
                               step="0.01"
                               placeholder="0.00" 
                               {...field}
-                              value={field.value || ''}
+                              value={String(field.value ?? '')}
                               onChange={(e) => field.onChange(e.target.value)}
                               ref={(el) => { fieldRefs.current.weight = el; }}
                               onKeyDown={(e) => handleKeyNavigation(e, 'weight')}
@@ -1498,7 +1503,8 @@ export default function ProductsPage() {
                           </FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
+                        );
+                      }}
                     />
 
                     <FormField
