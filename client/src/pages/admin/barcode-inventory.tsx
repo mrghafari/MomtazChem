@@ -111,15 +111,45 @@ export default function BarcodeInventory() {
     iraqBarcodeGeneration.mutate();
   };
 
-  // Filter and sort products
-  const filteredProducts = products?.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.barcode?.includes(searchTerm) ||
-    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.price && product.price.toString().includes(searchTerm)) ||
-    (product.priceUnit && product.priceUnit.toLowerCase().includes(searchTerm.toLowerCase()))
-  ) || [];
+  // Filter and sort products - only show real available products
+  const filteredProducts = products?.filter(product => {
+    // Valid chemical product categories
+    const validCategories = [
+      'Water Treatment',
+      'Fuel Additives', 
+      'Paint & Solvents',
+      'Agricultural Products',
+      'Agricultural Fertilizers',
+      'Industrial Chemicals',
+      'Paint Thinner',
+      'Technical Equipment',
+      'Commercial Goods'
+    ];
+
+    // Only show products that are real chemical products (not test products)
+    const isRealProduct = product.name && 
+      !product.name.toLowerCase().includes('test') &&
+      !product.name.toLowerCase().includes('تست') &&
+      !product.name.toLowerCase().includes('آزمایشی') &&
+      !product.name.toLowerCase().includes('sample') &&
+      !product.name.toLowerCase().includes('advanced fuel additive') && // Remove this test product
+      !product.name.toLowerCase().includes('agricultural fertilizer mix') && // Remove this test product
+      product.category && 
+      validCategories.includes(product.category) &&
+      product.stockQuantity >= 0; // Include products with 0 stock but exclude negative values
+
+    // Apply search filter
+    const matchesSearch = !searchTerm || (
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.barcode?.includes(searchTerm) ||
+      product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.price && product.price.toString().includes(searchTerm)) ||
+      (product.priceUnit && product.priceUnit.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    return isRealProduct && matchesSearch;
+  }) || [];
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (!sortField) return 0;
