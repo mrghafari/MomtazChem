@@ -854,29 +854,36 @@ export default function ProductsPage() {
   }, [form.watch("barcode"), dialogOpen]); // Added dialogOpen dependency
 
   // Update preview states when form values change (for edit mode)
+  // Only sync if dialog is open and we're not in the middle of form reset
   useEffect(() => {
+    if (dialogOpen && !editingProduct) return; // Skip for new product creation
+    
     const imageUrl = form.getValues('imageUrl');
     if (imageUrl !== imagePreview) {
       setImagePreview(imageUrl || null);
       console.log("Image preview synced with form:", imageUrl);
     }
-  }, [form.watch('imageUrl')]);
+  }, [form.watch('imageUrl'), dialogOpen, editingProduct]);
 
   useEffect(() => {
+    if (dialogOpen && !editingProduct) return; // Skip for new product creation
+    
     const catalogUrl = form.getValues('pdfCatalogUrl');
     if (catalogUrl !== catalogPreview) {
       setCatalogPreview(catalogUrl || null);
       console.log("Catalog preview synced with form:", catalogUrl);
     }
-  }, [form.watch('pdfCatalogUrl')]);
+  }, [form.watch('pdfCatalogUrl'), dialogOpen, editingProduct]);
 
   useEffect(() => {
+    if (dialogOpen && !editingProduct) return; // Skip for new product creation
+    
     const msdsUrl = form.getValues('msdsUrl');
     if (msdsUrl !== msdsPreview) {
       setMsdsPreview(msdsUrl || null);
       console.log("MSDS preview synced with form:", msdsUrl);
     }
-  }, [form.watch('msdsUrl')]);
+  }, [form.watch('msdsUrl'), dialogOpen, editingProduct]);
 
   // Redirect if not authenticated
   useEffect(() => {
