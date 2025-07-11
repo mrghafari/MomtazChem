@@ -84,37 +84,41 @@ export class UnifiedInventoryManager {
   
   /**
    * Get all products with their unified inventory
-   * This will be used by both showcase and shop frontends
+   * Only returns products that are actually available for sale in the shop
    */
   static async getAllProductsWithInventory(): Promise<any[]> {
     try {
-      console.log(`📦 [INVENTORY] Getting all products with unified inventory`);
+      console.log(`📦 [INVENTORY] Getting all shop products with unified inventory`);
       
-      // Get showcase products (single source of truth for inventory)
-      const showcaseProducts = await storage.getProducts();
-      
-      // Get shop products (for pricing and SKU info only)
+      // Get shop products (these are the products actually for sale)
       const shopProducts = await shopStorage.getShopProducts();
       
-      // Merge data with showcase_products as inventory source
-      const unifiedProducts = showcaseProducts.map(showcaseProduct => {
-        const shopProduct = shopProducts.find(sp => sp.name === showcaseProduct.name);
+      // Get showcase products (for inventory data)
+      const showcaseProducts = await storage.getProducts();
+      
+      // Only include products that exist in the shop (actually for sale)
+      const unifiedProducts = shopProducts.map(shopProduct => {
+        const showcaseProduct = showcaseProducts.find(sp => sp.name === shopProduct.name);
         
         return {
-          ...showcaseProduct,
-          // Use showcase inventory as single source of truth
-          stockQuantity: showcaseProduct.stockQuantity || 0,
-          minStockLevel: showcaseProduct.minStockLevel || 5,
-          lowStockThreshold: 10, // Default threshold for customer warnings
-          inStock: (showcaseProduct.stockQuantity || 0) > 0,
-          // Include shop pricing if available
-          shopPrice: shopProduct?.price,
-          shopSku: shopProduct?.sku,
-          shopId: shopProduct?.id
+          id: shopProduct.id,
+          name: shopProduct.name,
+          category: shopProduct.category,
+          // Use showcase inventory as single source of truth if available, otherwise shop inventory
+          stockQuantity: showcaseProduct?.stockQuantity || shopProduct.stockQuantity || 0,
+          minStockLevel: showcaseProduct?.minStockLevel || shopProduct.minStockLevel || 5,
+          lowStockThreshold: shopProduct.lowStockThreshold || 10,
+          inStock: (showcaseProduct?.stockQuantity || shopProduct.stockQuantity || 0) > 0,
+          // Shop pricing and product data
+          shopPrice: shopProduct.price,
+          shopSku: shopProduct.sku,
+          shopId: shopProduct.id,
+          priceUnit: shopProduct.priceUnit,
+          description: shopProduct.description
         };
       });
       
-      console.log(`✅ [INVENTORY] Retrieved ${unifiedProducts.length} products with unified inventory`);
+      console.log(`✅ [INVENTORY] Retrieved ${unifiedProducts.length} shop products with unified inventory`);
       return unifiedProducts;
       
     } catch (error) {
