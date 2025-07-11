@@ -23,9 +23,9 @@ export default function ProductReviews() {
     enabled: !!id,
   });
 
-  // Get product reviews data
+  // Get product reviews data using shop endpoint
   const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
-    queryKey: ['/api/products', id, 'reviews'],
+    queryKey: ['/api/shop/products', id, 'reviews'],
     enabled: !!id,
   });
 
@@ -33,7 +33,7 @@ export default function ProductReviews() {
   const reviews = reviewsData?.data?.reviews || [];
   const productStats = reviewsData?.data?.stats || { averageRating: 0, totalReviews: 0 };
 
-  // Add review mutation
+  // Add review mutation for shop products
   const addReviewMutation = useMutation({
     mutationFn: async (reviewData: { rating: number; comment: string; customerName: string }) => {
       const payload = {
@@ -45,11 +45,11 @@ export default function ProductReviews() {
         pros: [], // Optional field
         cons: [] // Optional field
       };
-      return await apiRequest(`/api/products/${id}/reviews`, 'POST', payload);
+      return await apiRequest(`/api/shop/products/${id}/reviews`, 'POST', payload);
     },
     onSuccess: () => {
-      // Invalidate and refetch product reviews (which includes stats)
-      queryClient.invalidateQueries({ queryKey: ['/api/products', id, 'reviews'] });
+      // Invalidate and refetch product reviews using shop endpoint
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/products', id, 'reviews'] });
       toast({
         title: t.reviewSubmitted,
         description: t.reviewSubmittedDesc,
