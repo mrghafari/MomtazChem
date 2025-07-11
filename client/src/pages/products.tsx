@@ -24,11 +24,11 @@ import VisualBarcode from "@/components/ui/visual-barcode";
 
 // Custom form schema that handles numeric inputs properly
 const formSchema = insertShowcaseProductSchema.extend({
-  unitPrice: z.coerce.number().min(0.01, "قیمت باید بیشتر از صفر باشد"),
+  unitPrice: z.string().min(1, "قیمت محصول الزامی است"), // Keep as string like database
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
-  // Weight fields - Required
+  // Weight fields - Keep as string to match database
   weight: z.string().min(1, "وزن محصول الزامی است").refine((val) => !isNaN(Number(val)) && Number(val) > 0, "وزن باید عددی مثبت باشد"),
   weightUnit: z.string().default("kg"),
   // Barcode field - Required
@@ -687,17 +687,23 @@ export default function ProductsPage() {
     console.log("formData.maxStockLevel:", formData.maxStockLevel, "type:", typeof formData.maxStockLevel);
     console.log("Complete form data:", JSON.stringify(formData, null, 2));
     
-    // Reset form and manually set problematic fields
-    form.reset(formData);
+    // Don't use reset, manually set all values
+    console.log("=== MANUALLY SETTING ALL FORM VALUES ===");
     
-    // Force set the problematic fields after a short delay
+    // Set all form values manually
+    Object.entries(formData).forEach(([key, value]) => {
+      console.log(`Setting ${key}:`, value, typeof value);
+      form.setValue(key as any, value, { shouldValidate: false, shouldDirty: false });
+    });
+    
+    // Verify the problematic fields were set correctly
     setTimeout(() => {
-      console.log("=== FORCE SETTING FIELDS ===");
-      form.setValue("weight", formData.weight, { shouldValidate: false, shouldDirty: false });
-      form.setValue("maxStockLevel", formData.maxStockLevel, { shouldValidate: false, shouldDirty: false });
-      console.log("Weight field after setValue:", form.getValues("weight"));
-      console.log("MaxStockLevel field after setValue:", form.getValues("maxStockLevel"));
-    }, 100);
+      console.log("=== VERIFICATION AFTER MANUAL SET ===");
+      const currentWeight = form.getValues("weight");
+      const currentMaxStock = form.getValues("maxStockLevel");
+      console.log("Current weight in form:", currentWeight, typeof currentWeight);
+      console.log("Current maxStockLevel in form:", currentMaxStock, typeof currentMaxStock);
+    }, 200);
     
     setDialogOpen(true);
     
