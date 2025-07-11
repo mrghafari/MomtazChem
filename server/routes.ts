@@ -1619,6 +1619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category: product.category,
         stockQuantity: product.stockQuantity || 0,
         minStockLevel: product.minStockLevel || 10,
+        maxStockLevel: product.maxStockLevel || 1000, // Add maxStockLevel field
         barcode: product.barcode,
         qrCode: product.qrCode,
         sku: product.sku,
@@ -1628,8 +1629,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Map price fields properly for frontend interface
         price: product.unitPrice ? parseFloat(product.unitPrice.toString()) : 0,
         priceUnit: product.currency || 'IQD',
-        unitPrice: product.unitPrice ? parseFloat(product.unitPrice.toString()) : 0,
-        currency: product.currency || 'IQD'
+        unitPrice: product.unitPrice ? product.unitPrice.toString() : "0", // Keep as string for form
+        currency: product.currency || 'IQD',
+        // Add weight fields
+        weight: product.weight || "1",
+        weightUnit: product.weightUnit || "kg"
       }));
       
       res.json(mappedProducts);
@@ -1661,7 +1665,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      res.json(product);
+      // Map single product response to include all fields needed for edit form
+      const mappedProduct = {
+        ...product,
+        unitPrice: product.unitPrice ? product.unitPrice.toString() : "0", // Keep as string for form
+        maxStockLevel: product.maxStockLevel || 1000,
+        weight: product.weight || "1",
+        weightUnit: product.weightUnit || "kg"
+      };
+
+      res.json(mappedProduct);
     } catch (error) {
       res.status(500).json({ 
         success: false, 
