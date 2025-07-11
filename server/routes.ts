@@ -4528,6 +4528,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ Bank receipt method selected - customer will upload receipt");
       }
 
+      // Handle online payment and hybrid payment (wallet + online)
+      let paymentGatewayResponse = null;
+      const needsOnlinePayment = (
+        orderData.paymentMethod === 'online_payment' || 
+        (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0)
+      );
+
+      if (needsOnlinePayment) {
+        try {
+          // Import TBI Payment Service
+          const { TBIPaymentService } = await import('./tbi-payment-service');
+          const tbiService = new TBIPaymentService();
+
+          // Prepare payment data for TBI Bank POS
+          const paymentAmount = orderData.paymentMethod === 'wallet_partial' ? remainingAmount : totalAmount;
+          
+          const tbiPaymentData = {
+            customerName: customerInfo.name,
+            customerAddress: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.country}`,
+            customerPhone: customerInfo.phone,
+            customerEmail: '', // Optional
+            orderId: orderNumber,
+            orderItems: Object.entries(orderData.cart || {}).map(([productId, quantity]) => ({
+              name: `Product ${productId}`,
+              quantity: Number(quantity),
+              price: paymentAmount / Object.values(orderData.cart || {}).reduce((sum, qty) => sum + Number(qty), 0),
+            })),
+            totalAmount: paymentAmount,
+            currency: 'IQD',
+            callbackUrl: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment/callback`,
+            statusUrl: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/api/payment/status`,
+            description: orderData.paymentMethod === 'wallet_partial' ? 
+              `پرداخت مابقی سفارش ${orderNumber} - کیف پول: ${walletAmountUsed} IQD استفاده شد` :
+              `پرداخت سفارش ${orderNumber}`
+          };
+
+          console.log('🏦 Registering payment with TBI Bank POS...', { 
+            orderId: orderNumber, 
+            amount: paymentAmount,
+            paymentType: orderData.paymentMethod
+          });
+
+          paymentGatewayResponse = await tbiService.registerPayment(tbiPaymentData);
+          
+          console.log('✅ TBI Bank POS payment registered:', paymentGatewayResponse);
+          
+        } catch (error) {
+          console.error('❌ TBI Bank POS registration failed:', error);
+          // Don't fail the order, just log the error
+          console.log('⚠️ Continuing without payment gateway integration');
+        }
+      }
+
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
         orderNumber,
@@ -4682,11 +4735,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         walletAmountUsed: walletAmountUsed,
       };
 
-      // Add redirect URL for online payment
-      if (finalPaymentMethod === 'online_payment') {
+      // Add redirect URL for online payment and hybrid payment (wallet + online)
+      if (needsOnlinePayment && paymentGatewayResponse) {
+        responseData.redirectToPayment = true;
+        responseData.paymentGatewayUrl = paymentGatewayResponse.url;
+        responseData.tbiCreditApplicationId = paymentGatewayResponse.creditApplicationId;
+        console.log(`✅ Order ${orderNumber} created - redirecting to TBI Bank POS for ${paymentGatewayResponse.totalAmount || (remainingAmount > 0 ? remainingAmount : totalAmount)} IQD`);
+      } else if (finalPaymentMethod === 'online_payment') {
+        // Fallback to local payment page if TBI Bank integration fails
         responseData.redirectToPayment = true;
         responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}`;
-        console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
+        console.log(`✅ Order ${orderNumber} created - redirecting to local payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
       }
 
       res.json(responseData);
@@ -4695,6 +4754,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Failed to create order"
+      });
+    }
+  });
+
+  // TBI Bank Payment Callback Handler
+  app.post("/api/payment/tbi-callback", async (req, res) => {
+    try {
+      const { orderId, creditApplicationId, status, transactionId, amount, timestamp } = req.body;
+      
+      console.log('🏦 TBI Bank payment callback received:', { 
+        orderId, 
+        creditApplicationId, 
+        status, 
+        transactionId, 
+        amount 
+      });
+
+      // Update order payment status based on callback
+      if (status === 'SUCCESS' || status === 'COMPLETED') {
+        console.log(`✅ Payment successful for order ${orderId}`);
+        
+        // Update customer order payment status
+        try {
+          const order = await customerStorage.getOrderByNumber(orderId);
+          if (order) {
+            await customerStorage.updateOrderPaymentStatus(order.id, 'paid');
+            console.log(`✅ Order ${orderId} payment status updated to 'paid'`);
+          }
+        } catch (updateError) {
+          console.error('❌ Error updating order payment status:', updateError);
+        }
+        
+        // Update order management status to move to financial department
+        try {
+          await orderManagementStorage.updateOrderStatus(orderId, 'paid', 'financial');
+          console.log(`✅ Order ${orderId} moved to financial department`);
+        } catch (omError) {
+          console.error('❌ Error updating order management status:', omError);
+        }
+        
+      } else if (status === 'FAILED' || status === 'CANCELLED') {
+        console.log(`❌ Payment failed for order ${orderId}: ${status}`);
+        
+        // Update order status to failed
+        try {
+          const order = await customerStorage.getOrderByNumber(orderId);
+          if (order) {
+            await customerStorage.updateOrderPaymentStatus(order.id, 'failed');
+            console.log(`❌ Order ${orderId} payment status updated to 'failed'`);
+          }
+        } catch (updateError) {
+          console.error('❌ Error updating failed order status:', updateError);
+        }
+      }
+
+      // Return success response to TBI Bank
+      res.json({
+        success: true,
+        message: "Callback processed successfully",
+        orderId,
+        status
+      });
+      
+    } catch (error) {
+      console.error('❌ Error processing TBI Bank callback:', error);
+      res.status(500).json({
+        success: false,
+        message: "Error processing payment callback"
+      });
+    }
+  });
+
+  // Payment Status Check Endpoint
+  app.get("/api/payment/status/:orderId", async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      
+      console.log(`🔍 Checking payment status for order: ${orderId}`);
+      
+      const order = await customerStorage.getOrderByNumber(orderId);
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "Order not found"
+        });
+      }
+
+      res.json({
+        success: true,
+        orderId: order.orderNumber,
+        paymentStatus: order.paymentStatus,
+        totalAmount: order.totalAmount,
+        currency: order.currency
+      });
+      
+    } catch (error) {
+      console.error('❌ Error checking payment status:', error);
+      res.status(500).json({
+        success: false,
+        message: "Error checking payment status"
       });
     }
   });

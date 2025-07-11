@@ -637,17 +637,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     onSuccess: (response: any) => {
       console.log('Order response:', response);
       
-      // Check if payment gateway redirect is needed
+      // Check if payment gateway redirect is needed for online payment or hybrid payment
       if (response.redirectToPayment && response.paymentGatewayUrl) {
         toast({
           title: "انتقال به درگاه پرداخت",
-          description: "در حال انتقال شما به درگاه پرداخت..."
+          description: paymentMethod === 'wallet_partial' ? 
+            `کیف پول: ${formatCurrency(walletAmount)} کسر شد. در حال انتقال به درگاه برای مابقی...` :
+            "در حال انتقال شما به درگاه پرداخت..."
         });
         
-        // Redirect to payment gateway
+        // Redirect to payment gateway (TBI Bank POS)
         setTimeout(() => {
           window.location.href = response.paymentGatewayUrl;
-        }, 1500);
+        }, 2000);
       } 
 
       // Check if bank receipt upload is needed

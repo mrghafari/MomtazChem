@@ -15,6 +15,7 @@ import Contact from "@/pages/contact";
 import Shop from "@/pages/shop";
 import Checkout from "@/pages/checkout";
 import Payment from "@/pages/payment";
+import PaymentSuccess from "@/pages/payment-success";
 import CheckoutSuccess from "@/pages/checkout-success";
 import ShopAdmin from "@/pages/shop-admin";
 import InvoiceManagement from "@/pages/admin/invoice-management";
@@ -111,6 +112,8 @@ function Router() {
           <Route path="/product-recommendations" component={ProductRecommendations} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
           <Route path="/payment/:orderId" component={Payment} />
+          <Route path="/payment/success" component={PaymentSuccess} />
+          <Route path="/payment/callback" component={PaymentSuccess} />
           <Route path="/checkout/success/:orderId" component={CheckoutSuccess} />
           <Route path="/bank-receipt-upload/:orderId" component={BankReceiptUpload} />
           <Route path="/shop-search" component={ShopSearch} />
