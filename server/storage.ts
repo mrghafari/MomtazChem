@@ -136,6 +136,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProducts(): Promise<ShowcaseProduct[]> {
+    // Return all products regardless of isActive status for barcode inventory management
     return await showcaseDb.select().from(showcaseProducts).orderBy(desc(showcaseProducts.createdAt));
   }
 

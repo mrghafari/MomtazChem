@@ -1611,37 +1611,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products = await storage.getProducts();
       }
       
-      // Valid chemical product categories
-      const validCategories = [
-        'Water Treatment',
-        'Fuel Additives', 
-        'Paint & Solvents',
-        'Agricultural Products',
-        'Agricultural Fertilizers',
-        'Industrial Chemicals',
-        'Paint Thinner',
-        'Technical Equipment',
-        'Commercial Goods'
-      ];
-
-      // Filter for real chemical products only
-      const realProducts = products.filter(product => {
-        return product.name && 
-          !product.name.toLowerCase().includes('test') &&
-          !product.name.toLowerCase().includes('تست') &&
-          !product.name.toLowerCase().includes('آزمایشی') &&
-          !product.name.toLowerCase().includes('sample') &&
-          !product.name.toLowerCase().includes('advanced fuel additive') &&
-          !product.name.toLowerCase().includes('agricultural fertilizer mix') &&
-          !product.name.toLowerCase().includes('concrete additives') &&
-          !product.name.toLowerCase().includes('corrosion inhibitor') &&
-          product.category && 
-          validCategories.includes(product.category) &&
-          (product.stockQuantity || 0) >= 0; // Include products with 0 stock but exclude negative values
-      });
-
-      // Map showcase products to barcode inventory interface format
-      const mappedProducts = realProducts.map(product => ({
+      // Map all products from inventory to barcode interface
+      const mappedProducts = products.map(product => ({
         id: product.id,
         name: product.name,
         category: product.category,

@@ -111,34 +111,9 @@ export default function BarcodeInventory() {
     iraqBarcodeGeneration.mutate();
   };
 
-  // Filter and sort products - only show real available products
+  // Filter and sort products - show all inventory products
   const filteredProducts = products?.filter(product => {
-    // Valid chemical product categories
-    const validCategories = [
-      'Water Treatment',
-      'Fuel Additives', 
-      'Paint & Solvents',
-      'Agricultural Products',
-      'Agricultural Fertilizers',
-      'Industrial Chemicals',
-      'Paint Thinner',
-      'Technical Equipment',
-      'Commercial Goods'
-    ];
-
-    // Only show products that are real chemical products (not test products)
-    const isRealProduct = product.name && 
-      !product.name.toLowerCase().includes('test') &&
-      !product.name.toLowerCase().includes('تست') &&
-      !product.name.toLowerCase().includes('آزمایشی') &&
-      !product.name.toLowerCase().includes('sample') &&
-      !product.name.toLowerCase().includes('advanced fuel additive') && // Remove this test product
-      !product.name.toLowerCase().includes('agricultural fertilizer mix') && // Remove this test product
-      product.category && 
-      validCategories.includes(product.category) &&
-      product.stockQuantity >= 0; // Include products with 0 stock but exclude negative values
-
-    // Apply search filter
+    // Apply search filter only
     const matchesSearch = !searchTerm || (
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -148,7 +123,7 @@ export default function BarcodeInventory() {
       (product.priceUnit && product.priceUnit.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    return isRealProduct && matchesSearch;
+    return matchesSearch;
   }) || [];
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
