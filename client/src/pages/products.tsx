@@ -1584,22 +1584,21 @@ export default function ProductsPage() {
                       ref={(el) => { fieldRefs.current.sku = el; }}
                       onKeyDown={(e) => handleKeyNavigation(e, 'sku')}
                     />
-                    {!editingProduct && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={generateSmartSKU}
-                        disabled={generateSKUMutation.isPending}
-                        className="whitespace-nowrap"
-                      >
-                        {generateSKUMutation.isPending ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                        ) : (
-                          "🤖 AI SKU"
-                        )}
-                      </Button>
-                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={generateSmartSKU}
+                      disabled={generateSKUMutation.isPending || !!editingProduct}
+                      className="whitespace-nowrap"
+                      title={editingProduct ? "SKU cannot be regenerated for existing products" : "Generate AI-powered SKU"}
+                    >
+                      {generateSKUMutation.isPending ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      ) : (
+                        "🤖 AI SKU"
+                      )}
+                    </Button>
                   </div>
                   {editingProduct && (
                     <div className="text-xs text-amber-600 font-medium">
