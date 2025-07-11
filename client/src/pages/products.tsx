@@ -625,7 +625,7 @@ export default function ProductsPage() {
       unitPrice: product.unitPrice ? product.unitPrice.toString() : "0",
       currency: product.currency || "IQD",
       priceRange: product.priceRange || "",
-      weight: product.weight ? String(product.weight) : "",
+      weight: product.weight ? String(product.weight) : "0",
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
@@ -1418,7 +1418,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Currency</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value || "IQD"}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select currency" />
@@ -1467,7 +1467,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Weight Unit</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value || "kg"}>
+                          <Select onValueChange={field.onChange} value={field.value || "kg"}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select weight unit" />
