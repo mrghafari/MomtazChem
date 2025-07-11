@@ -651,11 +651,13 @@ export default function ProductsPage() {
       category: product.category,
       shortDescription: product.shortDescription || "",
       features: (() => {
+        console.log("Raw features:", product.features, typeof product.features);
         if (Array.isArray(product.features)) {
           return product.features.join('\n');
         } else if (typeof product.features === 'string') {
           try {
             const parsed = JSON.parse(product.features);
+            console.log("Parsed features:", parsed);
             return Array.isArray(parsed) ? parsed.join('\n') : product.features;
           } catch {
             return product.features;
@@ -664,11 +666,13 @@ export default function ProductsPage() {
         return "";
       })(),
       applications: (() => {
+        console.log("Raw applications:", product.applications, typeof product.applications);
         if (Array.isArray(product.applications)) {
           return product.applications.join('\n');
         } else if (typeof product.applications === 'string') {
           try {
             const parsed = JSON.parse(product.applications);
+            console.log("Parsed applications:", parsed);
             return Array.isArray(parsed) ? parsed.join('\n') : product.applications;
           } catch {
             return product.applications;
@@ -677,9 +681,14 @@ export default function ProductsPage() {
         return "";
       })(),
       specifications: (() => {
+        console.log("Raw specifications:", product.specifications, typeof product.specifications);
         if (typeof product.specifications === 'string') {
-          // If it's a quoted string like "\"Specifications Specifications\"", remove the extra quotes
-          return product.specifications.replace(/^"(.*)"$/, '$1');
+          // Remove quotes if it's a quoted string like "\"Short Description\""
+          let cleaned = product.specifications.replace(/^"+(.*?)"+$/, '$1');
+          // Also remove escaped quotes
+          cleaned = cleaned.replace(/\\"/g, '"');
+          console.log("Cleaned specifications:", cleaned);
+          return cleaned;
         } else if (typeof product.specifications === 'object' && product.specifications !== null) {
           return JSON.stringify(product.specifications, null, 2);
         }
@@ -702,7 +711,15 @@ export default function ProductsPage() {
       showMsdsToCustomers: product.showMsdsToCustomers || false,
       catalogFileName: product.catalogFileName || "",
       showCatalogToCustomers: product.showCatalogToCustomers || false,
-      tags: product.tags || "",
+      tags: (() => {
+        console.log("Raw tags:", product.tags, typeof product.tags);
+        if (typeof product.tags === 'string') {
+          return product.tags;
+        } else if (Array.isArray(product.tags)) {
+          return product.tags.join(', ');
+        }
+        return "";
+      })(),
       syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       isActive: product.isActive !== false,
       // Publication permissions
