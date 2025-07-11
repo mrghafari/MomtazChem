@@ -332,8 +332,18 @@ const Shop = () => {
   // Update local wallet balance when query data changes
   useEffect(() => {
     if (walletData !== undefined) {
-      setWalletBalance(walletData);
-      console.log('🔄 Shop wallet balance updated:', walletData);
+      // Extract numeric value from wallet data object
+      let balanceValue = 0;
+      if (typeof walletData === 'number') {
+        balanceValue = walletData;
+      } else if (walletData && typeof walletData === 'object' && 'balance' in walletData) {
+        balanceValue = parseFloat(walletData.balance) || 0;
+      } else if (walletData && typeof walletData === 'object' && walletData.data && 'balance' in walletData.data) {
+        balanceValue = parseFloat(walletData.data.balance) || 0;
+      }
+      
+      setWalletBalance(balanceValue);
+      console.log('🔄 Shop wallet balance updated:', { walletData, balanceValue });
     }
   }, [walletData]);
 
@@ -873,7 +883,7 @@ const Shop = () => {
                   >
                     <Wallet className="w-4 h-4" />
                     <span className="text-sm">
-                      {walletBalance.toLocaleString()} IQD
+                      {(typeof walletBalance === 'number' ? walletBalance : 0).toLocaleString()} IQD
                     </span>
                   </Button>
                   <Button 
