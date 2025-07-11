@@ -225,9 +225,21 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    // Only auto-sync to shop if syncWithShop is enabled
-    if (product.syncWithShop) {
+    // Only auto-sync to shop if syncWithShop is enabled and this is not a content update
+    // Skip sync for content fields (description, features, applications, etc.) as they belong only to showcase
+    const isContentUpdate = productUpdate.hasOwnProperty('description') || 
+                           productUpdate.hasOwnProperty('shortDescription') ||
+                           productUpdate.hasOwnProperty('features') ||
+                           productUpdate.hasOwnProperty('applications') ||
+                           productUpdate.hasOwnProperty('specifications') ||
+                           productUpdate.hasOwnProperty('tags') ||
+                           productUpdate.hasOwnProperty('msdsUrl') ||
+                           productUpdate.hasOwnProperty('pdfCatalogUrl');
+    
+    if (product.syncWithShop && !isContentUpdate) {
       await this.syncProductToShop(product);
+    } else if (isContentUpdate) {
+      console.log(`📝 Content update for showcase product - skipping shop sync: ${product.name}`);
     }
     
     return product;
@@ -265,33 +277,17 @@ export class DatabaseStorage implements IStorage {
       }
       
       if (existingShopProduct) {
-        // Update existing shop product with real inventory data
+        // Only sync inventory/pricing data - NEVER content fields
         await shopStorage.updateShopProduct(existingShopProduct.id, {
-          name: showcaseProduct.name,
-          description: showcaseProduct.description,
-          price: productPrice,
-          category: showcaseProduct.category,
           stockQuantity: showcaseProduct.stockQuantity || 0,
           lowStockThreshold: showcaseProduct.minStockLevel || 10,
-          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
+          price: productPrice,
           isActive: showcaseProduct.isActive,
+          visibleInShop: showcaseProduct.syncWithShop !== false
         });
+        console.log(`✅ Synced only inventory/pricing data to shop: ${showcaseProduct.name}`);
       } else {
-        // Create new shop product with real inventory data
-        await shopStorage.createShopProduct({
-          name: showcaseProduct.name,
-          sku: productSku,
-          description: showcaseProduct.description || '',
-          price: productPrice,
-          priceUnit: 'unit',
-          category: showcaseProduct.category,
-          stockQuantity: showcaseProduct.stockQuantity || 0,
-          lowStockThreshold: showcaseProduct.minStockLevel || 10,
-          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
-          isActive: showcaseProduct.isActive,
-          isFeatured: false,
-          visibleInShop: showcaseProduct.syncWithShop || false,
-        });
+        console.log(`⚠️ Shop product doesn't exist for: ${showcaseProduct.name} - content updates stay in showcase only`);
       }
     } catch (error) {
       console.error('Error syncing product to shop:', error);
