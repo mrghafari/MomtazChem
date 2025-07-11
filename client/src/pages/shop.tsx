@@ -356,6 +356,9 @@ const Shop = () => {
     setCustomer(customerData);
     fetchWalletBalance();
     
+    // Close the auth modal immediately
+    setShowAuth(false);
+    
     // Invalidate cache to refresh header
     queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
     queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
@@ -388,6 +391,9 @@ const Shop = () => {
   const handleRegisterSuccess = (customerData: any) => {
     setCustomer(customerData);
     fetchWalletBalance();
+    
+    // Close the auth modal immediately
+    setShowAuth(false);
     
     // Invalidate cache to refresh header
     queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
