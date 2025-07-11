@@ -374,18 +374,16 @@ const Shop = () => {
       description: `${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, show checkout modal, otherwise to profile
-    setTimeout(() => {
-      if (hasCartItems) {
+    // If user had items in cart, immediately show checkout modal
+    if (hasCartItems) {
+      setTimeout(() => {
         setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
-          description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
+          description: "فرم سفارش برای شما باز شد",
         });
-      } else {
-        navigate("/customer/profile");
-      }
-    }, 1000);
+      }, 500); // Reduced delay for faster UX
+    }
   };
 
   const handleRegisterSuccess = (customerData: any) => {
@@ -410,18 +408,16 @@ const Shop = () => {
       description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, show checkout modal, otherwise to profile
-    setTimeout(() => {
-      if (hasCartItems) {
+    // If user had items in cart, immediately show checkout modal
+    if (hasCartItems) {
+      setTimeout(() => {
         setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
-          description: "کالاهای انتخابی شما آماده پرداخت است",
+          description: "فرم سفارش برای شما باز شد",
         });
-      } else {
-        navigate("/customer/profile");
-      }
-    }, 1000);
+      }, 500); // Reduced delay for faster UX  
+    }
   };
 
   const handleLogout = async () => {
