@@ -245,12 +245,21 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-// Customer authentication middleware  
+// Customer authentication middleware with improved error handling  
 const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) => {
-  if (req.session.customerId) {
-    next();
-  } else {
-    res.status(401).json({ success: false, message: "احراز هویت مشتری مورد نیاز است" });
+  try {
+    if (req.session && req.session.customerId) {
+      next();
+    } else {
+      console.log('Customer authentication failed for:', req.originalUrl);
+      res.status(401).json({ success: false, message: "احراز هویت نشده" });
+    }
+  } catch (error) {
+    console.error('Customer authentication middleware error:', error);
+    res.status(500).json({
+      success: false,
+      message: "خطا در احراز هویت مشتری"
+    });
   }
 };
 
@@ -393,6 +402,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error generating project proposal PDF:', error);
       res.status(500).json({ success: false, message: 'Failed to generate project proposal PDF' });
+    }
+  });
+
+  // =============================================================================
+  // API MIDDLEWARE - ENSURE ALL /api ROUTES RETURN JSON
+  // =============================================================================
+  
+  // Middleware to ensure all API routes return JSON (not HTML)
+  app.use('/api/*', (req, res, next) => {
+    // Set Content-Type header to application/json for all API routes
+    res.setHeader('Content-Type', 'application/json');
+    
+    // Override the default error handling to always return JSON
+    const originalSend = res.send;
+    res.send = function(data) {
+      // If data is a string that looks like HTML, convert to JSON error
+      if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
+        return originalSend.call(this, JSON.stringify({
+          success: false,
+          message: 'API endpoint not found',
+          error: 'This endpoint should return JSON, not HTML'
+        }));
+      }
+      return originalSend.call(this, data);
+    };
+    
+    next();
+  });
+
+  // =============================================================================
+  // HEALTH CHECK API
+  // =============================================================================
+  
+  // Health check endpoint - must return JSON
+  app.get("/api/health", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Test database connection
+      const dbResult = await pool.query('SELECT 1 as healthy');
+      const dbHealthy = dbResult.rows[0]?.healthy === 1;
+      
+      const status = {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        services: {
+          database: dbHealthy ? 'healthy' : 'unhealthy',
+          server: 'healthy'
+        }
+      };
+      
+      res.json(status);
+    } catch (error) {
+      console.error('Health check failed:', error);
+      res.status(500).json({
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        error: error.message,
+        services: {
+          database: 'unhealthy',
+          server: 'healthy'
+        }
+      });
     }
   });
 
@@ -18452,6 +18524,34 @@ momtazchem.com
     } catch (error) {
       console.error('Error calculating weights for all orders:', error);
       res.status(500).json({ success: false, message: 'خطا در محاسبه وزن سفارشات' });
+    }
+  });
+
+  // =============================================================================
+  // API ERROR HANDLER - CATCH ALL API ROUTES AND ENSURE JSON RESPONSES
+  // =============================================================================
+  
+  // Catch-all for API routes that don't exist - return JSON 404
+  app.all('/api/*', (req, res) => {
+    res.status(404).json({
+      success: false,
+      message: 'API endpoint not found',
+      path: req.originalUrl,
+      method: req.method
+    });
+  });
+  
+  // Global error handler for all API routes
+  app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
+    console.error('API Error:', err);
+    
+    // Ensure JSON response even for errors
+    if (!res.headersSent) {
+      res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal server error',
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+      });
     }
   });
 

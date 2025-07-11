@@ -100,6 +100,12 @@ app.use((req, res, next) => {
       throw err;
     });
 
+    // Add JSON headers for all API routes to ensure proper response type
+    app.use('/api/*', (req, res, next) => {
+      res.header('Content-Type', 'application/json');
+      next();
+    });
+
     // importantly only setup vite in development and after
     // setting up all the other routes so the catch-all route
     // doesn't interfere with the other routes

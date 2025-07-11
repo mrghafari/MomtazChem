@@ -3,11 +3,25 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
+    
+    // Check if response is HTML instead of JSON
+    if (text.includes('<!DOCTYPE html>') || text.includes('<html>')) {
+      console.error('Received HTML response instead of JSON for:', res.url);
+      throw new Error(`${res.status}: API returned HTML instead of JSON`);
+    }
+    
     // Completely suppress 401 errors - they're expected for guest users
     if (res.status === 401) {
       return { success: false, message: 'Unauthorized' };
     }
-    throw new Error(`${res.status}: ${text}`);
+    
+    // Try to parse as JSON for structured error messages
+    try {
+      const errorData = JSON.parse(text);
+      throw new Error(errorData.message || `${res.status}: ${text}`);
+    } catch (parseError) {
+      throw new Error(`${res.status}: ${text}`);
+    }
   }
 }
 
@@ -45,6 +59,14 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
+    
+    // Additional check for HTML response
+    const contentType = res.headers.get('content-type');
+    if (contentType && !contentType.includes('application/json')) {
+      console.error('Non-JSON content type received:', contentType);
+      throw new Error('API returned non-JSON response');
+    }
+    
     return await res.json();
   };
 
