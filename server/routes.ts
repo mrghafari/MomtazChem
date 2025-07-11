@@ -1766,12 +1766,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      await shopStorage.deleteShopProduct(id);
+      // Delete from showcase_products table (kardex) since that's what /api/products uses
+      await storage.deleteProduct(id);
+      
+      // Also delete from shop_products if exists (optional cleanup)
+      try {
+        const shopProducts = await shopStorage.getShopProducts();
+        const matchingShopProduct = shopProducts.find(sp => sp.showcaseProductId === id);
+        if (matchingShopProduct) {
+          await shopStorage.deleteShopProduct(matchingShopProduct.id);
+          console.log(`🗑️ Also removed corresponding shop product: ${matchingShopProduct.name}`);
+        }
+      } catch (error) {
+        console.log('Note: No corresponding shop product found for cleanup');
+      }
+      
       res.json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
+      console.error("Error deleting product:", error);
       res.status(500).json({ 
         success: false, 
-        message: "Internal server error" 
+        message: "Internal server error",
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
