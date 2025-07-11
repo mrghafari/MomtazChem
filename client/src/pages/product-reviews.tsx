@@ -51,10 +51,16 @@ export default function ProductReviews() {
       return await apiRequest(`/api/shop/products/${id}/reviews`, 'POST', payload);
     },
     onSuccess: () => {
-      // Invalidate and refetch product reviews using shop endpoint
+      // Force immediate refetch of reviews
       queryClient.invalidateQueries({ queryKey: [`/api/shop/products/${id}/reviews`] });
+      
       // Also invalidate shop products to update stats
       queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
+      
+      // Force a complete page refresh to ensure latest data
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
       
       toast({
         title: t.reviewSubmitted,
