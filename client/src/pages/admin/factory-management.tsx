@@ -207,6 +207,11 @@ export default function FactoryManagement() {
     queryKey: ["/api/factory/equipment-maintenance"],
   });
 
+  // Get products from showcase for production orders
+  const { data: showcaseProducts = [], isLoading: showcaseProductsLoading } = useQuery<any[]>({
+    queryKey: ["/api/products"],
+  });
+
   // Helper functions
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -991,9 +996,20 @@ export default function FactoryManagement() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>نام محصول</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="انتخاب محصول از کاردکس" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {showcaseProducts?.map((product) => (
+                              <SelectItem key={product.id} value={product.name}>
+                                {product.name} ({product.category})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
