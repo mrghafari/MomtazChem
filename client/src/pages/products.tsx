@@ -29,7 +29,7 @@ const formSchema = insertShowcaseProductSchema.extend({
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
   // Weight fields - Required
-  weight: z.string().min(1, "وزن محصول الزامی است"),
+  weight: z.string().refine((val) => val !== "" && !isNaN(Number(val)) && Number(val) > 0, "وزن محصول الزامی است و باید عددی مثبت باشد"),
   weightUnit: z.string().default("kg"),
   // Barcode field - Required
   barcode: z.string().min(1, "بارکد محصول الزامی است"),
@@ -358,7 +358,7 @@ export default function ProductsPage() {
       sku: "",
       stockQuantity: 0,
       minStockLevel: 0,
-      maxStockLevel: 0,
+      maxStockLevel: 100,
       unitPrice: "0",
       currency: "IQD",
       weight: "",
@@ -417,14 +417,14 @@ export default function ProductsPage() {
   const onSubmit = (data: InsertShowcaseProduct) => {
     console.log("Form data before processing:", data);
     
-    // Convert numeric fields to strings for API compatibility  
+    // Convert fields for API compatibility  
     const processedData = {
       ...data,
       unitPrice: data.unitPrice ? data.unitPrice.toString() : "0",
-      weight: data.weight || "",
+      weight: data.weight || "0",
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
-      maxStockLevel: Number(data.maxStockLevel) || 0,
+      maxStockLevel: Number(data.maxStockLevel) || 100,
       // Convert string fields to arrays for backend compatibility
       features: typeof data.features === 'string' && data.features.trim() 
         ? data.features.split('\n').map(f => f.trim()).filter(f => f.length > 0)
@@ -621,11 +621,11 @@ export default function ProductsPage() {
       sku: product.sku || "",
       stockQuantity: Number(product.stockQuantity) ?? 0,
       minStockLevel: Number(product.minStockLevel) ?? 0,
-      maxStockLevel: Number(product.maxStockLevel) ?? 0,
+      maxStockLevel: Number(product.maxStockLevel) || 100,
       unitPrice: product.unitPrice ? product.unitPrice.toString() : "0",
       currency: product.currency || "IQD",
       priceRange: product.priceRange || "",
-      weight: product.weight ? product.weight.toString() : "",
+      weight: product.weight ? String(product.weight) : "",
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
