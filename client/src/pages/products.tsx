@@ -180,8 +180,10 @@ export default function ProductsPage() {
     { value: "commercial-goods", label: "Commercial Goods", icon: <Package className="w-4 h-4" /> },
   ];
 
-  const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
-    queryKey: ["/api/products"],
+  const { data: products, isLoading, refetch } = useQuery<ShowcaseProduct[]>({
+    queryKey: ["/api/products", refreshKey],
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache data
   });
 
   const { mutate: createProduct } = useMutation({
@@ -213,19 +215,21 @@ export default function ProductsPage() {
       apiRequest(`/api/products/${id}`, "PUT", data),
     onSuccess: (result) => {
       console.log("Update success result:", result);
+      console.log("Updated product description:", result?.description);
       
-      // Clear and refresh data completely
+      // Force cache invalidation and refresh
+      setRefreshKey(prev => prev + 1);
       queryClient.removeQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.refetchQueries({ queryKey: ["/api/products"] });
-      setRefreshKey(prev => prev + 1); // Force component re-render
       
-      // Close dialog and clear editing state
-      setDialogOpen(false);
-      setEditingProduct(null);
-      setImagePreview(null);
-      setCatalogPreview(null);
-      setMsdsPreview(null);
+      // Close dialog after a short delay to see the changes
+      setTimeout(() => {
+        setDialogOpen(false);
+        setEditingProduct(null);
+        setImagePreview(null);
+        setCatalogPreview(null);
+        setMsdsPreview(null);
+      }, 500);
       
       // Show success message
       toast({
