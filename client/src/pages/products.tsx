@@ -849,6 +849,31 @@ export default function ProductsPage() {
     return () => clearTimeout(timer);
   }, [form.watch("barcode"), dialogOpen]); // Added dialogOpen dependency
 
+  // Update preview states when form values change (for edit mode)
+  useEffect(() => {
+    const imageUrl = form.getValues('imageUrl');
+    if (imageUrl !== imagePreview) {
+      setImagePreview(imageUrl || null);
+      console.log("Image preview synced with form:", imageUrl);
+    }
+  }, [form.watch('imageUrl')]);
+
+  useEffect(() => {
+    const catalogUrl = form.getValues('pdfCatalogUrl');
+    if (catalogUrl !== catalogPreview) {
+      setCatalogPreview(catalogUrl || null);
+      console.log("Catalog preview synced with form:", catalogUrl);
+    }
+  }, [form.watch('pdfCatalogUrl')]);
+
+  useEffect(() => {
+    const msdsUrl = form.getValues('msdsUrl');
+    if (msdsUrl !== msdsPreview) {
+      setMsdsPreview(msdsUrl || null);
+      console.log("MSDS preview synced with form:", msdsUrl);
+    }
+  }, [form.watch('msdsUrl')]);
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
