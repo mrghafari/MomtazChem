@@ -299,8 +299,9 @@ export class WalletStorage implements IWalletStorage {
       throw new Error("Recharge request not found");
     }
 
-    if (request.status !== "pending") {
-      throw new Error("Recharge request is not pending");
+    // Allow re-approval of rejected requests or processing of pending requests
+    if (request.status !== "pending" && request.status !== "rejected") {
+      throw new Error("Recharge request cannot be processed - status: " + request.status);
     }
 
     // Credit the wallet

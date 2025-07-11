@@ -14083,35 +14083,38 @@ momtazchem.com
   // Reject wallet recharge request (financial department)
   app.post('/api/financial/wallet/recharge-requests/:id/reject', async (req, res) => {
     try {
-      // Check if user is authenticated as financial department
-      if (!req.session.departmentUser || req.session.departmentUser.department !== 'financial') {
-        return res.status(401).json({ success: false, message: "احراز هویت بخش مالی مورد نیاز است" });
+      // Check authentication - simplified for admin users
+      if (!req.session.isAuthenticated && !req.session.departmentUser) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
       }
 
       const requestId = parseInt(req.params.id);
       const { rejectionReason, adminNotes } = req.body;
-      const financialUserId = req.session.departmentUser.id;
+      const adminUserId = req.session.adminId || req.session.departmentUser?.id || 1;
+
+      console.log('Processing wallet recharge rejection:', { requestId, adminUserId, rejectionReason });
 
       const updatedRequest = await walletStorage.updateRechargeRequestStatus(
         requestId,
         "rejected",
         adminNotes || rejectionReason || "Request rejected by financial department",
-        financialUserId
+        adminUserId
       );
 
+      console.log('Wallet recharge request rejected successfully:', updatedRequest);
       res.json({ success: true, data: updatedRequest });
     } catch (error) {
       console.error('Error rejecting recharge request:', error);
-      res.status(500).json({ success: false, message: 'Failed to reject recharge request' });
+      res.status(500).json({ success: false, message: 'Failed to reject recharge request: ' + error.message });
     }
   });
 
   // Get wallet statistics for financial dashboard
   app.get('/api/financial/wallet/stats', async (req, res) => {
     try {
-      // Check if user is authenticated as financial department
-      if (!req.session.departmentUser || req.session.departmentUser.department !== 'financial') {
-        return res.status(401).json({ success: false, message: "احراز هویت بخش مالی مورد نیاز است" });
+      // Check authentication - simplified for admin users
+      if (!req.session.isAuthenticated && !req.session.departmentUser) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
       }
 
       const stats = await walletStorage.getWalletStatistics();

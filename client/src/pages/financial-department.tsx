@@ -683,15 +683,66 @@ export default function FinancialDepartment() {
                             {new Date(request.createdAt).toLocaleDateString('fa-IR')}
                           </p>
                         </div>
-                        {request.attachmentUrl && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => window.open(request.attachmentUrl, '_blank')}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        )}
+                        <div className="flex gap-2">
+                          {request.attachmentUrl && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.open(request.attachmentUrl, '_blank')}
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          )}
+                          
+                          {/* Action buttons for rejected requests */}
+                          {request.status === 'rejected' && (
+                            <Button
+                              size="sm"
+                              onClick={() => processWalletRequestMutation.mutate({
+                                requestId: request.id,
+                                action: 'approve',
+                                notes: 'تایید مجدد پس از بررسی'
+                              })}
+                              disabled={processWalletRequestMutation.isPending}
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                            >
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              تایید مجدد
+                            </Button>
+                          )}
+                          
+                          {/* Action buttons for pending requests */}
+                          {request.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => processWalletRequestMutation.mutate({
+                                  requestId: request.id,
+                                  action: 'approve',
+                                  notes: 'تایید شده توسط بخش مالی'
+                                })}
+                                disabled={processWalletRequestMutation.isPending}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                تایید
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => processWalletRequestMutation.mutate({
+                                  requestId: request.id,
+                                  action: 'reject',
+                                  rejectionReason: 'رد شده توسط بخش مالی'
+                                })}
+                                disabled={processWalletRequestMutation.isPending}
+                              >
+                                <XCircle className="w-3 h-3 mr-1" />
+                                رد
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
