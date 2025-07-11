@@ -730,6 +730,18 @@ export default function ProductsPage() {
     // Use form.reset to properly populate all fields
     form.reset(formData);
     
+    // Set preview states AFTER form reset to ensure they persist
+    setTimeout(() => {
+      console.log("=== SETTING PREVIEW STATES AFTER FORM RESET ===");
+      setImagePreview(product.imageUrl || null);
+      setCatalogPreview(product.pdfCatalogUrl || null);
+      setMsdsPreview(product.msdsUrl || null);
+      console.log("Final preview states set:");
+      console.log("- Image preview:", product.imageUrl);
+      console.log("- Catalog preview:", product.pdfCatalogUrl); 
+      console.log("- MSDS preview:", product.msdsUrl);
+    }, 100);
+    
     setDialogOpen(true);
     
     // Focus first empty field when editing
