@@ -214,6 +214,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
+  // Check if this is a guest-to-customer checkout conversion
+  const isGuestToCustomerCheckout = sessionStorage.getItem('guestToCustomerCheckout') === 'true';
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
@@ -568,6 +570,35 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
   
   console.log('Wallet Debug:', { walletData, walletBalance, canUseWallet, totalAmount });
+
+  // Auto-submit form for guest-to-customer checkout with online payment
+  useEffect(() => {
+    if (isGuestToCustomerCheckout && customerData?.success && customerData.customer) {
+      console.log('🚀 Auto-submitting guest-to-customer checkout with online payment...');
+      
+      // Clear the session flag to prevent multiple submissions
+      sessionStorage.removeItem('guestToCustomerCheckout');
+      
+      // Automatically submit the form with online payment
+      setTimeout(() => {
+        if (Object.keys(cart).length > 0) {
+          const formValues = form.getValues();
+          console.log('Form values for auto-submit:', formValues);
+          
+          // Make sure we have minimum required fields
+          if (formValues.customerName && formValues.address && formValues.city) {
+            onSubmit(formValues);
+          } else {
+            console.log('⚠️ Missing required fields for auto-submit, showing form instead');
+            toast({
+              title: "لطفاً اطلاعات تحویل را تکمیل کنید",
+              description: "برای ادامه پرداخت، اطلاعات آدرس الزامی است"
+            });
+          }
+        }
+      }, 1000); // Give time for form to populate
+    }
+  }, [isGuestToCustomerCheckout, customerData, cart]);
 
 
 

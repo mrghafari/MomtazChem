@@ -393,13 +393,16 @@ const Shop = () => {
       description: `${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, immediately show checkout modal
+    // If user had items in cart, immediately show checkout modal with auto-online payment
     if (hasCartItems) {
+      // Store flag to indicate this is a guest-to-customer conversion checkout
+      sessionStorage.setItem('guestToCustomerCheckout', 'true');
+      
       setTimeout(() => {
         setShowCheckout(true);
         toast({
-          title: "آماده پرداخت",
-          description: "فرم سفارش برای شما باز شد",
+          title: "آماده پرداخت آنلاین",
+          description: "فرم پرداخت آنلاین برای شما باز شد",
         });
       }, 500); // Reduced delay for faster UX
     }
@@ -427,13 +430,16 @@ const Shop = () => {
       description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, immediately show checkout modal
+    // If user had items in cart, immediately show checkout modal with auto-online payment
     if (hasCartItems) {
+      // Store flag to indicate this is a guest-to-customer conversion checkout
+      sessionStorage.setItem('guestToCustomerCheckout', 'true');
+      
       setTimeout(() => {
         setShowCheckout(true);
         toast({
-          title: "آماده پرداخت",
-          description: "فرم سفارش برای شما باز شد",
+          title: "آماده پرداخت آنلاین",
+          description: "فرم پرداخت آنلاین برای شما باز شد",
         });
       }, 500); // Reduced delay for faster UX  
     }
