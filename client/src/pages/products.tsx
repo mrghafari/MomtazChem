@@ -919,7 +919,7 @@ export default function ProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setVisibilityFilter('hidden')}>
+          <Card className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => { setVisibilityFilter('hidden'); setSelectedInventoryStatus('all'); }}>
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
                 <div>
