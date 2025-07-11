@@ -1574,7 +1574,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isVariant: productData.isVariant || false,
         parentProductId: productData.parentProductId || null,
         variantType: productData.variantType || null,
-        variantValue: productData.variantValue || null
+        variantValue: productData.variantValue || null,
+        // Publication permissions
+        publishShortDescription: productData.publishShortDescription !== false,
+        publishPriceRange: productData.publishPriceRange !== false,
+        publishSpecifications: productData.publishSpecifications !== false,
+        publishFeatures: productData.publishFeatures !== false,
+        publishApplications: productData.publishApplications !== false,
+        publishWeight: productData.publishWeight !== false,
+        publishTags: productData.publishTags !== false,
+        publishCertifications: productData.publishCertifications || false
       };
       
       console.log("Final showcase product data:", showcaseProductData);

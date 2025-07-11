@@ -387,6 +387,15 @@ export default function ProductsPage() {
       showCatalogToCustomers: false,
       // Shop sync
       syncWithShop: true,
+      // Publication permissions
+      publishShortDescription: true,
+      publishPriceRange: true,
+      publishSpecifications: true,
+      publishFeatures: true,
+      publishApplications: true,
+      publishWeight: true,
+      publishTags: true,
+      publishCertifications: false,
     },
   });
 
@@ -660,6 +669,15 @@ export default function ProductsPage() {
       tags: product.tags || "",
       syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       isActive: product.isActive !== false,
+      // Publication permissions
+      publishShortDescription: product.publishShortDescription !== false,
+      publishPriceRange: product.publishPriceRange !== false,
+      publishSpecifications: product.publishSpecifications !== false,
+      publishFeatures: product.publishFeatures !== false,
+      publishApplications: product.publishApplications !== false,
+      publishWeight: product.publishWeight !== false,
+      publishTags: product.publishTags !== false,
+      publishCertifications: product.publishCertifications || false,
     };
     
     console.log("=== FINAL FORM DATA ===");
@@ -1950,6 +1968,167 @@ export default function ProductsPage() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Publication Permissions Section */}
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-lg font-semibold text-blue-900">🏪 مجوزهای انتشار در فروشگاه</h3>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800 mb-4">
+                    مشخص کنید کدام اطلاعات محصول در کارت فروشگاه آنلاین نمایش داده شود:
+                  </p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="publishShortDescription"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            توضیح کوتاه
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishPriceRange"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            محدوده قیمت
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishWeight"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            وزن محصول
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishTags"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            برچسب‌ها
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishSpecifications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            مشخصات فنی
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishFeatures"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            ویژگی‌ها
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishApplications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            کاربردها
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishCertifications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            گواهینامه‌ها
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="mt-3 text-xs text-blue-700 bg-white p-2 rounded border-l-2 border-blue-400">
+                    <strong>نکته:</strong> فیلدهای انتخاب شده در کارت محصول فروشگاه آنلاین نمایش داده می‌شوند. 
+                    می‌توانید برای حفظ حریم خصوصی یا سادگی نمایش، برخی اطلاعات را مخفی کنید.
+                  </div>
+                </div>
               </div>
 
               {/* Additional Information */}

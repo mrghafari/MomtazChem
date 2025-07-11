@@ -48,6 +48,15 @@ export const showcaseProducts = pgTable("showcase_products", {
   msdsUploadDate: timestamp("msds_upload_date"), // When MSDS was uploaded
   certifications: json("certifications"), // Array of certifications
   tags: text("tags"), // Product tags for search and filtering
+  // Publication permissions for shop display
+  publishShortDescription: boolean("publish_short_description").default(true),
+  publishPriceRange: boolean("publish_price_range").default(true),
+  publishSpecifications: boolean("publish_specifications").default(true),
+  publishFeatures: boolean("publish_features").default(true),
+  publishApplications: boolean("publish_applications").default(true),
+  publishWeight: boolean("publish_weight").default(true),
+  publishTags: boolean("publish_tags").default(true),
+  publishCertifications: boolean("publish_certifications").default(false),
   // Inventory management fields
   stockQuantity: integer("stock_quantity").default(0), // Current stock level
   minStockLevel: integer("min_stock_level").default(10), // Minimum stock threshold
