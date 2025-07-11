@@ -18083,30 +18083,51 @@ momtazchem.com
         });
       }
 
-      const { rating, title, review, pros, cons } = req.body;
+      const { rating, title, review, comment, pros, cons } = req.body;
+      
+      // Handle both 'review' and 'comment' field names from frontend
+      const reviewText = review || comment;
       
       // Validation
       if (!rating || rating < 1 || rating > 5) {
         return res.status(400).json({ success: false, message: "امتیاز باید بین 1 تا 5 باشد" });
       }
-      if (!review || review.trim().length === 0) {
+      if (!reviewText || reviewText.trim().length === 0) {
         return res.status(400).json({ success: false, message: "متن نظر الزامی است" });
       }
 
       const { pool } = await import('./db');
       
-      // Get customer information
-      const customerResult = await pool.query(`
-        SELECT first_name, last_name, email FROM customers WHERE id = $1
+      // Get customer information from both CRM and legacy tables
+      let customer = null;
+      let customerName = '';
+      let customerEmail = '';
+      
+      // Try CRM customers first
+      const crmResult = await pool.query(`
+        SELECT first_name, last_name, email FROM crm_customers WHERE id = $1
       `, [customerId]);
       
-      if (customerResult.rows.length === 0) {
-        return res.status(400).json({ success: false, message: "Customer not found" });
+      if (crmResult.rows.length > 0) {
+        customer = crmResult.rows[0];
+        customerName = `${customer.first_name} ${customer.last_name}`;
+        customerEmail = customer.email;
+      } else {
+        // Fallback to legacy customers table
+        const legacyResult = await pool.query(`
+          SELECT first_name, last_name, email FROM customers WHERE id = $1
+        `, [customerId]);
+        
+        if (legacyResult.rows.length > 0) {
+          customer = legacyResult.rows[0];
+          customerName = `${customer.first_name} ${customer.last_name}`;
+          customerEmail = customer.email;
+        }
       }
       
-      const customer = customerResult.rows[0];
-      const customerName = `${customer.first_name} ${customer.last_name}`;
-      const customerEmail = customer.email;
+      if (!customer) {
+        return res.status(400).json({ success: false, message: "Customer not found" });
+      }
       
       // Check if customer already reviewed this product
       const existingReview = await pool.query(`
@@ -18140,7 +18161,7 @@ momtazchem.com
         RETURNING id, created_at
       `, [
         productId, customerId, customerName, customerEmail, rating,
-        title || '', review.trim(), JSON.stringify(pros || []), JSON.stringify(cons || []),
+        title || '', reviewText.trim(), JSON.stringify(pros || []), JSON.stringify(cons || []),
         isVerifiedPurchase, true // Auto-approve reviews for better UX
       ]);
 
@@ -18288,104 +18309,7 @@ momtazchem.com
     }
   });
 
-  // Add product review (duplicate endpoint - should be removed or redirected)
-  app.post("/api/products/:id/reviews", async (req, res) => {
-    try {
-      const productId = parseInt(req.params.id);
-      const { rating, comment } = req.body;
 
-      if (isNaN(productId)) {
-        return res.status(400).json({ success: false, message: "Invalid product ID" });
-      }
-
-      // Check if user is authenticated
-      const customerId = req.session.customerId;
-      if (!customerId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "برای ثبت نظر ابتدا وارد حساب کاربری خود شوید" 
-        });
-      }
-
-      if (!rating || !comment) {
-        return res.status(400).json({
-          success: false,
-          message: "امتیاز و متن نظر الزامی است"
-        });
-      }
-
-      if (rating < 1 || rating > 5) {
-        return res.status(400).json({
-          success: false,
-          message: "امتیاز باید بین 1 تا 5 باشد"
-        });
-      }
-
-      const { pool } = await import('./db');
-
-      // Get customer information
-      const customerResult = await pool.query(`
-        SELECT first_name, last_name, email FROM customers WHERE id = $1
-      `, [customerId]);
-      
-      if (customerResult.rows.length === 0) {
-        return res.status(400).json({ success: false, message: "Customer not found" });
-      }
-      
-      const customer = customerResult.rows[0];
-      const customerName = `${customer.first_name} ${customer.last_name}`;
-
-      // Check if customer already reviewed this product
-      const existingReview = await pool.query(`
-        SELECT id FROM product_reviews 
-        WHERE product_id = $1 AND customer_id = $2
-      `, [productId, customerId]);
-      
-      if (existingReview.rows.length > 0) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "شما قبلاً روی این محصول نظر داده‌اید" 
-        });
-      }
-
-      // Check if customer has purchased this product (for verified purchase)
-      let isVerifiedPurchase = false;
-      const purchaseCheck = await pool.query(`
-        SELECT o.id FROM orders o
-        JOIN order_items oi ON o.id = oi.order_id
-        WHERE o.customer_id = $1 AND oi.product_id = $2 AND o.payment_status = 'paid'
-      `, [customerId, productId]);
-      
-      isVerifiedPurchase = purchaseCheck.rows.length > 0;
-
-      // Insert review using proper schema
-      const reviewResult = await pool.query(`
-        INSERT INTO product_reviews (product_id, customer_id, customer_name, customer_email, rating, review, is_verified_purchase, is_approved)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id, customer_name, rating, review, created_at
-      `, [productId, customerId, customerName, customer.email, rating, comment, isVerifiedPurchase, true]);
-
-      const newReview = reviewResult.rows[0];
-
-      // Update product stats using the function
-      await updateProductStats(productId);
-
-      res.json({
-        success: true,
-        message: "نظر شما با موفقیت ثبت شد",
-        review: {
-          id: newReview.id,
-          customerName: newReview.customer_name,
-          rating: newReview.rating,
-          comment: newReview.review, // Map review to comment for compatibility
-          createdAt: newReview.created_at
-        }
-      });
-    } catch (error) {
-      console.error("Error adding product review:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
-    }
-  });
 
   // Mark review as helpful/not helpful
   app.post("/api/reviews/:id/helpful", async (req, res) => {
