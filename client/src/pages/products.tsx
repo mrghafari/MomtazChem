@@ -635,14 +635,22 @@ export default function ProductsPage() {
   };
 
   const openEditDialog = (product: ShowcaseProduct) => {
-    console.log("Opening edit dialog for product:", product);
-    console.log("Product weight value:", product.weight, "Type:", typeof product.weight);
-    console.log("Product maxStockLevel value:", product.maxStockLevel, "Type:", typeof product.maxStockLevel);
+    console.log("=== OPENING EDIT DIALOG ===");
+    console.log("Raw product data:", JSON.stringify(product, null, 2));
+    console.log("Product weight:", product.weight, "type:", typeof product.weight);
+    console.log("Product maxStockLevel:", product.maxStockLevel, "type:", typeof product.maxStockLevel);
     
     setEditingProduct(product);
     setImagePreview(product.imageUrl || null);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
+    
+    // Ensure weight and maxStockLevel are properly converted
+    const weight = product.weight !== undefined && product.weight !== null && product.weight !== "" ? String(product.weight) : "1";
+    const maxStockLevel = product.maxStockLevel !== undefined && product.maxStockLevel !== null ? Number(product.maxStockLevel) : 100;
+    
+    console.log("Processed weight:", weight, "type:", typeof weight);
+    console.log("Processed maxStockLevel:", maxStockLevel, "type:", typeof maxStockLevel);
     
     const formData = {
       name: product.name,
@@ -656,11 +664,11 @@ export default function ProductsPage() {
       sku: product.sku || "",
       stockQuantity: Number(product.stockQuantity) ?? 0,
       minStockLevel: Number(product.minStockLevel) ?? 0,
-      maxStockLevel: Number(product.maxStockLevel) || 100,
+      maxStockLevel: maxStockLevel,
       unitPrice: product.unitPrice ? String(product.unitPrice) : "0",
       currency: product.currency || "IQD",
       priceRange: product.priceRange || "",
-      weight: String(product.weight || "1"),
+      weight: weight,
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
@@ -673,8 +681,10 @@ export default function ProductsPage() {
       isActive: product.isActive !== false,
     };
     
-    console.log("Form data being set:", formData);
-    console.log("Weight in form data:", formData.weight, "MaxStockLevel in form data:", formData.maxStockLevel);
+    console.log("=== FINAL FORM DATA ===");
+    console.log("formData.weight:", formData.weight, "type:", typeof formData.weight);
+    console.log("formData.maxStockLevel:", formData.maxStockLevel, "type:", typeof formData.maxStockLevel);
+    console.log("Complete form data:", JSON.stringify(formData, null, 2));
     
     form.reset(formData);
     setDialogOpen(true);
