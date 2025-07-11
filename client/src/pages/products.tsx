@@ -188,17 +188,23 @@ export default function ProductsPage() {
 
   const { mutate: createProduct } = useMutation({
     mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log("✅ Product created successfully:", result);
+      
+      // Immediate cache refresh
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setRefreshKey(prev => prev + 1); // Force component re-render
+      setRefreshKey(prev => prev + 1);
+      
+      // Close dialog and clear state  
       setDialogOpen(false);
       setImagePreview(null);
       setCatalogPreview(null);
       setMsdsPreview(null);
       form.reset();
+      
       toast({
-        title: "Success",
-        description: "Product created successfully",
+        title: "موفقیت", 
+        description: "محصول با موفقیت در بخش تولید ایجاد شد",
       });
     },
     onError: (error: any) => {
@@ -214,22 +220,18 @@ export default function ProductsPage() {
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
       apiRequest(`/api/products/${id}`, "PUT", data),
     onSuccess: (result) => {
-      console.log("Update success result:", result);
-      console.log("Updated product description:", result?.description);
+      console.log("✅ Update successful:", result);
       
-      // Force cache invalidation and refresh
-      setRefreshKey(prev => prev + 1);
-      queryClient.removeQueries({ queryKey: ["/api/products"] });
+      // Immediate cache refresh
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setRefreshKey(prev => prev + 1);
       
-      // Close dialog after a short delay to see the changes
-      setTimeout(() => {
-        setDialogOpen(false);
-        setEditingProduct(null);
-        setImagePreview(null);
-        setCatalogPreview(null);
-        setMsdsPreview(null);
-      }, 500);
+      // Close dialog and clear state
+      setDialogOpen(false);
+      setEditingProduct(null);
+      setImagePreview(null);
+      setCatalogPreview(null);
+      setMsdsPreview(null);
       
       // Show success message
       toast({
