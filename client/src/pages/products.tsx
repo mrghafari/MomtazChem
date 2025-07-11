@@ -933,50 +933,7 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* Visibility Status Cards */}
-      {products && products.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setVisibilityFilter('visible')}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-600">در فروشگاه</p>
-                  <p className="text-2xl font-bold text-green-800">
-                    {products.filter(p => p.syncWithShop === true).length}
-                  </p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setVisibilityFilter('hidden')}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-red-600">مخفی شده</p>
-                  <p className="text-2xl font-bold text-red-800">
-                    {products.filter(p => p.syncWithShop !== true).length}
-                  </p>
-                </div>
-                <XCircle className="w-8 h-8 text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setVisibilityFilter('all')}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-600">کل محصولات</p>
-                  <p className="text-2xl font-bold text-blue-800">{products.length}</p>
-                </div>
-                <Package className="w-8 h-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
         <TabsList className="flex flex-wrap w-full gap-1 h-auto min-h-[40px] p-1 bg-muted">
