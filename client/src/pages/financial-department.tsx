@@ -190,7 +190,13 @@ export default function FinancialDepartment() {
   const { data: walletRequestsData, isLoading: walletRequestsLoading } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
     queryKey: ['/api/financial/wallet/recharge-requests'],
     enabled: !!user,
-    refetchInterval: 300000, // Refresh every 5 minutes
+    refetchInterval: 30000, // Refresh every 30 seconds
+    onError: (error) => {
+      console.error('Error fetching wallet requests:', error);
+    },
+    onSuccess: (data) => {
+      console.log('Wallet requests fetched successfully:', data);
+    }
   });
 
   // Wallet Recharge Request Processing
@@ -553,7 +559,7 @@ export default function FinancialDepartment() {
                                 <div className="flex items-center gap-2">
                                   <Badge variant="secondary">#{request.requestNumber}</Badge>
                                   <span className="text-sm text-gray-600">
-                                    {new Date(request.createdAt).toLocaleDateString('fa-IR')}
+                                    {new Date(request.createdAt).toLocaleDateString('en-US')}
                                   </span>
                                 </div>
                                 
