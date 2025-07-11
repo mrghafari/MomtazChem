@@ -29,6 +29,7 @@ export default function UnifiedInventory() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [showOutOfStock, setShowOutOfStock] = useState(false);
 
   // Fetch unified products
   const { data: products = [], isLoading, refetch } = useQuery({
@@ -36,11 +37,18 @@ export default function UnifiedInventory() {
     retry: false,
   });
 
-  // Filter products based on search
-  const filteredProducts = products.filter((product: UnifiedProduct) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter products based on search and stock status
+  const filteredProducts = products.filter((product: UnifiedProduct) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.category.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // If showOutOfStock is false, only show products that are in stock
+    if (!showOutOfStock && !product.inStock) {
+      return false;
+    }
+    
+    return matchesSearch;
+  });
 
   // Calculate statistics
   const stats = {
@@ -279,6 +287,23 @@ export default function UnifiedInventory() {
                     className="pl-9"
                   />
                 </div>
+                <Button 
+                  variant={showOutOfStock ? "default" : "outline"}
+                  onClick={() => setShowOutOfStock(!showOutOfStock)}
+                  className="whitespace-nowrap"
+                >
+                  {showOutOfStock ? (
+                    <>
+                      <XCircle className="h-4 w-4 mr-2" />
+                      مخفی کردن موجودی صفر
+                    </>
+                  ) : (
+                    <>
+                      <Package className="h-4 w-4 mr-2" />
+                      نمایش موجودی صفر
+                    </>
+                  )}
+                </Button>
               </div>
 
               <div className="border rounded-lg">
