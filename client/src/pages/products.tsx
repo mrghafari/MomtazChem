@@ -448,10 +448,12 @@ export default function ProductsPage() {
 
   const onSubmit = (data: InsertShowcaseProduct) => {
     console.log("Form data before processing:", data);
+    console.log("Description value from form:", data.description);
     
     // Convert fields for API compatibility  
     const processedData = {
       ...data,
+      description: data.description && data.description.trim() ? data.description.trim() : "",
       unitPrice: data.unitPrice ? data.unitPrice.toString() : "0",
       weight: data.weight && data.weight !== "" ? String(data.weight) : "1",
       stockQuantity: Number(data.stockQuantity) || 0,
