@@ -40,6 +40,7 @@ export interface ICustomerStorage {
   updateOrderPaymentStatus(id: number, paymentStatus: string): Promise<CustomerOrder>;
   getAllOrders(): Promise<CustomerOrder[]>;
   getFailedOrders(cutoffTime: Date): Promise<CustomerOrder[]>;
+  getOrphanedWalletTransactions(cutoffTime: Date): Promise<any[]>;
   
   // Order items
   createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
@@ -234,6 +235,62 @@ export class CustomerStorage implements ICustomerStorage {
         )
       )
       .orderBy(desc(customerOrders.createdAt));
+  }
+
+  async getOrphanedWalletTransactions(cutoffTime: Date): Promise<any[]> {
+    // پیدا کردن تراکنش‌های wallet که order متناظرشان وجود ندارد
+    const { walletTransactions } = await import('../shared/customer-schema');
+    const { customerDb } = await import('./customer-db');
+    
+    // پیدا کردن تراکنش‌های debit که order شامل ندارند
+    const orphanedTransactions = await customerDb
+      .select({
+        id: walletTransactions.id,
+        walletId: walletTransactions.walletId,
+        customerId: walletTransactions.customerId,
+        amount: walletTransactions.amount,
+        currency: walletTransactions.currency,
+        description: walletTransactions.description,
+        createdAt: walletTransactions.createdAt,
+        referenceType: walletTransactions.referenceType,
+        transactionType: walletTransactions.transactionType
+      })
+      .from(walletTransactions)
+      .where(
+        and(
+          eq(walletTransactions.transactionType, 'debit'),
+          eq(walletTransactions.referenceType, 'order'),
+          sql`${walletTransactions.createdAt} < ${cutoffTime}`,
+          sql`${walletTransactions.description} LIKE 'پرداخت سفارش ORD-%'`
+        )
+      );
+
+    // بررسی اینکه آیا order متناظر هر تراکنش وجود دارد یا نه
+    const realOrphanedTransactions = [];
+    for (const transaction of orphanedTransactions) {
+      // استخراج شماره سفارش از description
+      const orderNumberMatch = transaction.description.match(/ORD-[A-Z0-9-]+/);
+      if (orderNumberMatch) {
+        const orderNumber = orderNumberMatch[0];
+        
+        // بررسی وجود سفارش
+        const existingOrder = await customerDb
+          .select()
+          .from(customerOrders)
+          .where(eq(customerOrders.orderNumber, orderNumber))
+          .limit(1);
+          
+        if (existingOrder.length === 0) {
+          // سفارش وجود ندارد - این یک orphaned transaction است
+          realOrphanedTransactions.push({
+            ...transaction,
+            orderNumber
+          });
+        }
+      }
+    }
+    
+    return realOrphanedTransactions;
   }
 
   // Helper method to update customer metrics after order creation

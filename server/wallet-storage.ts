@@ -227,46 +227,52 @@ export class WalletStorage implements IWalletStorage {
   async refundWalletAmount(
     customerId: number, 
     amount: number, 
-    originalOrderNumber: string, 
-    reason: string
-  ): Promise<WalletTransaction> {
-    console.log(`💰 Processing wallet refund: ${amount} IQD for customer ${customerId}, order ${originalOrderNumber}`);
-    
-    // Get or create wallet
-    let wallet = await this.getWalletByCustomerId(customerId);
-    if (!wallet) {
-      wallet = await this.createWallet({
+    reason: string, 
+    originalOrderNumber: string
+  ): Promise<{ success: boolean; transaction?: WalletTransaction; error?: string }> {
+    try {
+      console.log(`💰 Processing wallet refund: ${amount} IQD for customer ${customerId}, order ${reason}`);
+      
+      // Get or create wallet
+      let wallet = await this.getWalletByCustomerId(customerId);
+      if (!wallet) {
+        wallet = await this.createWallet({
+          customerId,
+          balance: "0",
+          currency: "IQD",
+          status: "active"
+        });
+      }
+
+      const currentBalance = parseFloat(wallet.balance);
+      const newBalance = currentBalance + amount;
+
+      // Create refund transaction record
+      const transaction = await this.createTransaction({
+        walletId: wallet.id,
         customerId,
-        balance: "0",
-        currency: "IQD",
-        status: "active"
+        transactionType: "credit",
+        amount: amount.toString(),
+        currency: wallet.currency,
+        balanceBefore: currentBalance.toString(),
+        balanceAfter: newBalance.toString(),
+        description: `بازگشت وجه - ${reason}`,
+        referenceType: "refund",
+        referenceId: null,
+        status: "completed",
+        processedBy: null
       });
+
+      // Update wallet balance
+      await this.updateWalletBalance(wallet.id, newBalance);
+
+      console.log(`✅ Wallet refund completed: ${amount} IQD returned to customer ${customerId}`);
+      return { success: true, transaction };
+      
+    } catch (error) {
+      console.error(`❌ Wallet refund failed for customer ${customerId}:`, error);
+      return { success: false, error: error.message };
     }
-
-    const currentBalance = parseFloat(wallet.balance);
-    const newBalance = currentBalance + amount;
-
-    // Create refund transaction record
-    const transaction = await this.createTransaction({
-      walletId: wallet.id,
-      customerId,
-      transactionType: "credit",
-      amount: amount.toString(),
-      currency: wallet.currency,
-      balanceBefore: currentBalance.toString(),
-      balanceAfter: newBalance.toString(),
-      description: `بازگشت وجه - ${reason} - سفارش ${originalOrderNumber}`,
-      referenceType: "refund",
-      referenceId: null,
-      status: "completed",
-      processedBy: null
-    });
-
-    // Update wallet balance
-    await this.updateWalletBalance(wallet.id, newBalance);
-
-    console.log(`✅ Wallet refund completed: ${amount} IQD returned to customer ${customerId}`);
-    return transaction;
   }
 
   // Recharge requests

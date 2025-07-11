@@ -49,12 +49,15 @@ class AutoRefundScheduler {
       const cutoffTime = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
       const failedOrders = await customerStorage.getFailedOrders(cutoffTime);
       
-      if (failedOrders.length === 0) {
+      // همچنین بررسی تراکنش‌های wallet بدون سفارش متناظر
+      const orphanedTransactions = await customerStorage.getOrphanedWalletTransactions(cutoffTime);
+      
+      if (failedOrders.length === 0 && orphanedTransactions.length === 0) {
         console.log('✅ No failed transactions found');
         return;
       }
 
-      console.log(`🚨 Found ${failedOrders.length} failed transactions to process`);
+      console.log(`🚨 Found ${failedOrders.length} failed orders and ${orphanedTransactions.length} orphaned wallet transactions to process`);
       
       let refundedCount = 0;
       
@@ -93,7 +96,33 @@ class AutoRefundScheduler {
         }
       }
       
-      console.log(`🏁 Auto-refund process completed: ${refundedCount} transactions refunded out of ${failedOrders.length} failed orders`);
+      // پردازش orphaned wallet transactions
+      for (const transaction of orphanedTransactions) {
+        try {
+          console.log(`💰 Auto-refunding orphaned wallet transaction: ${transaction.orderNumber}`);
+          
+          const refundResult = await walletStorage.refundWalletAmount(
+            transaction.customerId,
+            parseFloat(transaction.amount),
+            `بازگشت خودکار وجه - تراکنش یتیم ${transaction.orderNumber}`,
+            transaction.orderNumber
+          );
+          
+          if (refundResult.success) {
+            refundedCount++;
+            console.log(`✅ Orphaned transaction refund successful: ${transaction.amount} IQD returned to customer ${transaction.customerId}`);
+            
+            // Log for audit trail
+            console.log(`📝 AUDIT: Orphaned transaction refunded - Order: ${transaction.orderNumber}, Customer: ${transaction.customerId}, Amount: ${transaction.amount} IQD`);
+          } else {
+            console.error(`❌ Orphaned transaction refund failed for ${transaction.orderNumber}:`, refundResult.error);
+          }
+        } catch (transactionError) {
+          console.error(`❌ Error processing orphaned transaction ${transaction.orderNumber}:`, transactionError);
+        }
+      }
+      
+      console.log(`🏁 Auto-refund process completed: ${refundedCount} transactions refunded out of ${failedOrders.length} failed orders and ${orphanedTransactions.length} orphaned transactions`);
       
     } catch (error) {
       console.error('❌ Auto-refund scheduler error:', error);

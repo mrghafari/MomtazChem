@@ -4995,6 +4995,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cutoffTime = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
       const failedOrders = await customerStorage.getFailedOrders(cutoffTime);
       
+      // همچنین بررسی تراکنش‌های wallet بدون سفارش متناظر
+      const orphanedTransactions = await customerStorage.getOrphanedWalletTransactions(cutoffTime);
+      
       let refundedCount = 0;
       const refundResults = [];
       
@@ -5046,13 +5049,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log(`🏁 Auto-refund process completed: ${refundedCount} orders refunded`);
+      // پردازش orphaned wallet transactions
+      for (const transaction of orphanedTransactions) {
+        try {
+          console.log(`💰 Auto-refunding orphaned wallet transaction: ${transaction.orderNumber}`);
+          
+          const refundResult = await walletStorage.refundWalletAmount(
+            transaction.customerId,
+            parseFloat(transaction.amount),
+            `بازگشت خودکار وجه - تراکنش یتیم ${transaction.orderNumber}`,
+            transaction.orderNumber
+          );
+          
+          if (refundResult.success) {
+            refundedCount++;
+            refundResults.push({
+              orderNumber: transaction.orderNumber,
+              customerId: transaction.customerId,
+              refundAmount: transaction.amount,
+              status: 'success',
+              type: 'orphaned_transaction'
+            });
+            
+            console.log(`✅ Orphaned transaction refund successful: ${transaction.amount} IQD returned to customer ${transaction.customerId}`);
+          } else {
+            refundResults.push({
+              orderNumber: transaction.orderNumber,
+              customerId: transaction.customerId,
+              refundAmount: transaction.amount,
+              status: 'failed',
+              error: refundResult.error,
+              type: 'orphaned_transaction'
+            });
+            console.error(`❌ Orphaned transaction refund failed for ${transaction.orderNumber}:`, refundResult.error);
+          }
+        } catch (transactionError) {
+          console.error(`❌ Error processing orphaned transaction ${transaction.orderNumber}:`, transactionError);
+          refundResults.push({
+            orderNumber: transaction.orderNumber,
+            customerId: transaction.customerId,
+            status: 'error',
+            error: transactionError.message,
+            type: 'orphaned_transaction'
+          });
+        }
+      }
+      
+      console.log(`🏁 Auto-refund process completed: ${refundedCount} transactions refunded out of ${failedOrders.length} failed orders and ${orphanedTransactions.length} orphaned transactions`);
       
       res.json({
         success: true,
-        message: `Auto-refund completed: ${refundedCount} failed transactions refunded`,
+        message: `Auto-refund completed: ${refundedCount} transactions refunded`,
         refundedCount,
         totalOrders: failedOrders.length,
+        totalOrphanedTransactions: orphanedTransactions.length,
         details: refundResults
       });
       
