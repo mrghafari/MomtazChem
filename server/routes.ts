@@ -1750,6 +1750,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`🔒 محصول از فروشگاه مخفی شد: ${product.name}`);
       }
       
+      console.log(`✅ Response product data:`, {
+        id: product.id,
+        name: product.name,
+        description: product.description
+      });
+      
       const responseProduct = product;
       
       res.json(responseProduct);
