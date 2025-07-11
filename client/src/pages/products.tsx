@@ -650,9 +650,41 @@ export default function ProductsPage() {
       description: product.description || "",
       category: product.category,
       shortDescription: product.shortDescription || "",
-      features: Array.isArray(product.features) ? product.features.join('\n') : (product.features || ""),
-      applications: Array.isArray(product.applications) ? product.applications.join('\n') : (product.applications || ""),
-      specifications: typeof product.specifications === 'object' && product.specifications !== null ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
+      features: (() => {
+        if (Array.isArray(product.features)) {
+          return product.features.join('\n');
+        } else if (typeof product.features === 'string') {
+          try {
+            const parsed = JSON.parse(product.features);
+            return Array.isArray(parsed) ? parsed.join('\n') : product.features;
+          } catch {
+            return product.features;
+          }
+        }
+        return "";
+      })(),
+      applications: (() => {
+        if (Array.isArray(product.applications)) {
+          return product.applications.join('\n');
+        } else if (typeof product.applications === 'string') {
+          try {
+            const parsed = JSON.parse(product.applications);
+            return Array.isArray(parsed) ? parsed.join('\n') : product.applications;
+          } catch {
+            return product.applications;
+          }
+        }
+        return "";
+      })(),
+      specifications: (() => {
+        if (typeof product.specifications === 'string') {
+          // If it's a quoted string like "\"Specifications Specifications\"", remove the extra quotes
+          return product.specifications.replace(/^"(.*)"$/, '$1');
+        } else if (typeof product.specifications === 'object' && product.specifications !== null) {
+          return JSON.stringify(product.specifications, null, 2);
+        }
+        return product.specifications || "";
+      })(),
       barcode: product.barcode || "",
       sku: product.sku || "",
       stockQuantity: Number(product.stockQuantity) ?? 0,
