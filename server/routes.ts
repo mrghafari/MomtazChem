@@ -1737,6 +1737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const productData = req.body;
       console.log(`📝 Updating shop product ${id} with data:`, productData);
+      console.log(`📝 Description value in request:`, productData.description);
       
       // Update showcase product
       const product = await storage.updateProduct(id, productData);
