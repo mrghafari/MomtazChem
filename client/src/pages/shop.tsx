@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -28,6 +28,7 @@ import StarRating from "@/components/StarRating";
 import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 
 const Shop = () => {
+  const queryClient = useQueryClient();
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
 
