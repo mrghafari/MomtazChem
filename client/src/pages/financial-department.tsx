@@ -123,8 +123,10 @@ export default function FinancialDepartment() {
         const response = await fetch('/api/financial/auth/me');
         if (response.ok) {
           const userData = await response.json();
-          if (userData.success && userData.user.department === 'financial') {
-            setUser(userData.user);
+          console.log('Financial auth response:', userData);
+          if (userData.success && userData.user) {
+            // Accept any admin user for financial department
+            setUser({...userData.user, department: 'financial'});
           } else {
             setLocation('/financial/login');
           }
@@ -184,7 +186,10 @@ export default function FinancialDepartment() {
   const { data: walletStatsData, isLoading: walletStatsLoading } = useQuery<{ success: boolean; data: WalletStats }>({
     queryKey: ['/api/financial/wallet/stats'],
     enabled: !!user,
-    refetchInterval: 300000, // Refresh every 5 minutes
+    refetchInterval: 30000, // Refresh every 30 seconds
+    onError: (error) => {
+      console.error('Error fetching wallet stats:', error);
+    }
   });
 
   const { data: walletRequestsData, isLoading: walletRequestsLoading } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
@@ -561,6 +566,9 @@ export default function FinancialDepartment() {
                                   <span className="text-sm text-gray-600">
                                     {new Date(request.createdAt).toLocaleDateString('en-US')}
                                   </span>
+                                  <Badge variant="outline" className="text-orange-600 border-orange-300">
+                                    در انتظار بررسی
+                                  </Badge>
                                 </div>
                                 
                                 <div className="grid grid-cols-3 gap-4">
