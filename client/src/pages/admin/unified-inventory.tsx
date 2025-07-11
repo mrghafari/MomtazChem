@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Package, AlertTriangle, TrendingUp, Search, RefreshCw, CheckCircle, XCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -275,35 +276,31 @@ export default function UnifiedInventory() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-2 mb-4">
-                <Label htmlFor="search">جستجو:</Label>
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    placeholder="جستجو بر اساس نام یا دسته‌بندی..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
+              <div className="space-y-4 mb-4">
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="search">جستجو:</Label>
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="search"
+                      placeholder="جستجو بر اساس نام یا دسته‌بندی..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
                 </div>
-                <Button 
-                  variant={showOutOfStock ? "default" : "outline"}
-                  onClick={() => setShowOutOfStock(!showOutOfStock)}
-                  className="whitespace-nowrap"
-                >
-                  {showOutOfStock ? (
-                    <>
-                      <XCircle className="h-4 w-4 mr-2" />
-                      مخفی کردن موجودی صفر
-                    </>
-                  ) : (
-                    <>
-                      <Package className="h-4 w-4 mr-2" />
-                      نمایش موجودی صفر
-                    </>
-                  )}
-                </Button>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="show-out-of-stock"
+                    checked={showOutOfStock}
+                    onCheckedChange={(checked) => setShowOutOfStock(!!checked)}
+                  />
+                  <Label htmlFor="show-out-of-stock" className="text-sm cursor-pointer">
+                    نمایش محصولات با موجودی صفر
+                  </Label>
+                </div>
               </div>
 
               <div className="border rounded-lg">
