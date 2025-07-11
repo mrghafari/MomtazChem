@@ -13,7 +13,7 @@ interface Review {
   id: number;
   customerName: string;
   rating: number;
-  comment: string;
+  review: string;
   createdAt: string;
 }
 
