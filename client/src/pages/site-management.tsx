@@ -187,7 +187,7 @@ export default function SiteManagement() {
       id: "inventory-management",
       label: "Inventory Management",
       icon: Calculator,
-      onClick: () => setLocation("/inventory-management"),
+      onClick: () => setLocation("/admin/inventory-management"),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50"
     },
     {
