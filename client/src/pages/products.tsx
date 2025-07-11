@@ -389,6 +389,7 @@ export default function ProductsPage() {
       syncWithShop: true,
       // Publication permissions
       publishShortDescription: true,
+      publishDescription: true,
       publishPriceRange: true,
       publishSpecifications: true,
       publishFeatures: true,
@@ -396,6 +397,9 @@ export default function ProductsPage() {
       publishWeight: true,
       publishTags: true,
       publishCertifications: false,
+      publishImage: true,
+      publishMsds: false,
+      publishCatalogPdf: false,
     },
   });
 
@@ -671,6 +675,7 @@ export default function ProductsPage() {
       isActive: product.isActive !== false,
       // Publication permissions
       publishShortDescription: product.publishShortDescription !== false,
+      publishDescription: product.publishDescription !== false,
       publishPriceRange: product.publishPriceRange !== false,
       publishSpecifications: product.publishSpecifications !== false,
       publishFeatures: product.publishFeatures !== false,
@@ -678,6 +683,9 @@ export default function ProductsPage() {
       publishWeight: product.publishWeight !== false,
       publishTags: product.publishTags !== false,
       publishCertifications: product.publishCertifications || false,
+      publishImage: product.publishImage !== false,
+      publishMsds: product.publishMsds || false,
+      publishCatalogPdf: product.publishCatalogPdf || false,
     };
     
     console.log("=== FINAL FORM DATA ===");
@@ -1999,7 +2007,7 @@ export default function ProductsPage() {
                     
                     <FormField
                       control={form.control}
-                      name="publishPriceRange"
+                      name="publishDescription"
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                           <FormControl>
@@ -2009,61 +2017,7 @@ export default function ProductsPage() {
                             />
                           </FormControl>
                           <FormLabel className="text-sm font-normal">
-                            محدوده قیمت
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishWeight"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            وزن محصول
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishTags"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            برچسب‌ها
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="publishSpecifications"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            مشخصات فنی
+                            توضیحات کامل
                           </FormLabel>
                         </FormItem>
                       )}
@@ -2107,6 +2061,132 @@ export default function ProductsPage() {
                     
                     <FormField
                       control={form.control}
+                      name="publishSpecifications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            مشخصات فنی
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishTags"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            برچسب‌ها
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishImage"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            تصویر محصول
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishMsds"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            برگه ایمنی (MSDS)
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishCatalogPdf"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            کاتالوگ PDF
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishPriceRange"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            محدوده قیمت
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="publishWeight"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            وزن محصول
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
                       name="publishCertifications"
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center space-x-2 space-y-0">
@@ -2124,9 +2204,16 @@ export default function ProductsPage() {
                     />
                   </div>
                   
-                  <div className="mt-3 text-xs text-blue-700 bg-white p-2 rounded border-l-2 border-blue-400">
-                    <strong>نکته:</strong> فیلدهای انتخاب شده در کارت محصول فروشگاه آنلاین نمایش داده می‌شوند. 
-                    می‌توانید برای حفظ حریم خصوصی یا سادگی نمایش، برخی اطلاعات را مخفی کنید.
+                  <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-green-600">✅</span>
+                      <strong className="text-green-800">فیلدهای کامل:</strong>
+                    </div>
+                    <p className="text-xs text-green-700 leading-relaxed">
+                      همه فیلدهای مورد نیاز شما الان در سیستم موجود است: Short Description, Description, Features, Applications, Specifications, Tags, Product Image, MSDS, Product Catalog PDF.
+                      <br />
+                      <strong>کنترل نمایش:</strong> با تیک زدن هر فیلد، آن اطلاعات در کارت فروشگاه آنلاین نمایش داده می‌شود.
+                    </p>
                   </div>
                 </div>
               </div>

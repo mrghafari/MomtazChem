@@ -50,6 +50,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   tags: text("tags"), // Product tags for search and filtering
   // Publication permissions for shop display
   publishShortDescription: boolean("publish_short_description").default(true),
+  publishDescription: boolean("publish_description").default(true),
   publishPriceRange: boolean("publish_price_range").default(true),
   publishSpecifications: boolean("publish_specifications").default(true),
   publishFeatures: boolean("publish_features").default(true),
@@ -57,6 +58,9 @@ export const showcaseProducts = pgTable("showcase_products", {
   publishWeight: boolean("publish_weight").default(true),
   publishTags: boolean("publish_tags").default(true),
   publishCertifications: boolean("publish_certifications").default(false),
+  publishImage: boolean("publish_image").default(true),
+  publishMsds: boolean("publish_msds").default(false),
+  publishCatalogPdf: boolean("publish_catalog_pdf").default(false),
   // Inventory management fields
   stockQuantity: integer("stock_quantity").default(0), // Current stock level
   minStockLevel: integer("min_stock_level").default(10), // Minimum stock threshold

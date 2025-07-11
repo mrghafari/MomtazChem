@@ -1577,13 +1577,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         variantValue: productData.variantValue || null,
         // Publication permissions
         publishShortDescription: productData.publishShortDescription !== false,
+        publishDescription: productData.publishDescription !== false,
         publishPriceRange: productData.publishPriceRange !== false,
         publishSpecifications: productData.publishSpecifications !== false,
         publishFeatures: productData.publishFeatures !== false,
         publishApplications: productData.publishApplications !== false,
         publishWeight: productData.publishWeight !== false,
         publishTags: productData.publishTags !== false,
-        publishCertifications: productData.publishCertifications || false
+        publishCertifications: productData.publishCertifications || false,
+        publishImage: productData.publishImage !== false,
+        publishMsds: productData.publishMsds || false,
+        publishCatalogPdf: productData.publishCatalogPdf || false
       };
       
       console.log("Final showcase product data:", showcaseProductData);
