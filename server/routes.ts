@@ -1837,11 +1837,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const product = await storage.updateProduct(id, productData);
       console.log(`✅ Updated product:`, product.name);
       
-      // Shop visibility logic
+      // Shop visibility logic - actually sync to shop when enabled
       if (productData.syncWithShop === true) {
         console.log(`🏪 محصول در فروشگاه نمایش داده می‌شود: ${product.name}`);
+        
+        // Actually sync this product to shop
+        try {
+          const existingShopProducts = await shopStorage.getShopProducts();
+          const existingShopProduct = existingShopProducts.find(sp => sp.name === product.name);
+          
+          if (!existingShopProduct) {
+            const shopProductData = {
+              name: product.name,
+              category: product.category,
+              description: product.description,
+              shortDescription: product.shortDescription || product.description,
+              price: product.unitPrice || product.price || 0,
+              priceUnit: product.currency || product.priceUnit || 'IQD',
+              inStock: (product.stockQuantity || 0) > 0,
+              stockQuantity: product.stockQuantity || 0,
+              lowStockThreshold: 10,
+              minStockLevel: product.minStockLevel || 5,
+              maxStockLevel: product.maxStockLevel || 100,
+              sku: product.sku || `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+              barcode: product.barcode,
+              imageUrls: product.imageUrl ? [product.imageUrl] : [],
+              specifications: product.specifications || {},
+              features: product.features || [],
+              applications: product.applications || [],
+              isActive: true,
+              isFeatured: false,
+              metaTitle: product.name,
+              metaDescription: product.description
+            };
+            
+            await shopStorage.createShopProduct(shopProductData);
+            console.log(`✅ محصول به فروشگاه اضافه شد: ${product.name}`);
+          } else {
+            console.log(`⚠️  محصول قبلاً در فروشگاه موجود است: ${product.name}`);
+          }
+        } catch (syncError) {
+          console.error(`❌ خطا در sync کردن محصول ${product.name}:`, syncError);
+        }
       } else if (productData.syncWithShop === false) {
         console.log(`🔒 محصول از فروشگاه مخفی شد: ${product.name}`);
+        
+        // Remove from shop if sync is disabled
+        try {
+          const existingShopProducts = await shopStorage.getShopProducts();
+          const existingShopProduct = existingShopProducts.find(sp => sp.name === product.name);
+          
+          if (existingShopProduct) {
+            await shopStorage.deleteShopProduct(existingShopProduct.id);
+            console.log(`🗑️  محصول از فروشگاه حذف شد: ${product.name}`);
+          }
+        } catch (removeError) {
+          console.error(`❌ خطا در حذف محصول ${product.name} از فروشگاه:`, removeError);
+        }
       }
       
       const responseProduct = product;
@@ -6719,11 +6771,69 @@ ${procedure.content}
     }
   });
 
-  // Product synchronization endpoint
+  // Product synchronization endpoint - sync showcase products to shop
   app.post("/api/sync-products", requireAuth, async (req, res) => {
     try {
-      // No sync needed - unified table approach
-      res.json({ success: true, message: "All products synchronized successfully" });
+      console.log("🔄 Starting complete product synchronization from showcase to shop...");
+      
+      // Get all showcase products
+      const showcaseProducts = await storage.getProducts();
+      
+      // Get existing shop products for comparison
+      const existingShopProducts = await shopStorage.getShopProducts();
+      
+      let syncedCount = 0;
+      let skippedCount = 0;
+      
+      for (const showcaseProduct of showcaseProducts) {
+        // Check if product already exists in shop
+        const existingShopProduct = existingShopProducts.find(sp => sp.name === showcaseProduct.name);
+        
+        if (existingShopProduct) {
+          console.log(`⚠️  Product already exists in shop: ${showcaseProduct.name}`);
+          skippedCount++;
+          continue;
+        }
+        
+        // Create new shop product from showcase product
+        const shopProductData = {
+          name: showcaseProduct.name,
+          category: showcaseProduct.category,
+          description: showcaseProduct.description,
+          shortDescription: showcaseProduct.shortDescription || showcaseProduct.description,
+          price: showcaseProduct.unitPrice || showcaseProduct.price || 0,
+          priceUnit: showcaseProduct.currency || showcaseProduct.priceUnit || 'IQD',
+          inStock: (showcaseProduct.stockQuantity || 0) > 0,
+          stockQuantity: showcaseProduct.stockQuantity || 0,
+          lowStockThreshold: 10,
+          minStockLevel: showcaseProduct.minStockLevel || 5,
+          maxStockLevel: showcaseProduct.maxStockLevel || 100,
+          sku: showcaseProduct.sku || `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+          barcode: showcaseProduct.barcode,
+          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : [],
+          specifications: showcaseProduct.specifications || {},
+          features: showcaseProduct.features || [],
+          applications: showcaseProduct.applications || [],
+          isActive: true,
+          isFeatured: false,
+          metaTitle: showcaseProduct.name,
+          metaDescription: showcaseProduct.description
+        };
+        
+        await shopStorage.createShopProduct(shopProductData);
+        console.log(`✅ Synced to shop: ${showcaseProduct.name}`);
+        syncedCount++;
+      }
+      
+      console.log(`🔄 Sync completed: ${syncedCount} products added, ${skippedCount} already existed`);
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully synchronized ${syncedCount} products to shop. ${skippedCount} products already existed.`,
+        syncedCount,
+        skippedCount,
+        totalShowcaseProducts: showcaseProducts.length
+      });
     } catch (error) {
       console.error("Error syncing products:", error);
       res.status(500).json({ success: false, message: "Failed to sync products" });
