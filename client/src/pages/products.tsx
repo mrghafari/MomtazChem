@@ -648,111 +648,67 @@ export default function ProductsPage() {
   const openEditDialog = (product: ShowcaseProduct) => {
     console.log("=== OPENING EDIT DIALOG ===");
     console.log("Raw product data:", JSON.stringify(product, null, 2));
-    console.log("Product weight:", product.weight, "type:", typeof product.weight);
-    console.log("Product maxStockLevel:", product.maxStockLevel, "type:", typeof product.maxStockLevel);
     
     setEditingProduct(product);
-    setImagePreview(product.imageUrl || null);
     
-    // Debug catalog and MSDS URLs
-    console.log("Setting catalog preview:", product.pdfCatalogUrl);
-    console.log("Setting MSDS preview:", product.msdsUrl);
+    // Set preview states for files FIRST
+    console.log("Setting previews:");
+    console.log("- Image preview:", product.imageUrl);
+    console.log("- Catalog preview:", product.pdfCatalogUrl);
+    console.log("- MSDS preview:", product.msdsUrl);
+    
+    setImagePreview(product.imageUrl || null);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
     
-    // Ensure weight and maxStockLevel are properly converted
-    const weight = product.weight !== undefined && product.weight !== null && product.weight !== "" ? String(product.weight) : "1";
-    const maxStockLevel = product.maxStockLevel !== undefined && product.maxStockLevel !== null ? Number(product.maxStockLevel) : 100;
-    
-    console.log("Processed weight:", weight, "type:", typeof weight);
-    console.log("Processed maxStockLevel:", maxStockLevel, "type:", typeof maxStockLevel);
+    // Process form data
+    const processText = (value: any): string => {
+      if (Array.isArray(value)) {
+        return value.join('\n');
+      } else if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          return Array.isArray(parsed) ? parsed.join('\n') : value;
+        } catch {
+          return value;
+        }
+      }
+      return value || "";
+    };
     
     const formData = {
-      name: product.name,
+      name: product.name || "",
       description: product.description || "",
-      category: product.category,
+      category: product.category || "",
       shortDescription: product.shortDescription || "",
-      features: (() => {
-        console.log("Raw features:", product.features, typeof product.features);
-        if (Array.isArray(product.features)) {
-          return product.features.join('\n');
-        } else if (typeof product.features === 'string') {
-          try {
-            const parsed = JSON.parse(product.features);
-            console.log("Parsed features:", parsed);
-            return Array.isArray(parsed) ? parsed.join('\n') : product.features;
-          } catch {
-            return product.features;
-          }
-        }
-        return "";
-      })(),
-      applications: (() => {
-        console.log("Raw applications:", product.applications, typeof product.applications);
-        if (Array.isArray(product.applications)) {
-          return product.applications.join('\n');
-        } else if (typeof product.applications === 'string') {
-          try {
-            const parsed = JSON.parse(product.applications);
-            console.log("Parsed applications:", parsed);
-            return Array.isArray(parsed) ? parsed.join('\n') : product.applications;
-          } catch {
-            return product.applications;
-          }
-        }
-        return "";
-      })(),
-      specifications: (() => {
-        console.log("Raw specifications:", product.specifications, typeof product.specifications);
-        if (typeof product.specifications === 'string') {
-          // Remove quotes if it's a quoted string like "\"Short Description\""
-          let cleaned = product.specifications.replace(/^"+(.*?)"+$/, '$1');
-          // Also remove escaped quotes
-          cleaned = cleaned.replace(/\\"/g, '"');
-          console.log("Cleaned specifications:", cleaned);
-          return cleaned;
-        } else if (typeof product.specifications === 'object' && product.specifications !== null) {
-          return JSON.stringify(product.specifications, null, 2);
-        }
-        return product.specifications || "";
-      })(),
+      features: processText(product.features),
+      applications: processText(product.applications),
+      specifications: product.specifications || "",
       barcode: product.barcode || "",
       sku: product.sku || "",
-      stockQuantity: Number(product.stockQuantity) ?? 0,
-      minStockLevel: Number(product.minStockLevel) ?? 0,
-      maxStockLevel: maxStockLevel,
-      unitPrice: product.unitPrice ? String(product.unitPrice) : "0",
+      stockQuantity: Number(product.stockQuantity) || 0,
+      minStockLevel: Number(product.minStockLevel) || 0,
+      maxStockLevel: Number(product.maxStockLevel) || 100,
+      unitPrice: String(product.unitPrice || "0"),
       currency: product.currency || "IQD",
       priceRange: product.priceRange || "",
-      weight: weight,
+      weight: String(product.weight || "1"),
       weightUnit: product.weightUnit || "kg",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
-      msdsUrl: (() => {
-        console.log("Raw msdsUrl:", product.msdsUrl, typeof product.msdsUrl);
-        return product.msdsUrl || "";
-      })(),
-      msdsFileName: (() => {
-        console.log("Raw msdsFileName:", product.msdsFileName, typeof product.msdsFileName);
-        return product.msdsFileName || "";
-      })(),
-      showMsdsToCustomers: product.showMsdsToCustomers || false,
-      catalogFileName: (() => {
-        console.log("Raw catalogFileName:", product.catalogFileName, typeof product.catalogFileName);
-        return product.catalogFileName || "";
-      })(),
-      showCatalogToCustomers: product.showCatalogToCustomers || false,
-      tags: (() => {
-        console.log("Raw tags:", product.tags, typeof product.tags);
-        if (typeof product.tags === 'string') {
-          return product.tags;
-        } else if (Array.isArray(product.tags)) {
-          return product.tags.join(', ');
-        }
-        return "";
-      })(),
-      syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
+      msdsUrl: product.msdsUrl || "",
+      msdsFileName: product.msdsFileName || "",
+      showMsdsToCustomers: Boolean(product.showMsdsToCustomers),
+      catalogFileName: product.catalogFileName || "",
+      showCatalogToCustomers: Boolean(product.showCatalogToCustomers),
+      tags: typeof product.tags === 'string' ? product.tags : (Array.isArray(product.tags) ? product.tags.join(', ') : ""),
+      syncWithShop: product.syncWithShop !== false,
       isActive: product.isActive !== false,
+      // Variant fields
+      isVariant: Boolean(product.isVariant),
+      parentProductId: product.parentProductId || undefined,
+      variantType: product.variantType || "",
+      variantValue: product.variantValue || "",
       // Publication permissions
       publishShortDescription: product.publishShortDescription !== false,
       publishDescription: product.publishDescription !== false,
@@ -762,34 +718,17 @@ export default function ProductsPage() {
       publishApplications: product.publishApplications !== false,
       publishWeight: product.publishWeight !== false,
       publishTags: product.publishTags !== false,
-      publishCertifications: product.publishCertifications || false,
+      publishCertifications: Boolean(product.publishCertifications),
       publishImage: product.publishImage !== false,
-      publishMsds: product.publishMsds || false,
-      publishCatalogPdf: product.publishCatalogPdf || false,
+      publishMsds: Boolean(product.publishMsds),
+      publishCatalogPdf: Boolean(product.publishCatalogPdf),
     };
     
-    console.log("=== FINAL FORM DATA ===");
-    console.log("formData.weight:", formData.weight, "type:", typeof formData.weight);
-    console.log("formData.maxStockLevel:", formData.maxStockLevel, "type:", typeof formData.maxStockLevel);
-    console.log("Complete form data:", JSON.stringify(formData, null, 2));
+    console.log("=== SETTING FORM WITH RESET ===");
+    console.log("Processed form data:", formData);
     
-    // Don't use reset, manually set all values
-    console.log("=== MANUALLY SETTING ALL FORM VALUES ===");
-    
-    // Set all form values manually
-    Object.entries(formData).forEach(([key, value]) => {
-      console.log(`Setting ${key}:`, value, typeof value);
-      form.setValue(key as any, value, { shouldValidate: false, shouldDirty: false });
-    });
-    
-    // Verify the problematic fields were set correctly
-    setTimeout(() => {
-      console.log("=== VERIFICATION AFTER MANUAL SET ===");
-      const currentWeight = form.getValues("weight");
-      const currentMaxStock = form.getValues("maxStockLevel");
-      console.log("Current weight in form:", currentWeight, typeof currentWeight);
-      console.log("Current maxStockLevel in form:", currentMaxStock, typeof currentMaxStock);
-    }, 200);
+    // Use form.reset to properly populate all fields
+    form.reset(formData);
     
     setDialogOpen(true);
     
