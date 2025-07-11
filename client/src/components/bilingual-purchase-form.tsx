@@ -327,6 +327,31 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
+  // Fetch available payment gateways for dynamic payment method selection
+  const { data: paymentGatewaysData } = useQuery({
+    queryKey: ['/api/payment/available-gateways'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/payment/available-gateways', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Payment Gateways API response:', result);
+          if (result.success) {
+            return result.data;
+          }
+        }
+        return [];
+      } catch (error) {
+        console.log('Error fetching payment gateways:', error);
+        return [];
+      }
+    },
+    retry: false,
+  });
+
   // Fetch active shipping rates
   const { data: shippingRatesData, isLoading: isLoadingShippingRates, error: shippingRatesError } = useQuery({
     queryKey: ['/api/shipping-rates'],
@@ -647,6 +672,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           window.location.href = response.paymentGatewayUrl;
         }, 1500);
       } 
+      // Check if specific gateway was selected
+      else if (paymentMethod.startsWith('gateway_')) {
+        const gatewayId = paymentMethod.replace('gateway_', '');
+        const selectedGateway = paymentGatewaysData?.find((g: any) => g.id.toString() === gatewayId);
+        
+        toast({
+          title: "✅ سفارش ثبت شد",
+          description: `سفارش شما برای پرداخت از طریق ${selectedGateway?.name} آماده است`
+        });
+        
+        // You might want to redirect to a specific payment page for this gateway
+        setTimeout(() => {
+          window.location.href = `/payment/${response.orderId}?gateway=${gatewayId}`;
+        }, 1500);
+      }
       // Check if bank receipt upload is needed
       else if (paymentMethod === 'bank_receipt') {
         if (selectedReceiptFile) {
@@ -699,7 +739,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       remainingAmount: totalAmount,
     };
 
-    // Handle wallet payment calculations
+    // Handle different payment methods
     if (paymentMethod === 'wallet_full') {
       orderData.walletAmountUsed = totalAmount;
       orderData.remainingAmount = 0;
@@ -712,6 +752,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     } else if (paymentMethod === 'bank_receipt') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
+    } else if (paymentMethod.startsWith('gateway_')) {
+      // Handle specific gateway selection
+      const gatewayId = paymentMethod.replace('gateway_', '');
+      const selectedGateway = paymentGatewaysData?.find((g: any) => g.id.toString() === gatewayId);
+      
+      orderData.walletAmountUsed = 0;
+      orderData.remainingAmount = totalAmount;
+      orderData.selectedGateway = selectedGateway;
+      orderData.paymentMethod = `gateway_${gatewayId}`;
+      
+      console.log('Selected payment gateway:', selectedGateway);
     }
 
     console.log('Submitting order with wallet data:', {
@@ -957,6 +1008,23 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
               {/* Payment Options */}
               <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
+                {/* نمایش درگاه‌های پرداخت دینامیک از API */}
+                {paymentGatewaysData && paymentGatewaysData.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">درگاه‌های پرداخت بانکی</h4>
+                    {paymentGatewaysData.map((gateway: any) => (
+                      <div key={gateway.id} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value={`gateway_${gateway.id}`} id={`gateway_${gateway.id}`} />
+                        <Label htmlFor={`gateway_${gateway.id}`} className="flex items-center gap-2 cursor-pointer">
+                          <CreditCard className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium">{gateway.name}</span>
+                          <span className="text-sm text-gray-500">({gateway.type})</span>
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
                 {/* اولویت اول: پرداخت آنلاین */}
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <RadioGroupItem value="online_payment" id="online_payment" />
