@@ -283,9 +283,12 @@ export default function ProductsPage() {
 
   // Quick sync toggle mutation
   const { mutate: toggleSync } = useMutation({
-    mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) =>
-      apiRequest(`/api/products/${id}`, "PUT", { syncWithShop }),
-    onSuccess: () => {
+    mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) => {
+      console.log(`🔄 Toggling sync for product ${id}: ${syncWithShop}`);
+      return apiRequest(`/api/products/${id}`, "PUT", { syncWithShop });
+    },
+    onSuccess: (data) => {
+      console.log(`✅ Toggle sync successful:`, data);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1);
       toast({
@@ -294,6 +297,7 @@ export default function ProductsPage() {
       });
     },
     onError: (error: any) => {
+      console.error(`❌ Toggle sync failed:`, error);
       toast({
         title: "خطا",
         description: error.message || "خطا در به‌روزرسانی وضعیت نمایش",
