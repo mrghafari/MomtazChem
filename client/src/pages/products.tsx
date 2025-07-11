@@ -212,55 +212,25 @@ export default function ProductsPage() {
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
       apiRequest(`/api/products/${id}`, "PUT", data),
     onSuccess: (result) => {
+      console.log("Update success result:", result);
+      
       // Clear and refresh data completely
       queryClient.removeQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.refetchQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
       
-      // Update form with the returned data to show updated values
-      if (result && editingProduct) {
-        const updatedProduct = { ...editingProduct, ...result };
-        form.reset({
-          name: updatedProduct.name,
-          description: updatedProduct.description || "",
-          category: updatedProduct.category,
-          shortDescription: updatedProduct.shortDescription || "",
-          features: Array.isArray(updatedProduct.features) ? updatedProduct.features.join('\n') : (updatedProduct.features || ""),
-          applications: Array.isArray(updatedProduct.applications) ? updatedProduct.applications.join('\n') : (updatedProduct.applications || ""),
-          specifications: typeof updatedProduct.specifications === 'object' && updatedProduct.specifications !== null ? JSON.stringify(updatedProduct.specifications, null, 2) : (updatedProduct.specifications || ""),
-          barcode: updatedProduct.barcode || "",
-          sku: updatedProduct.sku || "",
-          stockQuantity: Number(updatedProduct.stockQuantity) ?? 0,
-          minStockLevel: Number(updatedProduct.minStockLevel) ?? 0,
-          maxStockLevel: Number(updatedProduct.maxStockLevel) || 100,
-          unitPrice: updatedProduct.unitPrice ? String(updatedProduct.unitPrice) : "0",
-          currency: updatedProduct.currency || "IQD",
-          priceRange: updatedProduct.priceRange || "",
-          weight: updatedProduct.weight ? String(updatedProduct.weight) : "1",
-          weightUnit: updatedProduct.weightUnit || "kg",
-          imageUrl: updatedProduct.imageUrl || "",
-          pdfCatalogUrl: updatedProduct.pdfCatalogUrl || "",
-          msdsUrl: updatedProduct.msdsUrl || "",
-          msdsFileName: updatedProduct.msdsFileName || "",
-          showMsdsToCustomers: updatedProduct.showMsdsToCustomers || false,
-          catalogFileName: updatedProduct.catalogFileName || "",
-          showCatalogToCustomers: updatedProduct.showCatalogToCustomers || false,
-          syncWithShop: updatedProduct.syncWithShop !== undefined ? updatedProduct.syncWithShop : true,
-          isActive: updatedProduct.isActive !== false,
-        });
-      }
+      // Close dialog and clear editing state
+      setDialogOpen(false);
+      setEditingProduct(null);
+      setImagePreview(null);
+      setCatalogPreview(null);
+      setMsdsPreview(null);
       
-      setTimeout(() => {
-        setDialogOpen(false);
-        setEditingProduct(null);
-        setImagePreview(null);
-        setCatalogPreview(null);
-        setMsdsPreview(null);
-      }, 1500); // Allow user to see the updated values for 1.5 seconds
+      // Show success message
       toast({
-        title: "Success",
-        description: "Product updated successfully",
+        title: "موفقیت",
+        description: "محصول با موفقیت به‌روزرسانی شد",
       });
     },
     onError: (error: any) => {
