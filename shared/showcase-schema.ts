@@ -70,6 +70,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   isActive: boolean("is_active").default(true),
   displayOrder: integer("display_order").default(0), // For ordering on website
   syncWithShop: boolean("sync_with_shop").default(true), // Whether to include in shop sync process
+  showWhenOutOfStock: boolean("show_when_out_of_stock").default(false), // Whether to show product in shop when stock is 0
   // Product Variant Fields
   isVariant: boolean("is_variant").default(false), // Whether this is a variant of another product
   parentProductId: integer("parent_product_id"), // Reference to parent product if this is a variant

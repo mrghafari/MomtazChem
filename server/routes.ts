@@ -1859,6 +1859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               lowStockThreshold: 10,
               minStockLevel: product.minStockLevel || 5,
               maxStockLevel: product.maxStockLevel || 100,
+              showWhenOutOfStock: productData.showWhenOutOfStock || false,
               sku: product.sku || `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
               barcode: product.barcode,
               imageUrls: product.imageUrl ? [product.imageUrl] : [],
@@ -1874,7 +1875,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await shopStorage.createShopProduct(shopProductData);
             console.log(`✅ محصول به فروشگاه اضافه شد: ${product.name}`);
           } else {
-            console.log(`⚠️  محصول قبلاً در فروشگاه موجود است: ${product.name}`);
+            // Shop product already exists, update it
+            const updateData = {
+              stockQuantity: product.stockQuantity || 0,
+              inStock: (product.stockQuantity || 0) > 0,
+              price: product.unitPrice || product.price || 0,
+              priceUnit: product.currency || product.priceUnit || 'IQD',
+              description: product.description,
+              shortDescription: product.shortDescription || product.description,
+              imageUrls: product.imageUrl ? [product.imageUrl] : (existingShopProduct.imageUrls || []),
+              specifications: product.specifications || {},
+              features: product.features || [],
+              applications: product.applications || [],
+              barcode: product.barcode,
+              sku: product.sku || existingShopProduct.sku,
+              showWhenOutOfStock: productData.showWhenOutOfStock || false
+            };
+            
+            await shopStorage.updateShopProduct(existingShopProduct.id, updateData);
+            console.log(`✅ محصول در فروشگاه به‌روزرسانی شد: ${product.name}`);
           }
         } catch (syncError) {
           console.error(`❌ خطا در sync کردن محصول ${product.name}:`, syncError);
@@ -5933,7 +5952,7 @@ ${procedure.content}
         tags,
         sortBy = 'relevance',
         sortOrder = 'desc',
-        limit = 20,
+        limit = 50,
         offset = 0
       } = req.query;
 
@@ -5945,7 +5964,7 @@ ${procedure.content}
         tags: tags ? (Array.isArray(tags) ? tags as string[] : [tags as string]) : undefined,
         sortBy: sortBy as 'name' | 'price' | 'created' | 'relevance',
         sortOrder: sortOrder as 'asc' | 'desc',
-        limit: parseInt(limit as string) || 20,
+        limit: parseInt(limit as string) || 50,
         offset: parseInt(offset as string) || 0
       };
 

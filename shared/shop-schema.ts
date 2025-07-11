@@ -76,6 +76,7 @@ export const shopProducts = pgTable("shop_products", {
   isActive: boolean("is_active").default(true),
   isFeatured: boolean("is_featured").default(false),
   visibleInShop: boolean("visible_in_shop").default(true), // کنترل نمایش در فروشگاه
+  showWhenOutOfStock: boolean("show_when_out_of_stock").default(false), // نمایش در فروشگاه حتی با موجودی صفر
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
   // MSDS (Material Safety Data Sheet) fields

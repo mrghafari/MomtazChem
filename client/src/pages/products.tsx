@@ -49,6 +49,8 @@ const formSchema = insertShowcaseProductSchema.extend({
   showCatalogToCustomers: z.boolean().optional(),
   // Shop sync control
   syncWithShop: z.boolean().default(true),
+  // Out of stock display control
+  showWhenOutOfStock: z.boolean().default(false),
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -373,6 +375,9 @@ export default function ProductsPage() {
       pdfCatalogUrl: "",
       catalogFileName: "",
       showCatalogToCustomers: false,
+      // Shop visibility control
+      syncWithShop: true,
+      showWhenOutOfStock: false,
     },
   });
 
@@ -587,6 +592,7 @@ export default function ProductsPage() {
       catalogFileName: product.catalogFileName || "",
       showCatalogToCustomers: product.showCatalogToCustomers || false,
       syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
+      showWhenOutOfStock: product.showWhenOutOfStock ?? false,
       isActive: product.isActive !== false,
     });
     setDialogOpen(true);
@@ -1447,6 +1453,43 @@ export default function ProductsPage() {
                           <div className="text-xs text-gray-600 bg-white p-2 rounded border-l-2 border-blue-400">
                             <strong>توضیح:</strong> با فعال بودن این گزینه، محصول در فروشگاه آنلاین قابل مشاهده و خرید خواهد بود. 
                             اگر غیرفعال باشد، محصول فقط در کاردکس نمایشی موجود است و در فروشگاه نمایش داده نمی‌شود.
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {/* Show When Out of Stock Control */}
+                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                    <FormField
+                      control={form.control}
+                      name="showWhenOutOfStock"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <div className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="h-5 w-5"
+                              />
+                            </FormControl>
+                            <div className="flex flex-col">
+                              <FormLabel className="text-sm font-medium text-orange-900">
+                                📦 نمایش در هنگام اتمام موجودی (Out of Stock Display)
+                              </FormLabel>
+                              <div className="text-xs text-orange-700 mt-1">
+                                {field.value ? (
+                                  "✓ این محصول حتی در صورت اتمام موجودی نمایش داده می‌شود"
+                                ) : (
+                                  "⨯ این محصول در صورت اتمام موجودی مخفی می‌شود"
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-600 bg-white p-2 rounded border-l-2 border-orange-400">
+                            <strong>توضیح:</strong> با فعال بودن این گزینه، محصول حتی در صورت صفر بودن موجودی در فروشگاه نمایش داده می‌شود. 
+                            اگر غیرفعال باشد، محصول در صورت اتمام موجودی از فروشگاه حذف می‌شود.
                           </div>
                         </FormItem>
                       )}

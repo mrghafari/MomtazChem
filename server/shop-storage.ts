@@ -240,7 +240,11 @@ export class ShopStorage implements IShopStorage {
       .from(shopProducts)
       .where(and(
         eq(shopProducts.isActive, true),
-        eq(shopProducts.visibleInShop, true)
+        // Show products that are either in stock OR have showWhenOutOfStock enabled
+        or(
+          gt(shopProducts.stockQuantity, 0),
+          eq(shopProducts.showWhenOutOfStock, true)
+        )
       ))
       .orderBy(shopProducts.name);
 
@@ -360,14 +364,13 @@ export class ShopStorage implements IShopStorage {
       tags,
       sortBy = 'relevance',
       sortOrder = 'desc',
-      limit = 20,
+      limit = 50,
       offset = 0
     } = filters;
 
-    // Build WHERE conditions - only visible products
+    // Build WHERE conditions - only active products
     const whereConditions = [
-      eq(shopProducts.isActive, true),
-      eq(shopProducts.visibleInShop, true)
+      eq(shopProducts.isActive, true)
     ];
 
     // Text search in multiple fields
@@ -415,6 +418,14 @@ export class ShopStorage implements IShopStorage {
         // For other cases, use the inStock flag
         whereConditions.push(eq(shopProducts.inStock, inStock));
       }
+    } else {
+      // When no inStock filter is applied, show products that are either in stock OR have showWhenOutOfStock enabled
+      whereConditions.push(
+        or(
+          gt(shopProducts.stockQuantity, 0),
+          eq(shopProducts.showWhenOutOfStock, true)
+        )
+      );
     }
 
     // Tags filter
@@ -474,10 +485,7 @@ export class ShopStorage implements IShopStorage {
         count: count()
       })
       .from(shopProducts)
-      .where(and(
-        eq(shopProducts.isActive, true),
-        eq(shopProducts.visibleInShop, true)
-      ))
+      .where(eq(shopProducts.isActive, true))
       .groupBy(shopProducts.category);
 
     const priceRangeResult = await shopDb
