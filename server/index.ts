@@ -4,6 +4,7 @@ import MemoryStore from "memorystore";
 import path from "path";
 import { registerRoutes } from "./routes";
 import InventoryAlertService from "./inventory-alerts";
+import { autoRefundScheduler } from "./auto-refund-scheduler";
 import { setupVite, serveStatic, log } from "./vite";
 
 // Global error handlers to prevent server crashes
@@ -128,6 +129,15 @@ app.use((req, res, next) => {
           console.error("Error starting inventory monitoring:", monitoringError);
         }
       }, 5000); // Delay 5 seconds to ensure database connections are stable
+      
+      // Start auto-refund scheduler for failed transactions
+      setTimeout(() => {
+        try {
+          autoRefundScheduler.start();
+        } catch (refundError) {
+          console.error("Error starting auto-refund scheduler:", refundError);
+        }
+      }, 6000); // Delay 6 seconds after inventory monitoring
     });
   } catch (error) {
     console.error("Failed to start server:", error);

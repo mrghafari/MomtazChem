@@ -39,6 +39,7 @@ export interface ICustomerStorage {
   updateOrder(id: number, order: Partial<InsertCustomerOrder>): Promise<CustomerOrder>;
   updateOrderPaymentStatus(id: number, paymentStatus: string): Promise<CustomerOrder>;
   getAllOrders(): Promise<CustomerOrder[]>;
+  getFailedOrders(cutoffTime: Date): Promise<CustomerOrder[]>;
   
   // Order items
   createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
@@ -215,6 +216,23 @@ export class CustomerStorage implements ICustomerStorage {
     return await customerDb
       .select()
       .from(customerOrders)
+      .orderBy(desc(customerOrders.createdAt));
+  }
+
+  async getFailedOrders(cutoffTime: Date): Promise<CustomerOrder[]> {
+    return await customerDb
+      .select()
+      .from(customerOrders)
+      .where(
+        and(
+          eq(customerOrders.paymentStatus, 'pending'),
+          sql`${customerOrders.createdAt} < ${cutoffTime}`,
+          or(
+            eq(customerOrders.paymentMethod, 'wallet_partial'),
+            eq(customerOrders.paymentMethod, 'online_payment')
+          )
+        )
+      )
       .orderBy(desc(customerOrders.createdAt));
   }
 

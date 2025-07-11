@@ -4986,6 +4986,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Auto-refund failed transactions endpoint
+  app.post('/api/payment/auto-refund-failed', async (req, res) => {
+    try {
+      console.log('🔄 Starting auto-refund process for failed transactions...');
+      
+      // Get all pending orders older than 10 minutes (failed transactions)
+      const cutoffTime = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
+      const failedOrders = await customerStorage.getFailedOrders(cutoffTime);
+      
+      let refundedCount = 0;
+      const refundResults = [];
+      
+      for (const order of failedOrders) {
+        try {
+          // Check if order used wallet_partial payment and has wallet amount
+          if (order.paymentMethod === 'wallet_partial' && order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0) {
+            console.log(`💰 Auto-refunding wallet amount for failed order: ${order.orderNumber}`);
+            
+            const refundResult = await walletStorage.refundWalletAmount(
+              order.customerId,
+              parseFloat(order.walletAmountUsed),
+              `بازگشت خودکار وجه - تراکنش ناموفق ${order.orderNumber}`,
+              order.orderNumber
+            );
+            
+            if (refundResult.success) {
+              // Update order status to cancelled
+              await customerStorage.updateOrderPaymentStatus(order.id, 'cancelled');
+              
+              refundedCount++;
+              refundResults.push({
+                orderNumber: order.orderNumber,
+                customerId: order.customerId,
+                refundAmount: order.walletAmountUsed,
+                status: 'success'
+              });
+              
+              console.log(`✅ Auto-refund successful: ${order.walletAmountUsed} IQD returned to customer ${order.customerId}`);
+            } else {
+              refundResults.push({
+                orderNumber: order.orderNumber,
+                customerId: order.customerId,
+                refundAmount: order.walletAmountUsed,
+                status: 'failed',
+                error: refundResult.error
+              });
+              console.error(`❌ Auto-refund failed for order ${order.orderNumber}:`, refundResult.error);
+            }
+          }
+        } catch (orderError) {
+          console.error(`❌ Error processing order ${order.orderNumber}:`, orderError);
+          refundResults.push({
+            orderNumber: order.orderNumber,
+            customerId: order.customerId,
+            status: 'error',
+            error: orderError.message
+          });
+        }
+      }
+      
+      console.log(`🏁 Auto-refund process completed: ${refundedCount} orders refunded`);
+      
+      res.json({
+        success: true,
+        message: `Auto-refund completed: ${refundedCount} failed transactions refunded`,
+        refundedCount,
+        totalOrders: failedOrders.length,
+        details: refundResults
+      });
+      
+    } catch (error) {
+      console.error('❌ Auto-refund process failed:', error);
+      res.status(500).json({
+        success: false,
+        message: "Auto-refund process failed",
+        error: error.message
+      });
+    }
+  });
+
+  // Auto-refund scheduler management endpoints
+  app.get('/api/payment/auto-refund-status', async (req, res) => {
+    try {
+      const { autoRefundScheduler } = await import('./auto-refund-scheduler');
+      const status = autoRefundScheduler.getStatus();
+      
+      res.json({
+        success: true,
+        scheduler: status,
+        message: status.isRunning ? "Auto-refund scheduler is running" : "Auto-refund scheduler is stopped"
+      });
+    } catch (error) {
+      console.error('❌ Error getting auto-refund status:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get auto-refund status",
+        error: error.message
+      });
+    }
+  });
+
+  app.post('/api/payment/auto-refund-start', async (req, res) => {
+    try {
+      const { autoRefundScheduler } = await import('./auto-refund-scheduler');
+      autoRefundScheduler.start();
+      
+      res.json({
+        success: true,
+        message: "Auto-refund scheduler started successfully"
+      });
+    } catch (error) {
+      console.error('❌ Error starting auto-refund scheduler:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to start auto-refund scheduler",
+        error: error.message
+      });
+    }
+  });
+
+  app.post('/api/payment/auto-refund-stop', async (req, res) => {
+    try {
+      const { autoRefundScheduler } = await import('./auto-refund-scheduler');
+      autoRefundScheduler.stop();
+      
+      res.json({
+        success: true,
+        message: "Auto-refund scheduler stopped successfully"
+      });
+    } catch (error) {
+      console.error('❌ Error stopping auto-refund scheduler:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to stop auto-refund scheduler",
+        error: error.message
+      });
+    }
+  });
+
   // Get customer order history
   app.get("/api/customers/orders", async (req, res) => {
     try {
