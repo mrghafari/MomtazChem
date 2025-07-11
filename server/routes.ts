@@ -236,11 +236,7 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     sessionData: JSON.stringify(req.session)
   });
   
-  // Store session for session tracking
-  sessionStore.storeSession({
-    sessionId: req.sessionID,
-    sessionData: JSON.stringify(req.session)
-  });
+  // Session tracking handled by express-session middleware
   
   // More robust authentication check
   if (req.session && req.session.isAuthenticated === true && req.session.adminId) {
