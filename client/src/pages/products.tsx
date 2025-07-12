@@ -430,6 +430,8 @@ export default function ProductsPage() {
       })(),
     };
     
+    console.log('Processed data being sent:', processedData);
+    
     if (editingProduct) {
       updateProduct({ id: editingProduct.id, data: processedData });
     } else {
@@ -1619,7 +1621,14 @@ export default function ProductsPage() {
                           <Input 
                             placeholder="Auto-generated or enter manually" 
                             {...field}
+                            readOnly={!!field.value && editingProduct}
+                            className={!!field.value && editingProduct ? "bg-gray-100 cursor-not-allowed" : ""}
                             onChange={async (e) => {
+                              // Prevent editing if it's an existing product with barcode
+                              if (!!field.value && editingProduct) {
+                                return;
+                              }
+                              
                               const newBarcode = e.target.value;
                               field.onChange(e);
                               
@@ -1654,25 +1663,26 @@ export default function ProductsPage() {
                             }}
                           />
                         </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={async () => {
-                            const currentBarcode = form.getValues("barcode");
-                            
-                            // Protect existing barcodes - don't allow overwriting
-                            if (currentBarcode && currentBarcode.trim() !== "") {
-                              toast({
-                                title: "Barcode Exists",
-                                description: "This product already has a barcode. Clear the field first if you want to generate a new one.",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
-                            
-                            const productName = form.getValues("name");
-                            const category = form.getValues("category");
+                        {(!field.value || !editingProduct) && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              const currentBarcode = form.getValues("barcode");
+                              
+                              // Protect existing barcodes - don't allow overwriting
+                              if (currentBarcode && currentBarcode.trim() !== "") {
+                                toast({
+                                  title: "Barcode Exists",
+                                  description: "This product already has a barcode. Clear the field first if you want to generate a new one.",
+                                  variant: "destructive"
+                                });
+                                return;
+                              }
+                              
+                              const productName = form.getValues("name");
+                              const category = form.getValues("category");
                             
                             if (!productName || !category) {
                               toast({
@@ -1748,11 +1758,24 @@ export default function ProductsPage() {
                           <QrCode className="w-4 h-4 mr-1" />
                           Generate
                         </Button>
+                        )}
+                        {field.value && editingProduct && (
+                          <div className="flex items-center text-sm text-green-600 px-3 py-2 bg-green-50 rounded border">
+                            ✓ قفل شده
+                          </div>
+                        )}
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        Click "Generate" to create GS1-compliant EAN-13 barcode automatically. 
-                        <span className="text-amber-600 font-medium">Note: Existing barcodes are protected from overwriting.</span>
-                      </div>
+                      {field.value && editingProduct && (
+                        <p className="text-xs text-muted-foreground">
+                          بارکد بعد از تولید قابل تغییر نیست
+                        </p>
+                      )}
+                      {(!field.value || !editingProduct) && (
+                        <div className="text-xs text-muted-foreground">
+                          Click "Generate" to create GS1-compliant EAN-13 barcode automatically. 
+                          <span className="text-amber-600 font-medium">Note: Existing barcodes are protected from overwriting.</span>
+                        </div>
+                      )}
                       
                       {/* Barcode Display - Canvas always rendered for stable ref */}
                       <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">

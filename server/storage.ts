@@ -196,7 +196,16 @@ export class DatabaseStorage implements IStorage {
       updateData.certifications = Array.isArray(productUpdate.certifications) && productUpdate.certifications.length > 0 ? productUpdate.certifications : null;
     }
     if (productUpdate.tags !== undefined) {
+      console.log(`🏷️ [DEBUG] Processing tags update:`, {
+        originalTags: productUpdate.tags,
+        type: typeof productUpdate.tags,
+        isArray: Array.isArray(productUpdate.tags),
+        length: Array.isArray(productUpdate.tags) ? productUpdate.tags.length : 'N/A'
+      });
+      
       updateData.tags = Array.isArray(productUpdate.tags) && productUpdate.tags.length > 0 ? productUpdate.tags : ["شیمیایی"];
+      
+      console.log(`🏷️ [DEBUG] Final tags value for database:`, updateData.tags);
     }
 
     const [product] = await showcaseDb

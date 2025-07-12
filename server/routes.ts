@@ -1853,11 +1853,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = req.body;
-      console.log(`📝 Updating shop product ${id} with data:`, productData);
+      console.log(`📝 [DEBUG] Updating showcase product ${id} with raw data:`, JSON.stringify(productData, null, 2));
+      console.log(`📝 [DEBUG] Tags field:`, productData.tags, 'Type:', typeof productData.tags);
       
       // Update showcase product
       const product = await storage.updateProduct(id, productData);
-      console.log(`✅ Updated product:`, product.name);
+      console.log(`✅ [DEBUG] Updated product result:`, JSON.stringify({
+        id: product.id,
+        name: product.name,
+        tags: product.tags,
+        description: product.description
+      }, null, 2));
       
       // Shop visibility logic - actually sync to shop when enabled
       if (productData.syncWithShop === true) {
