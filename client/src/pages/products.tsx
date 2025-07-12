@@ -219,9 +219,14 @@ export default function ProductsPage() {
   });
 
   const { mutate: updateProduct } = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
-      apiRequest(`/api/products/${id}`, "PUT", data),
-    onSuccess: () => {
+    mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) => {
+      console.log('🌐 [DEBUG] Making API request to update product:', id);
+      console.log('🌐 [DEBUG] API request data:', JSON.stringify(data, null, 2));
+      return apiRequest(`/api/products/${id}`, "PUT", data);
+    },
+    onSuccess: (result) => {
+      console.log('✅ [DEBUG] Update mutation successful, result:', result);
+      
       // Aggressive cache clearing for immediate updates
       queryClient.removeQueries({ queryKey: ["/api/products"] });
       queryClient.clear(); // Clear entire cache
@@ -246,6 +251,7 @@ export default function ProductsPage() {
       });
     },
     onError: (error: any) => {
+      console.error('❌ [DEBUG] Update mutation failed:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to update product",
@@ -395,8 +401,10 @@ export default function ProductsPage() {
   });
 
   const onSubmit = (data: InsertShowcaseProduct) => {
-    console.log('Form data:', data);
-    console.log('Tags in form data:', data.tags);
+    console.log('🔍 [DEBUG] Form submission - Raw form data:', data);
+    console.log('🔍 [DEBUG] Tags in form data:', data.tags, 'Type:', typeof data.tags);
+    console.log('🔍 [DEBUG] Description in form data:', data.description);
+    console.log('🔍 [DEBUG] editingProduct state:', editingProduct?.id);
     
     // Convert numeric fields to strings for API compatibility
     const processedData = {
@@ -430,11 +438,13 @@ export default function ProductsPage() {
       })(),
     };
     
-    console.log('Processed data being sent:', processedData);
+    console.log('🚀 [DEBUG] Final processed data being sent to API:', JSON.stringify(processedData, null, 2));
     
     if (editingProduct) {
+      console.log('📝 [DEBUG] Calling updateProduct with ID:', editingProduct.id);
       updateProduct({ id: editingProduct.id, data: processedData });
     } else {
+      console.log('➕ [DEBUG] Calling createProduct');
       createProduct(processedData);
     }
   };
