@@ -1780,7 +1780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const product = await storage.getProduct(id);
+      const product = await storage.getProductById(id);
       if (!product) {
         return res.status(404).json({ 
           success: false, 
@@ -1790,9 +1790,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(product);
     } catch (error) {
+      console.error(`Error fetching product ${id}:`, error);
       res.status(500).json({ 
         success: false, 
-        message: "Internal server error" 
+        message: "Internal server error",
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
