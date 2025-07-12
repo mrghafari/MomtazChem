@@ -90,7 +90,7 @@ import InventoryNotificationSettings from "@/pages/admin/inventory-notification-
 import InventoryManagement from "@/pages/inventory-management";
 import ContentManagement from "@/pages/content-management";
 import SecurityManagement from "@/pages/security-management-new";
-import UnifiedInventory from "@/pages/admin/unified-inventory";
+
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
 
@@ -165,7 +165,7 @@ function Router() {
           <Route path="/admin/department-users" component={DepartmentUsers} />
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           <Route path="/admin/inventory-management" component={InventoryManagement} />
-          <Route path="/admin/unified-inventory" component={UnifiedInventory} />
+
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/security-management" component={SecurityManagement} />
 

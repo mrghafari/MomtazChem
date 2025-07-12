@@ -26,8 +26,12 @@ import {
   Database,
   Edit2,
   Save,
-  X
+  X,
+  Mail,
+  MessageSquare,
+  XCircle
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
@@ -55,6 +59,22 @@ export default function InventoryManagement() {
   const [editingProduct, setEditingProduct] = useState<string | null>(null);
   const [editingQuantity, setEditingQuantity] = useState<number>(0);
   const { toast } = useToast();
+  
+  // Threshold settings state
+  const [thresholdSettings, setThresholdSettings] = useState({
+    settingName: 'global_default',
+    lowStockThreshold: 10,
+    warningStockLevel: 5,
+    emailEnabled: true,
+    smsEnabled: true,
+    managerEmail: 'manager@momtazchem.com',
+    managerPhone: '+9647700000000',
+    managerName: 'مدیر انبار',
+    checkFrequency: 60,
+    businessHoursOnly: true,
+    weekendsEnabled: false,
+    isActive: true
+  });
 
   // Fetch unified products - single source of truth
   const { data: unifiedProducts = [], isLoading: productsLoading, refetch: refetchProducts } = useQuery({
@@ -608,7 +628,163 @@ export default function InventoryManagement() {
           <InventoryAlerts />
         </TabsContent>
 
-        <TabsContent value="settings">
+        <TabsContent value="settings" className="space-y-6">
+          {/* Threshold Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                تنظیمات آستانه موجودی
+              </CardTitle>
+              <CardDescription>
+                تنظیم حدود هشدار موجودی و پیکربندی ارسال پیام و ایمیل به مدیر
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Threshold Levels */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="lowStockThreshold" className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    حد پایین (هشدار اولیه)
+                  </Label>
+                  <Input
+                    id="lowStockThreshold"
+                    type="number"
+                    value={thresholdSettings.lowStockThreshold}
+                    onChange={(e) => setThresholdSettings(prev => ({ 
+                      ...prev, 
+                      lowStockThreshold: parseInt(e.target.value) || 0 
+                    }))}
+                    placeholder="مثال: 10"
+                    className="text-right"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    وقتی موجودی به این حد برسد، هشدار اولیه ارسال می‌شود و در فروشگاه نمایش داده می‌شود
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="warningStockLevel" className="flex items-center gap-2">
+                    <XCircle className="h-4 w-4 text-red-500" />
+                    حد هشدار (بحرانی)
+                  </Label>
+                  <Input
+                    id="warningStockLevel"
+                    type="number"
+                    value={thresholdSettings.warningStockLevel}
+                    onChange={(e) => setThresholdSettings(prev => ({ 
+                      ...prev, 
+                      warningStockLevel: parseInt(e.target.value) || 0 
+                    }))}
+                    placeholder="مثال: 5"
+                    className="text-right"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    وقتی موجودی به این حد برسد، هشدار بحرانی فوری ارسال می‌شود
+                  </p>
+                </div>
+              </div>
+
+              {/* Notification Settings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">تنظیمات اطلاع‌رسانی</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Switch
+                      id="emailEnabled"
+                      checked={thresholdSettings.emailEnabled}
+                      onCheckedChange={(checked) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        emailEnabled: checked 
+                      }))}
+                    />
+                    <Label htmlFor="emailEnabled" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      ارسال ایمیل
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Switch
+                      id="smsEnabled"
+                      checked={thresholdSettings.smsEnabled}
+                      onCheckedChange={(checked) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        smsEnabled: checked 
+                      }))}
+                    />
+                    <Label htmlFor="smsEnabled" className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      ارسال پیامک
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Manager Contact Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">اطلاعات تماس مدیر</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="managerName">نام مدیر</Label>
+                    <Input
+                      id="managerName"
+                      value={thresholdSettings.managerName}
+                      onChange={(e) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        managerName: e.target.value 
+                      }))}
+                      placeholder="مدیر انبار"
+                      className="text-right"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="managerEmail">ایمیل مدیر</Label>
+                    <Input
+                      id="managerEmail"
+                      type="email"
+                      value={thresholdSettings.managerEmail}
+                      onChange={(e) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        managerEmail: e.target.value 
+                      }))}
+                      placeholder="manager@momtazchem.com"
+                      className="text-left"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="managerPhone">شماره موبایل مدیر</Label>
+                    <Input
+                      id="managerPhone"
+                      type="tel"
+                      value={thresholdSettings.managerPhone}
+                      onChange={(e) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        managerPhone: e.target.value 
+                      }))}
+                      placeholder="+9647700000000"
+                      className="text-left"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-end">
+                <Button className="flex items-center gap-2">
+                  <Save className="h-4 w-4" />
+                  ذخیره تنظیمات
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Original Notification Settings */}
           <InventoryNotificationSettings />
         </TabsContent>
 
