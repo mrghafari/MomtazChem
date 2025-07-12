@@ -18715,6 +18715,96 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // INVENTORY THRESHOLD SETTINGS API ENDPOINTS
+  // =============================================================================
+
+  // Get inventory threshold settings
+  app.get("/api/inventory/threshold-settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { inventoryThresholdSettings } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const settings = await db.select()
+        .from(inventoryThresholdSettings)
+        .where(eq(inventoryThresholdSettings.isActive, true))
+        .orderBy(inventoryThresholdSettings.settingName);
+      
+      res.json({ success: true, data: settings });
+    } catch (error) {
+      console.error("Error fetching threshold settings:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت تنظیمات آستانه موجودی" 
+      });
+    }
+  });
+
+  // Create or update threshold settings
+  app.post("/api/inventory/threshold-settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { inventoryThresholdSettings, insertInventoryThresholdSettingsSchema } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const validatedData = insertInventoryThresholdSettingsSchema.parse(req.body);
+      
+      // Check if setting already exists
+      const existingSetting = await db.select()
+        .from(inventoryThresholdSettings)
+        .where(eq(inventoryThresholdSettings.settingName, validatedData.settingName))
+        .limit(1);
+      
+      let result;
+      if (existingSetting.length > 0) {
+        // Update existing setting
+        result = await db.update(inventoryThresholdSettings)
+          .set({
+            ...validatedData,
+            updatedAt: new Date()
+          })
+          .where(eq(inventoryThresholdSettings.settingName, validatedData.settingName))
+          .returning();
+      } else {
+        // Create new setting
+        result = await db.insert(inventoryThresholdSettings)
+          .values(validatedData)
+          .returning();
+      }
+      
+      res.json({ success: true, data: result[0] });
+    } catch (error) {
+      console.error("Error saving threshold settings:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ذخیره تنظیمات آستانه موجودی" 
+      });
+    }
+  });
+
+  // Get inventory alerts log
+  app.get("/api/inventory/alerts-log", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { inventoryAlertLog } = await import("../shared/schema");
+      const { desc } = await import("drizzle-orm");
+      
+      const { limit = 50, offset = 0 } = req.query;
+      
+      const alerts = await db.select()
+        .from(inventoryAlertLog)
+        .orderBy(desc(inventoryAlertLog.sentAt))
+        .limit(parseInt(limit as string))
+        .offset(parseInt(offset as string));
+      
+      res.json({ success: true, data: alerts });
+    } catch (error) {
+      console.error("Error fetching alerts log:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت گزارش هشدارها" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

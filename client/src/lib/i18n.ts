@@ -7,7 +7,10 @@ export interface Translation {
   services: string;
   products: string;
   contact: string;
-  shop: string;
+  shop: {
+    title: string;
+    lowStockWarning: string;
+  };
   
   // Common actions
   login: string;
@@ -256,7 +259,10 @@ export const translations: Record<Language, Translation> = {
     services: 'Services',
     products: 'Products',
     contact: 'Contact',
-    shop: 'Shop',
+    shop: {
+      title: 'Shop',
+      lowStockWarning: 'Only {count} items left!'
+    },
     
     // Common actions
     login: 'Login',
@@ -503,7 +509,10 @@ export const translations: Record<Language, Translation> = {
     services: 'الخدمات',
     products: 'المنتجات',
     contact: 'اتصل بنا',
-    shop: 'المتجر',
+    shop: {
+      title: 'المتجر',
+      lowStockWarning: 'لم يتبق سوى {count} قطعة!'
+    },
     
     // Common actions
     login: 'تسجيل الدخول',
@@ -750,7 +759,10 @@ export const translations: Record<Language, Translation> = {
     services: 'خزمەتگوزاریەکان',
     products: 'بەرهەمەکان',
     contact: 'پەیوەندی',
-    shop: 'فرۆشگا',
+    shop: {
+      title: 'فرۆشگا',
+      lowStockWarning: 'تەنها {count} دانە ماوە!'
+    },
     
     // Common actions
     login: 'چوونەژوورەوە',
@@ -997,7 +1009,10 @@ export const translations: Record<Language, Translation> = {
     services: 'Hizmetler',
     products: 'Ürünler',
     contact: 'İletişim',
-    shop: 'Mağaza',
+    shop: {
+      title: 'Mağaza',
+      lowStockWarning: 'Sadece {count} adet kaldı!'
+    },
     
     // Common actions
     login: 'Giriş Yap',

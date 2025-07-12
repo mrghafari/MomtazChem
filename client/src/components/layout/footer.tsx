@@ -33,7 +33,7 @@ const Footer = () => {
   const companyLinks = [
     { name: t.about, href: "/about" },
     { name: t.services, href: "/services" },
-    { name: t.shop, href: "/shop" },
+    { name: t.shop.title, href: "/shop" },
     { name: "Careers", href: "#careers" },
   ];
 

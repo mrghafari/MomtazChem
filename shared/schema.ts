@@ -527,6 +527,91 @@ export const insertLeadActivitySchema = createInsertSchema(leadActivities).omit(
 export type InsertLeadActivity = z.infer<typeof insertLeadActivitySchema>;
 export type LeadActivity = typeof leadActivities.$inferSelect;
 
+// =============================================================================
+// INVENTORY THRESHOLD SETTINGS SCHEMA
+// =============================================================================
+
+// Inventory threshold settings for alert management
+export const inventoryThresholdSettings = pgTable("inventory_threshold_settings", {
+  id: serial("id").primaryKey(),
+  settingName: text("setting_name").notNull().unique(), // 'global_default', 'category_specific', etc.
+  lowStockThreshold: integer("low_stock_threshold").notNull().default(10), // First warning level
+  warningStockLevel: integer("warning_stock_level").notNull().default(5), // Critical warning level
+  
+  // Notification settings
+  emailEnabled: boolean("email_enabled").default(true),
+  smsEnabled: boolean("sms_enabled").default(true),
+  
+  // Manager contact information
+  managerEmail: text("manager_email").notNull().default("manager@momtazchem.com"),
+  managerPhone: text("manager_phone").notNull().default("+9647700000000"),
+  managerName: text("manager_name").notNull().default("مدیر انبار"),
+  
+  // Alert frequency settings
+  lowStockAlertSent: boolean("low_stock_alert_sent").default(false),
+  warningAlertSent: boolean("warning_alert_sent").default(false),
+  lastLowStockAlert: timestamp("last_low_stock_alert"),
+  lastWarningAlert: timestamp("last_warning_alert"),
+  
+  // Additional settings
+  checkFrequency: integer("check_frequency").default(60), // Check every N minutes
+  businessHoursOnly: boolean("business_hours_only").default(true),
+  weekendsEnabled: boolean("weekends_enabled").default(false),
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertInventoryThresholdSettingsSchema = createInsertSchema(inventoryThresholdSettings).omit({
+  id: true,
+  lowStockAlertSent: true,
+  warningAlertSent: true,
+  lastLowStockAlert: true,
+  lastWarningAlert: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertInventoryThresholdSettings = z.infer<typeof insertInventoryThresholdSettingsSchema>;
+export type InventoryThresholdSettings = typeof inventoryThresholdSettings.$inferSelect;
+
+// Inventory alert log for tracking sent notifications
+export const inventoryAlertLog = pgTable("inventory_alert_log", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  productName: text("product_name").notNull(),
+  alertType: text("alert_type").notNull(), // 'low_stock', 'warning_level'
+  currentStock: integer("current_stock").notNull(),
+  thresholdValue: integer("threshold_value").notNull(),
+  
+  // Notification details
+  emailSent: boolean("email_sent").default(false),
+  smsSent: boolean("sms_sent").default(false),
+  recipientEmail: text("recipient_email"),
+  recipientPhone: text("recipient_phone"),
+  
+  // Message content
+  emailContent: text("email_content"),
+  smsContent: text("sms_content"),
+  
+  // Delivery status
+  emailDelivered: boolean("email_delivered").default(false),
+  smsDelivered: boolean("sms_delivered").default(false),
+  deliveryErrors: text("delivery_errors"),
+  
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertInventoryAlertLogSchema = createInsertSchema(inventoryAlertLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertInventoryAlertLog = z.infer<typeof insertInventoryAlertLogSchema>;
+export type InventoryAlertLog = typeof inventoryAlertLog.$inferSelect;
+
 // Dashboard widget usage tracking
 export const dashboardWidgets = pgTable("dashboard_widgets", {
   id: serial("id").primaryKey(),

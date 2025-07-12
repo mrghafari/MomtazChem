@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Package, AlertTriangle, TrendingUp, Search, RefreshCw, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Package, AlertTriangle, TrendingUp, Search, RefreshCw, CheckCircle, XCircle, Settings, Save, Bell, Mail, MessageSquare } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -31,10 +33,38 @@ export default function UnifiedInventory() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [showOutOfStock, setShowOutOfStock] = useState(false);
+  
+  // Threshold settings state
+  const [thresholdSettings, setThresholdSettings] = useState({
+    settingName: 'global_default',
+    lowStockThreshold: 10,
+    warningStockLevel: 5,
+    emailEnabled: true,
+    smsEnabled: true,
+    managerEmail: 'manager@momtazchem.com',
+    managerPhone: '+9647700000000',
+    managerName: 'مدیر انبار',
+    checkFrequency: 60,
+    businessHoursOnly: true,
+    weekendsEnabled: false,
+    isActive: true
+  });
 
   // Fetch unified products
   const { data: products = [], isLoading, refetch } = useQuery({
     queryKey: ["/api/inventory/unified/products"],
+    retry: false,
+  });
+
+  // Fetch threshold settings
+  const { data: settingsData } = useQuery({
+    queryKey: ["/api/inventory/threshold-settings"],
+    retry: false,
+  });
+
+  // Fetch alerts log
+  const { data: alertsLog = [] } = useQuery({
+    queryKey: ["/api/inventory/alerts-log"],
     retry: false,
   });
 
@@ -79,6 +109,27 @@ export default function UnifiedInventory() {
       toast({
         title: "❌ System Test Failed",
         description: "There was an error testing the unified inventory system",
+        variant: "destructive",
+        duration: 3000
+      });
+    }
+  });
+
+  // Save threshold settings mutation
+  const saveThresholdSettingsMutation = useMutation({
+    mutationFn: (settings: any) => apiRequest("/api/inventory/threshold-settings", "POST", settings),
+    onSuccess: () => {
+      toast({
+        title: "✅ تنظیمات ذخیره شد",
+        description: "تنظیمات آستانه موجودی با موفقیت بروزرسانی شد",
+        duration: 3000
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/threshold-settings"] });
+    },
+    onError: () => {
+      toast({
+        title: "❌ خطا در ذخیره",
+        description: "خطا در ذخیره تنظیمات آستانه موجودی",
         variant: "destructive",
         duration: 3000
       });
@@ -216,6 +267,10 @@ export default function UnifiedInventory() {
           <TabsTrigger value="overview">نمای کلی</TabsTrigger>
           <TabsTrigger value="products">فهرست محصولات</TabsTrigger>
           <TabsTrigger value="alerts">هشدارها</TabsTrigger>
+          <TabsTrigger value="settings">
+            <Settings className="h-4 w-4 mr-2" />
+            تنظیمات آستانه
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -428,6 +483,257 @@ export default function UnifiedInventory() {
                   </div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                تنظیمات آستانه موجودی
+              </CardTitle>
+              <CardDescription>
+                تنظیم حدود هشدار موجودی و پیکربندی ارسال پیام و ایمیل به مدیر
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Threshold Levels */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="lowStockThreshold" className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    حد پایین (هشدار اولیه)
+                  </Label>
+                  <Input
+                    id="lowStockThreshold"
+                    type="number"
+                    value={thresholdSettings.lowStockThreshold}
+                    onChange={(e) => setThresholdSettings(prev => ({ 
+                      ...prev, 
+                      lowStockThreshold: parseInt(e.target.value) || 0 
+                    }))}
+                    placeholder="مثال: 10"
+                    className="text-right"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    وقتی موجودی به این حد برسد، هشدار اولیه ارسال می‌شود و در فروشگاه نمایش داده می‌شود
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="warningStockLevel" className="flex items-center gap-2">
+                    <XCircle className="h-4 w-4 text-red-500" />
+                    حد هشدار (بحرانی)
+                  </Label>
+                  <Input
+                    id="warningStockLevel"
+                    type="number"
+                    value={thresholdSettings.warningStockLevel}
+                    onChange={(e) => setThresholdSettings(prev => ({ 
+                      ...prev, 
+                      warningStockLevel: parseInt(e.target.value) || 0 
+                    }))}
+                    placeholder="مثال: 5"
+                    className="text-right"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    وقتی موجودی به این حد برسد، هشدار بحرانی فوری ارسال می‌شود
+                  </p>
+                </div>
+              </div>
+
+              {/* Notification Settings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">تنظیمات اطلاع‌رسانی</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Switch
+                      id="emailEnabled"
+                      checked={thresholdSettings.emailEnabled}
+                      onCheckedChange={(checked) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        emailEnabled: checked 
+                      }))}
+                    />
+                    <Label htmlFor="emailEnabled" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      ارسال ایمیل
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Switch
+                      id="smsEnabled"
+                      checked={thresholdSettings.smsEnabled}
+                      onCheckedChange={(checked) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        smsEnabled: checked 
+                      }))}
+                    />
+                    <Label htmlFor="smsEnabled" className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      ارسال پیامک
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Manager Contact Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">اطلاعات تماس مدیر</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="managerName">نام مدیر</Label>
+                    <Input
+                      id="managerName"
+                      value={thresholdSettings.managerName}
+                      onChange={(e) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        managerName: e.target.value 
+                      }))}
+                      placeholder="مدیر انبار"
+                      className="text-right"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="managerEmail">ایمیل مدیر</Label>
+                    <Input
+                      id="managerEmail"
+                      type="email"
+                      value={thresholdSettings.managerEmail}
+                      onChange={(e) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        managerEmail: e.target.value 
+                      }))}
+                      placeholder="manager@momtazchem.com"
+                      className="text-left"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="managerPhone">شماره موبایل مدیر</Label>
+                    <Input
+                      id="managerPhone"
+                      type="tel"
+                      value={thresholdSettings.managerPhone}
+                      onChange={(e) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        managerPhone: e.target.value 
+                      }))}
+                      placeholder="+9647700000000"
+                      className="text-left"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Advanced Settings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">تنظیمات پیشرفته</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="checkFrequency">فرکانس بررسی (دقیقه)</Label>
+                    <Input
+                      id="checkFrequency"
+                      type="number"
+                      value={thresholdSettings.checkFrequency}
+                      onChange={(e) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        checkFrequency: parseInt(e.target.value) || 60 
+                      }))}
+                      placeholder="60"
+                      className="text-right"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Switch
+                      id="businessHoursOnly"
+                      checked={thresholdSettings.businessHoursOnly}
+                      onCheckedChange={(checked) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        businessHoursOnly: checked 
+                      }))}
+                    />
+                    <Label htmlFor="businessHoursOnly">فقط ساعات کاری</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Switch
+                      id="weekendsEnabled"
+                      checked={thresholdSettings.weekendsEnabled}
+                      onCheckedChange={(checked) => setThresholdSettings(prev => ({ 
+                        ...prev, 
+                        weekendsEnabled: checked 
+                      }))}
+                    />
+                    <Label htmlFor="weekendsEnabled">شامل آخر هفته</Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <div className="pt-4 border-t">
+                <Button 
+                  onClick={() => saveThresholdSettingsMutation.mutate(thresholdSettings)}
+                  disabled={saveThresholdSettingsMutation.isPending}
+                  className="w-full md:w-auto"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {saveThresholdSettingsMutation.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Alerts Log */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                گزارش هشدارهای ارسال شده
+              </CardTitle>
+              <CardDescription>
+                آخرین هشدارهای موجودی ارسال شده به مدیر
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {alertsLog && alertsLog.data && alertsLog.data.length > 0 ? (
+                <div className="space-y-4">
+                  {alertsLog.data.slice(0, 10).map((alert: any) => (
+                    <div key={alert.id} className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-semibold">{alert.productName}</h4>
+                        <Badge variant={alert.alertType === 'warning_level' ? 'destructive' : 'warning'}>
+                          {alert.alertType === 'warning_level' ? 'بحرانی' : 'هشدار'}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <p>موجودی فعلی: {alert.currentStock} - حد آستانه: {alert.thresholdValue}</p>
+                        <p>ارسال شده در: {new Date(alert.sentAt).toLocaleDateString('fa-IR')}</p>
+                        <div className="flex gap-4">
+                          <span className={`${alert.emailSent ? 'text-green-600' : 'text-gray-400'}`}>
+                            ایمیل: {alert.emailSent ? '✓' : '✗'}
+                          </span>
+                          <span className={`${alert.smsSent ? 'text-green-600' : 'text-gray-400'}`}>
+                            پیامک: {alert.smsSent ? '✓' : '✗'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  هنوز هیچ هشداری ارسال نشده است
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

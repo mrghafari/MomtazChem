@@ -813,7 +813,7 @@ const Shop = () => {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between relative">
             <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-gray-900">{t.shop}</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{t.shop.title}</h1>
               
               {/* AI Recommendations Button - Left */}
               <Button 
@@ -1201,14 +1201,15 @@ const Shop = () => {
                           
 
 
-                          {/* Low Stock Warning */}
+                          {/* Low Stock Warning - Multilingual */}
                           {product.inStock && displayStock[product.id] && product.lowStockThreshold && 
                             displayStock[product.id] <= product.lowStockThreshold && (
                             <div className="mb-3 p-2 bg-orange-50 rounded-lg border border-orange-200">
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                              <div className="flex items-center gap-2" dir={direction}>
+                                <AlertTriangle className="w-4 h-4 text-orange-500 animate-pulse" />
                                 <span className="text-sm font-semibold text-orange-800">
-                                  تنها {displayStock[product.id] || 0} عدد باقی مانده!
+                                  {t.shop?.lowStockWarning?.replace('{count}', (displayStock[product.id] || 0).toString()) || 
+                                   `Only ${displayStock[product.id] || 0} items left!`}
                                 </span>
                               </div>
                             </div>
