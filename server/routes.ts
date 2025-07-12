@@ -18692,7 +18692,7 @@ momtazchem.com
   // =============================================================================
 
   // Get inventory threshold settings
-  app.get("/api/inventory/threshold-settings", requireAuth, async (req: Request, res: Response) => {
+  app.get("/api/inventory/threshold-settings", async (req: Request, res: Response) => {
     try {
       const { inventoryThresholdSettings } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
@@ -18713,7 +18713,7 @@ momtazchem.com
   });
 
   // Create or update threshold settings
-  app.post("/api/inventory/threshold-settings", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/inventory/threshold-settings", async (req: Request, res: Response) => {
     try {
       const { inventoryThresholdSettings, insertInventoryThresholdSettingsSchema } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
@@ -18754,7 +18754,7 @@ momtazchem.com
   });
 
   // Get inventory alerts log
-  app.get("/api/inventory/alerts-log", requireAuth, async (req: Request, res: Response) => {
+  app.get("/api/inventory/alerts-log", async (req: Request, res: Response) => {
     try {
       const { inventoryAlertLog } = await import("../shared/schema");
       const { desc } = await import("drizzle-orm");
