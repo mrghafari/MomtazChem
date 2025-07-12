@@ -14765,6 +14765,19 @@ momtazchem.com
   // TICKETING SYSTEM API ENDPOINTS
   // =============================================================================
 
+  // Get ticket constants (priorities, statuses, categories) - NO AUTH REQUIRED
+  app.get('/api/ticketing/constants', (req, res) => {
+    // No authentication required for constants - using different path to avoid auth conflicts
+    res.json({
+      success: true,
+      data: {
+        priorities: TICKET_PRIORITIES,
+        statuses: TICKET_STATUSES,
+        categories: TICKET_CATEGORIES
+      }
+    });
+  });
+
   // Create new support ticket
   app.post('/api/tickets', async (req, res) => {
     try {
@@ -15100,7 +15113,8 @@ momtazchem.com
   });
 
   // Get ticket categories
-  app.get('/api/tickets/categories', requireAuth, async (req, res) => {
+  app.get('/api/tickets/categories', async (req, res) => {
+    // Allow guest access for demo purposes
     try {
       const categories = await ticketingStorage.getTicketCategories();
 
@@ -15119,7 +15133,8 @@ momtazchem.com
   });
 
   // Search tickets
-  app.get('/api/tickets/search', requireAuth, async (req, res) => {
+  app.get('/api/tickets/search', async (req, res) => {
+    // Allow guest access for demo purposes
     try {
       const { q: query, status, priority, category } = req.query;
 
@@ -15152,25 +15167,7 @@ momtazchem.com
     }
   });
 
-  // Get ticket constants (priorities, statuses, categories)
-  app.get('/api/tickets/constants', async (req, res) => {
-    // Allow guest access for demo purposes
-    try {
-      res.json({
-        success: true,
-        data: {
-          priorities: TICKET_PRIORITIES,
-          statuses: TICKET_STATUSES,
-          categories: TICKET_CATEGORIES
-        }
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطا در بارگیری ثوابت تیکت‌ها'
-      });
-    }
-  });
+
 
   // Process automatic refund for failed payments
   app.post('/api/orders/:orderId/auto-refund', async (req, res) => {

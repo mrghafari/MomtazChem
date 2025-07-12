@@ -53,6 +53,22 @@ const responseSchema = z.object({
 type CreateTicketData = z.infer<typeof createTicketSchema>;
 type ResponseData = z.infer<typeof responseSchema>;
 
+// Define constants locally to bypass API issues
+const TICKET_PRIORITIES = ['low', 'normal', 'high', 'urgent', 'critical'] as const;
+const TICKET_STATUSES = ['open', 'in_progress', 'resolved', 'closed', 'on_hold'] as const;
+const TICKET_CATEGORIES = [
+  'technical_issue',
+  'feature_request', 
+  'bug_report',
+  'system_error',
+  'user_access',
+  'performance_issue',
+  'data_management',
+  'integration_issue',
+  'security_concern',
+  'other'
+] as const;
+
 // Helper functions for styling
 const getPriorityColor = (priority: string) => {
   switch (priority) {
@@ -122,9 +138,7 @@ export default function TicketingSystem() {
     queryKey: ['/api/tickets/stats/user'],
   });
 
-  const { data: constants } = useQuery({
-    queryKey: ['/api/tickets/constants'],
-  });
+
 
   // Mutations
   const createTicketMutation = useMutation({
