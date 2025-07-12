@@ -7503,9 +7503,51 @@ ${procedure.content}
           });
         };
 
-        const transporter = await createTransporter('admin');
-        const categorySettings = await emailStorage.getCategoryWithSettings('admin');
-        const smtp = categorySettings?.smtp;
+        // Determine the correct category for email routing based on inquiry category
+        let emailCategory = 'admin'; // Default fallback
+        
+        if (inquiry.category) {
+          // Map inquiry category to email category key
+          const categoryMap: { [key: string]: string } = {
+            'fuel-additives': 'fuel-additives',
+            'water-treatment': 'water-treatment', 
+            'paint-solvents': 'paint-solvents',
+            'agricultural-products': 'agricultural-products',
+            'agricultural-fertilizers': 'agricultural-fertilizers',
+            'industrial-chemicals': 'industrial-chemicals',
+            'paint-thinner': 'paint-thinner',
+            'technical-equipment': 'technical-equipment',
+            'commercial-goods': 'commercial-goods',
+            'general': 'admin',
+            'support': 'support'
+          };
+          
+          emailCategory = categoryMap[inquiry.category] || 'admin';
+          console.log(`📧 Inquiry response routing: inquiry category '${inquiry.category}' → email category '${emailCategory}'`);
+        }
+
+        // Try to get category-specific settings, fallback to admin if not found
+        let categorySettings, smtp, transporter;
+        
+        try {
+          categorySettings = await emailStorage.getCategoryWithSettings(emailCategory);
+          if (!categorySettings?.smtp) {
+            throw new Error(`No SMTP configuration found for category: ${emailCategory}`);
+          }
+          transporter = await createTransporter(emailCategory);
+          smtp = categorySettings.smtp;
+          console.log(`✅ Using SMTP settings for category '${emailCategory}': ${smtp.fromEmail}`);
+        } catch (categoryError) {
+          console.log(`❌ Category '${emailCategory}' not configured, falling back to admin: ${categoryError.message}`);
+          // Fallback to admin category
+          categorySettings = await emailStorage.getCategoryWithSettings('admin');
+          if (!categorySettings?.smtp) {
+            throw new Error('No SMTP configuration found for admin fallback category');
+          }
+          transporter = await createTransporter('admin');
+          smtp = categorySettings.smtp;
+          console.log(`✅ Using fallback admin SMTP settings: ${smtp.fromEmail}`);
+        }
 
         if (smtp) {
           // Send follow-up email to customer

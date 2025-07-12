@@ -368,11 +368,62 @@ export interface ProductInquiryData {
 
 export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): Promise<void> {
   try {
-    const transporter = await createTransporter('product_inquiries');
-    const categorySettings = await emailStorage.getCategoryWithSettings('product_inquiries');
+    // Determine the correct category for email routing based on inquiry category
+    let emailCategory = 'product_inquiries'; // Default for backward compatibility
     
-    if (!categorySettings?.smtp || !categorySettings.recipients?.length) {
-      throw new Error('No email configuration found for product inquiries');
+    if (inquiryData.category) {
+      // Map inquiry category to email category key
+      const categoryMap: { [key: string]: string } = {
+        'fuel-additives': 'fuel-additives',
+        'water-treatment': 'water-treatment', 
+        'paint-solvents': 'paint-solvents',
+        'agricultural-products': 'agricultural-products',
+        'agricultural-fertilizers': 'agricultural-fertilizers',
+        'industrial-chemicals': 'industrial-chemicals',
+        'paint-thinner': 'paint-thinner',
+        'technical-equipment': 'technical-equipment',
+        'commercial-goods': 'commercial-goods',
+        'general': 'product_inquiries',
+        'support': 'support'
+      };
+      
+      emailCategory = categoryMap[inquiryData.category] || 'product_inquiries';
+      console.log(`📧 Product inquiry routing: inquiry category '${inquiryData.category}' → email category '${emailCategory}'`);
+    }
+
+    // Try to get category-specific settings, fallback to product_inquiries, then admin
+    let transporter, categorySettings;
+    
+    try {
+      transporter = await createTransporter(emailCategory);
+      categorySettings = await emailStorage.getCategoryWithSettings(emailCategory);
+      
+      if (!categorySettings?.smtp || !categorySettings.recipients?.length) {
+        throw new Error(`No email configuration found for category: ${emailCategory}`);
+      }
+      console.log(`✅ Using SMTP settings for category '${emailCategory}': ${categorySettings.smtp.fromEmail}`);
+    } catch (categoryError) {
+      console.log(`❌ Category '${emailCategory}' not configured, falling back to product_inquiries: ${categoryError.message}`);
+      try {
+        // Fallback to product_inquiries category
+        transporter = await createTransporter('product_inquiries');
+        categorySettings = await emailStorage.getCategoryWithSettings('product_inquiries');
+        
+        if (!categorySettings?.smtp || !categorySettings.recipients?.length) {
+          throw new Error('No email configuration found for product_inquiries fallback');
+        }
+        console.log(`✅ Using fallback product_inquiries SMTP settings: ${categorySettings.smtp.fromEmail}`);
+      } catch (fallbackError) {
+        console.log(`❌ Product_inquiries fallback failed, using admin: ${fallbackError.message}`);
+        // Final fallback to admin category
+        transporter = await createTransporter('admin');
+        categorySettings = await emailStorage.getCategoryWithSettings('admin');
+        
+        if (!categorySettings?.smtp || !categorySettings.recipients?.length) {
+          throw new Error('No email configuration found for any category including admin');
+        }
+        console.log(`✅ Using final admin fallback SMTP settings: ${categorySettings.smtp.fromEmail}`);
+      }
     }
 
     const smtp = categorySettings.smtp;
