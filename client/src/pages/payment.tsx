@@ -102,7 +102,7 @@ export default function Payment() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'IQD',
     }).format(amount);
   };
 

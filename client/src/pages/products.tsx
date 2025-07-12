@@ -1425,9 +1425,7 @@ export default function ProductsPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="IQD">IQD</SelectItem>
-                              <SelectItem value="USD">USD</SelectItem>
-                              <SelectItem value="EUR">EUR</SelectItem>
+                              <SelectItem value="IQD">IQD (دینار عراقی)</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
