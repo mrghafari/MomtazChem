@@ -395,6 +395,9 @@ export default function ProductsPage() {
   });
 
   const onSubmit = (data: InsertShowcaseProduct) => {
+    console.log('Form data:', data);
+    console.log('Tags in form data:', data.tags);
+    
     // Convert numeric fields to strings for API compatibility
     const processedData = {
       ...data,
@@ -411,7 +414,7 @@ export default function ProductsPage() {
         : [],
       tags: typeof data.tags === 'string' && data.tags.trim()
         ? data.tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
-        : [],
+        : ["شیمیایی"],
       // Handle specifications - try to parse as JSON if possible, otherwise keep as string
       specifications: (() => {
         if (!data.specifications || typeof data.specifications !== 'string') return {};
@@ -1304,7 +1307,12 @@ export default function ProductsPage() {
                         <FormControl>
                           <Input 
                             placeholder="Enter tags separated by commas (e.g., شیمیایی, صنعتی, پاک‌کننده)" 
-                            {...field} 
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              console.log('Tags input changed:', e.target.value);
+                              field.onChange(e.target.value);
+                            }}
                           />
                         </FormControl>
                         <div className="text-xs text-muted-foreground">
