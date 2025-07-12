@@ -34,6 +34,7 @@ const formSchema = insertShowcaseProductSchema.extend({
   // Text fields for array handling
   features: z.string().optional(),
   applications: z.string().optional(),
+  tags: z.string().optional(), // Tags as comma-separated string
   // Variant fields
   isVariant: z.boolean().default(false),
   parentProductId: z.number().optional(),
@@ -408,6 +409,9 @@ export default function ProductsPage() {
       applications: typeof data.applications === 'string' && data.applications.trim()
         ? data.applications.split('\n').map(a => a.trim()).filter(a => a.length > 0)
         : [],
+      tags: typeof data.tags === 'string' && data.tags.trim()
+        ? data.tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
+        : [],
       // Handle specifications - try to parse as JSON if possible, otherwise keep as string
       specifications: (() => {
         if (!data.specifications || typeof data.specifications !== 'string') return {};
@@ -586,6 +590,7 @@ export default function ProductsPage() {
       features: Array.isArray(product.features) ? product.features.join('\n') : (product.features || ""),
       applications: Array.isArray(product.applications) ? product.applications.join('\n') : (product.applications || ""),
       specifications: typeof product.specifications === 'object' && product.specifications !== null ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
+      tags: Array.isArray(product.tags) ? product.tags.join(', ') : (product.tags || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
       stockQuantity: Number(product.stockQuantity) ?? 0,
@@ -1285,6 +1290,26 @@ export default function ProductsPage() {
                             {...field} 
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="tags"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tags (برچسب‌ها)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter tags separated by commas (e.g., شیمیایی, صنعتی, پاک‌کننده)" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <div className="text-xs text-muted-foreground">
+                          برچسب‌ها را با کاما از هم جدا کنید. این برچسب‌ها در فروشگاه نمایش داده خواهند شد.
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}

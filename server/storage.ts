@@ -195,6 +195,9 @@ export class DatabaseStorage implements IStorage {
     if (productUpdate.certifications !== undefined) {
       updateData.certifications = Array.isArray(productUpdate.certifications) && productUpdate.certifications.length > 0 ? productUpdate.certifications : null;
     }
+    if (productUpdate.tags !== undefined) {
+      updateData.tags = Array.isArray(productUpdate.tags) && productUpdate.tags.length > 0 ? productUpdate.tags : ["شیمیایی"];
+    }
 
     const [product] = await showcaseDb
       .update(showcaseProducts)
@@ -274,6 +277,7 @@ export class DatabaseStorage implements IStorage {
           lowStockThreshold: showcaseProduct.minStockLevel || 10,
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : null,
           isActive: showcaseProduct.isActive,
+          tags: showcaseProduct.tags || ["شیمیایی"],
         });
       } else {
         // Create new shop product with real inventory data
@@ -290,6 +294,7 @@ export class DatabaseStorage implements IStorage {
           isActive: showcaseProduct.isActive,
           isFeatured: false,
           visibleInShop: showcaseProduct.syncWithShop || false,
+          tags: showcaseProduct.tags || ["شیمیایی"],
         });
       }
     } catch (error) {

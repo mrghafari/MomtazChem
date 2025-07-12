@@ -67,7 +67,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   barcode: text("barcode").unique(), // Main product barcode (EAN-13, UPC, etc.)
   qrCode: text("qr_code"), // QR code data for additional product information
   sku: text("sku").unique(), // Stock Keeping Unit
-  tags: text("tags").default('["شیمیایی"]'), // Product tags
+  tags: json("tags").default(["شیمیایی"]), // Product tags
   isActive: boolean("is_active").default(true),
   displayOrder: integer("display_order").default(0), // For ordering on website
   syncWithShop: boolean("sync_with_shop").default(true), // Whether to include in shop sync process
