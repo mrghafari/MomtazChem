@@ -33,7 +33,7 @@ export default function AdminLogin() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: (data: LoginForm) => apiRequest("/api/admin/login", "POST", data),
+    mutationFn: (data: LoginForm) => apiRequest("/api/admin/login", { method: "POST", body: data }),
     onSuccess: async (response) => {
       console.log("Login response:", response);
       
