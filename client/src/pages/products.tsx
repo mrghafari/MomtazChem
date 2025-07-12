@@ -222,6 +222,7 @@ export default function ProductsPage() {
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) => {
       console.log('🌐 [DEBUG] Making API request to update product:', id);
       console.log('🌐 [DEBUG] API request data:', JSON.stringify(data, null, 2));
+      console.log('🌐 [DEBUG] API URL:', `/api/products/${id}`);
       return apiRequest(`/api/products/${id}`, "PUT", data);
     },
     onSuccess: (result) => {
