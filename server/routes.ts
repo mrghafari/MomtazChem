@@ -14766,30 +14766,30 @@ momtazchem.com
   // =============================================================================
 
   // Create new support ticket
-  app.post('/api/tickets', requireAuth, async (req, res) => {
+  app.post('/api/tickets', async (req, res) => {
     try {
       const validatedData = insertSupportTicketSchema.parse(req.body);
       const adminId = req.session.adminId;
-      const user = req.session.user;
+      const customerId = req.session.customerId;
 
-      if (!adminId && !user) {
+      if (!adminId && !customerId) {
         return res.status(401).json({ 
           success: false, 
           message: "Authentication required to create tickets" 
         });
       }
 
-      // Use admin info or user info
+      // Use admin info or customer info
       const submitterInfo = adminId ? {
         submittedBy: adminId,
         submitterName: req.session.adminName || 'Admin User',
         submitterEmail: req.session.adminEmail || 'admin@momtazchem.com',
         submitterDepartment: req.session.adminDepartment || 'Administration'
       } : {
-        submittedBy: user.id,
-        submitterName: user.firstName + ' ' + user.lastName,
-        submitterEmail: user.email,
-        submitterDepartment: user.department || 'Site Management'
+        submittedBy: customerId,
+        submitterName: req.session.customerEmail || 'Customer',
+        submitterEmail: req.session.customerEmail || 'customer@momtazchem.com',
+        submitterDepartment: 'Customer'
       };
 
       const ticketData = {
@@ -14817,7 +14817,14 @@ momtazchem.com
   });
 
   // Get all tickets (admin view)
-  app.get('/api/tickets', requireAuth, async (req, res) => {
+  app.get('/api/tickets', async (req, res) => {
+    // Check authentication for either admin or customer
+    if (!req.session.adminId && !req.session.customerId) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "احراز هویت مورد نیاز است" 
+      });
+    }
     try {
       const { 
         status, 
@@ -14856,13 +14863,13 @@ momtazchem.com
   });
 
   // Get tickets for current user
-  app.get('/api/tickets/my-tickets', requireAuth, async (req, res) => {
+  app.get('/api/tickets/my-tickets', async (req, res) => {
     try {
       const { limit = 50, offset = 0 } = req.query;
       const adminId = req.session.adminId;
-      const user = req.session.user;
+      const customerId = req.session.customerId;
 
-      const userId = adminId || user?.id;
+      const userId = adminId || customerId;
       if (!userId) {
         return res.status(401).json({ 
           success: false, 
@@ -15061,7 +15068,14 @@ momtazchem.com
   });
 
   // Get ticket statistics
-  app.get('/api/tickets/stats/overview', requireAuth, async (req, res) => {
+  app.get('/api/tickets/stats/overview', async (req, res) => {
+    // Check authentication for either admin or customer
+    if (!req.session.adminId && !req.session.customerId) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "احراز هویت مورد نیاز است" 
+      });
+    }
     try {
       const stats = await ticketingStorage.getTicketStats();
 
@@ -15080,11 +15094,11 @@ momtazchem.com
   });
 
   // Get user ticket statistics
-  app.get('/api/tickets/stats/user', requireAuth, async (req, res) => {
+  app.get('/api/tickets/stats/user', async (req, res) => {
     try {
       const adminId = req.session.adminId;
-      const user = req.session.user;
-      const userId = adminId || user?.id;
+      const customerId = req.session.customerId;
+      const userId = adminId || customerId;
 
       if (!userId) {
         return res.status(401).json({ 
@@ -15164,6 +15178,13 @@ momtazchem.com
 
   // Get ticket constants (priorities, statuses, categories)
   app.get('/api/tickets/constants', async (req, res) => {
+    // Check authentication for either admin or customer
+    if (!req.session.adminId && !req.session.customerId) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "احراز هویت مورد نیاز است" 
+      });
+    }
     try {
       res.json({
         success: true,
