@@ -226,13 +226,13 @@ export default function ProductsPage() {
     onSuccess: (result) => {
       console.log('✅ [DEBUG] Update mutation successful, result:', result);
       
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      
       // Close dialog and reset form
       setDialogOpen(false);
       setEditingProduct(null);
       form.reset();
+      
+      // Refresh products list to ensure UI is in sync
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       
       toast({
         title: "موفقیت",
@@ -241,15 +241,18 @@ export default function ProductsPage() {
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Update mutation failed:', error);
-      console.error('❌ [DEBUG] Error details:', {
-        message: error.message,
-        status: error.status,
-        statusText: error.statusText,
-        stack: error.stack
-      });
+      
+      // Show user-friendly error message
+      let errorMessage = "بروزرسانی محصول ناموفق بود";
+      if (error.message?.includes("already exists")) {
+        errorMessage = "کد SKU تکراری است، لطفاً کد جدید وارد کنید";
+      } else if (error.message?.includes("authentication") || error.message?.includes("احراز هویت")) {
+        errorMessage = "لطفاً مجدداً وارد شوید";
+      }
+      
       toast({
         title: "خطا",
-        description: error.message || "بروزرسانی محصول ناموفق بود",
+        description: errorMessage,
         variant: "destructive",
       });
     },

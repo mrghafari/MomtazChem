@@ -241,22 +241,24 @@ const upload = multer({
 
 // Admin authentication middleware
 const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('Auth check:', {
-    isAuthenticated: req.session.isAuthenticated,
-    adminId: req.session.adminId,
-    sessionId: req.sessionID,
-    sessionData: JSON.stringify(req.session)
-  });
-  
-  // Session tracking handled by express-session middleware
-  
-  // More robust authentication check
+  // More robust authentication check with session validation
   if (req.session && req.session.isAuthenticated === true && req.session.adminId) {
-    // Session activity tracking disabled for now
+    console.log(`✅ Authentication successful for admin ${req.session.adminId}`);
     next();
   } else {
     console.log('Authentication failed for:', req.path);
-    res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+    
+    // Clear any invalid session data
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) console.error('Session destruction error:', err);
+      });
+    }
+    
+    res.status(401).json({ 
+      success: false, 
+      message: "احراز هویت مورد نیاز است" 
+    });
   }
 };
 
@@ -1855,7 +1857,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = req.body;
-      console.log(`📝 [DEBUG] Updating showcase product ${id} with raw data:`, JSON.stringify(productData, null, 2));
+      
+      // Validate required fields
+      if (!productData.name || productData.name.trim() === '') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "نام محصول اجباری است" 
+        });
+      }
+      
+      // Validate numerical fields
+      if (productData.stockQuantity !== undefined && (isNaN(productData.stockQuantity) || productData.stockQuantity < 0)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "مقدار موجودی باید عدد مثبت باشد" 
+        });
+      }
+      
+      if (productData.unitPrice !== undefined && (isNaN(parseFloat(productData.unitPrice)) || parseFloat(productData.unitPrice) < 0)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "قیمت باید عدد مثبت باشد" 
+        });
+      }
+      
+      console.log(`📝 [DEBUG] Updating showcase product ${id} with validated data`);
       console.log(`📝 [DEBUG] Tags field:`, productData.tags, 'Type:', typeof productData.tags);
       
       // Update showcase product
@@ -1890,7 +1916,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               minStockLevel: product.minStockLevel || 5,
               maxStockLevel: product.maxStockLevel || 100,
               showWhenOutOfStock: productData.showWhenOutOfStock || false,
-              sku: product.sku || `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+              sku: product.sku && !existingShopProducts.some(sp => sp.sku === product.sku) 
+                ? product.sku 
+                : `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
               barcode: product.barcode,
               imageUrls: product.imageUrl ? [product.imageUrl] : [],
               specifications: product.specifications || {},
@@ -1926,7 +1954,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ محصول در فروشگاه به‌روزرسانی شد: ${product.name}`);
           }
         } catch (syncError) {
-          console.error(`❌ خطا در sync کردن محصول ${product.name}:`, syncError);
+          console.error(`❌ خطا در sync کردن محصول ${product.name}:`, syncError.message);
+          // Continue with the product update even if shop sync fails
         }
       } else if (productData.syncWithShop === false) {
         console.log(`🔒 محصول از فروشگاه مخفی شد: ${product.name}`);
@@ -1940,29 +1969,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await shopStorage.deleteShopProduct(existingShopProduct.id);
             console.log(`🗑️  محصول از فروشگاه حذف شد: ${product.name}`);
           }
-        } catch (removeError) {
-          console.error(`❌ خطا در حذف محصول ${product.name} از فروشگاه:`, removeError);
+        } catch (removeError: any) {
+          console.error(`❌ خطا در حذف محصول ${product.name} از فروشگاه:`, removeError.message);
+          // Continue with the product update even if shop removal fails
         }
       }
       
       const responseProduct = product;
       
       res.json(responseProduct);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating showcase product:", error);
+      
+      // Handle specific database errors with Persian messages
+      let errorMessage = "خطای داخلی سرور";
+      let statusCode = 500;
+      
       if (error instanceof z.ZodError) {
-        res.status(400).json({ 
-          success: false, 
-          message: "Invalid product data", 
-          errors: error.errors 
-        });
-      } else {
-        res.status(500).json({ 
-          success: false, 
-          message: "Internal server error",
-          error: error instanceof Error ? error.message : String(error)
-        });
+        statusCode = 400;
+        errorMessage = "داده‌های نامعتبر ارسال شده";
+      } else if (error.code === '23505') { // Unique constraint violation
+        statusCode = 400;
+        if (error.constraint?.includes('sku')) {
+          errorMessage = "کد SKU تکراری است";
+        } else if (error.constraint?.includes('barcode')) {
+          errorMessage = "بارکد تکراری است";
+        } else {
+          errorMessage = "مقدار تکراری وجود دارد";
+        }
+      } else if (error.code === '23503') { // Foreign key violation
+        statusCode = 400;
+        errorMessage = "مرجع نامعتبر";
+      } else if (error.code === '23514') { // Check constraint violation
+        statusCode = 400;
+        errorMessage = "مقدار نامعتبر وارد شده";
+      } else if (error.message?.includes('authentication')) {
+        statusCode = 401;
+        errorMessage = "احراز هویت مورد نیاز است";
       }
+      
+      res.status(statusCode).json({ 
+        success: false, 
+        message: errorMessage
+      });
     }
   });
 
