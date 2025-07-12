@@ -481,7 +481,7 @@ export default function AdvancedEmailSettingsPage() {
                   <p className="text-sm text-gray-600">{category.description}</p>
                   <div className="mt-2 flex gap-2">
                     <Badge variant="outline" className="text-xs">
-                      {category.recipients.length} recipients
+                      {category.recipients?.length || 0} recipients
                     </Badge>
                     <Badge variant="outline" className="text-xs">
                       {category.smtp ? "SMTP configured" : "No SMTP"}
