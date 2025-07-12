@@ -207,6 +207,8 @@ export default function TicketingSystemFixed() {
       if (selectedTicket) {
         queryClient.invalidateQueries({ queryKey: [`/api/tickets/${selectedTicket.id}`] });
       }
+      // Reset the form after successful response
+      responseForm.reset();
       toast({
         title: "موفقیت",
         description: "پاسخ اضافه شد",
@@ -246,7 +248,7 @@ export default function TicketingSystemFixed() {
         message: data.message,
         isInternal: data.isInternal,
       });
-      responseForm.reset();
+      // Form reset is now handled in onSuccess callback
     }
   };
 
