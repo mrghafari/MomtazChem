@@ -832,17 +832,7 @@ ${optionalFields}^XZ`;
                             websiteText={labelOptions.websiteText}
                           />
                         </div>
-                        <div className="text-xs text-gray-600 space-y-1">
-                          {labelOptions.includePrice && (
-                            <div className="font-medium text-green-600">{priceText}</div>
-                          )}
-                          {labelOptions.includeSKU && (
-                            <div>SKU: {product.sku || 'N/A'}</div>
-                          )}
-                          {labelOptions.includeWebsite && (
-                            <div className="text-blue-600">{labelOptions.websiteText}</div>
-                          )}
-                        </div>
+                        {/* اطلاعات اضافی در VisualBarcode component نمایش داده می‌شود */}
                       </div>
                     );
                   })}
