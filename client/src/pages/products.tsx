@@ -1508,23 +1508,40 @@ export default function ProductsPage() {
                       <FormLabel>SKU</FormLabel>
                       <div className="flex gap-2">
                         <FormControl>
-                          <Input placeholder="Enter SKU" {...field} />
+                          <Input 
+                            placeholder="Enter SKU" 
+                            {...field} 
+                            readOnly={!!field.value && editingProduct}
+                            className={!!field.value && editingProduct ? "bg-gray-100 cursor-not-allowed" : ""}
+                          />
                         </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={generateSmartSKU}
-                          disabled={generateSKUMutation.isPending}
-                          className="whitespace-nowrap"
-                        >
-                          {generateSKUMutation.isPending ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          ) : (
-                            "🤖 AI SKU"
-                          )}
-                        </Button>
+                        {(!field.value || !editingProduct) && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={generateSmartSKU}
+                            disabled={generateSKUMutation.isPending}
+                            className="whitespace-nowrap"
+                          >
+                            {generateSKUMutation.isPending ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            ) : (
+                              "🤖 AI SKU"
+                            )}
+                          </Button>
+                        )}
+                        {field.value && editingProduct && (
+                          <div className="flex items-center text-sm text-green-600 px-3 py-2 bg-green-50 rounded border">
+                            ✓ قفل شده
+                          </div>
+                        )}
                       </div>
+                      {field.value && editingProduct && (
+                        <p className="text-xs text-muted-foreground">
+                          SKU بعد از تولید قابل تغییر نیست
+                        </p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
