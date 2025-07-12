@@ -644,7 +644,7 @@ function TicketList({
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {new Date(ticket.createdAt).toLocaleDateString('fa-IR')}
+                    {new Date(ticket.createdAt).toLocaleDateString('en-US')}
                   </div>
                   {ticket.department && (
                     <div className="flex items-center gap-1">
@@ -659,7 +659,7 @@ function TicketList({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onTicketSelectranslate(ticket)}
+                  onClick={() => setSelectedTicket(ticket)}
                   className="flex items-center gap-1"
                 >
                   <Eye className="w-4 h-4" />
