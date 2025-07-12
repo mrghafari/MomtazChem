@@ -21,6 +21,38 @@ export default function SiteManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // Function to track button clicks and sort by usage
+  const trackButtonClick = (buttonId: string, action: () => void) => {
+    // Get current click counts from localStorage
+    const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
+    
+    // Increment click count for this button
+    clickCounts[buttonId] = (clickCounts[buttonId] || 0) + 1;
+    
+    // Save updated counts
+    localStorage.setItem('site-management-click-counts', JSON.stringify(clickCounts));
+    
+    // Execute the original action
+    action();
+    
+    // Re-sort buttons based on new usage data
+    setTimeout(() => {
+      const updatedButtons = sortButtonsByUsage(getInitialButtons());
+      setButtons(updatedButtons);
+    }, 100);
+  };
+
+  // Function to sort buttons by usage frequency
+  const sortButtonsByUsage = (initialButtons: QuickActionButton[]): QuickActionButton[] => {
+    const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
+    
+    return [...initialButtons].sort((a, b) => {
+      const aClicks = clickCounts[a.id] || 0;
+      const bClicks = clickCounts[b.id] || 0;
+      return bClicks - aClicks; // Sort in descending order (most clicked first)
+    });
+  };
+
   // Fetch active users data - removed automatic refresh
   const { data: activeUsersData, isLoading: isLoadingActiveUsers, refetch: refetchActiveUsers, error } = useQuery({
     queryKey: ['/api/active-users'],
@@ -34,180 +66,183 @@ export default function SiteManagement() {
       id: "shop",
       label: "Shop",
       icon: DollarSign,
-      onClick: () => setLocation("/admin/shop"),
+      onClick: () => trackButtonClick("shop", () => setLocation("/admin/shop")),
       className: "border-purple-300 text-purple-600 hover:bg-purple-50"
     },
     {
       id: "products",
-      label: "Products",
+      label: "Products", 
       icon: Box,
-      onClick: () => setLocation("/admin/products"),
+      onClick: () => trackButtonClick("products", () => setLocation("/admin/products")),
       className: "border-violet-300 text-violet-600 hover:bg-violet-50"
     },
     {
       id: "order-management",
       label: "Order Management",
       icon: Truck,
-      onClick: () => setLocation("/admin/finance-orders"),
+      onClick: () => trackButtonClick("order-management", () => setLocation("/admin/finance-orders")),
       className: "border-orange-300 text-orange-600 hover:bg-orange-50"
     },
     {
       id: "inventory-management",
       label: "Inventory Management",
       icon: Calculator,
-      onClick: () => setLocation("/admin/inventory-management"),
+      onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
     },
-    // Row 2: Customer and business management
     {
       id: "inquiries",
       label: "Inquiries",
       icon: BarChart3,
-      onClick: () => setLocation("/admin/inquiries"),
+      onClick: () => trackButtonClick("inquiries", () => setLocation("/admin/inquiries")),
       className: "border-amber-300 text-amber-600 hover:bg-amber-50"
     },
     {
       id: "crm",
       label: "CRM",
       icon: Users,
-      onClick: () => setLocation("/crm"),
+      onClick: () => trackButtonClick("crm", () => setLocation("/crm")),
       className: "border-pink-300 text-pink-600 hover:bg-pink-50"
     },
     {
       id: "barcode",
       label: "Barcode",
       icon: QrCode,
-      onClick: () => setLocation("/admin/barcode-inventory"),
+      onClick: () => trackButtonClick("barcode", () => setLocation("/admin/barcode-inventory")),
       className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50"
     },
     {
       id: "email-settings",
       label: "Email Settings",
       icon: Mail,
-      onClick: () => setLocation("/admin/advanced-email-settings"),
+      onClick: () => trackButtonClick("email-settings", () => setLocation("/admin/advanced-email-settings")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
     },
-    // Row 3: System administration
     {
       id: "database-backup",
       label: "Database Backup",
       icon: Database,
-      onClick: () => setLocation("/admin/database-management"),
+      onClick: () => trackButtonClick("database-backup", () => setLocation("/admin/database-management")),
       className: "border-slate-300 text-slate-600 hover:bg-slate-50"
     },
     {
       id: "seo",
       label: "SEO",
       icon: Globe,
-      onClick: () => setLocation("/seo-management"),
+      onClick: () => trackButtonClick("seo", () => setLocation("/seo-management")),
       className: "border-purple-300 text-purple-600 hover:bg-purple-50"
     },
     {
       id: "categories",
       label: "Categories",
       icon: Package,
-      onClick: () => setLocation("/category-management"),
+      onClick: () => trackButtonClick("categories", () => setLocation("/category-management")),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50"
     },
     {
       id: "sms",
       label: "SMS",
       icon: MessageSquare,
-      onClick: () => setLocation("/admin/sms-management"),
+      onClick: () => trackButtonClick("sms", () => setLocation("/admin/sms-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50"
     },
-    // Row 4: Manufacturing and operations
     {
       id: "factory",
       label: "Factory",
       icon: Factory,
-      onClick: () => setLocation("/admin/factory-management"),
+      onClick: () => trackButtonClick("factory", () => setLocation("/admin/factory-management")),
       className: "border-purple-300 text-purple-600 hover:bg-purple-50"
     },
     {
       id: "super-admin",
       label: "Super Admin",
       icon: UserCog,
-      onClick: () => setLocation("/admin/super-admin-settings"),
+      onClick: () => trackButtonClick("super-admin", () => setLocation("/admin/super-admin-settings")),
       className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50"
     },
     {
       id: "user-management",
       label: "User Management",
       icon: Users2,
-      onClick: () => setLocation("/admin/user-management"),
+      onClick: () => trackButtonClick("user-management", () => setLocation("/admin/user-management")),
       className: "border-red-300 text-red-600 hover:bg-red-50"
     },
     {
       id: "procedures",
       label: "Procedures",
       icon: BookOpen,
-      onClick: () => setLocation("/admin/procedures-management"),
+      onClick: () => trackButtonClick("procedures", () => setLocation("/admin/procedures-management")),
       className: "border-amber-300 text-amber-600 hover:bg-amber-50"
     },
-    // Row 5: Technical tools
     {
       id: "smtp-test",
       label: "SMTP Test",
       icon: TestTube,
-      onClick: () => setLocation("/admin/smtp-test"),
+      onClick: () => trackButtonClick("smtp-test", () => setLocation("/admin/smtp-test")),
       className: "border-sky-300 text-sky-600 hover:bg-sky-50"
     },
     {
       id: "payment-settings",
       label: "Payment Settings",
       icon: CreditCard,
-      onClick: () => setLocation("/admin/payment-settings"),
+      onClick: () => trackButtonClick("payment-settings", () => setLocation("/admin/payment-settings")),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50"
     },
     {
       id: "wallet-management",
       label: "Wallet Management",
       icon: Wallet,
-      onClick: () => setLocation("/admin/wallet-management"),
+      onClick: () => trackButtonClick("wallet-management", () => setLocation("/admin/wallet-management")),
       className: "border-yellow-300 text-yellow-600 hover:bg-yellow-50"
     },
     {
       id: "geography-analytics",
       label: "Geography Analytics",
       icon: MapPin,
-      onClick: () => setLocation("/sales-analytics"),
+      onClick: () => trackButtonClick("geography-analytics", () => setLocation("/sales-analytics")),
       className: "border-teal-300 text-teal-600 hover:bg-teal-50"
     },
-    // Row 6: Advanced features
     {
       id: "ai-settings",
       label: "AI Settings",
       icon: Zap,
-      onClick: () => setLocation("/admin/ai-settings"),
+      onClick: () => trackButtonClick("ai-settings", () => setLocation("/admin/ai-settings")),
       className: "border-purple-300 text-purple-600 hover:bg-purple-50"
     },
     {
       id: "refresh-control",
       label: "Refresh Control",
       icon: RefreshCw,
-      onClick: () => setLocation("/admin/global-refresh-settings"),
+      onClick: () => trackButtonClick("refresh-control", () => setLocation("/admin/global-refresh-settings")),
       className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50"
     },
     {
       id: "department-users",
       label: "Department Users",
       icon: Users,
-      onClick: () => setLocation("/admin/department-users"),
+      onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
     },
     {
       id: "content-management",
       label: "Content Management",
       icon: Edit3,
-      onClick: () => setLocation("/content-management"),
+      onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50"
     }
   ];
 
-  // State for drag and drop functionality
+  // State for drag and drop functionality with usage-based sorting
   const [buttons, setButtons] = useState<QuickActionButton[]>(() => {
     const savedOrder = localStorage.getItem('site-management-button-order');
+    const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
+    
+    // Always start with usage-sorted buttons if we have click data
+    if (Object.keys(clickCounts).length > 0) {
+      return sortButtonsByUsage(getInitialButtons());
+    }
+    
+    // Otherwise use saved order or default
     if (savedOrder) {
       try {
         const savedButtonIds = JSON.parse(savedOrder);
@@ -272,6 +307,43 @@ export default function SiteManagement() {
                 Comprehensive website management and configuration
               </p>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
+                const sorted = Object.entries(clickCounts)
+                  .sort(([,a], [,b]) => (b as number) - (a as number))
+                  .slice(0, 5);
+                
+                toast({
+                  title: "پرکاربردترین ابزارها",
+                  description: sorted.length ? sorted.map(([id, count]) => `${id}: ${count} کلیک`).join('\n') : "هنوز آماری ثبت نشده",
+                });
+              }}
+              className="text-xs"
+            >
+              <BarChart3 className="w-3 h-3 mr-1" />
+              آمار استفاده
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                localStorage.removeItem('site-management-click-counts');
+                setButtons(getInitialButtons());
+                toast({
+                  title: "آمار بازنشانی شد",
+                  description: "ترتیب بلوک‌ها به حالت پیش‌فرض بازگشت",
+                });
+              }}
+              className="text-xs"
+            >
+              <RefreshCw className="w-3 h-3 mr-1" />
+              بازنشانی آمار
+            </Button>
           </div>
         </div>
 
