@@ -215,7 +215,7 @@ export default function TicketingSystem() {
         message: data.message,
         isInternal: data.isInternal,
       });
-      responseForm.resetranslate();
+      responseForm.reset();
     }
   };
 
@@ -227,8 +227,8 @@ export default function TicketingSystem() {
     if (!tickets) return [];
     
     return tickets.filter(ticket => {
-      const matchesStatus = !filterStatus || ticket.status === filterStatus;
-      const matchesPriority = !filterPriority || ticket.priority === filterPriority;
+      const matchesStatus = !filterStatus || filterStatus === 'all' || ticket.status === filterStatus;
+      const matchesPriority = !filterPriority || filterPriority === 'all' || ticket.priority === filterPriority;
       const matchesSearch = !searchQuery || 
         ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ticket.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase());
@@ -470,7 +470,7 @@ export default function TicketingSystem() {
                 <SelectValue placeholder={translate('ticketing.status', 'وضعیت')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{translate('common.all', 'همه')}</SelectItem>
+                <SelectItem value="all">{translate('common.all', 'همه')}</SelectItem>
                 <SelectItem value="open">{translate('ticketing.statuses.open', 'باز')}</SelectItem>
                 <SelectItem value="in_progress">{translate('ticketing.statuses.inProgress', 'در حال انجام')}</SelectItem>
                 <SelectItem value="resolved">{translate('ticketing.statuses.resolved', 'حل شده')}</SelectItem>
@@ -484,7 +484,7 @@ export default function TicketingSystem() {
                 <SelectValue placeholder={translate('ticketing.priority', 'اولویت')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{translate('common.all', 'همه')}</SelectItem>
+                <SelectItem value="all">{translate('common.all', 'همه')}</SelectItem>
                 <SelectItem value="low">{translate('ticketing.priorities.low', 'کم')}</SelectItem>
                 <SelectItem value="normal">{translate('ticketing.priorities.normal', 'معمولی')}</SelectItem>
                 <SelectItem value="high">{translate('ticketing.priorities.high', 'زیاد')}</SelectItem>
