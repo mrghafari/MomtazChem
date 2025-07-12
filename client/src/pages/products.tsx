@@ -227,28 +227,8 @@ export default function ProductsPage() {
     onSuccess: (result) => {
       console.log('✅ [DEBUG] Update mutation successful, result:', result);
       
-      // Aggressive cache clearing for immediate updates
-      queryClient.removeQueries({ queryKey: ["/api/products"] });
-      queryClient.clear(); // Clear entire cache
-      
-      // Force immediate refetch
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.refetchQueries({ queryKey: ["/api/products"] }, { exact: true });
-      
-      setRefreshKey(prev => prev + 1); // Force component re-render
-      
-      // Close dialog immediately to see changes
-      setDialogOpen(false);
-      setEditingProduct(null);
-      setImagePreview(null);
-      setCatalogPreview(null);
-      setMsdsPreview(null);
-      form.reset();
-      
-      toast({
-        title: "موفقیت",
-        description: "محصول با موفقیت بروزرسانی شد",
-      });
+      // Force immediate window reload for instant UI update
+      window.location.reload();
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Update mutation failed:', error);

@@ -1,0 +1,227 @@
+chunk-RPCDYKBN.js?v=75750eb4:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+products.tsx:685 Barcode effect triggered:  Canvas ref: null
+queryClient.ts:52  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:52
+fetchFn @ @tanstack_react-query.js?v=75750eb4:840
+run @ @tanstack_react-query.js?v=75750eb4:494
+start @ @tanstack_react-query.js?v=75750eb4:536
+fetch @ @tanstack_react-query.js?v=75750eb4:926
+executeFetch_fn @ @tanstack_react-query.js?v=75750eb4:2211
+onSubscribe @ @tanstack_react-query.js?v=75750eb4:1898
+subscribe @ @tanstack_react-query.js?v=75750eb4:24
+(anonymous) @ @tanstack_react-query.js?v=75750eb4:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=75750eb4:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=75750eb4:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=75750eb4:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=75750eb4:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=75750eb4:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=75750eb4:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=75750eb4:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=75750eb4:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=75750eb4:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=75750eb4:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=75750eb4:19432
+commitRoot @ chunk-RPCDYKBN.js?v=75750eb4:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=75750eb4:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=75750eb4:18718
+workLoop @ chunk-RPCDYKBN.js?v=75750eb4:197
+flushWork @ chunk-RPCDYKBN.js?v=75750eb4:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=75750eb4:384
+queryClient.ts:52  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:52
+fetchFn @ @tanstack_react-query.js?v=75750eb4:840
+run @ @tanstack_react-query.js?v=75750eb4:494
+start @ @tanstack_react-query.js?v=75750eb4:536
+fetch @ @tanstack_react-query.js?v=75750eb4:926
+executeFetch_fn @ @tanstack_react-query.js?v=75750eb4:2211
+onSubscribe @ @tanstack_react-query.js?v=75750eb4:1898
+subscribe @ @tanstack_react-query.js?v=75750eb4:24
+(anonymous) @ @tanstack_react-query.js?v=75750eb4:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=75750eb4:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=75750eb4:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=75750eb4:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=75750eb4:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=75750eb4:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=75750eb4:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=75750eb4:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=75750eb4:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=75750eb4:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=75750eb4:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=75750eb4:19432
+commitRoot @ chunk-RPCDYKBN.js?v=75750eb4:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=75750eb4:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=75750eb4:18718
+workLoop @ chunk-RPCDYKBN.js?v=75750eb4:197
+flushWork @ chunk-RPCDYKBN.js?v=75750eb4:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=75750eb4:384
+products.tsx:156  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/categories 401 (Unauthorized)
+queryFn @ products.tsx:156
+fetchFn @ @tanstack_react-query.js?v=75750eb4:840
+run @ @tanstack_react-query.js?v=75750eb4:494
+start @ @tanstack_react-query.js?v=75750eb4:536
+fetch @ @tanstack_react-query.js?v=75750eb4:926
+executeFetch_fn @ @tanstack_react-query.js?v=75750eb4:2211
+onSubscribe @ @tanstack_react-query.js?v=75750eb4:1898
+subscribe @ @tanstack_react-query.js?v=75750eb4:24
+(anonymous) @ @tanstack_react-query.js?v=75750eb4:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=75750eb4:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=75750eb4:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=75750eb4:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=75750eb4:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=75750eb4:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=75750eb4:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=75750eb4:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=75750eb4:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=75750eb4:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=75750eb4:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=75750eb4:19432
+commitRoot @ chunk-RPCDYKBN.js?v=75750eb4:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=75750eb4:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=75750eb4:18718
+workLoop @ chunk-RPCDYKBN.js?v=75750eb4:197
+flushWork @ chunk-RPCDYKBN.js?v=75750eb4:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=75750eb4:384
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-vendors.js:2
+admin-login.tsx:38 Login response: {success: true, message: 'Login successful', user: {…}}
+admin.tsx:16  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/content-management/items?section=admin_dashboard 404 (Not Found)
+queryFn @ admin.tsx:16
+fetchFn @ @tanstack_react-query.js?v=75750eb4:840
+run @ @tanstack_react-query.js?v=75750eb4:494
+start @ @tanstack_react-query.js?v=75750eb4:536
+fetch @ @tanstack_react-query.js?v=75750eb4:926
+executeFetch_fn @ @tanstack_react-query.js?v=75750eb4:2211
+onSubscribe @ @tanstack_react-query.js?v=75750eb4:1898
+subscribe @ @tanstack_react-query.js?v=75750eb4:24
+(anonymous) @ @tanstack_react-query.js?v=75750eb4:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=75750eb4:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=75750eb4:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=75750eb4:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=75750eb4:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=75750eb4:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=75750eb4:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=75750eb4:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=75750eb4:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=75750eb4:19416
+commitRoot @ chunk-RPCDYKBN.js?v=75750eb4:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=75750eb4:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=75750eb4:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=75750eb4:18627
+products.tsx:685 Barcode effect triggered:  Canvas ref: null
+products.tsx:685 Barcode effect triggered: 8649677158564 Canvas ref: null
+products.tsx:691 Attempting to generate barcode: 8649677158564
+products.tsx:716 EAN-13 barcode generated successfully
+products:1 Uncaught (in promise) AbortError: The play() request was interrupted by a call to pause(). https://goo.gl/LdLk22
+products.tsx:2232 🔥 [DEBUG] Submit button clicked!
+products.tsx:2233 🔥 [DEBUG] Form state: false
+products.tsx:2234 🔥 [DEBUG] Form errors: {}
+products.tsx:404 🔍 [DEBUG] Form submission - Raw form data: {name: 'تصفیه‌کننده آب صنعتی AquaPure', category: 'water-treatment', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', priceRange: '25.00 unit', …}
+products.tsx:405 🔍 [DEBUG] Tags in form data: شیمیایی Type: string
+products.tsx:406 🔍 [DEBUG] Description in form data: این یک محصول شیمیایی تولید شرکت ممتاز شیمی است
+products.tsx:407 🔍 [DEBUG] editingProduct state: 22
+products.tsx:441 🚀 [DEBUG] Final processed data being sent to API: {
+  "name": "تصفیه‌کننده آب صنعتی AquaPure",
+  "category": "water-treatment",
+  "description": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "shortDescription": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "priceRange": "25.00 unit",
+  "imageUrl": "",
+  "pdfCatalogUrl": "",
+  "specifications": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "features": [
+    "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است"
+  ],
+  "applications": [
+    "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است"
+  ],
+  "msdsUrl": "",
+  "showMsdsToCustomers": false,
+  "msdsFileName": "",
+  "stockQuantity": 12,
+  "minStockLevel": 12,
+  "maxStockLevel": 12,
+  "unitPrice": "11.01",
+  "currency": "IQD",
+  "weight": "11.01",
+  "weightUnit": "kg",
+  "barcode": "8649677158564",
+  "sku": "SP-7-تصفیه‌کنند",
+  "tags": [
+    "شیمیایی"
+  ],
+  "isActive": true,
+  "syncWithShop": true,
+  "showWhenOutOfStock": false,
+  "isVariant": false,
+  "catalogFileName": "",
+  "showCatalogToCustomers": false
+}
+products.tsx:444 📝 [DEBUG] Calling updateProduct with ID: 22
+products.tsx:445 📝 [DEBUG] updateProduct function exists: function
+products.tsx:223 🌐 [DEBUG] Making API request to update product: 22
+products.tsx:224 🌐 [DEBUG] API request data: {
+  "name": "تصفیه‌کننده آب صنعتی AquaPure",
+  "category": "water-treatment",
+  "description": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "shortDescription": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "priceRange": "25.00 unit",
+  "imageUrl": "",
+  "pdfCatalogUrl": "",
+  "specifications": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "features": [
+    "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است"
+  ],
+  "applications": [
+    "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است"
+  ],
+  "msdsUrl": "",
+  "showMsdsToCustomers": false,
+  "msdsFileName": "",
+  "stockQuantity": 12,
+  "minStockLevel": 12,
+  "maxStockLevel": 12,
+  "unitPrice": "11.01",
+  "currency": "IQD",
+  "weight": "11.01",
+  "weightUnit": "kg",
+  "barcode": "8649677158564",
+  "sku": "SP-7-تصفیه‌کنند",
+  "tags": [
+    "شیمیایی"
+  ],
+  "isActive": true,
+  "syncWithShop": true,
+  "showWhenOutOfStock": false,
+  "isVariant": false,
+  "catalogFileName": "",
+  "showCatalogToCustomers": false
+}
+products.tsx:228 ✅ [DEBUG] Update mutation successful, result: {id: 22, name: 'تصفیه‌کننده آب صنعتی AquaPure', category: 'water-treatment', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+products.tsx:685 Barcode effect triggered: 8649677158564 Canvas ref: null
+products.tsx:685 Barcode effect triggered: 8649677158564 Canvas ref: null
+products.tsx:691 Attempting to generate barcode: 8649677158564
+products.tsx:716 EAN-13 barcode generated successfully
