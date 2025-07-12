@@ -103,7 +103,7 @@ export default function TicketingSystem() {
   const [filterPriority, setFilterPriority] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   
-  const queryClient = useQueryClientranslate();
+  const queryClient = useQueryClient();
 
   // Queries
   const { data: myTickets } = useQuery({
@@ -128,20 +128,20 @@ export default function TicketingSystem() {
 
   // Mutations
   const createTicketMutation = useMutation({
-    mutationFn: (data: CreateTicketData) => apiRequestranslate('/api/tickets', {
+    mutationFn: (data: CreateTicketData) => apiRequest('/api/tickets', {
       method: 'POST',
       body: data,
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
       setCreateTicketOpen(false);
-      toastranslate({
+      toast({
         title: "موفقیت",
         description: "تیکت پشتیبانی با موفقیت ایجاد شد",
       });
     },
     onError: (error: any) => {
-      toastranslate({
+      toast({
         title: "خطا",
         description: error.message || "خطا در ایجاد تیکت",
         variant: "destructive",
@@ -151,13 +151,13 @@ export default function TicketingSystem() {
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ ticketId, status, reason }: { ticketId: number; status: string; reason?: string }) =>
-      apiRequestranslate(`/api/tickets/${ticketId}/status`, {
+      apiRequest(`/api/tickets/${ticketId}/status`, {
         method: 'PATCH',
         body: { status, reason },
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
-      toastranslate({
+      toast({
         title: "موفقیت",
         description: "وضعیت تیکت به‌روزرسانی شد",
       });
@@ -166,7 +166,7 @@ export default function TicketingSystem() {
 
   const addResponseMutation = useMutation({
     mutationFn: ({ ticketId, message, isInternal }: { ticketId: number; message: string; isInternal: boolean }) =>
-      apiRequestranslate(`/api/tickets/${ticketId}/responses`, {
+      apiRequest(`/api/tickets/${ticketId}/responses`, {
         method: 'POST',
         body: { message, isInternal },
       }),
@@ -176,7 +176,7 @@ export default function TicketingSystem() {
         // Refresh ticket detail
         queryClient.invalidateQueries({ queryKey: [`/api/tickets/${selectedTicket.id}`] });
       }
-      toastranslate({
+      toast({
         title: "موفقیت",
         description: "پاسخ اضافه شد",
       });
@@ -215,7 +215,7 @@ export default function TicketingSystem() {
         message: data.message,
         isInternal: data.isInternal,
       });
-      responseForm.resetranslate();
+      responseForm.reset();
     }
   };
 
@@ -244,10 +244,10 @@ export default function TicketingSystem() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Ticket className="w-8 h-8 text-blue-600" />
-            {translate('ticketing.title', 'سیستم تیکتینگ')}
+            {t('ticketing.title', 'سیستم تیکتینگ')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {translate('ticketing.description', 'مدیریت تیکت‌های پشتیبانی فنی و ارتباط با ادمین')}
+            {t('ticketing.description', 'مدیریت تیکت‌های پشتیبانی فنی و ارتباط با ادمین')}
           </p>
         </div>
         
@@ -255,23 +255,23 @@ export default function TicketingSystem() {
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              {translate('ticketing.newTicket', 'تیکت جدید')}
+              {t('ticketing.newTicket', 'تیکت جدید')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md" dir={direction}>
             <DialogHeader>
-              <DialogTitle>{translate('ticketing.createNewTicket', 'ایجاد تیکت پشتیبانی جدید')}</DialogTitle>
+              <DialogTitle>{t('ticketing.createNewTicket', 'ایجاد تیکت پشتیبانی جدید')}</DialogTitle>
             </DialogHeader>
             <Form {...createForm}>
-              <form onSubmit={createForm.handleSubmitranslate(handleCreateTicket)} className="space-y-4">
+              <form onSubmit={createForm.handleSubmit(handleCreateTicket)} className="space-y-4">
                 <FormField
                   control={createForm.control}
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('ticketing.title', 'عنوان')} *</FormLabel>
+                      <FormLabel>{t('ticketing.title', 'عنوان')} *</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={translate('ticketing.titlePlaceholder', 'عنوان مشکل را بنویسید...')} />
+                        <Input {...field} placeholder={t('ticketing.titlePlaceholder', 'عنوان مشکل را بنویسید...')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -283,24 +283,24 @@ export default function TicketingSystem() {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('ticketing.category', 'دسته‌بندی')} *</FormLabel>
+                      <FormLabel>{t('ticketing.category', 'دسته‌بندی')} *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={translate('ticketing.selectCategory', 'انتخاب دسته‌بندی')} />
+                            <SelectValue placeholder={t('ticketing.selectCategory', 'انتخاب دسته‌بندی')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="technical_issue">{translate('ticketing.categories.technical', 'مشکل فنی')}</SelectItem>
-                          <SelectItem value="bug_report">{translate('ticketing.categories.bug', 'گزارش باگ')}</SelectItem>
-                          <SelectItem value="feature_request">{translate('ticketing.categories.feature', 'درخواست ویژگی')}</SelectItem>
-                          <SelectItem value="system_error">{translate('ticketing.categories.system', 'خطای سیستم')}</SelectItem>
-                          <SelectItem value="user_access">{translate('ticketing.categories.access', 'دسترسی کاربر')}</SelectItem>
-                          <SelectItem value="performance_issue">{translate('ticketing.categories.performance', 'مشکل عملکرد')}</SelectItem>
-                          <SelectItem value="security_concern">{translate('ticketing.categories.security', 'نگرانی امنیتی')}</SelectItem>
-                          <SelectItem value="data_issue">{translate('ticketing.categories.data', 'مشکل داده')}</SelectItem>
-                          <SelectItem value="integration_problem">{translate('ticketing.categories.integration', 'مشکل یکپارچه‌سازی')}</SelectItem>
-                          <SelectItem value="other">{translate('ticketing.categories.other', 'سایر')}</SelectItem>
+                          <SelectItem value="technical_issue">{t('ticketing.categories.technical', 'مشکل فنی')}</SelectItem>
+                          <SelectItem value="bug_report">{t('ticketing.categories.bug', 'گزارش باگ')}</SelectItem>
+                          <SelectItem value="feature_request">{t('ticketing.categories.feature', 'درخواست ویژگی')}</SelectItem>
+                          <SelectItem value="system_error">{t('ticketing.categories.system', 'خطای سیستم')}</SelectItem>
+                          <SelectItem value="user_access">{t('ticketing.categories.access', 'دسترسی کاربر')}</SelectItem>
+                          <SelectItem value="performance_issue">{t('ticketing.categories.performance', 'مشکل عملکرد')}</SelectItem>
+                          <SelectItem value="security_concern">{t('ticketing.categories.security', 'نگرانی امنیتی')}</SelectItem>
+                          <SelectItem value="data_issue">{t('ticketing.categories.data', 'مشکل داده')}</SelectItem>
+                          <SelectItem value="integration_problem">{t('ticketing.categories.integration', 'مشکل یکپارچه‌سازی')}</SelectItem>
+                          <SelectItem value="other">{t('ticketing.categories.other', 'سایر')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -313,19 +313,19 @@ export default function TicketingSystem() {
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('ticketing.priority', 'اولویت')} *</FormLabel>
+                      <FormLabel>{t('ticketing.priority', 'اولویت')} *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={translate('ticketing.selectPriority', 'انتخاب اولویت')} />
+                            <SelectValue placeholder={t('ticketing.selectPriority', 'انتخاب اولویت')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="low">{translate('ticketing.priorities.low', 'کم')}</SelectItem>
-                          <SelectItem value="normal">{translate('ticketing.priorities.normal', 'معمولی')}</SelectItem>
-                          <SelectItem value="high">{translate('ticketing.priorities.high', 'زیاد')}</SelectItem>
-                          <SelectItem value="urgent">{translate('ticketing.priorities.urgent', 'فوری')}</SelectItem>
-                          <SelectItem value="critical">{translate('ticketing.priorities.critical', 'بحرانی')}</SelectItem>
+                          <SelectItem value="low">{t('ticketing.priorities.low', 'کم')}</SelectItem>
+                          <SelectItem value="normal">{t('ticketing.priorities.normal', 'معمولی')}</SelectItem>
+                          <SelectItem value="high">{t('ticketing.priorities.high', 'زیاد')}</SelectItem>
+                          <SelectItem value="urgent">{t('ticketing.priorities.urgent', 'فوری')}</SelectItem>
+                          <SelectItem value="critical">{t('ticketing.priorities.critical', 'بحرانی')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -338,9 +338,9 @@ export default function TicketingSystem() {
                   name="department"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('ticketing.department', 'بخش مربوطه')}</FormLabel>
+                      <FormLabel>{t('ticketing.department', 'بخش مربوطه')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={translate('ticketing.departmentPlaceholder', 'نام بخش یا ماژول مربوطه...')} />
+                        <Input {...field} placeholder={t('ticketing.departmentPlaceholder', 'نام بخش یا ماژول مربوطه...')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -352,11 +352,11 @@ export default function TicketingSystem() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{translate('ticketing.description', 'توضیحات')} *</FormLabel>
+                      <FormLabel>{t('ticketing.description', 'توضیحات')} *</FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
-                          placeholder={translate('ticketing.descriptionPlaceholder', 'توضیح کاملی از مشکل، مراحل تکرار، و اطلاعات مرتبط ارائه دهید...')}
+                          placeholder={t('ticketing.descriptionPlaceholder', 'توضیح کاملی از مشکل، مراحل تکرار، و اطلاعات مرتبط ارائه دهید...')}
                           rows={4}
                         />
                       </FormControl>
@@ -372,8 +372,8 @@ export default function TicketingSystem() {
                     className="flex-1"
                   >
                     {createTicketMutation.isPending 
-                      ? translate('ticketing.creating', 'در حال ایجاد...') 
-                      : translate('ticketing.createTicket', 'ایجاد تیکت')
+                      ? t('ticketing.creating', 'در حال ایجاد...') 
+                      : t('ticketing.createTicket', 'ایجاد تیکت')
                     }
                   </Button>
                   <Button 
@@ -381,7 +381,7 @@ export default function TicketingSystem() {
                     variant="outline" 
                     onClick={() => setCreateTicketOpen(false)}
                   >
-                    {translate('common.cancel', 'انصراف')}
+                    {t('common.cancel', 'انصراف')}
                   </Button>
                 </div>
               </form>
@@ -399,7 +399,7 @@ export default function TicketingSystem() {
                 <Ticket className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{translate('ticketing.stats.myTickets', 'تیکت‌های من')}</p>
+                <p className="text-sm text-muted-foreground">{t('ticketing.stats.myTickets', 'تیکت‌های من')}</p>
                 <p className="text-2xl font-bold">{userStats?.data?.totalSubmitted || 0}</p>
               </div>
             </div>
@@ -413,7 +413,7 @@ export default function TicketingSystem() {
                 <AlertTriangle className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{translate('ticketing.stats.open', 'باز')}</p>
+                <p className="text-sm text-muted-foreground">{t('ticketing.stats.open', 'باز')}</p>
                 <p className="text-2xl font-bold">{userStats?.data?.openTickets || 0}</p>
               </div>
             </div>
@@ -427,7 +427,7 @@ export default function TicketingSystem() {
                 <CheckCircle className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{translate('ticketing.stats.resolved', 'حل شده')}</p>
+                <p className="text-sm text-muted-foreground">{t('ticketing.stats.resolved', 'حل شده')}</p>
                 <p className="text-2xl font-bold">{userStats?.data?.resolvedTickets || 0}</p>
               </div>
             </div>
@@ -441,7 +441,7 @@ export default function TicketingSystem() {
                 <Clock className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{translate('ticketing.stats.averageResolution', 'میانگین حل')}</p>
+                <p className="text-sm text-muted-foreground">{t('ticketing.stats.averageResolution', 'میانگین حل')}</p>
                 <p className="text-2xl font-bold">
                   {Math.round(userStats?.data?.averageResolutionTime || 0)}س
                 </p>
@@ -458,7 +458,7 @@ export default function TicketingSystem() {
             <div className="flex items-center gap-2">
               <Search className="w-4 h-4" />
               <Input
-                placeholder={translate('ticketing.searchPlaceholder', 'جستجو در تیکت‌ها...')}
+                placeholder={t('ticketing.searchPlaceholder', 'جستجو در تیکت‌ها...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-64"
@@ -467,29 +467,29 @@ export default function TicketingSystem() {
             
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-32">
-                <SelectValue placeholder={translate('ticketing.status', 'وضعیت')} />
+                <SelectValue placeholder={t('ticketing.status', 'وضعیت')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{translate('common.all', 'همه')}</SelectItem>
-                <SelectItem value="open">{translate('ticketing.statuses.open', 'باز')}</SelectItem>
-                <SelectItem value="in_progress">{translate('ticketing.statuses.inProgress', 'در حال انجام')}</SelectItem>
-                <SelectItem value="resolved">{translate('ticketing.statuses.resolved', 'حل شده')}</SelectItem>
-                <SelectItem value="closed">{translate('ticketing.statuses.closed', 'بسته')}</SelectItem>
-                <SelectItem value="on_hold">{translate('ticketing.statuses.onHold', 'معوق')}</SelectItem>
+                <SelectItem value="">{t('common.all', 'همه')}</SelectItem>
+                <SelectItem value="open">{t('ticketing.statuses.open', 'باز')}</SelectItem>
+                <SelectItem value="in_progress">{t('ticketing.statuses.inProgress', 'در حال انجام')}</SelectItem>
+                <SelectItem value="resolved">{t('ticketing.statuses.resolved', 'حل شده')}</SelectItem>
+                <SelectItem value="closed">{t('ticketing.statuses.closed', 'بسته')}</SelectItem>
+                <SelectItem value="on_hold">{t('ticketing.statuses.onHold', 'معوق')}</SelectItem>
               </SelectContent>
             </Select>
             
             <Select value={filterPriority} onValueChange={setFilterPriority}>
               <SelectTrigger className="w-32">
-                <SelectValue placeholder={translate('ticketing.priority', 'اولویت')} />
+                <SelectValue placeholder={t('ticketing.priority', 'اولویت')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{translate('common.all', 'همه')}</SelectItem>
-                <SelectItem value="low">{translate('ticketing.priorities.low', 'کم')}</SelectItem>
-                <SelectItem value="normal">{translate('ticketing.priorities.normal', 'معمولی')}</SelectItem>
-                <SelectItem value="high">{translate('ticketing.priorities.high', 'زیاد')}</SelectItem>
-                <SelectItem value="urgent">{translate('ticketing.priorities.urgent', 'فوری')}</SelectItem>
-                <SelectItem value="critical">{translate('ticketing.priorities.critical', 'بحرانی')}</SelectItem>
+                <SelectItem value="">{t('common.all', 'همه')}</SelectItem>
+                <SelectItem value="low">{t('ticketing.priorities.low', 'کم')}</SelectItem>
+                <SelectItem value="normal">{t('ticketing.priorities.normal', 'معمولی')}</SelectItem>
+                <SelectItem value="high">{t('ticketing.priorities.high', 'زیاد')}</SelectItem>
+                <SelectItem value="urgent">{t('ticketing.priorities.urgent', 'فوری')}</SelectItem>
+                <SelectItem value="critical">{t('ticketing.priorities.critical', 'بحرانی')}</SelectItem>
               </SelectContent>
             </Select>
             
@@ -503,7 +503,7 @@ export default function TicketingSystem() {
                   setSearchQuery("");
                 }}
               >
-{translate('ticketing.clearFilters', 'پاک کردن فیلترها')}
+{t('ticketing.clearFilters', 'پاک کردن فیلترها')}
               </Button>
             )}
           </div>
@@ -513,15 +513,15 @@ export default function TicketingSystem() {
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="my-tickets">{translate('ticketing.tabs.myTickets', 'تیکت‌های من')}</TabsTrigger>
-          <TabsTrigger value="all-tickets">{translate('ticketing.tabs.allTickets', 'همه تیکت‌ها')}</TabsTrigger>
+          <TabsTrigger value="my-tickets">{t('ticketing.tabs.myTickets', 'تیکت‌های من')}</TabsTrigger>
+          <TabsTrigger value="all-tickets">{t('ticketing.tabs.allTickets', 'همه تیکت‌ها')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="my-tickets" className="space-y-4">
           <TicketList 
             tickets={filteredTickets(myTickets?.data || [])} 
             onTicketSelect={(ticket) => {
-              setSelectedTicketranslate(ticket);
+              setSelectedTicket(ticket);
               setTicketDetailOpen(true);
             }}
             onStatusChange={handleStatusChange}
@@ -532,7 +532,7 @@ export default function TicketingSystem() {
           <TicketList 
             tickets={filteredTickets(allTickets?.data || [])} 
             onTicketSelect={(ticket) => {
-              setSelectedTicketranslate(ticket);
+              setSelectedTicket(ticket);
               setTicketDetailOpen(true);
             }}
             onStatusChange={handleStatusChange}
@@ -558,7 +558,7 @@ export default function TicketingSystem() {
 }
 
 // Ticket List Component
-function TicketListranslate({ 
+function TicketList({ 
   tickets, 
   onTicketSelect, 
   onStatusChange 
@@ -574,7 +574,7 @@ function TicketListranslate({
       <Card>
         <CardContent className="p-8 text-center">
           <Ticket className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">{translate('ticketing.noTicketsFound', 'هیچ تیکتی یافت نشد')}</p>
+          <p className="text-muted-foreground">{t('ticketing.noTicketsFound', 'هیچ تیکتی یافت نشد')}</p>
         </CardContent>
       </Card>
     );
@@ -599,7 +599,7 @@ function TicketListranslate({
                     {ticket.status}
                   </Badge>
                   {ticket.isUrgent && (
-                    <Badge variant="destructive">{translate('ticketing.urgent', 'فوری')}</Badge>
+                    <Badge variant="destructive">{t('ticketing.urgent', 'فوری')}</Badge>
                   )}
                 </div>
                 
@@ -631,11 +631,11 @@ function TicketListranslate({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onTicketSelectranslate(ticket)}
+                  onClick={() => onTicketSelect(ticket)}
                   className="flex items-center gap-1"
                 >
                   <Eye className="w-4 h-4" />
-{translate('ticketing.details', 'جزئیات')}
+{t('ticketing.details', 'جزئیات')}
                 </Button>
                 
                 {ticket.status === 'open' && (
@@ -646,7 +646,7 @@ function TicketListranslate({
                     className="flex items-center gap-1"
                   >
                     <Clock className="w-4 h-4" />
-{translate('ticketing.start', 'شروع')}
+{t('ticketing.start', 'شروع')}
                   </Button>
                 )}
                 
@@ -658,7 +658,7 @@ function TicketListranslate({
                     className="flex items-center gap-1"
                   >
                     <CheckCircle className="w-4 h-4" />
-{translate('ticketing.resolve', 'حل شد')}
+{t('ticketing.resolve', 'حل شد')}
                   </Button>
                 )}
               </div>
@@ -696,7 +696,7 @@ function TicketDetail({
     <div className="space-y-6">
       <DialogHeader>
         <DialogTitle className="flex items-center justify-between">
-          <span>{translate('ticketing.ticketDetails', 'جزئیات تیکت')} {ticketData.ticketNumber}</span>
+          <span>{t('ticketing.ticketDetails', 'جزئیات تیکت')} {ticketData.ticketNumber}</span>
           <div className="flex gap-2">
             <Badge className={getPriorityColor(ticketData.priority)}>
               {ticketData.priority}
@@ -721,13 +721,13 @@ function TicketDetail({
           
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-medium">{translate('ticketing.submitter', 'ایجاد کننده')}:</span> {ticketData.submitterName}
+              <span className="font-medium">{t('ticketing.submitter', 'ایجاد کننده')}:</span> {ticketData.submitterName}
             </div>
             <div>
-              <span className="font-medium">{translate('ticketing.email', 'ایمیل')}:</span> {ticketData.submitterEmail}
+              <span className="font-medium">{t('ticketing.email', 'ایمیل')}:</span> {ticketData.submitterEmail}
             </div>
             <div>
-              <span className="font-medium">{translate('ticketing.createdAt', 'تاریخ ایجاد')}:</span> {new Date(ticketData.createdAt).toLocaleDateString('en-US')}
+              <span className="font-medium">{t('ticketing.createdAt', 'تاریخ ایجاد')}:</span> {new Date(ticketData.createdAt).toLocaleDateString('en-US')}
             </div>
             <div>
               <span className="font-medium">آخرین به‌روزرسانی:</span> {new Date(ticketData.updatedAt).toLocaleDateString('fa-IR')}
@@ -823,7 +823,7 @@ function TicketDetail({
           {/* Add Response Form */}
           <div className="border-t pt-4">
             <Form {...responseForm}>
-              <form onSubmit={responseForm.handleSubmitranslate(onAddResponse)} className="space-y-3">
+              <form onSubmit={responseForm.handleSubmit(onAddResponse)} className="space-y-3">
                 <FormField
                   control={responseForm.control}
                   name="message"
