@@ -659,7 +659,10 @@ function TicketList({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSelectedTicket(ticket)}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    setTicketDetailOpen(true);
+                  }}
                   className="flex items-center gap-1"
                 >
                   <Eye className="w-4 h-4" />
@@ -763,7 +766,7 @@ function TicketDetail({
               <span className="font-medium">{translate('ticketing.createdAt', 'تاریخ ایجاد')}:</span> {new Date(ticketData.createdAt).toLocaleDateString('en-US')}
             </div>
             <div>
-              <span className="font-medium">آخرین به‌روزرسانی:</span> {new Date(ticketData.updatedAt).toLocaleDateString('fa-IR')}
+              <span className="font-medium">آخرین به‌روزرسانی:</span> {new Date(ticketData.updatedAt).toLocaleDateString('en-US')}
             </div>
             {ticketData.department && (
               <div>
@@ -844,7 +847,7 @@ function TicketDetail({
                       )}
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {new Date(response.createdAt).toLocaleDateString('fa-IR')}
+                      {new Date(response.createdAt).toLocaleDateString('en-US')}
                     </span>
                   </div>
                   <p className="text-sm">{response.message}</p>
@@ -934,7 +937,7 @@ function TicketDetail({
                     )}
                   </div>
                   <span className="text-muted-foreground">
-                    {new Date(history.createdAt).toLocaleDateString('fa-IR')}
+                    {new Date(history.createdAt).toLocaleDateString('en-US')}
                   </span>
                 </div>
               ))}
