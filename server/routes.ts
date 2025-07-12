@@ -859,6 +859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
   app.post("/api/admin/logout", (req, res) => {
     req.session.destroy((err) => {
       if (err) {
