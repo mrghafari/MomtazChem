@@ -171,8 +171,8 @@ export default function TicketingSystemFixed() {
       console.log('Ticket created successfully:', response);
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tickets/my-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/overview'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/user'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tickets/stats/overview'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tickets/stats/user'] });
       setCreateTicketOpen(false);
       createForm.reset();
       toast({
@@ -197,10 +197,11 @@ export default function TicketingSystemFixed() {
         body: { status, reason },
       }),
     onSuccess: () => {
+      // Invalidate cache and refetch stats immediately
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tickets/my-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/overview'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/user'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tickets/stats/overview'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tickets/stats/user'] });
       toast({
         title: "موفقیت",
         description: "وضعیت تیکت به‌روزرسانی شد",
@@ -217,8 +218,8 @@ export default function TicketingSystemFixed() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tickets/my-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/overview'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/user'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tickets/stats/overview'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tickets/stats/user'] });
       if (selectedTicket) {
         queryClient.invalidateQueries({ queryKey: ['/api/tickets', selectedTicket.id, 'responses'] });
       }
