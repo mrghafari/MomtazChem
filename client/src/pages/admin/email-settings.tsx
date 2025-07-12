@@ -233,9 +233,10 @@ export default function EmailSettingsPage() {
       </div>
 
       <Tabs defaultValue="email-addresses" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="email-addresses">Email Addresses</TabsTrigger>
           <TabsTrigger value="smtp-settings">SMTP Settings</TabsTrigger>
+          <TabsTrigger value="email-templates">قالب‌های ایمیل</TabsTrigger>
         </TabsList>
 
         {/* Email Addresses Tab */}
@@ -448,6 +449,41 @@ export default function EmailSettingsPage() {
                   Regular passwords will not work with modern email providers.
                 </AlertDescription>
               </Alert>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Email Templates Tab */}
+        <TabsContent value="email-templates" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5" />
+                مدیریت قالب‌های ایمیل
+              </CardTitle>
+              <CardDescription>
+                ایجاد، ویرایش و مدیریت قالب‌های ایمیل برای پاسخ‌های خودکار
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-center items-center py-8">
+                <Button
+                  onClick={() => setLocation("/admin/email-templates")}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg"
+                >
+                  <Mail className="w-5 h-5 mr-2" />
+                  باز کردن مدیریت قالب‌ها
+                </Button>
+              </div>
+              <div className="text-center text-gray-600 mt-4">
+                <p>در این بخش می‌توانید:</p>
+                <div className="mt-2 space-y-1 text-sm">
+                  <p>• قالب‌های جدید ایجاد کنید</p>
+                  <p>• قالب‌های موجود را ویرایش کنید</p>
+                  <p>• متغیرهای پویا اضافه کنید</p>
+                  <p>• قالب پیش‌فرض تنظیم کنید</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -230,13 +230,7 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50"
     },
-    {
-      id: "email-templates",
-      label: "Email Templates",
-      icon: Mail,
-      onClick: () => trackButtonClick("email-templates", () => setLocation("/admin/email-templates")),
-      className: "border-pink-300 text-pink-600 hover:bg-pink-50"
-    }
+
   ];
 
   // State for drag and drop functionality with usage-based sorting
