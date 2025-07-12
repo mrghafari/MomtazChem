@@ -27,14 +27,51 @@ export default function SiteManagement() {
     enabled: false, // Don't auto-fetch on mount
   });
 
-  // Initial button configuration
+  // Initial button configuration ordered by most frequent usage (top-left priority)
   const getInitialButtons = (): QuickActionButton[] => [
+    // Row 1: Most frequently used daily operations
+    {
+      id: "shop",
+      label: "Shop",
+      icon: DollarSign,
+      onClick: () => setLocation("/admin/shop"),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+    },
+    {
+      id: "products",
+      label: "Products",
+      icon: Box,
+      onClick: () => setLocation("/admin/products"),
+      className: "border-violet-300 text-violet-600 hover:bg-violet-50"
+    },
+    {
+      id: "order-management",
+      label: "Order Management",
+      icon: Truck,
+      onClick: () => setLocation("/admin/finance-orders"),
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50"
+    },
+    {
+      id: "inventory-management",
+      label: "Inventory Management",
+      icon: Calculator,
+      onClick: () => setLocation("/admin/inventory-management"),
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+    },
+    // Row 2: Customer and business management
     {
       id: "inquiries",
       label: "Inquiries",
       icon: BarChart3,
       onClick: () => setLocation("/admin/inquiries"),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50"
+      className: "border-amber-300 text-amber-600 hover:bg-amber-50"
+    },
+    {
+      id: "crm",
+      label: "CRM",
+      icon: Users,
+      onClick: () => setLocation("/crm"),
+      className: "border-pink-300 text-pink-600 hover:bg-pink-50"
     },
     {
       id: "barcode",
@@ -50,19 +87,13 @@ export default function SiteManagement() {
       onClick: () => setLocation("/admin/advanced-email-settings"),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
     },
+    // Row 3: System administration
     {
       id: "database-backup",
       label: "Database Backup",
       icon: Database,
       onClick: () => setLocation("/admin/database-management"),
       className: "border-slate-300 text-slate-600 hover:bg-slate-50"
-    },
-    {
-      id: "crm",
-      label: "CRM",
-      icon: Users,
-      onClick: () => setLocation("/crm"),
-      className: "border-pink-300 text-pink-600 hover:bg-pink-50"
     },
     {
       id: "seo",
@@ -85,6 +116,7 @@ export default function SiteManagement() {
       onClick: () => setLocation("/admin/sms-management"),
       className: "border-green-300 text-green-600 hover:bg-green-50"
     },
+    // Row 4: Manufacturing and operations
     {
       id: "factory",
       label: "Factory",
@@ -107,39 +139,19 @@ export default function SiteManagement() {
       className: "border-red-300 text-red-600 hover:bg-red-50"
     },
     {
-      id: "shop",
-      label: "Shop",
-      icon: DollarSign,
-      onClick: () => setLocation("/shop-admin"),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
-    },
-    {
       id: "procedures",
       label: "Procedures",
       icon: BookOpen,
       onClick: () => setLocation("/admin/procedures-management"),
       className: "border-amber-300 text-amber-600 hover:bg-amber-50"
     },
+    // Row 5: Technical tools
     {
       id: "smtp-test",
       label: "SMTP Test",
       icon: TestTube,
       onClick: () => setLocation("/admin/smtp-test"),
       className: "border-sky-300 text-sky-600 hover:bg-sky-50"
-    },
-    {
-      id: "order-management",
-      label: "Order Management",
-      icon: Truck,
-      onClick: () => setLocation("/admin/finance-orders"),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50"
-    },
-    {
-      id: "products",
-      label: "Products",
-      icon: Box,
-      onClick: () => setLocation("/admin/products"),
-      className: "border-violet-300 text-violet-600 hover:bg-violet-50"
     },
     {
       id: "payment-settings",
@@ -162,6 +174,7 @@ export default function SiteManagement() {
       onClick: () => setLocation("/sales-analytics"),
       className: "border-teal-300 text-teal-600 hover:bg-teal-50"
     },
+    // Row 6: Advanced features
     {
       id: "ai-settings",
       label: "AI Settings",
@@ -184,25 +197,11 @@ export default function SiteManagement() {
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
     },
     {
-      id: "inventory-management",
-      label: "Inventory Management",
-      icon: Calculator,
-      onClick: () => setLocation("/admin/inventory-management"),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
-    },
-    {
       id: "content-management",
       label: "Content Management",
       icon: Edit3,
       onClick: () => setLocation("/content-management"),
       className: "border-green-300 text-green-600 hover:bg-green-50"
-    },
-    {
-      id: "barcode-ean13",
-      label: "EAN-13 Barcode",
-      icon: Barcode,
-      onClick: () => setLocation("/admin/ean13-generator"),
-      className: "border-rose-300 text-rose-600 hover:bg-rose-50"
     }
   ];
 
