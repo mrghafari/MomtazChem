@@ -140,6 +140,13 @@ export default function TicketingSystem() {
 
 
 
+  // Check if user is admin (simple check based on current user data)
+  const { data: currentUser } = useQuery({
+    queryKey: ['/api/customers/me'],
+  });
+  
+  const isAdmin = currentUser?.customer?.email?.includes('admin') || false;
+
   // Mutations
   const createTicketMutation = useMutation({
     mutationFn: (data: CreateTicketData) => {
@@ -243,6 +250,14 @@ export default function TicketingSystem() {
   };
 
   const handleStatusChange = (ticketId: number, newStatus: string) => {
+    if (!isAdmin) {
+      toast({
+        title: "خطا",
+        description: "برای تغییر وضعیت تیکت باید به عنوان ادمین وارد شوید",
+        variant: "destructive",
+      });
+      return;
+    }
     updateStatusMutation.mutate({ ticketId, status: newStatus });
   };
 
@@ -548,6 +563,7 @@ export default function TicketingSystem() {
               setTicketDetailOpen(true);
             }}
             onStatusChange={handleStatusChange}
+            isAdmin={isAdmin}
           />
         </TabsContent>
         
@@ -559,6 +575,7 @@ export default function TicketingSystem() {
               setTicketDetailOpen(true);
             }}
             onStatusChange={handleStatusChange}
+            isAdmin={isAdmin}
           />
         </TabsContent>
       </Tabs>
@@ -584,11 +601,13 @@ export default function TicketingSystem() {
 function TicketList({ 
   tickets, 
   onTicketSelect, 
-  onStatusChange 
+  onStatusChange,
+  isAdmin 
 }: { 
   tickets: any[]; 
   onTicketSelect: (ticket: any) => void;
   onStatusChange: (ticketId: number, status: string) => void;
+  isAdmin: boolean;
 }) {
   const { t } = useLanguage();
   
@@ -673,11 +692,13 @@ function TicketList({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onStatusChange(ticket.id, 'in_progress')}
+                    onClick={() => handleStatusChange(ticket.id, 'in_progress')}
                     className="flex items-center gap-1"
+                    disabled={!isAdmin}
+                    title={!isAdmin ? "نیاز به ورود ادمین" : ""}
                   >
                     <Clock className="w-4 h-4" />
-{translate('ticketing.start', 'شروع')}
+                    {translate('ticketing.start', 'شروع')} {isAdmin ? '' : '(ادمین)'}
                   </Button>
                 )}
                 
@@ -685,11 +706,13 @@ function TicketList({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onStatusChange(ticket.id, 'resolved')}
+                    onClick={() => handleStatusChange(ticket.id, 'resolved')}
                     className="flex items-center gap-1"
+                    disabled={!isAdmin}
+                    title={!isAdmin ? "نیاز به ورود ادمین" : ""}
                   >
                     <CheckCircle className="w-4 h-4" />
-{translate('ticketing.resolve', 'حل شد')}
+                    {translate('ticketing.resolve', 'حل شد')} {isAdmin ? '' : '(ادمین)'}
                   </Button>
                 )}
               </div>
