@@ -78,7 +78,7 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 0, // Always refetch data for real-time updates
       retry: false,
       onError: (error: any) => {
         // Suppress 401 auth errors globally - they're expected 
