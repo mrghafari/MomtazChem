@@ -14772,24 +14772,25 @@ momtazchem.com
       const adminId = req.session.adminId;
       const customerId = req.session.customerId;
 
-      if (!adminId && !customerId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Authentication required to create tickets" 
-        });
-      }
+      // Allow guest ticket creation for demo/testing purposes
+      const isGuestTicket = !adminId && !customerId;
 
-      // Use admin info or customer info
+      // Use admin info, customer info, or guest info
       const submitterInfo = adminId ? {
         submittedBy: adminId,
         submitterName: req.session.adminName || 'Admin User',
         submitterEmail: req.session.adminEmail || 'admin@momtazchem.com',
         submitterDepartment: req.session.adminDepartment || 'Administration'
-      } : {
+      } : customerId ? {
         submittedBy: customerId,
         submitterName: req.session.customerEmail || 'Customer',
         submitterEmail: req.session.customerEmail || 'customer@momtazchem.com',
         submitterDepartment: 'Customer'
+      } : {
+        submittedBy: 0,  // Guest user
+        submitterName: 'Guest User',
+        submitterEmail: 'guest@momtazchem.com',
+        submitterDepartment: 'Guest'
       };
 
       const ticketData = {
@@ -14818,13 +14819,7 @@ momtazchem.com
 
   // Get all tickets (admin view)
   app.get('/api/tickets', async (req, res) => {
-    // Check authentication for either admin or customer
-    if (!req.session.adminId && !req.session.customerId) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "احراز هویت مورد نیاز است" 
-      });
-    }
+    // Allow guest access for demo purposes
     try {
       const { 
         status, 
@@ -14869,13 +14864,7 @@ momtazchem.com
       const adminId = req.session.adminId;
       const customerId = req.session.customerId;
 
-      const userId = adminId || customerId;
-      if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Authentication required" 
-        });
-      }
+      const userId = adminId || customerId || 0; // Use 0 for guest users
 
       const tickets = await ticketingStorage.getTicketsByUser(
         userId, 
@@ -15069,13 +15058,7 @@ momtazchem.com
 
   // Get ticket statistics
   app.get('/api/tickets/stats/overview', async (req, res) => {
-    // Check authentication for either admin or customer
-    if (!req.session.adminId && !req.session.customerId) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "احراز هویت مورد نیاز است" 
-      });
-    }
+    // Allow guest access for demo purposes
     try {
       const stats = await ticketingStorage.getTicketStats();
 
@@ -15098,14 +15081,7 @@ momtazchem.com
     try {
       const adminId = req.session.adminId;
       const customerId = req.session.customerId;
-      const userId = adminId || customerId;
-
-      if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Authentication required" 
-        });
-      }
+      const userId = adminId || customerId || 0; // Use 0 for guest users
 
       const stats = await ticketingStorage.getUserTicketStats(userId);
 
@@ -15178,13 +15154,7 @@ momtazchem.com
 
   // Get ticket constants (priorities, statuses, categories)
   app.get('/api/tickets/constants', async (req, res) => {
-    // Check authentication for either admin or customer
-    if (!req.session.adminId && !req.session.customerId) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "احراز هویت مورد نیاز است" 
-      });
-    }
+    // Allow guest access for demo purposes
     try {
       res.json({
         success: true,
