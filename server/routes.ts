@@ -14682,6 +14682,147 @@ momtazchem.com
     }
   });
 
+  // Process order refund to wallet
+  app.post('/api/orders/:orderId/refund', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { amount, reason, refundType = 'full' } = req.body;
+      const adminId = req.session.adminId;
+
+      if (!adminId) {
+        return res.status(401).json({ success: false, message: "Admin authentication required" });
+      }
+
+      // Get order details
+      const order = await customerStorage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: "سفارش یافت نشد" });
+      }
+
+      // Validate refund amount
+      const orderAmount = parseFloat(order.totalAmount);
+      const refundAmount = refundType === 'full' ? orderAmount : parseFloat(amount);
+      
+      if (refundAmount <= 0 || refundAmount > orderAmount) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "مبلغ برگشتی نامعتبر است" 
+        });
+      }
+
+      // Process wallet refund
+      const transaction = await walletStorage.creditWallet(
+        order.customerId,
+        refundAmount,
+        `برگشت وجه سفارش #${order.orderNumber} - ${reason || 'عدم موفقیت پرداخت'}`,
+        'refund',
+        orderId,
+        adminId
+      );
+
+      // Update order status
+      await customerStorage.updateOrder(orderId, {
+        status: refundType === 'full' ? 'refunded' : 'partially_refunded',
+        paymentStatus: refundType === 'full' ? 'refunded' : 'partial_refund',
+        refundAmount: refundAmount.toString(),
+        refundReason: reason,
+        refundDate: new Date(),
+        refundProcessedBy: adminId
+      });
+
+      console.log(`✅ Order refund processed: ${refundAmount} IQD credited to customer ${order.customerId}, transaction ID: ${transaction.id}`);
+
+      res.json({
+        success: true,
+        message: "برگشت وجه با موفقیت انجام شد",
+        data: {
+          refundAmount,
+          transactionId: transaction.id,
+          newWalletBalance: transaction.balanceAfter
+        }
+      });
+
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'خطا در پردازش برگشت وجه'
+      });
+    }
+  });
+
+  // Process automatic refund for failed payments
+  app.post('/api/orders/:orderId/auto-refund', async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { reason = 'پرداخت ناموفق' } = req.body;
+
+      // Get order details
+      const order = await customerStorage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: "سفارش یافت نشد" });
+      }
+
+      // Check if wallet was used for this order
+      if (order.paymentMethod === 'wallet_full' || order.paymentMethod === 'wallet_partial') {
+        const orderAmount = parseFloat(order.totalAmount);
+        
+        // Get wallet amount used (if stored in order data)
+        const walletAmountUsed = order.walletAmountUsed ? parseFloat(order.walletAmountUsed) : orderAmount;
+        
+        if (walletAmountUsed > 0) {
+          // Refund to wallet
+          const transaction = await walletStorage.creditWallet(
+            order.customerId,
+            walletAmountUsed,
+            `برگشت خودکار وجه سفارش #${order.orderNumber} - ${reason}`,
+            'auto_refund',
+            orderId,
+            null // System processing
+          );
+
+          // Update order status
+          await customerStorage.updateOrder(orderId, {
+            status: 'payment_failed',
+            paymentStatus: 'failed_refunded',
+            refundAmount: walletAmountUsed.toString(),
+            refundReason: reason,
+            refundDate: new Date()
+          });
+
+          console.log(`✅ Automatic refund processed: ${walletAmountUsed} IQD credited back to customer ${order.customerId}`);
+
+          res.json({
+            success: true,
+            message: "برگشت خودکار وجه انجام شد",
+            data: {
+              refundAmount: walletAmountUsed,
+              transactionId: transaction.id,
+              newWalletBalance: transaction.balanceAfter
+            }
+          });
+        } else {
+          res.json({
+            success: true,
+            message: "هیچ مبلغی از کیف پول استفاده نشده بود"
+          });
+        }
+      } else {
+        res.json({
+          success: true,
+          message: "سفارش با کیف پول پرداخت نشده بود"
+        });
+      }
+
+    } catch (error) {
+      console.error('Error processing automatic refund:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'خطا در برگشت خودکار وجه'
+      });
+    }
+  });
+
   // Get customer wallet details (admin)
   app.get('/api/admin/wallet/customer/:customerId', requireAuth, async (req, res) => {
     try {

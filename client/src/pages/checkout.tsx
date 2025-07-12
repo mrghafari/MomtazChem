@@ -66,6 +66,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletAmountToUse, setWalletAmountToUse] = useState(0);
+  const [useWallet, setUseWallet] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -150,6 +153,32 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     }, 100);
   }, [isUserLoggedIn, form]);
 
+  // Fetch wallet balance for logged in users
+  const fetchWalletBalance = async () => {
+    if (!isUserLoggedIn) return;
+    
+    try {
+      const response = await fetch('/api/customers/wallet/balance', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setWalletBalance(result.balance || 0);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isUserLoggedIn) {
+      fetchWalletBalance();
+    }
+  }, [isUserLoggedIn]);
+
   // Calculate order totals
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
@@ -184,7 +213,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   
   const taxRate = 0.09; // 9% tax
   const taxAmount = subtotal * taxRate;
-  const totalAmount = subtotal + shippingCost + taxAmount;
+  const beforeWalletTotal = subtotal + shippingCost + taxAmount;
+  
+  // Calculate wallet usage
+  const maxWalletUsage = Math.min(walletBalance, beforeWalletTotal);
+  const actualWalletUsage = useWallet ? Math.min(walletAmountToUse, maxWalletUsage) : 0;
+  const totalAmount = beforeWalletTotal - actualWalletUsage;
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
@@ -264,10 +298,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         quantity: item.quantity,
         unitPrice: parseFloat(item.price),
       })),
-      totalAmount,
+      totalAmount: beforeWalletTotal,
       notes: data.notes || '',
       shippingMethod: data.shippingMethod,
-      paymentMethod: data.paymentMethod,
+      paymentMethod: actualWalletUsage >= beforeWalletTotal ? 'wallet_full' : 
+                    actualWalletUsage > 0 ? 'wallet_partial' : data.paymentMethod,
+      walletAmountUsed: actualWalletUsage,
+      remainingAmount: totalAmount,
     };
 
     createOrderMutation.mutate(orderData);
@@ -623,10 +660,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="iraqi_bank">انتقال بانکی عراقی (Iraqi Bank Transfer)</SelectItem>
-                                <SelectItem value="credit_card">کارت اعتباری/نقدی (Credit/Debit Card)</SelectItem>
-                                <SelectItem value="bank_transfer">انتقال بانکی بین‌المللی (International Bank Transfer)</SelectItem>
-                                <SelectItem value="digital_wallet">کیف پول دیجیتال (Digital Wallet)</SelectItem>
+                                <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی (Bank Receipt Upload)</SelectItem>
+                                <SelectItem value="online_payment">پرداخت آنلاین (Online Payment)</SelectItem>
                                 <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل (Cash on Delivery)</SelectItem>
                                 <SelectItem value="company_credit">حساب اعتباری شرکت (Company Credit)</SelectItem>
                               </SelectContent>
@@ -636,6 +671,79 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         </FormItem>
                       )}
                     />
+
+                    {/* Wallet Payment Section */}
+                    {isUserLoggedIn && walletBalance > 0 && (
+                      <div className="p-4 bg-green-50 rounded-lg space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium text-green-800">موجودی کیف پول</h4>
+                            <p className="text-sm text-green-600">{walletBalance.toLocaleString()} IQD موجود است</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id="useWallet"
+                              checked={useWallet}
+                              onChange={(e) => {
+                                setUseWallet(e.target.checked);
+                                if (e.target.checked) {
+                                  setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal));
+                                } else {
+                                  setWalletAmountToUse(0);
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <label htmlFor="useWallet" className="text-sm font-medium text-green-700">
+                              استفاده از کیف پول
+                            </label>
+                          </div>
+                        </div>
+                        
+                        {useWallet && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-green-700">
+                              مبلغ مورد استفاده از کیف پول (IQD)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max={maxWalletUsage}
+                              value={walletAmountToUse}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value) || 0;
+                                setWalletAmountToUse(Math.min(value, maxWalletUsage));
+                              }}
+                              className="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                              placeholder={`حداکثر ${maxWalletUsage.toLocaleString()} IQD`}
+                            />
+                            <div className="flex justify-between text-xs text-green-600">
+                              <span>موجودی: {walletBalance.toLocaleString()} IQD</span>
+                              <span>حداکثر قابل استفاده: {maxWalletUsage.toLocaleString()} IQD</span>
+                            </div>
+                            
+                            {actualWalletUsage > 0 && (
+                              <div className="mt-2 p-2 bg-green-100 rounded text-sm text-green-800">
+                                <div className="flex justify-between">
+                                  <span>مبلغ از کیف پول:</span>
+                                  <span className="font-semibold">-{actualWalletUsage.toLocaleString()} IQD</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>مبلغ باقی‌مانده:</span>
+                                  <span className="font-semibold">{totalAmount.toLocaleString()} IQD</span>
+                                </div>
+                                {actualWalletUsage >= beforeWalletTotal && (
+                                  <div className="mt-1 text-green-700 font-medium">
+                                    ✓ سفارش کاملاً با کیف پول پرداخت می‌شود
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     <FormField
                       control={form.control}
@@ -692,28 +800,42 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>جمع کالاها:</span>
+                    <span>{subtotal.toLocaleString()} IQD</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Shipping:</span>
-                    <span>{shippingCost === 0 ? "Free" : `$${shippingCost.toFixed(2)}`}</span>
+                    <span>هزینه ارسال:</span>
+                    <span>{shippingCost === 0 ? "رایگان" : `${shippingCost.toLocaleString()} IQD`}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax (9%):</span>
-                    <span>${taxAmount.toFixed(2)}</span>
+                    <span>مالیات (9%):</span>
+                    <span>{taxAmount.toLocaleString()} IQD</span>
                   </div>
                   <Separator />
+                  {actualWalletUsage > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>کیف پول استفاده شده:</span>
+                      <span>-{actualWalletUsage.toLocaleString()} IQD</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Total:</span>
-                    <span>${totalAmount.toFixed(2)}</span>
+                    <span>مجموع قابل پرداخت:</span>
+                    <span>{totalAmount.toLocaleString()} IQD</span>
                   </div>
                 </div>
 
                 {shippingCost === 0 && (
                   <div className="bg-green-50 p-3 rounded-lg">
                     <p className="text-sm text-green-800">
-                      🎉 You qualify for free shipping!
+                      🎉 شما واجد شرایط ارسال رایگان هستید!
+                    </p>
+                  </div>
+                )}
+                
+                {actualWalletUsage >= beforeWalletTotal && (
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      💳 این سفارش کاملاً با کیف پول شما پرداخت خواهد شد
                     </p>
                   </div>
                 )}
