@@ -100,10 +100,8 @@ const Shop = () => {
         sortOrder: filters.sortOrder
       });
       
-      // Only perform search if query is empty or has 3+ characters
-      if (debouncedQuery.length > 0 && debouncedQuery.length < 3) {
-        return null; // Don't search with less than 3 characters
-      }
+      // Always perform search - removed character limit restriction
+      // This ensures we always get proper total count from search API
 
       if (filters.category) params.append('category', filters.category);
       if (filters.priceMin !== undefined) params.append('priceMin', filters.priceMin.toString());
@@ -1075,12 +1073,7 @@ const Shop = () => {
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-600">
-                {/* Debug: showing search results data */}
-                {searchResults?.data ? (
-                  <>نمایش {searchResults.data.total} محصول{searchResults.data.total !== 1 ? ' ' : ''} {currentPage > 0 ? `(صفحه ${currentPage + 1} از ${totalPages})` : ''}</>
-                ) : (
-                  <>نمایش {products.length} محصول{products.length !== 1 ? ' ' : ''} (fallback){currentPage > 0 ? ` (صفحه ${currentPage + 1} از ${totalPages})` : ''}</>
-                )}
+                نمایش {totalResults} محصول{totalResults !== 1 ? ' ' : ''} {currentPage > 0 ? `(صفحه ${currentPage + 1} از ${totalPages})` : ''}
               </p>
               <div className="flex items-center gap-2">
                 <Button

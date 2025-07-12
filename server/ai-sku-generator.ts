@@ -44,8 +44,8 @@ Product Details:
 - Variant Value: ${productData.variantValue || 'N/A'}
 
 SKU Requirements:
-1. Length: 8-12 characters
-2. Format: [CATEGORY-CODE][PRODUCT-CODE][VARIANT-CODE if applicable]
+1. Length: 6 characters total (including hyphens)
+2. Format: [CATEGORY-CODE]-[PRODUCT-CODE] where PRODUCT-CODE is exactly 3 characters
 3. Use abbreviations for chemical categories:
    - fuel-additives → FA
    - water-treatment → WT
@@ -59,9 +59,9 @@ SKU Requirements:
 8. Use uppercase letters and numbers
 
 Example SKUs:
-- FA-DIS-5L (Fuel Additive Dispersant 5 Liter)
-- WT-CLR-25K (Water Treatment Clarifier 25kg)
-- PT-THN-PRO (Paint Thinner Professional)
+- FA-DIS (Fuel Additive Dispersant)
+- WT-CLR (Water Treatment Clarifier)
+- PT-THN (Paint Thinner)
 
 Please respond with JSON in this exact format:
 {
@@ -112,16 +112,25 @@ Please respond with JSON in this exact format:
     };
 
     const categoryCode = categoryMap[productData.category] || 'GEN';
-    const productCode = productData.name.substring(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const variantCode = productData.variantValue ? `-${productData.variantValue.substring(0, 2).toUpperCase()}` : '';
-    const fallbackSKU = `${categoryCode}-${productCode}${variantCode}-${Date.now().toString().slice(-4)}`;
+    // Generate exactly 3-character product code from name
+    let productCode = productData.name.substring(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    
+    // Ensure exactly 3 characters - pad with numbers if needed
+    if (productCode.length < 3) {
+      const randomNum = Math.floor(100 + Math.random() * 900).toString();
+      productCode = (productCode + randomNum).substring(0, 3);
+    } else if (productCode.length > 3) {
+      productCode = productCode.substring(0, 3);
+    }
+    
+    const fallbackSKU = `${categoryCode}-${productCode}`;
 
     return {
       sku: fallbackSKU,
       reasoning: "Generated using fallback method due to AI service unavailability",
       categoryCode,
       productCode,
-      variantCode
+      variantCode: ""
     };
   }
 }
