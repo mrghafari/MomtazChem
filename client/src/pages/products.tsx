@@ -223,7 +223,7 @@ export default function ProductsPage() {
       console.log('🌐 [DEBUG] Making API request to update product:', id);
       console.log('🌐 [DEBUG] API request data:', JSON.stringify(data, null, 2));
       console.log('🌐 [DEBUG] API URL:', `/api/products/${id}`);
-      return apiRequest(`/api/products/${id}`, "PUT", data);
+      return apiRequest(`/api/products/${id}`, { method: "PUT", body: data });
     },
     onSuccess: (result) => {
       console.log('✅ [DEBUG] Update mutation successful, result:', result);
