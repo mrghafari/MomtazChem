@@ -1820,7 +1820,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrls: productData.imageUrl ? [productData.imageUrl] : (productData.imageUrls || [])
       };
       
-      const product = await shopStorage.updateShopProduct(id, mappedData);
+      // Update showcase product instead of shop product for admin panel
+      const product = await storage.updateProduct(id, mappedData);
       res.json(product);
     } catch (error) {
       console.error("Error updating product:", error);
