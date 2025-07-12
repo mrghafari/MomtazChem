@@ -89,6 +89,7 @@ import DepartmentUsers from "@/pages/admin/department-users";
 import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
 import InventoryManagement from "@/pages/inventory-management";
 import ContentManagement from "@/pages/content-management";
+import EmailTemplates from "@/pages/email-templates";
 import SecurityManagement from "@/pages/security-management-new";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
@@ -167,6 +168,7 @@ function Router() {
           <Route path="/admin/inventory-management" component={InventoryManagement} />
 
           <Route path="/admin/content-management" component={ContentManagement} />
+          <Route path="/admin/email-templates" component={EmailTemplates} />
           <Route path="/admin/security-management" component={SecurityManagement} />
 
           

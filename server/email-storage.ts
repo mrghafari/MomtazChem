@@ -299,6 +299,34 @@ export class EmailStorage implements IEmailStorage {
       .from(emailTemplates)
       .orderBy(emailTemplates.templateName);
   }
+
+  async getAllTemplates(): Promise<EmailTemplate[]> {
+    const { desc } = await import("drizzle-orm");
+    const { sql } = await import("drizzle-orm");
+    
+    const result = await emailDb.execute(sql`
+      SELECT 
+        id, 
+        name as templateName, 
+        category as categoryName,
+        subject, 
+        html_content as htmlContent, 
+        text_content as textContent, 
+        variables, 
+        is_active as isActive, 
+        is_default as isDefault, 
+        language, 
+        created_by as createdBy, 
+        usage_count as usageCount, 
+        last_used as lastUsed, 
+        created_at as createdAt, 
+        updated_at as updatedAt
+      FROM email_templates 
+      ORDER BY is_default DESC, name ASC
+    `);
+    
+    return result.rows as EmailTemplate[];
+  }
   
   async getTemplatesByCategory(categoryId: number): Promise<EmailTemplate[]> {
     return await emailDb
@@ -331,6 +359,20 @@ export class EmailStorage implements IEmailStorage {
   async deleteTemplate(id: number): Promise<void> {
     await emailDb
       .delete(emailTemplates)
+      .where(eq(emailTemplates.id, id));
+  }
+
+  async setDefaultTemplate(id: number, category: string): Promise<void> {
+    // First remove default status from all templates in this category
+    await emailDb
+      .update(emailTemplates)
+      .set({ isDefault: false })
+      .where(eq(emailTemplates.category, category));
+
+    // Then set the specified template as default
+    await emailDb
+      .update(emailTemplates)
+      .set({ isDefault: true })
       .where(eq(emailTemplates.id, id));
   }
   

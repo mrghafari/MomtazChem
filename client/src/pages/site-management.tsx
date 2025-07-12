@@ -229,6 +229,13 @@ export default function SiteManagement() {
       icon: Edit3,
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50"
+    },
+    {
+      id: "email-templates",
+      label: "Email Templates",
+      icon: Mail,
+      onClick: () => trackButtonClick("email-templates", () => setLocation("/admin/email-templates")),
+      className: "border-pink-300 text-pink-600 hover:bg-pink-50"
     }
   ];
 

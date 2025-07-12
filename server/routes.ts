@@ -7287,6 +7287,180 @@ ${procedure.content}
     }
   });
 
+  // Admin Email Templates Management - New endpoints for the admin interface
+  app.get("/api/admin/email/templates", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const templates = await emailStorage.getAllTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching admin email templates:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت قالب‌های ایمیل" 
+      });
+    }
+  });
+
+  app.post("/api/admin/email/templates", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const { insertEmailTemplateSchema } = await import("../shared/email-schema");
+      
+      const templateData = {
+        ...req.body,
+        createdBy: req.session.adminId
+      };
+      
+      const template = await emailStorage.createTemplate(templateData);
+      res.status(201).json({ 
+        success: true, 
+        message: "قالب ایمیل با موفقیت ایجاد شد",
+        template 
+      });
+    } catch (error) {
+      console.error("Error creating admin email template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ایجاد قالب ایمیل" 
+      });
+    }
+  });
+
+  app.put("/api/admin/email/templates/:id", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه قالب نامعتبر است" 
+        });
+      }
+
+      const updates = req.body;
+      const template = await emailStorage.updateTemplate(id, updates);
+      res.json({ 
+        success: true, 
+        message: "قالب ایمیل با موفقیت بروزرسانی شد",
+        template 
+      });
+    } catch (error) {
+      console.error("Error updating admin email template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در بروزرسانی قالب ایمیل" 
+      });
+    }
+  });
+
+  app.delete("/api/admin/email/templates/:id", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه قالب نامعتبر است" 
+        });
+      }
+
+      await emailStorage.deleteTemplate(id);
+      res.json({ 
+        success: true, 
+        message: "قالب ایمیل با موفقیت حذف شد" 
+      });
+    } catch (error) {
+      console.error("Error deleting admin email template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در حذف قالب ایمیل" 
+      });
+    }
+  });
+
+  app.put("/api/admin/email/templates/:id/toggle", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const id = parseInt(req.params.id);
+      const { isActive } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه قالب نامعتبر است" 
+        });
+      }
+
+      const template = await emailStorage.updateTemplate(id, { isActive });
+      res.json({ 
+        success: true, 
+        message: isActive ? "قالب فعال شد" : "قالب غیرفعال شد",
+        template 
+      });
+    } catch (error) {
+      console.error("Error toggling email template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در تغییر وضعیت قالب" 
+      });
+    }
+  });
+
+  app.put("/api/admin/email/templates/:id/set-default", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه قالب نامعتبر است" 
+        });
+      }
+
+      // Get the template to find its category
+      const template = await emailStorage.getTemplateById(id);
+      if (!template) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "قالب یافت نشد" 
+        });
+      }
+
+      await emailStorage.setDefaultTemplate(id, template.category);
+      res.json({ 
+        success: true, 
+        message: "قالب به عنوان پیش‌فرض تنظیم شد" 
+      });
+    } catch (error) {
+      console.error("Error setting default template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در تنظیم قالب پیش‌فرض" 
+      });
+    }
+  });
+
+  app.get("/api/admin/email/categories", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const categories = await emailStorage.getCategories();
+      res.json({ 
+        success: true, 
+        categories 
+      });
+    } catch (error) {
+      console.error("Error fetching email categories:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت دسته‌بندی‌های ایمیل" 
+      });
+    }
+  });
+
   // Template processing routes
   app.post("/api/templates/send-response", requireAuth, async (req, res) => {
     try {
