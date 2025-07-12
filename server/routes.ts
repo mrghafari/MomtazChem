@@ -1844,10 +1844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update product (PUT method - for compatibility)
   app.put("/api/products/:id", requireAuth, async (req, res) => {
     try {
-      console.log('🔑 [DEBUG] PUT /api/products/:id authentication passed');
-      console.log('🔑 [DEBUG] Session data:', req.session);
-      console.log('🔑 [DEBUG] Request params:', req.params);
-      console.log('🔑 [DEBUG] Request body keys:', Object.keys(req.body));
+
       
       const id = parseInt(req.params.id);
       if (isNaN(id)) {

@@ -32,13 +32,7 @@ export async function apiRequest(
   const method = options?.method || 'GET';
   const data = options?.body;
   
-  console.log('🚀 [DEBUG] apiRequest called with:', { url, method, dataKeys: data ? Object.keys(data as any) : 'no data' });
-  
-  if (data) {
-    console.log('🚀 [DEBUG] Request body size:', JSON.stringify(data).length, 'chars');
-  }
-  
-  console.log('🚀 [DEBUG] Sending fetch request to:', url);
+
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -46,7 +40,7 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  console.log('🚀 [DEBUG] Response received:', res.status, res.statusText);
+
   await throwIfResNotOk(res);
   return res.json();
 }
