@@ -1244,7 +1244,9 @@ export default function ProductsPage() {
           </DialogHeader>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              console.log('❌ [DEBUG] Form validation failed:', errors);
+            })} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Basic Information */}
                 <div className="space-y-4">
@@ -2222,7 +2224,14 @@ export default function ProductsPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button 
+                  type="submit"
+                  onClick={(e) => {
+                    console.log('🔥 [DEBUG] Submit button clicked!');
+                    console.log('🔥 [DEBUG] Form state:', form.formState.isValid);
+                    console.log('🔥 [DEBUG] Form errors:', form.formState.errors);
+                  }}
+                >
                   {editingProduct ? "Update Product" : "Create Product"}
                 </Button>
               </div>
