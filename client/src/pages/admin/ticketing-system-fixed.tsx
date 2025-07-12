@@ -461,16 +461,16 @@ export default function TicketingSystemFixed() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Ticket className="w-5 h-5 text-blue-600" />
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{translate('ticketing.stats.myTickets', 'تیکت‌های من')}</p>
-                <p className="text-2xl font-bold">{userStats?.data?.totalSubmitted || 0}</p>
+                <p className="text-sm text-muted-foreground">{translate('ticketing.stats.open', 'باز')}</p>
+                <p className="text-2xl font-bold">{ticketStats?.data?.openTickets || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -484,7 +484,7 @@ export default function TicketingSystemFixed() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{translate('ticketing.stats.resolved', 'حل شده')}</p>
-                <p className="text-2xl font-bold">{userStats?.data?.resolved || 0}</p>
+                <p className="text-2xl font-bold">{ticketStats?.data?.resolvedTickets || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -498,7 +498,7 @@ export default function TicketingSystemFixed() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{translate('ticketing.stats.pending', 'در انتظار')}</p>
-                <p className="text-2xl font-bold">{userStats?.data?.pending || 0}</p>
+                <p className="text-2xl font-bold">{ticketStats?.data?.inProgressTickets || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -513,6 +513,20 @@ export default function TicketingSystemFixed() {
               <div>
                 <p className="text-sm text-muted-foreground">{translate('ticketing.stats.total', 'کل تیکت‌ها')}</p>
                 <p className="text-2xl font-bold">{ticketStats?.data?.totalTickets || 0}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <XCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{translate('ticketing.stats.closed', 'بسته شده')}</p>
+                <p className="text-2xl font-bold">{ticketStats?.data?.closedTickets || 0}</p>
               </div>
             </div>
           </CardContent>
