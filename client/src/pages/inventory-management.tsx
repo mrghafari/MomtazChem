@@ -94,6 +94,33 @@ export default function InventoryManagement() {
     refetchInterval: 30000
   });
 
+  // Fetch threshold settings
+  const { data: settingsData, refetch: refetchSettings } = useQuery({
+    queryKey: ["/api/inventory/threshold-settings"],
+    retry: false,
+  });
+
+  // Update thresholdSettings when data is loaded
+  useEffect(() => {
+    if (settingsData?.data && settingsData.data.length > 0) {
+      const settings = settingsData.data[0];
+      setThresholdSettings({
+        settingName: settings.settingName || 'global_default',
+        lowStockThreshold: settings.lowStockThreshold || 10,
+        warningStockLevel: settings.warningStockLevel || 5,
+        emailEnabled: settings.emailEnabled ?? true,
+        smsEnabled: settings.smsEnabled ?? true,
+        managerEmail: settings.managerEmail || 'manager@momtazchem.com',
+        managerPhone: settings.managerPhone || '+9647700000000',
+        managerName: settings.managerName || 'مدیر انبار',
+        checkFrequency: settings.checkFrequency || 60,
+        businessHoursOnly: settings.businessHoursOnly ?? true,
+        weekendsEnabled: settings.weekendsEnabled ?? false,
+        isActive: settings.isActive ?? true
+      });
+    }
+  }, [settingsData]);
+
   // Filter products based on search
   const filteredProducts = unifiedProducts.filter((product: UnifiedProduct) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -188,6 +215,32 @@ export default function InventoryManagement() {
     }
   };
 
+  // Save threshold settings mutation
+  const saveThresholdMutation = useMutation({
+    mutationFn: (settings: typeof thresholdSettings) =>
+      apiRequest("/api/inventory/threshold-settings", "POST", settings),
+    onSuccess: () => {
+      toast({
+        title: "✅ تنظیمات ذخیره شد",
+        description: "تنظیمات آستانه موجودی با موفقیت ذخیره شد",
+        duration: 3000
+      });
+      refetchSettings();
+    },
+    onError: () => {
+      toast({
+        title: "❌ خطا در ذخیره",
+        description: "خطا در ذخیره تنظیمات آستانه موجودی",
+        variant: "destructive",
+        duration: 3000
+      });
+    }
+  });
+
+  const handleSaveThresholdSettings = () => {
+    saveThresholdMutation.mutate(thresholdSettings);
+  };
+
   const startEdit = (product: UnifiedProduct) => {
     setEditingProduct(product.name);
     setEditingQuantity(product.stockQuantity);
@@ -230,16 +283,17 @@ export default function InventoryManagement() {
     markAsDeliveredMutation.mutate(transitId);
   };
 
+  // Calculate inventory statistics (consolidated)
   const inventoryStats = {
     totalProducts: unifiedStats.totalProducts,
-    lowStockProducts: unifiedStats.lowStock,
-    outOfStockProducts: unifiedStats.outOfStock,
-    activeAlerts: unifiedStats.criticalStock + unifiedStats.lowStock,
-    notificationsSent: unifiedStats.lowStock + unifiedStats.criticalStock,
+    inStock: unifiedStats.inStock,
+    outOfStock: unifiedStats.outOfStock,
+    lowStock: unifiedStats.lowStock,
+    criticalStock: unifiedStats.criticalStock,
     goodsInTransit: goodsInTransit?.filter((item: any) => item.status === 'in_transit')?.length || 0,
     transitValue: goodsInTransit?.filter((item: any) => item.status === 'in_transit')
       ?.reduce((sum: number, item: any) => sum + (parseFloat(item.totalAmount) || 0), 0) || 0,
-    lastUpdateTime: new Date().toLocaleString('fa-IR')
+    lastUpdateTime: new Date().toLocaleString('en-US')
   };
 
   return (
@@ -278,8 +332,20 @@ export default function InventoryManagement() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-gray-600">موجود</p>
+                <p className="text-2xl font-bold text-green-600">{inventoryStats.inStock}</p>
+              </div>
+              <CheckCircle className="w-8 h-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="text-sm font-medium text-gray-600">موجودی کم</p>
-                <p className="text-2xl font-bold text-orange-600">{inventoryStats.lowStockProducts}</p>
+                <p className="text-2xl font-bold text-orange-600">{inventoryStats.lowStock}</p>
               </div>
               <AlertTriangle className="w-8 h-8 text-orange-500" />
             </div>
@@ -291,21 +357,9 @@ export default function InventoryManagement() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">اتمام موجودی</p>
-                <p className="text-2xl font-bold text-red-600">{inventoryStats.outOfStockProducts}</p>
+                <p className="text-2xl font-bold text-red-600">{inventoryStats.outOfStock}</p>
               </div>
               <Archive className="w-8 h-8 text-red-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">هشدارهای فعال</p>
-                <p className="text-2xl font-bold text-purple-600">{inventoryStats.activeAlerts}</p>
-              </div>
-              <Bell className="w-8 h-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>
@@ -776,9 +830,13 @@ export default function InventoryManagement() {
 
               {/* Save Button */}
               <div className="flex justify-end">
-                <Button className="flex items-center gap-2">
+                <Button 
+                  onClick={handleSaveThresholdSettings}
+                  disabled={saveThresholdMutation.isPending}
+                  className="flex items-center gap-2"
+                >
                   <Save className="h-4 w-4" />
-                  ذخیره تنظیمات
+                  {saveThresholdMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
                 </Button>
               </div>
             </CardContent>

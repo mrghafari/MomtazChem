@@ -18688,34 +18688,6 @@ momtazchem.com
   });
 
   // =============================================================================
-  // API ERROR HANDLER - CATCH ALL API ROUTES AND ENSURE JSON RESPONSES
-  // =============================================================================
-  
-  // Catch-all for API routes that don't exist - return JSON 404
-  app.all('/api/*', (req, res) => {
-    res.status(404).json({
-      success: false,
-      message: 'API endpoint not found',
-      path: req.originalUrl,
-      method: req.method
-    });
-  });
-  
-  // Global error handler for all API routes
-  app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
-    console.error('API Error:', err);
-    
-    // Ensure JSON response even for errors
-    if (!res.headersSent) {
-      res.status(err.status || 500).json({
-        success: false,
-        message: err.message || 'Internal server error',
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-      });
-    }
-  });
-
-  // =============================================================================
   // INVENTORY THRESHOLD SETTINGS API ENDPOINTS
   // =============================================================================
 
@@ -18801,6 +18773,34 @@ momtazchem.com
       res.status(500).json({ 
         success: false, 
         message: "خطا در دریافت گزارش هشدارها" 
+      });
+    }
+  });
+
+  // =============================================================================
+  // API ERROR HANDLER - CATCH ALL API ROUTES AND ENSURE JSON RESPONSES
+  // =============================================================================
+  
+  // Catch-all for API routes that don't exist - return JSON 404
+  app.all('/api/*', (req, res) => {
+    res.status(404).json({
+      success: false,
+      message: 'API endpoint not found',
+      path: req.originalUrl,
+      method: req.method
+    });
+  });
+  
+  // Global error handler for all API routes
+  app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
+    console.error('API Error:', err);
+    
+    // Ensure JSON response even for errors
+    if (!res.headersSent) {
+      res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal server error',
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
       });
     }
   });
