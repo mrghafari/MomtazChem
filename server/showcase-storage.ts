@@ -17,6 +17,7 @@ import {
 } from "@shared/showcase-schema";
 import { showcaseDb } from "./showcase-db";
 import { eq, desc } from "drizzle-orm";
+import { shopStorage } from "./shop-storage";
 
 export interface IShowcaseStorage {
   // Showcase products for website display
@@ -102,7 +103,42 @@ export class ShowcaseStorage implements IShowcaseStorage {
       .set({ ...productUpdate, updatedAt: new Date() })
       .where(eq(showcaseProducts.id, id))
       .returning();
+    
+    // Auto-sync to shop if syncWithShop is enabled and imageUrl was updated
+    if (updatedProduct && updatedProduct.syncWithShop && productUpdate.imageUrl) {
+      console.log(`🖼️ Image updated for ${updatedProduct.name}, syncing to shop...`);
+      await this.syncProductToShop(updatedProduct);
+    }
+    
     return updatedProduct;
+  }
+
+  // Sync product to shop
+  async syncProductToShop(showcaseProduct: ShowcaseProduct): Promise<void> {
+    try {
+      if (!showcaseProduct.syncWithShop) {
+        console.log(`⚠️ Skipping sync for ${showcaseProduct.name} - syncWithShop is disabled`);
+        return;
+      }
+
+      // Check if product exists in shop by name
+      const allShopProducts = await shopStorage.getShopProducts();
+      const existingShopProduct = allShopProducts.find(p => p.name === showcaseProduct.name);
+      
+      if (existingShopProduct) {
+        // Update existing shop product, focusing on image sync
+        await shopStorage.updateShopProduct(existingShopProduct.id, {
+          imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : [],
+          thumbnailUrl: showcaseProduct.imageUrl || null,
+          price: showcaseProduct.unitPrice?.toString() || existingShopProduct.price,
+          stockQuantity: showcaseProduct.stockQuantity || existingShopProduct.stockQuantity,
+          description: showcaseProduct.description || existingShopProduct.description,
+        });
+        console.log(`✅ Image synced to shop: ${showcaseProduct.name}`);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to sync product to shop: ${showcaseProduct.name}`, error);
+    }
   }
 
   async deleteShowcaseProduct(id: number): Promise<void> {
