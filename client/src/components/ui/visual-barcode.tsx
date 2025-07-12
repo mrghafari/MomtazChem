@@ -391,50 +391,102 @@ const VisualBarcode = ({
             <title>Print Barcode - ${value}</title>
             <style>
               @page {
-                size: 4in 2in;
-                margin: 0.2in;
+                size: A4;
+                margin: 0.5in;
+              }
+              * {
+                box-sizing: border-box;
               }
               body {
                 margin: 0;
-                padding: 10px;
+                padding: 20px;
                 font-family: Arial, sans-serif;
-                text-align: center;
                 background: white;
+                color: black;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
               }
-              .barcode-container {
-                width: 100%;
-                height: 100%;
+              .label {
+                width: 300px;
+                height: 200px;
+                border: 2px solid #000;
+                padding: 15px;
+                margin: 0 auto;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: space-between;
                 align-items: center;
+                text-align: center;
+                background: white;
+                page-break-inside: avoid;
               }
               .product-name {
-                font-size: 12px;
+                font-size: 16px;
                 font-weight: bold;
+                margin-bottom: 8px;
+                color: black;
+                line-height: 1.2;
+                max-height: 40px;
+                overflow: hidden;
+              }
+              .sku-info {
+                font-size: 12px;
+                color: #444;
                 margin-bottom: 10px;
-                color: #000;
+                font-family: monospace;
               }
-              .sku {
-                font-size: 10px;
-                margin-top: 10px;
-                color: #666;
+              .barcode-section {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                max-height: 80px;
               }
-              svg {
-                max-width: 100%;
+              .barcode-section svg {
+                max-width: 250px;
+                max-height: 70px;
+                width: auto;
                 height: auto;
               }
+              .bottom-info {
+                margin-top: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+              }
+              .price {
+                font-size: 14px;
+                font-weight: bold;
+                color: #008000;
+                margin-bottom: 5px;
+              }
+              .website {
+                font-size: 10px;
+                color: #666;
+              }
               @media print {
-                body { -webkit-print-color-adjust: exact; }
+                body { 
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+                .label {
+                  box-shadow: none;
+                  border: 2px solid black !important;
+                }
               }
             </style>
           </head>
           <body>
-            <div class="barcode-container">
+            <div class="label">
               ${productName ? `<div class="product-name">${productName}</div>` : ''}
-              ${svgContent}
-              ${sku ? `<div class="sku">SKU: ${sku}</div>` : ''}
-              ${price ? `<div class="price" style="color: #16a34a; font-weight: 500; text-align: center; margin-top: 4px;">${Math.round(price)} IQD</div>` : ''}
+              ${sku ? `<div class="sku-info">SKU: ${sku}</div>` : ''}
+              <div class="barcode-section">
+                ${svgContent}
+              </div>
+              <div class="bottom-info">
+                ${price ? `<div class="price">${Math.round(price)} IQD</div>` : ''}
+                ${showWebsite ? `<div class="website">momtazchem.com</div>` : ''}
+              </div>
             </div>
           </body>
           </html>

@@ -2321,7 +2321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
 
     const generateBarcode = (value: string) => {
-      return `<div style="font-family: 'Libre Barcode 128', monospace; font-size: ${config.barcodeFont}; letter-spacing: 0.2px; text-align: center; line-height: 1;">${value}</div>`;
+      return `<div class="barcode-text" style="font-family: 'Courier New', monospace; font-size: ${config.barcodeFont}; font-weight: bold; letter-spacing: 1px; text-align: center; line-height: 1.2; background: white; color: black;">${value}</div>`;
     };
 
     const labelsHTML = products.map(product => {
@@ -2332,9 +2332,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       <div style="
         width: ${config.width}; 
         height: ${config.height}; 
-        border: 2px solid #888; 
+        border: 3px solid #000; 
         padding: ${config.padding}; 
-        margin: 1mm; 
+        margin: 2mm; 
         display: inline-block; 
         vertical-align: top;
         background: white;
@@ -2343,6 +2343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         font-family: Arial, sans-serif;
         overflow: hidden;
         position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       ">
         <!-- Fixed 4-row grid layout -->
         <div style="
@@ -2376,10 +2377,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             min-height: 0;
           ">
             ${showSKU && product.sku ? `
-              <span style="
+              <span class="sku-text" style="
                 font-size: ${config.skuFont}; 
-                color: #666; 
-                font-family: monospace;
+                color: #333; 
+                font-family: 'Courier New', monospace;
+                font-weight: 500;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -2410,27 +2412,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
             min-height: 0;
           ">
             ${showPrice && product.price ? `
-              <span style="
+              <span class="price-text" style="
                 font-weight: bold; 
-                color: #2d5a27; 
+                color: #008000; 
                 font-size: ${config.priceFont}; 
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 max-width: 100%;
+                text-shadow: 0 1px 1px rgba(0,0,0,0.1);
               ">
                 ${formatPrice(product)}
               </span>
             ` : ''}
             
             ${showWebsite ? `
-              <span style="
+              <span class="website-text" style="
                 color: #666; 
                 font-size: ${config.websiteFont}; 
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 max-width: 100%;
+                font-weight: 500;
               ">
                 momtazchem.com
               </span>
@@ -2445,24 +2449,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
       <html>
       <head>
         <meta charset="UTF-8">
-        <title>Product Labels</title>
+        <title>Product Labels - Momtazchem</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap');
+          
+          * {
+            box-sizing: border-box;
+          }
+          
           body { 
             margin: 0; 
-            padding: 5mm; 
+            padding: 10mm; 
             font-family: Arial, sans-serif;
             background: white;
+            color: black;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
+          
+          .labels-container {
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 3mm; 
+            align-items: flex-start;
+            justify-content: flex-start;
+          }
+          
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
+          
           @media print {
-            body { margin: 0; padding: 5mm; }
-            .no-print { display: none; }
+            body { 
+              margin: 0; 
+              padding: 10mm;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            
+            .no-print { 
+              display: none; 
+            }
+            
+            .labels-container > div {
+              border: 2px solid black !important;
+              background: white !important;
+              page-break-inside: avoid;
+            }
+            
+            /* Enhanced print quality */
+            .barcode-text {
+              font-family: 'Courier New', monospace !important;
+              font-weight: bold !important;
+              letter-spacing: 1px !important;
+            }
+            
+            /* Prevent text from breaking across pages */
+            h1, h2, h3, h4, h5, h6 {
+              page-break-after: avoid;
+            }
+            
+            /* Better color contrast for printing */
+            .price-text {
+              color: #008000 !important;
+              font-weight: bold !important;
+            }
+            
+            .sku-text {
+              color: #333333 !important;
+            }
+            
+            .website-text {
+              color: #666666 !important;
+            }
+          }
+          
+          /* Print preview styling */
+          @media screen {
+            body {
+              background: #f5f5f5;
+              padding: 20mm;
+            }
+            
+            .labels-container {
+              background: white;
+              padding: 10mm;
+              box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
           }
         </style>
       </head>
       <body>
-        <div style="display: flex; flex-wrap: wrap; gap: 2mm; align-items: flex-start;">
+        <div class="labels-container">
           ${labelsHTML}
+        </div>
+        
+        <!-- Print Instructions (hidden in print) -->
+        <div class="no-print" style="margin-top: 20mm; padding: 10mm; background: #f0f0f0; border-radius: 5mm;">
+          <h3 style="margin: 0 0 5mm 0; color: #333;">Print Instructions:</h3>
+          <ul style="margin: 0; padding-left: 15mm; color: #666;">
+            <li>Use Ctrl+P (Cmd+P on Mac) to print</li>
+            <li>Select "More settings" → "Options" → "Background graphics" for best quality</li>
+            <li>Recommended: Use high-quality printer with black ink</li>
+            <li>Print on A4 paper for standard labels</li>
+          </ul>
         </div>
       </body>
       </html>
