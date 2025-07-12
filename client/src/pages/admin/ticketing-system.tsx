@@ -128,20 +128,20 @@ export default function TicketingSystem() {
 
   // Mutations
   const createTicketMutation = useMutation({
-    mutationFn: (data: CreateTicketData) => apiRequestranslate('/api/tickets', {
+    mutationFn: (data: CreateTicketData) => apiRequest('/api/tickets', {
       method: 'POST',
       body: data,
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
       setCreateTicketOpen(false);
-      toastranslate({
+      toast({
         title: "موفقیت",
         description: "تیکت پشتیبانی با موفقیت ایجاد شد",
       });
     },
     onError: (error: any) => {
-      toastranslate({
+      toast({
         title: "خطا",
         description: error.message || "خطا در ایجاد تیکت",
         variant: "destructive",
@@ -151,13 +151,13 @@ export default function TicketingSystem() {
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ ticketId, status, reason }: { ticketId: number; status: string; reason?: string }) =>
-      apiRequestranslate(`/api/tickets/${ticketId}/status`, {
+      apiRequest(`/api/tickets/${ticketId}/status`, {
         method: 'PATCH',
         body: { status, reason },
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
-      toastranslate({
+      toast({
         title: "موفقیت",
         description: "وضعیت تیکت به‌روزرسانی شد",
       });
@@ -166,7 +166,7 @@ export default function TicketingSystem() {
 
   const addResponseMutation = useMutation({
     mutationFn: ({ ticketId, message, isInternal }: { ticketId: number; message: string; isInternal: boolean }) =>
-      apiRequestranslate(`/api/tickets/${ticketId}/responses`, {
+      apiRequest(`/api/tickets/${ticketId}/responses`, {
         method: 'POST',
         body: { message, isInternal },
       }),
@@ -176,7 +176,7 @@ export default function TicketingSystem() {
         // Refresh ticket detail
         queryClient.invalidateQueries({ queryKey: [`/api/tickets/${selectedTicket.id}`] });
       }
-      toastranslate({
+      toast({
         title: "موفقیت",
         description: "پاسخ اضافه شد",
       });
@@ -569,6 +569,11 @@ function TicketList({
 }) {
   const { t } = useLanguage();
   
+  // Local translate function
+  const translate = (key: string, fallback: string) => {
+    return typeof t === 'function' ? t(key, fallback) : fallback;
+  };
+  
   if (!tickets || tickets.length === 0) {
     return (
       <Card>
@@ -683,6 +688,11 @@ function TicketDetail({
   onStatusChange: (ticketId: number, status: string) => void;
 }) {
   const { t } = useLanguage();
+  
+  // Local translate function
+  const translate = (key: string, fallback: string) => {
+    return typeof t === 'function' ? t(key, fallback) : fallback;
+  };
   
   const { data: ticketDetail } = useQuery({
     queryKey: [`/api/tickets/${ticket.id}`],
