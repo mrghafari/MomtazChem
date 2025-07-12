@@ -245,7 +245,9 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   console.log(`🔐 [AUTH DEBUG] Session:`, {
     exists: !!req.session,
     isAuthenticated: req.session?.isAuthenticated,
-    adminId: req.session?.adminId
+    adminId: req.session?.adminId,
+    sessionID: req.sessionID,
+    fullSession: req.session
   });
 
   // More robust authentication check with session validation
@@ -847,11 +849,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save session explicitly
       req.session.save((err) => {
         if (err) {
+          console.error('Session save error:', err);
           return res.status(500).json({ 
             success: false, 
             message: "Failed to save session" 
           });
         }
+        
+        console.log(`✅ [LOGIN] Session saved for admin ${user.id}:`, {
+          adminId: req.session.adminId,
+          isAuthenticated: req.session.isAuthenticated,
+          sessionId: req.sessionID
+        });
         
         res.json({ 
           success: true, 
