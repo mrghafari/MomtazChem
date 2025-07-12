@@ -704,7 +704,8 @@ function TicketList({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     setSelectedTicket(ticket);
                     setTicketDetailOpen(true);
                   }}
