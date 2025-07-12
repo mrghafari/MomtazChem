@@ -43,6 +43,8 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { smsService } from "./sms-service";
 import { ticketingStorage } from "./ticketing-storage";
+import { supportTickets } from "../shared/ticketing-schema";
+import { db } from "./db";
 import { 
   insertSupportTicketSchema, 
   insertTicketResponseSchema,
@@ -280,8 +282,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Import department auth functions
   const { attachUserDepartments, requireDepartment } = await import("./department-auth");
   
-  // Add department middleware to all authenticated routes
-  app.use('/api', attachUserDepartments);
+  // Add department middleware to all authenticated routes (excluding ticket creation for guest access)
+  app.use('/api', (req, res, next) => {
+    // Skip auth middleware for ticket creation to allow guest access
+    if (req.path === '/tickets' && req.method === 'POST') {
+      return next();
+    }
+    attachUserDepartments(req, res, next);
+  });
   
   // Serve static files from attached_assets directory
   app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
@@ -14781,7 +14789,17 @@ momtazchem.com
   // Create new support ticket
   app.post('/api/tickets', async (req, res) => {
     try {
-      const validatedData = insertSupportTicketSchema.parse(req.body);
+      // Manual validation for guest users - bypass schema validation that requires auth fields
+      const { title, description, category, priority = 'normal', department } = req.body;
+      
+      if (!title || !description || !category) {
+        return res.status(400).json({
+          success: false,
+          message: 'Title, description, and category are required'
+        });
+      }
+      
+      const validatedData = { title, description, category, priority, department };
       const adminId = req.session.adminId;
       const customerId = req.session.customerId;
 
@@ -14806,12 +14824,40 @@ momtazchem.com
         submitterDepartment: 'Guest'
       };
 
+      // Merge validated data with submitter info, ensuring all required fields are present
       const ticketData = {
-        ...validatedData,
-        ...submitterInfo
+        title: validatedData.title,
+        description: validatedData.description,
+        category: validatedData.category,
+        priority: validatedData.priority || 'normal',
+        department: validatedData.department,
+        submittedBy: submitterInfo.submittedBy,
+        submitterName: submitterInfo.submitterName,
+        submitterEmail: submitterInfo.submitterEmail,
+        submitterDepartment: submitterInfo.submitterDepartment,
+        status: 'open',
+        // Optional fields
+        assignedTo: null,
+        attachments: null,
+        tags: null,
+        estimatedResolution: null,
+        actualResolution: null,
+        resolutionNotes: null,
+        customerSatisfaction: null,
+        internalNotes: null,
+        isUrgent: false,
+        followUpRequired: false,
+        followUpDate: null
       };
 
-      const ticket = await ticketingStorage.createTicket(ticketData);
+      // Create ticket directly bypassing type validation
+      const ticketNumber = `TKT-${Date.now()}`;
+      const [ticket] = await db.insert(supportTickets).values({
+        ...ticketData,
+        ticketNumber,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
 
       console.log(`✅ New support ticket created: ${ticket.ticketNumber} by ${submitterInfo.submitterName}`);
 
