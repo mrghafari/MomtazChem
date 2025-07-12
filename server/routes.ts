@@ -1858,27 +1858,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const productData = req.body;
       
-      // Validate required fields
-      if (!productData.name || productData.name.trim() === '') {
-        return res.status(400).json({ 
-          success: false, 
-          message: "نام محصول اجباری است" 
-        });
-      }
+      // Handle sync toggle requests (skip all validations)
+      const isSyncToggle = Object.keys(productData).length === 1 && 'syncWithShop' in productData;
       
-      // Validate numerical fields
-      if (productData.stockQuantity !== undefined && (isNaN(productData.stockQuantity) || productData.stockQuantity < 0)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "مقدار موجودی باید عدد مثبت باشد" 
-        });
-      }
-      
-      if (productData.unitPrice !== undefined && (isNaN(parseFloat(productData.unitPrice)) || parseFloat(productData.unitPrice) < 0)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "قیمت باید عدد مثبت باشد" 
-        });
+      if (isSyncToggle) {
+        console.log(`🔄 [DEBUG] Quick sync toggle request for product ${id}:`, productData.syncWithShop);
+        // Skip all validations for sync toggles - just update the field
+      } else {
+        // Full validation for regular updates
+        if (!productData.name || productData.name.trim() === '') {
+          return res.status(400).json({ 
+            success: false, 
+            message: "نام محصول اجباری است" 
+          });
+        }
+        
+        // Validate numerical fields
+        if (productData.stockQuantity !== undefined && (isNaN(productData.stockQuantity) || productData.stockQuantity < 0)) {
+          return res.status(400).json({ 
+            success: false, 
+            message: "مقدار موجودی باید عدد مثبت باشد" 
+          });
+        }
+        
+        if (productData.unitPrice !== undefined && (isNaN(parseFloat(productData.unitPrice)) || parseFloat(productData.unitPrice) < 0)) {
+          return res.status(400).json({ 
+            success: false, 
+            message: "قیمت باید عدد مثبت باشد" 
+          });
+        }
       }
       
       console.log(`📝 [DEBUG] Updating showcase product ${id} with validated data`);
