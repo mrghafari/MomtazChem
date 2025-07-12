@@ -719,7 +719,10 @@ function TicketList({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleStatusChange(ticket.id, 'in_progress')}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleStatusChange(ticket.id, 'in_progress');
+                    }}
                     className="flex items-center gap-1"
                     disabled={!isAdmin}
                     title={!isAdmin ? "نیاز به ورود ادمین" : ""}
@@ -733,7 +736,10 @@ function TicketList({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleStatusChange(ticket.id, 'resolved')}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleStatusChange(ticket.id, 'resolved');
+                    }}
                     className="flex items-center gap-1"
                     disabled={!isAdmin}
                     title={!isAdmin ? "نیاز به ورود ادمین" : ""}
