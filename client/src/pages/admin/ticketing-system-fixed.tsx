@@ -124,6 +124,15 @@ export default function TicketingSystemFixed() {
     queryKey: ['/api/tickets/stats/user'],
   });
 
+  // Get ticket responses for selected ticket
+  const { data: ticketResponses } = useQuery({
+    queryKey: ['/api/tickets', selectedTicket?.id, 'responses'],
+    queryFn: () => selectedTicket ? 
+      fetch(`/api/tickets/${selectedTicket.id}/responses`, { credentials: 'include' }).then(res => res.json()) : 
+      null,
+    enabled: !!selectedTicket,
+  });
+
   // Check both customer and admin authentication
   const { data: currentUser } = useQuery({
     queryKey: ['/api/customers/me'],
@@ -189,6 +198,9 @@ export default function TicketingSystemFixed() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/my-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/overview'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/user'] });
       toast({
         title: "موفقیت",
         description: "وضعیت تیکت به‌روزرسانی شد",
@@ -204,8 +216,11 @@ export default function TicketingSystemFixed() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/my-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/overview'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/user'] });
       if (selectedTicket) {
-        queryClient.invalidateQueries({ queryKey: [`/api/tickets/${selectedTicket.id}`] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tickets', selectedTicket.id, 'responses'] });
       }
       // Reset the form after successful response
       responseForm.reset();
@@ -540,6 +555,7 @@ export default function TicketingSystemFixed() {
             </DialogHeader>
             <TicketDetail 
               ticket={selectedTicket}
+              responses={ticketResponses?.data || []}
               onAddResponse={handleAddResponse}
               responseForm={responseForm}
               isAdmin={isAdmin}
@@ -665,12 +681,14 @@ function TicketList({
 // Ticket Detail Component
 function TicketDetail({ 
   ticket, 
+  responses,
   onAddResponse, 
   responseForm, 
   isAdmin, 
   translate 
 }: { 
   ticket: any, 
+  responses: any[],
   onAddResponse: (data: ResponseData) => void, 
   responseForm: any, 
   isAdmin: boolean, 
@@ -689,7 +707,54 @@ function TicketDetail({
         </div>
         <h3 className="font-semibold text-lg mb-2">{ticket.title}</h3>
         <p className="text-muted-foreground">{ticket.description}</p>
+        
+        <div className="mt-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <User className="w-4 h-4" />
+              {ticket.submitterName}
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              {new Date(ticket.createdAt).toLocaleDateString('en-US')}
+            </div>
+            {ticket.department && (
+              <div className="flex items-center gap-1">
+                <Tag className="w-4 h-4" />
+                {ticket.department}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Responses Section */}
+      {responses && responses.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="font-medium text-sm text-muted-foreground">پاسخ‌ها و نظرات:</h4>
+          {responses.map((response: any) => (
+            <div key={response.id} className="p-3 bg-background border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant={response.senderType === 'admin' ? 'default' : 'secondary'}>
+                    {response.senderName}
+                  </Badge>
+                  {response.senderType === 'admin' && (
+                    <Badge variant="outline" className="text-xs">ادمین</Badge>
+                  )}
+                  {response.isInternal && (
+                    <Badge variant="destructive" className="text-xs">داخلی</Badge>
+                  )}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(response.createdAt).toLocaleDateString('en-US')} - {new Date(response.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+              <p className="text-sm">{response.message}</p>
+            </div>
+          ))}
+        </div>
+      )}
       
       {isAdmin && (
         <Form {...responseForm}>
@@ -704,6 +769,28 @@ function TicketDetail({
                     <Textarea {...field} placeholder="پاسخ خود را بنویسید..." rows={3} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={responseForm.control}
+              name="isInternal"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="rounded border-gray-300"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="text-sm font-normal">
+                      پاسخ داخلی (فقط برای ادمین‌ها قابل مشاهده)
+                    </FormLabel>
+                  </div>
                 </FormItem>
               )}
             />

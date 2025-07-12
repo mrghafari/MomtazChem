@@ -15033,6 +15033,26 @@ momtazchem.com
     }
   });
 
+  // Get ticket responses
+  app.get('/api/tickets/:id/responses', async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const responses = await ticketingStorage.getTicketResponses(ticketId);
+
+      res.json({
+        success: true,
+        data: responses
+      });
+
+    } catch (error) {
+      console.error('Error getting ticket responses:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت پاسخ‌ها'
+      });
+    }
+  });
+
   // Add response to ticket
   app.post('/api/tickets/:id/responses', requireAuth, async (req, res) => {
     try {
