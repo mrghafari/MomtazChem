@@ -685,7 +685,7 @@ function TicketList({
                   className="flex items-center gap-1"
                 >
                   <Eye className="w-4 h-4" />
-{translate('ticketing.details', 'جزئیات')}
+                  {translate('ticketing.details', 'جزئیات')}
                 </Button>
                 
                 {ticket.status === 'open' && (
