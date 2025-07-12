@@ -241,12 +241,19 @@ const upload = multer({
 
 // Admin authentication middleware
 const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+  console.log(`🔐 [AUTH DEBUG] ${req.method} ${req.path}`);
+  console.log(`🔐 [AUTH DEBUG] Session:`, {
+    exists: !!req.session,
+    isAuthenticated: req.session?.isAuthenticated,
+    adminId: req.session?.adminId
+  });
+
   // More robust authentication check with session validation
   if (req.session && req.session.isAuthenticated === true && req.session.adminId) {
     console.log(`✅ Authentication successful for admin ${req.session.adminId}`);
     next();
   } else {
-    console.log('Authentication failed for:', req.path);
+    console.log('❌ Authentication failed for:', req.path);
     
     // Clear any invalid session data
     if (req.session) {
@@ -1846,10 +1853,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update product (PUT method - for compatibility)
   app.put("/api/products/:id", requireAuth, async (req, res) => {
     try {
-
+      console.log(`🔧 [DEBUG] PUT /api/products/${req.params.id} - Body:`, JSON.stringify(req.body, null, 2));
       
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
+        console.log(`❌ [DEBUG] Invalid product ID: ${req.params.id}`);
         return res.status(400).json({ 
           success: false, 
           message: "Invalid product ID" 
@@ -1857,6 +1865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = req.body;
+      console.log(`📋 [DEBUG] Product data keys:`, Object.keys(productData));
       
       // Handle sync toggle requests (skip all validations)
       const isSyncToggle = Object.keys(productData).length === 1 && 'syncWithShop' in productData;
@@ -1984,8 +1993,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const responseProduct = product;
+      console.log(`✅ [DEBUG] Product update completed successfully for product ${id}`);
       
-      res.json(responseProduct);
+      res.json({ 
+        success: true, 
+        message: isSyncToggle ? "وضعیت نمایش در فروشگاه به‌روزرسانی شد" : "محصول با موفقیت به‌روزرسانی شد",
+        product: responseProduct 
+      });
     } catch (error: any) {
       console.error("Error updating showcase product:", error);
       
