@@ -549,18 +549,20 @@ export default function TicketingSystemFixed() {
       {/* Ticket Detail Dialog */}
       {selectedTicket && (
         <Dialog open={ticketDetailOpen} onOpenChange={setTicketDetailOpen}>
-          <DialogContent className="max-w-2xl" dir={direction}>
-            <DialogHeader>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" dir={direction}>
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle>جزئیات تیکت #{selectedTicket.ticketNumber}</DialogTitle>
             </DialogHeader>
-            <TicketDetail 
-              ticket={selectedTicket}
-              responses={ticketResponses?.data || []}
-              onAddResponse={handleAddResponse}
-              responseForm={responseForm}
-              isAdmin={isAdmin}
-              translate={translate}
-            />
+            <div className="flex-1 overflow-y-auto pr-2">
+              <TicketDetail 
+                ticket={selectedTicket}
+                responses={ticketResponses?.data || []}
+                onAddResponse={handleAddResponse}
+                responseForm={responseForm}
+                isAdmin={isAdmin}
+                translate={translate}
+              />
+            </div>
           </DialogContent>
         </Dialog>
       )}
@@ -731,76 +733,81 @@ function TicketDetail({
       {/* Responses Section */}
       {responses && responses.length > 0 && (
         <div className="space-y-3">
-          <h4 className="font-medium text-sm text-muted-foreground">پاسخ‌ها و نظرات:</h4>
-          {responses.map((response: any) => (
-            <div key={response.id} className="p-3 bg-background border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant={response.senderType === 'admin' ? 'default' : 'secondary'}>
-                    {response.senderName}
-                  </Badge>
-                  {response.senderType === 'admin' && (
-                    <Badge variant="outline" className="text-xs">ادمین</Badge>
-                  )}
-                  {response.isInternal && (
-                    <Badge variant="destructive" className="text-xs">داخلی</Badge>
-                  )}
+          <h4 className="font-medium text-sm text-muted-foreground">پاسخ‌ها و نظرات ({responses.length}):</h4>
+          <div className="max-h-[300px] overflow-y-auto space-y-3 border rounded-lg p-3 bg-gray-50/50">
+            {responses.map((response: any) => (
+              <div key={response.id} className="p-3 bg-white border rounded-lg shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant={response.senderType === 'admin' ? 'default' : 'secondary'}>
+                      {response.senderName}
+                    </Badge>
+                    {response.senderType === 'admin' && (
+                      <Badge variant="outline" className="text-xs">ادمین</Badge>
+                    )}
+                    {response.isInternal && (
+                      <Badge variant="destructive" className="text-xs">داخلی</Badge>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(response.createdAt).toLocaleDateString('en-US')} - {new Date(response.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(response.createdAt).toLocaleDateString('en-US')} - {new Date(response.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                <p className="text-sm leading-relaxed">{response.message}</p>
               </div>
-              <p className="text-sm">{response.message}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
       
       {isAdmin && (
-        <Form {...responseForm}>
-          <form onSubmit={responseForm.handleSubmit(onAddResponse)} className="space-y-4">
-            <FormField
-              control={responseForm.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>پاسخ ادمین</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} placeholder="پاسخ خود را بنویسید..." rows={3} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div className="border-t pt-4 mt-4 bg-gray-50/30 rounded-lg p-4">
+          <h4 className="font-medium text-sm mb-3 text-muted-foreground">افزودن پاسخ جدید:</h4>
+          <Form {...responseForm}>
+            <form onSubmit={responseForm.handleSubmit(onAddResponse)} className="space-y-4">
+              <FormField
+                control={responseForm.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>پاسخ ادمین</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} placeholder="پاسخ خود را بنویسید..." rows={3} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={responseForm.control}
-              name="isInternal"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="rounded border-gray-300"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="text-sm font-normal">
-                      پاسخ داخلی (فقط برای ادمین‌ها قابل مشاهده)
-                    </FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
-            
-            <Button type="submit" className="flex items-center gap-2">
-              <Send className="w-4 h-4" />
-              ارسال پاسخ
-            </Button>
-          </form>
-        </Form>
+              <FormField
+                control={responseForm.control}
+                name="isInternal"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="rounded border-gray-300"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-normal">
+                        پاسخ داخلی (فقط برای ادمین‌ها قابل مشاهده)
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <Button type="submit" className="flex items-center gap-2 w-full">
+                <Send className="w-4 h-4" />
+                ارسال پاسخ
+              </Button>
+            </form>
+          </Form>
+        </div>
       )}
     </div>
   );
