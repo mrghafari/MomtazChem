@@ -181,6 +181,8 @@ export default function ProductsPage() {
 
   const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
     queryKey: ["/api/products"],
+    staleTime: 0, // Always refetch for real-time updates
+    cacheTime: 0, // Don't cache data
   });
 
   const { mutate: createProduct } = useMutation({
@@ -211,25 +213,27 @@ export default function ProductsPage() {
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) =>
       apiRequest(`/api/products/${id}`, "PUT", data),
     onSuccess: () => {
-      // Clear and refresh data completely
+      // Aggressive cache clearing for immediate updates
       queryClient.removeQueries({ queryKey: ["/api/products"] });
+      queryClient.clear(); // Clear entire cache
+      
+      // Force immediate refetch
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.refetchQueries({ queryKey: ["/api/products"] });
+      queryClient.refetchQueries({ queryKey: ["/api/products"] }, { exact: true });
+      
       setRefreshKey(prev => prev + 1); // Force component re-render
       
-      // Keep the form values to show updated data
-      // Don't reset form or close dialog immediately
+      // Close dialog immediately to see changes
+      setDialogOpen(false);
+      setEditingProduct(null);
+      setImagePreview(null);
+      setCatalogPreview(null);
+      setMsdsPreview(null);
+      form.reset();
       
-      setTimeout(() => {
-        setDialogOpen(false);
-        setEditingProduct(null);
-        setImagePreview(null);
-        setCatalogPreview(null);
-        setMsdsPreview(null);
-      }, 1000); // Allow user to see the updated values for 1 second
       toast({
-        title: "Success",
-        description: "Product updated successfully",
+        title: "موفقیت",
+        description: "محصول با موفقیت بروزرسانی شد",
       });
     },
     onError: (error: any) => {
