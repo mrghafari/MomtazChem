@@ -1,0 +1,90 @@
+Barcode effect triggered:  Canvas ref: null
+products.tsx:683 Barcode effect triggered: 8649677158564 Canvas ref: null
+products.tsx:689 Attempting to generate barcode: 8649677158564
+products.tsx:714 EAN-13 barcode generated successfully
+products:1 Uncaught (in promise) AbortError: The play() request was interrupted by a call to pause(). https://goo.gl/LdLk22Understand this error
+products.tsx:2230 🔥 [DEBUG] Submit button clicked!
+products.tsx:2231 🔥 [DEBUG] Form state: false
+products.tsx:2232 🔥 [DEBUG] Form errors: {}
+products.tsx:404 🔍 [DEBUG] Form submission - Raw form data: {name: 'تصفیه‌کننده آب صنعتی AquaPure', category: 'water-treatment', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', priceRange: '25.00 unit', …}
+products.tsx:405 🔍 [DEBUG] Tags in form data: شیمیایی Type: string
+products.tsx:406 🔍 [DEBUG] Description in form data: این یک محصول شیمیایی تولید شرکت ممتاز شیمی است
+products.tsx:407 🔍 [DEBUG] editingProduct state: 22
+products.tsx:441 🚀 [DEBUG] Final processed data being sent to API: {
+  "name": "تصفیه‌کننده آب صنعتی AquaPure",
+  "category": "water-treatment",
+  "description": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "shortDescription": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "priceRange": "25.00 unit",
+  "imageUrl": "",
+  "pdfCatalogUrl": "",
+  "specifications": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "features": [
+    "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است"
+  ],
+  "applications": [
+    "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است"
+  ],
+  "msdsUrl": "",
+  "showMsdsToCustomers": false,
+  "msdsFileName": "",
+  "stockQuantity": 12,
+  "minStockLevel": 12,
+  "maxStockLevel": 11,
+  "unitPrice": "11",
+  "currency": "IQD",
+  "weight": "11",
+  "weightUnit": "kg",
+  "barcode": "8649677158564",
+  "sku": "SP-7-تصفیه‌کنند",
+  "tags": [
+    "شیمیایی"
+  ],
+  "isActive": true,
+  "syncWithShop": true,
+  "showWhenOutOfStock": false,
+  "isVariant": false,
+  "catalogFileName": "",
+  "showCatalogToCustomers": false
+}
+products.tsx:444 📝 [DEBUG] Calling updateProduct with ID: 22
+products.tsx:223 🌐 [DEBUG] Making API request to update product: 22
+products.tsx:224 🌐 [DEBUG] API request data: {
+  "name": "تصفیه‌کننده آب صنعتی AquaPure",
+  "category": "water-treatment",
+  "description": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "shortDescription": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "priceRange": "25.00 unit",
+  "imageUrl": "",
+  "pdfCatalogUrl": "",
+  "specifications": "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+  "features": [
+    "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است"
+  ],
+  "applications": [
+    "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است"
+  ],
+  "msdsUrl": "",
+  "showMsdsToCustomers": false,
+  "msdsFileName": "",
+  "stockQuantity": 12,
+  "minStockLevel": 12,
+  "maxStockLevel": 11,
+  "unitPrice": "11",
+  "currency": "IQD",
+  "weight": "11",
+  "weightUnit": "kg",
+  "barcode": "8649677158564",
+  "sku": "SP-7-تصفیه‌کنند",
+  "tags": [
+    "شیمیایی"
+  ],
+  "isActive": true,
+  "syncWithShop": true,
+  "showWhenOutOfStock": false,
+  "isVariant": false,
+  "catalogFileName": "",
+  "showCatalogToCustomers": false
+}
+products.tsx:228 ✅ [DEBUG] Update mutation successful, result: {id: 22, name: 'تصفیه‌کننده آب صنعتی AquaPure', category: 'water-treatment', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+products.tsx:683 Barcode effect triggered: 8649677158564 Canvas ref: null

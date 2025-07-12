@@ -442,9 +442,11 @@ export default function ProductsPage() {
     
     if (editingProduct) {
       console.log('📝 [DEBUG] Calling updateProduct with ID:', editingProduct.id);
+      console.log('📝 [DEBUG] updateProduct function exists:', typeof updateProduct);
       updateProduct({ id: editingProduct.id, data: processedData });
     } else {
       console.log('➕ [DEBUG] Calling createProduct');
+      console.log('➕ [DEBUG] createProduct function exists:', typeof createProduct);
       createProduct(processedData);
     }
   };
