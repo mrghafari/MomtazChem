@@ -140,12 +140,30 @@ export default function TicketingSystem() {
 
 
 
-  // Check if user is admin (simple check based on current user data)
+  // Check both customer and admin authentication
   const { data: currentUser } = useQuery({
     queryKey: ['/api/customers/me'],
+    retry: false,
   });
   
-  const isAdmin = currentUser?.customer?.email?.includes('admin') || false;
+  const { data: adminUser } = useQuery({
+    queryKey: ['/api/admin/me'],
+    retry: false,
+  });
+  
+  // Determine if user is admin - check both admin session and email patterns
+  const isAdmin = Boolean(adminUser?.user) || currentUser?.customer?.email?.includes('admin') || false;
+  
+  // Get current authenticated user info (admin takes precedence)
+  const currentUserInfo = adminUser?.user ? {
+    name: adminUser.user.username || 'Admin User',
+    email: adminUser.user.email || 'admin@momtazchem.com',
+    type: 'admin'
+  } : currentUser?.customer ? {
+    name: `${currentUser.customer.firstName} ${currentUser.customer.lastName}`.trim() || 'Customer',
+    email: currentUser.customer.email,
+    type: 'customer'
+  } : null;
 
   // Mutations
   const createTicketMutation = useMutation({
@@ -287,6 +305,14 @@ export default function TicketingSystem() {
           <p className="text-muted-foreground mt-1">
             {translate('ticketing.description', 'مدیریت تیکت‌های پشتیبانی فنی و ارتباط با ادمین')}
           </p>
+          {currentUserInfo && (
+            <div className="mt-2 text-sm">
+              <span className="text-gray-600">کاربر فعلی: </span>
+              <span className="font-medium text-blue-600">
+                {currentUserInfo.name} ({currentUserInfo.type === 'admin' ? 'مدیر سیستم' : 'مشتری'})
+              </span>
+            </div>
+          )}
         </div>
         
         <Dialog open={createTicketOpen} onOpenChange={setCreateTicketOpen}>
