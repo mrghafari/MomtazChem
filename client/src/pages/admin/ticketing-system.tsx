@@ -521,7 +521,7 @@ export default function TicketingSystem() {
           <TicketList 
             tickets={filteredTickets(myTickets?.data || [])} 
             onTicketSelect={(ticket) => {
-              setSelectedTicketranslate(ticket);
+              setSelectedTicket(ticket);
               setTicketDetailOpen(true);
             }}
             onStatusChange={handleStatusChange}
@@ -532,7 +532,7 @@ export default function TicketingSystem() {
           <TicketList 
             tickets={filteredTickets(allTickets?.data || [])} 
             onTicketSelect={(ticket) => {
-              setSelectedTicketranslate(ticket);
+              setSelectedTicket(ticket);
               setTicketDetailOpen(true);
             }}
             onStatusChange={handleStatusChange}
@@ -558,7 +558,7 @@ export default function TicketingSystem() {
 }
 
 // Ticket List Component
-function TicketListranslate({ 
+function TicketList({ 
   tickets, 
   onTicketSelect, 
   onStatusChange 
