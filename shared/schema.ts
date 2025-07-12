@@ -12,6 +12,7 @@ export * from "./showcase-schema";
 export * from "./shop-schema";
 export * from "./content-schema";
 export * from "./security-schema";
+export * from "./ticketing-schema";
 
 // =============================================================================
 // SEO MANAGEMENT SCHEMA

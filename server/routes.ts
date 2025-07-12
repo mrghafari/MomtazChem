@@ -42,6 +42,16 @@ import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBar
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { smsService } from "./sms-service";
+import { ticketingStorage } from "./ticketing-storage";
+import { 
+  insertSupportTicketSchema, 
+  insertTicketResponseSchema,
+  type SupportTicket,
+  type TicketResponse,
+  TICKET_PRIORITIES,
+  TICKET_STATUSES,
+  TICKET_CATEGORIES
+} from "@shared/ticketing-schema";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -14747,6 +14757,426 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: error instanceof Error ? error.message : 'خطا در پردازش برگشت وجه'
+      });
+    }
+  });
+
+  // =============================================================================
+  // TICKETING SYSTEM API ENDPOINTS
+  // =============================================================================
+
+  // Create new support ticket
+  app.post('/api/tickets', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertSupportTicketSchema.parse(req.body);
+      const adminId = req.session.adminId;
+      const user = req.session.user;
+
+      if (!adminId && !user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required to create tickets" 
+        });
+      }
+
+      // Use admin info or user info
+      const submitterInfo = adminId ? {
+        submittedBy: adminId,
+        submitterName: req.session.adminName || 'Admin User',
+        submitterEmail: req.session.adminEmail || 'admin@momtazchem.com',
+        submitterDepartment: req.session.adminDepartment || 'Administration'
+      } : {
+        submittedBy: user.id,
+        submitterName: user.firstName + ' ' + user.lastName,
+        submitterEmail: user.email,
+        submitterDepartment: user.department || 'Site Management'
+      };
+
+      const ticketData = {
+        ...validatedData,
+        ...submitterInfo
+      };
+
+      const ticket = await ticketingStorage.createTicket(ticketData);
+
+      console.log(`✅ New support ticket created: ${ticket.ticketNumber} by ${submitterInfo.submitterName}`);
+
+      res.json({
+        success: true,
+        message: "تیکت پشتیبانی با موفقیت ایجاد شد",
+        data: ticket
+      });
+
+    } catch (error) {
+      console.error('Error creating support ticket:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'خطا در ایجاد تیکت پشتیبانی'
+      });
+    }
+  });
+
+  // Get all tickets (admin view)
+  app.get('/api/tickets', requireAuth, async (req, res) => {
+    try {
+      const { 
+        status, 
+        priority, 
+        category, 
+        assignedTo, 
+        submittedBy, 
+        limit = 50, 
+        offset = 0 
+      } = req.query;
+
+      const filters = {
+        status: status as string,
+        priority: priority as string,
+        category: category as string,
+        assignedTo: assignedTo ? parseInt(assignedTo as string) : undefined,
+        submittedBy: submittedBy ? parseInt(submittedBy as string) : undefined,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      };
+
+      const tickets = await ticketingStorage.getTickets(filters);
+
+      res.json({
+        success: true,
+        data: tickets
+      });
+
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بارگیری لیست تیکت‌ها'
+      });
+    }
+  });
+
+  // Get tickets for current user
+  app.get('/api/tickets/my-tickets', requireAuth, async (req, res) => {
+    try {
+      const { limit = 50, offset = 0 } = req.query;
+      const adminId = req.session.adminId;
+      const user = req.session.user;
+
+      const userId = adminId || user?.id;
+      if (!userId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+
+      const tickets = await ticketingStorage.getTicketsByUser(
+        userId, 
+        parseInt(limit as string), 
+        parseInt(offset as string)
+      );
+
+      res.json({
+        success: true,
+        data: tickets
+      });
+
+    } catch (error) {
+      console.error('Error fetching user tickets:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بارگیری تیکت‌های شما'
+      });
+    }
+  });
+
+  // Get single ticket by ID
+  app.get('/api/tickets/:id', requireAuth, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const ticket = await ticketingStorage.getTicketById(ticketId);
+
+      if (!ticket) {
+        return res.status(404).json({
+          success: false,
+          message: 'تیکت یافت نشد'
+        });
+      }
+
+      // Get ticket responses
+      const responses = await ticketingStorage.getTicketResponses(ticketId);
+      
+      // Get status history
+      const statusHistory = await ticketingStorage.getTicketStatusHistory(ticketId);
+
+      res.json({
+        success: true,
+        data: {
+          ticket,
+          responses,
+          statusHistory
+        }
+      });
+
+    } catch (error) {
+      console.error('Error fetching ticket:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بارگیری تیکت'
+      });
+    }
+  });
+
+  // Update ticket status
+  app.patch('/api/tickets/:id/status', requireAuth, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const { status, reason } = req.body;
+      const adminId = req.session.adminId;
+      const user = req.session.user;
+
+      if (!TICKET_STATUSES.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: 'وضعیت تیکت نامعتبر است'
+        });
+      }
+
+      const userInfo = adminId ? {
+        userId: adminId,
+        userName: req.session.adminName || 'Admin User',
+        userType: 'admin' as const
+      } : {
+        userId: user.id,
+        userName: user.firstName + ' ' + user.lastName,
+        userType: 'site_manager' as const
+      };
+
+      await ticketingStorage.updateTicketStatus(
+        ticketId,
+        status,
+        userInfo.userId,
+        userInfo.userName,
+        userInfo.userType,
+        reason
+      );
+
+      console.log(`✅ Ticket ${ticketId} status updated to ${status} by ${userInfo.userName}`);
+
+      res.json({
+        success: true,
+        message: 'وضعیت تیکت با موفقیت به‌روزرسانی شد'
+      });
+
+    } catch (error) {
+      console.error('Error updating ticket status:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در به‌روزرسانی وضعیت تیکت'
+      });
+    }
+  });
+
+  // Add response to ticket
+  app.post('/api/tickets/:id/responses', requireAuth, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const { message, attachments, isInternal } = req.body;
+      const adminId = req.session.adminId;
+      const user = req.session.user;
+
+      const senderInfo = adminId ? {
+        senderId: adminId,
+        senderName: req.session.adminName || 'Admin User',
+        senderType: 'admin' as const
+      } : {
+        senderId: user.id,
+        senderName: user.firstName + ' ' + user.lastName,
+        senderType: 'site_manager' as const
+      };
+
+      const responseData = {
+        ticketId,
+        message,
+        attachments: attachments || [],
+        isInternal: isInternal || false,
+        ...senderInfo
+      };
+
+      const response = await ticketingStorage.createTicketResponse(responseData);
+
+      console.log(`✅ New response added to ticket ${ticketId} by ${senderInfo.senderName}`);
+
+      res.json({
+        success: true,
+        message: 'پاسخ با موفقیت اضافه شد',
+        data: response
+      });
+
+    } catch (error) {
+      console.error('Error adding ticket response:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در افزودن پاسخ'
+      });
+    }
+  });
+
+  // Assign ticket to admin
+  app.post('/api/tickets/:id/assign', requireAuth, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const { assignedTo, notes } = req.body;
+      const adminId = req.session.adminId;
+
+      if (!adminId) {
+        return res.status(403).json({
+          success: false,
+          message: 'فقط ادمین می‌تواند تیکت را واگذار کند'
+        });
+      }
+
+      const assignment = await ticketingStorage.assignTicket(
+        ticketId,
+        assignedTo,
+        adminId,
+        notes
+      );
+
+      console.log(`✅ Ticket ${ticketId} assigned to admin ${assignedTo} by admin ${adminId}`);
+
+      res.json({
+        success: true,
+        message: 'تیکت با موفقیت واگذار شد',
+        data: assignment
+      });
+
+    } catch (error) {
+      console.error('Error assigning ticket:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در واگذاری تیکت'
+      });
+    }
+  });
+
+  // Get ticket statistics
+  app.get('/api/tickets/stats/overview', requireAuth, async (req, res) => {
+    try {
+      const stats = await ticketingStorage.getTicketStats();
+
+      res.json({
+        success: true,
+        data: stats
+      });
+
+    } catch (error) {
+      console.error('Error fetching ticket stats:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بارگیری آمار تیکت‌ها'
+      });
+    }
+  });
+
+  // Get user ticket statistics
+  app.get('/api/tickets/stats/user', requireAuth, async (req, res) => {
+    try {
+      const adminId = req.session.adminId;
+      const user = req.session.user;
+      const userId = adminId || user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+
+      const stats = await ticketingStorage.getUserTicketStats(userId);
+
+      res.json({
+        success: true,
+        data: stats
+      });
+
+    } catch (error) {
+      console.error('Error fetching user ticket stats:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بارگیری آمار تیکت‌های کاربر'
+      });
+    }
+  });
+
+  // Get ticket categories
+  app.get('/api/tickets/categories', requireAuth, async (req, res) => {
+    try {
+      const categories = await ticketingStorage.getTicketCategories();
+
+      res.json({
+        success: true,
+        data: categories
+      });
+
+    } catch (error) {
+      console.error('Error fetching ticket categories:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بارگیری دسته‌بندی تیکت‌ها'
+      });
+    }
+  });
+
+  // Search tickets
+  app.get('/api/tickets/search', requireAuth, async (req, res) => {
+    try {
+      const { q: query, status, priority, category } = req.query;
+
+      if (!query) {
+        return res.status(400).json({
+          success: false,
+          message: 'Query parameter is required'
+        });
+      }
+
+      const filters = {
+        status: status as string,
+        priority: priority as string,
+        category: category as string
+      };
+
+      const tickets = await ticketingStorage.searchTickets(query as string, filters);
+
+      res.json({
+        success: true,
+        data: tickets
+      });
+
+    } catch (error) {
+      console.error('Error searching tickets:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در جستجوی تیکت‌ها'
+      });
+    }
+  });
+
+  // Get ticket constants (priorities, statuses, categories)
+  app.get('/api/tickets/constants', async (req, res) => {
+    try {
+      res.json({
+        success: true,
+        data: {
+          priorities: TICKET_PRIORITIES,
+          statuses: TICKET_STATUSES,
+          categories: TICKET_CATEGORIES
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بارگیری ثوابت تیکت‌ها'
       });
     }
   });

@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -229,6 +229,13 @@ export default function SiteManagement() {
       icon: Edit3,
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50"
+    },
+    {
+      id: "ticketing-system",
+      label: "Ticketing System",
+      icon: Ticket,
+      onClick: () => trackButtonClick("ticketing-system", () => setLocation("/admin/ticketing-system")),
+      className: "border-red-300 text-red-600 hover:bg-red-50"
     },
 
   ];

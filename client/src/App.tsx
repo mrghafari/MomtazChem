@@ -73,6 +73,7 @@ import LogisticsSimple from "@/pages/logistics-simple";
 import FinancialLogin from "@/pages/financial-login";
 import WarehouseLogin from "@/pages/warehouse-login";
 import LogisticsLogin from "@/pages/logistics-login";
+import TicketingSystem from "@/pages/admin/ticketing-system";
 import SuperAdminDepartmentManagement from "@/pages/super-admin-department-management";
 import SuperAdminSettings from "@/pages/super-admin-settings";
 import SiteManagement from "@/pages/site-management";
@@ -170,6 +171,7 @@ function Router() {
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/email-templates" component={EmailTemplates} />
           <Route path="/admin/security-management" component={SecurityManagement} />
+          <Route path="/admin/ticketing-system" component={TicketingSystem} />
 
           
           {/* Department-specific routes */}
