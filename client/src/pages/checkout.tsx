@@ -81,7 +81,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   });
 
   // Determine if user is logged in first
-  const isUserLoggedIn = customerData?.success && customerData.customer;
+  const isUserLoggedIn = (customerData?.success && customerData.customer) || isLoggedIn;
   
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(createCheckoutFormSchema(!!isUserLoggedIn)),
@@ -137,7 +137,18 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     } else {
       setIsLoggedIn(false);
     }
-  }, [customerData, form]);
+  }, [customerData, form, isLoggedIn]);
+
+  // Update form validation when authentication status changes
+  useEffect(() => {
+    // Re-create form with new validation schema based on login status
+    const newResolver = zodResolver(createCheckoutFormSchema(!!isUserLoggedIn));
+    form.clearErrors(); // Clear any existing validation errors
+    // Force form re-validation
+    setTimeout(() => {
+      form.trigger();
+    }, 100);
+  }, [isUserLoggedIn, form]);
 
   // Calculate order totals
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {
@@ -366,7 +377,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       <CardTitle className="flex items-center gap-2">
                         <User className="w-5 h-5" />
                         Customer Information
-                        {isLoggedIn && (
+                        {isUserLoggedIn && (
                           <Badge variant="secondary" className="ml-2">
                             Auto-filled from account
                           </Badge>
@@ -380,7 +391,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>First Name {!isLoggedIn && "*"}</FormLabel>
+                            <FormLabel>First Name {!isUserLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -393,7 +404,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Last Name {!isLoggedIn && "*"}</FormLabel>
+                            <FormLabel>Last Name {!isUserLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -408,7 +419,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email Address {!isLoggedIn && "*"}</FormLabel>
+                            <FormLabel>Email Address {!isUserLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} type="email" />
                             </FormControl>
@@ -421,7 +432,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Phone Number {!isLoggedIn && "*"}</FormLabel>
+                            <FormLabel>Phone Number {!isUserLoggedIn && "*"}</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -721,6 +732,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           // Refetch customer data to update authentication status
           await refetchCustomer();
           setIsLoggedIn(true);
+          // Force form to re-validate with new authentication status
+          form.trigger();
+          // Show success message
+          toast({
+            title: "ورود موفق",
+            description: "اکنون می‌توانید خرید خود را تکمیل کنید",
+          });
         }}
         initialMode={authMode}
       />
