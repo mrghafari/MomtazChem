@@ -179,11 +179,19 @@ export default function ProductsPage() {
     { value: "commercial-goods", label: "Commercial Goods", icon: <Package className="w-4 h-4" /> },
   ];
 
-  const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
+  const { data: products, isLoading, refetch } = useQuery<ShowcaseProduct[]>({
     queryKey: ["/api/products"],
     staleTime: 0, // Always refetch for real-time updates
     cacheTime: 0, // Don't cache data
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
+
+  // Force refresh every time component mounts
+  useEffect(() => {
+    queryClient.removeQueries({ queryKey: ["/api/products"] });
+    refetch();
+  }, [refetch]);
 
   const { mutate: createProduct } = useMutation({
     mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
@@ -820,10 +828,28 @@ export default function ProductsPage() {
         )}
 
         {/* Management Actions */}
-        <div className="mb-6">
+        <div className="mb-6 flex gap-3">
           <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 h-12 text-sm">
             <Plus className="w-4 h-4 mr-2" />
             Add Product
+          </Button>
+          
+          <Button 
+            onClick={() => {
+              queryClient.clear();
+              queryClient.removeQueries({ queryKey: ["/api/products"] });
+              refetch();
+              setRefreshKey(prev => prev + 1);
+              toast({
+                title: "Cache Cleared",
+                description: "Data refreshed successfully",
+              });
+            }}
+            variant="outline" 
+            className="h-12 text-sm"
+          >
+            <Database className="w-4 h-4 mr-2" />
+            Force Refresh
           </Button>
         </div>
       </div>
