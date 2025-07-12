@@ -142,19 +142,28 @@ export default function TicketingSystem() {
 
   // Mutations
   const createTicketMutation = useMutation({
-    mutationFn: (data: CreateTicketData) => apiRequest('/api/tickets', {
-      method: 'POST',
-      body: data,
-    }),
-    onSuccess: () => {
+    mutationFn: (data: CreateTicketData) => {
+      console.log('Creating ticket with data:', data);
+      return apiRequest('/api/tickets', {
+        method: 'POST',
+        body: data,
+      });
+    },
+    onSuccess: (response) => {
+      console.log('Ticket created successfully:', response);
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/my-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/overview'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets/stats/user'] });
       setCreateTicketOpen(false);
+      createForm.reset();
       toast({
         title: "موفقیت",
         description: "تیکت پشتیبانی با موفقیت ایجاد شد",
       });
     },
     onError: (error: any) => {
+      console.error('Error creating ticket:', error);
       toast({
         title: "خطا",
         description: error.message || "خطا در ایجاد تیکت",
