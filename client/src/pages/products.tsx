@@ -228,14 +228,30 @@ export default function ProductsPage() {
     onSuccess: (result) => {
       console.log('✅ [DEBUG] Update mutation successful, result:', result);
       
-      // Force immediate window reload for instant UI update
-      window.location.reload();
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      
+      // Close dialog and reset form
+      setDialogOpen(false);
+      setEditingProduct(null);
+      form.reset();
+      
+      toast({
+        title: "موفقیت",
+        description: "محصول با موفقیت بروزرسانی شد",
+      });
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Update mutation failed:', error);
+      console.error('❌ [DEBUG] Error details:', {
+        message: error.message,
+        status: error.status,
+        statusText: error.statusText,
+        stack: error.stack
+      });
       toast({
-        title: "Error",
-        description: error.message || "Failed to update product",
+        title: "خطا",
+        description: error.message || "بروزرسانی محصول ناموفق بود",
         variant: "destructive",
       });
     },
