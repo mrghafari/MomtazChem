@@ -330,6 +330,7 @@ export class DatabaseStorage implements IStorage {
           name: showcaseProduct.name,
           description: showcaseProduct.description,
           price: productPrice,
+          priceUnit: showcaseProduct.currency || 'IQD', // Currency field sync
           category: showcaseProduct.category,
           stockQuantity: showcaseProduct.stockQuantity || 0,
           lowStockThreshold: showcaseProduct.minStockLevel || 10,
@@ -350,7 +351,7 @@ export class DatabaseStorage implements IStorage {
           sku: productSku,
           description: showcaseProduct.description || '',
           price: productPrice,
-          priceUnit: 'unit',
+          priceUnit: showcaseProduct.currency || 'IQD', // Currency field sync
           category: showcaseProduct.category,
           stockQuantity: showcaseProduct.stockQuantity || 0,
           lowStockThreshold: showcaseProduct.minStockLevel || 10,

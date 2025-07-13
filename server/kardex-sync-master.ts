@@ -328,7 +328,7 @@ export class KardexSyncMaster {
         description: kardexProduct.description || '',
         shortDescription: kardexProduct.shortDescription || '',
         price: kardexProduct.unitPrice?.toString() || '0',
-        priceUnit: kardexProduct.priceUnit || 'unit',
+        priceUnit: kardexProduct.currency || 'IQD', // Currency field sync
         stockQuantity: kardexProduct.stockQuantity || 0,
         minStockLevel: kardexProduct.minStockLevel || 5,
         maxStockLevel: kardexProduct.maxStockLevel || 100,
@@ -372,7 +372,7 @@ export class KardexSyncMaster {
         description: kardexProduct.description || '',
         shortDescription: kardexProduct.shortDescription || '',
         price: kardexProduct.unitPrice?.toString() || '0',
-        priceUnit: kardexProduct.priceUnit || 'unit',
+        priceUnit: kardexProduct.currency || 'IQD', // Currency field sync
         stockQuantity: kardexProduct.stockQuantity || 0,
         minStockLevel: kardexProduct.minStockLevel || 5,
         maxStockLevel: kardexProduct.maxStockLevel || 100,
@@ -420,9 +420,15 @@ export class KardexSyncMaster {
       kardexProduct.category !== shopProduct.category ||
       kardexProduct.description !== shopProduct.description ||
       kardexProduct.unitPrice?.toString() !== shopProduct.price ||
+      (kardexProduct.currency || 'IQD') !== shopProduct.priceUnit ||
       kardexProduct.stockQuantity !== shopProduct.stockQuantity ||
       kardexProduct.imageUrl !== shopProduct.thumbnailUrl ||
-      kardexProduct.isActive !== shopProduct.isActive
+      kardexProduct.isActive !== shopProduct.isActive ||
+      // Document fields
+      kardexProduct.showCatalogToCustomers !== shopProduct.showCatalogToCustomers ||
+      kardexProduct.showMsdsToCustomers !== shopProduct.showMsdsToCustomers ||
+      kardexProduct.pdfCatalogUrl !== shopProduct.pdfCatalogUrl ||
+      kardexProduct.msdsUrl !== shopProduct.msdsUrl
     );
     
     if (needsUpdate) {
