@@ -1,0 +1,284 @@
+chunk-RPCDYKBN.js?v=7c134e41:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+queryClient.ts:57  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7c134e41:840
+run @ @tanstack_react-query.js?v=7c134e41:494
+start @ @tanstack_react-query.js?v=7c134e41:536
+fetch @ @tanstack_react-query.js?v=7c134e41:926
+executeFetch_fn @ @tanstack_react-query.js?v=7c134e41:2211
+onSubscribe @ @tanstack_react-query.js?v=7c134e41:1898
+subscribe @ @tanstack_react-query.js?v=7c134e41:24
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=7c134e41:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=7c134e41:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=7c134e41:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=7c134e41:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=7c134e41:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=7c134e41:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=7c134e41:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=7c134e41:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=7c134e41:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=7c134e41:19432
+commitRoot @ chunk-RPCDYKBN.js?v=7c134e41:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=7c134e41:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18718
+workLoop @ chunk-RPCDYKBN.js?v=7c134e41:197
+flushWork @ chunk-RPCDYKBN.js?v=7c134e41:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=7c134e41:384
+useAuth.ts:12  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:12
+fetchFn @ @tanstack_react-query.js?v=7c134e41:840
+run @ @tanstack_react-query.js?v=7c134e41:494
+start @ @tanstack_react-query.js?v=7c134e41:536
+fetch @ @tanstack_react-query.js?v=7c134e41:926
+executeFetch_fn @ @tanstack_react-query.js?v=7c134e41:2211
+onSubscribe @ @tanstack_react-query.js?v=7c134e41:1898
+subscribe @ @tanstack_react-query.js?v=7c134e41:24
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=7c134e41:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=7c134e41:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=7c134e41:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=7c134e41:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=7c134e41:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=7c134e41:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=7c134e41:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=7c134e41:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=7c134e41:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=7c134e41:19432
+commitRoot @ chunk-RPCDYKBN.js?v=7c134e41:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=7c134e41:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18718
+workLoop @ chunk-RPCDYKBN.js?v=7c134e41:197
+flushWork @ chunk-RPCDYKBN.js?v=7c134e41:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=7c134e41:384
+shop.tsx:341  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+checkCustomerAuth @ shop.tsx:341
+(anonymous) @ shop.tsx:266
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=7c134e41:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=7c134e41:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=7c134e41:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=7c134e41:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=7c134e41:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=7c134e41:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=7c134e41:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=7c134e41:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=7c134e41:19432
+commitRoot @ chunk-RPCDYKBN.js?v=7c134e41:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=7c134e41:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18718
+workLoop @ chunk-RPCDYKBN.js?v=7c134e41:197
+flushWork @ chunk-RPCDYKBN.js?v=7c134e41:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=7c134e41:384
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-common.js:2
+queryClient.ts:57  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7c134e41:840
+run @ @tanstack_react-query.js?v=7c134e41:494
+start @ @tanstack_react-query.js?v=7c134e41:536
+fetch @ @tanstack_react-query.js?v=7c134e41:926
+executeFetch_fn @ @tanstack_react-query.js?v=7c134e41:2211
+fetch @ @tanstack_react-query.js?v=7c134e41:2011
+refetch @ @tanstack_react-query.js?v=7c134e41:2001
+onFocus @ @tanstack_react-query.js?v=7c134e41:749
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:1112
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:1111
+batch @ @tanstack_react-query.js?v=7c134e41:583
+onFocus @ @tanstack_react-query.js?v=7c134e41:1110
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:313
+onFocus @ @tanstack_react-query.js?v=7c134e41:312
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:299
+listener @ @tanstack_react-query.js?v=7c134e41:270
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:833 Cart clicked, total items: 2
+shop.tsx:834 Customer: null
+shop.tsx:845 User not logged in, showing pre-checkout modal
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:851 🔐 [LOGIN] Login choice selected
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:429 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:430 🔐 [LOGIN] Customer data: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+shop.tsx:431 🔐 [LOGIN] Current cart state: {383: 1, 384: 1}
+shop.tsx:435 🔐 [LOGIN] Customer state set
+shop.tsx:438 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:442 🔐 [LOGIN] Auth modal closed
+shop.tsx:447 🔐 [LOGIN] Cache invalidated
+shop.tsx:451 🔐 [LOGIN] Has cart items: true
+shop.tsx:452 🔐 [LOGIN] Cart contents: {383: 1, 384: 1}
+shop.tsx:456 🔐 [LOGIN] Cart migration completed
+shop.tsx:462 🔐 [LOGIN] Welcome toast shown
+shop.tsx:466 🔐 [LOGIN] Showing checkout after login
+shop.tsx:492 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 22}
+bilingual-purchase-form.tsx:335 Fetching shipping rates...
+bilingual-purchase-form.tsx:381 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:382 existingCustomer from parent: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:383 customerData from API: null
+bilingual-purchase-form.tsx:384 crmCustomerData from API: undefined
+bilingual-purchase-form.tsx:385 isLoadingCustomer: false
+bilingual-purchase-form.tsx:396 Using existingCustomer from parent
+bilingual-purchase-form.tsx:403 Customer object found: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:404 Customer firstName: ABAS
+bilingual-purchase-form.tsx:405 Customer lastName: ABASI
+bilingual-purchase-form.tsx:406 Customer phone: 09124955173
+bilingual-purchase-form.tsx:407 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+bilingual-purchase-form.tsx:408 Customer secondaryAddress: undefined
+bilingual-purchase-form.tsx:409 Customer city: تهران
+bilingual-purchase-form.tsx:410 Customer country: Iran
+bilingual-purchase-form.tsx:411 Customer postalCode: undefined
+bilingual-purchase-form.tsx:414 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:428 Form data to reset: {customerName: 'ABAS ABASI', phone: '09124955173', address: 'شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran', city: 'تهران', country: 'Iran', …}
+bilingual-purchase-form.tsx:430 Form reset completed
+bilingual-purchase-form.tsx:434 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:495 🚚 Shipping cost calculation: {selectedShippingMethod: null, hasShippingData: false, subtotalAmount: '22.00'}
+bilingual-purchase-form.tsx:529 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:536 Shipping rates state: {isLoadingShippingRates: true, shippingRatesError: null, dataLength: 0, data: undefined}
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 22}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 22}
+bilingual-purchase-form.tsx:381 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:382 existingCustomer from parent: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:383 customerData from API: {success: true, customer: {…}}
+bilingual-purchase-form.tsx:384 crmCustomerData from API: undefined
+bilingual-purchase-form.tsx:385 isLoadingCustomer: false
+bilingual-purchase-form.tsx:396 Using existingCustomer from parent
+bilingual-purchase-form.tsx:403 Customer object found: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:404 Customer firstName: ABAS
+bilingual-purchase-form.tsx:405 Customer lastName: ABASI
+bilingual-purchase-form.tsx:406 Customer phone: 09124955173
+bilingual-purchase-form.tsx:407 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+bilingual-purchase-form.tsx:408 Customer secondaryAddress: undefined
+bilingual-purchase-form.tsx:409 Customer city: تهران
+bilingual-purchase-form.tsx:410 Customer country: Iran
+bilingual-purchase-form.tsx:411 Customer postalCode: undefined
+bilingual-purchase-form.tsx:414 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:428 Form data to reset: {customerName: 'ABAS ABASI', phone: '09124955173', address: 'شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran', city: 'تهران', country: 'Iran', …}
+bilingual-purchase-form.tsx:430 Form reset completed
+bilingual-purchase-form.tsx:434 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 22}
+bilingual-purchase-form.tsx:316 VAT API response: {success: true, vatSettings: {…}}
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 24.2}
+bilingual-purchase-form.tsx:342 Shipping rates API response: {success: true, data: Array(11)}
+bilingual-purchase-form.tsx:344 Successfully loaded shipping rates: 11 methods
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 24.2}
+bilingual-purchase-form.tsx:495 🚚 Shipping cost calculation: {selectedShippingMethod: null, hasShippingData: true, subtotalAmount: '22.00'}
+bilingual-purchase-form.tsx:529 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:536 Shipping rates state: {isLoadingShippingRates: false, shippingRatesError: null, dataLength: 11, data: Array(11)}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 24.2}
+bilingual-purchase-form.tsx:264 CRM Customer API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 24.2}
+bilingual-purchase-form.tsx:381 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:382 existingCustomer from parent: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:383 customerData from API: {success: true, customer: {…}}
+bilingual-purchase-form.tsx:384 crmCustomerData from API: {id: 8, email: 'oilstar@hotmail.com', passwordHash: '$2b$12$xEcwo0XtA2kYxQzIF1Vri.8dEC4So8.Ch/C4p9JWtdhUvn4l3Fq9.', firstName: 'ABAS', lastName: 'ABASI', …}
+bilingual-purchase-form.tsx:385 isLoadingCustomer: false
+bilingual-purchase-form.tsx:393 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:403 Customer object found: {id: 8, email: 'oilstar@hotmail.com', passwordHash: '$2b$12$xEcwo0XtA2kYxQzIF1Vri.8dEC4So8.Ch/C4p9JWtdhUvn4l3Fq9.', firstName: 'ABAS', lastName: 'ABASI', …}
+bilingual-purchase-form.tsx:404 Customer firstName: ABAS
+bilingual-purchase-form.tsx:405 Customer lastName: ABASI
+bilingual-purchase-form.tsx:406 Customer phone: 09124955173
+bilingual-purchase-form.tsx:407 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+bilingual-purchase-form.tsx:408 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:409 Customer city: تهران
+bilingual-purchase-form.tsx:410 Customer country: Iran
+bilingual-purchase-form.tsx:411 Customer postalCode: 1968913751
+bilingual-purchase-form.tsx:414 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:428 Form data to reset: {customerName: 'ABAS ABASI', phone: '09124955173', address: 'شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran', city: 'تهران', country: 'Iran', …}
+bilingual-purchase-form.tsx:430 Form reset completed
+bilingual-purchase-form.tsx:434 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 24.2}
+bilingual-purchase-form.tsx:290 Wallet API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:717 Submitting order with wallet data: {paymentMethod: 'wallet_full', totalAmount: 24.2, walletAmountUsed: 24.2, remainingAmount: 0, walletBalance: 18837}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:636 Order response: {success: true, orders: Array(2)}
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]

@@ -298,7 +298,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         return null;
       }
     },
-    enabled: !!(customerData?.success && customerData.customer),
+    enabled: !!(existingCustomer || (customerData?.success && customerData.customer)),
     retry: false,
   });
 
