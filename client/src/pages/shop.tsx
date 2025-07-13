@@ -928,17 +928,11 @@ const Shop = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
-                      placeholder="Search products... (minimum 3 characters)"
+                      placeholder="Search products..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-10"
                     />
-                    {/* Search hint */}
-                    {searchTerm.length > 0 && searchTerm.length < 3 && (
-                      <div className="absolute top-full left-0 right-0 bg-yellow-50 border border-yellow-200 rounded-b-lg px-3 py-2 text-xs text-yellow-700 z-10">
-                        Type at least 3 characters to search
-                      </div>
-                    )}
                   </div>
                 </div>
 
