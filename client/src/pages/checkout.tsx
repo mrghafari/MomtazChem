@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -72,6 +72,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [secondaryPaymentMethod, setSecondaryPaymentMethod] = useState('');
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
 
   // Get customer information if logged in
   const { data: customerData, refetch: refetchCustomer } = useQuery<any>({
@@ -243,6 +244,17 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     onSuccess: (data: any) => {
       const orderId = data.order.id;
       const paymentMethod = data.order.paymentMethod;
+      
+      // Invalidate wallet balance cache if wallet payment was used
+      if (actualWalletUsage > 0) {
+        queryClient.invalidateQueries({ queryKey: ['/api/customers/wallet/balance'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
+        
+        // Force refresh wallet balance
+        fetchWalletBalance();
+        
+        console.log(`🔄 Wallet balance cache invalidated after ${actualWalletUsage} IQD payment`);
+      }
       
       // Check if payment processing is required
       const requiresPayment = ['iraqi_bank', 'credit_card', 'bank_transfer', 'digital_wallet'].includes(paymentMethod);

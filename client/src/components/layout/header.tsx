@@ -40,7 +40,8 @@ export default function Header() {
     queryKey: ['/api/customers/wallet/balance'],
     enabled: isAuthenticated && !!customer,
     retry: false,
-    staleTime: 30000, // 30 seconds
+    staleTime: 10000, // 10 seconds
+    refetchOnWindowFocus: true,
   });
 
   const rawBalance = walletData?.balance || walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";
