@@ -1116,15 +1116,22 @@ const Shop = () => {
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
                           {product.imageUrl ? (
-                            <div className="relative w-full h-full">
+                            <div 
+                              className="relative w-full h-full cursor-pointer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Image clicked:', product.imageUrl);
+                                setSelectedImageForZoom(product.imageUrl);
+                              }}
+                            >
                               <img 
                                 src={product.imageUrl} 
                                 alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                                onClick={() => setSelectedImageForZoom(product.imageUrl)}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
                               />
                               {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
                                 <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                               </div>
                             </div>
@@ -1384,15 +1391,22 @@ const Shop = () => {
                       <div className="flex">
                         <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
                           {product.imageUrl ? (
-                            <div className="relative w-full h-full overflow-hidden">
+                            <div 
+                              className="relative w-full h-full overflow-hidden cursor-pointer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('List image clicked:', product.imageUrl);
+                                setSelectedImageForZoom(product.imageUrl);
+                              }}
+                            >
                               <img 
                                 src={product.imageUrl} 
                                 alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                                onClick={() => setSelectedImageForZoom(product.imageUrl)}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
                               />
                               {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
                                 <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                               </div>
                             </div>
@@ -1784,32 +1798,47 @@ const Shop = () => {
 
       {/* Image Zoom Modal */}
       {selectedImageForZoom && (
-        <Dialog open={!!selectedImageForZoom} onOpenChange={() => setSelectedImageForZoom(null)}>
-          <DialogContent className="max-w-4xl w-full h-[80vh] p-2">
-            <div className="relative w-full h-full flex items-center justify-center bg-black rounded-lg">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute top-2 right-2 z-10 bg-white/10 hover:bg-white/20 text-white"
-                onClick={() => setSelectedImageForZoom(null)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
+        <div 
+          className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center p-4"
+          onClick={() => setSelectedImageForZoom(null)}
+        >
+          <div 
+            className="relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4 z-10 bg-white/20 hover:bg-white/30 text-white rounded-full p-2"
+              onClick={() => setSelectedImageForZoom(null)}
+            >
+              <X className="w-6 h-6" />
+            </Button>
+            <div className="relative overflow-hidden rounded-lg bg-white p-2">
               <img
                 src={selectedImageForZoom}
                 alt="Product Image"
-                className="max-w-full max-h-full object-contain cursor-zoom-in"
-                style={{ transform: 'scale(1)', transition: 'transform 0.3s ease' }}
+                className="max-w-full max-h-[80vh] object-contain transition-transform duration-300 ease-in-out cursor-zoom-in"
+                style={{ 
+                  transform: 'scale(1)', 
+                  transformOrigin: 'center',
+                }}
                 onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.transform = 'scale(4)';
+                  (e.target as HTMLImageElement).style.transform = 'scale(4)';
                 }}
                 onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.transform = 'scale(1)';
+                  (e.target as HTMLImageElement).style.transform = 'scale(1)';
+                }}
+                onMouseMove={(e) => {
+                  const rect = (e.target as HTMLImageElement).getBoundingClientRect();
+                  const x = ((e.clientX - rect.left) / rect.width) * 100;
+                  const y = ((e.clientY - rect.top) / rect.height) * 100;
+                  (e.target as HTMLImageElement).style.transformOrigin = `${x}% ${y}%`;
                 }}
               />
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </div>
       )}
 
       {/* Auth Dialog */}
