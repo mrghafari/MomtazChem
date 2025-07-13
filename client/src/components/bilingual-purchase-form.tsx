@@ -276,29 +276,39 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
+  // Check wallet query conditions
+  const walletQueryEnabled = !!(existingCustomer || (customerData?.success && customerData.customer));
+  console.log('💳 [WALLET QUERY] Enabled condition check:', {
+    existingCustomer: !!existingCustomer,
+    customerDataSuccess: !!(customerData?.success && customerData.customer),
+    finalEnabled: walletQueryEnabled
+  });
+
   // Fetch wallet data for logged-in customers
   const { data: walletData } = useQuery({
     queryKey: ['/api/customer/wallet'],
     queryFn: async () => {
       try {
+        console.log('💳 [WALLET QUERY] Fetching wallet data...');
         const response = await fetch('/api/customer/wallet', {
           credentials: 'include'
         });
         
         if (response.ok) {
           const result = await response.json();
-          console.log('Wallet API response:', result);
+          console.log('💳 [WALLET QUERY] Wallet API response:', result);
           if (result.success) {
             return result;
           }
         }
+        console.log('💳 [WALLET QUERY] No successful response');
         return null;
       } catch (error) {
-        console.log('Error fetching wallet data:', error);
+        console.log('💳 [WALLET QUERY] Error fetching wallet data:', error);
         return null;
       }
     },
-    enabled: !!(existingCustomer || (customerData?.success && customerData.customer)),
+    enabled: walletQueryEnabled,
     retry: false,
   });
 
