@@ -208,6 +208,10 @@ export default function ProductsPage() {
         title: "Success",
         description: "Product created successfully",
       });
+      // Auto-refresh page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     },
     onError: (error: any) => {
       toast({
@@ -238,6 +242,10 @@ export default function ProductsPage() {
         title: "موفقیت",
         description: "محصول با موفقیت بروزرسانی شد",
       });
+      // Auto-refresh page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Update mutation failed:', error);
@@ -272,6 +280,10 @@ export default function ProductsPage() {
         title: "موفقیت",
         description: "محصول با موفقیت حذف شد و از فروشگاه نیز حذف شد",
       });
+      // Auto-refresh page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     },
     onError: (error: any) => {
       console.error(`❌ [DELETE] Delete failed:`, error);
@@ -314,6 +326,10 @@ export default function ProductsPage() {
         title: "به‌روزرسانی موفقیت‌آمیز",
         description: "وضعیت نمایش در فروشگاه به‌روزرسانی شد",
       });
+      // Auto-refresh page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Toggle sync failed:', error);

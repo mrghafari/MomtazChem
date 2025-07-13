@@ -65,6 +65,10 @@ export function KardexSyncPanel() {
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
       }, 500);
+      // Auto-refresh page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     },
     onError: () => {
       toast({
@@ -93,6 +97,10 @@ export function KardexSyncPanel() {
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
       }, 500);
+      // Auto-refresh page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     },
     onError: () => {
       toast({
@@ -121,6 +129,10 @@ export function KardexSyncPanel() {
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
       }, 500);
+      // Auto-refresh page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     },
     onError: () => {
       toast({
