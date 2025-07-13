@@ -4847,7 +4847,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
-      const { items, customerInfo, totalAmount, notes, shippingMethod, paymentMethod } = req.body;
+      const { items, customerInfo, totalAmount, notes, shippingMethod, paymentMethod, walletAmountUsed, remainingAmount } = req.body;
+      
+      console.log('🛒 [ORDER DEBUG] Order data received:', {
+        paymentMethod,
+        walletAmountUsed,
+        remainingAmount,
+        totalAmount,
+        customerId,
+        crmCustomerId
+      });
 
       let finalCustomerInfo = customerInfo;
       let finalCrmCustomerId = crmCustomerId;
@@ -4896,13 +4905,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate order number
       const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+      // Handle wallet payments
+      let finalPaymentStatus = "pending";
+      let actualWalletUsed = 0;
+      let finalPaymentMethod = paymentMethod || "bank_transfer";
+      
+      if (paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial') {
+        const walletUsage = parseFloat(walletAmountUsed || 0);
+        const remaining = parseFloat(remainingAmount || totalAmount);
+        
+        console.log('💰 [WALLET DEBUG] Processing wallet payment:', {
+          walletUsage,
+          remaining,
+          finalCrmCustomerId,
+          customerId
+        });
+        
+        if (walletUsage > 0 && (finalCrmCustomerId || customerId)) {
+          try {
+            // Use the customer ID that exists (prioritize CRM customer)
+            const customerIdToUse = finalCrmCustomerId || customerId;
+            
+            // Use walletStorage.debitWallet which handles all the logic
+            const transaction = await walletStorage.debitWallet(
+              customerIdToUse,
+              walletUsage,
+              `پرداخت سفارش ${orderNumber}`,
+              'order',
+              undefined, // reference ID will be set after order creation
+              undefined  // no admin processing this
+            );
+            
+            console.log(`✅ Wallet payment processed: ${walletUsage} IQD deducted, transaction ID: ${transaction.id}`);
+            actualWalletUsed = walletUsage;
+            
+            if (remaining === 0) {
+              finalPaymentStatus = "paid"; // Fully paid by wallet
+            } else {
+              finalPaymentStatus = "partial"; // Partially paid by wallet
+            }
+          } catch (walletError) {
+            console.log(`❌ Wallet payment failed:`, walletError);
+            return res.status(400).json({
+              success: false,
+              message: "موجودی کیف پول کافی نیست یا خطا در پردازش"
+            });
+          }
+        }
+      }
+
       // Create order in customer orders table
       const orderData = {
         orderNumber,
         customerId: customerId || null,
         totalAmount: totalAmount.toString(),
         status: 'pending' as const,
-        paymentMethod: paymentMethod || 'bank_transfer',
+        paymentStatus: finalPaymentStatus,
+        paymentMethod: finalPaymentMethod,
+        walletAmountUsed: actualWalletUsed.toString(),
         shippingAddress: {
           address: finalCustomerInfo.address,
           city: finalCustomerInfo.city,
@@ -4985,6 +5045,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: order.id,
           totalAmount: order.totalAmount,
           status: order.status,
+          paymentStatus: finalPaymentStatus,
+          paymentMethod: finalPaymentMethod,
+          walletAmountUsed: actualWalletUsed,
           crmCustomerId: finalCrmCustomerId,
         }
       });
