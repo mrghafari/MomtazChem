@@ -1,79 +1,127 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+
+// Configure pdfMake with fonts for multilingual support
+pdfMake.vfs = {
+  ...pdfFonts.pdfMake.vfs,
+};
+
+pdfMake.fonts = {
+  Vazirmatn: {
+    normal: "Roboto-Regular.ttf", // Using Roboto as fallback for Vazirmatn
+    bold: "Roboto-Medium.ttf",
+    italics: "Roboto-Italic.ttf",
+    bolditalics: "Roboto-MediumItalic.ttf",
+  },
+  Roboto: {
+    normal: "Roboto-Regular.ttf",
+    bold: "Roboto-Medium.ttf", 
+    italics: "Roboto-Italic.ttf",
+    bolditalics: "Roboto-MediumItalic.ttf",
+  }
+};
+
+// Enhanced PDF generator for CRM customer export
+export function exportCRMCustomerPDF(customerData: Array<{label: string, text: string}>): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    try {
+      const contentArray: any[] = [];
+
+      customerData.forEach(entry => {
+        const isRTL = /[\u0600-\u06FF]/.test(entry.text); // Persian/Arabic/Kurdish detection
+
+        contentArray.push({
+          text: `${entry.label}: ${entry.text}`,
+          font: "Vazirmatn",
+          alignment: isRTL ? "right" : "left",
+          margin: [0, 5, 0, 5],
+          fontSize: 12,
+        });
+      });
+
+      const docDefinition = {
+        content: contentArray,
+        defaultStyle: {
+          font: "Vazirmatn",
+        },
+        pageMargins: [40, 60, 40, 60] as [number, number, number, number],
+        info: {
+          title: 'Customer Report',
+          author: 'Momtazchem CRM System',
+          subject: 'Customer Data Export',
+          creator: 'Momtazchem Platform'
+        }
+      };
+
+      const pdfDoc = pdfMake.createPdf(docDefinition);
+      
+      pdfDoc.getBuffer((buffer: Buffer) => {
+        resolve(buffer);
+      }, (error: any) => {
+        reject(error);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
 // Enhanced PDF generator using pdfMake for better multilingual support
 export async function generateMultilingualPDF(content: string, title: string): Promise<Buffer> {
-  try {
-    // Import pdfMake dynamically to avoid ES module issues
-    const pdfMake = await import('pdfmake/build/pdfmake.js');
-    const pdfFonts = await import('pdfmake/build/vfs_fonts.js');
-    
-    // Setup pdfMake with fonts
-    pdfMake.default.vfs = pdfFonts.default.pdfMake.vfs;
-    
-    // Configure fonts for multilingual support
-    pdfMake.default.fonts = {
-      Roboto: {
-        normal: 'Roboto-Regular.ttf',
-        bold: 'Roboto-Medium.ttf',
-        italics: 'Roboto-Italic.ttf',
-        bolditalics: 'Roboto-MediumItalic.ttf'
-      }
-    };
-
-    return new Promise((resolve, reject) => {
-      try {
-        const docDefinition = {
-          content: [
-            {
-              text: title,
-              fontSize: 18,
-              bold: true,
-              margin: [0, 0, 0, 20] as [number, number, number, number],
-              alignment: 'left' as const
-            },
-            {
-              text: `Generated: ${new Date().toLocaleDateString('en-US')}`,
-              fontSize: 12,
-              margin: [0, 0, 0, 20] as [number, number, number, number],
-              color: 'gray'
-            },
-            {
-              text: content,
-              fontSize: 12,
-              lineHeight: 1.5,
-              alignment: 'left' as const,
-              preserveLeadingSpaces: true
-            }
-          ],
-          defaultStyle: {
-            font: 'Roboto',
-            fontSize: 12
+  return new Promise((resolve, reject) => {
+    try {
+      const docDefinition = {
+        content: [
+          {
+            text: title,
+            fontSize: 18,
+            bold: true,
+            margin: [0, 0, 0, 20] as [number, number, number, number],
+            alignment: 'left' as const,
+            font: 'Vazirmatn'
           },
-          pageMargins: [40, 60, 40, 60] as [number, number, number, number],
-          info: {
-            title: title,
-            author: 'Momtazchem CRM System',
-            subject: 'Customer Report',
-            creator: 'Momtazchem Platform'
+          {
+            text: `Generated: ${new Date().toLocaleDateString('en-US')}`,
+            fontSize: 12,
+            margin: [0, 0, 0, 20] as [number, number, number, number],
+            color: 'gray',
+            font: 'Roboto'
+          },
+          {
+            text: content,
+            fontSize: 12,
+            lineHeight: 1.5,
+            alignment: 'left' as const,
+            preserveLeadingSpaces: true,
+            font: 'Vazirmatn'
           }
-        };
+        ],
+        defaultStyle: {
+          font: 'Vazirmatn',
+          fontSize: 12
+        },
+        pageMargins: [40, 60, 40, 60] as [number, number, number, number],
+        info: {
+          title: title,
+          author: 'Momtazchem CRM System',
+          subject: 'Customer Report',
+          creator: 'Momtazchem Platform'
+        }
+      };
 
-        const pdfDoc = pdfMake.default.createPdf(docDefinition);
-        
-        pdfDoc.getBuffer((buffer: Buffer) => {
-          resolve(buffer);
-        }, (error: any) => {
-          reject(error);
-        });
-      } catch (error) {
+      const pdfDoc = pdfMake.createPdf(docDefinition);
+      
+      pdfDoc.getBuffer((buffer: Buffer) => {
+        resolve(buffer);
+      }, (error: any) => {
         reject(error);
-      }
-    });
-  } catch (error) {
-    console.error('pdfMake import failed:', error);
-    throw error;
-  }
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 // Fallback simple text-based PDF generator for compatibility
@@ -1170,9 +1218,47 @@ function cleanTextForPdf(text: string | null | undefined): string {
 
 // Enhanced Customer PDF report generation using pdfMake
 export async function generateCustomerPDF(customer: any, analytics: any, activities: any[]): Promise<Buffer> {
-  const currentDate = new Date().toLocaleDateString('en-US');
-  
-  const content = `CUSTOMER REPORT - MOMTAZCHEM CRM
+  try {
+    // Prepare customer data for export
+    const customerData = [
+      { label: 'Customer ID', text: customer.id.toString() },
+      { label: 'Name', text: `${cleanTextForPdf(customer.firstName)} ${cleanTextForPdf(customer.lastName)}` },
+      { label: 'Email', text: customer.email || 'N/A' },
+      { label: 'Company', text: cleanTextForPdf(customer.company) },
+      { label: 'Phone', text: cleanTextForPdf(customer.phone) },
+      { label: 'Country', text: cleanTextForPdf(customer.country) },
+      { label: 'City', text: cleanTextForPdf(customer.city) },
+      { label: 'Address', text: cleanTextForPdf(customer.address) },
+      { label: 'Secondary Address', text: cleanTextForPdf(customer.secondaryAddress) },
+      { label: 'Postal Code', text: cleanTextForPdf(customer.postalCode) },
+      { label: 'Customer Type', text: cleanTextForPdf(customer.customerType) },
+      { label: 'Status', text: cleanTextForPdf(customer.customerStatus) },
+      { label: 'Source', text: cleanTextForPdf(customer.customerSource) },
+      { label: 'Registration Date', text: new Date(customer.createdAt).toLocaleDateString('en-US') },
+      { label: 'Total Orders', text: (analytics.totalOrders || 0).toString() },
+      { label: 'Total Spent', text: `${analytics.totalSpent || 0} IQD` },
+      { label: 'Average Order Value', text: `${analytics.averageOrderValue || 0} IQD` },
+      { label: 'First Order Date', text: analytics.firstOrderDate ? new Date(analytics.firstOrderDate).toLocaleDateString('en-US') : 'N/A' },
+      { label: 'Last Order Date', text: analytics.lastOrderDate ? new Date(analytics.lastOrderDate).toLocaleDateString('en-US') : 'N/A' },
+      { label: 'Days Since Last Order', text: analytics.daysSinceLastOrder ? analytics.daysSinceLastOrder.toString() : 'N/A' }
+    ];
+
+    // Add recent activities
+    if (activities.length > 0) {
+      activities.slice(0, 10).forEach((activity, index) => {
+        customerData.push({
+          label: `Activity ${index + 1}`,
+          text: `${cleanTextForPdf(activity.activityType)} - ${cleanTextForPdf(activity.description)} (${new Date(activity.createdAt).toLocaleDateString('en-US')})`
+        });
+      });
+    }
+
+    return await exportCRMCustomerPDF(customerData);
+  } catch (error) {
+    // Fallback to simple PDF generation
+    console.log('pdfMake failed, using fallback PDF generation');
+    const currentDate = new Date().toLocaleDateString('en-US');
+    const content = `CUSTOMER REPORT - MOMTAZCHEM CRM
 ===============================
 Customer ID: ${customer.id}
 
@@ -1185,8 +1271,6 @@ Phone: ${cleanTextForPdf(customer.phone)}
 Country: ${cleanTextForPdf(customer.country)}
 City: ${cleanTextForPdf(customer.city)}
 Address: ${cleanTextForPdf(customer.address)}
-Secondary Address: ${cleanTextForPdf(customer.secondaryAddress)}
-Postal Code: ${cleanTextForPdf(customer.postalCode)}
 
 CUSTOMER STATUS
 ===============
@@ -1200,35 +1284,10 @@ PURCHASE ANALYTICS
 Total Orders: ${analytics.totalOrders || 0}
 Total Spent: ${analytics.totalSpent || 0} IQD
 Average Order Value: ${analytics.averageOrderValue || 0} IQD
-First Order Date: ${analytics.firstOrderDate ? new Date(analytics.firstOrderDate).toLocaleDateString('en-US') : 'N/A'}
-Last Order Date: ${analytics.lastOrderDate ? new Date(analytics.lastOrderDate).toLocaleDateString('en-US') : 'N/A'}
-Days Since Last Order: ${analytics.daysSinceLastOrder || 'N/A'}
-
-RECENT ACTIVITIES
-=================
-${activities.length > 0 ? activities.map((activity, index) => `
-${index + 1}. ${cleanTextForPdf(activity.activityType)} - ${cleanTextForPdf(activity.description)}
-   Date: ${new Date(activity.createdAt).toLocaleDateString('en-US')}
-   Performed By: ${cleanTextForPdf(activity.performedBy)}
-`).join('') : 'No recent activities recorded.'}
-
-CUSTOMER SUMMARY
-================
-This customer has been with Momtazchem since ${new Date(customer.createdAt).toLocaleDateString('en-US')}.
-${analytics.totalOrders > 0 ? `They have placed ${analytics.totalOrders} orders totaling ${analytics.totalSpent} IQD.` : 'No orders placed yet.'}
-Current status: ${cleanTextForPdf(customer.customerStatus).toUpperCase()}
-Customer type: ${cleanTextForPdf(customer.customerType).toUpperCase()}
 
 Report Generated By: Momtazchem CRM System
-Date: ${currentDate}
-Platform: Chemical Solutions Management Platform
-Version: 1.0`;
+Date: ${currentDate}`;
 
-  try {
-    return await generateMultilingualPDF(content, `Customer Report - ${cleanTextForPdf(customer.firstName)} ${cleanTextForPdf(customer.lastName)}`);
-  } catch (error) {
-    // Fallback to simple PDF generation
-    console.log('pdfMake failed, using fallback PDF generation');
     return await generateSimplePDF(content, `Customer Report - ${cleanTextForPdf(customer.firstName)} ${cleanTextForPdf(customer.lastName)}`);
   }
 }
