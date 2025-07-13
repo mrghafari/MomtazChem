@@ -286,11 +286,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Fetch wallet data for logged-in customers
   const { data: walletData, isLoading: isLoadingWallet, error: walletError } = useQuery({
-    queryKey: ['/api/customer/wallet'],
+    queryKey: ['/api/customer/wallet', Date.now()],
     queryFn: async () => {
       try {
         console.log('💳 [WALLET QUERY] Starting wallet fetch...');
-        const response = await fetch('/api/customer/wallet', {
+        const response = await fetch(`/api/customer/wallet?t=${Date.now()}`, {
           credentials: 'include'
         });
         
