@@ -106,7 +106,23 @@ export default function CustomerWallet() {
 
   // Create recharge request mutation
   const createRechargeMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/customer/wallet/recharge', 'POST', data),
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/customer/wallet/recharge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create recharge request');
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: t.rechargeSuccess,
