@@ -1054,6 +1054,23 @@ export default function ProductsPage() {
                           >
                             {product.syncWithShop ? 'فروشگاه نمایش' : 'فروشگاه مخفی'}
                           </Badge>
+                          
+                          {/* Document Availability Indicators */}
+                          <div className="flex gap-2 mr-2">
+                            {/* Catalog Indicator */}
+                            {product.showCatalogToCustomers && product.pdfCatalogUrl && (
+                              <div className="bg-green-500 rounded-full p-1.5 shadow-lg border-2 border-white" title="کاتالوگ موجود">
+                                <Eye className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+                            
+                            {/* MSDS Indicator */}
+                            {product.showMsdsToCustomers && product.msdsUrl && (
+                              <div className="bg-blue-500 rounded-full p-1.5 shadow-lg border-2 border-white" title="MSDS موجود">
+                                <FileText className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
