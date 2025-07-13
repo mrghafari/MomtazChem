@@ -195,7 +195,7 @@ export default function ProductsPage() {
   }, [refetch]);
 
   const { mutate: createProduct } = useMutation({
-    mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", "POST", data),
+    mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", { method: "POST", body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
@@ -265,7 +265,7 @@ export default function ProductsPage() {
   const { mutate: deleteProduct } = useMutation({
     mutationFn: (id: number) => {
       console.log(`🗑️ [DELETE] Starting delete for product ID: ${id}`);
-      return apiRequest(`/api/products/${id}`, "DELETE");
+      return apiRequest(`/api/products/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
       console.log(`✅ [DELETE] Product deleted successfully`);
