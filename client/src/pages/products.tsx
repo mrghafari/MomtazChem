@@ -1052,7 +1052,7 @@ export default function ProductsPage() {
                             variant={product.syncWithShop ? "default" : "secondary"} 
                             className={`text-xs ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}
                           >
-                            {product.syncWithShop ? 'در فروشگاه' : 'مخفی'}
+                            {product.syncWithShop ? 'فروشگاه نمایش' : 'فروشگاه مخفی'}
                           </Badge>
                         </div>
                       </div>
@@ -1066,7 +1066,7 @@ export default function ProductsPage() {
                           className={`h-8 w-16 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
                           title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
                         >
-                          {product.syncWithShop ? 'مخفی' : 'نمایش'}
+                          {product.syncWithShop ? 'مخفی کردن' : 'نمایش'}
                         </Button>
                         <Button
                           variant="ghost"
