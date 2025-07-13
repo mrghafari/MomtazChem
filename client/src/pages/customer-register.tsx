@@ -29,6 +29,7 @@ const customerRegistrationSchema = insertCustomerSchema.omit({
   customerType: true,
   customerStatus: true,
 }).extend({
+  email: z.string().email("Please enter a valid email address").min(1, "Email is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
   phone: z.string().min(1, "Phone number is required"),

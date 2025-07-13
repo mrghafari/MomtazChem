@@ -4373,10 +4373,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate mandatory fields
-      if (!phone || !country || !city || !address) {
+      if (!email || !phone || !country || !city || !address) {
         return res.status(400).json({ 
           success: false, 
-          message: "Phone, country, city, and address are required fields" 
+          message: "ایمیل، شماره تلفن، کشور، شهر و آدرس اجباری هستند" 
         });
       }
 
@@ -8961,10 +8961,10 @@ Leading Chemical Solutions Provider
       }
       
       // Validate mandatory fields
-      if (!customerData.phone || !customerData.country || !customerData.city || !customerData.address) {
+      if (!customerData.email || !customerData.phone || !customerData.country || !customerData.city || !customerData.address) {
         return res.status(400).json({
           success: false,
-          message: "Phone, country, city, and address are required fields"
+          message: "ایمیل، شماره تلفن، کشور، شهر و آدرس اجباری هستند"
         });
       }
 
@@ -9005,8 +9005,15 @@ Leading Chemical Solutions Provider
         success: true,
         data: crmCustomer
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating CRM customer:", error);
+      // Check if it's a duplicate error message
+      if (error.message && (error.message.includes("ایمیل تکراری است") || error.message.includes("شماره تلفن تکراری است"))) {
+        return res.status(400).json({
+          success: false,
+          message: error.message
+        });
+      }
       res.status(500).json({
         success: false,
         message: "Failed to create customer"
@@ -9025,8 +9032,15 @@ Leading Chemical Solutions Provider
         success: true,
         data: customer
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating CRM customer:", error);
+      // Check if it's a duplicate error message
+      if (error.message && (error.message.includes("ایمیل تکراری است") || error.message.includes("شماره تلفن تکراری است"))) {
+        return res.status(400).json({
+          success: false,
+          message: error.message
+        });
+      }
       res.status(500).json({
         success: false,
         message: "Failed to update customer"
