@@ -14711,6 +14711,22 @@ momtazchem.com
     }
   });
 
+  // Get wallet recharge information/status
+  app.get('/api/customer/wallet/recharge', async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer authentication required" });
+      }
+
+      // Return wallet recharge information or status
+      const requests = await walletStorage.getRechargeRequestsByCustomer(req.session.customerId);
+      res.json({ success: true, data: requests });
+    } catch (error) {
+      console.error('Error fetching recharge info:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch recharge information' });
+    }
+  });
+
   // Create wallet recharge request
   app.post('/api/customer/wallet/recharge', async (req, res) => {
     try {
