@@ -143,6 +143,12 @@ const Shop = () => {
   
   // Debug product stats
   console.log('🌟 [RATINGS DEBUG] Product stats loaded:', productStats ? Object.keys(productStats).length : 0, 'products with ratings');
+  
+  // Debug current products with their IDs
+  if (filteredProducts && filteredProducts.length > 0) {
+    console.log('🌟 [RATINGS DEBUG] Current products:', filteredProducts.map(p => ({ id: p.id, name: p.name })));
+    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter(p => productStats?.[p.id]).map(p => ({ id: p.id, name: p.name, rating: productStats[p.id] })));
+  }
 
   // Initialize price range only once when first loaded
   useEffect(() => {
@@ -383,6 +389,9 @@ const Shop = () => {
     setCustomer(customerData);
     fetchWalletBalance();
     
+    // Close auth modal
+    setShowAuth(false);
+    
     // Invalidate cache to refresh header
     queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
     queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
@@ -415,6 +424,9 @@ const Shop = () => {
   const handleRegisterSuccess = (customerData: any) => {
     setCustomer(customerData);
     fetchWalletBalance();
+    
+    // Close auth modal
+    setShowAuth(false);
     
     // Invalidate cache to refresh header
     queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
