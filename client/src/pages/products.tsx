@@ -1055,22 +1055,7 @@ export default function ProductsPage() {
                             {product.syncWithShop ? 'فروشگاه نمایش' : 'فروشگاه مخفی'}
                           </Badge>
                           
-                          {/* Document Availability Indicators */}
-                          <div className="flex gap-2 mr-2">
-                            {/* Catalog Indicator */}
-                            {product.showCatalogToCustomers && product.pdfCatalogUrl && (
-                              <div className="bg-green-500 rounded-full p-1.5 shadow-lg border-2 border-white" title="کاتالوگ موجود">
-                                <Eye className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                            
-                            {/* MSDS Indicator */}
-                            {product.showMsdsToCustomers && product.msdsUrl && (
-                              <div className="bg-blue-500 rounded-full p-1.5 shadow-lg border-2 border-white" title="MSDS موجود">
-                                <FileText className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                          </div>
+
                         </div>
                       </div>
 
@@ -1243,6 +1228,33 @@ export default function ProductsPage() {
                           </div>
                         </div>
                       )}
+                      
+                      {/* Document Availability Indicators - Bottom Right */}
+                      <div className="flex justify-end mt-3">
+                        <div className="flex gap-2">
+                          {/* Catalog Indicator */}
+                          {product.showCatalogToCustomers && product.pdfCatalogUrl && (
+                            <div 
+                              className="bg-green-500 rounded-full p-1.5 shadow-lg border-2 border-white cursor-pointer hover:bg-green-600 transition-colors" 
+                              title="کلیک برای باز کردن کاتالوگ"
+                              onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
+                            >
+                              <Eye className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                          
+                          {/* MSDS Indicator */}
+                          {product.showMsdsToCustomers && product.msdsUrl && (
+                            <div 
+                              className="bg-blue-500 rounded-full p-1.5 shadow-lg border-2 border-white cursor-pointer hover:bg-blue-600 transition-colors" 
+                              title="کلیک برای باز کردن MSDS"
+                              onClick={() => window.open(product.msdsUrl, '_blank')}
+                            >
+                              <FileText className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
