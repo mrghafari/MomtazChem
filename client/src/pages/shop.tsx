@@ -1199,18 +1199,21 @@ const Shop = () => {
                               </Badge>
                               
                               {/* Document Availability Indicators */}
-                              <div className="flex gap-1 justify-end">
+                              <div className="flex gap-2 justify-end mt-1">
+                                {/* Debug logging */}
+                                {console.log(`Product ${product.name}: showCatalog=${product.showCatalogToCustomers}, pdfUrl=${product.pdfCatalogUrl}, showMsds=${product.showMsdsToCustomers}, msdsUrl=${product.msdsUrl}`)}
+                                
                                 {/* Catalog Indicator */}
                                 {product.showCatalogToCustomers && product.pdfCatalogUrl && (
-                                  <div className="bg-green-500 rounded-full p-1 shadow-sm" title="Catalog Available">
-                                    <Eye className="w-3 h-3 text-white" />
+                                  <div className="bg-green-500 rounded-full p-2 shadow-lg border-2 border-white" title="کاتالوگ موجود">
+                                    <Eye className="w-4 h-4 text-white" />
                                   </div>
                                 )}
                                 
                                 {/* MSDS Indicator */}
                                 {product.showMsdsToCustomers && product.msdsUrl && (
-                                  <div className="bg-blue-500 rounded-full p-1 shadow-sm" title="MSDS Available">
-                                    <FileText className="w-3 h-3 text-white" />
+                                  <div className="bg-blue-500 rounded-full p-2 shadow-lg border-2 border-white" title="MSDS موجود">
+                                    <FileText className="w-4 h-4 text-white" />
                                   </div>
                                 )}
                               </div>
@@ -1482,18 +1485,18 @@ const Shop = () => {
                                   </Badge>
                                   
                                   {/* Document Availability Indicators - List View */}
-                                  <div className="flex gap-1 justify-end">
+                                  <div className="flex gap-2 justify-end mt-1">
                                     {/* Catalog Indicator */}
                                     {product.showCatalogToCustomers && product.pdfCatalogUrl && (
-                                      <div className="bg-green-500 rounded-full p-1 shadow-sm" title="Catalog Available">
-                                        <Eye className="w-3 h-3 text-white" />
+                                      <div className="bg-green-500 rounded-full p-2 shadow-lg border-2 border-white" title="کاتالوگ موجود">
+                                        <Eye className="w-4 h-4 text-white" />
                                       </div>
                                     )}
                                     
                                     {/* MSDS Indicator */}
                                     {product.showMsdsToCustomers && product.msdsUrl && (
-                                      <div className="bg-blue-500 rounded-full p-1 shadow-sm" title="MSDS Available">
-                                        <FileText className="w-3 h-3 text-white" />
+                                      <div className="bg-blue-500 rounded-full p-2 shadow-lg border-2 border-white" title="MSDS موجود">
+                                        <FileText className="w-4 h-4 text-white" />
                                       </div>
                                     )}
                                   </div>
