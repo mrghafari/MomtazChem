@@ -54,6 +54,15 @@ import {
   TICKET_STATUSES,
   TICKET_CATEGORIES
 } from "@shared/ticketing-schema";
+import { cartStorage } from "./cart-storage";
+import { 
+  cartSessions, 
+  abandonedCartSettings, 
+  abandonedCartNotifications,
+  type CartSession,
+  type AbandonedCartSettings,
+  type AbandonedCartNotification
+} from "@shared/cart-schema";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -19992,6 +20001,167 @@ momtazchem.com
     });
   });
   
+  // =============================================================================
+  // ABANDONED CART MANAGEMENT API
+  // =============================================================================
+
+  // Track cart session activity
+  app.post("/api/cart/session", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ success: false, message: "Authentication required" });
+      }
+
+      const { sessionId, cartData, itemCount, totalValue } = req.body;
+      
+      const cartSessionId = await cartStorage.createOrUpdateCartSession({
+        customerId,
+        sessionId,
+        cartData,
+        itemCount,
+        totalValue
+      });
+
+      res.json({ success: true, cartSessionId });
+    } catch (error) {
+      console.error("Error tracking cart session:", error);
+      res.status(500).json({ success: false, message: "Failed to track cart session" });
+    }
+  });
+
+  // Get abandoned cart settings
+  app.get("/api/admin/abandoned-cart/settings", requireAuth, async (req, res) => {
+    try {
+      const settings = await cartStorage.getAbandonedCartSettings();
+      res.json({ success: true, data: settings });
+    } catch (error) {
+      console.error("Error fetching abandoned cart settings:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch settings" });
+    }
+  });
+
+  // Update abandoned cart settings
+  app.put("/api/admin/abandoned-cart/settings", requireAuth, async (req, res) => {
+    try {
+      const settings = req.body;
+      await cartStorage.updateAbandonedCartSettings(settings);
+      res.json({ success: true, message: "Settings updated successfully" });
+    } catch (error) {
+      console.error("Error updating abandoned cart settings:", error);
+      res.status(500).json({ success: false, message: "Failed to update settings" });
+    }
+  });
+
+  // Get abandoned carts
+  app.get("/api/admin/abandoned-cart/carts", requireAuth, async (req, res) => {
+    try {
+      const { timeout } = req.query;
+      const timeoutMinutes = timeout ? parseInt(timeout as string) : 30;
+      
+      const abandonedCarts = await cartStorage.getAbandonedCarts(timeoutMinutes);
+      res.json({ success: true, data: abandonedCarts });
+    } catch (error) {
+      console.error("Error fetching abandoned carts:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch abandoned carts" });
+    }
+  });
+
+  // Send abandoned cart notification
+  app.post("/api/admin/abandoned-cart/notify/:cartId", requireAuth, async (req, res) => {
+    try {
+      const cartId = parseInt(req.params.cartId);
+      const { title, message, notificationType } = req.body;
+      
+      // Get cart session info
+      const cartSessions = await cartStorage.getActiveCartSessions();
+      const cartSession = cartSessions.find(cart => cart.id === cartId);
+      
+      if (!cartSession) {
+        return res.status(404).json({ success: false, message: "Cart session not found" });
+      }
+
+      await cartStorage.createNotification({
+        cartSessionId: cartId,
+        customerId: cartSession.customerId,
+        notificationType: notificationType || 'browser',
+        title,
+        message
+      });
+
+      res.json({ success: true, message: "Notification sent successfully" });
+    } catch (error) {
+      console.error("Error sending abandoned cart notification:", error);
+      res.status(500).json({ success: false, message: "Failed to send notification" });
+    }
+  });
+
+  // Get customer notifications
+  app.get("/api/cart/notifications", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ success: false, message: "Authentication required" });
+      }
+
+      const notifications = await cartStorage.getCustomerNotifications(customerId);
+      res.json({ success: true, data: notifications });
+    } catch (error) {
+      console.error("Error fetching customer notifications:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.patch("/api/cart/notifications/:id/read", async (req, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      await cartStorage.markNotificationAsRead(notificationId);
+      res.json({ success: true, message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ success: false, message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Get abandoned cart analytics
+  app.get("/api/admin/abandoned-cart/analytics", requireAuth, async (req, res) => {
+    try {
+      const { days } = req.query;
+      const analyticsDays = days ? parseInt(days as string) : 30;
+      
+      const analytics = await cartStorage.getCartRecoveryAnalytics(analyticsDays);
+      const overallStats = await cartStorage.getOverallStats();
+      
+      res.json({ 
+        success: true, 
+        data: {
+          analytics,
+          overallStats
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching abandoned cart analytics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Complete cart session (when order is placed)
+  app.post("/api/cart/session/complete", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ success: false, message: "Authentication required" });
+      }
+
+      await cartStorage.clearCartSession(customerId);
+      res.json({ success: true, message: "Cart session completed" });
+    } catch (error) {
+      console.error("Error completing cart session:", error);
+      res.status(500).json({ success: false, message: "Failed to complete cart session" });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);

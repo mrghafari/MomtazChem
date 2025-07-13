@@ -73,6 +73,39 @@ const Shop = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+
+  // Track cart session for abandoned cart management
+  const trackCartSession = async (cartData: {[key: number]: number}) => {
+    if (!customer) return;
+    
+    try {
+      const cartItems = Object.entries(cartData).map(([productId, quantity]) => ({
+        productId: parseInt(productId),
+        quantity
+      }));
+      
+      const totalValue = cartItems.reduce((sum, item) => {
+        const product = currentProducts?.find(p => p.id === item.productId);
+        return sum + (product?.price || 0) * item.quantity;
+      }, 0);
+
+      await fetch('/api/cart/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          sessionId: `session_${Date.now()}`,
+          cartData: cartItems,
+          itemCount: cartItems.length,
+          totalValue: totalValue.toString()
+        })
+      });
+    } catch (error) {
+      console.error('Error tracking cart session:', error);
+    }
+  };
   const [selectedImageForZoom, setSelectedImageForZoom] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 12;
@@ -214,10 +247,14 @@ const Shop = () => {
     queryKey: ["/api/shop/categories"],
   });
 
-  // Sync cart changes with appropriate storage
+  // Sync cart changes with appropriate storage and track abandoned cart
   useEffect(() => {
     if (Object.keys(cart).length > 0 || customer !== null) {
       saveCartToStorage(cart);
+      // Track cart session for abandoned cart management
+      if (customer && Object.keys(cart).length > 0) {
+        trackCartSession(cart);
+      }
     }
   }, [cart, customer]);
 

@@ -66,6 +66,7 @@ import SeoManagement from "@/pages/seo-management";
 import AdminSmsManagement from "@/pages/admin-sms-management";
 import WidgetRecommendations from "@/pages/widget-recommendations";
 import AdminOrderManagement from "@/pages/admin-order-management";
+import AbandonedCartManagement from "@/pages/abandoned-cart-management";
 import FinancialDepartment from "@/pages/financial-department";
 import WarehouseDepartment from "@/pages/warehouse-department";
 import LogisticsDepartment from "@/pages/logistics-department";
@@ -150,6 +151,7 @@ function Router() {
           <Route path="/admin/sms" component={AdminSmsManagement} />
           <Route path="/admin/widgets" component={WidgetRecommendations} />
           <Route path="/admin/order-management" component={AdminOrderManagement} />
+          <Route path="/admin/abandoned-cart-management" component={AbandonedCartManagement} />
           <Route path="/admin/site-management" component={SiteManagement} />
           <Route path="/admin/products" component={ProductsPage} />
           <Route path="/admin/product-variants" component={ProductVariants} />
