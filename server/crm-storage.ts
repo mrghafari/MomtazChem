@@ -16,13 +16,7 @@ import {
 import {
   crmCustomers,
   type CrmCustomer,
-  type InsertCrmCustomer,
-  type UpsertCrmCustomer
-} from "../shared/schema";
-import { 
-  crmCustomers,
-  type InsertCrmCustomer, 
-  type CrmCustomer
+  type InsertCrmCustomer
 } from "../shared/schema";
 
 export interface ICrmStorage {
@@ -184,10 +178,26 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async deleteCrmCustomer(id: number): Promise<void> {
-    await customerDb
-      .update(customers)
-      .set({ isActive: false, updatedAt: new Date() })
-      .where(eq(customers.id, id));
+    try {
+      // Log deletion activity before removing customer
+      await this.logCustomerActivity({
+        customerId: id,
+        activityType: "customer_deleted",
+        description: `Customer was permanently deleted from CRM`,
+        performedBy: "admin",
+        activityData: { deletionTime: new Date().toISOString() }
+      });
+      
+      // Actually delete the customer from the CRM database
+      await crmDb
+        .delete(crmCustomers)
+        .where(eq(crmCustomers.id, id));
+        
+      console.log(`CRM Customer ${id} deleted successfully`);
+    } catch (error) {
+      console.error("Error deleting CRM customer:", error);
+      throw error;
+    }
   }
 
   async searchCrmCustomers(query: string): Promise<Customer[]> {
@@ -255,7 +265,6 @@ export class CrmStorage implements ICrmStorage {
     const customerData = await crmDb
       .select()
       .from(crmCustomers)
-      .where(eq(crmCustomers.isActive, true))
       .orderBy(desc(crmCustomers.updatedAt))
       .limit(limit)
       .offset(offset);
