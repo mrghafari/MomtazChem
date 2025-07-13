@@ -2056,17 +2056,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get product name before deletion for shop cleanup
+      const productToDelete = await storage.getProductById(id);
+      
       // Delete from showcase products (admin interface)
       await storage.deleteProduct(id);
       
-      // Also remove from shop if it exists there
-      try {
-        await shopStorage.deleteShopProduct(id);
-      } catch (error) {
-        console.log("Product not found in shop or already deleted");
+      // Also remove from shop if it exists there (by name matching)
+      if (productToDelete) {
+        try {
+          const shopProducts = await shopStorage.getShopProducts();
+          const matchingShopProduct = shopProducts.find(p => p.name === productToDelete.name);
+          if (matchingShopProduct) {
+            await shopStorage.deleteShopProduct(matchingShopProduct.id);
+            console.log(`Removed matching shop product: ${productToDelete.name}`);
+          }
+        } catch (error) {
+          console.log("Error removing from shop:", error);
+        }
       }
       
-      console.log(`Product ${id} deleted successfully from both showcase and shop`);
+      // Trigger automatic synchronization after deletion
+      try {
+        const { KardexSyncMaster } = await import('./kardex-sync-master');
+        const result = await KardexSyncMaster.smartSyncShopFromKardex();
+        console.log(`🔄 Auto-sync completed after deleting product ${id}:`, result.message);
+      } catch (syncError) {
+        console.log("Auto-sync failed after deletion:", syncError);
+      }
+      
+      console.log(`Product ${id} deleted successfully from both showcase and shop with auto-sync`);
       res.json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
       console.error("Delete product error:", error);
