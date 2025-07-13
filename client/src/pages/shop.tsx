@@ -444,13 +444,19 @@ const Shop = () => {
       description: `${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, show checkout modal, otherwise to profile
-    setTimeout(() => {
-      // Check cart again after migration completes
+    // If user had items in cart, show checkout modal immediately
+    if (hasCartItems) {
+      setShowCheckout(true);
+      toast({
+        title: "آماده پرداخت",
+        description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
+      });
+    } else {
+      // Check if there are items in user cart after migration
       const userCartData = localStorage.getItem('momtazchem_user_cart');
       const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
       
-      if (hasCartItems || totalCartItems > 0) {
+      if (totalCartItems > 0) {
         setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
@@ -459,7 +465,7 @@ const Shop = () => {
       } else {
         navigate("/customer/profile");
       }
-    }, 1500);
+    }
   };
 
   const handleRegisterSuccess = (customerData: any) => {
@@ -484,13 +490,19 @@ const Shop = () => {
       description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, show checkout modal, otherwise to profile
-    setTimeout(() => {
-      // Check cart again after migration completes
+    // If user had items in cart, show checkout modal immediately
+    if (hasCartItems) {
+      setShowCheckout(true);
+      toast({
+        title: "آماده پرداخت",
+        description: "کالاهای انتخابی شما آماده پرداخت است",
+      });
+    } else {
+      // Check if there are items in user cart after migration
       const userCartData = localStorage.getItem('momtazchem_user_cart');
       const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
       
-      if (hasCartItems || totalCartItems > 0) {
+      if (totalCartItems > 0) {
         setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
@@ -499,7 +511,7 @@ const Shop = () => {
       } else {
         navigate("/customer/profile");
       }
-    }, 1500);
+    }
   };
 
   const handleLogout = async () => {
