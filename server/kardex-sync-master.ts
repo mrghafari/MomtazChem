@@ -235,9 +235,9 @@ export class KardexSyncMaster {
       
       let added = 0, updated = 0, removed = 0, unchanged = 0;
       
-      // فیلتر کردن محصولات کاردکس که syncWithShop فعال دارند و بارکد دارند
+      // فیلتر کردن محصولات کاردکس که بارکد دارند (همه محصولات کاردکس باید sync شوند)
       const syncEnabledKardex = kardexProducts.filter(p => 
-        p.syncWithShop !== false && p.barcode && p.barcode.trim() !== ''
+        p.barcode && p.barcode.trim() !== ''
       );
       
       // محصولاتی که در کاردکس هستند و باید در فروشگاه باشند (بر اساس بارکد EAN-13)
@@ -446,9 +446,9 @@ export class KardexSyncMaster {
       const kardexProducts = await storage.getProducts();
       const shopProducts = await shopStorage.getShopProducts();
       
-      // فیلتر کردن محصولات فقط برای آنهایی که syncWithShop فعال است و بارکد دارند
+      // فیلتر کردن محصولات که بارکد دارند (همه محصولات کاردکس باید sync شوند)
       const syncEnabledKardex = kardexProducts.filter(p => 
-        p.syncWithShop !== false && p.barcode && p.barcode.trim() !== ''
+        p.barcode && p.barcode.trim() !== ''
       );
       
       // استفاده از بارکد EAN-13 برای تشخیص همگام‌سازی
