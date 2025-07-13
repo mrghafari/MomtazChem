@@ -19988,6 +19988,94 @@ momtazchem.com
   });
 
   // =============================================================================
+  // =============================================================================
+  // ABANDONED CART MANAGEMENT API ENDPOINTS
+  // =============================================================================
+  
+  // Get abandoned cart settings
+  app.get("/api/admin/abandoned-cart/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const settings = await cartStorage.getAbandonedCartSettings();
+      res.json({ success: true, data: settings });
+    } catch (error) {
+      console.error("Error fetching abandoned cart settings:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Update abandoned cart settings
+  app.put("/api/admin/abandoned-cart/settings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const settings = await cartStorage.updateAbandonedCartSettings(req.body);
+      res.json({ success: true, data: settings });
+    } catch (error) {
+      console.error("Error updating abandoned cart settings:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get abandoned cart sessions
+  app.get("/api/admin/abandoned-cart/carts", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const carts = await cartStorage.getAbandonedCarts();
+      res.json({ success: true, data: carts });
+    } catch (error) {
+      console.error("Error fetching abandoned carts:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get abandoned cart analytics
+  app.get("/api/admin/abandoned-cart/analytics", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const analytics = await cartStorage.getAbandonedCartAnalytics();
+      res.json({ success: true, data: analytics });
+    } catch (error) {
+      console.error("Error fetching abandoned cart analytics:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Track cart session (for logged-in customers)
+  app.post("/api/cart/session", async (req: Request, res: Response) => {
+    try {
+      const { sessionId, cartData, itemCount, totalValue } = req.body;
+      const session = req.session as SessionData;
+      
+      if (!session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer not authenticated" });
+      }
+      
+      const sessionData = {
+        customerId: session.customerId,
+        sessionId,
+        cartData,
+        itemCount,
+        totalValue: parseFloat(totalValue) || 0
+      };
+      
+      await cartStorage.createOrUpdateCartSession(sessionData);
+      res.json({ success: true, message: "Cart session tracked successfully" });
+    } catch (error) {
+      console.error("Error tracking cart session:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Send abandoned cart notification
+  app.post("/api/admin/abandoned-cart/notify/:cartId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { cartId } = req.params;
+      const { message, discountCode } = req.body;
+      
+      await cartStorage.sendAbandonedCartNotification(parseInt(cartId), message, discountCode);
+      res.json({ success: true, message: "Notification sent successfully" });
+    } catch (error) {
+      console.error("Error sending abandoned cart notification:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // API ERROR HANDLER - CATCH ALL API ROUTES AND ENSURE JSON RESPONSES
   // =============================================================================
   
