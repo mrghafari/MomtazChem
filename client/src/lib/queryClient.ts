@@ -1,6 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-async function throwIfResNotOk(res: Response) {
+async function throwIfResNotOk(res: Response, requestUrl?: string, method?: string) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
     
@@ -10,8 +10,11 @@ async function throwIfResNotOk(res: Response) {
       throw new Error(`${res.status}: API returned HTML instead of JSON`);
     }
     
-    // Completely suppress 401 errors - they're expected for guest users
+    // Don't suppress 401 errors for DELETE operations - admin authentication is required
     if (res.status === 401) {
+      if (requestUrl?.includes('/api/products/') && method === 'DELETE') {
+        throw new Error("احراز هویت مورد نیاز است - لطفاً ابتدا وارد شوید");
+      }
       return { success: false, message: 'Unauthorized' };
     }
     
@@ -41,7 +44,7 @@ export async function apiRequest(
   });
 
 
-  await throwIfResNotOk(res);
+  await throwIfResNotOk(res, url, method);
   return res.json();
 }
 
@@ -62,7 +65,7 @@ export const getQueryFn: <T>(options: {
       return null;
     }
 
-    await throwIfResNotOk(res);
+    await throwIfResNotOk(res, queryKey[0] as string, 'GET');
     
     // Additional check for HTML response
     const contentType = res.headers.get('content-type');
