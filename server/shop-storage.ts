@@ -337,6 +337,11 @@ export class ShopStorage implements IShopStorage {
   }
 
   async createShopProduct(product: InsertShopProduct): Promise<ShopProduct> {
+    // بررسی الزامی بودن بارکد
+    if (!product.barcode || product.barcode.trim() === '') {
+      throw new Error('خطا: بارکد الزامی است. محصولات بدون بارکد مجاز نیستند.');
+    }
+    
     // بررسی SKU تکراری قبل از ایجاد محصول
     if (product.sku && product.sku.trim() !== '') {
       const skuExists = await this.checkSkuExists(product.sku);
@@ -353,6 +358,11 @@ export class ShopStorage implements IShopStorage {
   }
 
   async updateShopProduct(id: number, productUpdate: Partial<InsertShopProduct>): Promise<ShopProduct> {
+    // بررسی الزامی بودن بارکد در بروزرسانی (اگر مقدار داده شده)
+    if (productUpdate.hasOwnProperty('barcode') && (!productUpdate.barcode || productUpdate.barcode.trim() === '')) {
+      throw new Error('خطا: بارکد الزامی است. نمی‌توان بارکد را خالی گذاشت.');
+    }
+    
     // بررسی SKU تکراری قبل از بروزرسانی محصول
     if (productUpdate.sku && productUpdate.sku.trim() !== '') {
       const skuExists = await this.checkSkuExists(productUpdate.sku, id);

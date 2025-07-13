@@ -127,6 +127,11 @@ export class DatabaseStorage implements IStorage {
 
   // Showcase Product management methods
   async createProduct(insertProduct: InsertShowcaseProduct): Promise<ShowcaseProduct> {
+    // بررسی الزامی بودن بارکد
+    if (!insertProduct.barcode || insertProduct.barcode.trim() === '') {
+      throw new Error('خطا: بارکد الزامی است. محصولات بدون بارکد مجاز نیستند.');
+    }
+    
     // بررسی SKU تکراری قبل از ایجاد محصول
     if (insertProduct.sku && insertProduct.sku.trim() !== '') {
       const skuExists = await this.checkShowcaseSkuExists(insertProduct.sku);
@@ -180,6 +185,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
+    // بررسی الزامی بودن بارکد در بروزرسانی (اگر مقدار داده شده)
+    if (productUpdate.hasOwnProperty('barcode') && (!productUpdate.barcode || productUpdate.barcode.trim() === '')) {
+      throw new Error('خطا: بارکد الزامی است. نمی‌توان بارکد را خالی گذاشت.');
+    }
+    
     // بررسی SKU تکراری قبل از بروزرسانی محصول
     if (productUpdate.sku && productUpdate.sku.trim() !== '') {
       const skuExists = await this.checkShowcaseSkuExists(productUpdate.sku, id);
