@@ -68,6 +68,61 @@ export class KardexSyncMaster {
   }
   
   /**
+   * حذف کامل محصولات اضافی از فروشگاه که در کاردکس نیستند
+   */
+  static async cleanupExtraShopProducts(): Promise<{
+    success: boolean;
+    message: string;
+    deletedCount: number;
+    deletedProducts: string[];
+  }> {
+    try {
+      console.log("🧹 [KARDEX-SYNC] شروع حذف محصولات اضافی از فروشگاه...");
+      
+      // دریافت محصولات کاردکس و فروشگاه
+      const kardexProducts = await storage.getProducts();
+      const shopProducts = await shopStorage.getShopProducts();
+      
+      // ایجاد لیست نام‌های محصولات کاردکس
+      const kardexProductNames = new Set(kardexProducts.map(p => p.name.trim()));
+      
+      // پیدا کردن محصولات اضافی در فروشگاه
+      const extraShopProducts = shopProducts.filter(
+        shopProduct => !kardexProductNames.has(shopProduct.name.trim())
+      );
+      
+      console.log(`🔍 [KARDEX-SYNC] ${extraShopProducts.length} محصول اضافی در فروشگاه یافت شد`);
+      
+      const deletedProducts: string[] = [];
+      
+      // حذف محصولات اضافی
+      for (const extraProduct of extraShopProducts) {
+        await shopStorage.deleteShopProduct(extraProduct.id);
+        deletedProducts.push(extraProduct.name);
+        console.log(`🗑️ [KARDEX-SYNC] حذف شد: ${extraProduct.name}`);
+      }
+      
+      console.log(`✅ [KARDEX-SYNC] حذف محصولات اضافی کامل شد - ${deletedProducts.length} محصول حذف شد`);
+      
+      return {
+        success: true,
+        message: `${deletedProducts.length} محصول اضافی از فروشگاه حذف شد`,
+        deletedCount: deletedProducts.length,
+        deletedProducts
+      };
+      
+    } catch (error) {
+      console.error("❌ [KARDEX-SYNC] خطا در حذف محصولات اضافی:", error);
+      return {
+        success: false,
+        message: "خطا در حذف محصولات اضافی",
+        deletedCount: 0,
+        deletedProducts: []
+      };
+    }
+  }
+
+  /**
    * همگام‌سازی هوشمند - فقط تغییرات را اعمال می‌کند
    */
   static async smartSyncShopFromKardex(): Promise<{

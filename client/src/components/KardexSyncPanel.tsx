@@ -92,6 +92,29 @@ export function KardexSyncPanel() {
     }
   });
 
+  // Cleanup extra products mutation
+  const cleanupMutation = useMutation({
+    mutationFn: () => apiRequest<{ data: { deletedCount: number; deletedProducts: string[] } }>('/api/kardex-sync/cleanup-extra', {
+      method: 'POST'
+    }),
+    onSuccess: (data) => {
+      toast({
+        title: "حذف محصولات اضافی انجام شد",
+        description: `${data.data.deletedCount} محصول از فروشگاه حذف شد`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا در حذف محصولات اضافی",
+        description: "لطفاً مجدداً تلاش کنید",
+        variant: "destructive",
+      });
+    }
+  });
+
   const status = syncStatus?.data;
   const isInSync = status?.inSync;
   const hasMissingProducts = status?.missingInShop?.length > 0;
@@ -172,26 +195,41 @@ export function KardexSyncPanel() {
 
         {/* Sync Actions */}
         {!isAuthError && (
-          <div className="flex gap-2">
-          <Button
-            onClick={() => smartSyncMutation.mutate()}
-            disabled={smartSyncMutation.isPending || statusLoading}
-            className="flex-1"
-            variant={isInSync ? "secondary" : "default"}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            {smartSyncMutation.isPending ? "در حال همگام‌سازی..." : "همگام‌سازی هوشمند"}
-          </Button>
-          
-          <Button
-            onClick={() => fullRebuildMutation.mutate()}
-            disabled={fullRebuildMutation.isPending || statusLoading}
-            variant="outline"
-            className="flex-1"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            {fullRebuildMutation.isPending ? "در حال بازسازی..." : "بازسازی کامل"}
-          </Button>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Button
+                onClick={() => smartSyncMutation.mutate()}
+                disabled={smartSyncMutation.isPending || statusLoading}
+                className="flex-1"
+                variant={isInSync ? "secondary" : "default"}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {smartSyncMutation.isPending ? "در حال همگام‌سازی..." : "همگام‌سازی هوشمند"}
+              </Button>
+              
+              <Button
+                onClick={() => fullRebuildMutation.mutate()}
+                disabled={fullRebuildMutation.isPending || statusLoading}
+                variant="outline"
+                className="flex-1"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {fullRebuildMutation.isPending ? "در حال بازسازی..." : "بازسازی کامل"}
+              </Button>
+            </div>
+            
+            {/* Cleanup Extra Products Button */}
+            {hasExtraProducts && (
+              <Button
+                onClick={() => cleanupMutation.mutate()}
+                disabled={cleanupMutation.isPending || statusLoading}
+                variant="outline"
+                className="w-full border-red-300 text-red-600 hover:bg-red-50"
+              >
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                {cleanupMutation.isPending ? "در حال حذف..." : `حذف ${status?.extraInShop?.length || 0} محصول اضافی از فروشگاه`}
+              </Button>
+            )}
           </div>
         )}
 

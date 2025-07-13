@@ -2141,6 +2141,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // حذف کامل محصولات اضافی از فروشگاه که در کاردکس نیستند
+  app.post("/api/kardex-sync/cleanup-extra", requireAuth, async (req, res) => {
+    try {
+      const { KardexSyncMaster } = await import('./kardex-sync-master');
+      const result = await KardexSyncMaster.cleanupExtraShopProducts();
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          message: result.message,
+          data: {
+            deletedCount: result.deletedCount,
+            deletedProducts: result.deletedProducts
+          }
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: result.message
+        });
+      }
+    } catch (error) {
+      console.error("❌ [CLEANUP-EXTRA] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف محصولات اضافی"
+      });
+    }
+  });
+
   // =============================================================================
   // BARCODE & INVENTORY MANAGEMENT ENDPOINTS
   // =============================================================================
