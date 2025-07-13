@@ -669,7 +669,7 @@ export default function CRM() {
                           {getSortIcon("createdAt")}
                         </div>
                       </TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="min-w-[180px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -694,8 +694,8 @@ export default function CRM() {
                         <TableCell>
                           {formatDate(customer.createdAt)}
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
+                        <TableCell className="min-w-[180px]">
+                          <div className="flex items-center gap-1 justify-start">
                             <Button
                               variant="outline"
                               size="sm"
@@ -703,6 +703,7 @@ export default function CRM() {
                                 setSelectedCustomer(customer);
                                 setIsCustomerDetailDialogOpen(true);
                               }}
+                              title="View customer details"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -710,6 +711,7 @@ export default function CRM() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditCustomer(customer)}
+                              title="Edit customer"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -726,6 +728,7 @@ export default function CRM() {
                               size="sm"
                               onClick={() => handleDeleteCustomer(customer.id)}
                               className="text-red-600 hover:text-red-700"
+                              title="Delete customer"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
