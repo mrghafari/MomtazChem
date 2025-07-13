@@ -1180,20 +1180,7 @@ export default function ProductsPage() {
                         )}
                       </div>
 
-                      {/* Tags */}
-                      {product.tags && product.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {(Array.isArray(product.tags) ? product.tags : String(product.tags).split(',')).slice(0, 3).map((tag, index) => (
-                            <Badge 
-                              key={index} 
-                              variant="secondary" 
-                              className="text-xs px-2 py-0 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                            >
-                              {tag.trim()}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
+
 
                       {/* Product Variants Section */}
                       {products && Array.isArray(products) && 
