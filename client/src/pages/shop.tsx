@@ -1150,22 +1150,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Document Availability Indicators - Top Right */}
-                          <div className="absolute top-2 right-2 flex flex-col gap-1">
-                            {/* Catalog Indicator */}
-                            {product.showCatalogToCustomers && product.pdfCatalogUrl && (
-                              <div className="bg-green-500/90 backdrop-blur-sm rounded-full p-1.5 shadow-md hover:bg-green-600 transition-colors">
-                                <Eye className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                            
-                            {/* MSDS Indicator */}
-                            {product.showMsdsToCustomers && product.msdsUrl && (
-                              <div className="bg-blue-500/90 backdrop-blur-sm rounded-full p-1.5 shadow-md hover:bg-blue-600 transition-colors">
-                                <FileText className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                          </div>
+
 
                           {/* Reviews and Specs - Right side */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
@@ -1212,7 +1197,23 @@ const Shop = () => {
                               <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                 {product.inStock ? "In Stock" : "Out of Stock"}
                               </Badge>
-
+                              
+                              {/* Document Availability Indicators */}
+                              <div className="flex gap-1 justify-end">
+                                {/* Catalog Indicator */}
+                                {product.showCatalogToCustomers && product.pdfCatalogUrl && (
+                                  <div className="bg-green-500 rounded-full p-1 shadow-sm" title="Catalog Available">
+                                    <Eye className="w-3 h-3 text-white" />
+                                  </div>
+                                )}
+                                
+                                {/* MSDS Indicator */}
+                                {product.showMsdsToCustomers && product.msdsUrl && (
+                                  <div className="bg-blue-500 rounded-full p-1 shadow-sm" title="MSDS Available">
+                                    <FileText className="w-3 h-3 text-white" />
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                           
@@ -1430,22 +1431,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Document Availability Indicators - Top Right List View */}
-                          <div className="absolute top-2 right-2 flex flex-col gap-1">
-                            {/* Catalog Indicator */}
-                            {product.showCatalogToCustomers && product.pdfCatalogUrl && (
-                              <div className="bg-green-500/90 backdrop-blur-sm rounded-full p-1.5 shadow-md hover:bg-green-600 transition-colors">
-                                <Eye className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                            
-                            {/* MSDS Indicator */}
-                            {product.showMsdsToCustomers && product.msdsUrl && (
-                              <div className="bg-blue-500/90 backdrop-blur-sm rounded-full p-1.5 shadow-md hover:bg-blue-600 transition-colors">
-                                <FileText className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                          </div>
+
 
                           {/* Reviews and Specs - Right side - List View */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
@@ -1494,7 +1480,23 @@ const Shop = () => {
                                   <Badge variant={product.inStock ? "secondary" : "destructive"}>
                                     {product.inStock ? "In Stock" : "Out of Stock"}
                                   </Badge>
-
+                                  
+                                  {/* Document Availability Indicators - List View */}
+                                  <div className="flex gap-1 justify-end">
+                                    {/* Catalog Indicator */}
+                                    {product.showCatalogToCustomers && product.pdfCatalogUrl && (
+                                      <div className="bg-green-500 rounded-full p-1 shadow-sm" title="Catalog Available">
+                                        <Eye className="w-3 h-3 text-white" />
+                                      </div>
+                                    )}
+                                    
+                                    {/* MSDS Indicator */}
+                                    {product.showMsdsToCustomers && product.msdsUrl && (
+                                      <div className="bg-blue-500 rounded-full p-1 shadow-sm" title="MSDS Available">
+                                        <FileText className="w-3 h-3 text-white" />
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                               
