@@ -14,7 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote } from "lucide-react";
+import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote, Shield } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface WalletSummary {
   wallet?: {
@@ -69,11 +70,14 @@ export default function CustomerWallet() {
     currency: "IQD",
     paymentMethod: "",
     paymentReference: "",
-    customerNotes: ""
+    customerNotes: "",
+    bankReference: "",
+    bankReceipt: null as File | null
   });
 
   // Authentication
   const { customer, isAuthenticated, isLoading: authLoading } = useCustomer();
+  const { isAuthenticated: isAdminAuthenticated } = useAuth();
 
   // Get language from centralized system
   const { language, t, direction } = useLanguage();
@@ -114,7 +118,9 @@ export default function CustomerWallet() {
         currency: "IQD",
         paymentMethod: "",
         paymentReference: "",
-        customerNotes: ""
+        customerNotes: "",
+        bankReference: "",
+        bankReceipt: null
       });
       queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
       queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet/recharge-requests'] });
@@ -128,7 +134,7 @@ export default function CustomerWallet() {
     }
   });
 
-  const handleRechargeSubmit = (e: React.FormEvent) => {
+  const handleRechargeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!rechargeForm.amount || parseFloat(rechargeForm.amount) <= 0) {
@@ -149,7 +155,82 @@ export default function CustomerWallet() {
       return;
     }
 
-    createRechargeMutation.mutate(rechargeForm);
+    // Validate bank transfer fields
+    if (rechargeForm.paymentMethod === 'bank_transfer') {
+      if (!rechargeForm.bankReference.trim()) {
+        toast({
+          title: t.inputError,
+          description: t.bankReferenceRequired,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (!rechargeForm.bankReceipt) {
+        toast({
+          title: t.inputError,
+          description: t.bankReceiptRequired,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Prepare form data for submission
+    const formData = new FormData();
+    formData.append('amount', rechargeForm.amount);
+    formData.append('currency', rechargeForm.currency);
+    formData.append('paymentMethod', rechargeForm.paymentMethod);
+    formData.append('customerNotes', rechargeForm.customerNotes);
+    
+    if (rechargeForm.paymentMethod === 'bank_transfer') {
+      formData.append('bankReference', rechargeForm.bankReference);
+      if (rechargeForm.bankReceipt) {
+        formData.append('bankReceipt', rechargeForm.bankReceipt);
+      }
+    } else {
+      formData.append('paymentReference', rechargeForm.paymentReference);
+    }
+
+    // Submit the form data
+    try {
+      const response = await fetch('/api/customer/wallet/recharge', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit recharge request');
+      }
+
+      const result = await response.json();
+      
+      toast({
+        title: t.rechargeSuccess,
+        description: t.requestSubmitted,
+      });
+      
+      setIsRechargeDialogOpen(false);
+      setRechargeForm({
+        amount: "",
+        currency: "IQD",
+        paymentMethod: "",
+        paymentReference: "",
+        customerNotes: "",
+        bankReference: "",
+        bankReceipt: null
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet/recharge-requests'] });
+      
+    } catch (error: any) {
+      toast({
+        title: t.requestError,
+        description: error.message || t.errorCreatingRequest,
+        variant: "destructive",
+      });
+    }
   };
 
   const formatCurrency = (amount: string | number, currency: string = "IQD") => {
@@ -247,10 +328,22 @@ export default function CustomerWallet() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className={`text-3xl font-bold text-gray-900 flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <Wallet className="h-8 w-8 text-blue-600" />
-            {t.walletTitle}
-          </h1>
+          <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <h1 className={`text-3xl font-bold text-gray-900 flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <Wallet className="h-8 w-8 text-blue-600" />
+              {t.walletTitle}
+            </h1>
+            
+            {/* Admin Status Badge */}
+            {isAdminAuthenticated && (
+              <div className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full border border-red-200 dark:border-red-800">
+                <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                  {isRTL ? 'مدیر' : 'Admin'}
+                </span>
+              </div>
+            )}
+          </div>
           <p className="text-gray-600 mt-2">{t.walletSubtitle}</p>
         </div>
 
@@ -388,15 +481,47 @@ export default function CustomerWallet() {
                         </Select>
                       </div>
 
-                      <div>
-                        <Label htmlFor="paymentReference">{t.paymentReference} ({t.optional})</Label>
-                        <Input
-                          id="paymentReference"
-                          value={rechargeForm.paymentReference}
-                          onChange={(e) => setRechargeForm({...rechargeForm, paymentReference: e.target.value})}
-                          placeholder={t.enterPaymentReference}
-                        />
-                      </div>
+                      {/* Bank Transfer Fields */}
+                      {rechargeForm.paymentMethod === 'bank_transfer' && (
+                        <>
+                          <div>
+                            <Label htmlFor="bankReference">{t.bankReference} *</Label>
+                            <Input
+                              id="bankReference"
+                              value={rechargeForm.bankReference}
+                              onChange={(e) => setRechargeForm({...rechargeForm, bankReference: e.target.value})}
+                              placeholder={t.enterBankReference}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="bankReceipt">{t.bankReceipt} *</Label>
+                            <Input
+                              id="bankReceipt"
+                              type="file"
+                              accept=".jpg,.jpeg,.png,.pdf"
+                              onChange={(e) => setRechargeForm({...rechargeForm, bankReceipt: e.target.files?.[0] || null})}
+                              required
+                            />
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {t.uploadBankReceipt}
+                            </p>
+                          </div>
+                        </>
+                      )}
+
+                      {/* General Payment Reference (for non-bank transfers) */}
+                      {rechargeForm.paymentMethod !== 'bank_transfer' && (
+                        <div>
+                          <Label htmlFor="paymentReference">{t.paymentReference} ({t.optional})</Label>
+                          <Input
+                            id="paymentReference"
+                            value={rechargeForm.paymentReference}
+                            onChange={(e) => setRechargeForm({...rechargeForm, paymentReference: e.target.value})}
+                            placeholder={t.enterPaymentReference}
+                          />
+                        </div>
+                      )}
 
                       <div>
                         <Label htmlFor="customerNotes">{t.notes} ({t.optional})</Label>

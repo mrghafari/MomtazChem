@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, ShoppingBag } from 'lucide-react';
+import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, ShoppingBag, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useCustomer } from '@/hooks/useCustomer';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +33,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, direction } = useLanguage();
   const { customer, isAuthenticated, logout } = useCustomer();
+  const { isAuthenticated: isAdminAuthenticated } = useAuth();
 
   // Fetch wallet balance for authenticated customers
   const { data: walletData, isError, error } = useQuery({
@@ -159,7 +161,18 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-900/95 dark:supports-[backdrop-filter]:bg-gray-900/60">
+    <header className={cn(
+      "sticky top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60",
+      isAdminAuthenticated 
+        ? "bg-red-50/95 border-red-200 dark:bg-red-900/95 dark:border-red-800" 
+        : "bg-white/95 dark:bg-gray-900/95"
+    )}>
+      {/* Admin Status Indicator */}
+      {isAdminAuthenticated && (
+        <div className="bg-red-600 text-white text-center py-1 text-sm font-medium">
+          🔐 وضعیت مدیریت فعال - Admin Mode Active
+        </div>
+      )}
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -258,6 +271,16 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-4">
+            {/* Admin Status Badge */}
+            {isAdminAuthenticated && (
+              <div className="hidden md:flex items-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full border border-red-200 dark:border-red-800">
+                <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                  {direction === 'rtl' ? 'مدیر' : 'Admin'}
+                </span>
+              </div>
+            )}
+            
             {/* Language Switcher - Desktop */}
             <div className="hidden md:block">
               <LanguageSwitcher />
@@ -329,6 +352,16 @@ export default function Header() {
               className="md:hidden border-t border-gray-200 dark:border-gray-700"
             >
               <nav className="py-4 space-y-1">
+                {/* Admin Status Badge - Mobile */}
+                {isAdminAuthenticated && (
+                  <div className="flex items-center justify-center gap-2 bg-red-100 dark:bg-red-900/30 mx-4 px-3 py-2 rounded-full border border-red-200 dark:border-red-800 mb-4">
+                    <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                      {direction === 'rtl' ? 'وضعیت مدیریت فعال' : 'Admin Mode Active'}
+                    </span>
+                  </div>
+                )}
+                
                 {navigation.map((item, index) => (
                   <motion.div
                     key={item.href}

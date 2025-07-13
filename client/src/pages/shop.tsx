@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ const Shop = () => {
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
   const queryClient = useQueryClient();
+  const { isAuthenticated: isAdminAuthenticated } = useAuth();
 
 
   const [, navigate] = useLocation();
@@ -919,6 +921,16 @@ const Shop = () => {
           <div className="flex items-center justify-between relative">
             <div className="flex items-center gap-4">
               <h1 className="text-3xl font-bold text-gray-900">{t.shop.title}</h1>
+              
+              {/* Admin Status Badge */}
+              {isAdminAuthenticated && (
+                <div className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full border border-red-200 dark:border-red-800">
+                  <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                    {direction === 'rtl' ? 'مدیر' : 'Admin'}
+                  </span>
+                </div>
+              )}
               
               {/* AI Recommendations Button - Left */}
               <Button 
