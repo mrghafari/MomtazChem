@@ -1048,16 +1048,6 @@ export default function ProductsPage() {
                             </Badge>
                           )}
                         </div>
-                        {/* Shop Visibility Status - Separate Line */}
-                        <div className="mb-2 flex flex-col">
-                          <div className="text-xs text-gray-600 mb-1">وضعیت فروشگاه:</div>
-                          <Badge 
-                            variant={product.syncWithShop ? "default" : "secondary"} 
-                            className={`text-xs w-fit ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}
-                          >
-                            {product.syncWithShop ? 'نمایش در فروشگاه' : 'مخفی'}
-                          </Badge>
-                        </div>
                       </div>
 
                       {/* Action Buttons */}
