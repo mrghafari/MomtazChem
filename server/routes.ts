@@ -9798,10 +9798,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get customer activities
       const activities = await crmStorage.getCustomerActivities(customerId, 20);
 
-      // Generate PDF using simplified compatible generator
-      const { generateSimplePDF, generateCustomerPDFHTML } = await import('./simple-pdf-generator');
-      const htmlContent = generateCustomerPDFHTML(customer, analytics, activities);
-      const pdfBuffer = await generateSimplePDF(htmlContent, `Customer Report - ${customer.firstName} ${customer.lastName}`);
+      // Generate PDF using enhanced pdfMake generator for better Persian support
+      const { generateCustomerPDF } = await import('./simple-pdf-generator');
+      const pdfBuffer = await generateCustomerPDF(customer, analytics, activities);
 
       // Set response headers for PDF download
       // Validate PDF buffer before sending
