@@ -4714,6 +4714,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
+      const adminId = (req.session as any)?.adminId;
+      
+      // If admin is logged in, don't allow customer data access
+      if (adminId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Admin authenticated - not a customer" 
+        });
+      }
       
       if (!customerId && !crmCustomerId) {
         return res.status(401).json({ 
@@ -14684,6 +14693,11 @@ momtazchem.com
   // Customer wallet endpoints
   app.get('/api/customer/wallet', async (req, res) => {
     try {
+      // Prevent admin from accessing customer wallet data
+      if (req.session.adminId) {
+        return res.status(401).json({ success: false, message: "Admin authenticated - not a customer" });
+      }
+      
       if (!req.session.customerId) {
         return res.status(401).json({ success: false, message: "Customer authentication required" });
       }
@@ -14699,6 +14713,11 @@ momtazchem.com
   // Get customer wallet balance only
   app.get('/api/customers/wallet/balance', async (req, res) => {
     try {
+      // Prevent admin from accessing customer wallet data
+      if (req.session.adminId) {
+        return res.status(401).json({ success: false, message: "Admin authenticated - not a customer" });
+      }
+      
       if (!req.session.customerId) {
         return res.status(401).json({ success: false, message: "Customer authentication required" });
       }
@@ -14714,6 +14733,11 @@ momtazchem.com
   // Get wallet recharge information/status
   app.get('/api/customer/wallet/recharge', async (req, res) => {
     try {
+      // Prevent admin from accessing customer wallet data
+      if (req.session.adminId) {
+        return res.status(401).json({ success: false, message: "Admin authenticated - not a customer" });
+      }
+      
       if (!req.session.customerId) {
         return res.status(401).json({ success: false, message: "Customer authentication required" });
       }
@@ -14732,6 +14756,13 @@ momtazchem.com
     try {
       console.log('💰 [WALLET-RECHARGE] POST request received:', req.body);
       console.log('💰 [WALLET-RECHARGE] Customer ID:', req.session.customerId);
+      console.log('💰 [WALLET-RECHARGE] Admin ID:', req.session.adminId);
+      
+      // Prevent admin from accessing customer wallet data
+      if (req.session.adminId) {
+        console.log('💰 [WALLET-RECHARGE] ERROR: Admin authenticated - not a customer');
+        return res.status(401).json({ success: false, message: "Admin authenticated - not a customer" });
+      }
       
       if (!req.session.customerId) {
         console.log('💰 [WALLET-RECHARGE] ERROR: No customer ID in session');
