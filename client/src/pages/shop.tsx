@@ -437,6 +437,7 @@ const Shop = () => {
     // Check if user has items in cart before migration
     const hasCartItems = Object.keys(cart).length > 0;
     console.log('Has cart items:', hasCartItems);
+    console.log('Cart contents:', cart);
     
     // Migrate guest cart to user cart
     migrateGuestCartToUser();
@@ -458,6 +459,8 @@ const Shop = () => {
       // Check if there are items in user cart after migration
       const userCartData = localStorage.getItem('momtazchem_user_cart');
       const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
+      console.log('User cart data:', userCartData);
+      console.log('Total cart items after migration:', totalCartItems);
       
       if (totalCartItems > 0) {
         console.log('Showing checkout after migration');
@@ -467,6 +470,7 @@ const Shop = () => {
           description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
         });
       } else {
+        console.log('No items in cart, navigating to profile');
         navigate("/customer/profile");
       }
     }

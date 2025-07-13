@@ -1,0 +1,67 @@
+chunk-RPCDYKBN.js?v=7c134e41:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+twk-chunk-common.js:2 Uncaught (in promise) TypeError: t.$_Tawk.i18next is not a function
+    at e.a.$i18n (twk-chunk-common.js:2:232205)
+    at Object.parseVisitorName (twk-chunk-common.js:2:236498)
+    at p.setVisitorInformation (twk-chunk-common.js:2:201194)
+    at twk-vendor.js:2:76176
+    at twk-vendor.js:2:77697
+    at Array.forEach (<anonymous>)
+    at twk-vendor.js:2:77676
+    at p._withCommit (twk-vendor.js:2:79503)
+    at p.commit (twk-vendor.js:2:77650)
+    at p.commit (twk-vendor.js:2:73905)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:810 Cart clicked, total items: 1
+shop.tsx:811 Customer: null
+shop.tsx:822 User not logged in, showing pre-checkout modal
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:426 Login successful, customer data: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:178 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:182 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:183 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
