@@ -1,72 +1,79 @@
 import * as fs from 'fs';
 import * as path from 'path';
-const pdfMake = require('pdfmake/build/pdfmake');
-const pdfFonts = require('pdfmake/build/vfs_fonts');
-
-// Setup pdfMake with fonts
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
-
-// Configure fonts for multilingual support
-pdfMake.fonts = {
-  Roboto: {
-    normal: 'Roboto-Regular.ttf',
-    bold: 'Roboto-Medium.ttf',
-    italics: 'Roboto-Italic.ttf',
-    bolditalics: 'Roboto-MediumItalic.ttf'
-  }
-};
 
 // Enhanced PDF generator using pdfMake for better multilingual support
 export async function generateMultilingualPDF(content: string, title: string): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    try {
-      const docDefinition = {
-        content: [
-          {
-            text: title,
-            fontSize: 18,
-            bold: true,
-            margin: [0, 0, 0, 20] as [number, number, number, number],
-            alignment: 'left' as const
-          },
-          {
-            text: `Generated: ${new Date().toLocaleDateString('en-US')}`,
-            fontSize: 12,
-            margin: [0, 0, 0, 20] as [number, number, number, number],
-            color: 'gray'
-          },
-          {
-            text: content,
-            fontSize: 12,
-            lineHeight: 1.5,
-            alignment: 'left' as const,
-            preserveLeadingSpaces: true
-          }
-        ],
-        defaultStyle: {
-          font: 'Roboto',
-          fontSize: 12
-        },
-        pageMargins: [40, 60, 40, 60] as [number, number, number, number],
-        info: {
-          title: title,
-          author: 'Momtazchem CRM System',
-          subject: 'Customer Report',
-          creator: 'Momtazchem Platform'
-        }
-      };
+  try {
+    // Import pdfMake dynamically to avoid ES module issues
+    const pdfMake = await import('pdfmake/build/pdfmake.js');
+    const pdfFonts = await import('pdfmake/build/vfs_fonts.js');
+    
+    // Setup pdfMake with fonts
+    pdfMake.default.vfs = pdfFonts.default.pdfMake.vfs;
+    
+    // Configure fonts for multilingual support
+    pdfMake.default.fonts = {
+      Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+      }
+    };
 
-      const pdfDoc = pdfMake.createPdf(docDefinition);
-      
-      pdfDoc.getBuffer((buffer: Buffer) => {
-        resolve(buffer);
-      }, (error: any) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const docDefinition = {
+          content: [
+            {
+              text: title,
+              fontSize: 18,
+              bold: true,
+              margin: [0, 0, 0, 20] as [number, number, number, number],
+              alignment: 'left' as const
+            },
+            {
+              text: `Generated: ${new Date().toLocaleDateString('en-US')}`,
+              fontSize: 12,
+              margin: [0, 0, 0, 20] as [number, number, number, number],
+              color: 'gray'
+            },
+            {
+              text: content,
+              fontSize: 12,
+              lineHeight: 1.5,
+              alignment: 'left' as const,
+              preserveLeadingSpaces: true
+            }
+          ],
+          defaultStyle: {
+            font: 'Roboto',
+            fontSize: 12
+          },
+          pageMargins: [40, 60, 40, 60] as [number, number, number, number],
+          info: {
+            title: title,
+            author: 'Momtazchem CRM System',
+            subject: 'Customer Report',
+            creator: 'Momtazchem Platform'
+          }
+        };
+
+        const pdfDoc = pdfMake.default.createPdf(docDefinition);
+        
+        pdfDoc.getBuffer((buffer: Buffer) => {
+          resolve(buffer);
+        }, (error: any) => {
+          reject(error);
+        });
+      } catch (error) {
         reject(error);
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
+      }
+    });
+  } catch (error) {
+    console.error('pdfMake import failed:', error);
+    throw error;
+  }
 }
 
 // Fallback simple text-based PDF generator for compatibility
