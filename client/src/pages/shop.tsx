@@ -1815,26 +1815,67 @@ const Shop = () => {
               <X className="w-6 h-6" />
             </Button>
             <div className="relative overflow-hidden rounded-lg bg-white p-2">
-              <img
-                src={selectedImageForZoom}
-                alt="Product Image"
-                className="max-w-full max-h-[80vh] object-contain transition-transform duration-300 ease-in-out cursor-zoom-in"
-                style={{ 
-                  transform: 'scale(1)', 
-                  transformOrigin: 'center',
+              <div className="relative">
+                <img
+                  src={selectedImageForZoom}
+                  alt="Product Image"
+                  className="max-w-full max-h-[80vh] object-contain block cursor-crosshair"
+                  onMouseMove={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    const lens = document.getElementById('zoom-lens');
+                    const result = document.getElementById('zoom-result');
+                    
+                    if (!lens || !result) return;
+                    
+                    const rect = img.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Show lens and result
+                    lens.style.opacity = '1';
+                    result.style.opacity = '1';
+                    
+                    // Position lens
+                    lens.style.left = `${x}px`;
+                    lens.style.top = `${y}px`;
+                    
+                    // Calculate zoom position
+                    const cx = (x / rect.width) * 100;
+                    const cy = (y / rect.height) * 100;
+                    
+                    // Update zoomed background position
+                    result.style.backgroundPosition = `${cx}% ${cy}%`;
+                  }}
+                  onMouseLeave={() => {
+                    const lens = document.getElementById('zoom-lens');
+                    const result = document.getElementById('zoom-result');
+                    
+                    if (lens) lens.style.opacity = '0';
+                    if (result) result.style.opacity = '0';
+                  }}
+                />
+                {/* Zoom lens that follows mouse */}
+                <div
+                  className="absolute border-2 border-blue-500 bg-blue-500/20 rounded-full pointer-events-none opacity-0 transition-opacity duration-200"
+                  style={{
+                    width: '150px',
+                    height: '150px',
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                  id="zoom-lens"
+                />
+              </div>
+              
+              {/* Zoomed view container */}
+              <div
+                className="absolute top-4 right-4 w-80 h-80 border-4 border-white rounded-lg overflow-hidden bg-white shadow-2xl opacity-0 transition-opacity duration-200 pointer-events-none"
+                style={{
+                  backgroundImage: `url(${selectedImageForZoom})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '400%',
+                  zIndex: 10,
                 }}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLImageElement).style.transform = 'scale(4)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLImageElement).style.transform = 'scale(1)';
-                }}
-                onMouseMove={(e) => {
-                  const rect = (e.target as HTMLImageElement).getBoundingClientRect();
-                  const x = ((e.clientX - rect.left) / rect.width) * 100;
-                  const y = ((e.clientY - rect.top) / rect.height) * 100;
-                  (e.target as HTMLImageElement).style.transformOrigin = `${x}% ${y}%`;
-                }}
+                id="zoom-result"
               />
             </div>
           </div>
