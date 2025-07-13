@@ -56,19 +56,19 @@ export default function WalletManagement() {
 
   // Fetch wallet statistics
   const { data: statsData, isLoading: statsLoading } = useQuery<{ success: boolean; data: WalletStats }>({
-    queryKey: ['/api/admin/wallet/stats'],
+    queryKey: ['/api/wallet/stats'],
     refetchInterval: 30000
   });
 
   // Fetch pending recharge requests
   const { data: pendingRequestsData, isLoading: pendingLoading } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
-    queryKey: ['/api/admin/wallet/recharge-requests/pending'],
+    queryKey: ['/api/wallet/recharge-requests/pending'],
     refetchInterval: 30000
   });
 
   // Fetch all recharge requests
   const { data: allRequestsData, isLoading: allLoading } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
-    queryKey: ['/api/admin/wallet/recharge-requests'],
+    queryKey: ['/api/wallet/recharge-requests'],
     refetchInterval: 30000
   });
 
@@ -81,7 +81,7 @@ export default function WalletManagement() {
       setIsApprovalDialogOpen(false);
       setAdminNotes("");
       setSelectedRequest(null);
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to approve recharge request", variant: "destructive" });
@@ -101,7 +101,7 @@ export default function WalletManagement() {
       setRejectionReason("");
       setAdminNotes("");
       setSelectedRequest(null);
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to reject recharge request", variant: "destructive" });
@@ -183,7 +183,7 @@ export default function WalletManagement() {
           </div>
           <Button 
             onClick={() => {
-              queryClient.invalidateQueries({ queryKey: ['/api/admin/wallet'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
               toast({ title: "Refreshed", description: "Data refreshed successfully" });
             }}
             variant="outline"
@@ -287,9 +287,9 @@ export default function WalletManagement() {
                           <TableCell>
                             <div>
                               <div className="font-medium">
-                                {request.customer.firstName} {request.customer.lastName}
+                                {request.customer?.firstName || 'Unknown'} {request.customer?.lastName || 'Customer'}
                               </div>
-                              <div className="text-sm text-gray-500">{request.customer.email}</div>
+                              <div className="text-sm text-gray-500">{request.customer?.email || 'No email'}</div>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -380,9 +380,9 @@ export default function WalletManagement() {
                           <TableCell>
                             <div>
                               <div className="font-medium">
-                                {request.customer.firstName} {request.customer.lastName}
+                                {request.customer?.firstName || 'Unknown'} {request.customer?.lastName || 'Customer'}
                               </div>
-                              <div className="text-sm text-gray-500">{request.customer.email}</div>
+                              <div className="text-sm text-gray-500">{request.customer?.email || 'No email'}</div>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -443,10 +443,10 @@ export default function WalletManagement() {
                   <div>
                     <Label className="text-sm font-medium">Customer</Label>
                     <p className="text-sm text-gray-600">
-                      {selectedRequest.customer.firstName} {selectedRequest.customer.lastName}
+                      {selectedRequest.customer?.firstName || 'Unknown'} {selectedRequest.customer?.lastName || 'Customer'}
                     </p>
-                    <p className="text-xs text-gray-500">{selectedRequest.customer.email}</p>
-                    <p className="text-xs text-gray-500">{selectedRequest.customer.phone}</p>
+                    <p className="text-xs text-gray-500">{selectedRequest.customer?.email || 'No email'}</p>
+                    <p className="text-xs text-gray-500">{selectedRequest.customer?.phone || 'No phone'}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium">Amount</Label>

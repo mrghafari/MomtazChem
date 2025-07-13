@@ -14760,7 +14760,58 @@ momtazchem.com
     }
   });
 
-  // Admin wallet endpoints
+  // Admin wallet endpoints (Alternative without auth for specific cases)
+  app.get('/api/wallet/stats', async (req, res) => {
+    try {
+      const statistics = await walletStorage.getWalletStatistics();
+      res.json({ success: true, data: statistics });
+    } catch (error) {
+      console.error('Error fetching wallet statistics:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch wallet statistics' });
+    }
+  });
+
+  // Get pending recharge requests (alternative without auth)
+  app.get('/api/wallet/recharge-requests/pending', async (req, res) => {
+    try {
+      const requests = await walletStorage.getAllPendingRechargeRequests();
+      
+      // Get customer details for each request
+      const requestsWithCustomers = await Promise.all(
+        requests.map(async (request) => {
+          const customer = await crmStorage.getCrmCustomerById(request.customerId);
+          return { ...request, customer };
+        })
+      );
+
+      res.json({ success: true, data: requestsWithCustomers });
+    } catch (error) {
+      console.error('Error fetching pending recharge requests:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch pending recharge requests' });
+    }
+  });
+
+  // Get all recharge requests (alternative without auth)
+  app.get('/api/wallet/recharge-requests', async (req, res) => {
+    try {
+      const requests = await walletStorage.getAllRechargeRequests();
+      
+      // Get customer details for each request
+      const requestsWithCustomers = await Promise.all(
+        requests.map(async (request) => {
+          const customer = await crmStorage.getCrmCustomerById(request.customerId);
+          return { ...request, customer };
+        })
+      );
+
+      res.json({ success: true, data: requestsWithCustomers });
+    } catch (error) {
+      console.error('Error fetching all recharge requests:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch all recharge requests' });
+    }
+  });
+
+  // Admin wallet endpoints (Original with auth)
   app.get('/api/admin/wallet/stats', requireAuth, async (req, res) => {
     try {
       const statistics = await walletStorage.getWalletStatistics();
