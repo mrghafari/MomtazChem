@@ -12,7 +12,7 @@ export function useCustomer() {
   });
 
   const logout = useMutation({
-    mutationFn: () => apiRequest("/api/customers/logout", "POST"),
+    mutationFn: () => apiRequest("/api/customers/logout", { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
       queryClient.clear();
