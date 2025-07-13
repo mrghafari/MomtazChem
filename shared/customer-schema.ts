@@ -359,7 +359,7 @@ export type QuoteRequest = typeof quoteRequests.$inferSelect;
 // Customer wallets table - stores customer credit balance
 export const customerWallets = pgTable("customer_wallets", {
   id: serial("id").primaryKey(),
-  customerId: integer("customer_id").notNull().unique().references(() => customers.id),
+  customerId: integer("customer_id").notNull().unique().references(() => crmCustomers.id),
   balance: decimal("balance", { precision: 12, scale: 2 }).notNull().default("0"),
   currency: text("currency").notNull().default("IQD"), // IQD, USD, EUR
   status: text("status").notNull().default("active"), // active, frozen, suspended

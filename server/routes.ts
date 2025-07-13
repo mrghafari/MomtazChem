@@ -14831,7 +14831,7 @@ momtazchem.com
         return res.status(400).json({ success: false, message: "Valid amount is required" });
       }
 
-      // Get or create wallet
+      // Get or create wallet using CRM customer ID
       let wallet = await walletStorage.getWalletByCustomerId(req.session.customerId);
       console.log('💰 [WALLET-RECHARGE] Existing wallet:', wallet);
       
