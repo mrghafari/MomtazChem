@@ -67,7 +67,7 @@ export default function SiteManagement() {
     // Row 1: Most frequently used daily operations
     {
       id: "kardex-sync",
-      label: "کاردکس Sync",
+      label: "Syncing Shop",
       icon: Database,
       onClick: () => trackButtonClick("kardex-sync", () => setShowKardexSync(true)),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50"
