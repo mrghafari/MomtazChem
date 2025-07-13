@@ -5067,6 +5067,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
       const orderData = req.body;
+      
+      console.log('🛒 [BILINGUAL ORDER DEBUG] Order data received:', {
+        paymentMethod: orderData.paymentMethod,
+        walletAmountUsed: orderData.walletAmountUsed,
+        remainingAmount: orderData.remainingAmount,
+        totalAmount: orderData.totalAmount,
+        customerId,
+        crmCustomerId
+      });
 
       // Extract customer information from form data
       const customerInfo = {
@@ -5112,6 +5121,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
         walletAmountUsed = parseFloat(orderData.walletAmountUsed || 0);
         remainingAmount = parseFloat(orderData.remainingAmount || totalAmount);
+        
+        console.log('💰 [BILINGUAL WALLET DEBUG] Processing wallet payment:', {
+          walletAmountUsed,
+          remainingAmount,
+          finalCustomerId,
+          paymentMethod: orderData.paymentMethod
+        });
         
         if (walletAmountUsed > 0) {
           try {
