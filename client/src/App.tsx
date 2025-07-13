@@ -117,6 +117,7 @@ function Router() {
           <Route path="/bank-receipt-upload/:orderId" component={BankReceiptUpload} />
           <Route path="/shop-search" component={ShopSearch} />
           <Route path="/shop-admin" component={ShopAdmin} />
+          <Route path="/admin/shop" component={ShopAdmin} />
           <Route path="/admin" component={AdminPage} />
           <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin/users" component={AdminUsers} />
