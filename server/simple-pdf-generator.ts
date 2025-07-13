@@ -28,11 +28,9 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
   // Start first page
   currentPageContent = 'BT\n/F1 12 Tf\n50 750 Td\n';
   
-  // Handle title with Persian/Arabic support
-  const cleanTitle = title.substring(0, 60).replace(/[()\\]/g, '\\$&');
-  const pdfCompatibleTitle = cleanTitle.replace(/[\u0600-\u06FF]/g, (match) => {
-    return `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`;
-  });
+  // Handle title with Persian/Arabic support using enhanced cleaning
+  const cleanTitle = cleanTextForPdf(title).substring(0, 60).replace(/[()\\]/g, '\\$&');
+  const pdfCompatibleTitle = cleanTitle;
   
   currentPageContent += `(${pdfCompatibleTitle}) Tj\n0 -20 Td\n`;
   currentPageContent += `(Generated: ${new Date().toLocaleDateString()}) Tj\n0 -25 Td\n`;
@@ -62,12 +60,8 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
         for (const word of words) {
           if ((currentLine + word).length > maxLineLength) {
             if (currentLine.trim()) {
-              const escapedLine = currentLine.trim().replace(/[()\\]/g, '\\$&');
-              // Convert Unicode characters to compatible format for PDF
-              const pdfCompatibleLine = escapedLine.replace(/[\u0600-\u06FF]/g, (match) => {
-                return `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`;
-              });
-              currentPageContent += `(${pdfCompatibleLine}) Tj\n0 -14 Td\n`;
+              const escapedLine = cleanTextForPdf(currentLine.trim()).replace(/[()\\]/g, '\\$&');
+              currentPageContent += `(${escapedLine}) Tj\n0 -14 Td\n`;
               lineCount++;
             }
             currentLine = word + ' ';
@@ -77,21 +71,13 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
         }
         
         if (currentLine.trim()) {
-          const escapedLine = currentLine.trim().replace(/[()\\]/g, '\\$&');
-          // Convert Unicode characters to compatible format for PDF
-          const pdfCompatibleLine = escapedLine.replace(/[\u0600-\u06FF]/g, (match) => {
-            return `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`;
-          });
-          currentPageContent += `(${pdfCompatibleLine}) Tj\n0 -14 Td\n`;
+          const escapedLine = cleanTextForPdf(currentLine.trim()).replace(/[()\\]/g, '\\$&');
+          currentPageContent += `(${escapedLine}) Tj\n0 -14 Td\n`;
           lineCount++;
         }
       } else {
-        const escapedLine = line.replace(/[()\\]/g, '\\$&');
-        // Convert Unicode characters to compatible format for PDF
-        const pdfCompatibleLine = escapedLine.replace(/[\u0600-\u06FF]/g, (match) => {
-          return `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`;
-        });
-        currentPageContent += `(${pdfCompatibleLine}) Tj\n0 -14 Td\n`;
+        const escapedLine = cleanTextForPdf(line).replace(/[()\\]/g, '\\$&');
+        currentPageContent += `(${escapedLine}) Tj\n0 -14 Td\n`;
         lineCount++;
       }
       
@@ -1085,6 +1071,34 @@ Generated: ${new Date().toISOString()}
 `;
 }
 
+// Helper function to safely convert Persian/Arabic text for PDF
+function cleanTextForPdf(text: string | null | undefined): string {
+  if (!text) return 'N/A';
+  
+  try {
+    let cleanText = text.toString();
+    
+    // Clean up common problematic characters for PDF generation
+    cleanText = cleanText
+      // Remove zero-width characters that can cause PDF encoding issues
+      .replace(/[\u200C\u200D\u200E\u200F\u061C]/g, '')
+      // Remove other invisible/formatting characters
+      .replace(/[\uFEFF\u2060]/g, '')
+      // Normalize Arabic/Persian characters to more standard forms
+      .replace(/ی/g, 'ي') // Persian ye to Arabic ye
+      .replace(/ک/g, 'ك') // Persian kaf to Arabic kaf
+      // Clean up extra whitespace
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    // If the text is empty after cleaning, return N/A
+    return cleanText || 'N/A';
+  } catch (error) {
+    console.error('Error cleaning text for PDF:', error);
+    return 'N/A';
+  }
+}
+
 // Customer PDF report generation
 export function generateCustomerPDFHTML(customer: any, analytics: any, activities: any[]): string {
   const currentDate = new Date().toLocaleDateString('en-US');
@@ -1097,21 +1111,21 @@ Customer ID: ${customer.id}
 
 CUSTOMER INFORMATION
 ====================
-Name: ${customer.firstName} ${customer.lastName}
+Name: ${cleanTextForPdf(customer.firstName)} ${cleanTextForPdf(customer.lastName)}
 Email: ${customer.email}
-Company: ${customer.company || 'N/A'}
-Phone: ${customer.phone || 'N/A'}
-Country: ${customer.country || 'N/A'}
-City: ${customer.city || 'N/A'}
-Address: ${customer.address || 'N/A'}
-Secondary Address: ${customer.secondaryAddress || 'N/A'}
-Postal Code: ${customer.postalCode || 'N/A'}
+Company: ${cleanTextForPdf(customer.company)}
+Phone: ${cleanTextForPdf(customer.phone)}
+Country: ${cleanTextForPdf(customer.country)}
+City: ${cleanTextForPdf(customer.city)}
+Address: ${cleanTextForPdf(customer.address)}
+Secondary Address: ${cleanTextForPdf(customer.secondaryAddress)}
+Postal Code: ${cleanTextForPdf(customer.postalCode)}
 
 CUSTOMER STATUS
 ===============
-Type: ${customer.customerType}
-Status: ${customer.customerStatus}
-Source: ${customer.customerSource}
+Type: ${cleanTextForPdf(customer.customerType)}
+Status: ${cleanTextForPdf(customer.customerStatus)}
+Source: ${cleanTextForPdf(customer.customerSource)}
 Registration Date: ${new Date(customer.createdAt).toLocaleDateString('en-US')}
 
 PURCHASE ANALYTICS
@@ -1126,17 +1140,17 @@ Days Since Last Order: ${analytics.daysSinceLastOrder || 'N/A'}
 RECENT ACTIVITIES
 =================
 ${activities.length > 0 ? activities.map((activity, index) => `
-${index + 1}. ${activity.activityType} - ${activity.description}
+${index + 1}. ${cleanTextForPdf(activity.activityType)} - ${cleanTextForPdf(activity.description)}
    Date: ${new Date(activity.createdAt).toLocaleDateString('en-US')}
-   Performed By: ${activity.performedBy}
+   Performed By: ${cleanTextForPdf(activity.performedBy)}
 `).join('') : 'No recent activities recorded.'}
 
 CUSTOMER SUMMARY
 ================
 This customer has been with Momtazchem since ${new Date(customer.createdAt).toLocaleDateString('en-US')}.
 ${analytics.totalOrders > 0 ? `They have placed ${analytics.totalOrders} orders totaling ${analytics.totalSpent} IQD.` : 'No orders placed yet.'}
-Current status: ${customer.customerStatus.toUpperCase()}
-Customer type: ${customer.customerType.toUpperCase()}
+Current status: ${cleanTextForPdf(customer.customerStatus).toUpperCase()}
+Customer type: ${cleanTextForPdf(customer.customerType).toUpperCase()}
 
 Report Generated By: Momtazchem CRM System
 Date: ${currentDate}
@@ -1166,7 +1180,7 @@ TOP CUSTOMERS
 =============
 ${dashboardStats.topCustomers && dashboardStats.topCustomers.length > 0 ? 
   dashboardStats.topCustomers.map((customer: any, index: number) => `
-${index + 1}. ${customer.name}
+${index + 1}. ${cleanTextForPdf(customer.name)}
    Email: ${customer.email}
    Total Spent: ${customer.totalSpent} IQD
    Total Orders: ${customer.totalOrders}
@@ -1176,16 +1190,16 @@ CUSTOMERS BY TYPE
 =================
 ${dashboardStats.customersByType && dashboardStats.customersByType.length > 0 ?
   dashboardStats.customersByType.map((type: any) => `
-${type.type}: ${type.count} customers
+${cleanTextForPdf(type.type)}: ${type.count} customers
 `).join('') : 'No customer type data available.'}
 
 RECENT ACTIVITIES
 =================
 ${dashboardStats.recentActivities && dashboardStats.recentActivities.length > 0 ?
   dashboardStats.recentActivities.slice(0, 10).map((activity: any, index: number) => `
-${index + 1}. ${activity.activityType} - ${activity.description}
+${index + 1}. ${cleanTextForPdf(activity.activityType)} - ${cleanTextForPdf(activity.description)}
    Date: ${new Date(activity.createdAt).toLocaleDateString('en-US')}
-   Performed By: ${activity.performedBy}
+   Performed By: ${cleanTextForPdf(activity.performedBy)}
 `).join('') : 'No recent activities recorded.'}
 
 REPORT SUMMARY
