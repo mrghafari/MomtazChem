@@ -271,13 +271,27 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-4">
-            {/* Admin Status Badge */}
+            {/* Admin Status Badge with Logout */}
             {isAdminAuthenticated && (
-              <div className="hidden md:flex items-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full border border-red-200 dark:border-red-800">
-                <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
-                <span className="text-sm font-medium text-red-700 dark:text-red-300">
-                  {direction === 'rtl' ? 'مدیر' : 'Admin'}
-                </span>
+              <div className="hidden md:flex items-center gap-2">
+                <div className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full border border-red-200 dark:border-red-800">
+                  <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                    {direction === 'rtl' ? 'مدیر' : 'Admin'}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adminLogout()}
+                  className="flex items-center gap-1 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-2 py-1 rounded-md border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm font-medium transition-colors"
+                  title={direction === 'rtl' ? 'خروج مدیر' : 'Admin Logout'}
+                >
+                  <LogOut className="h-3 w-3" />
+                  <span className="hidden lg:inline">
+                    {direction === 'rtl' ? 'خروج' : 'Logout'}
+                  </span>
+                </Button>
               </div>
             )}
             
@@ -354,11 +368,25 @@ export default function Header() {
               <nav className="py-4 space-y-1">
                 {/* Admin Status Badge - Mobile */}
                 {isAdminAuthenticated && (
-                  <div className="flex items-center justify-center gap-2 bg-red-100 dark:bg-red-900/30 mx-4 px-3 py-2 rounded-full border border-red-200 dark:border-red-800 mb-4">
-                    <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
-                    <span className="text-sm font-medium text-red-700 dark:text-red-300">
-                      {direction === 'rtl' ? 'وضعیت مدیریت فعال' : 'Admin Mode Active'}
-                    </span>
+                  <div className="mx-4 mb-4">
+                    <div className="flex items-center justify-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-2 rounded-full border border-red-200 dark:border-red-800 mb-2">
+                      <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                        {direction === 'rtl' ? 'وضعیت مدیریت فعال' : 'Admin Mode Active'}
+                      </span>
+                    </div>
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        onClick={() => adminLogout()}
+                        className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-3 py-2 rounded-md border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm font-medium transition-colors"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>
+                          {direction === 'rtl' ? 'خروج مدیر' : 'Admin Logout'}
+                        </span>
+                      </Button>
+                    </div>
                   </div>
                 )}
                 
