@@ -176,60 +176,45 @@ export default function CustomerWallet() {
       }
     }
 
-    // Prepare form data for submission
-    const formData = new FormData();
-    formData.append('amount', rechargeForm.amount);
-    formData.append('currency', rechargeForm.currency);
-    formData.append('paymentMethod', rechargeForm.paymentMethod);
-    formData.append('customerNotes', rechargeForm.customerNotes);
-    
-    if (rechargeForm.paymentMethod === 'bank_transfer') {
-      formData.append('bankReference', rechargeForm.bankReference);
-      if (rechargeForm.bankReceipt) {
-        formData.append('bankReceipt', rechargeForm.bankReceipt);
+    // Prepare data for submission
+    const submitData = {
+      amount: parseFloat(rechargeForm.amount),
+      currency: rechargeForm.currency,
+      paymentMethod: rechargeForm.paymentMethod,
+      customerNotes: rechargeForm.customerNotes,
+      paymentReference: rechargeForm.paymentReference,
+      bankReference: rechargeForm.bankReference
+    };
+
+    // Submit the data using the mutation
+    createRechargeMutation.mutate(submitData);
+
+    // Handle file upload separately if needed
+    if (rechargeForm.paymentMethod === 'bank_transfer' && rechargeForm.bankReceipt) {
+      const formData = new FormData();
+      formData.append('bankReceipt', rechargeForm.bankReceipt);
+      
+      try {
+        const response = await fetch('/api/customer/wallet/upload-receipt', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload receipt');
+        }
+
+        const result = await response.json();
+        console.log('Receipt uploaded successfully:', result);
+        
+      } catch (error: any) {
+        console.error('Error uploading receipt:', error);
+        toast({
+          title: t.requestError,
+          description: error.message || 'Failed to upload receipt',
+          variant: "destructive",
+        });
       }
-    } else {
-      formData.append('paymentReference', rechargeForm.paymentReference);
-    }
-
-    // Submit the form data
-    try {
-      const response = await fetch('/api/customer/wallet/recharge', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit recharge request');
-      }
-
-      const result = await response.json();
-      
-      toast({
-        title: t.rechargeSuccess,
-        description: t.requestSubmitted,
-      });
-      
-      setIsRechargeDialogOpen(false);
-      setRechargeForm({
-        amount: "",
-        currency: "IQD",
-        paymentMethod: "",
-        paymentReference: "",
-        customerNotes: "",
-        bankReference: "",
-        bankReceipt: null
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet/recharge-requests'] });
-      
-    } catch (error: any) {
-      toast({
-        title: t.requestError,
-        description: error.message || t.errorCreatingRequest,
-        variant: "destructive",
-      });
     }
   };
 
