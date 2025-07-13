@@ -446,7 +446,11 @@ const Shop = () => {
     
     // If user had items in cart, show checkout modal, otherwise to profile
     setTimeout(() => {
-      if (hasCartItems) {
+      // Check cart again after migration completes
+      const userCartData = localStorage.getItem('momtazchem_user_cart');
+      const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
+      
+      if (hasCartItems || totalCartItems > 0) {
         setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
@@ -455,7 +459,7 @@ const Shop = () => {
       } else {
         navigate("/customer/profile");
       }
-    }, 1000);
+    }, 1500);
   };
 
   const handleRegisterSuccess = (customerData: any) => {
@@ -482,7 +486,11 @@ const Shop = () => {
     
     // If user had items in cart, show checkout modal, otherwise to profile
     setTimeout(() => {
-      if (hasCartItems) {
+      // Check cart again after migration completes
+      const userCartData = localStorage.getItem('momtazchem_user_cart');
+      const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
+      
+      if (hasCartItems || totalCartItems > 0) {
         setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
@@ -491,7 +499,7 @@ const Shop = () => {
       } else {
         navigate("/customer/profile");
       }
-    }, 1000);
+    }, 1500);
   };
 
   const handleLogout = async () => {
