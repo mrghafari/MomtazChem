@@ -561,11 +561,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Calculate wallet payment amounts
   const walletBalance = walletData?.data?.wallet ? parseFloat(walletData.data.wallet.balance) : 
                        walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
-  const canUseWallet = walletBalance > 0 && customerData?.success;
+  const canUseWallet = walletBalance > 0 && (existingCustomer || customerData?.success);
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
   
-  console.log('Wallet Debug:', { walletData, walletBalance, canUseWallet, totalAmount });
+  console.log('💳 [WALLET DEBUG] Complete wallet analysis:', { 
+    walletData, 
+    walletBalance, 
+    canUseWallet, 
+    totalAmount,
+    existingCustomer: !!existingCustomer,
+    customerDataSuccess: !!customerData?.success,
+    walletDataStructure: walletData ? Object.keys(walletData) : 'no data'
+  });
 
 
 
