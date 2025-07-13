@@ -33,7 +33,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, direction } = useLanguage();
   const { customer, isAuthenticated, logout } = useCustomer();
-  const { isAuthenticated: isAdminAuthenticated } = useAuth();
+  const { isAuthenticated: isAdminAuthenticated, logout: adminLogout } = useAuth();
 
   // Fetch wallet balance for authenticated customers
   const { data: walletData, isError, error } = useQuery({
@@ -169,7 +169,7 @@ export default function Header() {
     )}>
       {/* Admin Status Indicator */}
       {isAdminAuthenticated && (
-        <div className="bg-red-600 text-white text-center py-1 text-sm font-medium">
+        <div className="text-white text-center py-1 text-sm font-medium bg-[#28c70e]">
           🔐 وضعیت مدیریت فعال - Admin Mode Active
         </div>
       )}
