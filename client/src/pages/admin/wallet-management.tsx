@@ -518,7 +518,7 @@ export default function WalletManagement() {
                 <div className="bg-gray-50 p-4 rounded border">
                   <p className="font-medium">Request: {selectedRequest.requestNumber}</p>
                   <p className="text-sm text-gray-600">
-                    {selectedRequest.customer.firstName} {selectedRequest.customer.lastName} - {formatCurrency(selectedRequest.amount, selectedRequest.currency)}
+                    {selectedRequest.customer?.firstName || 'Unknown'} {selectedRequest.customer?.lastName || 'Customer'} - {formatCurrency(selectedRequest.amount, selectedRequest.currency)}
                   </p>
                 </div>
                 
