@@ -83,6 +83,83 @@ export class KardexSyncMaster {
   }
   
   /**
+   * تشخیص و حذف SKU تکراری - جدیدترین محصول حذف می‌شود
+   */
+  static async cleanupDuplicateSKUs(): Promise<{
+    success: boolean;
+    deletedCount: number;
+    duplicates: Array<{sku: string; deletedProduct: string; keptProduct: string}>;
+    message: string;
+  }> {
+    try {
+      console.log("🔍 [SKU-CLEANUP] شروع تشخیص SKU تکراری...");
+      
+      const shopProducts = await shopStorage.getShopProducts();
+      const skuMap = new Map<string, any[]>();
+      
+      // گروه‌بندی محصولات بر اساس SKU
+      for (const product of shopProducts) {
+        if (product.sku && product.sku.trim() !== '') {
+          const sku = product.sku.trim();
+          if (!skuMap.has(sku)) {
+            skuMap.set(sku, []);
+          }
+          skuMap.get(sku)!.push(product);
+        }
+      }
+      
+      const duplicates: Array<{sku: string; deletedProduct: string; keptProduct: string}> = [];
+      let deletedCount = 0;
+      
+      // پیدا کردن و حذف SKU تکراری
+      for (const [sku, products] of skuMap.entries()) {
+        if (products.length > 1) {
+          console.log(`⚠️ [SKU-CLEANUP] SKU تکراری پیدا شد: ${sku} - ${products.length} محصول`);
+          
+          // مرتب سازی بر اساس ID (قدیمی‌ترین اول)
+          products.sort((a, b) => a.id - b.id);
+          
+          // حفظ اولین محصول، حذف بقیه
+          const keptProduct = products[0];
+          
+          for (let i = 1; i < products.length; i++) {
+            const productToDelete = products[i];
+            await shopStorage.deleteShopProduct(productToDelete.id);
+            
+            duplicates.push({
+              sku: sku,
+              deletedProduct: productToDelete.name,
+              keptProduct: keptProduct.name
+            });
+            
+            deletedCount++;
+            console.log(`🗑️ [SKU-CLEANUP] حذف شد (SKU تکراری): ${productToDelete.name} (ID: ${productToDelete.id})`);
+            console.log(`✅ [SKU-CLEANUP] نگهداری شد: ${keptProduct.name} (ID: ${keptProduct.id})`);
+          }
+        }
+      }
+      
+      console.log(`✅ [SKU-CLEANUP] ${deletedCount} محصول با SKU تکراری حذف شد`);
+      
+      return {
+        success: true,
+        deletedCount,
+        duplicates,
+        message: `${deletedCount} محصول با SKU تکراری حذف شد`
+      };
+      
+    } catch (error) {
+      console.error("❌ [SKU-CLEANUP] خطا در حذف SKU تکراری:", error);
+      return {
+        success: false,
+        deletedCount: 0,
+        duplicates: [],
+        message: "خطا در حذف SKU تکراری"
+      };
+    }
+  }
+
+  /**
    * حذف کامل محصولات اضافی از فروشگاه که در کاردکس نیستند
    */
   static async cleanupExtraShopProducts(): Promise<{
@@ -158,36 +235,51 @@ export class KardexSyncMaster {
       
       let added = 0, updated = 0, removed = 0, unchanged = 0;
       
-      // محصولاتی که در کاردکس هستند
-      const kardexNames = new Set(kardexProducts.map(p => p.name));
+      // فیلتر کردن محصولات کاردکس که syncWithShop فعال دارند و بارکد دارند
+      const syncEnabledKardex = kardexProducts.filter(p => 
+        p.syncWithShop !== false && p.barcode && p.barcode.trim() !== ''
+      );
       
-      // محصولاتی که در فروشگاه هستند
-      const shopNames = new Set(shopProducts.map(p => p.name));
+      // محصولاتی که در کاردکس هستند و باید در فروشگاه باشند (بر اساس بارکد EAN-13)
+      const kardexBarcodes = new Set(syncEnabledKardex.map(p => p.barcode.trim()));
       
-      // حذف محصولاتی که در کاردکس نیستند
+      // حذف محصولاتی که بارکدشان در کاردکس نیست
       for (const shopProduct of shopProducts) {
-        if (!kardexNames.has(shopProduct.name)) {
+        if (shopProduct.barcode && shopProduct.barcode.trim() !== '' && !kardexBarcodes.has(shopProduct.barcode.trim())) {
           await shopStorage.deleteShopProduct(shopProduct.id);
           removed++;
-          console.log(`🗑️ [KARDEX-SYNC] حذف شد: ${shopProduct.name}`);
+          console.log(`🗑️ [KARDEX-SYNC] حذف شد (بارکد غیرمجاز): ${shopProduct.name} - ${shopProduct.barcode}`);
         }
       }
       
-      // اضافه کردن یا بروزرسانی محصولات
-      for (const kardexProduct of kardexProducts) {
-        const existingShopProduct = shopProducts.find(p => p.name === kardexProduct.name);
+      // اضافه کردن یا بروزرسانی محصولات که syncWithShop فعال دارند (بر اساس بارکد)
+      for (const kardexProduct of syncEnabledKardex) {
+        const existingShopProduct = shopProducts.find(p => 
+          p.barcode && p.barcode.trim() === kardexProduct.barcode.trim()
+        );
         
         if (!existingShopProduct) {
-          // محصول جدید
-          await this.copyKardexProductToShop(kardexProduct);
-          added++;
-          console.log(`➕ [KARDEX-SYNC] اضافه شد: ${kardexProduct.name}`);
+          // محصول جدید - بررسی اضافی که محصول قبلاً اضافه نشده باشد
+          try {
+            await this.copyKardexProductToShop(kardexProduct);
+            added++;
+            console.log(`➕ [KARDEX-SYNC] اضافه شد: ${kardexProduct.name}`);
+          } catch (error) {
+            console.error(`❌ [KARDEX-SYNC] خطا در اضافه کردن ${kardexProduct.name}:`, error);
+            // Skip this product and continue with others
+            continue;
+          }
         } else {
           // بررسی نیاز به بروزرسانی
           if (this.needsUpdate(kardexProduct, existingShopProduct)) {
-            await this.updateShopProductFromKardex(existingShopProduct.id, kardexProduct);
-            updated++;
-            console.log(`🔄 [KARDEX-SYNC] بروزرسانی شد: ${kardexProduct.name}`);
+            try {
+              await this.updateShopProductFromKardex(existingShopProduct.id, kardexProduct);
+              updated++;
+              console.log(`🔄 [KARDEX-SYNC] بروزرسانی شد: ${kardexProduct.name}`);
+            } catch (error) {
+              console.error(`❌ [KARDEX-SYNC] خطا در بروزرسانی ${kardexProduct.name}:`, error);
+              continue;
+            }
           } else {
             unchanged++;
           }
@@ -216,12 +308,14 @@ export class KardexSyncMaster {
    * کپی کردن یک محصول از کاردکس به فروشگاه با SKU منحصر به فرد
    */
   private static async copyKardexProductToShop(kardexProduct: ShowcaseProduct): Promise<void> {
-    // Check if product already exists in shop by name
+    // بررسی موجودیت محصول بر اساس بارکد EAN-13
     const existingShopProducts = await shopStorage.getShopProducts();
-    const existingProduct = existingShopProducts.find(p => p.name.trim() === kardexProduct.name.trim());
+    const existingProduct = existingShopProducts.find(p => 
+      p.barcode && p.barcode.trim() === kardexProduct.barcode?.trim()
+    );
     
     if (existingProduct) {
-      console.log(`⚠️ [KARDEX-SYNC] محصول ${kardexProduct.name} قبلاً در فروشگاه موجود است، رد می‌شود`);
+      console.log(`⚠️ [KARDEX-SYNC] محصول با بارکد ${kardexProduct.barcode} قبلاً در فروشگاه موجود است: ${kardexProduct.name}`);
       return;
     }
     try {
@@ -311,11 +405,17 @@ export class KardexSyncMaster {
   }
   
   /**
-   * بررسی نیاز به بروزرسانی
+   * بررسی نیاز به بروزرسانی - محصولات بر اساس بارکد EAN-13 مطابقت داده می‌شوند
    */
   private static needsUpdate(kardexProduct: ShowcaseProduct, shopProduct: any): boolean {
-    // بررسی فیلدهای مهم
-    return (
+    // اول بررسی کنیم که بارکدها مطابقت دارند
+    if (kardexProduct.barcode?.trim() !== shopProduct.barcode?.trim()) {
+      console.log(`🔍 [SYNC] بارکد مختلف - کاردکس: ${kardexProduct.barcode}, فروشگاه: ${shopProduct.barcode}`);
+      return true;
+    }
+    
+    // بررسی فیلدهای مهم دیگر
+    const needsUpdate = (
       kardexProduct.name !== shopProduct.name ||
       kardexProduct.category !== shopProduct.category ||
       kardexProduct.description !== shopProduct.description ||
@@ -324,6 +424,12 @@ export class KardexSyncMaster {
       kardexProduct.imageUrl !== shopProduct.thumbnailUrl ||
       kardexProduct.isActive !== shopProduct.isActive
     );
+    
+    if (needsUpdate) {
+      console.log(`🔍 [SYNC] نیاز به بروزرسانی برای: ${kardexProduct.name} (بارکد: ${kardexProduct.barcode})`);
+    }
+    
+    return needsUpdate;
   }
   
   /**
@@ -340,21 +446,30 @@ export class KardexSyncMaster {
       const kardexProducts = await storage.getProducts();
       const shopProducts = await shopStorage.getShopProducts();
       
-      const kardexNames = new Set(kardexProducts.map(p => p.name));
-      const shopNames = new Set(shopProducts.map(p => p.name));
+      // فیلتر کردن محصولات فقط برای آنهایی که syncWithShop فعال است و بارکد دارند
+      const syncEnabledKardex = kardexProducts.filter(p => 
+        p.syncWithShop !== false && p.barcode && p.barcode.trim() !== ''
+      );
       
-      const missingInShop = kardexProducts
-        .filter(p => !shopNames.has(p.name))
+      // استفاده از بارکد EAN-13 برای تشخیص همگام‌سازی
+      const kardexBarcodes = new Set(syncEnabledKardex.map(p => p.barcode.trim()));
+      const shopBarcodes = new Set(shopProducts.map(p => p.barcode?.trim()).filter(Boolean));
+      
+      const missingInShop = syncEnabledKardex
+        .filter(p => !shopBarcodes.has(p.barcode.trim()))
         .map(p => p.name);
       
       const extraInShop = shopProducts
-        .filter(p => !kardexNames.has(p.name))
+        .filter(p => p.barcode && p.barcode.trim() !== '' && !kardexBarcodes.has(p.barcode.trim()))
         .map(p => p.name);
       
       const inSync = missingInShop.length === 0 && extraInShop.length === 0;
       
+      console.log(`📊 [SYNC STATUS] کاردکس با بارکد: ${syncEnabledKardex.length}, فروشگاه: ${shopProducts.length}, همگام: ${inSync}`);
+      console.log(`📊 [SYNC STATUS] کمبود در فروشگاه: ${missingInShop.length}, اضافی در فروشگاه: ${extraInShop.length}`);
+      
       return {
-        kardexCount: kardexProducts.length,
+        kardexCount: syncEnabledKardex.length,
         shopCount: shopProducts.length,
         inSync,
         missingInShop,

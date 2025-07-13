@@ -130,6 +130,35 @@ export function KardexSyncPanel() {
     }
   });
 
+  // Cleanup duplicate SKUs mutation
+  const cleanupDuplicatesMutation = useMutation({
+    mutationFn: () => apiRequest<{ data: { deletedCount: number; duplicates: Array<{sku: string; deletedProduct: string; keptProduct: string}> } }>('/api/kardex-sync/cleanup-duplicates', {
+      method: 'POST'
+    }),
+    onSuccess: (data) => {
+      toast({
+        title: "حذف SKU تکراری انجام شد",
+        description: `${data.data.deletedCount} محصول با SKU تکراری حذف شد`,
+      });
+      console.log('🔍 [SKU-CLEANUP] جزئیات:', data.data.duplicates);
+      // فوری بروزرسانی کنید تا اعداد جدید نمایش داده شود
+      queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      // رفرش فوری وضعیت
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
+      }, 500);
+    },
+    onError: () => {
+      toast({
+        title: "خطا در حذف SKU تکراری",
+        description: "لطفاً مجدداً تلاش کنید",
+        variant: "destructive",
+      });
+    }
+  });
+
   const status = syncStatus?.data;
   const isInSync = status?.inSync;
   const hasMissingProducts = status?.missingInShop?.length > 0;
@@ -245,6 +274,17 @@ export function KardexSyncPanel() {
                 {cleanupMutation.isPending ? "در حال حذف..." : `حذف ${status?.extraInShop?.length || 0} محصول اضافی از فروشگاه`}
               </Button>
             )}
+            
+            {/* دکمه حذف SKU تکراری */}
+            <Button
+              onClick={() => cleanupDuplicatesMutation.mutate()}
+              disabled={cleanupDuplicatesMutation.isPending || statusLoading}
+              variant="outline"
+              className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+            >
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              {cleanupDuplicatesMutation.isPending ? "در حال بررسی SKU تکراری..." : "بررسی و حذف SKU تکراری"}
+            </Button>
           </div>
         )}
 

@@ -2171,6 +2171,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // حذف SKU تکراری
+  app.post("/api/kardex-sync/cleanup-duplicates", requireAuth, async (req, res) => {
+    try {
+      const { KardexSyncMaster } = await import('./kardex-sync-master');
+      const result = await KardexSyncMaster.cleanupDuplicateSKUs();
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          message: result.message,
+          data: {
+            deletedCount: result.deletedCount,
+            duplicates: result.duplicates
+          }
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: result.message
+        });
+      }
+    } catch (error) {
+      console.error("❌ [CLEANUP-SKU] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف SKU تکراری"
+      });
+    }
+  });
+
   // =============================================================================
   // BARCODE & INVENTORY MANAGEMENT ENDPOINTS
   // =============================================================================
