@@ -142,11 +142,7 @@ const Shop = () => {
   });
   
   // Debug product stats
-  console.log('🌟 [RATINGS DEBUG] Product stats loading:', statsLoading);
-  console.log('🌟 [RATINGS DEBUG] Product stats error:', statsError);
-  console.log('🌟 [RATINGS DEBUG] Product stats data:', productStats);
-  console.log('🌟 [RATINGS DEBUG] Product stats keys:', productStats ? Object.keys(productStats) : 'No keys');
-  console.log('🌟 [RATINGS DEBUG] Sample product stats:', productStats ? productStats[Object.keys(productStats)[0]] : 'No sample');
+  console.log('🌟 [RATINGS DEBUG] Product stats loaded:', productStats ? Object.keys(productStats).length : 0, 'products with ratings');
 
   // Initialize price range only once when first loaded
   useEffect(() => {
@@ -1165,12 +1161,6 @@ const Shop = () => {
                               </Button>
                             </div>
                           )}
-                          {/* DEBUG: Show when productStats exists - Grid View */}
-                          {productStats && product.id && (
-                            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                              ID: {product.id} | Has Stats: {productStats[product.id] ? 'YES' : 'NO'}
-                            </div>
-                          )}
                           
 
 
@@ -1444,12 +1434,6 @@ const Shop = () => {
                                   showNumber={false}
                                 />
                               </Button>
-                            </div>
-                          )}
-                          {/* DEBUG: Show when productStats exists - List View */}
-                          {productStats && product.id && (
-                            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                              ID: {product.id} | Has Stats: {productStats[product.id] ? 'YES' : 'NO'}
                             </div>
                           )}
                           

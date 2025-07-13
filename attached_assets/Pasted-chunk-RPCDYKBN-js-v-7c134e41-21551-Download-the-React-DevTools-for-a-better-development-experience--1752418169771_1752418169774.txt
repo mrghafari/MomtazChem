@@ -1,0 +1,157 @@
+chunk-RPCDYKBN.js?v=7c134e41:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:145 🌟 [RATINGS DEBUG] Product stats loading: true
+shop.tsx:146 🌟 [RATINGS DEBUG] Product stats error: null
+shop.tsx:147 🌟 [RATINGS DEBUG] Product stats data: undefined
+shop.tsx:148 🌟 [RATINGS DEBUG] Product stats keys: No keys
+shop.tsx:149 🌟 [RATINGS DEBUG] Sample product stats: No sample
+queryClient.ts:57  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7c134e41:840
+run @ @tanstack_react-query.js?v=7c134e41:494
+start @ @tanstack_react-query.js?v=7c134e41:536
+fetch @ @tanstack_react-query.js?v=7c134e41:926
+executeFetch_fn @ @tanstack_react-query.js?v=7c134e41:2211
+onSubscribe @ @tanstack_react-query.js?v=7c134e41:1898
+subscribe @ @tanstack_react-query.js?v=7c134e41:24
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=7c134e41:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=7c134e41:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=7c134e41:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=7c134e41:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=7c134e41:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=7c134e41:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=7c134e41:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=7c134e41:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=7c134e41:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=7c134e41:19432
+commitRoot @ chunk-RPCDYKBN.js?v=7c134e41:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=7c134e41:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18718
+workLoop @ chunk-RPCDYKBN.js?v=7c134e41:197
+flushWork @ chunk-RPCDYKBN.js?v=7c134e41:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=7c134e41:384
+shop.tsx:299  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+checkCustomerAuth @ shop.tsx:299
+(anonymous) @ shop.tsx:224
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=7c134e41:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=7c134e41:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=7c134e41:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=7c134e41:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=7c134e41:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=7c134e41:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=7c134e41:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=7c134e41:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=7c134e41:19432
+commitRoot @ chunk-RPCDYKBN.js?v=7c134e41:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=7c134e41:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=7c134e41:18718
+workLoop @ chunk-RPCDYKBN.js?v=7c134e41:197
+flushWork @ chunk-RPCDYKBN.js?v=7c134e41:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=7c134e41:384
+shop.tsx:145 🌟 [RATINGS DEBUG] Product stats loading: true
+shop.tsx:146 🌟 [RATINGS DEBUG] Product stats error: null
+shop.tsx:147 🌟 [RATINGS DEBUG] Product stats data: undefined
+shop.tsx:148 🌟 [RATINGS DEBUG] Product stats keys: No keys
+shop.tsx:149 🌟 [RATINGS DEBUG] Sample product stats: No sample
+shop.tsx:145 🌟 [RATINGS DEBUG] Product stats loading: true
+shop.tsx:146 🌟 [RATINGS DEBUG] Product stats error: null
+shop.tsx:147 🌟 [RATINGS DEBUG] Product stats data: undefined
+shop.tsx:148 🌟 [RATINGS DEBUG] Product stats keys: No keys
+shop.tsx:149 🌟 [RATINGS DEBUG] Sample product stats: No sample
+shop.tsx:145 🌟 [RATINGS DEBUG] Product stats loading: false
+shop.tsx:146 🌟 [RATINGS DEBUG] Product stats error: null
+shop.tsx:147 🌟 [RATINGS DEBUG] Product stats data: {12: {…}, 13: {…}, 14: {…}, 15: {…}, 18: {…}, 19: {…}, 20: {…}, 21: {…}, 22: {…}, 23: {…}, 24: {…}, 32: {…}, 33: {…}, 34: {…}, 35: {…}, 57: {…}}
+shop.tsx:148 🌟 [RATINGS DEBUG] Product stats keys: (16) ['12', '13', '14', '15', '18', '19', '20', '21', '22', '23', '24', '32', '33', '34', '35', '57']
+shop.tsx:149 🌟 [RATINGS DEBUG] Sample product stats: {totalReviews: 9, averageRating: 4.29}
+shop.tsx:145 🌟 [RATINGS DEBUG] Product stats loading: false
+shop.tsx:146 🌟 [RATINGS DEBUG] Product stats error: null
+shop.tsx:147 🌟 [RATINGS DEBUG] Product stats data: {12: {…}, 13: {…}, 14: {…}, 15: {…}, 18: {…}, 19: {…}, 20: {…}, 21: {…}, 22: {…}, 23: {…}, 24: {…}, 32: {…}, 33: {…}, 34: {…}, 35: {…}, 57: {…}}
+shop.tsx:148 🌟 [RATINGS DEBUG] Product stats keys: (16) ['12', '13', '14', '15', '18', '19', '20', '21', '22', '23', '24', '32', '33', '34', '35', '57']
+shop.tsx:149 🌟 [RATINGS DEBUG] Sample product stats: {totalReviews: 9, averageRating: 4.29}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+twk-chunk-common.js:2 Uncaught (in promise) TypeError: t.$_Tawk.i18next is not a function
+    at e.a.$i18n (twk-chunk-common.js:2:232205)
+    at Object.parseVisitorName (twk-chunk-common.js:2:236498)
+    at p.setVisitorInformation (twk-chunk-common.js:2:201194)
+    at twk-vendor.js:2:76176
+    at twk-vendor.js:2:77697
+    at Array.forEach (<anonymous>)
+    at twk-vendor.js:2:77676
+    at p._withCommit (twk-vendor.js:2:79503)
+    at p.commit (twk-vendor.js:2:77650)
+    at p.commit (twk-vendor.js:2:73905)
+e.a.$i18n @ twk-chunk-common.js:2
+parseVisitorName @ twk-chunk-common.js:2
+setVisitorInformation @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+p._withCommit @ twk-vendor.js:2
+p.commit @ twk-vendor.js:2
+commit @ twk-vendor.js:2
+o.commit @ twk-vendor.js:2
+updateVisitorInformation @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+queryClient.ts:57  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7c134e41:840
+run @ @tanstack_react-query.js?v=7c134e41:494
+start @ @tanstack_react-query.js?v=7c134e41:536
+fetch @ @tanstack_react-query.js?v=7c134e41:926
+executeFetch_fn @ @tanstack_react-query.js?v=7c134e41:2211
+fetch @ @tanstack_react-query.js?v=7c134e41:2011
+refetch @ @tanstack_react-query.js?v=7c134e41:2001
+onFocus @ @tanstack_react-query.js?v=7c134e41:749
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:1112
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:1111
+batch @ @tanstack_react-query.js?v=7c134e41:583
+onFocus @ @tanstack_react-query.js?v=7c134e41:1110
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:313
+onFocus @ @tanstack_react-query.js?v=7c134e41:312
+(anonymous) @ @tanstack_react-query.js?v=7c134e41:299
+listener @ @tanstack_react-query.js?v=7c134e41:270
