@@ -1,128 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-
-// Configure pdfMake with fonts for multilingual support
-pdfMake.vfs = {
-  ...pdfFonts.pdfMake.vfs,
-};
-
-pdfMake.fonts = {
-  Vazirmatn: {
-    normal: "Roboto-Regular.ttf", // Using Roboto as fallback for Vazirmatn
-    bold: "Roboto-Medium.ttf",
-    italics: "Roboto-Italic.ttf",
-    bolditalics: "Roboto-MediumItalic.ttf",
-  },
-  Roboto: {
-    normal: "Roboto-Regular.ttf",
-    bold: "Roboto-Medium.ttf", 
-    italics: "Roboto-Italic.ttf",
-    bolditalics: "Roboto-MediumItalic.ttf",
-  }
-};
-
-// Enhanced PDF generator for CRM customer export
-export function exportCRMCustomerPDF(customerData: Array<{label: string, text: string}>): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    try {
-      const contentArray: any[] = [];
-
-      customerData.forEach(entry => {
-        const isRTL = /[\u0600-\u06FF]/.test(entry.text); // Persian/Arabic/Kurdish detection
-
-        contentArray.push({
-          text: `${entry.label}: ${entry.text}`,
-          font: "Vazirmatn",
-          alignment: isRTL ? "right" : "left",
-          margin: [0, 5, 0, 5],
-          fontSize: 12,
-        });
-      });
-
-      const docDefinition = {
-        content: contentArray,
-        defaultStyle: {
-          font: "Vazirmatn",
-        },
-        pageMargins: [40, 60, 40, 60] as [number, number, number, number],
-        info: {
-          title: 'Customer Report',
-          author: 'Momtazchem CRM System',
-          subject: 'Customer Data Export',
-          creator: 'Momtazchem Platform'
-        }
-      };
-
-      const pdfDoc = pdfMake.createPdf(docDefinition);
-      
-      pdfDoc.getBuffer((buffer: Buffer) => {
-        resolve(buffer);
-      }, (error: any) => {
-        reject(error);
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-// Enhanced PDF generator using pdfMake for better multilingual support
-export async function generateMultilingualPDF(content: string, title: string): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    try {
-      const docDefinition = {
-        content: [
-          {
-            text: title,
-            fontSize: 18,
-            bold: true,
-            margin: [0, 0, 0, 20] as [number, number, number, number],
-            alignment: 'left' as const,
-            font: 'Vazirmatn'
-          },
-          {
-            text: `Generated: ${new Date().toLocaleDateString('en-US')}`,
-            fontSize: 12,
-            margin: [0, 0, 0, 20] as [number, number, number, number],
-            color: 'gray',
-            font: 'Roboto'
-          },
-          {
-            text: content,
-            fontSize: 12,
-            lineHeight: 1.5,
-            alignment: 'left' as const,
-            preserveLeadingSpaces: true,
-            font: 'Vazirmatn'
-          }
-        ],
-        defaultStyle: {
-          font: 'Vazirmatn',
-          fontSize: 12
-        },
-        pageMargins: [40, 60, 40, 60] as [number, number, number, number],
-        info: {
-          title: title,
-          author: 'Momtazchem CRM System',
-          subject: 'Customer Report',
-          creator: 'Momtazchem Platform'
-        }
-      };
-
-      const pdfDoc = pdfMake.createPdf(docDefinition);
-      
-      pdfDoc.getBuffer((buffer: Buffer) => {
-        resolve(buffer);
-      }, (error: any) => {
-        reject(error);
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
 
 // Fallback simple text-based PDF generator for compatibility
 export async function generateSimplePDF(htmlContent: string, title: string): Promise<Buffer> {
@@ -152,7 +29,7 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
   currentPageContent = 'BT\n/F1 12 Tf\n50 750 Td\n';
   
   // Handle title with Persian/Arabic support using enhanced cleaning
-  const cleanTitle = cleanTextForPdf(title).substring(0, 60).replace(/[()\\]/g, '\\$&');
+  const cleanTitle = title ? title.substring(0, 60).replace(/[()\\]/g, '\\$&') : 'Customer Report';
   const pdfCompatibleTitle = cleanTitle;
   
   currentPageContent += `(${pdfCompatibleTitle}) Tj\n0 -20 Td\n`;
@@ -1194,7 +1071,7 @@ Generated: ${new Date().toISOString()}
 `;
 }
 
-// Enhanced text cleaning for better PDF compatibility
+// Enhanced text cleaning for better PDF compatibility with Persian support
 function cleanTextForPdf(text: string | null | undefined): string {
   if (!text) return 'N/A';
   
@@ -1208,7 +1085,14 @@ function cleanTextForPdf(text: string | null | undefined): string {
       .replace(/\s+/g, ' ') // Multiple spaces
       .trim();
     
-    // Keep Persian/Arabic text as-is for pdfMake to handle
+    // For Persian/Arabic text, ensure proper display
+    const hasPersianArabic = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(cleanText);
+    
+    if (hasPersianArabic) {
+      // Keep Persian/Arabic characters as-is - our PDF generator handles them properly
+      return cleanText || 'N/A';
+    }
+    
     return cleanText || 'N/A';
   } catch (error) {
     console.error('Error cleaning text for PDF:', error);
@@ -1216,61 +1100,27 @@ function cleanTextForPdf(text: string | null | undefined): string {
   }
 }
 
-// Enhanced Customer PDF report generation using pdfMake
+// Enhanced Customer PDF report generation with better Persian support
 export async function generateCustomerPDF(customer: any, analytics: any, activities: any[]): Promise<Buffer> {
-  try {
-    // Prepare customer data for export
-    const customerData = [
-      { label: 'Customer ID', text: customer.id.toString() },
-      { label: 'Name', text: `${cleanTextForPdf(customer.firstName)} ${cleanTextForPdf(customer.lastName)}` },
-      { label: 'Email', text: customer.email || 'N/A' },
-      { label: 'Company', text: cleanTextForPdf(customer.company) },
-      { label: 'Phone', text: cleanTextForPdf(customer.phone) },
-      { label: 'Country', text: cleanTextForPdf(customer.country) },
-      { label: 'City', text: cleanTextForPdf(customer.city) },
-      { label: 'Address', text: cleanTextForPdf(customer.address) },
-      { label: 'Secondary Address', text: cleanTextForPdf(customer.secondaryAddress) },
-      { label: 'Postal Code', text: cleanTextForPdf(customer.postalCode) },
-      { label: 'Customer Type', text: cleanTextForPdf(customer.customerType) },
-      { label: 'Status', text: cleanTextForPdf(customer.customerStatus) },
-      { label: 'Source', text: cleanTextForPdf(customer.customerSource) },
-      { label: 'Registration Date', text: new Date(customer.createdAt).toLocaleDateString('en-US') },
-      { label: 'Total Orders', text: (analytics.totalOrders || 0).toString() },
-      { label: 'Total Spent', text: `${analytics.totalSpent || 0} IQD` },
-      { label: 'Average Order Value', text: `${analytics.averageOrderValue || 0} IQD` },
-      { label: 'First Order Date', text: analytics.firstOrderDate ? new Date(analytics.firstOrderDate).toLocaleDateString('en-US') : 'N/A' },
-      { label: 'Last Order Date', text: analytics.lastOrderDate ? new Date(analytics.lastOrderDate).toLocaleDateString('en-US') : 'N/A' },
-      { label: 'Days Since Last Order', text: analytics.daysSinceLastOrder ? analytics.daysSinceLastOrder.toString() : 'N/A' }
-    ];
-
-    // Add recent activities
-    if (activities.length > 0) {
-      activities.slice(0, 10).forEach((activity, index) => {
-        customerData.push({
-          label: `Activity ${index + 1}`,
-          text: `${cleanTextForPdf(activity.activityType)} - ${cleanTextForPdf(activity.description)} (${new Date(activity.createdAt).toLocaleDateString('en-US')})`
-        });
-      });
-    }
-
-    return await exportCRMCustomerPDF(customerData);
-  } catch (error) {
-    // Fallback to simple PDF generation
-    console.log('pdfMake failed, using fallback PDF generation');
-    const currentDate = new Date().toLocaleDateString('en-US');
-    const content = `CUSTOMER REPORT - MOMTAZCHEM CRM
+  const currentDate = new Date().toLocaleDateString('en-US');
+  
+  // Create comprehensive customer report content
+  const content = `CUSTOMER REPORT - MOMTAZCHEM CRM
 ===============================
+Generated: ${currentDate}
 Customer ID: ${customer.id}
 
 CUSTOMER INFORMATION
 ====================
 Name: ${cleanTextForPdf(customer.firstName)} ${cleanTextForPdf(customer.lastName)}
-Email: ${customer.email}
+Email: ${customer.email || 'N/A'}
 Company: ${cleanTextForPdf(customer.company)}
 Phone: ${cleanTextForPdf(customer.phone)}
 Country: ${cleanTextForPdf(customer.country)}
 City: ${cleanTextForPdf(customer.city)}
 Address: ${cleanTextForPdf(customer.address)}
+Secondary Address: ${cleanTextForPdf(customer.secondaryAddress)}
+Postal Code: ${cleanTextForPdf(customer.postalCode)}
 
 CUSTOMER STATUS
 ===============
@@ -1284,11 +1134,35 @@ PURCHASE ANALYTICS
 Total Orders: ${analytics.totalOrders || 0}
 Total Spent: ${analytics.totalSpent || 0} IQD
 Average Order Value: ${analytics.averageOrderValue || 0} IQD
+First Order Date: ${analytics.firstOrderDate ? new Date(analytics.firstOrderDate).toLocaleDateString('en-US') : 'N/A'}
+Last Order Date: ${analytics.lastOrderDate ? new Date(analytics.lastOrderDate).toLocaleDateString('en-US') : 'N/A'}
+Days Since Last Order: ${analytics.daysSinceLastOrder || 'N/A'}
+
+RECENT ACTIVITIES
+=================
+${activities.length > 0 ? activities.slice(0, 10).map((activity, index) => `
+${index + 1}. ${cleanTextForPdf(activity.activityType)} - ${cleanTextForPdf(activity.description)}
+   Date: ${new Date(activity.createdAt).toLocaleDateString('en-US')}
+   Performed By: ${cleanTextForPdf(activity.performedBy)}
+`).join('') : 'No recent activities recorded.'}
+
+CUSTOMER SUMMARY
+================
+This customer has been with Momtazchem since ${new Date(customer.createdAt).toLocaleDateString('en-US')}.
+${analytics.totalOrders > 0 ? `They have placed ${analytics.totalOrders} orders totaling ${analytics.totalSpent} IQD.` : 'No orders placed yet.'}
+Current status: ${cleanTextForPdf(customer.customerStatus).toUpperCase()}
+Customer type: ${cleanTextForPdf(customer.customerType).toUpperCase()}
 
 Report Generated By: Momtazchem CRM System
-Date: ${currentDate}`;
+Date: ${currentDate}
+Platform: Chemical Solutions Management Platform
+Version: 1.0`;
 
+  try {
     return await generateSimplePDF(content, `Customer Report - ${cleanTextForPdf(customer.firstName)} ${cleanTextForPdf(customer.lastName)}`);
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+    throw error;
   }
 }
 

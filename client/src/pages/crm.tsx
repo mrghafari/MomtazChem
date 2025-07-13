@@ -13,7 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog } from "lucide-react";
+import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import UnifiedCustomerProfile from "@/components/unified-customer-profile";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -75,6 +75,8 @@ export default function CRM() {
   const [isCustomerDetailDialogOpen, setIsCustomerDetailDialogOpen] = useState(false);
   const [isEditCustomerDialogOpen, setIsEditCustomerDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<CrmCustomer | null>(null);
+  const [sortField, setSortField] = useState<string>("createdAt");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [newCustomer, setNewCustomer] = useState({
     email: "",
     firstName: "",
@@ -117,9 +119,9 @@ export default function CRM() {
     enabled: isAuthenticated,
   });
 
-  // Fetch customers with search
+  // Fetch customers with search and sorting
   const { data: customers = [], isLoading: customersLoading } = useQuery<CrmCustomer[]>({
-    queryKey: ["/api/crm/customers", { search: searchTerm }],
+    queryKey: ["/api/crm/customers", { search: searchTerm, sortField, sortDirection }],
     queryFn: async () => {
       if (searchTerm.length >= 2) {
         const response = await fetch(`/api/crm/customers/search?q=${encodeURIComponent(searchTerm)}`, {
@@ -137,6 +139,69 @@ export default function CRM() {
     },
     enabled: isAuthenticated,
   });
+
+  // Sort customers locally
+  const sortedCustomers = customers.slice().sort((a, b) => {
+    let aValue: any, bValue: any;
+    
+    switch (sortField) {
+      case "name":
+        aValue = `${a.firstName} ${a.lastName}`.toLowerCase();
+        bValue = `${b.firstName} ${b.lastName}`.toLowerCase();
+        break;
+      case "email":
+        aValue = a.email.toLowerCase();
+        bValue = b.email.toLowerCase();
+        break;
+      case "company":
+        aValue = (a.company || "").toLowerCase();
+        bValue = (b.company || "").toLowerCase();
+        break;
+      case "totalSpent":
+        aValue = parseFloat(a.totalSpent) || 0;
+        bValue = parseFloat(b.totalSpent) || 0;
+        break;
+      case "totalOrdersCount":
+        aValue = a.totalOrdersCount || 0;
+        bValue = b.totalOrdersCount || 0;
+        break;
+      case "createdAt":
+        aValue = new Date(a.createdAt);
+        bValue = new Date(b.createdAt);
+        break;
+      case "customerStatus":
+        aValue = a.customerStatus.toLowerCase();
+        bValue = b.customerStatus.toLowerCase();
+        break;
+      default:
+        aValue = a.createdAt;
+        bValue = b.createdAt;
+    }
+    
+    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  // Handle sort click
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  // Get sort icon
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
+    }
+    return sortDirection === "asc" ? 
+      <ArrowUp className="h-4 w-4 text-blue-600" /> : 
+      <ArrowDown className="h-4 w-4 text-blue-600" />;
+  };
 
   // Create customer mutation
   const createCustomerMutation = useMutation({
@@ -549,18 +614,66 @@ export default function CRM() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Company</TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => handleSort("name")}
+                      >
+                        <div className="flex items-center gap-2">
+                          Name
+                          {getSortIcon("name")}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => handleSort("email")}
+                      >
+                        <div className="flex items-center gap-2">
+                          Email
+                          {getSortIcon("email")}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => handleSort("company")}
+                      >
+                        <div className="flex items-center gap-2">
+                          Company
+                          {getSortIcon("company")}
+                        </div>
+                      </TableHead>
                       <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Total Purchases</TableHead>
-                      <TableHead>Last Order</TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => handleSort("customerStatus")}
+                      >
+                        <div className="flex items-center gap-2">
+                          Status
+                          {getSortIcon("customerStatus")}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => handleSort("totalSpent")}
+                      >
+                        <div className="flex items-center gap-2">
+                          Total Purchases
+                          {getSortIcon("totalSpent")}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        onClick={() => handleSort("createdAt")}
+                      >
+                        <div className="flex items-center gap-2">
+                          Registration Date
+                          {getSortIcon("createdAt")}
+                        </div>
+                      </TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {customers.map((customer) => (
+                    {sortedCustomers.map((customer) => (
                       <TableRow key={customer.id}>
                         <TableCell className="font-medium">
                           {customer.firstName} {customer.lastName}
@@ -579,7 +692,7 @@ export default function CRM() {
                         </TableCell>
                         <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
                         <TableCell>
-                          {customer.lastOrderDate ? formatDate(customer.lastOrderDate) : 'No orders yet'}
+                          {formatDate(customer.createdAt)}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
