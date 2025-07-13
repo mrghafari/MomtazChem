@@ -39,10 +39,11 @@ export function KardexSyncPanel() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Query for sync status
-  const { data: syncStatus, isLoading: statusLoading } = useQuery({
+  const { data: syncStatus, isLoading: statusLoading, error: statusError } = useQuery({
     queryKey: ['/api/kardex-sync/status'],
     queryFn: () => apiRequest<{ data: SyncStatus }>('/api/kardex-sync/status'),
     refetchInterval: 30000, // بررسی هر 30 ثانیه
+    retry: false, // Don't retry on auth errors
   });
 
   // Smart sync mutation
@@ -95,6 +96,7 @@ export function KardexSyncPanel() {
   const isInSync = status?.inSync;
   const hasMissingProducts = status?.missingInShop?.length > 0;
   const hasExtraProducts = status?.extraInShop?.length > 0;
+  const isAuthError = statusError && String(statusError).includes('احراز هویت');
 
   return (
     <Card className="w-full">
@@ -130,24 +132,47 @@ export function KardexSyncPanel() {
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Authentication Error */}
+        {isAuthError && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center text-red-800 mb-2">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              <span className="font-medium">نیاز به ورود به پنل ادمین</span>
+            </div>
+            <p className="text-sm text-red-700">
+              برای استفاده از سیستم همگام‌سازی، ابتدا باید وارد پنل ادمین شوید.
+            </p>
+            <Button 
+              className="mt-3" 
+              size="sm" 
+              onClick={() => window.location.href = '/admin/login'}
+            >
+              ورود به پنل ادمین
+            </Button>
+          </div>
+        )}
+
         {/* Status Overview */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-            <span className="text-sm font-medium">کاردکس</span>
-            <span className="text-lg font-bold text-blue-600">
-              {statusLoading ? "..." : status?.kardexCount || 0}
-            </span>
+        {!isAuthError && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <span className="text-sm font-medium">کاردکس</span>
+              <span className="text-lg font-bold text-blue-600">
+                {statusLoading ? "..." : status?.kardexCount || 0}
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <span className="text-sm font-medium">فروشگاه</span>
+              <span className="text-lg font-bold text-green-600">
+                {statusLoading ? "..." : status?.shopCount || 0}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-            <span className="text-sm font-medium">فروشگاه</span>
-            <span className="text-lg font-bold text-green-600">
-              {statusLoading ? "..." : status?.shopCount || 0}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* Sync Actions */}
-        <div className="flex gap-2">
+        {!isAuthError && (
+          <div className="flex gap-2">
           <Button
             onClick={() => smartSyncMutation.mutate()}
             disabled={smartSyncMutation.isPending || statusLoading}
@@ -167,10 +192,11 @@ export function KardexSyncPanel() {
             <RefreshCw className="h-4 w-4 mr-2" />
             {fullRebuildMutation.isPending ? "در حال بازسازی..." : "بازسازی کامل"}
           </Button>
-        </div>
+          </div>
+        )}
 
         {/* Detailed Status (Expandable) */}
-        {isExpanded && status && (
+        {!isAuthError && isExpanded && status && (
           <>
             <Separator />
             <div className="space-y-3">
@@ -232,10 +258,12 @@ export function KardexSyncPanel() {
         )}
 
         {/* Help Text */}
-        <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-          <strong>همگام‌سازی هوشمند:</strong> فقط تغییرات را اعمال می‌کند<br />
-          <strong>بازسازی کامل:</strong> فروشگاه را پاک کرده و از کاردکس بازسازی می‌کند
-        </div>
+        {!isAuthError && (
+          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+            <strong>همگام‌سازی هوشمند:</strong> فقط تغییرات را اعمال می‌کند<br />
+            <strong>بازسازی کامل:</strong> فروشگاه را پاک کرده و از کاردکس بازسازی می‌کند
+          </div>
+        )}
       </CardContent>
     </Card>
   );
