@@ -14730,27 +14730,38 @@ momtazchem.com
   // Create wallet recharge request
   app.post('/api/customer/wallet/recharge', async (req, res) => {
     try {
+      console.log('💰 [WALLET-RECHARGE] POST request received:', req.body);
+      console.log('💰 [WALLET-RECHARGE] Customer ID:', req.session.customerId);
+      
       if (!req.session.customerId) {
+        console.log('💰 [WALLET-RECHARGE] ERROR: No customer ID in session');
         return res.status(401).json({ success: false, message: "Customer authentication required" });
       }
 
       const { amount, currency, paymentMethod, paymentReference, customerNotes } = req.body;
+      console.log('💰 [WALLET-RECHARGE] Request data:', { amount, currency, paymentMethod, paymentReference, customerNotes });
 
       if (!amount || amount <= 0) {
+        console.log('💰 [WALLET-RECHARGE] ERROR: Invalid amount:', amount);
         return res.status(400).json({ success: false, message: "Valid amount is required" });
       }
 
       // Get or create wallet
       let wallet = await walletStorage.getWalletByCustomerId(req.session.customerId);
+      console.log('💰 [WALLET-RECHARGE] Existing wallet:', wallet);
+      
       if (!wallet) {
+        console.log('💰 [WALLET-RECHARGE] Creating new wallet...');
         wallet = await walletStorage.createWallet({
           customerId: req.session.customerId,
           balance: "0",
           currency: currency || "IQD",
           status: "active"
         });
+        console.log('💰 [WALLET-RECHARGE] New wallet created:', wallet);
       }
 
+      console.log('💰 [WALLET-RECHARGE] Creating recharge request...');
       const rechargeRequest = await walletStorage.createRechargeRequest({
         customerId: req.session.customerId,
         walletId: wallet.id,
@@ -14761,9 +14772,10 @@ momtazchem.com
         customerNotes
       });
 
+      console.log('💰 [WALLET-RECHARGE] Recharge request created successfully:', rechargeRequest);
       res.json({ success: true, data: rechargeRequest });
     } catch (error) {
-      console.error('Error creating recharge request:', error);
+      console.error('💰 [WALLET-RECHARGE] ERROR:', error);
       res.status(500).json({ success: false, message: 'Failed to create recharge request' });
     }
   });
