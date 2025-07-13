@@ -285,31 +285,39 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   });
 
   // Fetch wallet data for logged-in customers
-  const { data: walletData } = useQuery({
+  const { data: walletData, isLoading: isLoadingWallet, error: walletError } = useQuery({
     queryKey: ['/api/customer/wallet'],
     queryFn: async () => {
       try {
-        console.log('💳 [WALLET QUERY] Fetching wallet data...');
+        console.log('💳 [WALLET QUERY] Starting wallet fetch...');
         const response = await fetch('/api/customer/wallet', {
           credentials: 'include'
         });
         
+        console.log('💳 [WALLET QUERY] Response status:', response.status);
+        
         if (response.ok) {
           const result = await response.json();
-          console.log('💳 [WALLET QUERY] Wallet API response:', result);
+          console.log('💳 [WALLET QUERY] Wallet API response received:', result);
           if (result.success) {
+            console.log('💳 [WALLET QUERY] Returning successful result:', result);
             return result;
+          } else {
+            console.log('💳 [WALLET QUERY] Response not successful:', result);
           }
+        } else {
+          console.log('💳 [WALLET QUERY] Response not ok:', response.status, response.statusText);
         }
-        console.log('💳 [WALLET QUERY] No successful response');
+        console.log('💳 [WALLET QUERY] Returning null - no successful response');
         return null;
       } catch (error) {
-        console.log('💳 [WALLET QUERY] Error fetching wallet data:', error);
+        console.log('💳 [WALLET QUERY] Exception during fetch:', error);
         return null;
       }
     },
     enabled: walletQueryEnabled,
     retry: false,
+    staleTime: 0, // Disable caching to force fresh requests
   });
 
   // Fetch VAT settings
@@ -572,7 +580,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     totalAmount,
     existingCustomer: !!existingCustomer,
     customerDataSuccess: !!customerData?.success,
-    walletDataStructure: walletData ? Object.keys(walletData) : 'no data'
+    walletDataStructure: walletData ? Object.keys(walletData) : 'no data',
+    isLoadingWallet,
+    walletError,
+    walletQueryEnabled
   });
 
 
