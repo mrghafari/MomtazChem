@@ -1696,56 +1696,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Protected admin routes for product management
+  // Protected admin routes for product management (کاردکس)
   app.post("/api/products", requireAuth, async (req, res) => {
     try {
       const productData = req.body;
       
-      // Create product directly in unified shop_products table
-      const shopProductData = {
+      // Generate barcode if not provided
+      let barcode = productData.barcode;
+      if (!barcode) {
+        try {
+          const { generateEAN13Barcode } = await import('../shared/barcode-utils');
+          barcode = await generateEAN13Barcode(productData.name, productData.category);
+          console.log(`🔢 Generated barcode for new product: ${barcode}`);
+        } catch (barcodeError) {
+          console.error("Barcode generation failed:", barcodeError);
+          throw new Error("خطا در تولید بارکد برای محصول جدید");
+        }
+      }
+      
+      // Create product in showcase_products table (کاردکس)
+      const showcaseProductData = {
         name: productData.name,
         category: productData.category,
-        description: productData.description,
-        shortDescription: productData.shortDescription || null,
-        price: productData.unitPrice || productData.price || 0,
-        compareAtPrice: null,
-        priceUnit: productData.currency || 'IQD',
-        inStock: true,
-        stockQuantity: productData.stockQuantity || 0,
-        lowStockThreshold: 10,
-        sku: productData.sku || `SKU-${Date.now()}`,
-        barcode: productData.barcode || null,
-        weight: null,
-        weightUnit: 'kg',
-        dimensions: null,
-        imageUrls: productData.imageUrl ? [productData.imageUrl] : [],
-        thumbnailUrl: productData.imageUrl || null,
-        specifications: productData.specifications || {},
-        features: productData.features || [],
-        applications: productData.applications || [],
-        tags: [],
-        minimumOrderQuantity: 1,
-        maximumOrderQuantity: null,
-        leadTime: null,
-        shippingClass: 'standard',
-        taxClass: 'standard',
+        description: productData.description || "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+        shortDescription: productData.shortDescription || productData.description,
+        unitPrice: productData.unitPrice || productData.price || 11,
+        currency: productData.currency || 'IQD',
+        stockQuantity: productData.stockQuantity || 11,
+        minStockLevel: productData.minStockLevel || 5,
+        maxStockLevel: productData.maxStockLevel || 100,
+        sku: productData.sku || `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+        barcode: barcode,
+        weight: productData.weight || 11,
+        imageUrl: productData.imageUrl || null,
+        specifications: productData.specifications || productData.description || "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+        features: productData.features || productData.description || "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+        applications: productData.applications || productData.description || "این یک محصول شیمیایی تولید شرکت ممتاز شیمی است",
+        tags: productData.tags || ["شیمیایی"],
         isActive: productData.isActive !== false,
-        isFeatured: false,
-        metaTitle: productData.name,
-        metaDescription: productData.shortDescription,
-        quantityDiscounts: [],
+        syncWithShop: productData.syncWithShop || false,
         parentProductId: productData.parentProductId || null,
         isVariant: productData.isVariant || false,
         variantType: productData.variantType || null,
-        variantValue: productData.variantValue || null,
-        sortOrder: 0,
-        minStockLevel: productData.minStockLevel || 5
+        variantValue: productData.variantValue || null
       };
       
-      const product = await shopStorage.createShopProduct(shopProductData);
+      const product = await storage.createProduct(showcaseProductData);
+      
+      // Trigger automatic synchronization after creating product
+      try {
+        const { KardexSyncMaster } = await import('./kardex-sync-master');
+        const result = await KardexSyncMaster.smartSyncShopFromKardex();
+        console.log(`🔄 Auto-sync completed after creating product:`, result.message);
+      } catch (syncError) {
+        console.log("Auto-sync failed after creation:", syncError);
+      }
+      
       res.status(201).json(product);
     } catch (error) {
-      console.error("Error creating product:", error);
+      console.error("Error creating showcase product:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ 
           success: false, 
@@ -1999,6 +2008,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error(`❌ خطا در حذف محصول ${product.name} از فروشگاه:`, removeError.message);
           // Continue with the product update even if shop removal fails
         }
+      }
+      
+      // Trigger automatic synchronization after any update
+      try {
+        const { KardexSyncMaster } = await import('./kardex-sync-master');
+        const result = await KardexSyncMaster.smartSyncShopFromKardex();
+        console.log(`🔄 Auto-sync completed after updating product ${id}:`, result.message);
+      } catch (syncError) {
+        console.log("Auto-sync failed after update:", syncError);
       }
       
       const responseProduct = product;
