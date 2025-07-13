@@ -18,6 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 interface SyncStatus {
   kardexCount: number;
   shopCount: number;
+  hiddenCount: number;
   inSync: boolean;
   missingInShop: string[];
   extraInShop: string[];
@@ -221,20 +222,51 @@ export function KardexSyncPanel() {
 
         {/* Status Overview */}
         {!isAuthError && (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm font-medium">کاردکس</span>
-              <span className="text-lg font-bold text-blue-600">
-                {statusLoading ? "..." : status?.kardexCount || 0}
-              </span>
+          <>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm font-medium">کاردکس</span>
+                <span className="text-lg font-bold text-blue-600">
+                  {statusLoading ? "..." : status?.kardexCount || 0}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <span className="text-sm font-medium">فروشگاه</span>
+                <span className="text-lg font-bold text-green-600">
+                  {statusLoading ? "..." : status?.shopCount || 0}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-sm font-medium">مخفی</span>
+                <span className="text-lg font-bold text-gray-600">
+                  {statusLoading ? "..." : status?.hiddenCount || 0}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <span className="text-sm font-medium">فروشگاه</span>
-              <span className="text-lg font-bold text-green-600">
-                {statusLoading ? "..." : status?.shopCount || 0}
-              </span>
-            </div>
-          </div>
+            
+            {/* Sync Status Hint */}
+            {!statusLoading && status && (
+              <div className={`p-3 rounded-lg border ${
+                isInSync 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-orange-50 border-orange-200'
+              }`}>
+                <div className="flex items-center text-sm">
+                  {isInSync ? (
+                    <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                  ) : (
+                    <AlertTriangle className="h-4 w-4 mr-2 text-orange-600" />
+                  )}
+                  <span className={isInSync ? 'text-green-700' : 'text-orange-700'}>
+                    {isInSync 
+                      ? `همگام‌سازی کامل: ${status.shopCount} محصول فعال + ${status.hiddenCount} محصول مخفی = ${status.kardexCount} کاردکس`
+                      : `نیاز به همگام‌سازی: ${status.missingInShop?.length || 0} محصول کمبود، ${status.extraInShop?.length || 0} محصول اضافی، ${status.hiddenCount} محصول مخفی`
+                    }
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Sync Actions */}

@@ -438,6 +438,7 @@ export class KardexSyncMaster {
   static async checkSyncStatus(): Promise<{
     kardexCount: number;
     shopCount: number;
+    hiddenCount: number;
     inSync: boolean;
     missingInShop: string[];
     extraInShop: string[];
@@ -449,6 +450,11 @@ export class KardexSyncMaster {
       // فیلتر کردن محصولات که بارکد دارند (همه محصولات کاردکس باید sync شوند)
       const syncEnabledKardex = kardexProducts.filter(p => 
         p.barcode && p.barcode.trim() !== ''
+      );
+      
+      // محاسبه محصولات مخفی (syncWithShop = false)
+      const hiddenKardexProducts = syncEnabledKardex.filter(p => 
+        p.syncWithShop === false
       );
       
       // استفاده از بارکد EAN-13 برای تشخیص همگام‌سازی
@@ -463,14 +469,18 @@ export class KardexSyncMaster {
         .filter(p => p.barcode && p.barcode.trim() !== '' && !kardexBarcodes.has(p.barcode.trim()))
         .map(p => p.name);
       
-      const inSync = missingInShop.length === 0 && extraInShop.length === 0;
+      // منطق جدید همگام‌سازی: اگر مجموع محصولات همگام‌شده و مخفی‌ها برابر کل کاردکس باشد
+      const totalAccountedProducts = (syncEnabledKardex.length - missingInShop.length) + hiddenKardexProducts.length;
+      const inSync = totalAccountedProducts === syncEnabledKardex.length && extraInShop.length === 0;
       
-      console.log(`📊 [SYNC STATUS] کاردکس با بارکد: ${syncEnabledKardex.length}, فروشگاه: ${shopProducts.length}, همگام: ${inSync}`);
+      console.log(`📊 [SYNC STATUS] کاردکس: ${syncEnabledKardex.length}, فروشگاه: ${shopProducts.length}, مخفی: ${hiddenKardexProducts.length}, همگام: ${inSync}`);
       console.log(`📊 [SYNC STATUS] کمبود در فروشگاه: ${missingInShop.length}, اضافی در فروشگاه: ${extraInShop.length}`);
+      console.log(`📊 [SYNC STATUS] منطق جدید: (${syncEnabledKardex.length} - ${missingInShop.length}) + ${hiddenKardexProducts.length} = ${totalAccountedProducts} از ${syncEnabledKardex.length}`);
       
       return {
         kardexCount: syncEnabledKardex.length,
         shopCount: shopProducts.length,
+        hiddenCount: hiddenKardexProducts.length,
         inSync,
         missingInShop,
         extraInShop
@@ -481,6 +491,7 @@ export class KardexSyncMaster {
       return {
         kardexCount: 0,
         shopCount: 0,
+        hiddenCount: 0,
         inSync: false,
         missingInShop: [],
         extraInShop: []
