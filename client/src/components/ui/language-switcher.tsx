@@ -41,6 +41,15 @@ const KurdishFlag = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const TurkishFlag = ({ className }: { className?: string }) => (
+  <svg className={cn("w-5 h-4", className)} viewBox="0 0 60 40" fill="none">
+    <rect width="60" height="40" fill="#E30A17"/>
+    <circle cx="19" cy="20" r="8" fill="#E30A17" stroke="#fff" strokeWidth="1"/>
+    <circle cx="21" cy="20" r="6" fill="#E30A17"/>
+    <path d="M27 16 L31 20 L27 24 L29 20 Z" fill="#fff"/>
+  </svg>
+);
+
 interface LanguageOption {
   code: Language;
   name: string;
@@ -66,6 +75,12 @@ const languages: LanguageOption[] = [
     name: 'Kurdish',
     nativeName: 'کوردی',
     flag: KurdishFlag,
+  },
+  {
+    code: 'tr',
+    name: 'Turkish',
+    nativeName: 'Türkçe',
+    flag: TurkishFlag,
   },
 ];
 
