@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,7 @@ const Shop = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [selectedImageForZoom, setSelectedImageForZoom] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 12;
 
@@ -1113,13 +1114,20 @@ const Shop = () => {
                   <Card key={product.id} className={viewMode === "list" ? "flex" : ""}>
                     {viewMode === "grid" ? (
                       <>
-                        <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative">
+                        <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
                           {product.imageUrl ? (
-                            <img 
-                              src={product.imageUrl} 
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
+                            <div className="relative w-full h-full">
+                              <img 
+                                src={product.imageUrl} 
+                                alt={product.name}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                onClick={() => setSelectedImageForZoom(product.imageUrl)}
+                              />
+                              {/* Zoom overlay on hover */}
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              </div>
+                            </div>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
                               No Image
@@ -1374,13 +1382,20 @@ const Shop = () => {
                       </>
                     ) : (
                       <div className="flex">
-                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative">
+                        <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
                           {product.imageUrl ? (
-                            <img 
-                              src={product.imageUrl} 
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
+                            <div className="relative w-full h-full overflow-hidden">
+                              <img 
+                                src={product.imageUrl} 
+                                alt={product.name}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                onClick={() => setSelectedImageForZoom(product.imageUrl)}
+                              />
+                              {/* Zoom overlay on hover */}
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              </div>
+                            </div>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
                               No Image
@@ -1765,6 +1780,36 @@ const Shop = () => {
           }}
           product={selectedProductForSpecs}
         />
+      )}
+
+      {/* Image Zoom Modal */}
+      {selectedImageForZoom && (
+        <Dialog open={!!selectedImageForZoom} onOpenChange={() => setSelectedImageForZoom(null)}>
+          <DialogContent className="max-w-4xl w-full h-[80vh] p-2">
+            <div className="relative w-full h-full flex items-center justify-center bg-black rounded-lg">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-2 z-10 bg-white/10 hover:bg-white/20 text-white"
+                onClick={() => setSelectedImageForZoom(null)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+              <img
+                src={selectedImageForZoom}
+                alt="Product Image"
+                className="max-w-full max-h-full object-contain cursor-zoom-in"
+                style={{ transform: 'scale(1)', transition: 'transform 0.3s ease' }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.transform = 'scale(4)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.transform = 'scale(1)';
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Auth Dialog */}
