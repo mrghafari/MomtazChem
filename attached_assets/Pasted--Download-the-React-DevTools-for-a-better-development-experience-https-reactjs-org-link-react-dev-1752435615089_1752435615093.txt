@@ -1,0 +1,220 @@
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 
+value @ twk-chunk-common.js:2
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ Cart clicked, total items: 2
+ Customer: null
+ User not logged in, showing pre-checkout modal
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🔐 [LOGIN] Login choice selected
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🔐 [LOGIN] Starting handleLoginSuccess
+ 🔐 [LOGIN] Customer data: Object
+ 🔐 [LOGIN] Current cart state: Object
+ 🔐 [LOGIN] Customer state set
+ 🔐 [LOGIN] Wallet balance fetch initiated
+ 🔐 [LOGIN] Auth modal closed
+ 🔐 [LOGIN] Cache invalidated
+ 🔐 [LOGIN] Has cart items: true
+ 🔐 [LOGIN] Cart contents: Object
+ 🔐 [LOGIN] Cart migration completed
+ 🔐 [LOGIN] Welcome toast shown
+ 🔐 [LOGIN] Showing checkout after login
+ 🔐 [LOGIN] handleLoginSuccess completed successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ Wallet Debug: Object
+ Fetching shipping rates...
+ === BilingualPurchaseForm Debug ===
+ existingCustomer from parent: Object
+ customerData from API: null
+ crmCustomerData from API: undefined
+ isLoadingCustomer: false
+ Using existingCustomer from parent
+ Customer object found: Object
+ Customer firstName: ABAS
+ Customer lastName: ABASI
+ Customer phone: 09124955173
+ Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+ Customer secondaryAddress: undefined
+ Customer city: تهران
+ Customer country: Iran
+ Customer postalCode: undefined
+ Full name constructed: ABAS ABASI
+ Form data to reset: Object
+ Form reset completed
+ === End BilingualPurchaseForm Debug ===
+ 🚚 Shipping cost calculation: Object
+ 🔄 No shipping method selected or no data, resetting cost
+ Shipping rates state: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ Wallet Debug: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ Wallet Debug: Object
+ === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:382 existingCustomer from parent: Object
+bilingual-purchase-form.tsx:383 customerData from API: Object
+bilingual-purchase-form.tsx:384 crmCustomerData from API: undefined
+bilingual-purchase-form.tsx:385 isLoadingCustomer: false
+bilingual-purchase-form.tsx:396 Using existingCustomer from parent
+bilingual-purchase-form.tsx:403 Customer object found: Object
+bilingual-purchase-form.tsx:404 Customer firstName: ABAS
+bilingual-purchase-form.tsx:405 Customer lastName: ABASI
+bilingual-purchase-form.tsx:406 Customer phone: 09124955173
+bilingual-purchase-form.tsx:407 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+bilingual-purchase-form.tsx:408 Customer secondaryAddress: undefined
+bilingual-purchase-form.tsx:409 Customer city: تهران
+bilingual-purchase-form.tsx:410 Customer country: Iran
+bilingual-purchase-form.tsx:411 Customer postalCode: undefined
+bilingual-purchase-form.tsx:414 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:428 Form data to reset: Object
+bilingual-purchase-form.tsx:430 Form reset completed
+bilingual-purchase-form.tsx:434 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:316 VAT API response: Object
+bilingual-purchase-form.tsx:558 Wallet Debug: Object
+bilingual-purchase-form.tsx:342 Shipping rates API response: Object
+bilingual-purchase-form.tsx:344 Successfully loaded shipping rates: 11 methods
+bilingual-purchase-form.tsx:290 Wallet API response: Object
+bilingual-purchase-form.tsx:264 CRM Customer API response: Object
+bilingual-purchase-form.tsx:558 Wallet Debug: Object
+bilingual-purchase-form.tsx:381 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:382 existingCustomer from parent: Object
+bilingual-purchase-form.tsx:383 customerData from API: Object
+bilingual-purchase-form.tsx:384 crmCustomerData from API: Object
+bilingual-purchase-form.tsx:385 isLoadingCustomer: false
+bilingual-purchase-form.tsx:393 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:403 Customer object found: Object
+bilingual-purchase-form.tsx:404 Customer firstName: ABAS
+bilingual-purchase-form.tsx:405 Customer lastName: ABASI
+bilingual-purchase-form.tsx:406 Customer phone: 09124955173
+bilingual-purchase-form.tsx:407 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+bilingual-purchase-form.tsx:408 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:409 Customer city: تهران
+bilingual-purchase-form.tsx:410 Customer country: Iran
+bilingual-purchase-form.tsx:411 Customer postalCode: 1968913751
+bilingual-purchase-form.tsx:414 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:428 Form data to reset: Object
+bilingual-purchase-form.tsx:430 Form reset completed
+bilingual-purchase-form.tsx:434 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:495 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:529 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:536 Shipping rates state: Object
+bilingual-purchase-form.tsx:558 Wallet Debug: Object
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+bilingual-purchase-form.tsx:558 Wallet Debug: Object
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+bilingual-purchase-form.tsx:558 Wallet Debug: Object
+bilingual-purchase-form.tsx:558 Wallet Debug: Object
+bilingual-purchase-form.tsx:717 Submitting order with wallet data: Object
+bilingual-purchase-form.tsx:558 Wallet Debug: Object
+bilingual-purchase-form.tsx:558 Wallet Debug: Object
+bilingual-purchase-form.tsx:636 Order response: Object
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:833 Cart clicked, total items: 2
+shop.tsx:834 Customer: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+shop.tsx:841 User is logged in, showing checkout
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:381 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:382 existingCustomer from parent: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:383 customerData from API: {success: true, customer: {…}}
+bilingual-purchase-form.tsx:384 crmCustomerData from API: {id: 8, email: 'oilstar@hotmail.com', passwordHash: '$2b$12$xEcwo0XtA2kYxQzIF1Vri.8dEC4So8.Ch/C4p9JWtdhUvn4l3Fq9.', firstName: 'ABAS', lastName: 'ABASI', …}
+bilingual-purchase-form.tsx:385 isLoadingCustomer: false
+bilingual-purchase-form.tsx:393 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:403 Customer object found: {id: 8, email: 'oilstar@hotmail.com', passwordHash: '$2b$12$xEcwo0XtA2kYxQzIF1Vri.8dEC4So8.Ch/C4p9JWtdhUvn4l3Fq9.', firstName: 'ABAS', lastName: 'ABASI', …}
+bilingual-purchase-form.tsx:404 Customer firstName: ABAS
+bilingual-purchase-form.tsx:405 Customer lastName: ABASI
+bilingual-purchase-form.tsx:406 Customer phone: 09124955173
+bilingual-purchase-form.tsx:407 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+bilingual-purchase-form.tsx:408 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:409 Customer city: تهران
+bilingual-purchase-form.tsx:410 Customer country: Iran
+bilingual-purchase-form.tsx:411 Customer postalCode: 1968913751
+bilingual-purchase-form.tsx:414 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:428 Form data to reset: {customerName: 'ABAS ABASI', phone: '09124955173', address: 'شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran', city: 'تهران', country: 'Iran', …}
+bilingual-purchase-form.tsx:430 Form reset completed
+bilingual-purchase-form.tsx:434 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:495 🚚 Shipping cost calculation: {selectedShippingMethod: null, hasShippingData: true, subtotalAmount: '22.00'}
+bilingual-purchase-form.tsx:529 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:536 Shipping rates state: {isLoadingShippingRates: false, shippingRatesError: null, dataLength: 11, data: Array(11)}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:316 VAT API response: {success: true, vatSettings: {…}}
+bilingual-purchase-form.tsx:264 CRM Customer API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:290 Wallet API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:717 Submitting order with wallet data: {paymentMethod: 'wallet_full', totalAmount: 24.2, walletAmountUsed: 24.2, remainingAmount: 0, walletBalance: 18837}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:558 Wallet Debug: {walletData: {…}, walletBalance: 18837, canUseWallet: true, totalAmount: 24.2}
+bilingual-purchase-form.tsx:636 Order response: {success: true, orders: Array(2)}
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:181 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:185 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:186 🌟 [RATINGS DEBUG] Products with ratings: (5) [{…}, {…}, {…}, {…}, {…}]

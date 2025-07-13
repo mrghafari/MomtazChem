@@ -633,7 +633,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
     },
     onSuccess: (response: any) => {
-      console.log('Order response:', response);
+      console.log('🎯 [ORDER SUCCESS] Order response received:', response);
+      console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
+      console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
       
       // Check if payment gateway redirect is needed
       if (response.redirectToPayment && response.paymentGatewayUrl) {
@@ -714,12 +716,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       orderData.remainingAmount = totalAmount;
     }
 
-    console.log('Submitting order with wallet data:', {
+    console.log('🚀 [ORDER SUBMIT] Submitting order with complete data:', {
+      endpoint: '/api/customers/orders',
       paymentMethod,
       totalAmount,
       walletAmountUsed: orderData.walletAmountUsed,
       remainingAmount: orderData.remainingAmount,
-      walletBalance
+      walletBalance,
+      orderData
     });
 
     submitOrderMutation.mutate(orderData);
