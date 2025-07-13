@@ -22,21 +22,54 @@ interface ProductSpecsModalProps {
 }
 
 export function ProductSpecsModal({ isOpen, onClose, product }: ProductSpecsModalProps) {
-  const specifications = product.specifications && typeof product.specifications === 'string' 
-    ? JSON.parse(product.specifications) 
-    : product.specifications || {};
+  const specifications = (() => {
+    try {
+      if (product.specifications && typeof product.specifications === 'string') {
+        // Try to parse as JSON first
+        return JSON.parse(product.specifications);
+      }
+      return product.specifications || {};
+    } catch (error) {
+      // If JSON parsing fails, treat as plain text
+      return { description: product.specifications };
+    }
+  })();
     
-  const features = product.features && typeof product.features === 'string'
-    ? JSON.parse(product.features)
-    : product.features || [];
+  const features = (() => {
+    try {
+      if (product.features && typeof product.features === 'string') {
+        return JSON.parse(product.features);
+      }
+      return product.features || [];
+    } catch (error) {
+      // If JSON parsing fails, treat as array with single text item
+      return [product.features];
+    }
+  })();
     
-  const applications = product.applications && typeof product.applications === 'string'
-    ? JSON.parse(product.applications)
-    : product.applications || [];
+  const applications = (() => {
+    try {
+      if (product.applications && typeof product.applications === 'string') {
+        return JSON.parse(product.applications);
+      }
+      return product.applications || [];
+    } catch (error) {
+      // If JSON parsing fails, treat as array with single text item
+      return [product.applications];
+    }
+  })();
     
-  const tags = product.tags && typeof product.tags === 'string'
-    ? JSON.parse(product.tags)
-    : product.tags || [];
+  const tags = (() => {
+    try {
+      if (product.tags && typeof product.tags === 'string') {
+        return JSON.parse(product.tags);
+      }
+      return product.tags || [];
+    } catch (error) {
+      // If JSON parsing fails, treat as array with single text item
+      return [product.tags];
+    }
+  })();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
