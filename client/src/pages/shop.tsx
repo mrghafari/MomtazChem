@@ -1229,15 +1229,10 @@ const Shop = () => {
                                 <div className="absolute inset-0 bg-white/50 backdrop-blur-sm"></div>
                                 
                                 <div className="relative z-20 p-3 h-full flex flex-col justify-between text-gray-700">
-                                  <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
                                     <div className="flex items-center gap-2">
                                       <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg animate-pulse"></div>
                                       <span className="text-xs font-semibold uppercase tracking-wider">Volume Deals</span>
-                                    </div>
-                                    <div className="bg-white/60 backdrop-blur-sm rounded-full px-2 py-1">
-                                      <span className="text-xs font-medium">
-                                        {product.quantityDiscounts.length} Tiers
-                                      </span>
                                     </div>
                                   </div>
                                   
