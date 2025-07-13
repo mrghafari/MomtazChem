@@ -56,9 +56,14 @@ export function KardexSyncPanel() {
         title: "همگام‌سازی هوشمند انجام شد",
         description: `${data.data.added} اضافه، ${data.data.updated} بروزرسانی، ${data.data.removed} حذف شد`,
       });
+      // فوری بروزرسانی کنید تا اعداد جدید نمایش داده شود
       queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      // رفرش فوری وضعیت
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
+      }, 500);
     },
     onError: () => {
       toast({
@@ -79,9 +84,14 @@ export function KardexSyncPanel() {
         title: "بازسازی کامل انجام شد",
         description: `${data.data.addedToShop} محصول از کاردکس به فروشگاه کپی شد`,
       });
+      // فوری بروزرسانی کنید تا اعداد جدید نمایش داده شود
       queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      // رفرش فوری وضعیت
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
+      }, 500);
     },
     onError: () => {
       toast({
@@ -102,9 +112,14 @@ export function KardexSyncPanel() {
         title: "حذف محصولات اضافی انجام شد",
         description: `${data.data.deletedCount} محصول از فروشگاه حذف شد`,
       });
+      // فوری بروزرسانی کنید تا اعداد جدید نمایش داده شود
       queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      // رفرش فوری وضعیت
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
+      }, 500);
     },
     onError: () => {
       toast({
