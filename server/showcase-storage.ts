@@ -126,13 +126,18 @@ export class ShowcaseStorage implements IShowcaseStorage {
       const existingShopProduct = allShopProducts.find(p => p.name === showcaseProduct.name);
       
       if (existingShopProduct) {
-        // Update existing shop product, focusing on image sync
+        // Update existing shop product, focusing on image sync AND document fields
         await shopStorage.updateShopProduct(existingShopProduct.id, {
           imageUrls: showcaseProduct.imageUrl ? [showcaseProduct.imageUrl] : [],
           thumbnailUrl: showcaseProduct.imageUrl || null,
           price: showcaseProduct.unitPrice?.toString() || existingShopProduct.price,
           stockQuantity: showcaseProduct.stockQuantity || existingShopProduct.stockQuantity,
           description: showcaseProduct.description || existingShopProduct.description,
+          // Document fields sync
+          showCatalogToCustomers: showcaseProduct.showCatalogToCustomers || false,
+          showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,
+          pdfCatalogUrl: showcaseProduct.pdfCatalogUrl || null,
+          msdsUrl: showcaseProduct.msdsUrl || null,
         });
         console.log(`✅ Image synced to shop: ${showcaseProduct.name}`);
       }

@@ -276,7 +276,7 @@ export class DatabaseStorage implements IStorage {
       }
       
       if (existingShopProduct) {
-        // Update existing shop product with real inventory data
+        // Update existing shop product with real inventory data AND document fields
         await shopStorage.updateShopProduct(existingShopProduct.id, {
           name: showcaseProduct.name,
           description: showcaseProduct.description,
@@ -288,9 +288,14 @@ export class DatabaseStorage implements IStorage {
           thumbnailUrl: showcaseProduct.imageUrl || null,
           isActive: showcaseProduct.isActive,
           tags: showcaseProduct.tags || ["شیمیایی"],
+          // Document fields sync
+          showCatalogToCustomers: showcaseProduct.showCatalogToCustomers || false,
+          showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,
+          pdfCatalogUrl: showcaseProduct.pdfCatalogUrl || null,
+          msdsUrl: showcaseProduct.msdsUrl || null,
         });
       } else {
-        // Create new shop product with real inventory data
+        // Create new shop product with real inventory data AND document fields
         await shopStorage.createShopProduct({
           name: showcaseProduct.name,
           sku: productSku,
@@ -306,6 +311,11 @@ export class DatabaseStorage implements IStorage {
           isFeatured: false,
           visibleInShop: showcaseProduct.syncWithShop || false,
           tags: showcaseProduct.tags || ["شیمیایی"],
+          // Document fields sync
+          showCatalogToCustomers: showcaseProduct.showCatalogToCustomers || false,
+          showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,
+          pdfCatalogUrl: showcaseProduct.pdfCatalogUrl || null,
+          msdsUrl: showcaseProduct.msdsUrl || null,
         });
       }
     } catch (error) {
