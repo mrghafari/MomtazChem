@@ -2080,17 +2080,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Delete from showcase products (admin interface)
       await storage.deleteProduct(id);
       
-      // Also remove from shop if it exists there (by name matching)
+      // Also remove from shop if it exists there (by barcode matching for better accuracy)
       if (productToDelete) {
         try {
           const shopProducts = await shopStorage.getShopProducts();
-          const matchingShopProduct = shopProducts.find(p => p.name === productToDelete.name);
+          const matchingShopProduct = shopProducts.find(p => 
+            p.barcode === productToDelete.barcode || 
+            p.name === productToDelete.name ||
+            p.sku === productToDelete.sku
+          );
           if (matchingShopProduct) {
             await shopStorage.deleteShopProduct(matchingShopProduct.id);
-            console.log(`Removed matching shop product: ${productToDelete.name}`);
+            console.log(`✅ [DELETE-SYNC] Removed matching shop product: ${matchingShopProduct.name} (barcode: ${matchingShopProduct.barcode})`);
+          } else {
+            console.log(`⚠️ [DELETE-SYNC] No matching shop product found for: ${productToDelete.name} (barcode: ${productToDelete.barcode})`);
           }
         } catch (error) {
-          console.log("Error removing from shop:", error);
+          console.log("❌ [DELETE-SYNC] Error removing from shop:", error);
         }
       }
       

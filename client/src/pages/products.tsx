@@ -259,17 +259,22 @@ export default function ProductsPage() {
   });
 
   const { mutate: deleteProduct } = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/products/${id}`, "DELETE"),
+    mutationFn: (id: number) => {
+      console.log(`🗑️ [DELETE] Starting delete for product ID: ${id}`);
+      return apiRequest(`/api/products/${id}`, "DELETE");
+    },
     onSuccess: () => {
+      console.log(`✅ [DELETE] Product deleted successfully`);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
       setDeletingProduct(null); // Close the confirmation dialog
       toast({
         title: "موفقیت",
-        description: "محصول با موفقیت حذف شد",
+        description: "محصول با موفقیت حذف شد و از فروشگاه نیز حذف شد",
       });
     },
     onError: (error: any) => {
+      console.error(`❌ [DELETE] Delete failed:`, error);
       setDeletingProduct(null); // Close the confirmation dialog
       toast({
         title: "خطا",
@@ -281,13 +286,17 @@ export default function ProductsPage() {
 
   // Handle delete product with confirmation
   const handleDeleteProduct = (product: ShowcaseProduct) => {
+    console.log(`🗑️ [DELETE] Opening delete confirmation for product:`, product.name);
     setDeletingProduct(product);
   };
 
   // Confirm delete product
   const confirmDeleteProduct = () => {
     if (deletingProduct) {
+      console.log(`🗑️ [DELETE] Confirming delete for product:`, deletingProduct.name, `ID: ${deletingProduct.id}`);
       deleteProduct(deletingProduct.id);
+    } else {
+      console.warn(`⚠️ [DELETE] No product selected for deletion`);
     }
   };
 
