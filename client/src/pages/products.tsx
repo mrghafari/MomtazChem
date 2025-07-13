@@ -1037,19 +1037,19 @@ export default function ProductsPage() {
                         <CardTitle className="text-lg font-semibold mb-1 text-gray-900 dark:text-white truncate">
                           {product.name}
                         </CardTitle>
-                        <div className="flex flex-col gap-2 mb-2">
-                          <div className="flex items-center gap-2">
-                            {categories.find((c: CategoryOption) => c.value === product.category)?.icon}
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              {categories.find((c: CategoryOption) => c.value === product.category)?.label}
-                            </span>
-                            {product.isVariant && (
-                              <Badge variant="secondary" className="text-xs">
-                                Variant: {product.variantValue}
-                              </Badge>
-                            )}
-                          </div>
-                          {/* Shop Visibility Status */}
+                        <div className="flex items-center gap-2 mb-2">
+                          {categories.find((c: CategoryOption) => c.value === product.category)?.icon}
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {categories.find((c: CategoryOption) => c.value === product.category)?.label}
+                          </span>
+                          {product.isVariant && (
+                            <Badge variant="secondary" className="text-xs">
+                              Variant: {product.variantValue}
+                            </Badge>
+                          )}
+                        </div>
+                        {/* Shop Visibility Status - Separate Line */}
+                        <div className="mb-2">
                           <Badge 
                             variant={product.syncWithShop ? "default" : "secondary"} 
                             className={`text-xs w-fit ${product.syncWithShop ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}
