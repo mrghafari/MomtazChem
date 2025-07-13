@@ -9801,7 +9801,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Generate PDF using simplified compatible generator
       const { generateSimplePDF, generateCustomerPDFHTML } = await import('./simple-pdf-generator');
       const htmlContent = generateCustomerPDFHTML(customer, analytics, activities);
-      const pdfBuffer = await generateSimplePDF(htmlContent);
+      const pdfBuffer = await generateSimplePDF(htmlContent, `Customer Report - ${customer.firstName} ${customer.lastName}`);
 
       // Set response headers for PDF download
       // Validate PDF buffer before sending
@@ -9838,7 +9838,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Generate PDF using simplified compatible generator
       const { generateSimplePDF, generateAnalyticsPDFHTML } = await import('./simple-pdf-generator');
       const htmlContent = generateAnalyticsPDFHTML(dashboardStats);
-      const pdfBuffer = await generateSimplePDF(htmlContent);
+      const pdfBuffer = await generateSimplePDF(htmlContent, 'CRM Analytics Report');
 
       // Set response headers for PDF download
       // Validate PDF buffer before sending
