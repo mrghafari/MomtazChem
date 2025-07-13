@@ -24,10 +24,15 @@ export interface ICrmStorage {
   createCrmCustomer(customer: InsertCrmCustomer): Promise<CrmCustomer>;
   getCrmCustomerById(id: number): Promise<CrmCustomer | undefined>;
   getCrmCustomerByEmail(email: string): Promise<CrmCustomer | undefined>;
+  getCrmCustomerByPhone(phone: string): Promise<CrmCustomer | undefined>;
   updateCrmCustomer(id: number, customer: Partial<InsertCrmCustomer>): Promise<CrmCustomer>;
   deleteCrmCustomer(id: number): Promise<void>;
   searchCrmCustomers(query: string): Promise<CrmCustomer[]>;
   getCrmCustomers(limit?: number, offset?: number): Promise<CrmCustomer[]>;
+  
+  // Duplicate prevention
+  checkEmailExists(email: string, excludeId?: number): Promise<boolean>;
+  checkPhoneExists(phone: string, excludeId?: number): Promise<boolean>;
   
   // Auto-capture from shop purchases
   createOrUpdateCustomerFromOrder(orderData: {
@@ -88,6 +93,16 @@ export interface ICrmStorage {
 export class CrmStorage implements ICrmStorage {
   
   async createCrmCustomer(customerData: InsertCrmCustomer): Promise<CrmCustomer> {
+    // Check for duplicate email
+    if (customerData.email && await this.checkEmailExists(customerData.email)) {
+      throw new Error("ایمیل تکراری است. این ایمیل قبلاً در سیستم ثبت شده است.");
+    }
+    
+    // Check for duplicate phone
+    if (customerData.phone && await this.checkPhoneExists(customerData.phone)) {
+      throw new Error("شماره تلفن تکراری است. این شماره قبلاً در سیستم ثبت شده است.");
+    }
+    
     const [customer] = await customerDb
       .insert(crmCustomers)
       .values(customerData)
@@ -127,6 +142,16 @@ export class CrmStorage implements ICrmStorage {
     console.log("CrmStorage updateCrmCustomer called:", { id, customerUpdate });
     
     try {
+      // Check for duplicate email (excluding current customer)
+      if (customerUpdate.email && await this.checkEmailExists(customerUpdate.email, id)) {
+        throw new Error("ایمیل تکراری است. این ایمیل قبلاً در سیستم ثبت شده است.");
+      }
+      
+      // Check for duplicate phone (excluding current customer)
+      if (customerUpdate.phone && await this.checkPhoneExists(customerUpdate.phone, id)) {
+        throw new Error("شماره تلفن تکراری است. این شماره قبلاً در سیستم ثبت شده است.");
+      }
+      
       // Handle date fields properly - convert strings to Date objects if needed
       const processedUpdate = { ...customerUpdate };
       
@@ -585,6 +610,47 @@ export class CrmStorage implements ICrmStorage {
       })),
       recentActivities
     };
+  }
+
+  async getCrmCustomerByPhone(phone: string): Promise<CrmCustomer | undefined> {
+    const [customer] = await crmDb
+      .select()
+      .from(crmCustomers)
+      .where(eq(crmCustomers.phone, phone))
+      .limit(1);
+    return customer;
+  }
+
+  async checkEmailExists(email: string, excludeId?: number): Promise<boolean> {
+    let whereClause = eq(crmCustomers.email, email);
+    
+    if (excludeId) {
+      whereClause = and(eq(crmCustomers.email, email), sql`${crmCustomers.id} != ${excludeId}`);
+    }
+    
+    const [customer] = await crmDb
+      .select({ id: crmCustomers.id })
+      .from(crmCustomers)
+      .where(whereClause)
+      .limit(1);
+    
+    return !!customer;
+  }
+
+  async checkPhoneExists(phone: string, excludeId?: number): Promise<boolean> {
+    let whereClause = eq(crmCustomers.phone, phone);
+    
+    if (excludeId) {
+      whereClause = and(eq(crmCustomers.phone, phone), sql`${crmCustomers.id} != ${excludeId}`);
+    }
+    
+    const [customer] = await crmDb
+      .select({ id: crmCustomers.id })
+      .from(crmCustomers)
+      .where(whereClause)
+      .limit(1);
+    
+    return !!customer;
   }
 }
 

@@ -4359,7 +4359,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (existingCrmCustomer) {
         return res.status(400).json({ 
           success: false, 
-          message: "Email already exists in our system" 
+          message: "ایمیل تکراری است. این ایمیل قبلاً در سیستم ثبت شده است." 
+        });
+      }
+
+      // Check if phone number already exists in CRM
+      const existingCrmPhone = await crmStorage.getCrmCustomerByPhone(phone);
+      if (existingCrmPhone) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شماره تلفن تکراری است. این شماره قبلاً در سیستم ثبت شده است." 
         });
       }
 

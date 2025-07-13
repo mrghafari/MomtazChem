@@ -214,7 +214,10 @@ export default function CRM() {
         credentials: 'include'
       });
       if (!response.ok) {
-        throw new Error("Failed to create customer");
+        const errorData = await response.json();
+        const error = new Error(errorData.message || "Failed to create customer");
+        (error as any).response = { data: errorData };
+        throw error;
       }
       return response.json();
     },
@@ -241,10 +244,13 @@ export default function CRM() {
         internalNotes: ""
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      // Extract error message from response
+      const errorMessage = error?.response?.data?.message || error?.message || "خطا در ایجاد مشتری جدید";
+      
       toast({ 
-        title: "Error", 
-        description: "Failed to create new customer",
+        title: "خطا", 
+        description: errorMessage,
         variant: "destructive" 
       });
     }
@@ -260,7 +266,10 @@ export default function CRM() {
         credentials: 'include'
       });
       if (!response.ok) {
-        throw new Error("Failed to update customer");
+        const errorData = await response.json();
+        const error = new Error(errorData.message || "Failed to update customer");
+        (error as any).response = { data: errorData };
+        throw error;
       }
       return response.json();
     },
@@ -271,10 +280,13 @@ export default function CRM() {
       setIsEditCustomerDialogOpen(false);
       setEditingCustomer(null);
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      // Extract error message from response
+      const errorMessage = error?.response?.data?.message || error?.message || "خطا در به‌روزرسانی اطلاعات مشتری";
+      
       toast({ 
-        title: "Error", 
-        description: "Failed to update customer information",
+        title: "خطا", 
+        description: errorMessage,
         variant: "destructive" 
       });
     }
