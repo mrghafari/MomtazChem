@@ -136,10 +136,15 @@ const Shop = () => {
 
 
   // Fetch product stats for ratings
-  const { data: productStats } = useQuery({
+  const { data: productStats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/shop/product-stats"],
     retry: false,
   });
+  
+  // Debug product stats
+  console.log('🌟 [RATINGS DEBUG] Product stats loading:', statsLoading);
+  console.log('🌟 [RATINGS DEBUG] Product stats error:', statsError);
+  console.log('🌟 [RATINGS DEBUG] Product stats data:', productStats);
 
   // Initialize price range only once when first loaded
   useEffect(() => {
