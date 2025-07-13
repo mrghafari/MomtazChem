@@ -423,56 +423,72 @@ const Shop = () => {
   };
 
   const handleLoginSuccess = (customerData: any) => {
-    console.log('Login successful, customer data:', customerData);
-    setCustomer(customerData);
-    fetchWalletBalance();
+    console.log('🔐 [LOGIN] Starting handleLoginSuccess');
+    console.log('🔐 [LOGIN] Customer data:', customerData);
+    console.log('🔐 [LOGIN] Current cart state:', cart);
     
-    // Close auth modal
-    setShowAuth(false);
-    
-    // Invalidate cache to refresh header
-    queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
-    
-    // Check if user has items in cart before migration
-    const hasCartItems = Object.keys(cart).length > 0;
-    console.log('Has cart items:', hasCartItems);
-    console.log('Cart contents:', cart);
-    
-    // Migrate guest cart to user cart
-    migrateGuestCartToUser();
-    
-    toast({
-      title: "خوش آمدید",
-      description: `${customerData.firstName} ${customerData.lastName}`,
-    });
-    
-    // If user had items in cart, show checkout modal immediately
-    if (hasCartItems) {
-      console.log('Showing checkout after login');
-      setShowCheckout(true);
-      toast({
-        title: "آماده پرداخت",
-        description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
-      });
-    } else {
-      // Check if there are items in user cart after migration
-      const userCartData = localStorage.getItem('momtazchem_user_cart');
-      const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
-      console.log('User cart data:', userCartData);
-      console.log('Total cart items after migration:', totalCartItems);
+    try {
+      setCustomer(customerData);
+      console.log('🔐 [LOGIN] Customer state set');
       
-      if (totalCartItems > 0) {
-        console.log('Showing checkout after migration');
+      fetchWalletBalance();
+      console.log('🔐 [LOGIN] Wallet balance fetch initiated');
+      
+      // Close auth modal
+      setShowAuth(false);
+      console.log('🔐 [LOGIN] Auth modal closed');
+      
+      // Invalidate cache to refresh header
+      queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
+      console.log('🔐 [LOGIN] Cache invalidated');
+      
+      // Check if user has items in cart before migration
+      const hasCartItems = Object.keys(cart).length > 0;
+      console.log('🔐 [LOGIN] Has cart items:', hasCartItems);
+      console.log('🔐 [LOGIN] Cart contents:', cart);
+      
+      // Migrate guest cart to user cart
+      migrateGuestCartToUser();
+      console.log('🔐 [LOGIN] Cart migration completed');
+      
+      toast({
+        title: "خوش آمدید",
+        description: `${customerData.firstName} ${customerData.lastName}`,
+      });
+      console.log('🔐 [LOGIN] Welcome toast shown');
+      
+      // If user had items in cart, show checkout modal immediately
+      if (hasCartItems) {
+        console.log('🔐 [LOGIN] Showing checkout after login');
         setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
           description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
         });
       } else {
-        console.log('No items in cart, navigating to profile');
-        navigate("/customer/profile");
+        // Check if there are items in user cart after migration
+        const userCartData = localStorage.getItem('momtazchem_user_cart');
+        const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
+        console.log('🔐 [LOGIN] User cart data:', userCartData);
+        console.log('🔐 [LOGIN] Total cart items after migration:', totalCartItems);
+        
+        if (totalCartItems > 0) {
+          console.log('🔐 [LOGIN] Showing checkout after migration');
+          setShowCheckout(true);
+          toast({
+            title: "آماده پرداخت",
+            description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
+          });
+        } else {
+          console.log('🔐 [LOGIN] No items in cart, navigating to profile');
+          navigate("/customer/profile");
+        }
       }
+      
+      console.log('🔐 [LOGIN] handleLoginSuccess completed successfully');
+    } catch (error) {
+      console.error('🔐 [LOGIN] Error in handleLoginSuccess:', error);
     }
   };
 
