@@ -373,7 +373,7 @@ export const customerWallets = pgTable("customer_wallets", {
 export const walletTransactions = pgTable("wallet_transactions", {
   id: serial("id").primaryKey(),
   walletId: integer("wallet_id").notNull().references(() => customerWallets.id),
-  customerId: integer("customer_id").notNull().references(() => customers.id),
+  customerId: integer("customer_id").notNull().references(() => crmCustomers.id),
   transactionType: text("transaction_type").notNull(), // credit, debit, refund, adjustment, payment
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
   currency: text("currency").notNull().default("IQD"),
@@ -394,7 +394,7 @@ export const walletTransactions = pgTable("wallet_transactions", {
 // Wallet recharge requests table - customer requests to add money to wallet
 export const walletRechargeRequests = pgTable("wallet_recharge_requests", {
   id: serial("id").primaryKey(),
-  customerId: integer("customer_id").notNull().references(() => customers.id),
+  customerId: integer("customer_id").notNull().references(() => crmCustomers.id),
   walletId: integer("wallet_id").notNull().references(() => customerWallets.id),
   requestNumber: text("request_number").notNull().unique(), // Auto-generated unique number
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
