@@ -29,20 +29,35 @@ export class KardexSyncMaster {
       const kardexProducts = await storage.getProducts();
       console.log(`📋 [KARDEX-SYNC] ${kardexProducts.length} محصول در کاردکس یافت شد`);
       
-      // مرحله 2: پاک کردن کامل فروشگاه
+      // مرحله 2: پاک کردن کامل فروشگاه با تأیید
       const existingShopProducts = await shopStorage.getShopProducts();
       const deletedCount = existingShopProducts.length;
       
+      console.log(`🗑️ [KARDEX-SYNC] در حال حذف ${deletedCount} محصول از فروشگاه...`);
       for (const shopProduct of existingShopProducts) {
-        await shopStorage.deleteShopProduct(shopProduct.id);
+        try {
+          await shopStorage.deleteShopProduct(shopProduct.id);
+          console.log(`✅ [KARDEX-SYNC] حذف شد: ${shopProduct.name} (ID: ${shopProduct.id})`);
+        } catch (deleteError) {
+          console.error(`❌ [KARDEX-SYNC] خطا در حذف ${shopProduct.name}:`, deleteError);
+        }
       }
-      console.log(`🗑️ [KARDEX-SYNC] ${deletedCount} محصول از فروشگاه حذف شد`);
+      
+      // تأیید پاک شدن کامل
+      const remainingProducts = await shopStorage.getShopProducts();
+      console.log(`🗑️ [KARDEX-SYNC] ${deletedCount} محصول حذف شد، ${remainingProducts.length} محصول باقی مانده`);
       
       // مرحله 3: کپی کردن همه محصولات از کاردکس
       let addedCount = 0;
       for (const kardexProduct of kardexProducts) {
-        await this.copyKardexProductToShop(kardexProduct);
-        addedCount++;
+        try {
+          await this.copyKardexProductToShop(kardexProduct);
+          addedCount++;
+          console.log(`✅ [KARDEX-SYNC] کپی شد: ${kardexProduct.name} (${addedCount}/${kardexProducts.length})`);
+        } catch (copyError) {
+          console.error(`❌ [KARDEX-SYNC] خطا در کپی ${kardexProduct.name}:`, copyError);
+          // Continue with other products instead of failing completely
+        }
       }
       
       console.log(`✅ [KARDEX-SYNC] بازسازی کامل انجام شد - ${addedCount} محصول اضافه شد`);
@@ -198,10 +213,21 @@ export class KardexSyncMaster {
   }
   
   /**
-   * کپی کردن یک محصول از کاردکس به فروشگاه
+   * کپی کردن یک محصول از کاردکس به فروشگاه با SKU منحصر به فرد
    */
   private static async copyKardexProductToShop(kardexProduct: ShowcaseProduct): Promise<void> {
+    // Check if product already exists in shop by name
+    const existingShopProducts = await shopStorage.getShopProducts();
+    const existingProduct = existingShopProducts.find(p => p.name.trim() === kardexProduct.name.trim());
+    
+    if (existingProduct) {
+      console.log(`⚠️ [KARDEX-SYNC] محصول ${kardexProduct.name} قبلاً در فروشگاه موجود است، رد می‌شود`);
+      return;
+    }
     try {
+      // Generate unique SKU to avoid duplicates
+      const uniqueSku = kardexProduct.sku || `SP-${kardexProduct.id}-${Date.now().toString().slice(-6)}`;
+      
       const shopProductData = {
         name: kardexProduct.name,
         category: kardexProduct.category,
@@ -213,7 +239,7 @@ export class KardexSyncMaster {
         minStockLevel: kardexProduct.minStockLevel || 5,
         maxStockLevel: kardexProduct.maxStockLevel || 100,
         lowStockThreshold: 10,
-        sku: kardexProduct.sku || `SK-${kardexProduct.id}`,
+        sku: uniqueSku,
         barcode: kardexProduct.barcode || '',
         weight: kardexProduct.weight ? parseFloat(kardexProduct.weight) : null,
         weightUnit: kardexProduct.weightUnit || 'kg',
@@ -256,7 +282,7 @@ export class KardexSyncMaster {
         stockQuantity: kardexProduct.stockQuantity || 0,
         minStockLevel: kardexProduct.minStockLevel || 5,
         maxStockLevel: kardexProduct.maxStockLevel || 100,
-        sku: kardexProduct.sku || `SK-${kardexProduct.id}`,
+        sku: kardexProduct.sku || `UP-${kardexProduct.id}-${Date.now().toString().slice(-6)}`,
         barcode: kardexProduct.barcode || '',
         weight: kardexProduct.weight ? parseFloat(kardexProduct.weight) : null,
         weightUnit: kardexProduct.weightUnit || 'kg',
