@@ -4,7 +4,9 @@ import { useLocation } from "wouter";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket } from "lucide-react";
+import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -20,6 +22,7 @@ interface QuickActionButton {
 export default function SiteManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [showKardexSync, setShowKardexSync] = useState(false);
 
   // Function to track button clicks and sort by usage
   const trackButtonClick = (buttonId: string, action: () => void) => {
@@ -62,6 +65,13 @@ export default function SiteManagement() {
   // Initial button configuration ordered by most frequent usage (top-left priority)
   const getInitialButtons = (): QuickActionButton[] => [
     // Row 1: Most frequently used daily operations
+    {
+      id: "kardex-sync",
+      label: "کاردکس Sync",
+      icon: Database,
+      onClick: () => trackButtonClick("kardex-sync", () => setShowKardexSync(true)),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
+    },
     {
       id: "shop",
       label: "Shop",
@@ -500,6 +510,19 @@ export default function SiteManagement() {
           </Card>
         </div>
       </div>
+
+      {/* Kardex Sync Dialog */}
+      <Dialog open={showKardexSync} onOpenChange={setShowKardexSync}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-blue-600" />
+              سیستم همگام‌سازی کاردکس
+            </DialogTitle>
+          </DialogHeader>
+          <KardexSyncPanel />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

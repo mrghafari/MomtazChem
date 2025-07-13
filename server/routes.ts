@@ -2078,6 +2078,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // KARDEX SYNC MASTER ENDPOINTS - سیستم همگام‌سازی ایمن
+  // =============================================================================
+  
+  // بررسی وضعیت همگام‌سازی
+  app.get("/api/kardex-sync/status", requireAuth, async (req, res) => {
+    try {
+      const { KardexSyncMaster } = await import('./kardex-sync-master');
+      const status = await KardexSyncMaster.checkSyncStatus();
+      
+      res.json({
+        success: true,
+        data: status,
+        message: "وضعیت همگام‌سازی بررسی شد"
+      });
+    } catch (error) {
+      console.error("Error checking sync status:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بررسی وضعیت همگام‌سازی"
+      });
+    }
+  });
+  
+  // بازسازی کامل فروشگاه از کاردکس (ایمن)
+  app.post("/api/kardex-sync/full-rebuild", requireAuth, async (req, res) => {
+    try {
+      const { KardexSyncMaster } = await import('./kardex-sync-master');
+      const result = await KardexSyncMaster.fullRebuildShopFromKardex();
+      
+      res.json({
+        success: result.success,
+        data: result.details,
+        message: result.message
+      });
+    } catch (error) {
+      console.error("Error in full rebuild:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بازسازی کامل فروشگاه"
+      });
+    }
+  });
+  
+  // همگام‌سازی هوشمند (فقط تغییرات)
+  app.post("/api/kardex-sync/smart-sync", requireAuth, async (req, res) => {
+    try {
+      const { KardexSyncMaster } = await import('./kardex-sync-master');
+      const result = await KardexSyncMaster.smartSyncShopFromKardex();
+      
+      res.json({
+        success: result.success,
+        data: result.details,
+        message: result.message
+      });
+    } catch (error) {
+      console.error("Error in smart sync:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در همگام‌سازی هوشمند"
+      });
+    }
+  });
+
+  // =============================================================================
   // BARCODE & INVENTORY MANAGEMENT ENDPOINTS
   // =============================================================================
 
