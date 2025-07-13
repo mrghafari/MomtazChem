@@ -44,6 +44,7 @@ interface CustomerActivity {
   activityType: string;
   description: string;
   performedBy: string;
+  customerName?: string;
   createdAt: string;
   activityData?: any;
 }
@@ -757,6 +758,9 @@ export default function CRM() {
                     <div className="flex-1">
                       <p className="font-medium">{activity.description}</p>
                       <p className="text-sm text-muted-foreground">
+                        {activity.customerName && (
+                          <span className="font-medium text-blue-600">{activity.customerName} - </span>
+                        )}
                         By {activity.performedBy} on {formatDate(activity.createdAt)}
                       </p>
                     </div>

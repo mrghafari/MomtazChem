@@ -246,6 +246,7 @@ export type InquiryResponse = typeof inquiryResponses.$inferSelect;
 export const customerActivities = pgTable("customer_activities", {
   id: serial("id").primaryKey(),
   customerId: integer("customer_id").notNull(),
+  customerName: text("customer_name"), // Store customer name for display
   activityType: text("activity_type").notNull(), // order_placed, payment_received, inquiry_submitted, email_sent, call_made, meeting_held
   activityData: json("activity_data"), // Flexible data storage for activity details
   description: text("description").notNull(),

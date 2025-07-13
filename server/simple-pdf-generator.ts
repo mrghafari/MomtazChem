@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Fallback simple text-based PDF generator for compatibility
-export async function generateSimplePDF(htmlContent: string, title: string): Promise<Buffer> {
+// Simple and reliable PDF generator
+export async function generateSimplePDF(content: string, title: string): Promise<Buffer> {
   // Clean content and prepare for PDF with proper encoding support
-  let cleanContent = htmlContent
+  let cleanContent = content
     .replace(/<[^>]*>/g, '') // Remove HTML tags
     .replace(/&nbsp;/g, ' ') // Replace nbsp with space
     .replace(/&amp;/g, '&') // Replace HTML entities
@@ -58,11 +58,20 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
         let currentLine = '';
         
         for (const word of words) {
-          if ((currentLine + word).length > maxLineLength) {
+          if ((currentLine + word + ' ').length > maxLineLength) {
             if (currentLine.trim()) {
-              const escapedLine = cleanTextForPdf(currentLine.trim()).replace(/[()\\]/g, '\\$&');
-              currentPageContent += `(${escapedLine}) Tj\n0 -14 Td\n`;
+              const escapedLine = currentLine.trim().replace(/[()\\]/g, '\\$&');
+              currentPageContent += `(${escapedLine}) Tj\n0 -15 Td\n`;
               lineCount++;
+              
+              // Check page break
+              if (lineCount >= maxLinesPerPage) {
+                currentPageContent += 'ET\n';
+                pageObjects.push(currentPageContent);
+                pageCount++;
+                currentPageContent = 'BT\n/F1 12 Tf\n50 750 Td\n';
+                lineCount = 0;
+              }
             }
             currentLine = word + ' ';
           } else {
@@ -70,9 +79,10 @@ export async function generateSimplePDF(htmlContent: string, title: string): Pro
           }
         }
         
+        // Add remaining text
         if (currentLine.trim()) {
-          const escapedLine = cleanTextForPdf(currentLine.trim()).replace(/[()\\]/g, '\\$&');
-          currentPageContent += `(${escapedLine}) Tj\n0 -14 Td\n`;
+          const escapedLine = currentLine.trim().replace(/[()\\]/g, '\\$&');
+          currentPageContent += `(${escapedLine}) Tj\n0 -15 Td\n`;
           lineCount++;
         }
       } else {
