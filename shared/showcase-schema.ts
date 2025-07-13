@@ -41,6 +41,8 @@ export const showcaseProducts = pgTable("showcase_products", {
   applications: json("applications"), // Applications array
   technicalDataSheet: text("technical_data_sheet_url"),
   safetyDataSheet: text("safety_data_sheet_url"),
+  // Document visibility controls
+  showCatalogToCustomers: boolean("show_catalog_to_customers").default(false), // Checkbox to control catalog visibility
   // MSDS (Material Safety Data Sheet) fields
   msdsUrl: text("msds_url"), // URL to MSDS PDF file
   showMsdsToCustomers: boolean("show_msds_to_customers").default(false), // Checkbox to control visibility
