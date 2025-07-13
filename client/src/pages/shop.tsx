@@ -846,6 +846,7 @@ const Shop = () => {
   };
 
   const handleLoginChoice = () => {
+    console.log('🔐 [LOGIN] Login choice selected');
     setShowPreCheckout(false);
     setAuthMode('login');
     setShowAuth(true);
@@ -1997,7 +1998,7 @@ const Shop = () => {
         onLoginSuccess={handleLoginSuccess}
         onRegisterSuccess={handleRegisterSuccess}
         initialMode={authMode}
-        existingCustomer={authMode === 'register' ? customer : undefined}
+        existingCustomer={undefined}
       />
     </div>
   );
