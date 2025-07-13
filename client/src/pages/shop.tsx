@@ -423,6 +423,7 @@ const Shop = () => {
   };
 
   const handleLoginSuccess = (customerData: any) => {
+    console.log('Login successful, customer data:', customerData);
     setCustomer(customerData);
     fetchWalletBalance();
     
@@ -435,6 +436,7 @@ const Shop = () => {
     
     // Check if user has items in cart before migration
     const hasCartItems = Object.keys(cart).length > 0;
+    console.log('Has cart items:', hasCartItems);
     
     // Migrate guest cart to user cart
     migrateGuestCartToUser();
@@ -446,6 +448,7 @@ const Shop = () => {
     
     // If user had items in cart, show checkout modal immediately
     if (hasCartItems) {
+      console.log('Showing checkout after login');
       setShowCheckout(true);
       toast({
         title: "آماده پرداخت",
@@ -457,6 +460,7 @@ const Shop = () => {
       const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
       
       if (totalCartItems > 0) {
+        console.log('Showing checkout after migration');
         setShowCheckout(true);
         toast({
           title: "آماده پرداخت",
@@ -803,14 +807,19 @@ const Shop = () => {
 
   // Pre-checkout handlers
   const handleCartClick = () => {
+    console.log('Cart clicked, total items:', getTotalItems());
+    console.log('Customer:', customer);
+    
     if (getTotalItems() === 0) return;
     
     // Direct checkout without cart modal
     if (customer && customer.id) {
       // User is logged in, proceed directly to checkout
+      console.log('User is logged in, showing checkout');
       setShowCheckout(true);
     } else {
       // User not logged in, show pre-checkout modal
+      console.log('User not logged in, showing pre-checkout modal');
       setShowPreCheckout(true);
     }
   };
@@ -828,6 +837,7 @@ const Shop = () => {
   };
 
   const handleGuestCheckout = () => {
+    console.log('Guest checkout selected');
     setShowPreCheckout(false);
     setShowCheckout(true);
   };
@@ -1804,42 +1814,47 @@ const Shop = () => {
 
       {/* Bilingual Purchase Form */}
       {showCheckout && (
-        <BilingualPurchaseForm
-          cart={cart}
-          products={currentProducts}
-          existingCustomer={customer}
-          onOrderComplete={async () => {
-            setCart({});
-            setShowCheckout(false);
-            // Force refresh of products data from server
-            await queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-            await queryClient.refetchQueries({ queryKey: ['/api/products'] });
-            // Reset display stock completely to force recalculation
-            setDisplayStock({});
-            // Show success message
-            toast({
-              title: "success",
-              description: "orderCreated",
-            });
-          }}
-          onClose={() => setShowCheckout(false)}
-          onUpdateQuantity={(productId, newQuantity) => {
-            if (newQuantity <= 0) {
+        <div>
+          <div style={{ position: 'fixed', top: '10px', right: '10px', background: 'red', color: 'white', padding: '10px', zIndex: 9999 }}>
+            CHECKOUT MODAL IS OPEN
+          </div>
+          <BilingualPurchaseForm
+            cart={cart}
+            products={currentProducts}
+            existingCustomer={customer}
+            onOrderComplete={async () => {
+              setCart({});
+              setShowCheckout(false);
+              // Force refresh of products data from server
+              await queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+              await queryClient.refetchQueries({ queryKey: ['/api/products'] });
+              // Reset display stock completely to force recalculation
+              setDisplayStock({});
+              // Show success message
+              toast({
+                title: "success",
+                description: "orderCreated",
+              });
+            }}
+            onClose={() => setShowCheckout(false)}
+            onUpdateQuantity={(productId, newQuantity) => {
+              if (newQuantity <= 0) {
+                const { [productId]: removed, ...newCart } = cart;
+                setCart(newCart);
+                localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
+              } else {
+                const newCart = { ...cart, [productId]: newQuantity };
+                setCart(newCart);
+                localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
+              }
+            }}
+            onRemoveItem={(productId) => {
               const { [productId]: removed, ...newCart } = cart;
               setCart(newCart);
               localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
-            } else {
-              const newCart = { ...cart, [productId]: newQuantity };
-              setCart(newCart);
-              localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
-            }
-          }}
-          onRemoveItem={(productId) => {
-            const { [productId]: removed, ...newCart } = cart;
-            setCart(newCart);
-            localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
-          }}
-        />
+            }}
+          />
+        </div>
       )}
 
       {/* Pre-checkout Modal */}
