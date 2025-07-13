@@ -350,7 +350,7 @@ export class KardexSyncMaster {
         msdsUrl: kardexProduct.msdsUrl || null,
         syncWithShop: kardexProduct.syncWithShop !== false,
         showWhenOutOfStock: kardexProduct.showWhenOutOfStock || false,
-        inStock: (kardexProduct.stockQuantity || 0) > 0
+        inStock: (kardexProduct.stockQuantity || 0) > 0 || (kardexProduct.showWhenOutOfStock || false)
       };
       
       await shopStorage.createShopProduct(shopProductData);
@@ -393,7 +393,7 @@ export class KardexSyncMaster {
         msdsUrl: kardexProduct.msdsUrl || null,
         syncWithShop: kardexProduct.syncWithShop !== false,
         showWhenOutOfStock: kardexProduct.showWhenOutOfStock || false,
-        inStock: (kardexProduct.stockQuantity || 0) > 0
+        inStock: (kardexProduct.stockQuantity || 0) > 0 || (kardexProduct.showWhenOutOfStock || false)
       };
       
       await shopStorage.updateShopProduct(shopProductId, updateData);
@@ -428,7 +428,9 @@ export class KardexSyncMaster {
       kardexProduct.showCatalogToCustomers !== shopProduct.showCatalogToCustomers ||
       kardexProduct.showMsdsToCustomers !== shopProduct.showMsdsToCustomers ||
       kardexProduct.pdfCatalogUrl !== shopProduct.pdfCatalogUrl ||
-      kardexProduct.msdsUrl !== shopProduct.msdsUrl
+      kardexProduct.msdsUrl !== shopProduct.msdsUrl ||
+      // Out of stock display control
+      kardexProduct.showWhenOutOfStock !== shopProduct.showWhenOutOfStock
     );
     
     if (needsUpdate) {
