@@ -102,8 +102,39 @@ export class DatabaseStorage implements IStorage {
     return { name: shopCategory.name, slug: shopCategory.slug };
   }
 
+  // SKU validation helper for showcase products
+  async checkShowcaseSkuExists(sku: string, excludeId?: number): Promise<boolean> {
+    if (!sku || sku.trim() === '') return false;
+    
+    const trimmedSku = sku.trim();
+    let whereCondition = eq(showcaseProducts.sku, trimmedSku);
+    
+    if (excludeId) {
+      whereCondition = and(
+        eq(showcaseProducts.sku, trimmedSku),
+        sql`${showcaseProducts.id} != ${excludeId}`
+      );
+    }
+    
+    const result = await showcaseDb
+      .select({ id: showcaseProducts.id })
+      .from(showcaseProducts)
+      .where(whereCondition)
+      .limit(1);
+      
+    return result.length > 0;
+  }
+
   // Showcase Product management methods
   async createProduct(insertProduct: InsertShowcaseProduct): Promise<ShowcaseProduct> {
+    // بررسی SKU تکراری قبل از ایجاد محصول
+    if (insertProduct.sku && insertProduct.sku.trim() !== '') {
+      const skuExists = await this.checkShowcaseSkuExists(insertProduct.sku);
+      if (skuExists) {
+        throw new Error(`خطا: SKU "${insertProduct.sku}" قبلاً در کاردکس وجود دارد. لطفاً SKU منحصر به فرد انتخاب کنید.`);
+      }
+    }
+
     // Validate that the category exists
     const categoryExists = await this.getCategoryBySlug(insertProduct.category);
     if (!categoryExists) {
@@ -149,6 +180,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
+    // بررسی SKU تکراری قبل از بروزرسانی محصول
+    if (productUpdate.sku && productUpdate.sku.trim() !== '') {
+      const skuExists = await this.checkShowcaseSkuExists(productUpdate.sku, id);
+      if (skuExists) {
+        throw new Error(`خطا: SKU "${productUpdate.sku}" قبلاً در کاردکس وجود دارد. لطفاً SKU منحصر به فرد انتخاب کنید.`);
+      }
+    }
+
     // Skip category validation for updates - just accept the category as provided
     // This allows for flexible category management without strict validation
 

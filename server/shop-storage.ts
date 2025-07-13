@@ -313,7 +313,38 @@ export class ShopStorage implements IShopStorage {
     return product;
   }
 
+  // SKU validation helper
+  async checkSkuExists(sku: string, excludeId?: number): Promise<boolean> {
+    if (!sku || sku.trim() === '') return false;
+    
+    const trimmedSku = sku.trim();
+    let whereCondition = eq(shopProducts.sku, trimmedSku);
+    
+    if (excludeId) {
+      whereCondition = and(
+        eq(shopProducts.sku, trimmedSku),
+        sql`${shopProducts.id} != ${excludeId}`
+      );
+    }
+    
+    const result = await shopDb
+      .select({ id: shopProducts.id })
+      .from(shopProducts)
+      .where(whereCondition)
+      .limit(1);
+      
+    return result.length > 0;
+  }
+
   async createShopProduct(product: InsertShopProduct): Promise<ShopProduct> {
+    // بررسی SKU تکراری قبل از ایجاد محصول
+    if (product.sku && product.sku.trim() !== '') {
+      const skuExists = await this.checkSkuExists(product.sku);
+      if (skuExists) {
+        throw new Error(`خطا: SKU "${product.sku}" قبلاً وجود دارد. لطفاً SKU منحصر به فرد انتخاب کنید.`);
+      }
+    }
+
     const [newProduct] = await shopDb
       .insert(shopProducts)
       .values(product)
@@ -322,6 +353,14 @@ export class ShopStorage implements IShopStorage {
   }
 
   async updateShopProduct(id: number, productUpdate: Partial<InsertShopProduct>): Promise<ShopProduct> {
+    // بررسی SKU تکراری قبل از بروزرسانی محصول
+    if (productUpdate.sku && productUpdate.sku.trim() !== '') {
+      const skuExists = await this.checkSkuExists(productUpdate.sku, id);
+      if (skuExists) {
+        throw new Error(`خطا: SKU "${productUpdate.sku}" قبلاً وجود دارد. لطفاً SKU منحصر به فرد انتخاب کنید.`);
+      }
+    }
+
     const [updatedProduct] = await shopDb
       .update(shopProducts)
       .set({ ...productUpdate, updatedAt: new Date() })
