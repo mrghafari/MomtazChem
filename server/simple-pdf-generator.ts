@@ -1078,20 +1078,44 @@ function cleanTextForPdf(text: string | null | undefined): string {
   try {
     let cleanText = text.toString();
     
-    // Clean up common problematic characters for PDF generation
+    // For Persian/Arabic text, convert to Latin transliteration for PDF compatibility
+    const persianToLatin: { [key: string]: string } = {
+      'ا': 'a', 'ب': 'b', 'پ': 'p', 'ت': 't', 'ث': 's', 'ج': 'j', 'چ': 'ch', 'ح': 'h',
+      'خ': 'kh', 'د': 'd', 'ذ': 'z', 'ر': 'r', 'ز': 'z', 'ژ': 'zh', 'س': 's', 'ش': 'sh',
+      'ص': 's', 'ض': 'z', 'ط': 't', 'ظ': 'z', 'ع': 'a', 'غ': 'gh', 'ف': 'f', 'ق': 'q',
+      'ک': 'k', 'گ': 'g', 'ل': 'l', 'م': 'm', 'ن': 'n', 'و': 'v', 'ه': 'h', 'ی': 'y',
+      'ي': 'y', 'ك': 'k', 'ؤ': 'o', 'ء': '', 'ئ': 'e', 'أ': 'a', 'إ': 'e', 'آ': 'aa',
+      '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9'
+    };
+    
+    // Check if text contains Persian/Arabic characters
+    const hasPersianArabic = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(cleanText);
+    
+    if (hasPersianArabic) {
+      // For better readability, add both original (if simple) and transliteration
+      const originalText = cleanText;
+      
+      // Convert Persian/Arabic characters to Latin equivalents
+      cleanText = cleanText.replace(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g, (match) => {
+        return persianToLatin[match] || '';
+      });
+      
+      // Add note about original language if text was converted
+      if (cleanText !== originalText && cleanText.trim()) {
+        cleanText = `${cleanText} (Persian/Arabic text converted)`;
+      } else if (!cleanText.trim()) {
+        // If conversion resulted in empty text, use description
+        cleanText = '[Persian/Arabic text - content not displayable in PDF]';
+      }
+    }
+    
+    // Clean up problematic characters
     cleanText = cleanText
-      // Remove zero-width characters that can cause PDF encoding issues
-      .replace(/[\u200C\u200D\u200E\u200F\u061C]/g, '')
-      // Remove other invisible/formatting characters
-      .replace(/[\uFEFF\u2060]/g, '')
-      // Normalize Arabic/Persian characters to more standard forms
-      .replace(/ی/g, 'ي') // Persian ye to Arabic ye
-      .replace(/ک/g, 'ك') // Persian kaf to Arabic kaf
-      // Clean up extra whitespace
-      .replace(/\s+/g, ' ')
+      .replace(/[\u200C\u200D\u200E\u200F\u061C]/g, '') // Zero-width characters
+      .replace(/[\uFEFF\u2060]/g, '') // Other invisible characters
+      .replace(/\s+/g, ' ') // Multiple spaces
       .trim();
     
-    // If the text is empty after cleaning, return N/A
     return cleanText || 'N/A';
   } catch (error) {
     console.error('Error cleaning text for PDF:', error);
