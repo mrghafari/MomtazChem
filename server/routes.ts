@@ -2056,9 +2056,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      await shopStorage.deleteShopProduct(id);
+      // Delete from showcase products (admin interface)
+      await storage.deleteProduct(id);
+      
+      // Also remove from shop if it exists there
+      try {
+        await shopStorage.deleteShopProduct(id);
+      } catch (error) {
+        console.log("Product not found in shop or already deleted");
+      }
+      
+      console.log(`Product ${id} deleted successfully from both showcase and shop`);
       res.json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
+      console.error("Delete product error:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 

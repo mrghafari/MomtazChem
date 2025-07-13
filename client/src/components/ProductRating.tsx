@@ -151,23 +151,9 @@ export default function ProductRating({
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 برای ثبت نظر ابتدا وارد شوید
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600">
                 جهت ثبت نظر و امتیاز دادن به محصولات، ابتدا باید وارد حساب کاربری خود شوید
               </p>
-              <div className="flex gap-2 justify-center">
-                <Button 
-                  onClick={() => window.location.href = '/auth/login'}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  ورود
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => window.location.href = '/auth/register'}
-                >
-                  ثبت نام
-                </Button>
-              </div>
             </div>
           ) : (
             <>

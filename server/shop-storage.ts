@@ -331,9 +331,9 @@ export class ShopStorage implements IShopStorage {
   }
 
   async deleteShopProduct(id: number): Promise<void> {
+    // Actually delete the product from shop database
     await shopDb
-      .update(shopProducts)
-      .set({ isActive: false, updatedAt: new Date() })
+      .delete(shopProducts)
       .where(eq(shopProducts.id, id));
   }
 
