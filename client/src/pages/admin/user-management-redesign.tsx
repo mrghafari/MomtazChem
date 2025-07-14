@@ -23,7 +23,22 @@ import {
   Phone,
   Mail,
   Lock,
-  Send
+  Send,
+  ShoppingCart,
+  Package,
+  BarChart3,
+  DollarSign,
+  Warehouse,
+  Truck,
+  FileText,
+  Database,
+  Search,
+  Zap,
+  Globe,
+  Smartphone,
+  HardDrive,
+  UserCog,
+  Calendar
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -114,24 +129,26 @@ type Module = {
   description: string;
   category: string;
   isCore: boolean;
+  icon?: any;
+  color?: string;
 };
 
 // Available modules for permission assignment
 const availableModules: Module[] = [
-  { id: 'shop', name: 'shop_management', displayName: 'مدیریت فروشگاه', description: 'مدیریت محصولات و فروش', category: 'sales', isCore: true },
-  { id: 'crm', name: 'crm_management', displayName: 'مدیریت CRM', description: 'مدیریت مشتریان و ارتباطات', category: 'customer', isCore: true },
-  { id: 'inventory', name: 'inventory_management', displayName: 'مدیریت انبار', description: 'کنترل موجودی و انبارداری', category: 'operations', isCore: true },
-  { id: 'orders', name: 'order_management', displayName: 'مدیریت سفارشات', description: 'پردازش و پیگیری سفارشات', category: 'sales', isCore: true },
-  { id: 'finance', name: 'finance_management', displayName: 'مدیریت مالی', description: 'حسابداری و مالی', category: 'finance', isCore: true },
-  { id: 'warehouse', name: 'warehouse_management', displayName: 'مدیریت انبار', description: 'عملیات انبارداری', category: 'operations', isCore: false },
-  { id: 'logistics', name: 'logistics_management', displayName: 'مدیریت لجستیک', description: 'حمل و نقل و ارسال', category: 'operations', isCore: false },
-  { id: 'analytics', name: 'analytics_view', displayName: 'آنالیتیکس', description: 'گزارشات و تحلیل‌ها', category: 'analytics', isCore: false },
-  { id: 'content', name: 'content_management', displayName: 'مدیریت محتوا', description: 'مدیریت محتوای وب‌سایت', category: 'content', isCore: false },
-  { id: 'seo', name: 'seo_management', displayName: 'مدیریت SEO', description: 'بهینه‌سازی موتور جستجو', category: 'marketing', isCore: false },
-  { id: 'email', name: 'email_management', displayName: 'مدیریت ایمیل', description: 'سیستم ایمیل و اطلاع‌رسانی', category: 'communication', isCore: false },
-  { id: 'sms', name: 'sms_management', displayName: 'مدیریت SMS', description: 'سیستم پیامک', category: 'communication', isCore: false },
-  { id: 'backup', name: 'backup_management', displayName: 'مدیریت بکاپ', description: 'پشتیبان‌گیری از داده‌ها', category: 'system', isCore: false },
-  { id: 'users', name: 'user_management', displayName: 'مدیریت کاربران', description: 'مدیریت کاربران و دسترسی‌ها', category: 'system', isCore: true }
+  { id: 'shop', name: 'shop_management', displayName: 'فروشگاه آنلاین', description: 'مدیریت فروش آنلاین، سبد خرید و پرداخت', category: 'sales', isCore: true, icon: ShoppingCart, color: 'bg-green-500' },
+  { id: 'crm', name: 'crm_management', displayName: 'مدیریت ارتباط با مشتریان', description: 'سیستم CRM، پیگیری مشتریان و فروش', category: 'customer', isCore: true, icon: Users, color: 'bg-purple-500' },
+  { id: 'inventory', name: 'inventory_management', displayName: 'کاردکس و موجودی', description: 'کنترل موجودی، ورود و خروج کالا از انبار', category: 'operations', isCore: true, icon: Package, color: 'bg-blue-500' },
+  { id: 'orders', name: 'order_management', displayName: 'مدیریت سفارشات', description: 'پردازش، تأیید و پیگیری سفارشات مشتریان', category: 'sales', isCore: true, icon: FileText, color: 'bg-orange-500' },
+  { id: 'finance', name: 'finance_management', displayName: 'مدیریت مالی و حسابداری', description: 'سیستم مالی، صورتحساب و گزارشات مالی', category: 'finance', isCore: true, icon: DollarSign, color: 'bg-emerald-500' },
+  { id: 'warehouse', name: 'warehouse_management', displayName: 'مدیریت انبار', description: 'عملیات انبارداری، آماده‌سازی و تحویل', category: 'operations', isCore: false, icon: Warehouse, color: 'bg-gray-500' },
+  { id: 'logistics', name: 'logistics_management', displayName: 'حمل و نقل و لجستیک', description: 'مدیریت ارسال، حمل و نقل و تحویل سفارشات', category: 'operations', isCore: false, icon: Truck, color: 'bg-indigo-500' },
+  { id: 'analytics', name: 'analytics_view', displayName: 'آنالیتیکس و گزارشات', description: 'تحلیل فروش، آمار مشتریان و داشبورد مدیریتی', category: 'analytics', isCore: false, icon: BarChart3, color: 'bg-cyan-500' },
+  { id: 'content', name: 'content_management', displayName: 'مدیریت محتوای وب‌سایت', description: 'ویرایش محتوا، صفحات و اطلاعات وب‌سایت', category: 'content', isCore: false, icon: Globe, color: 'bg-pink-500' },
+  { id: 'seo', name: 'seo_management', displayName: 'بهینه‌سازی موتورهای جستجو', description: 'SEO، متاتگ‌ها و بهینه‌سازی برای گوگل', category: 'marketing', isCore: false, icon: Search, color: 'bg-yellow-500' },
+  { id: 'email', name: 'email_management', displayName: 'سیستم ایمیل و اطلاع‌رسانی', description: 'ارسال ایمیل، خبرنامه و اطلاع‌رسانی خودکار', category: 'communication', isCore: false, icon: Mail, color: 'bg-red-500' },
+  { id: 'sms', name: 'sms_management', displayName: 'سیستم پیامک', description: 'ارسال پیامک، اطلاع‌رسانی و تأیید دو مرحله‌ای', category: 'communication', isCore: false, icon: Smartphone, color: 'bg-violet-500' },
+  { id: 'backup', name: 'backup_management', displayName: 'پشتیبان‌گیری و بازیابی', description: 'بکاپ خودکار، بازیابی داده‌ها و امنیت اطلاعات', category: 'system', isCore: false, icon: HardDrive, color: 'bg-slate-500' },
+  { id: 'users', name: 'user_management', displayName: 'مدیریت کاربران و دسترسی‌ها', description: 'تعریف نقش‌ها، مجوزها و کنترل دسترسی کاربران', category: 'system', isCore: true, icon: UserCog, color: 'bg-rose-500' }
 ];
 
 function UserManagement() {
@@ -812,14 +829,20 @@ function UserManagement() {
                         </div>
                         
                         <div className="space-y-3">
-                          <label className="text-sm font-medium">دسترسی‌های ماژولی</label>
-                          <div className="space-y-4 max-h-60 overflow-y-auto border rounded p-3">
+                          <label className="text-sm font-medium flex items-center gap-2">
+                            <Key className="h-4 w-4" />
+                            دسترسی‌های ماژولی
+                            <Badge variant="outline" className="text-xs">
+                              {selectedPermissions.length} انتخاب شده
+                            </Badge>
+                          </label>
+                          <div className="space-y-4 max-h-60 overflow-y-auto border rounded-lg p-4 bg-gray-50">
                             {Object.entries(getModulesByCategory()).map(([category, modules]) => (
-                              <div key={category} className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <Badge className={getCategoryColor(category)}>
-                                    {category === 'sales' && 'فروش'}
-                                    {category === 'customer' && 'مشتری'}
+                              <div key={category} className="space-y-3">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+                                  <Badge className={`${getCategoryColor(category)} text-white px-2 py-1`}>
+                                    {category === 'sales' && 'فروش و بازار'}
+                                    {category === 'customer' && 'مشتری و CRM'}
                                     {category === 'operations' && 'عملیات'}
                                     {category === 'finance' && 'مالی'}
                                     {category === 'analytics' && 'آنالیتیک'}
@@ -828,33 +851,44 @@ function UserManagement() {
                                     {category === 'communication' && 'ارتباطات'}
                                     {category === 'system' && 'سیستم'}
                                   </Badge>
-                                  <span className="text-sm text-muted-foreground">
+                                  <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
                                     {modules.length} ماژول
                                   </span>
                                 </div>
-                                <div className="grid grid-cols-2 gap-2 pr-4">
-                                  {modules.map((module) => (
-                                    <div key={module.id} className="flex items-center space-x-2">
-                                      <Checkbox
-                                        id={`module-${module.id}`}
-                                        checked={selectedPermissions.includes(module.name)}
-                                        onCheckedChange={(checked) => {
-                                          if (checked) {
-                                            setSelectedPermissions(prev => [...prev, module.name]);
-                                          } else {
-                                            setSelectedPermissions(prev => prev.filter(p => p !== module.name));
-                                          }
-                                        }}
-                                      />
-                                      <label 
-                                        htmlFor={`module-${module.id}`}
-                                        className="text-xs cursor-pointer flex items-center gap-1"
+                                <div className="grid grid-cols-1 gap-2">
+                                  {modules.map((module) => {
+                                    const IconComponent = module.icon || Settings;
+                                    return (
+                                      <div 
+                                        key={module.id} 
+                                        className="flex items-center gap-3 p-2 bg-white rounded border hover:border-blue-300 transition-colors"
                                       >
-                                        {module.isCore && <Crown className="h-3 w-3 text-yellow-500" />}
-                                        {module.displayName}
-                                      </label>
-                                    </div>
-                                  ))}
+                                        <Checkbox
+                                          id={`module-${module.id}`}
+                                          checked={selectedPermissions.includes(module.name)}
+                                          onCheckedChange={(checked) => {
+                                            if (checked) {
+                                              setSelectedPermissions(prev => [...prev, module.name]);
+                                            } else {
+                                              setSelectedPermissions(prev => prev.filter(p => p !== module.name));
+                                            }
+                                          }}
+                                        />
+                                        <div className={`p-1 rounded ${module.color || 'bg-gray-500'} text-white`}>
+                                          <IconComponent className="h-3 w-3" />
+                                        </div>
+                                        <label 
+                                          htmlFor={`module-${module.id}`}
+                                          className="text-xs cursor-pointer flex items-center gap-2 flex-1"
+                                        >
+                                          <span className="font-medium">{module.displayName}</span>
+                                          {module.isCore && (
+                                            <Crown className="h-3 w-3 text-yellow-500" />
+                                          )}
+                                        </label>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             ))}
@@ -967,18 +1001,21 @@ function UserManagement() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Key className="h-5 w-5" />
-                ماژول‌های سیستم
+                ماژول‌های سیستم و دسترسی‌ها
               </CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                مدیریت دسترسی کاربران به ماژول‌های مختلف سیستم
+              </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 {Object.entries(getModulesByCategory()).map(([category, modules]) => (
-                  <Card key={category} className={`border-2 ${getCategoryColor(category).includes('bg-') ? '' : 'border-gray-200'}`}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Badge className={getCategoryColor(category)}>
-                          {category === 'sales' && 'ماژول‌های فروش'}
-                          {category === 'customer' && 'ماژول‌های مشتری'}
+                  <Card key={category} className="border-2 border-slate-200 hover:border-slate-300 transition-colors">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-lg flex items-center gap-3">
+                        <Badge className={`${getCategoryColor(category)} text-white px-3 py-1`}>
+                          {category === 'sales' && 'ماژول‌های فروش و بازار'}
+                          {category === 'customer' && 'ماژول‌های مشتری و CRM'}
                           {category === 'operations' && 'ماژول‌های عملیاتی'}
                           {category === 'finance' && 'ماژول‌های مالی'}
                           {category === 'analytics' && 'ماژول‌های آنالیتیک'}
@@ -987,36 +1024,58 @@ function UserManagement() {
                           {category === 'communication' && 'ماژول‌های ارتباطات'}
                           {category === 'system' && 'ماژول‌های سیستم'}
                         </Badge>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-base text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
                           {modules.length} ماژول
                         </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {modules.map((module) => (
-                          <div
-                            key={module.id}
-                            className="p-3 bg-white rounded border hover:border-blue-300 transition-colors"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                {module.isCore && <Crown className="h-4 w-4 text-yellow-500" />}
-                                <span className="font-medium text-sm">{module.displayName}</span>
-                              </div>
-                              <Badge 
-                                variant={module.isCore ? "default" : "secondary"}
-                                className="text-xs"
-                              >
-                                {module.isCore ? 'هسته‌ای' : 'اضافی'}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-gray-600 mb-2">{module.description}</p>
-                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                              {module.name}
-                            </code>
-                          </div>
-                        ))}
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {modules.map((module) => {
+                          const IconComponent = module.icon || Settings;
+                          return (
+                            <Card
+                              key={module.id}
+                              className="relative overflow-hidden border-2 hover:border-blue-300 transition-all duration-200 hover:shadow-md group"
+                            >
+                              <CardContent className="p-4">
+                                <div className="flex items-start gap-3 mb-3">
+                                  <div className={`p-2 rounded-lg ${module.color || 'bg-gray-500'} text-white`}>
+                                    <IconComponent className="h-5 w-5" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h4 className="font-semibold text-sm text-gray-900 truncate">
+                                        {module.displayName}
+                                      </h4>
+                                      {module.isCore && (
+                                        <Crown className="h-4 w-4 text-yellow-500 flex-shrink-0" />
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                                      {module.description}
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                  <Badge 
+                                    variant={module.isCore ? "default" : "secondary"}
+                                    className="text-xs px-2 py-1"
+                                  >
+                                    {module.isCore ? 'ماژول هسته‌ای' : 'ماژول اضافی'}
+                                  </Badge>
+                                  <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700 font-mono">
+                                    {module.name}
+                                  </code>
+                                </div>
+                                
+                                {/* Hover effect overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
