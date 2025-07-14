@@ -147,10 +147,10 @@ export default function SiteManagement() {
     {
       id: "warehouse-management",
       label: "Warehouse Management",
-      icon: Calculator,
+      icon: Warehouse,
       onClick: () => trackButtonClick("warehouse-management", () => setLocation("/admin/warehouse-management")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
-      moduleId: "warehouse_management"
+      moduleId: "warehouse-management"
     },
     {
       id: "inquiries",
