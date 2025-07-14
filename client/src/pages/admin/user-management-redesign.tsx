@@ -173,7 +173,8 @@ const extractSiteManagementModules = (): Module[] => {
     { moduleId: 'geography_analytics', label: 'Geography Analytics', icon: MapPin, color: 'bg-teal-500' },
     { moduleId: 'ai_settings', label: 'AI Settings', icon: Zap, color: 'bg-purple-500' },
     { moduleId: 'refresh_control', label: 'Refresh Control', icon: RefreshCw, color: 'bg-indigo-500' },
-    { moduleId: 'content_management', label: 'Content Management', icon: Edit3, color: 'bg-green-500' }
+    { moduleId: 'content_management', label: 'Content Management', icon: Edit3, color: 'bg-green-500' },
+    { moduleId: 'user-management', label: 'User Management Module', icon: Users2, color: 'bg-red-500' }
   ];
 
   return siteManagementModules.map(module => ({
