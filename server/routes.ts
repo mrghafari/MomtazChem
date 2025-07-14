@@ -15955,71 +15955,59 @@ momtazchem.com
 
   app.get('/api/analytics/timeseries', async (req, res) => {
     try {
-      const { period = '30d' } = req.query;
+      console.log('🕐 [TIMESERIES] Starting timeseries analytics endpoint');
       
+      const { period = '30d' } = req.query;
       const now = new Date();
       let startDate = new Date();
-      let groupByFormat = '%Y-%m-%d';
       
       switch (period) {
         case '7d':
           startDate.setDate(now.getDate() - 7);
-          groupByFormat = '%Y-%m-%d';
           break;
         case '30d':
           startDate.setDate(now.getDate() - 30);
-          groupByFormat = '%Y-%m-%d';
           break;
         case '3m':
           startDate.setMonth(now.getMonth() - 3);
-          groupByFormat = '%Y-%m-%d';
           break;
         case '1y':
           startDate.setFullYear(now.getFullYear() - 1);
-          groupByFormat = '%Y-%m';
           break;
         default:
           startDate.setDate(now.getDate() - 30);
       }
 
-      const timeSeriesData = await customerDb.select({
-        date: sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`.as('date'),
-        orders: sql`count(*)::int`.as('orders'),
-        revenue: sql`sum(${customerOrders.totalAmount})::numeric`.as('revenue')
-      })
-      .from(customerOrders)
-      .where(gte(customerOrders.createdAt, startDate))
-      .groupBy(sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`)
-      .orderBy(sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`);
-
-      // Get regional breakdown for each time period
-      const processedData = await Promise.all(timeSeriesData.map(async (timePoint) => {
-        const regions = await customerDb.select({
-          country: sql`${customerOrders.shippingAddress}->>'country'`.as('country'),
-          count: sql`count(*)::int`.as('count')
-        })
+      // Use simple aggregation without complex GROUP BY
+      const orders = await customerDb.select()
         .from(customerOrders)
-        .where(
-          and(
-            sql`to_char(${customerOrders.createdAt}, '${groupByFormat}') = ${timePoint.date}`,
-            isNotNull(sql`${customerOrders.shippingAddress}->>'country'`)
-          )
-        )
-        .groupBy(sql`${customerOrders.shippingAddress}->>'country'`);
+        .where(gte(customerOrders.createdAt, startDate));
 
-        const regionCounts = regions.reduce((acc, region) => {
-          acc[region.country] = region.count;
-          return acc;
-        }, {} as { [key: string]: number });
+      console.log(`🕐 [TIMESERIES] Found ${orders.length} orders since ${startDate.toISOString()}`);
 
-        return {
-          date: timePoint.date,
-          orders: timePoint.orders,
-          revenue: Number(timePoint.revenue),
-          regions: regionCounts
-        };
-      }));
+      // Group by date in JavaScript to avoid SQL GROUP BY issues
+      const dateGroups: { [key: string]: { orders: number, revenue: number } } = {};
+      
+      orders.forEach(order => {
+        const dateKey = order.createdAt.toISOString().split('T')[0]; // YYYY-MM-DD format
+        if (!dateGroups[dateKey]) {
+          dateGroups[dateKey] = { orders: 0, revenue: 0 };
+        }
+        dateGroups[dateKey].orders += 1;
+        dateGroups[dateKey].revenue += Number(order.totalAmount || 0);
+      });
 
+      // Convert to array and sort by date
+      const processedData = Object.entries(dateGroups)
+        .map(([date, stats]) => ({
+          date,
+          orders: stats.orders,
+          revenue: stats.revenue,
+          regions: {}
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      console.log(`🕐 [TIMESERIES] Processed data: ${processedData.length} date groups`);
       res.json({ success: true, data: processedData });
     } catch (error) {
       console.error('Time series analytics API error:', error);
@@ -16029,64 +16017,82 @@ momtazchem.com
 
   app.get('/api/analytics/product-trends', async (req, res) => {
     try {
-      const { period = '30d', product = 'all' } = req.query;
+      console.log('📈 [PRODUCT-TRENDS] Starting product trends analytics endpoint');
       
+      const { period = '30d', product = 'all' } = req.query;
       const now = new Date();
       let startDate = new Date();
-      let groupByFormat = '%Y-%m-%d';
       
       switch (period) {
         case '7d':
           startDate.setDate(now.getDate() - 7);
-          groupByFormat = '%Y-%m-%d';
           break;
         case '30d':
           startDate.setDate(now.getDate() - 30);
-          groupByFormat = '%Y-%m-%d';
           break;
         case '3m':
           startDate.setMonth(now.getMonth() - 3);
-          groupByFormat = '%Y-%m-%d';
           break;
         case '1y':
           startDate.setFullYear(now.getFullYear() - 1);
-          groupByFormat = '%Y-%m';
           break;
         default:
           startDate.setDate(now.getDate() - 30);
       }
 
-      let query = customerDb.select({
-        date: sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`.as('date'),
-        productName: shopProducts.name,
-        quantity: sql`sum(${orderItems.quantity})::int`.as('quantity'),
-        revenue: sql`sum(${orderItems.quantity} * ${orderItems.unitPrice})::numeric`.as('revenue')
+      // Get order items with related data using simple joins
+      const orderItemsData = await customerDb.select({
+        orderId: orderItems.orderId,
+        productId: orderItems.productId,
+        quantity: orderItems.quantity,
+        unitPrice: orderItems.unitPrice,
+        createdAt: customerOrders.createdAt,
+        productName: shopProducts.name
       })
       .from(orderItems)
       .innerJoin(customerOrders, eq(orderItems.orderId, customerOrders.id))
       .innerJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
-      .where(gte(customerOrders.createdAt, startDate))
-      .groupBy(
-        sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`,
-        shopProducts.name
-      )
-      .orderBy(
-        sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`,
-        sql`sum(${orderItems.quantity} * ${orderItems.unitPrice}) desc`
-      );
+      .where(gte(customerOrders.createdAt, startDate));
 
+      console.log(`📈 [PRODUCT-TRENDS] Found ${orderItemsData.length} order items since ${startDate.toISOString()}`);
+
+      // Filter by product if specified
+      let filteredData = orderItemsData;
       if (product && product !== 'all') {
-        query = query.where(eq(shopProducts.name, product as string));
+        filteredData = orderItemsData.filter(item => item.productName === product);
+        console.log(`📈 [PRODUCT-TRENDS] Filtered to ${filteredData.length} items for product: ${product}`);
       }
 
-      const trends = await query;
+      // Group by date and product in JavaScript
+      const trends: { [key: string]: { date: string, productName: string, quantity: number, revenue: number } } = {};
       
-      res.json({ success: true, data: trends.map(t => ({
-        date: t.date,
-        productName: t.productName,
-        quantity: t.quantity,
-        revenue: Number(t.revenue)
-      })) });
+      filteredData.forEach(item => {
+        const dateKey = item.createdAt.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const key = `${dateKey}-${item.productName}`;
+        
+        if (!trends[key]) {
+          trends[key] = {
+            date: dateKey,
+            productName: item.productName,
+            quantity: 0,
+            revenue: 0
+          };
+        }
+        
+        trends[key].quantity += item.quantity;
+        trends[key].revenue += item.quantity * Number(item.unitPrice || 0);
+      });
+
+      // Convert to array and sort
+      const processedData = Object.values(trends)
+        .sort((a, b) => {
+          const dateCompare = a.date.localeCompare(b.date);
+          if (dateCompare !== 0) return dateCompare;
+          return b.revenue - a.revenue; // Sort by revenue desc within same date
+        });
+
+      console.log(`📈 [PRODUCT-TRENDS] Processed data: ${processedData.length} product-date combinations`);
+      res.json({ success: true, data: processedData });
     } catch (error) {
       console.error('Product trends analytics API error:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch product trends analytics data' });
