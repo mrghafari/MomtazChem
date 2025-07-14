@@ -1205,7 +1205,109 @@ export default function GeographicAnalytics() {
                         {/* Interactive Geographic Heat Map */}
                         <div className="bg-white rounded-lg border overflow-hidden">
                           <div className="relative w-full">
-                            <svg viewBox="0 0 1000 700" className="w-full h-96 bg-gradient-to-br from-blue-50 to-cyan-50">
+                            {/* Zoom Controls */}
+                            <div className="absolute top-3 left-3 z-10 flex flex-col space-y-2">
+                              <button
+                                onClick={() => {
+                                  const svg = document.getElementById('heat-map-svg');
+                                  if (svg) {
+                                    const currentViewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
+                                    const newWidth = Math.max(500, parseFloat(currentViewBox[2]) * 0.8);
+                                    const newHeight = Math.max(350, parseFloat(currentViewBox[3]) * 0.8);
+                                    const newX = parseFloat(currentViewBox[0]) + (parseFloat(currentViewBox[2]) - newWidth) / 2;
+                                    const newY = parseFloat(currentViewBox[1]) + (parseFloat(currentViewBox[3]) - newHeight) / 2;
+                                    svg.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
+                                  }
+                                }}
+                                className="w-8 h-8 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center text-gray-700 shadow-sm"
+                                title="زوم ورود"
+                              >
+                                <span className="text-lg font-bold">+</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const svg = document.getElementById('heat-map-svg');
+                                  if (svg) {
+                                    const currentViewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
+                                    const newWidth = Math.min(2000, parseFloat(currentViewBox[2]) * 1.25);
+                                    const newHeight = Math.min(1400, parseFloat(currentViewBox[3]) * 1.25);
+                                    const newX = parseFloat(currentViewBox[0]) - (newWidth - parseFloat(currentViewBox[2])) / 2;
+                                    const newY = parseFloat(currentViewBox[1]) - (newHeight - parseFloat(currentViewBox[3])) / 2;
+                                    svg.setAttribute('viewBox', `${Math.max(-500, newX)} ${Math.max(-350, newY)} ${newWidth} ${newHeight}`);
+                                  }
+                                }}
+                                className="w-8 h-8 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center text-gray-700 shadow-sm"
+                                title="زوم خروج"
+                              >
+                                <span className="text-lg font-bold">-</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const svg = document.getElementById('heat-map-svg');
+                                  if (svg) {
+                                    svg.setAttribute('viewBox', '0 0 1000 700');
+                                  }
+                                }}
+                                className="w-8 h-8 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center text-gray-700 shadow-sm"
+                                title="بازگشت به نمای اصلی"
+                              >
+                                <span className="text-xs">🏠</span>
+                              </button>
+                            </div>
+                            
+                            <svg 
+                              id="heat-map-svg"
+                              viewBox="0 0 1000 700" 
+                              className="w-full h-96 bg-gradient-to-br from-blue-50 to-cyan-50 cursor-grab active:cursor-grabbing"
+                              onMouseDown={(e) => {
+                                const svg = e.currentTarget;
+                                const startPoint = { x: e.clientX, y: e.clientY };
+                                const viewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
+                                const startViewBox = {
+                                  x: parseFloat(viewBox[0]),
+                                  y: parseFloat(viewBox[1]),
+                                  width: parseFloat(viewBox[2]),
+                                  height: parseFloat(viewBox[3])
+                                };
+                                
+                                const handleMouseMove = (e: MouseEvent) => {
+                                  const dx = (startPoint.x - e.clientX) * (startViewBox.width / svg.clientWidth);
+                                  const dy = (startPoint.y - e.clientY) * (startViewBox.height / svg.clientHeight);
+                                  svg.setAttribute('viewBox', `${startViewBox.x + dx} ${startViewBox.y + dy} ${startViewBox.width} ${startViewBox.height}`);
+                                };
+                                
+                                const handleMouseUp = () => {
+                                  document.removeEventListener('mousemove', handleMouseMove);
+                                  document.removeEventListener('mouseup', handleMouseUp);
+                                };
+                                
+                                document.addEventListener('mousemove', handleMouseMove);
+                                document.addEventListener('mouseup', handleMouseUp);
+                              }}
+                              onWheel={(e) => {
+                                e.preventDefault();
+                                const svg = e.currentTarget;
+                                const viewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
+                                const currentWidth = parseFloat(viewBox[2]);
+                                const currentHeight = parseFloat(viewBox[3]);
+                                const currentX = parseFloat(viewBox[0]);
+                                const currentY = parseFloat(viewBox[1]);
+                                
+                                const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+                                const newWidth = Math.max(400, Math.min(2000, currentWidth * zoomFactor));
+                                const newHeight = Math.max(280, Math.min(1400, currentHeight * zoomFactor));
+                                
+                                // Center zoom around mouse position
+                                const rect = svg.getBoundingClientRect();
+                                const mouseX = ((e.clientX - rect.left) / rect.width) * currentWidth + currentX;
+                                const mouseY = ((e.clientY - rect.top) / rect.height) * currentHeight + currentY;
+                                
+                                const newX = mouseX - (mouseX - currentX) * (newWidth / currentWidth);
+                                const newY = mouseY - (mouseY - currentY) * (newHeight / currentHeight);
+                                
+                                svg.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
+                              }}
+                            >
                               {/* Background Map */}
                               <defs>
                                 <pattern id="gridPattern" width="50" height="50" patternUnits="userSpaceOnUse">
@@ -1423,9 +1525,11 @@ export default function GeographicAnalytics() {
                                 </div>
                               </div>
                               
-                              <div className="flex items-center space-x-4">
-                                <div className="text-xs text-gray-600">
-                                  💡 نقاط بزرگ‌تر = تراکم بیشتر تحویل | انیمیشن = مناطق فعال
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="text-xs text-gray-600 flex-1">
+                                  💡 کنترل‌ها: اسکرول ماوس = زوم | کلیک و کشیدن = جابجایی | دکمه‌های + و - = زوم دستی
+                                  <br />
+                                  🎯 نقاط بزرگ‌تر = تراکم بیشتر تحویل | انیمیشن = مناطق فعال | کلیک روی نقاط = Google Maps
                                 </div>
                                 <button
                                   onClick={() => {
@@ -1435,7 +1539,7 @@ export default function GeographicAnalytics() {
                                     const googleMapsUrl = `https://www.google.com/maps/dir/${allCoords}/@${firstPoint.lat},${firstPoint.lng},10z`;
                                     window.open(googleMapsUrl, '_blank');
                                   }}
-                                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors flex-shrink-0"
                                 >
                                   🗺️ نمایش همه در Google Maps
                                 </button>
