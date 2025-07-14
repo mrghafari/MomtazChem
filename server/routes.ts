@@ -5074,7 +5074,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         remainingAmount: orderData.remainingAmount,
         totalAmount: orderData.totalAmount,
         customerId,
-        crmCustomerId
+        crmCustomerId,
+        'Will process wallet?': orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial',
+        'Wallet amount to deduct': orderData.walletAmountUsed
       });
 
       // Extract customer information from form data

@@ -722,6 +722,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       walletAmountUsed: orderData.walletAmountUsed,
       remainingAmount: orderData.remainingAmount,
       walletBalance,
+      walletAmount: walletAmount,
+      'Wallet amount input value': walletAmount,
+      'Payment method selected': paymentMethod,
+      'Should use wallet': paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial',
       orderData
     });
 
