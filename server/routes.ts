@@ -5063,10 +5063,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create customer order (from BilingualPurchaseForm)
   app.post("/api/customers/orders", async (req, res) => {
+    console.log('🚀 [ENDPOINT] /api/customers/orders called');
+    console.log('🚀 [ENDPOINT] Request method:', req.method);
+    console.log('🚀 [ENDPOINT] Request headers:', JSON.stringify(req.headers, null, 2));
+    
     try {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
       const orderData = req.body;
+      
+      console.log('🚀 [ENDPOINT] Session data:', {
+        customerId,
+        crmCustomerId,
+        hasSession: !!req.session,
+        sessionId: req.sessionID
+      });
       
       console.log('🛒 [BILINGUAL ORDER DEBUG] Order data received:', {
         paymentMethod: orderData.paymentMethod,
