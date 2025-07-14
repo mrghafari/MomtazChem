@@ -3536,6 +3536,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Management sync modules endpoint
+  app.post("/api/user-management/sync-modules", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Define all main modules that should exist in the system (matching Site Management)
+      const mainModules = [
+        'syncing_shop',
+        'inquiries',
+        'barcode',
+        'email_settings',
+        'database_backup',
+        'crm',
+        'seo',
+        'categories',
+        'sms',
+        'factory',
+        'user_management',
+        'shop_management',
+        'procedures',
+        'smtp_test',
+        'order_management',
+        'product_management',
+        'payment_management',
+        'wallet_management',
+        'geography_analytics',
+        'ai_settings',
+        'refresh_control',
+        'department_users',
+        'inventory_management',
+        'content_management',
+        'warehouse-management'
+      ];
+
+      // Get super admin role (admin@momtazchem.com has user ID 7)
+      const superAdminRoleId = '7';
+      
+      let syncedModules = 0;
+
+      // Sync each main module to module_permissions for super admin
+      for (const moduleId of mainModules) {
+        // Check if module permission exists for super admin
+        const existingPermission = await pool.query(
+          'SELECT id FROM module_permissions WHERE role_id = $1 AND module_id = $2',
+          [superAdminRoleId, moduleId]
+        );
+
+        if (existingPermission.rows.length === 0) {
+          // Create the permission for super admin
+          await pool.query(`
+            INSERT INTO module_permissions (role_id, module_id, can_view, can_create, can_edit, can_delete, can_approve, created_at, updated_at)
+            VALUES ($1, $2, true, true, true, true, true, NOW(), NOW())
+          `, [superAdminRoleId, moduleId]);
+          syncedModules++;
+        }
+      }
+
+      console.log(`✅ User Management sync completed: ${syncedModules} new modules synced`);
+      
+      res.json({
+        success: true,
+        message: "ماژول‌ها با موفقیت همگام‌سازی شدند",
+        syncedModules,
+        totalModules: mainModules.length
+      });
+    } catch (error) {
+      console.error("Error syncing modules from User Management:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در همگام‌سازی ماژول‌ها",
+        error: error.message 
+      });
+    }
+  });
+
   // Create new admin user
   app.post("/api/admin/users", requireSuperAdmin, async (req, res) => {
     try {

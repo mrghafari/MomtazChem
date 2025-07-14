@@ -337,6 +337,27 @@ function UserManagement() {
     }
   });
 
+  // Sync modules mutation
+  const syncModulesMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('/api/user-management/sync-modules', { method: 'POST' });
+    },
+    onSuccess: () => {
+      toast({ 
+        title: 'همگام‌سازی موفق', 
+        description: 'ماژول‌ها با Site Management همگام‌سازی شدند' 
+      });
+      // Refresh data if needed
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-roles'] });
+    },
+    onError: () => {
+      toast({ 
+        title: 'خطا در همگام‌سازی', 
+        description: 'مشکلی در همگام‌سازی ماژول‌ها رخ داد' 
+      });
+    }
+  });
+
   // Helper functions
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
@@ -1021,13 +1042,27 @@ function UserManagement() {
         <TabsContent value="modules" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" />
-                ماژول‌های سیستم و دسترسی‌ها
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-2">
-                مدیریت دسترسی کاربران به ماژول‌های مختلف سیستم
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Key className="h-5 w-5" />
+                    ماژول‌های سیستم و دسترسی‌ها
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    مدیریت دسترسی کاربران به ماژول‌های مختلف سیستم
+                  </p>
+                </div>
+                <Button
+                  onClick={() => syncModulesMutation.mutate()}
+                  disabled={syncModulesMutation.isPending}
+                  variant="default"
+                  size="sm"
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                >
+                  <RefreshCw className={`h-4 w-4 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
+                  همگام‌سازی ماژول‌ها
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {/* Display total count of modules */}
