@@ -213,10 +213,10 @@ export default function SiteManagement() {
       className: "border-yellow-300 text-yellow-600 hover:bg-yellow-50"
     },
     {
-      id: "geography-analytics",
+      id: "geography-analytics", 
       label: "Geography Analytics",
       icon: MapPin,
-      onClick: () => trackButtonClick("geography-analytics", () => setLocation("/sales-analytics")),
+      onClick: () => trackButtonClick("geography-analytics", () => setLocation("/admin/geographic-analytics")),
       className: "border-teal-300 text-teal-600 hover:bg-teal-50"
     },
     {
