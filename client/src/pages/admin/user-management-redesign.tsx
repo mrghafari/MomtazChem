@@ -146,7 +146,9 @@ type Module = {
 
 // Available modules for permission assignment - using exact names from Site Management
 const availableModules: Module[] = [
+  { id: 'syncing-shop', name: 'syncing_shop', displayName: 'Syncing Shop', description: 'همگام‌سازی محصولات بین کاردکس و فروشگاه', category: 'operations', isCore: true, icon: Database, color: 'bg-blue-500' },
   { id: 'shop', name: 'shop_management', displayName: 'Shop', description: 'مدیریت فروشگاه آنلاین، محصولات و فروش', category: 'sales', isCore: true, icon: ShoppingCart, color: 'bg-purple-500' },
+  { id: 'abandoned-cart', name: 'abandoned_cart', displayName: 'Abandoned Cart', description: 'مدیریت سبدهای خرید رها شده', category: 'sales', isCore: false, icon: ShoppingCart, color: 'bg-red-500' },
   { id: 'products', name: 'product_management', displayName: 'Products', description: 'مدیریت کاتالوگ محصولات و مشخصات', category: 'sales', isCore: true, icon: Package, color: 'bg-violet-500' },
   { id: 'crm', name: 'crm_management', displayName: 'CRM', description: 'سیستم مدیریت ارتباط با مشتریان', category: 'customer', isCore: true, icon: Users, color: 'bg-pink-500' },
   { id: 'order-management', name: 'order_management', displayName: 'Order Management', description: 'مدیریت سفارشات و پردازش آن‌ها', category: 'sales', isCore: true, icon: Truck, color: 'bg-orange-500' },
