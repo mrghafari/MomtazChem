@@ -41,6 +41,8 @@ import nodemailer from "nodemailer";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
+import { gpsDeliveryStorage } from "./gps-delivery-storage";
+import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
 import { smsService } from "./sms-service";
 import { ticketingStorage } from "./ticketing-storage";
 import { supportTickets } from "../shared/ticketing-schema";
@@ -63,6 +65,15 @@ import {
   type AbandonedCartSettings,
   type AbandonedCartNotification
 } from "@shared/cart-schema";
+import { gpsDeliveryStorage } from "./gps-delivery-storage";
+import { 
+  gpsDeliveryConfirmations,
+  gpsDeliveryAnalytics,
+  insertGpsDeliveryConfirmationSchema,
+  insertGpsDeliveryAnalyticsSchema,
+  type GpsDeliveryConfirmation,
+  type GpsDeliveryAnalytics
+} from "@shared/gps-delivery-schema";
 
 // Extend session type to include admin user and customer user
 declare module "express-session" {
@@ -20567,18 +20578,7 @@ momtazchem.com
     }
   });
 
-  // API ERROR HANDLER - CATCH ALL API ROUTES AND ENSURE JSON RESPONSES
-  // =============================================================================
-  
-  // Catch-all for API routes that don't exist - return JSON 404
-  app.all('/api/*', (req, res) => {
-    res.status(404).json({
-      success: false,
-      message: 'API endpoint not found',
-      path: req.originalUrl,
-      method: req.method
-    });
-  });
+
   
   // =============================================================================
   // ABANDONED CART MANAGEMENT API
@@ -20739,6 +20739,229 @@ momtazchem.com
       console.error("Error completing cart session:", error);
       res.status(500).json({ success: false, message: "Failed to complete cart session" });
     }
+  });
+
+  // ===========================================
+  // GPS DELIVERY TRACKING ENDPOINTS
+  // ===========================================
+
+  // Record GPS delivery confirmation
+  app.post("/api/gps-delivery/confirm", async (req, res) => {
+    try {
+      console.log('📍 [GPS-API] Delivery confirmation request:', req.body);
+      
+      const gpsData = insertGpsDeliveryConfirmationSchema.parse(req.body);
+      const confirmation = await gpsDeliveryStorage.recordGpsDelivery(gpsData);
+      
+      res.json({ 
+        success: true, 
+        data: confirmation,
+        message: "GPS delivery confirmation recorded successfully"
+      });
+    } catch (error) {
+      console.error("❌ [GPS-API] Error recording GPS delivery:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : "Failed to record GPS delivery confirmation" 
+      });
+    }
+  });
+
+  // Get GPS deliveries by order
+  app.get("/api/gps-delivery/order/:orderId", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: "Invalid order ID" });
+      }
+
+      const deliveries = await gpsDeliveryStorage.getGpsDeliveriesByOrder(orderId);
+      res.json({ success: true, data: deliveries });
+    } catch (error) {
+      console.error("Error fetching GPS deliveries for order:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch GPS deliveries" });
+    }
+  });
+
+  // Get GPS deliveries by delivery person
+  app.get("/api/gps-delivery/person/:phone", async (req, res) => {
+    try {
+      const phone = req.params.phone;
+      const deliveries = await gpsDeliveryStorage.getGpsDeliveriesByDeliveryPerson(phone);
+      res.json({ success: true, data: deliveries });
+    } catch (error) {
+      console.error("Error fetching GPS deliveries for delivery person:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch GPS deliveries" });
+    }
+  });
+
+  // Get GPS deliveries by location
+  app.get("/api/gps-delivery/location/:country/:city", async (req, res) => {
+    try {
+      const { country, city } = req.params;
+      const { startDate, endDate } = req.query;
+      
+      const start = startDate ? new Date(startDate as string) : undefined;
+      const end = endDate ? new Date(endDate as string) : undefined;
+      
+      const deliveries = await gpsDeliveryStorage.getGpsDeliveriesByLocation(country, city, start, end);
+      res.json({ success: true, data: deliveries });
+    } catch (error) {
+      console.error("Error fetching GPS deliveries by location:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch GPS deliveries" });
+    }
+  });
+
+  // Get delivery performance statistics
+  app.get("/api/gps-delivery/performance", async (req, res) => {
+    try {
+      const { period } = req.query;
+      const periodDays = period ? parseInt(period as string) : 30;
+      
+      const stats = await gpsDeliveryStorage.getDeliveryPerformanceStats(periodDays);
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("Error fetching delivery performance stats:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch performance statistics" });
+    }
+  });
+
+  // Get geographic coverage data
+  app.get("/api/gps-delivery/coverage", async (req, res) => {
+    try {
+      const { country } = req.query;
+      const coverage = await gpsDeliveryStorage.getGeographicCoverage(country as string);
+      res.json({ success: true, data: coverage });
+    } catch (error) {
+      console.error("Error fetching geographic coverage:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch geographic coverage" });
+    }
+  });
+
+  // Get delivery person statistics
+  app.get("/api/gps-delivery/person-stats/:phone", async (req, res) => {
+    try {
+      const phone = req.params.phone;
+      const { period } = req.query;
+      const periodDays = period ? parseInt(period as string) : 30;
+      
+      const stats = await gpsDeliveryStorage.getDeliveryPersonStats(phone, periodDays);
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("Error fetching delivery person stats:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch delivery person statistics" });
+    }
+  });
+
+  // Get delivery heatmap data
+  app.get("/api/gps-delivery/heatmap", async (req, res) => {
+    try {
+      const { country, city } = req.query;
+      if (!country) {
+        return res.status(400).json({ success: false, message: "Country parameter is required" });
+      }
+      
+      const heatmapData = await gpsDeliveryStorage.getDeliveryHeatmapData(country as string, city as string);
+      res.json({ success: true, data: heatmapData });
+    } catch (error) {
+      console.error("Error fetching delivery heatmap data:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch heatmap data" });
+    }
+  });
+
+  // Get delivery route analysis
+  app.get("/api/gps-delivery/route-analysis/:phone/:date", async (req, res) => {
+    try {
+      const { phone, date } = req.params;
+      const analysisDate = new Date(date);
+      
+      if (isNaN(analysisDate.getTime())) {
+        return res.status(400).json({ success: false, message: "Invalid date format" });
+      }
+      
+      const routeAnalysis = await gpsDeliveryStorage.getDeliveryRouteAnalysis(phone, analysisDate);
+      res.json({ success: true, data: routeAnalysis });
+    } catch (error) {
+      console.error("Error fetching delivery route analysis:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch route analysis" });
+    }
+  });
+
+  // Generate analytics for specific date
+  app.post("/api/gps-delivery/analytics/generate", requireAuth, async (req, res) => {
+    try {
+      const { date } = req.body;
+      const analyticsDate = date ? new Date(date) : new Date();
+      
+      await gpsDeliveryStorage.generateDailyAnalytics(analyticsDate);
+      res.json({ 
+        success: true, 
+        message: `Analytics generated for ${analyticsDate.toISOString().split('T')[0]}` 
+      });
+    } catch (error) {
+      console.error("Error generating GPS delivery analytics:", error);
+      res.status(500).json({ success: false, message: "Failed to generate analytics" });
+    }
+  });
+
+  // Get analytics by date range
+  app.get("/api/gps-delivery/analytics", async (req, res) => {
+    try {
+      const { startDate, endDate, country, city } = req.query;
+      
+      if (startDate && endDate) {
+        const start = new Date(startDate as string);
+        const end = new Date(endDate as string);
+        const analytics = await gpsDeliveryStorage.getAnalyticsByDateRange(start, end);
+        res.json({ success: true, data: analytics });
+      } else if (country) {
+        const analytics = await gpsDeliveryStorage.getAnalyticsByLocation(country as string, city as string);
+        res.json({ success: true, data: analytics });
+      } else {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Either date range (startDate, endDate) or country parameter is required" 
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching GPS delivery analytics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Validate delivery location
+  app.post("/api/gps-delivery/validate-location", async (req, res) => {
+    try {
+      const { latitude, longitude, customerAddress } = req.body;
+      
+      if (!latitude || !longitude) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Latitude and longitude are required" 
+        });
+      }
+      
+      const validation = await gpsDeliveryStorage.validateDeliveryLocation(
+        parseFloat(latitude), 
+        parseFloat(longitude), 
+        customerAddress || ''
+      );
+      
+      res.json({ success: true, data: validation });
+    } catch (error) {
+      console.error("Error validating delivery location:", error);
+      res.status(500).json({ success: false, message: "Failed to validate location" });
+    }
+  });
+
+  // Catch-all for unmatched API routes - return JSON 404
+  app.all('/api/*', (req, res) => {
+    res.status(404).json({
+      success: false,
+      message: 'API endpoint not found',
+      path: req.originalUrl,
+      method: req.method
+    });
   });
 
   // Global error handler for all API routes

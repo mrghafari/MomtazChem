@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { MapPin, Package, TrendingUp, Users, DollarSign, ShoppingCart, Calendar, Download, Filter, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { MapPin, Package, TrendingUp, Users, DollarSign, ShoppingCart, Calendar, Download, Filter, ArrowUpDown, ArrowUp, ArrowDown, Navigation, Target, Clock, CheckCircle, AlertTriangle } from "lucide-react";
 
 interface GeographicData {
   region: string;
@@ -42,6 +42,36 @@ interface TimeSeriesData {
   orders: number;
   revenue: number;
   regions: { [key: string]: number };
+}
+
+interface GpsDeliveryData {
+  id: number;
+  deliveryVerificationId: number;
+  customerOrderId: number;
+  latitude: string;
+  longitude: string;
+  accuracy: string;
+  deliveryPersonName: string;
+  deliveryPersonPhone: string;
+  addressMatched: boolean;
+  customerAddress: string;
+  detectedAddress: string;
+  distanceFromCustomer: string;
+  country: string;
+  city: string;
+  region: string;
+  verificationTime: string;
+  deliveryNotes: string;
+}
+
+interface GpsDeliveryStats {
+  totalDeliveries: number;
+  successfulDeliveries: number;
+  averageAccuracy: number;
+  coverageCountries: number;
+  coverageCities: number;
+  uniqueDeliveryPersons: number;
+  analytics: any[];
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -135,6 +165,36 @@ export default function GeographicAnalytics() {
       if (!response.ok) throw new Error('Failed to fetch time series data');
       const result = await response.json();
       return result.data || [];
+    }
+  });
+
+  // Fetch GPS delivery data  
+  const { data: gpsDeliveries, isLoading: gpsLoading } = useQuery<GpsDeliveryData[]>({
+    queryKey: ['/api/gps-delivery/analytics'],
+    queryFn: async () => {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      const endDate = new Date();
+      
+      const response = await fetch(`/api/gps-delivery/analytics?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch GPS delivery data');
+      const result = await response.json();
+      return result.data || [];
+    }
+  });
+
+  // Fetch GPS delivery performance stats
+  const { data: gpsStats, isLoading: gpsStatsLoading } = useQuery<GpsDeliveryStats>({
+    queryKey: ['/api/gps-delivery/performance'],
+    queryFn: async () => {
+      const response = await fetch('/api/gps-delivery/performance?period=30', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch GPS stats');
+      const result = await response.json();
+      return result.data || { totalDeliveries: 0, successfulDeliveries: 0, averageAccuracy: 0, coverageCountries: 0, coverageCities: 0, uniqueDeliveryPersons: 0, analytics: [] };
     }
   });
 
@@ -330,6 +390,7 @@ export default function GeographicAnalytics() {
           <TabsTrigger value="products">Product Performance</TabsTrigger>
           <TabsTrigger value="product-regions">Products by Region</TabsTrigger>
           <TabsTrigger value="trends">Trends</TabsTrigger>
+          <TabsTrigger value="gps-tracking">GPS Delivery Tracking</TabsTrigger>
         </TabsList>
 
         {/* Regional Analysis */}
@@ -784,6 +845,184 @@ export default function GeographicAnalytics() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* GPS Delivery Tracking */}
+        <TabsContent value="gps-tracking" className="space-y-6">
+          {gpsLoading || gpsStatsLoading ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              <p className="mt-2 text-gray-600">Loading GPS delivery data...</p>
+            </div>
+          ) : (
+            <>
+              {/* GPS Summary Cards */}
+              {gpsStats && (
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Deliveries</CardTitle>
+                      <Navigation className="h-4 w-4 text-blue-600" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-blue-600">{gpsStats.totalDeliveries}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Successful</CardTitle>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-600">{gpsStats.successfulDeliveries}</div>
+                      <p className="text-xs text-gray-600">
+                        {gpsStats.totalDeliveries > 0 ? 
+                          `${((gpsStats.successfulDeliveries / gpsStats.totalDeliveries) * 100).toFixed(1)}% success rate` : 
+                          'No data'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Avg Accuracy</CardTitle>
+                      <Target className="h-4 w-4 text-orange-600" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-orange-600">{gpsStats.averageAccuracy.toFixed(1)}m</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Countries</CardTitle>
+                      <MapPin className="h-4 w-4 text-purple-600" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-purple-600">{gpsStats.coverageCountries}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Cities</CardTitle>
+                      <MapPin className="h-4 w-4 text-indigo-600" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-indigo-600">{gpsStats.coverageCities}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Delivery Staff</CardTitle>
+                      <Users className="h-4 w-4 text-teal-600" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-teal-600">{gpsStats.uniqueDeliveryPersons}</div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* GPS Deliveries Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Navigation className="h-5 w-5 text-blue-600" />
+                    Recent GPS Delivery Confirmations
+                  </CardTitle>
+                  <p className="text-sm text-gray-600">Latest delivery location confirmations with GPS coordinates</p>
+                </CardHeader>
+                <CardContent>
+                  {gpsDeliveries && gpsDeliveries.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-gray-300">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Order ID</th>
+                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Delivery Person</th>
+                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Location</th>
+                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">GPS Coordinates</th>
+                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Accuracy</th>
+                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Address Match</th>
+                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Verification Time</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {gpsDeliveries.map((delivery, index) => (
+                            <tr key={delivery.id || index} className="hover:bg-gray-50">
+                              <td className="border border-gray-300 px-3 py-2 font-medium">
+                                #{delivery.customerOrderId}
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2">
+                                <div>
+                                  <p className="font-medium">{delivery.deliveryPersonName}</p>
+                                  <p className="text-xs text-gray-600">{delivery.deliveryPersonPhone}</p>
+                                </div>
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2">
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3 text-gray-400" />
+                                  <span>{delivery.city}, {delivery.country}</span>
+                                </div>
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2 text-xs">
+                                <div>
+                                  <p>Lat: {parseFloat(delivery.latitude).toFixed(6)}</p>
+                                  <p>Lng: {parseFloat(delivery.longitude).toFixed(6)}</p>
+                                </div>
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2">
+                                <Badge variant={parseFloat(delivery.accuracy) <= 10 ? "default" : "secondary"}>
+                                  ±{delivery.accuracy}m
+                                </Badge>
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2">
+                                {delivery.addressMatched ? (
+                                  <Badge variant="default" className="bg-green-100 text-green-800">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Match
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                    No Match
+                                  </Badge>
+                                )}
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2 text-xs">
+                                {new Date(delivery.verificationTime).toLocaleString('en-US')}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Navigation className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg font-medium">No GPS delivery data available</p>
+                      <p className="text-sm">GPS tracking data will appear here when delivery confirmations are made</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* GPS Analytics Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>GPS Delivery Analytics</CardTitle>
+                  <p className="text-sm text-gray-600">Delivery locations and accuracy trends</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center text-gray-500">
+                    <div className="text-center">
+                      <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg font-medium">GPS Analytics Visualization</p>
+                      <p className="text-sm">Advanced GPS tracking charts and heatmaps coming soon</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </TabsContent>
       </Tabs>
     </div>
