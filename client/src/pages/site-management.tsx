@@ -226,14 +226,7 @@ export default function SiteManagement() {
       className: "border-purple-300 text-purple-600 hover:bg-purple-50",
       moduleId: "factory"
     },
-    {
-      id: "super-admin",
-      label: "Super Admin",
-      icon: UserCog,
-      onClick: () => trackButtonClick("super-admin", () => setLocation("/admin/super-admin-settings")),
-      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
-      moduleId: "user_management"
-    },
+
     {
       id: "user-management",
       label: "User Management",

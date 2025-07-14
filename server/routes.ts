@@ -3466,7 +3466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'categories',
         'sms',
         'factory',
-        'super_admin',
+
         'user_management',
         'shop_management',
         'procedures',
@@ -13862,7 +13862,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       if (legacyUser[0].id === 7 || legacyUser[0].email === 'admin@momtazchem.com') {
         const allModules = [
           "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
-          "crm", "seo", "categories", "sms", "factory", "super_admin", "user_management",
+          "crm", "seo", "categories", "sms", "factory", "user_management",
           "shop_management", "procedures", "smtp_test", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",

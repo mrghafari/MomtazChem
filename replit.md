@@ -92,7 +92,7 @@ The database is organized into multiple schema files:
 - **Automated Barcode Generation**: Bulk barcode processing for existing products
 
 #### Site Management Features
-- **26 integrated administrative functions** centralized in unified Site Management interface with drag-and-drop Quick Actions layout:
+- **25 integrated administrative functions** centralized in unified Site Management interface with drag-and-drop Quick Actions layout:
 
 1. **Sync Shop** - Product synchronization between showcase and shop catalogs
 2. **Inquiries** - Customer inquiry management and response tracking
@@ -104,20 +104,21 @@ The database is organized into multiple schema files:
 8. **Categories** - Hierarchical product categorization with standardized shop categories
 9. **SMS** - Customer notification and verification systems with admin-configurable settings
 10. **Factory** - Production line and manufacturing operations management
-11. **Super Admin** - Admin account management and verification system with email/SMS authentication
-12. **User Management** - Multi-role admin system with department-based access control
-13. **Shop** - E-commerce administration with inventory tracking and pricing management
-14. **Procedures** - Document management system for operational procedures and methods
-15. **SMTP Test** - Comprehensive email connectivity testing and validation systems
-16. **Order Management** - 3-department sequential workflow (Financial → Warehouse → Logistics)
-17. **Products** - Showcase and shop product catalogs with variant support and specifications
-18. **Payment Settings** - Iraqi banking system integration with 3 major banks and invoice generation
-19. **Wallet Management** - Digital wallet system with recharge requests and balance management
-20. **Geography Analytics** - Regional sales tracking and performance analysis (Iraq and Turkey)
-21. **AI Settings** - Smart SKU generation, product recommendations, and OpenAI API integration
-22. **Refresh Control** - Centralized timing management for all department interfaces
-23. **Inventory Management** - Independent inventory system with alerts, automation, and real-time monitoring
-24. **Content Management** - Dynamic multilingual content editing system (430+ items in 4 languages)
+
+11. **User Management** - Multi-role admin system with department-based access control
+12. **Shop** - E-commerce administration with inventory tracking and pricing management
+13. **Procedures** - Document management system for operational procedures and methods
+14. **SMTP Test** - Comprehensive email connectivity testing and validation systems
+15. **Order Management** - 3-department sequential workflow (Financial → Warehouse → Logistics)
+16. **Products** - Showcase and shop product catalogs with variant support and specifications
+17. **Payment Settings** - Iraqi banking system integration with 3 major banks and invoice generation
+18. **Wallet Management** - Digital wallet system with recharge requests and balance management
+19. **Geography Analytics** - Regional sales tracking and performance analysis (Iraq and Turkey)
+20. **AI Settings** - Smart SKU generation, product recommendations, and OpenAI API integration
+21. **Refresh Control** - Centralized timing management for all department interfaces
+22. **Inventory Management** - Independent inventory system with alerts, automation, and real-time monitoring
+23. **Content Management** - Dynamic multilingual content editing system (430+ items in 4 languages)
+24. **Warehouse Management** - Unified warehouse operations with inventory, orders, and goods tracking
 25. **[Future Enhancement Slot]** - Reserved for additional administrative functionality
 
 ## Data Flow
@@ -193,7 +194,7 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
-- July 14, 2025: COMPLETED User Management module synchronization system - implemented comprehensive sync functionality to align module permissions with main system, fixed database table reference issues (admin_role_permissions to role_permissions), corrected role_id data type from integer to string for proper database compatibility, sync endpoint now properly adds all 26 Site Management modules to module_permissions table for super admin role, system replaces inventory_management with warehouse-management module as requested, sync button properly positioned in User Management page with Persian/Arabic language support, module synchronization ensures user management system stays aligned with main Site Management modules
+- July 14, 2025: COMPLETED User Management module synchronization system - implemented comprehensive sync functionality to align module permissions with main system, fixed database table reference issues (admin_role_permissions to role_permissions), corrected role_id data type from integer to string for proper database compatibility, sync endpoint now properly adds all 25 Site Management modules to module_permissions table for super admin role, REMOVED super_admin module completely from system reducing total modules from 26 to 25, system replaces inventory_management with warehouse-management module as requested, sync button properly positioned in User Management page with Persian/Arabic language support, module synchronization ensures user management system stays aligned with main Site Management modules
 - July 14, 2025: COMPLETED warehouse-management module integration into Site Management - successfully added warehouse-management module to permissions system with proper database entries for roles (super_admin, warehouse_admin, inventory_manager, order_manager, site_manager), updated permissions API endpoint to include warehouse-management module in super admin permissions array, fixed moduleId mapping in Site Management from "warehouse_management" to "warehouse-management" to match database schema, warehouse management button now properly displays in Site Management interface with appropriate permissions and routing to /admin/warehouse-management, system provides complete access control for warehouse operations
 - July 14, 2025: SUCCESSFULLY INTEGRATED inventory management into warehouse management system - completely merged standalone inventory-management module into comprehensive warehouse-management.tsx component, created unified warehouse management system with 5 integrated tabs: Orders, Inventory, Goods in Transit, Reports, and Statistics, eliminated duplicate inventory management module while preserving all functionality including unified product management, goods tracking, inventory movements, threshold settings, barcode integration, and kardex sync, updated Site Management button from "Inventory Management" to "Warehouse Management" with proper routing to /admin/warehouse-management, removed obsolete inventory-management.tsx file and updated App.tsx routing, warehouse management now serves as complete inventory control center with all previous inventory features seamlessly integrated, system maintains full functionality while providing unified warehouse operations interface
 - July 14, 2025: CRITICAL SECURITY FIX - Fixed major security vulnerability in Site Management reset order functionality that was bypassing role-based access control, reset order button was calling getInitialButtons() showing ALL modules to ALL users regardless of permissions, implemented secure reset functionality that uses getFilteredButtons() to respect user permissions, enhanced button initialization to start with empty array and populate only after permissions are loaded, fixed saved order restoration to filter out unauthorized buttons, eliminated Department Users module completely without compromising other functionality, fixed admin login authentication error "body stream already read" by removing problematic session save callback and improving response handling, security now properly enforced across all Site Management features including reset functionality
