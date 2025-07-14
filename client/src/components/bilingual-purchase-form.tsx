@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -276,48 +276,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
-  // Check wallet query conditions
-  const walletQueryEnabled = !!(existingCustomer || (customerData?.success && customerData.customer));
-  console.log('💳 [WALLET QUERY] Enabled condition check:', {
-    existingCustomer: !!existingCustomer,
-    customerDataSuccess: !!(customerData?.success && customerData.customer),
-    finalEnabled: walletQueryEnabled
-  });
+  // Check wallet query conditions with stable memoization
+  const walletQueryEnabled = useMemo(() => {
+    return !!(existingCustomer || (customerData?.success && customerData.customer));
+  }, [existingCustomer, customerData?.success]);
 
-  // Fetch wallet data for logged-in customers
+  // Fetch wallet data for logged-in customers using default query function
   const { data: walletData, isLoading: isLoadingWallet, error: walletError } = useQuery({
-    queryKey: ['/api/customer/wallet', Date.now()],
-    queryFn: async () => {
-      try {
-        console.log('💳 [WALLET QUERY] Starting wallet fetch...');
-        const response = await fetch(`/api/customer/wallet?t=${Date.now()}`, {
-          credentials: 'include'
-        });
-        
-        console.log('💳 [WALLET QUERY] Response status:', response.status);
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log('💳 [WALLET QUERY] Wallet API response received:', result);
-          if (result.success) {
-            console.log('💳 [WALLET QUERY] Returning successful result:', result);
-            return result;
-          } else {
-            console.log('💳 [WALLET QUERY] Response not successful:', result);
-          }
-        } else {
-          console.log('💳 [WALLET QUERY] Response not ok:', response.status, response.statusText);
-        }
-        console.log('💳 [WALLET QUERY] Returning null - no successful response');
-        return null;
-      } catch (error) {
-        console.log('💳 [WALLET QUERY] Exception during fetch:', error);
-        return null;
-      }
-    },
+    queryKey: ['/api/customer/wallet'],
     enabled: walletQueryEnabled,
     retry: false,
-    staleTime: 0, // Disable caching to force fresh requests
+    staleTime: 30000, // 30 seconds cache to prevent excessive requests
+    refetchOnWindowFocus: false,
   });
 
   // Fetch VAT settings
@@ -582,7 +552,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     customerDataSuccess: !!customerData?.success,
     walletDataStructure: walletData ? Object.keys(walletData) : 'no data',
     isLoadingWallet,
-    walletError,
+    walletError: walletError?.message,
     walletQueryEnabled
   });
 
