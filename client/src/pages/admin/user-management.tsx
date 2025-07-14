@@ -261,6 +261,29 @@ function UserManagement() {
     queryKey: ["/api/admin/roles"],
   });
 
+  // Sync modules mutation
+  const syncModulesMutation = useMutation({
+    mutationFn: () => apiRequest("/api/admin/sync-modules", { method: "POST" }),
+    onSuccess: () => {
+      toast({
+        title: t.syncSuccess,
+        description: t.syncSuccessMessage,
+      });
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/roles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/permissions"] });
+    },
+    onError: (error: any) => {
+      console.error("Error syncing modules:", error);
+      toast({
+        title: t.syncError,
+        description: t.syncErrorMessage,
+        variant: "destructive",
+      });
+    }
+  });
+
   // Fetch admin permissions
   const { data: permissions = [], isLoading: permissionsLoading } = useQuery<AdminPermission[]>({
     queryKey: ["/api/admin/permissions"],

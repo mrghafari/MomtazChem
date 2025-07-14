@@ -27,25 +27,7 @@ export default function SiteManagement() {
   const { user } = useAuth();
   const [showKardexSync, setShowKardexSync] = useState(false);
 
-  // Sync modules mutation
-  const syncModulesMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/sync-modules", "POST"),
-    onSuccess: () => {
-      toast({
-        title: "نجح!",
-        description: "تم مزامنة الوحدات بنجاح",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/permissions'] });
-    },
-    onError: (error: any) => {
-      console.error("Error syncing modules:", error);
-      toast({
-        title: "خطأ",
-        description: "فشل في مزامنة الوحدات",
-        variant: "destructive",
-      });
-    }
-  });
+
 
   // Function to track button clicks and sort by usage
   const trackButtonClick = (buttonId: string, action: () => void) => {
@@ -557,39 +539,27 @@ export default function SiteManagement() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Quick Actions</span>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => syncModulesMutation.mutate()}
-                    disabled={syncModulesMutation.isPending}
-                    className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-600"
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
-                    مزامنة الوحدات
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      localStorage.removeItem('site-management-button-order');
-                      localStorage.removeItem('site-management-click-counts');
-                      
-                      // Reset to filtered buttons (respecting permissions) instead of all buttons
-                      const authorizedButtons = getFilteredButtons();
-                      setButtons(authorizedButtons);
-                      
-                      toast({
-                        title: "ترتیب بازنشانی شد",
-                        description: "ترتیب بلوک‌های مدیریتی به حالت اولیه بازگشت",
-                      });
-                    }}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Reset Order
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    localStorage.removeItem('site-management-button-order');
+                    localStorage.removeItem('site-management-click-counts');
+                    
+                    // Reset to filtered buttons (respecting permissions) instead of all buttons
+                    const authorizedButtons = getFilteredButtons();
+                    setButtons(authorizedButtons);
+                    
+                    toast({
+                      title: "ترتیب بازنشانی شد",
+                      description: "ترتیب بلوک‌های مدیریتی به حالت اولیه بازگشت",
+                    });
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Reset Order
+                </Button>
               </CardTitle>
               <CardDescription>
                 Drag and drop to reorder management blocks. Your custom layout will be saved automatically.
@@ -642,29 +612,12 @@ export default function SiteManagement() {
                                         <IconComponent className="w-6 h-6" />
                                         <span className="font-medium text-sm">{button.label}</span>
                                       </div>
-                                      <div className="flex items-center gap-2">
-                                        {button.id === "user-management" && (
-                                          <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              syncModulesMutation.mutate();
-                                            }}
-                                            disabled={syncModulesMutation.isPending}
-                                            className="h-8 px-2 text-xs bg-blue-50 hover:bg-blue-100 border-blue-200"
-                                            title="مزامنة الوحدات"
-                                          >
-                                            <RefreshCw className={`w-3 h-3 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
-                                          </Button>
-                                        )}
-                                        <div 
-                                          {...provided.dragHandleProps}
-                                          className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1"
-                                          onClick={(e) => e.stopPropagation()}
-                                        >
-                                          <GripVertical className="w-4 h-4" />
-                                        </div>
+                                      <div 
+                                        {...provided.dragHandleProps}
+                                        className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <GripVertical className="w-4 h-4" />
                                       </div>
                                     </div>
                                   </CardContent>
