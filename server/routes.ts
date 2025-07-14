@@ -15922,27 +15922,50 @@ momtazchem.com
           startDate.setDate(now.getDate() - 30);
       }
 
-      let query = customerDb.select({
+      // Get all shop products with their sales data (LEFT JOIN to include products with zero sales)
+      const allProductsQuery = await customerDb.select({
+        id: shopProducts.id,
         name: shopProducts.name,
-        category: shopProducts.category,
-        totalSales: sql`sum(${orderItems.quantity})::int`.as('totalSales'),
-        revenue: sql`sum(${orderItems.quantity} * ${orderItems.unitPrice})::numeric`.as('revenue')
+        category: shopProducts.category
       })
-      .from(orderItems)
-      .innerJoin(customerOrders, eq(orderItems.orderId, customerOrders.id))
-      .innerJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
-      .where(gte(customerOrders.createdAt, startDate))
-      .groupBy(shopProducts.name, shopProducts.category)
-      .orderBy(sql`sum(${orderItems.quantity} * ${orderItems.unitPrice}) desc`);
+      .from(shopProducts)
+      .where(eq(shopProducts.inStock, true));
 
-      if (product && product !== 'all') {
-        query = query.where(eq(shopProducts.name, product as string));
-      }
+      console.log('📊 [PRODUCTS] Found', allProductsQuery.length, 'products in shop');
 
-      const productData = await query;
+      // For each product, calculate sales data
+      const productData = await Promise.all(allProductsQuery.map(async (product) => {
+        const salesData = await customerDb.select({
+          totalSales: sql`COALESCE(sum(${orderItems.quantity}), 0)::int`.as('totalSales'),
+          revenue: sql`COALESCE(sum(${orderItems.quantity} * ${orderItems.unitPrice}), 0)::numeric`.as('revenue')
+        })
+        .from(orderItems)
+        .innerJoin(customerOrders, eq(orderItems.orderId, customerOrders.id))
+        .where(and(
+          eq(orderItems.productId, product.id),
+          gte(customerOrders.createdAt, startDate)
+        ));
+
+        const sales = salesData[0] || { totalSales: 0, revenue: 0 };
+        
+        return {
+          name: product.name,
+          category: product.category,
+          totalSales: Number(sales.totalSales) || 0,
+          revenue: Number(sales.revenue) || 0
+        };
+      }));
+
+      // Sort by revenue descending
+      productData.sort((a, b) => b.revenue - a.revenue);
+
+      // Filter by specific product if requested
+      const filteredProductData = product && product !== 'all' 
+        ? productData.filter(p => p.name === product)
+        : productData;
       
       // Get regional breakdown for each product
-      const processedData = await Promise.all(productData.map(async (productInfo) => {
+      const processedData = await Promise.all(filteredProductData.map(async (productInfo) => {
         try {
           const regionsQuery = await customerDb.execute(sql`
             SELECT 
