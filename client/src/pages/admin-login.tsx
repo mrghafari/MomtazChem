@@ -51,8 +51,8 @@ export default function AdminLogin() {
       
       toast({ title: "Success", description: "Admin login successful" });
       
-      // Navigate to admin panel
-      setLocation("/admin");
+      // Navigate to Site Management for role-based access
+      setLocation("/site-management");
     },
     onError: (error: any) => {
       toast({ 
