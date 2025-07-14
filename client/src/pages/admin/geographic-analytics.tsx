@@ -171,18 +171,18 @@ export default function GeographicAnalytics() {
     }
   });
 
-  // Fetch GPS delivery data  
+  // Fetch GPS delivery confirmations data  
   const { data: gpsDeliveries, isLoading: gpsLoading } = useQuery<GpsDeliveryData[]>({
-    queryKey: ['/api/gps-delivery/analytics'],
+    queryKey: ['/api/gps-delivery/confirmations'],
     queryFn: async () => {
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 30);
+      startDate.setDate(startDate.getDate() - 7); // Last 7 days instead of 30
       const endDate = new Date();
       
-      const response = await fetch(`/api/gps-delivery/analytics?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`, {
+      const response = await fetch(`/api/gps-delivery/confirmations?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&limit=100`, {
         credentials: 'include'
       });
-      if (!response.ok) throw new Error('Failed to fetch GPS delivery data');
+      if (!response.ok) throw new Error('Failed to fetch GPS delivery confirmations');
       const result = await response.json();
       return result.data || [];
     }

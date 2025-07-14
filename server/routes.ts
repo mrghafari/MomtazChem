@@ -20958,6 +20958,32 @@ momtazchem.com
     }
   });
 
+  // Get actual GPS delivery confirmations for table display
+  app.get("/api/gps-delivery/confirmations", async (req, res) => {
+    try {
+      const { startDate, endDate, limit = 50 } = req.query;
+      console.log('🚚 [GPS-CONFIRMATIONS] Fetching delivery confirmations');
+      
+      // If no date range provided, default to last 7 days
+      const defaultStartDate = new Date();
+      defaultStartDate.setDate(defaultStartDate.getDate() - 7);
+      const defaultEndDate = new Date();
+      
+      const start = startDate ? new Date(startDate as string) : defaultStartDate;
+      const end = endDate ? new Date(endDate as string) : defaultEndDate;
+      
+      console.log(`🚚 [GPS-CONFIRMATIONS] Date range: ${start.toISOString()} to ${end.toISOString()}`);
+      
+      const confirmations = await gpsDeliveryStorage.getDeliveryConfirmations(start, end, parseInt(limit as string));
+      console.log(`🚚 [GPS-CONFIRMATIONS] Found ${confirmations.length} delivery confirmations`);
+      
+      res.json({ success: true, data: confirmations });
+    } catch (error) {
+      console.error("Error fetching GPS delivery confirmations:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch delivery confirmations" });
+    }
+  });
+
   // Get delivery route analysis
   app.get("/api/gps-delivery/route-analysis/:phone/:date", async (req, res) => {
     try {

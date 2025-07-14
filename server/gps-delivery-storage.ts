@@ -18,6 +18,7 @@ export interface IGpsDeliveryStorage {
   getGpsDeliveriesByOrder(customerOrderId: number): Promise<GpsDeliveryConfirmation[]>;
   getGpsDeliveriesByDeliveryPerson(deliveryPersonPhone: string): Promise<GpsDeliveryConfirmation[]>;
   getGpsDeliveriesByLocation(country: string, city: string, startDate?: Date, endDate?: Date): Promise<GpsDeliveryConfirmation[]>;
+  getDeliveryConfirmations(startDate: Date, endDate: Date, limit?: number): Promise<GpsDeliveryConfirmation[]>;
   
   // Analytics
   generateDailyAnalytics(date: Date): Promise<void>;
@@ -133,6 +134,27 @@ export class GpsDeliveryStorage implements IGpsDeliveryStorage {
     }
     
     return await query.orderBy(desc(gpsDeliveryConfirmations.verificationTime));
+  }
+
+  async getDeliveryConfirmations(startDate: Date, endDate: Date, limit: number = 50): Promise<GpsDeliveryConfirmation[]> {
+    try {
+      console.log(`🚚 [GPS-CONFIRMATIONS] Fetching confirmations from ${startDate.toISOString()} to ${endDate.toISOString()}, limit: ${limit}`);
+      
+      const confirmations = await db
+        .select()
+        .from(gpsDeliveryConfirmations)
+        .where(
+          between(gpsDeliveryConfirmations.verificationTime, startDate, endDate)
+        )
+        .orderBy(desc(gpsDeliveryConfirmations.verificationTime))
+        .limit(limit);
+      
+      console.log(`🚚 [GPS-CONFIRMATIONS] Found ${confirmations.length} confirmations`);
+      return confirmations;
+    } catch (error) {
+      console.error('❌ [GPS-CONFIRMATIONS] Error fetching delivery confirmations:', error);
+      throw error;
+    }
   }
   
   // ===========================================
