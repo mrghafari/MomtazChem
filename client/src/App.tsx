@@ -25,7 +25,7 @@ import AdminUsers from "@/pages/admin-users";
 
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
 import DatabaseManagement from "@/pages/admin/database-management";
-import UserManagement from "@/pages/admin/user-management";
+import UserManagementRedesign from "@/pages/admin/user-management-redesign";
 import FactoryManagement from "@/pages/admin/factory-management";
 import ProceduresManagement from "@/pages/admin/procedures-management";
 import SMTPTestPage from "@/pages/admin/smtp-test";
@@ -124,7 +124,7 @@ function Router() {
 
           <Route path="/admin/barcode-inventory" component={BarcodeInventory} />
           <Route path="/admin/database-management" component={DatabaseManagement} />
-          <Route path="/admin/user-management" component={UserManagement} />
+          <Route path="/admin/user-management" component={UserManagementRedesign} />
           <Route path="/admin/factory-management" component={FactoryManagement} />
           <Route path="/admin/procedures-management" component={ProceduresManagement} />
           <Route path="/admin/smtp-test" component={SMTPTestPage} />

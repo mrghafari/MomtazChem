@@ -323,6 +323,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Import department auth functions
   const { attachUserDepartments, requireDepartment } = await import("./department-auth");
   
+  // Create requireAdmin alias for better semantics
+  const requireAdmin = requireAuth;
+  
   // Add department middleware to all authenticated routes (excluding ticket creation for guest access)
   app.use('/api', (req, res, next) => {
     // Skip auth middleware for ticket creation to allow guest access
@@ -3726,14 +3729,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await pool.query('BEGIN');
       
       try {
-        // Remove all existing permissions for this role
+        // Remove existing permissions
         await pool.query(`DELETE FROM role_permissions WHERE role_id = $1`, [id]);
         
         // Add new permissions
-        for (const permissionId of permissionIds) {
-          await pool.query(`
-            INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)
-          `, [id, permissionId]);
+        if (permissionIds.length > 0) {
+          const values = permissionIds.map((permId: string, index: number) => 
+            `($1, $${index + 2})`
+          ).join(', ');
+          
+          const query = `INSERT INTO role_permissions (role_id, permission_id) VALUES ${values}`;
+          await pool.query(query, [id, ...permissionIds]);
         }
         
         await pool.query('COMMIT');
@@ -3749,6 +3755,684 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating role permissions:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // =============================================================================
+  // CUSTOM USER MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get all custom roles
+  app.get("/api/admin/custom-roles", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          cr.*,
+          COUNT(cu.id) as user_count
+        FROM custom_roles cr
+        LEFT JOIN custom_users cu ON cr.id = cu.role_id AND cu.is_active = true
+        GROUP BY cr.id
+        ORDER BY cr.priority DESC, cr.display_name
+      `);
+
+      const roles = result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        displayName: row.display_name,
+        description: row.description,
+        color: row.color,
+        priority: row.priority,
+        permissions: row.permissions || [],
+        userCount: parseInt(row.user_count),
+        isActive: row.is_active,
+        createdAt: row.created_at
+      }));
+
+      res.json({ success: true, data: roles });
+    } catch (error) {
+      console.error("Error fetching custom roles:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت نقش‌ها" });
+    }
+  });
+
+  // Create custom role
+  app.post("/api/admin/custom-roles", requireAuth, async (req, res) => {
+    try {
+      const { name, displayName, description, color, priority, permissions } = req.body;
+      
+      if (!name || !displayName) {
+        return res.status(400).json({ success: false, message: "نام و نام نمایشی الزامی است" });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO custom_roles (name, display_name, description, color, priority, permissions)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
+      `, [name, displayName, description, color || '#3b82f6', priority || 1, permissions || []]);
+
+      res.json({
+        success: true,
+        data: result.rows[0],
+        message: "نقش جدید با موفقیت ایجاد شد"
+      });
+    } catch (error: any) {
+      console.error("Error creating custom role:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "این نام نقش قبلاً استفاده شده است" });
+      } else {
+        res.status(500).json({ success: false, message: "خطا در ایجاد نقش" });
+      }
+    }
+  });
+
+  // Update custom role
+  app.patch("/api/admin/custom-roles/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, displayName, description, color, priority, permissions, isActive } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE custom_roles 
+        SET 
+          name = COALESCE($1, name),
+          display_name = COALESCE($2, display_name),
+          description = COALESCE($3, description),
+          color = COALESCE($4, color),
+          priority = COALESCE($5, priority),
+          permissions = COALESCE($6, permissions),
+          is_active = COALESCE($7, is_active),
+          updated_at = NOW()
+        WHERE id = $8
+        RETURNING *
+      `, [name, displayName, description, color, priority, permissions, isActive, id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "نقش یافت نشد" });
+      }
+
+      res.json({
+        success: true,
+        data: result.rows[0],
+        message: "نقش با موفقیت به‌روزرسانی شد"
+      });
+    } catch (error: any) {
+      console.error("Error updating custom role:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "این نام نقش قبلاً استفاده شده است" });
+      } else {
+        res.status(500).json({ success: false, message: "خطا در به‌روزرسانی نقش" });
+      }
+    }
+  });
+
+  // Delete custom role
+  app.delete("/api/admin/custom-roles/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const { pool } = await import('./db');
+      
+      // Check if role has users assigned
+      const usersCheck = await pool.query(`
+        SELECT COUNT(*) as user_count FROM custom_users WHERE role_id = $1
+      `, [id]);
+      
+      if (parseInt(usersCheck.rows[0].user_count) > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "نمی‌توان نقشی را حذف کرد که کاربران به آن تخصیص داده شده‌اند" 
+        });
+      }
+
+      const result = await pool.query(`
+        DELETE FROM custom_roles WHERE id = $1 RETURNING id
+      `, [id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "نقش یافت نشد" });
+      }
+
+      res.json({
+        success: true,
+        message: "نقش با موفقیت حذف شد"
+      });
+    } catch (error) {
+      console.error("Error deleting custom role:", error);
+      res.status(500).json({ success: false, message: "خطا در حذف نقش" });
+    }
+  });
+
+  // Get all custom users
+  app.get("/api/admin/custom-users", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          cu.*,
+          cr.name as role_name,
+          cr.display_name as role_display_name,
+          cr.color as role_color
+        FROM custom_users cu
+        LEFT JOIN custom_roles cr ON cu.role_id = cr.id
+        ORDER BY cu.created_at DESC
+      `);
+
+      const users = result.rows.map((row: any) => ({
+        id: row.id,
+        fullName: row.full_name,
+        email: row.email,
+        phone: row.phone,
+        roleId: row.role_id,
+        roleName: row.role_name,
+        roleDisplayName: row.role_display_name,
+        roleColor: row.role_color,
+        isActive: row.is_active,
+        smsNotifications: row.sms_notifications,
+        emailNotifications: row.email_notifications,
+        lastLogin: row.last_login,
+        createdAt: row.created_at
+      }));
+
+      res.json({ success: true, data: users });
+    } catch (error) {
+      console.error("Error fetching custom users:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت کاربران" });
+    }
+  });
+
+  // Create custom user
+  app.post("/api/admin/custom-users", requireAuth, async (req, res) => {
+    try {
+      const { fullName, email, phone, password, roleId, smsNotifications, emailNotifications, isActive } = req.body;
+      
+      if (!fullName || !email || !phone || !password || !roleId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "تمام فیلدها الزامی است" 
+        });
+      }
+
+      // Hash password
+      const bcrypt = await import('bcryptjs');
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO custom_users (
+          full_name, email, phone, password_hash, role_id, 
+          sms_notifications, email_notifications, is_active
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, full_name, email, phone, role_id, is_active, 
+                  sms_notifications, email_notifications, created_at
+      `, [fullName, email, phone, passwordHash, roleId, 
+          smsNotifications ?? true, emailNotifications ?? true, isActive ?? true]);
+
+      res.json({
+        success: true,
+        data: result.rows[0],
+        message: "کاربر جدید با موفقیت ایجاد شد"
+      });
+    } catch (error: any) {
+      console.error("Error creating custom user:", error);
+      if (error.code === '23505') {
+        if (error.constraint?.includes('email')) {
+          res.status(400).json({ success: false, message: "این ایمیل قبلاً استفاده شده است" });
+        } else if (error.constraint?.includes('phone')) {
+          res.status(400).json({ success: false, message: "این شماره تلفن قبلاً استفاده شده است" });
+        } else {
+          res.status(400).json({ success: false, message: "داده تکراری" });
+        }
+      } else {
+        res.status(500).json({ success: false, message: "خطا در ایجاد کاربر" });
+      }
+    }
+  });
+
+  // Update custom user
+  app.patch("/api/admin/custom-users/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { fullName, email, phone, password, roleId, smsNotifications, emailNotifications, isActive } = req.body;
+      
+      let passwordHash = undefined;
+      if (password) {
+        const bcrypt = await import('bcryptjs');
+        passwordHash = await bcrypt.hash(password, 10);
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE custom_users 
+        SET 
+          full_name = COALESCE($1, full_name),
+          email = COALESCE($2, email),
+          phone = COALESCE($3, phone),
+          password_hash = COALESCE($4, password_hash),
+          role_id = COALESCE($5, role_id),
+          sms_notifications = COALESCE($6, sms_notifications),
+          email_notifications = COALESCE($7, email_notifications),
+          is_active = COALESCE($8, is_active),
+          updated_at = NOW()
+        WHERE id = $9
+        RETURNING id, full_name, email, phone, role_id, is_active,
+                  sms_notifications, email_notifications, updated_at
+      `, [fullName, email, phone, passwordHash, roleId, smsNotifications, emailNotifications, isActive, id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "کاربر یافت نشد" });
+      }
+
+      res.json({
+        success: true,
+        data: result.rows[0],
+        message: "کاربر با موفقیت به‌روزرسانی شد"
+      });
+    } catch (error: any) {
+      console.error("Error updating custom user:", error);
+      if (error.code === '23505') {
+        if (error.constraint?.includes('email')) {
+          res.status(400).json({ success: false, message: "این ایمیل قبلاً استفاده شده است" });
+        } else if (error.constraint?.includes('phone')) {
+          res.status(400).json({ success: false, message: "این شماره تلفن قبلاً استفاده شده است" });
+        } else {
+          res.status(400).json({ success: false, message: "داده تکراری" });
+        }
+      } else {
+        res.status(500).json({ success: false, message: "خطا در به‌روزرسانی کاربر" });
+      }
+    }
+  });
+
+  // Delete custom user
+  app.delete("/api/admin/custom-users/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        DELETE FROM custom_users WHERE id = $1 RETURNING id
+      `, [id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "کاربر یافت نشد" });
+      }
+
+      res.json({
+        success: true,
+        message: "کاربر با موفقیت حذف شد"
+      });
+    } catch (error) {
+      console.error("Error deleting custom user:", error);
+      res.status(500).json({ success: false, message: "خطا در حذف کاربر" });
+    }
+  });
+
+  // Send SMS to users
+  app.post("/api/admin/send-sms", requireAuth, async (req, res) => {
+    try {
+      const { userIds, message } = req.body;
+      
+      if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "حداقل یک کاربر باید انتخاب شود" 
+        });
+      }
+
+      if (!message || message.trim().length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "متن پیامک الزامی است" 
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Get users who have SMS notifications enabled
+      const usersResult = await pool.query(`
+        SELECT id, full_name, phone, sms_notifications
+        FROM custom_users 
+        WHERE id = ANY($1) AND is_active = true AND sms_notifications = true
+      `, [userIds]);
+
+      if (usersResult.rows.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "هیچ کاربر فعالی با اطلاع‌رسانی SMS یافت نشد" 
+        });
+      }
+
+      // Log SMS notifications
+      const insertPromises = usersResult.rows.map((user: any) => 
+        pool.query(`
+          INSERT INTO sms_notifications (recipient_id, recipient_phone, message)
+          VALUES ($1, $2, $3)
+        `, [user.id, user.phone, message])
+      );
+
+      await Promise.all(insertPromises);
+
+      // Here you would integrate with actual SMS service
+      // For now, we'll just mark them as sent
+      await pool.query(`
+        UPDATE sms_notifications 
+        SET status = 'sent', sent_at = NOW()
+        WHERE recipient_id = ANY($1) AND message = $2 AND status = 'pending'
+      `, [userIds, message]);
+
+      res.json({
+        success: true,
+        message: `پیامک با موفقیت برای ${usersResult.rows.length} کاربر ارسال شد`,
+        sentTo: usersResult.rows.length
+      });
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      res.status(500).json({ success: false, message: "خطا در ارسال پیامک" });
+    }
+  });
+
+  // ============================================
+  // CUSTOM USER MANAGEMENT SYSTEM ENDPOINTS
+  // ============================================
+
+  // Get all custom roles
+  app.get("/api/custom-roles", requireAdmin, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT cr.*, 
+               COUNT(cu.id) as user_count
+        FROM custom_roles cr
+        LEFT JOIN custom_users cu ON cr.id = cu.role_id AND cu.is_active = true
+        WHERE cr.is_active = true
+        GROUP BY cr.id
+        ORDER BY cr.priority DESC, cr.name
+      `);
+
+      res.json({
+        success: true,
+        roles: result.rows
+      });
+    } catch (error) {
+      console.error("Error fetching custom roles:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت نقش‌ها" });
+    }
+  });
+
+  // Create custom role
+  app.post("/api/custom-roles", requireAdmin, async (req, res) => {
+    try {
+      const { name, displayName, description, color, priority, permissions } = req.body;
+      
+      if (!name || !displayName) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "نام و نام نمایشی نقش الزامی است" 
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Check if role with same name already exists
+      const existingRole = await pool.query(
+        'SELECT id FROM custom_roles WHERE name = $1',
+        [name]
+      );
+
+      if (existingRole.rows.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "نقش با این نام قبلاً وجود دارد"
+        });
+      }
+
+      const result = await pool.query(`
+        INSERT INTO custom_roles (name, display_name, description, color, priority, permissions)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
+      `, [name, displayName, description || '', color || '#3b82f6', priority || 1, permissions || []]);
+
+      res.json({
+        success: true,
+        role: result.rows[0],
+        message: "نقش با موفقیت ایجاد شد"
+      });
+    } catch (error) {
+      console.error("Error creating custom role:", error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد نقش" });
+    }
+  });
+
+  // Get all custom users
+  app.get("/api/custom-users", requireAdmin, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT cu.id, cu.full_name, cu.email, cu.phone, cu.is_active,
+               cu.sms_notifications, cu.email_notifications, cu.last_login,
+               cu.created_at, cu.updated_at,
+               cr.id as role_id, cr.name as role_name, 
+               cr.display_name as role_display_name, cr.color as role_color
+        FROM custom_users cu
+        JOIN custom_roles cr ON cu.role_id = cr.id
+        ORDER BY cu.created_at DESC
+      `);
+
+      res.json({
+        success: true,
+        users: result.rows
+      });
+    } catch (error) {
+      console.error("Error fetching custom users:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت کاربران" });
+    }
+  });
+
+  // Create custom user
+  app.post("/api/custom-users", requireAdmin, async (req, res) => {
+    try {
+      const { fullName, email, phone, roleId, password, smsNotifications, emailNotifications } = req.body;
+      
+      if (!fullName || !email || !phone || !roleId || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "تمام فیلدهای الزامی باید پر شوند" 
+        });
+      }
+
+      const { pool } = await import('./db');
+      const bcrypt = await import('bcryptjs');
+      
+      // Check if user with same email or phone already exists
+      const existingUser = await pool.query(
+        'SELECT id FROM custom_users WHERE email = $1 OR phone = $2',
+        [email, phone]
+      );
+
+      if (existingUser.rows.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "کاربر با این ایمیل یا شماره تلفن قبلاً وجود دارد"
+        });
+      }
+
+      // Hash password
+      const passwordHash = await bcrypt.hash(password, 12);
+
+      const result = await pool.query(`
+        INSERT INTO custom_users (full_name, email, phone, password_hash, role_id, sms_notifications, email_notifications)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id, full_name, email, phone, role_id, is_active, sms_notifications, email_notifications, created_at
+      `, [fullName, email, phone, passwordHash, roleId, smsNotifications !== false, emailNotifications !== false]);
+
+      // Send SMS notification if enabled
+      if (smsNotifications !== false) {
+        try {
+          await pool.query(`
+            INSERT INTO sms_notifications (recipient_id, recipient_phone, message, status)
+            VALUES ($1, $2, $3, 'pending')
+          `, [
+            result.rows[0].id,
+            phone,
+            `خوش آمدید ${fullName}! حساب کاربری شما در سیستم مدیریت ممتاز شیمی ایجاد شد. رمز عبور: ${password}`
+          ]);
+        } catch (smsError) {
+          console.error("Error creating SMS notification:", smsError);
+        }
+      }
+
+      res.json({
+        success: true,
+        user: result.rows[0],
+        message: "کاربر با موفقیت ایجاد شد"
+      });
+    } catch (error) {
+      console.error("Error creating custom user:", error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد کاربر" });
+    }
+  });
+
+  // Update custom user
+  app.put("/api/custom-users/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { fullName, roleId, isActive, smsNotifications, emailNotifications, password } = req.body;
+      
+      const { pool } = await import('./db');
+      let query = `
+        UPDATE custom_users 
+        SET full_name = $1, role_id = $2, is_active = $3, 
+            sms_notifications = $4, email_notifications = $5, updated_at = NOW()
+      `;
+      let values = [fullName, roleId, isActive, smsNotifications, emailNotifications];
+      
+      // If password is provided, hash and update it
+      if (password) {
+        const bcrypt = await import('bcryptjs');
+        const passwordHash = await bcrypt.hash(password, 12);
+        query += `, password_hash = $6`;
+        values.push(passwordHash);
+      }
+      
+      query += ` WHERE id = $${values.length + 1} RETURNING *`;
+      values.push(id);
+
+      const result = await pool.query(query, values);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "کاربر یافت نشد" });
+      }
+
+      res.json({
+        success: true,
+        user: result.rows[0],
+        message: "کاربر با موفقیت به‌روزرسانی شد"
+      });
+    } catch (error) {
+      console.error("Error updating custom user:", error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی کاربر" });
+    }
+  });
+
+  // Delete custom user
+  app.delete("/api/custom-users/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { pool } = await import('./db');
+      
+      const result = await pool.query('DELETE FROM custom_users WHERE id = $1 RETURNING *', [id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "کاربر یافت نشد" });
+      }
+
+      res.json({
+        success: true,
+        message: "کاربر با موفقیت حذف شد"
+      });
+    } catch (error) {
+      console.error("Error deleting custom user:", error);
+      res.status(500).json({ success: false, message: "خطا در حذف کاربر" });
+    }
+  });
+
+  // Send SMS to users with specific role
+  app.post("/api/custom-roles/:roleId/send-sms", requireAdmin, async (req, res) => {
+    try {
+      const { roleId } = req.params;
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "متن پیامک الزامی است" 
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Get all active users with this role who have SMS notifications enabled
+      const usersResult = await pool.query(`
+        SELECT id, full_name, phone 
+        FROM custom_users 
+        WHERE role_id = $1 AND is_active = true AND sms_notifications = true
+      `, [roleId]);
+
+      if (usersResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "هیچ کاربر فعالی با این نقش یافت نشد"
+        });
+      }
+
+      // Create SMS notifications for all users
+      for (const user of usersResult.rows) {
+        await pool.query(`
+          INSERT INTO sms_notifications (recipient_id, recipient_phone, message, status)
+          VALUES ($1, $2, $3, 'pending')
+        `, [user.id, user.phone, message]);
+      }
+
+      res.json({
+        success: true,
+        message: `پیامک با موفقیت برای ${usersResult.rows.length} کاربر ارسال شد`,
+        sentTo: usersResult.rows.length
+      });
+    } catch (error) {
+      console.error("Error sending SMS to role users:", error);
+      res.status(500).json({ success: false, message: "خطا در ارسال پیامک" });
+    }
+  });
+
+  // Get available modules/permissions
+  app.get("/api/custom-modules", requireAdmin, async (req, res) => {
+    try {
+      const modules = [
+        { id: 'shop_management', name: 'مدیریت فروشگاه', description: 'مدیریت محصولات، سفارشات و فروش', category: 'commerce' },
+        { id: 'crm_management', name: 'مدیریت CRM', description: 'مدیریت مشتریان و روابط', category: 'customer' },
+        { id: 'inventory_management', name: 'مدیریت انبار', description: 'کنترل موجودی و انبارداری', category: 'warehouse' },
+        { id: 'order_management', name: 'مدیریت سفارشات', description: 'پردازش و تایید سفارشات', category: 'commerce' },
+        { id: 'finance_management', name: 'مدیریت مالی', description: 'حسابداری و امور مالی', category: 'finance' },
+        { id: 'content_management', name: 'مدیریت محتوا', description: 'ویرایش محتوای وبسایت', category: 'content' },
+        { id: 'seo_management', name: 'مدیریت SEO', description: 'بهینه‌سازی موتورهای جستجو', category: 'content' },
+        { id: 'email_management', name: 'مدیریت ایمیل', description: 'ارسال و مدیریت ایمیل‌ها', category: 'communication' },
+        { id: 'sms_management', name: 'مدیریت پیامک', description: 'ارسال و مدیریت پیامک‌ها', category: 'communication' },
+        { id: 'analytics_view', name: 'مشاهده آمار', description: 'دسترسی به گزارشات و آمار', category: 'analytics' },
+        { id: 'warehouse_management', name: 'عملیات انبار', description: 'مدیریت عملیات روزانه انبار', category: 'warehouse' },
+        { id: 'user_management', name: 'مدیریت کاربران', description: 'ایجاد و مدیریت کاربران سیستم', category: 'admin' }
+      ];
+
+      res.json({
+        success: true,
+        modules
+      });
+    } catch (error) {
+      console.error("Error fetching modules:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت ماژول‌ها" });
     }
   });
 

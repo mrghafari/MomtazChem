@@ -1,6 +1,7 @@
-import { pgTable, text, serial, timestamp, decimal, boolean, integer, json, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, decimal, boolean, integer, json, varchar, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { sql } from "drizzle-orm";
 import { customers, insertCustomerSchema, type InsertCustomer, type Customer } from "./customer-schema";
 
 // =============================================================================
@@ -386,6 +387,85 @@ export type InsertSmsSettings = z.infer<typeof insertSmsSettingsSchema>;
 export type SmsSettings = typeof smsSettings.$inferSelect;
 export type InsertCustomerSmsSettings = z.infer<typeof insertCustomerSmsSettingsSchema>;
 export type CustomerSmsSettings = typeof customerSmsSettings.$inferSelect;
+
+// =============================================================================
+// CUSTOM USER MANAGEMENT SYSTEM
+// =============================================================================
+
+// Custom roles table for user-defined roles
+export const customRoles = pgTable('custom_roles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull().unique(),
+  displayName: text('display_name').notNull(),
+  description: text('description'),
+  color: text('color').notNull().default('#3b82f6'),
+  priority: integer('priority').notNull().default(1),
+  permissions: text('permissions').array().notNull().default(sql`ARRAY[]::text[]`),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// Custom users table for role-based users
+export const customUsers = pgTable('custom_users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  fullName: text('full_name').notNull(),
+  email: text('email').notNull().unique(),
+  phone: text('phone').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  roleId: uuid('role_id').references(() => customRoles.id).notNull(),
+  isActive: boolean('is_active').notNull().default(true),
+  smsNotifications: boolean('sms_notifications').notNull().default(true),
+  emailNotifications: boolean('email_notifications').notNull().default(true),
+  lastLogin: timestamp('last_login'),
+  loginAttempts: integer('login_attempts').notNull().default(0),
+  lockedUntil: timestamp('locked_until'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// SMS notifications log table
+export const smsNotifications = pgTable('sms_notifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  recipientId: uuid('recipient_id').references(() => customUsers.id).notNull(),
+  recipientPhone: text('recipient_phone').notNull(),
+  message: text('message').notNull(),
+  status: text('status').notNull().default('pending'), // pending, sent, failed
+  sentAt: timestamp('sent_at'),
+  failureReason: text('failure_reason'),
+  createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// Create insert schemas for custom user management
+export const insertCustomRoleSchema = createInsertSchema(customRoles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertCustomUserSchema = createInsertSchema(customUsers).omit({
+  id: true,
+  passwordHash: true,
+  lastLogin: true,
+  loginAttempts: true,
+  lockedUntil: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertSmsNotificationSchema = createInsertSchema(smsNotifications).omit({
+  id: true,
+  sentAt: true,
+  createdAt: true
+});
+
+// Export types for custom user management
+export type InsertCustomRole = z.infer<typeof insertCustomRoleSchema>;
+export type CustomRole = typeof customRoles.$inferSelect;
+export type InsertCustomUser = z.infer<typeof insertCustomUserSchema>;
+export type CustomUser = typeof customUsers.$inferSelect;
+export type InsertSmsNotification = z.infer<typeof insertSmsNotificationSchema>;
+export type SmsNotification = typeof smsNotifications.$inferSelect;
 
 // =============================================================================
 // CRM CUSTOMERS SCHEMA - Main Customer Management
