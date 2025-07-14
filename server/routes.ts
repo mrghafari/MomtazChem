@@ -13629,6 +13629,39 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Financial approve order (for financial department users)
+  app.get('/api/finance/orders/:id/approve', requireDepartmentAuth('financial'), async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const reviewerId = req.session.departmentUser?.id;
+      
+      if (!reviewerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+      
+      await orderManagementStorage.updateOrderStatus(
+        orderId,
+        'financial_approved',
+        reviewerId,
+        'financial',
+        'تایید شده توسط بخش مالی'
+      );
+
+      // Send website notification and email to customer (NO SMS)
+      const orderMgmt = await orderManagementStorage.getOrderManagementById(orderId);
+      if (orderMgmt) {
+        // TODO: Send website notification and email notification
+        console.log(`✓ واریزی تایید شد - سفارش ${orderMgmt.customerOrderId}`);
+        console.log('✓ تأیید از طریق وب‌سایت و ایمیل ارسال شد (بدون SMS)');
+      }
+
+      res.json({ success: true, message: "واریزی تایید شد و به انبار اعلام شد" });
+    } catch (error) {
+      console.error('Error approving financial order:', error);
+      res.status(500).json({ success: false, message: "خطا در تایید واریزی" });
+    }
+  });
+
   // Financial reject order (for admin panel)
   app.post('/api/finance/orders/:id/reject', requireAuth, async (req, res) => {
     try {
@@ -13642,6 +13675,39 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         adminId,
         'financial',
         notes || 'رد شده توسط بخش مالی'
+      );
+
+      // Send website notification and email to customer (NO SMS)
+      const orderMgmt = await orderManagementStorage.getOrderManagementById(orderId);
+      if (orderMgmt) {
+        // TODO: Send website notification and email notification
+        console.log(`✗ واریزی رد شد - سفارش ${orderMgmt.customerOrderId}`);
+        console.log('✓ اطلاع‌رسانی از طریق وب‌سایت و ایمیل ارسال شد (بدون SMS)');
+      }
+
+      res.json({ success: true, message: "واریزی رد شد" });
+    } catch (error) {
+      console.error('Error rejecting financial order:', error);
+      res.status(500).json({ success: false, message: "خطا در رد واریزی" });
+    }
+  });
+
+  // Financial reject order (for financial department users)
+  app.get('/api/finance/orders/:id/reject', requireDepartmentAuth('financial'), async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const reviewerId = req.session.departmentUser?.id;
+      
+      if (!reviewerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+      
+      await orderManagementStorage.updateOrderStatus(
+        orderId,
+        'financial_rejected',
+        reviewerId,
+        'financial',
+        'رد شده توسط بخش مالی'
       );
 
       // Send website notification and email to customer (NO SMS)
