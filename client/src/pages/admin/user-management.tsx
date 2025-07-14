@@ -26,7 +26,8 @@ import {
   Trash2,
   Settings,
   UserCog,
-  Save
+  Save,
+  RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -112,7 +113,13 @@ const translations = {
     shop: "shop",
     analytics: "analytics",
     content: "content",
-    system: "system"
+    system: "system",
+    syncModules: "Sync Modules",
+    syncModulesDescription: "Synchronize modules with main system",
+    syncSuccess: "Sync Successful",
+    syncSuccessMessage: "Modules synchronized with main system successfully",
+    syncError: "Sync Error",
+    syncErrorMessage: "Failed to synchronize modules"
   },
   ar: {
     title: "إدارة المستخدمين والصلاحيات",
@@ -164,7 +171,13 @@ const translations = {
     shop: "المتجر",
     analytics: "التحليلات",
     content: "المحتوى",
-    system: "النظام"
+    system: "النظام",
+    syncModules: "مزامنة الوحدات",
+    syncModulesDescription: "مزامنة الوحدات مع النظام الرئيسي",
+    syncSuccess: "تم التزامن بنجاح",
+    syncSuccessMessage: "تم تزامن الوحدات مع النظام الرئيسي بنجاح",
+    syncError: "خطأ في التزامن",
+    syncErrorMessage: "فشل في مزامنة الوحدات"
   }
 };
 
@@ -380,6 +393,28 @@ function UserManagement() {
     },
   });
 
+  // Sync modules mutation
+  const syncModulesMutation = useMutation({
+    mutationFn: () => apiRequest("/api/admin/sync-modules", "POST"),
+    onSuccess: () => {
+      toast({
+        title: t.syncSuccess,
+        description: t.syncSuccessMessage,
+      });
+      // Refresh all queries
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/roles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/permissions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: t.syncError,
+        description: error.message || t.syncErrorMessage,
+      });
+    },
+  });
+
   const onSubmit = (data: CreateUserForm) => {
     const formData = {
       ...data,
@@ -538,15 +573,27 @@ function UserManagement() {
             {t.superAdminOnly}
           </Badge>
         </div>
-        <Button
-          onClick={toggleLanguage}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <Globe className="h-4 w-4" />
-          {language === 'en' ? 'عربي' : 'English'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => syncModulesMutation.mutate()}
+            disabled={syncModulesMutation.isPending}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
+            {t.syncModules}
+          </Button>
+          <Button
+            onClick={toggleLanguage}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Globe className="h-4 w-4" />
+            {language === 'en' ? 'عربي' : 'English'}
+          </Button>
+        </div>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>

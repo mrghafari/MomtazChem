@@ -3449,6 +3449,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sync modules with main system
+  app.post("/api/admin/sync-modules", requireSuperAdmin, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Define the main system modules - these are the 26 Site Management modules
+      const mainModules = [
+        { id: 'sync-shop', name: 'Sync Shop', description: 'Product synchronization between showcase and shop catalogs', permissions: ['sync_shop_read', 'sync_shop_write'] },
+        { id: 'inquiries', name: 'Inquiries', description: 'Customer inquiry management and response tracking', permissions: ['inquiries_read', 'inquiries_write'] },
+        { id: 'barcode', name: 'Barcode', description: 'Professional GS1-compliant EAN-13 barcode system', permissions: ['barcode_read', 'barcode_write'] },
+        { id: 'email-settings', name: 'Email Settings', description: 'Multi-SMTP configuration with intelligent category-based routing', permissions: ['email_settings_read', 'email_settings_write'] },
+        { id: 'database-backup', name: 'Database Backup', description: 'Automated backup systems and PostgreSQL maintenance', permissions: ['database_backup_read', 'database_backup_write'] },
+        { id: 'crm', name: 'CRM', description: 'Customer relationship management with analytics', permissions: ['crm_read', 'crm_write'] },
+        { id: 'seo', name: 'SEO', description: 'Comprehensive multilingual SEO with sitemap generation', permissions: ['seo_read', 'seo_write'] },
+        { id: 'categories', name: 'Categories', description: 'Hierarchical product categorization system', permissions: ['categories_read', 'categories_write'] },
+        { id: 'sms', name: 'SMS', description: 'Customer notification and verification systems', permissions: ['sms_read', 'sms_write'] },
+        { id: 'factory', name: 'Factory', description: 'Production line and manufacturing operations management', permissions: ['factory_read', 'factory_write'] },
+        { id: 'super-admin', name: 'Super Admin', description: 'Admin account management and verification system', permissions: ['super_admin_read', 'super_admin_write'] },
+        { id: 'user-management', name: 'User Management', description: 'Multi-role admin system with department-based access control', permissions: ['user_management_read', 'user_management_write'] },
+        { id: 'shop', name: 'Shop', description: 'E-commerce administration with inventory tracking', permissions: ['shop_read', 'shop_write'] },
+        { id: 'procedures', name: 'Procedures', description: 'Document management system for operational procedures', permissions: ['procedures_read', 'procedures_write'] },
+        { id: 'smtp-test', name: 'SMTP Test', description: 'Comprehensive email connectivity testing and validation', permissions: ['smtp_test_read', 'smtp_test_write'] },
+        { id: 'order-management', name: 'Order Management', description: '3-department sequential workflow system', permissions: ['order_management_read', 'order_management_write'] },
+        { id: 'products', name: 'Products', description: 'Showcase and shop product catalogs with variant support', permissions: ['products_read', 'products_write'] },
+        { id: 'payment-settings', name: 'Payment Settings', description: 'Iraqi banking system integration with invoice generation', permissions: ['payment_settings_read', 'payment_settings_write'] },
+        { id: 'wallet-management', name: 'Wallet Management', description: 'Digital wallet system with recharge requests', permissions: ['wallet_management_read', 'wallet_management_write'] },
+        { id: 'geography-analytics', name: 'Geography Analytics', description: 'Regional sales tracking and performance analysis', permissions: ['geography_analytics_read', 'geography_analytics_write'] },
+        { id: 'ai-settings', name: 'AI Settings', description: 'Smart SKU generation and OpenAI API integration', permissions: ['ai_settings_read', 'ai_settings_write'] },
+        { id: 'refresh-control', name: 'Refresh Control', description: 'Centralized timing management for all department interfaces', permissions: ['refresh_control_read', 'refresh_control_write'] },
+        { id: 'warehouse-management', name: 'Warehouse Management', description: 'Independent inventory system with real-time monitoring', permissions: ['warehouse_management_read', 'warehouse_management_write'] },
+        { id: 'content-management', name: 'Content Management', description: 'Dynamic multilingual content editing system', permissions: ['content_management_read', 'content_management_write'] },
+        { id: 'security-management', name: 'Security Management', description: 'Security monitoring and threat detection system', permissions: ['security_management_read', 'security_management_write'] },
+        { id: 'site-management', name: 'Site Management', description: 'Centralized administrative interface with drag-and-drop Quick Actions', permissions: ['site_management_read', 'site_management_write'] }
+      ];
+
+      // First, ensure all main system modules exist in admin_permissions
+      let syncedModules = 0;
+      let syncedPermissions = 0;
+
+      for (const module of mainModules) {
+        // Check if module permissions exist
+        for (const permission of module.permissions) {
+          const existingPermission = await pool.query(
+            'SELECT id FROM admin_permissions WHERE name = $1',
+            [permission]
+          );
+
+          if (existingPermission.rows.length === 0) {
+            // Create the permission
+            await pool.query(`
+              INSERT INTO admin_permissions (name, display_name, description, module, is_active)
+              VALUES ($1, $2, $3, $4, true)
+              ON CONFLICT (name) DO NOTHING
+            `, [
+              permission,
+              permission.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+              `${module.description} - ${permission.includes('read') ? 'Read' : 'Write'} access`,
+              module.id
+            ]);
+            syncedPermissions++;
+          }
+        }
+        syncedModules++;
+      }
+
+      // Now sync roles and ensure they have proper permissions
+      // Get super admin role
+      const superAdminRole = await pool.query(
+        'SELECT id FROM admin_roles WHERE name = $1',
+        ['super_admin']
+      );
+
+      if (superAdminRole.rows.length > 0) {
+        const roleId = superAdminRole.rows[0].id;
+        
+        // Get all permissions
+        const allPermissions = await pool.query(
+          'SELECT id FROM admin_permissions WHERE is_active = true'
+        );
+
+        // Assign all permissions to super admin
+        for (const permission of allPermissions.rows) {
+          await pool.query(`
+            INSERT INTO admin_role_permissions (role_id, permission_id)
+            VALUES ($1, $2)
+            ON CONFLICT (role_id, permission_id) DO NOTHING
+          `, [roleId, permission.id]);
+        }
+      }
+
+      console.log(`✅ Module sync completed: ${syncedModules} modules, ${syncedPermissions} new permissions`);
+      
+      res.json({
+        success: true,
+        message: "Modules synchronized successfully",
+        syncedModules,
+        syncedPermissions
+      });
+    } catch (error) {
+      console.error("Error syncing modules:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to sync modules",
+        error: error.message 
+      });
+    }
+  });
+
   // Create new admin user
   app.post("/api/admin/users", requireSuperAdmin, async (req, res) => {
     try {
