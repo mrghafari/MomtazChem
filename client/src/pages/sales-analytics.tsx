@@ -158,10 +158,12 @@ export default function SalesAnalytics() {
             Comprehensive sales performance dashboard
           </p>
         </div>
-        <Button variant="outline" onClick={() => setLocation("/admin")}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Admin
-        </Button>
+        {user?.id === 1 && (
+          <Button variant="outline" onClick={() => setLocation("/admin")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Admin
+          </Button>
+        )}
       </div>
 
       {/* Key Metrics */}

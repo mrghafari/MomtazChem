@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from '@/hooks/use-toast';
 import { Search, Package, Plus, Edit, Download, Barcode, CheckCircle, AlertTriangle, ArrowLeft, FileSpreadsheet } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
 import EAN13Generator from '@/components/ui/ean13-generator';
 import VisualBarcode from '@/components/ui/visual-barcode';
 
@@ -41,6 +42,7 @@ interface EAN13Record {
 
 export default function EAN13Management() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showGenerator, setShowGenerator] = useState(false);
@@ -200,10 +202,12 @@ export default function EAN13Management() {
           <h1 className="text-3xl font-bold text-gray-900">EAN-13 Barcode Management</h1>
           <p className="text-gray-600 mt-2">GS1-compliant barcodes for retail distribution</p>
         </div>
-        <Button onClick={() => setLocation("/admin")} variant="outline">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Admin
-        </Button>
+        {user?.id === 1 && (
+          <Button onClick={() => setLocation("/admin")} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Admin
+          </Button>
+        )}
       </div>
 
       {/* Quick Stats */}

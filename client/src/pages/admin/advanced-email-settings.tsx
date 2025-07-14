@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Mail, Settings, TestTube, Save, Plus, Trash2, Edit, Check, X, AlertCircle, CheckCircle, Clock, Eye, EyeOff, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 import EmailSetupProgress from "@/components/ui/email-setup-progress";
 
 interface EmailCategory {
@@ -65,6 +66,7 @@ interface SMTPForm {
 export default function AdvancedEmailSettingsPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<EmailCategory | null>(null);
   const [smtpForm, setSmtpForm] = useState<SMTPForm>({
     host: "",
@@ -408,14 +410,16 @@ export default function AdvancedEmailSettingsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex items-center gap-4 mb-8">
-        <Button
-          variant="outline"
-          onClick={() => setLocation("/admin")}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Admin
-        </Button>
+        {user?.id === 1 && (
+          <Button
+            variant="outline"
+            onClick={() => setLocation("/admin")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Admin
+          </Button>
+        )}
         <div>
           <h1 className="text-3xl font-bold">Advanced Email Management</h1>
           <p className="text-gray-600 mt-1">Configure independent SMTP settings for each product category</p>

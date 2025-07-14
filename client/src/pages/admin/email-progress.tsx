@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
@@ -18,6 +19,7 @@ interface EmailCategory {
 
 export default function EmailProgressPage() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<EmailCategory | null>(null);
 
   // Load categories
@@ -41,14 +43,16 @@ export default function EmailProgressPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex items-center gap-4 mb-8">
-        <Button
-          variant="outline"
-          onClick={() => setLocation("/admin/email-settings")}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Email Settings
-        </Button>
+        {user?.id === 1 && (
+          <Button
+            variant="outline"
+            onClick={() => setLocation("/admin/email-settings")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Email Settings
+          </Button>
+        )}
         <div>
           <h1 className="text-3xl font-bold">Email Setup Progress Tracker</h1>
           <p className="text-gray-600 mt-1">Track your progress through the email configuration process</p>

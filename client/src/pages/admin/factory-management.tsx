@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -145,6 +146,7 @@ type ProductionOrderForm = z.infer<typeof productionOrderSchema>;
 export default function FactoryManagement() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [selectedTab, setSelectedTab] = useState("overview");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'production-line' | 'raw-material' | 'production-order' | null>(null);
@@ -308,14 +310,16 @@ export default function FactoryManagement() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setLocation('/admin')}
-        >
-          <ArrowLeft className="h-4 w-4 ml-2" />
-          بازگشت به داشبورد
-        </Button>
+        {user?.id === 1 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLocation('/admin')}
+          >
+            <ArrowLeft className="h-4 w-4 ml-2" />
+            بازگشت به داشبورد
+          </Button>
+        )}
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Factory className="h-6 w-6" />
           مدیریت کارخانه

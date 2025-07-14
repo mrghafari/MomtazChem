@@ -129,15 +129,17 @@ export default function AISettings() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation("/admin")}
-              className="flex items-center space-x-2 rtl:space-x-reverse"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>بازگشت به داشبورد</span>
-            </Button>
+            {user?.id === 1 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation("/admin")}
+                className="flex items-center space-x-2 rtl:space-x-reverse"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>بازگشت به داشبورد</span>
+              </Button>
+            )}
             <div className="flex items-center space-x-3 rtl:space-x-reverse">
               <div className="bg-purple-100 dark:bg-purple-900 p-2 rounded-lg">
                 <Zap className="h-6 w-6 text-purple-600 dark:text-purple-400" />

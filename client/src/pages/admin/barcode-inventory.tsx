@@ -430,14 +430,16 @@ ${optionalFields}^XZ`;
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setLocation("/admin/site-management")}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            بازگشت
-          </Button>
+          {user?.id === 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/admin/site-management")}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              بازگشت
+            </Button>
+          )}
           <h1 className="text-2xl font-bold">مدیریت موجودی و بارکد</h1>
         </div>
         <div className="flex items-center gap-2">

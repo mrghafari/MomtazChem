@@ -140,14 +140,16 @@ export default function DatabaseManagement() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setLocation('/admin')}
-        >
-          <ArrowLeft className="h-4 w-4 ml-2" />
-          بازگشت به داشبورد
-        </Button>
+        {user?.id === 1 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLocation('/admin')}
+          >
+            <ArrowLeft className="h-4 w-4 ml-2" />
+            بازگشت به داشبورد
+          </Button>
+        )}
         <h1 className="text-2xl font-bold">مدیریت دیتابیس</h1>
       </div>
 

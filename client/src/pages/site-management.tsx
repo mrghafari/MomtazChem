@@ -420,14 +420,16 @@ export default function SiteManagement() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/admin")}
-              className="hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Admin
-            </Button>
+            {user?.id === 1 && (
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/admin")}
+                className="hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Admin
+              </Button>
+            )}
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Site Management
