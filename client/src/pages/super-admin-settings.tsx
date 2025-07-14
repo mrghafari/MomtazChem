@@ -383,7 +383,7 @@ export default function SuperAdminSettings() {
                   <div className="text-center py-8">Loading...</div>
                 ) : (
                   <div className="space-y-4">
-                    {superAdmins.map((admin: SuperAdmin) => (
+                    {superAdmins?.map((admin: SuperAdmin) => (
                       <div key={admin.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
@@ -468,7 +468,7 @@ export default function SuperAdminSettings() {
                       onChange={(e) => setVerificationData(prev => ({ ...prev, adminId: parseInt(e.target.value) }))}
                     >
                       <option value={0}>Select an admin</option>
-                      {superAdmins.filter((admin: SuperAdmin) => !admin.emailVerified || (admin.phone && !admin.phoneVerified)).map((admin: SuperAdmin) => (
+                      {superAdmins?.filter((admin: SuperAdmin) => !admin.emailVerified || (admin.phone && !admin.phoneVerified)).map((admin: SuperAdmin) => (
                         <option key={admin.id} value={admin.id}>
                           {admin.username} - {admin.email}
                         </option>
@@ -516,7 +516,7 @@ export default function SuperAdminSettings() {
                     <div className="text-center py-4">Loading...</div>
                   ) : (
                     <div className="space-y-3">
-                      {pendingVerifications.map((verification: PendingVerification) => (
+                      {pendingVerifications?.map((verification: PendingVerification) => (
                         <div key={verification.id} className="p-3 border rounded-lg">
                           <div className="flex items-center justify-between">
                             <div>
