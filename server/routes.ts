@@ -13728,11 +13728,22 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(401).json({ success: false, message: "احراز هویت نشده" });
       }
 
-      // Check if this is a custom user from user-management system
+      // Get legacy user by adminId to find email
+      const legacyUser = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.id, adminId))
+        .limit(1);
+
+      if (legacyUser.length === 0) {
+        return res.status(404).json({ success: false, message: "کاربر یافت نشد" });
+      }
+
+      // Check if this is a custom user from user-management system using email
       const customUser = await db
         .select()
         .from(schema.customUsers)
-        .where(eq(schema.customUsers.id, adminId.toString()))
+        .where(eq(schema.customUsers.email, legacyUser[0].email))
         .limit(1);
 
       if (customUser.length > 0) {
@@ -13771,7 +13782,57 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         }
       }
 
-      // Fallback for legacy admin users or super admin
+      // If no custom user found, check for super admin or legacy permissions
+      // Only super admin (id=1) gets all permissions
+      if (legacyUser[0].id === 1) {
+        const allModules = [
+          "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
+          "crm", "seo", "categories", "sms", "factory", "super_admin", "user_management",
+          "shop_management", "procedures", "smtp_test", "order_management", "product_management",
+          "payment_management", "wallet_management", "geography_analytics", "ai_settings",
+          "refresh_control", "department_users", "inventory_management", "content_management"
+        ];
+
+        console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, allModules);
+
+        return res.json({
+          success: true,
+          permissions: allModules.map(moduleId => ({
+            moduleId,
+            canView: true,
+            canCreate: true,
+            canEdit: true,
+            canDelete: true,
+            canApprove: true
+          })),
+          modules: allModules,
+          roles: ["super_admin"],
+          roleInfo: {
+            name: "super_admin",
+            displayName: "مدیر ارشد"
+          }
+        });
+      }
+
+      // For other legacy users without custom role, return empty permissions
+      console.log(`✗ [PERMISSIONS] User ${legacyUser[0].email} has no role in custom system`);
+      return res.json({
+        success: true,
+        permissions: [],
+        modules: [],
+        roles: [],
+        roleInfo: null
+      });
+
+    } catch (error) {
+      console.error('Error fetching user permissions:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت مجوزها" });
+    }
+  });
+
+  // Legacy fallback endpoint
+  app.get('/api/user/permissions-legacy', async (req, res) => {
+    try {
       const legacyUser = await db
         .select()
         .from(schema.users)
