@@ -130,7 +130,7 @@ export default function GeographicAnalytics() {
   };
 
   // Fetch geographic sales data
-  const { data: geoData, isLoading: geoLoading } = useQuery<GeographicData[]>({
+  const { data: geoResult, isLoading: geoLoading } = useQuery<{data: GeographicData[], summary?: {totalUniqueCustomers: number}}>({
     queryKey: ['/api/analytics/geographic', dateRange, selectedRegion],
     queryFn: async () => {
       const response = await fetch(`/api/analytics/geographic?period=${dateRange}&region=${selectedRegion}`, {
@@ -138,9 +138,12 @@ export default function GeographicAnalytics() {
       });
       if (!response.ok) throw new Error('Failed to fetch geographic data');
       const result = await response.json();
-      return result.data || [];
+      return result || { data: [], summary: { totalUniqueCustomers: 0 } };
     }
   });
+
+  const geoData = geoResult?.data || [];
+  const totalUniqueCustomers = geoResult?.summary?.totalUniqueCustomers || 0;
 
   // Fetch product analytics
   const { data: productData, isLoading: productLoading } = useQuery<ProductAnalytics[]>({
@@ -241,7 +244,7 @@ export default function GeographicAnalytics() {
   const summaryStats = geoData ? {
     totalRevenue: geoData.reduce((sum, region) => sum + region.totalRevenue, 0),
     totalOrders: geoData.reduce((sum, region) => sum + region.totalOrders, 0),
-    totalCustomers: geoData.reduce((sum, region) => sum + region.customerCount, 0),
+    totalCustomers: totalUniqueCustomers, // Use actual unique customers count from backend
     regionsCount: geoData.length,
     avgOrderValue: geoData.reduce((sum, region) => sum + region.totalRevenue, 0) / geoData.reduce((sum, region) => sum + region.totalOrders, 0) || 0
   } : null;

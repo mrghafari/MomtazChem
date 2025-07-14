@@ -15831,6 +15831,20 @@ momtazchem.com
           startDate.setDate(now.getDate() - 30);
       }
 
+      // Get total unique customers count across all regions
+      const totalCustomersResult = await customerDb.select({
+        totalUniqueCustomers: sql`count(distinct ${customerOrders.customerId})::int`.as('totalUniqueCustomers')
+      })
+      .from(customerOrders)
+      .where(
+        and(
+          isNotNull(sql`${customerOrders.shippingAddress}->>'country'`),
+          isNotNull(sql`${customerOrders.shippingAddress}->>'city'`)
+        )
+      );
+
+      const totalUniqueCustomers = totalCustomersResult[0]?.totalUniqueCustomers || 0;
+
       // Get orders with geographic data from shipping_address JSON
       const geoData = await customerDb.select({
         country: sql`${customerOrders.shippingAddress}->>'country'`.as('country'),
@@ -15851,6 +15865,7 @@ momtazchem.com
       .limit(20);
       
       console.log('🌍 [GEO] Query result:', geoData.length, 'records found');
+      console.log('🌍 [GEO] Total unique customers:', totalUniqueCustomers);
       
       // Process data to add calculated fields and match frontend expectations
       const processedData = geoData.map((region) => {
@@ -15870,7 +15885,13 @@ momtazchem.com
       });
 
       console.log('🌍 [GEO] Processed data sample:', processedData.slice(0, 2));
-      res.json({ success: true, data: processedData });
+      res.json({ 
+        success: true, 
+        data: processedData,
+        summary: {
+          totalUniqueCustomers: totalUniqueCustomers
+        }
+      });
     } catch (error) {
       console.error('Geographic analytics API error:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch geographic analytics data' });
