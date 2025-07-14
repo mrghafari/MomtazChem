@@ -230,7 +230,7 @@ export default function SiteManagement() {
       icon: UserCog,
       onClick: () => trackButtonClick("super-admin", () => setLocation("/admin/super-admin-settings")),
       className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
-      moduleId: "user-management"
+      moduleId: "user_management"
     },
     {
       id: "user-management",
@@ -238,7 +238,7 @@ export default function SiteManagement() {
       icon: Users2,
       onClick: () => trackButtonClick("user-management", () => setLocation("/admin/user-management")),
       className: "border-red-300 text-red-600 hover:bg-red-50",
-      moduleId: "user-management"
+      moduleId: "user_management"
     },
     {
       id: "procedures",
