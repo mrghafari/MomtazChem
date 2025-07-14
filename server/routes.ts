@@ -15744,6 +15744,333 @@ momtazchem.com
   });
 
   // =============================================================================
+  // GEOGRAPHIC ANALYTICS API
+  // =============================================================================
+
+  // Geographic Analytics API endpoints
+  app.get('/api/analytics/geographic', requireAuth, async (req, res) => {
+    try {
+      const { period = '30d', region = 'all' } = req.query;
+      
+      // Calculate date range based on period
+      const now = new Date();
+      let startDate = new Date();
+      
+      switch (period) {
+        case '7d':
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case '30d':
+          startDate.setDate(now.getDate() - 30);
+          break;
+        case '3m':
+          startDate.setMonth(now.getMonth() - 3);
+          break;
+        case '1y':
+          startDate.setFullYear(now.getFullYear() - 1);
+          break;
+        default:
+          startDate.setDate(now.getDate() - 30);
+      }
+
+      // Get orders with geographic data
+      let query = db.select({
+        country: customerOrders.country,
+        city: customerOrders.city,
+        totalOrders: sql`count(*)::int`.as('totalOrders'),
+        totalRevenue: sql`sum(${customerOrders.totalAmount})::numeric`.as('totalRevenue'),
+        customerCount: sql`count(distinct ${customerOrders.customerId})::int`.as('customerCount')
+      })
+      .from(customerOrders)
+      .where(
+        and(
+          gte(customerOrders.createdAt, startDate),
+          isNotNull(customerOrders.country),
+          isNotNull(customerOrders.city)
+        )
+      )
+      .groupBy(customerOrders.country, customerOrders.city)
+      .orderBy(sql`sum(${customerOrders.totalAmount}) desc`);
+
+      if (region && region !== 'all') {
+        query = query.where(eq(customerOrders.country, region as string));
+      }
+
+      const geoData = await query;
+      
+      // Calculate average order value and add top products for each region
+      const processedData = await Promise.all(geoData.map(async (region) => {
+        const avgOrderValue = Number(region.totalRevenue) / region.totalOrders;
+        
+        // Get top products for this region
+        const topProducts = await db.select({
+          name: shopProducts.name,
+          quantity: sql`sum(${orderItems.quantity})::int`.as('quantity'),
+          revenue: sql`sum(${orderItems.quantity} * ${orderItems.unitPrice})::numeric`.as('revenue')
+        })
+        .from(orderItems)
+        .innerJoin(customerOrders, eq(orderItems.orderId, customerOrders.id))
+        .innerJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
+        .where(
+          and(
+            eq(customerOrders.country, region.country),
+            eq(customerOrders.city, region.city),
+            gte(customerOrders.createdAt, startDate)
+          )
+        )
+        .groupBy(shopProducts.name)
+        .orderBy(sql`sum(${orderItems.quantity} * ${orderItems.unitPrice}) desc`)
+        .limit(3);
+
+        return {
+          country: region.country,
+          city: region.city,
+          totalOrders: region.totalOrders,
+          totalRevenue: Number(region.totalRevenue),
+          customerCount: region.customerCount,
+          avgOrderValue,
+          topProducts: topProducts.map(p => ({
+            name: p.name,
+            quantity: p.quantity,
+            revenue: Number(p.revenue)
+          }))
+        };
+      }));
+
+      res.json({ success: true, data: processedData });
+    } catch (error) {
+      console.error('Geographic analytics API error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch geographic analytics data' });
+    }
+  });
+
+  app.get('/api/analytics/products', requireAuth, async (req, res) => {
+    try {
+      const { period = '30d', product = 'all' } = req.query;
+      
+      const now = new Date();
+      let startDate = new Date();
+      
+      switch (period) {
+        case '7d':
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case '30d':
+          startDate.setDate(now.getDate() - 30);
+          break;
+        case '3m':
+          startDate.setMonth(now.getMonth() - 3);
+          break;
+        case '1y':
+          startDate.setFullYear(now.getFullYear() - 1);
+          break;
+        default:
+          startDate.setDate(now.getDate() - 30);
+      }
+
+      let query = db.select({
+        name: shopProducts.name,
+        category: shopProducts.category,
+        totalSales: sql`sum(${orderItems.quantity})::int`.as('totalSales'),
+        revenue: sql`sum(${orderItems.quantity} * ${orderItems.unitPrice})::numeric`.as('revenue')
+      })
+      .from(orderItems)
+      .innerJoin(customerOrders, eq(orderItems.orderId, customerOrders.id))
+      .innerJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
+      .where(gte(customerOrders.createdAt, startDate))
+      .groupBy(shopProducts.name, shopProducts.category)
+      .orderBy(sql`sum(${orderItems.quantity} * ${orderItems.unitPrice}) desc`);
+
+      if (product && product !== 'all') {
+        query = query.where(eq(shopProducts.name, product as string));
+      }
+
+      const productData = await query;
+      
+      // Get regional breakdown for each product
+      const processedData = await Promise.all(productData.map(async (productInfo) => {
+        const regions = await db.select({
+          region: customerOrders.country,
+          city: customerOrders.city,
+          quantity: sql`sum(${orderItems.quantity})::int`.as('quantity'),
+          revenue: sql`sum(${orderItems.quantity} * ${orderItems.unitPrice})::numeric`.as('revenue')
+        })
+        .from(orderItems)
+        .innerJoin(customerOrders, eq(orderItems.orderId, customerOrders.id))
+        .innerJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
+        .where(
+          and(
+            eq(shopProducts.name, productInfo.name),
+            gte(customerOrders.createdAt, startDate),
+            isNotNull(customerOrders.country),
+            isNotNull(customerOrders.city)
+          )
+        )
+        .groupBy(customerOrders.country, customerOrders.city)
+        .orderBy(sql`sum(${orderItems.quantity} * ${orderItems.unitPrice}) desc`)
+        .limit(10);
+
+        return {
+          name: productInfo.name,
+          category: productInfo.category,
+          totalSales: productInfo.totalSales,
+          revenue: Number(productInfo.revenue),
+          regions: regions.map(r => ({
+            region: r.region,
+            city: r.city,
+            quantity: r.quantity,
+            revenue: Number(r.revenue)
+          }))
+        };
+      }));
+
+      res.json({ success: true, data: processedData });
+    } catch (error) {
+      console.error('Product analytics API error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch product analytics data' });
+    }
+  });
+
+  app.get('/api/analytics/timeseries', requireAuth, async (req, res) => {
+    try {
+      const { period = '30d' } = req.query;
+      
+      const now = new Date();
+      let startDate = new Date();
+      let groupByFormat = '%Y-%m-%d';
+      
+      switch (period) {
+        case '7d':
+          startDate.setDate(now.getDate() - 7);
+          groupByFormat = '%Y-%m-%d';
+          break;
+        case '30d':
+          startDate.setDate(now.getDate() - 30);
+          groupByFormat = '%Y-%m-%d';
+          break;
+        case '3m':
+          startDate.setMonth(now.getMonth() - 3);
+          groupByFormat = '%Y-%m-%d';
+          break;
+        case '1y':
+          startDate.setFullYear(now.getFullYear() - 1);
+          groupByFormat = '%Y-%m';
+          break;
+        default:
+          startDate.setDate(now.getDate() - 30);
+      }
+
+      const timeSeriesData = await db.select({
+        date: sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`.as('date'),
+        orders: sql`count(*)::int`.as('orders'),
+        revenue: sql`sum(${customerOrders.totalAmount})::numeric`.as('revenue')
+      })
+      .from(customerOrders)
+      .where(gte(customerOrders.createdAt, startDate))
+      .groupBy(sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`)
+      .orderBy(sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`);
+
+      // Get regional breakdown for each time period
+      const processedData = await Promise.all(timeSeriesData.map(async (timePoint) => {
+        const regions = await db.select({
+          country: customerOrders.country,
+          count: sql`count(*)::int`.as('count')
+        })
+        .from(customerOrders)
+        .where(
+          and(
+            sql`to_char(${customerOrders.createdAt}, '${groupByFormat}') = ${timePoint.date}`,
+            isNotNull(customerOrders.country)
+          )
+        )
+        .groupBy(customerOrders.country);
+
+        const regionCounts = regions.reduce((acc, region) => {
+          acc[region.country] = region.count;
+          return acc;
+        }, {} as { [key: string]: number });
+
+        return {
+          date: timePoint.date,
+          orders: timePoint.orders,
+          revenue: Number(timePoint.revenue),
+          regions: regionCounts
+        };
+      }));
+
+      res.json({ success: true, data: processedData });
+    } catch (error) {
+      console.error('Time series analytics API error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch time series analytics data' });
+    }
+  });
+
+  app.get('/api/analytics/product-trends', requireAuth, async (req, res) => {
+    try {
+      const { period = '30d', product = 'all' } = req.query;
+      
+      const now = new Date();
+      let startDate = new Date();
+      let groupByFormat = '%Y-%m-%d';
+      
+      switch (period) {
+        case '7d':
+          startDate.setDate(now.getDate() - 7);
+          groupByFormat = '%Y-%m-%d';
+          break;
+        case '30d':
+          startDate.setDate(now.getDate() - 30);
+          groupByFormat = '%Y-%m-%d';
+          break;
+        case '3m':
+          startDate.setMonth(now.getMonth() - 3);
+          groupByFormat = '%Y-%m-%d';
+          break;
+        case '1y':
+          startDate.setFullYear(now.getFullYear() - 1);
+          groupByFormat = '%Y-%m';
+          break;
+        default:
+          startDate.setDate(now.getDate() - 30);
+      }
+
+      let query = db.select({
+        date: sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`.as('date'),
+        productName: shopProducts.name,
+        quantity: sql`sum(${orderItems.quantity})::int`.as('quantity'),
+        revenue: sql`sum(${orderItems.quantity} * ${orderItems.unitPrice})::numeric`.as('revenue')
+      })
+      .from(orderItems)
+      .innerJoin(customerOrders, eq(orderItems.orderId, customerOrders.id))
+      .innerJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
+      .where(gte(customerOrders.createdAt, startDate))
+      .groupBy(
+        sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`,
+        shopProducts.name
+      )
+      .orderBy(
+        sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`,
+        sql`sum(${orderItems.quantity} * ${orderItems.unitPrice}) desc`
+      );
+
+      if (product && product !== 'all') {
+        query = query.where(eq(shopProducts.name, product as string));
+      }
+
+      const trends = await query;
+      
+      res.json({ success: true, data: trends.map(t => ({
+        date: t.date,
+        productName: t.productName,
+        quantity: t.quantity,
+        revenue: Number(t.revenue)
+      })) });
+    } catch (error) {
+      console.error('Product trends analytics API error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch product trends analytics data' });
+    }
+  });
+
   // GEOGRAPHIC DISTRIBUTION REPORTS API
   // =============================================================================
 
