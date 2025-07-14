@@ -185,13 +185,6 @@ export default function SiteManagement() {
       className: "border-red-300 text-red-600 hover:bg-red-50"
     },
     {
-      id: "role-management",
-      label: "Role Management",
-      icon: Shield,
-      onClick: () => trackButtonClick("role-management", () => setLocation("/admin/comprehensive-role-management")),
-      className: "border-red-400 text-red-700 hover:bg-red-50"
-    },
-    {
       id: "procedures",
       label: "Procedures",
       icon: BookOpen,

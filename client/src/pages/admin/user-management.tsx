@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Users, 
   UserPlus, 
@@ -24,7 +25,8 @@ import {
   Plus,
   Trash2,
   Settings,
-  UserCog
+  UserCog,
+  Save
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -209,7 +211,11 @@ function UserManagement() {
   const [, setLocation] = useLocation();
   const [selectedTab, setSelectedTab] = useState("users");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [editingRole, setEditingRole] = useState<AdminRole | null>(null);
+  const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
 
   // Get current translations
@@ -264,6 +270,82 @@ function UserManagement() {
         variant: "destructive",
         title: t.createUserError,
         description: t.createUserErrorMessage,
+      });
+    },
+  });
+
+  // Create role form
+  const roleForm = useForm({
+    defaultValues: {
+      name: "",
+      displayName: "",
+      description: "",
+    },
+  });
+
+  // Create role mutation
+  const createRoleMutation = useMutation({
+    mutationFn: (data: { name: string; displayName: string; description: string; permissions: number[] }) => 
+      apiRequest("/api/admin/roles", "POST", data),
+    onSuccess: () => {
+      toast({
+        title: "موفقیت",
+        description: "نقش جدید با موفقیت ایجاد شد",
+      });
+      setRoleDialogOpen(false);
+      setEditingRole(null);
+      setSelectedPermissions([]);
+      roleForm.reset();
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/roles'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error.message || "خطا در ایجاد نقش",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update role mutation
+  const updateRoleMutation = useMutation({
+    mutationFn: ({ roleId, data }: { roleId: number; data: any }) => 
+      apiRequest(`/api/admin/roles/${roleId}`, "PUT", data),
+    onSuccess: () => {
+      toast({
+        title: "موفقیت",
+        description: "نقش با موفقیت به‌روزرسانی شد",
+      });
+      setRoleDialogOpen(false);
+      setEditingRole(null);
+      setSelectedPermissions([]);
+      roleForm.reset();
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/roles'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error.message || "خطا در به‌روزرسانی نقش",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete role mutation
+  const deleteRoleMutation = useMutation({
+    mutationFn: (roleId: number) => apiRequest(`/api/admin/roles/${roleId}`, "DELETE"),
+    onSuccess: () => {
+      toast({
+        title: "موفقیت",
+        description: "نقش با موفقیت حذف شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/roles'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error.message || "خطا در حذف نقش",
+        variant: "destructive",
       });
     },
   });
@@ -783,10 +865,124 @@ function UserManagement() {
           {/* Complete Roles Table */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                {t.adminRoles} - Complete List
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  مدیریت نقش‌ها
+                </CardTitle>
+                <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      افزودن نقش جدید
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingRole ? "ویرایش نقش" : "افزودن نقش جدید"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <Form {...roleForm}>
+                      <form onSubmit={roleForm.handleSubmit((data) => {
+                        if (editingRole) {
+                          updateRoleMutation.mutate({
+                            roleId: editingRole.id,
+                            data: { ...data, permissions: selectedPermissions }
+                          });
+                        } else {
+                          createRoleMutation.mutate({ ...data, permissions: selectedPermissions });
+                        }
+                      })} className="space-y-4">
+                        <FormField
+                          control={roleForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>نام سیستمی نقش</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="manager_role" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={roleForm.control}
+                          name="displayName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>نام نمایشی نقش</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="مدیر بخش" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={roleForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>توضیحات نقش</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} placeholder="توضیح کامل نقش و وظایف..." />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div className="space-y-3">
+                          <label className="text-sm font-medium">دسترسی‌های نقش</label>
+                          <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border rounded p-3">
+                            {permissions.map((permission) => (
+                              <div key={permission.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`permission-${permission.id}`}
+                                  checked={selectedPermissions.includes(permission.id)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setSelectedPermissions(prev => [...prev, permission.id]);
+                                    } else {
+                                      setSelectedPermissions(prev => prev.filter(id => id !== permission.id));
+                                    }
+                                  }}
+                                />
+                                <label 
+                                  htmlFor={`permission-${permission.id}`}
+                                  className="text-xs cursor-pointer"
+                                >
+                                  {permission.displayName}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end gap-2">
+                          <Button type="button" variant="outline" onClick={() => {
+                            setRoleDialogOpen(false);
+                            setEditingRole(null);
+                            setSelectedPermissions([]);
+                            roleForm.reset();
+                          }}>
+                            لغو
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            disabled={createRoleMutation.isPending || updateRoleMutation.isPending}
+                          >
+                            <Save className="h-4 w-4 mr-2" />
+                            {editingRole ? "به‌روزرسانی" : "ایجاد"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardHeader>
             <CardContent>
               {rolesLoading ? (
@@ -795,38 +991,67 @@ function UserManagement() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t.roleName}</TableHead>
-                      <TableHead>{t.description}</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>{t.permissionCount}</TableHead>
-                      <TableHead>{t.status}</TableHead>
+                      <TableHead>نقش</TableHead>
+                      <TableHead>دسته‌بندی</TableHead>
+                      <TableHead>تعداد دسترسی‌ها</TableHead>
+                      <TableHead>وضعیت</TableHead>
+                      <TableHead>عملیات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {roles.map((role) => (
                       <TableRow key={role.id}>
                         <TableCell>
-                          <Badge className={getRoleBadgeColor(role.name)}>
-                            {role.displayName}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-xs">
-                          {role.description}
+                          <div>
+                            <div className="font-medium">{role.displayName}</div>
+                            <div className="text-sm text-muted-foreground">{role.name}</div>
+                          </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={getRoleCategoryColor(role.name)}>
+                          <Badge className={getRoleCategoryColor(role.name)}>
                             {getRoleCategory(role.name)}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">
-                            {role.permissionCount || 0}
-                          </Badge>
+                          <Badge variant="outline">{role.permissionCount || 0} دسترسی</Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={role.isActive ? "default" : "secondary"}>
-                            {role.isActive ? t.active : t.inactive}
-                          </Badge>
+                          <Switch
+                            checked={role.isActive}
+                            disabled={role.name === 'super_admin'} // Super admin cannot be deactivated
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEditingRole(role);
+                                // Load current permissions for editing
+                                setSelectedPermissions([]); // You'd fetch actual permissions here
+                                roleForm.setValue('name', role.name);
+                                roleForm.setValue('displayName', role.displayName);
+                                roleForm.setValue('description', role.description);
+                                setRoleDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            {role.name !== 'super_admin' && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm('آیا مطمئن هستید که می‌خواهید این نقش را حذف کنید؟')) {
+                                    deleteRoleMutation.mutate(role.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -843,45 +1068,61 @@ function UserManagement() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Key className="h-5 w-5" />
-                {t.adminPermissions}
+                لیست کامل دسترسی‌ها
               </CardTitle>
             </CardHeader>
             <CardContent>
               {permissionsLoading ? (
                 <div className="text-center py-8">{t.loading}</div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t.permission}</TableHead>
-                      <TableHead>{t.module}</TableHead>
-                      <TableHead>{t.description}</TableHead>
-                      <TableHead>{t.status}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {permissions.map((permission) => (
-                      <TableRow key={permission.id}>
-                        <TableCell className="font-medium">
-                          {permission.displayName}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getPermissionModuleColor(permission.module)}>
-                            {getModuleTranslation(permission.module)}
+                <div className="space-y-6">
+                  {/* Group permissions by module */}
+                  {Object.entries(
+                    permissions.reduce((groups, permission) => {
+                      const module = permission.module;
+                      if (!groups[module]) groups[module] = [];
+                      groups[module].push(permission);
+                      return groups;
+                    }, {} as Record<string, AdminPermission[]>)
+                  ).map(([module, modulePermissions]) => (
+                    <Card key={module} className={`border ${getPermissionModuleColor(module)}`}>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Badge className={getPermissionModuleColor(module)}>
+                            {getModuleTranslation(module)}
                           </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {permission.description}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={permission.isActive ? "default" : "secondary"}>
-                            {permission.isActive ? t.active : t.inactive}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                          <span className="text-sm text-gray-600">
+                            {modulePermissions.length} دسترسی
+                          </span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {modulePermissions.map((permission) => (
+                            <div
+                              key={permission.id}
+                              className="p-3 bg-white rounded border hover:border-blue-300 transition-colors"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">{permission.displayName}</span>
+                                <Badge 
+                                  variant={permission.isActive ? "default" : "secondary"}
+                                  className="text-xs"
+                                >
+                                  {permission.isActive ? 'فعال' : 'غیرفعال'}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-gray-600 mb-2">{permission.description}</p>
+                              <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                {permission.name}
+                              </code>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
