@@ -3355,7 +3355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
 
-    const canManageUsers = await hasPermission(session.adminId, 'manage_users');
+    const canManageUsers = await hasPermission(session.adminId, 'user_management');
     if (!canManageUsers) {
       return res.status(403).json({ success: false, message: "Super admin access required" });
     }
