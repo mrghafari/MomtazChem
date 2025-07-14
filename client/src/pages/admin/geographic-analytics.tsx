@@ -1311,8 +1311,8 @@ export default function GeographicAnalytics() {
                                   const svg = document.getElementById('heat-map-svg');
                                   if (svg) {
                                     const currentViewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
-                                    const newWidth = Math.max(500, parseFloat(currentViewBox[2]) * 0.8);
-                                    const newHeight = Math.max(350, parseFloat(currentViewBox[3]) * 0.8);
+                                    const newWidth = Math.max(50, parseFloat(currentViewBox[2]) * 0.75);
+                                    const newHeight = Math.max(35, parseFloat(currentViewBox[3]) * 0.75);
                                     const newX = parseFloat(currentViewBox[0]) + (parseFloat(currentViewBox[2]) - newWidth) / 2;
                                     const newY = parseFloat(currentViewBox[1]) + (parseFloat(currentViewBox[3]) - newHeight) / 2;
                                     svg.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
@@ -1328,8 +1328,8 @@ export default function GeographicAnalytics() {
                                   const svg = document.getElementById('heat-map-svg');
                                   if (svg) {
                                     const currentViewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
-                                    const newWidth = Math.min(2000, parseFloat(currentViewBox[2]) * 1.25);
-                                    const newHeight = Math.min(1400, parseFloat(currentViewBox[3]) * 1.25);
+                                    const newWidth = Math.min(10000, parseFloat(currentViewBox[2]) * 1.33);
+                                    const newHeight = Math.min(7000, parseFloat(currentViewBox[3]) * 1.33);
                                     const newX = parseFloat(currentViewBox[0]) - (newWidth - parseFloat(currentViewBox[2])) / 2;
                                     const newY = parseFloat(currentViewBox[1]) - (newHeight - parseFloat(currentViewBox[3])) / 2;
                                     svg.setAttribute('viewBox', `${Math.max(-500, newX)} ${Math.max(-350, newY)} ${newWidth} ${newHeight}`);
@@ -1392,9 +1392,9 @@ export default function GeographicAnalytics() {
                                 const currentX = parseFloat(viewBox[0]);
                                 const currentY = parseFloat(viewBox[1]);
                                 
-                                const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
-                                const newWidth = Math.max(400, Math.min(2000, currentWidth * zoomFactor));
-                                const newHeight = Math.max(280, Math.min(1400, currentHeight * zoomFactor));
+                                const zoomFactor = e.deltaY > 0 ? 1.15 : 0.85;
+                                const newWidth = Math.max(50, Math.min(10000, currentWidth * zoomFactor));
+                                const newHeight = Math.max(35, Math.min(7000, currentHeight * zoomFactor));
                                 
                                 // Center zoom around mouse position
                                 const rect = svg.getBoundingClientRect();
@@ -1626,9 +1626,9 @@ export default function GeographicAnalytics() {
                               
                               <div className="flex items-center justify-between flex-wrap gap-2">
                                 <div className="text-xs text-gray-600 flex-1">
-                                  💡 کنترل‌ها: اسکرول ماوس = زوم | کلیک و کشیدن = جابجایی | دکمه‌های + و - = زوم دستی
+                                  💡 کنترل‌ها: اسکرول ماوس = زوم قدرتمند (تا 200x) | کلیک و کشیدن = جابجایی | دکمه‌های + و - = زوم دستی
                                   <br />
-                                  🎯 نقاط بزرگ‌تر = تراکم بیشتر تحویل | انیمیشن = مناطق فعال | کلیک روی نقاط = Google Maps
+                                  🎯 نقاط بزرگ‌تر = تراکم بیشتر تحویل | انیمیشن = مناطق فعال | کلیک روی نقاط = Google Maps | دکمه 🏠 = بازگشت به نمای اصلی
                                 </div>
                                 <button
                                   onClick={() => {
