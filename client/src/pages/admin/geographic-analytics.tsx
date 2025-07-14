@@ -491,18 +491,40 @@ export default function GeographicAnalytics() {
             <CardContent>
               <div className="space-y-6">
                 {productTrendsData && productTrendsData.length > 0 ? (
-                  productTrendsData.slice(0, 5).map((product: any, index: number) => (
-                    <div key={product.name} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold">{product.name}</h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <Badge variant="outline">{product.category}</Badge>
-                            <span>Total Sales: {product.totalSales} units</span>
-                            <span>Total Revenue: ${product.totalRevenue.toFixed(2)}</span>
+                  // Group product trends by product name to create proper structure
+                  (() => {
+                    const grouped = productTrendsData.reduce((acc: any, item: any) => {
+                      const key = item.productName || item.name || 'Unknown Product';
+                      if (!acc[key]) {
+                        acc[key] = {
+                          name: key,
+                          totalSales: 0,
+                          totalRevenue: 0,
+                          dailyData: []
+                        };
+                      }
+                      acc[key].totalSales += Number(item.quantity || 0);
+                      acc[key].totalRevenue += Number(item.revenue || 0);
+                      acc[key].dailyData.push({
+                        date: item.date,
+                        sales: Number(item.quantity || 0),
+                        revenue: Number(item.revenue || 0)
+                      });
+                      return acc;
+                    }, {});
+                    
+                    return Object.values(grouped).slice(0, 5).map((product: any, index: number) => (
+                      <div key={product.name} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold">{product.name}</h3>
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <Badge variant="outline">Chemical Product</Badge>
+                              <span>Total Sales: {product.totalSales || 0} units</span>
+                              <span>Total Revenue: ${(product.totalRevenue || 0).toFixed(2)} IQD</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
                       
                       <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={product.dailyData}>
@@ -533,7 +555,8 @@ export default function GeographicAnalytics() {
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
-                  ))
+                  ));
+                  })()
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     No product trends data available for the selected period
