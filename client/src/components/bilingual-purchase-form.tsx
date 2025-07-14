@@ -610,7 +610,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       if (paymentMethod === 'bank_receipt' && selectedReceiptFile) {
         console.log('🚀 [MUTATION] Bank receipt path selected');
         // First create the order
-        const orderResponse = await apiRequest("/api/customers/orders", "POST", orderData);
+        const orderResponse = await apiRequest("/api/customers/orders", {
+          method: "POST",
+          body: orderData
+        });
         
         // Then upload the receipt file
         if (orderResponse.orderId) {
@@ -648,7 +651,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         const freshEndpoint = `/api/customers/orders?t=${timestamp}`;
         console.log('🚀 [MUTATION] Using fresh endpoint:', freshEndpoint);
         
-        const response = await apiRequest(freshEndpoint, "POST", orderData);
+        const response = await apiRequest(freshEndpoint, {
+          method: "POST",
+          body: orderData
+        });
         console.log('🚀 [MUTATION] apiRequest response received:', response);
         return response;
       }
