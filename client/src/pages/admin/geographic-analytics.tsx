@@ -82,6 +82,9 @@ export default function GeographicAnalytics() {
   const [selectedProduct, setSelectedProduct] = useState("all");
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [showAllGpsDeliveries, setShowAllGpsDeliveries] = useState(false);
+  const [gpsSortField, setGpsSortField] = useState<string>('');
+  const [gpsSortDirection, setGpsSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Sorting function
   const handleSort = (field: string) => {
@@ -93,10 +96,26 @@ export default function GeographicAnalytics() {
     }
   };
 
+  // GPS Sorting function
+  const handleGpsSort = (field: string) => {
+    if (gpsSortField === field) {
+      setGpsSortDirection(gpsSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setGpsSortField(field);
+      setGpsSortDirection('asc');
+    }
+  };
+
   // Get sort icon
   const getSortIcon = (field: string) => {
     if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
     return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+  };
+
+  // Get GPS sort icon
+  const getGpsSortIcon = (field: string) => {
+    if (gpsSortField !== field) return <ArrowUpDown className="h-4 w-4" />;
+    return gpsSortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
   };
 
   // English translations
@@ -323,6 +342,44 @@ export default function GeographicAnalytics() {
   };
 
   const sortedProductRegionData = getSortedProductRegionData();
+
+  // Sort GPS delivery data
+  const getSortedGpsData = () => {
+    if (!gpsDeliveries) return [];
+    
+    let sortedData = [...gpsDeliveries];
+    
+    if (gpsSortField) {
+      sortedData.sort((a, b) => {
+        let aVal = a[gpsSortField as keyof GpsDeliveryData];
+        let bVal = b[gpsSortField as keyof GpsDeliveryData];
+        
+        // Handle special fields
+        if (gpsSortField === 'customerOrderId' || gpsSortField === 'accuracy') {
+          aVal = parseFloat(String(aVal));
+          bVal = parseFloat(String(bVal));
+        }
+        
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          return gpsSortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        }
+        
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return gpsSortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+        
+        if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
+          return gpsSortDirection === 'asc' ? (aVal ? 1 : 0) - (bVal ? 1 : 0) : (bVal ? 1 : 0) - (aVal ? 1 : 0);
+        }
+        
+        return 0;
+      });
+    }
+    
+    return sortedData;
+  };
+
+  const sortedGpsData = getSortedGpsData();
 
   if (geoLoading || productLoading || timeLoading || trendsLoading) {
     return (
@@ -992,18 +1049,66 @@ export default function GeographicAnalytics() {
                         <table className="w-full border-collapse border border-gray-300">
                           <thead>
                             <tr className="bg-gray-100">
-                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Order ID</th>
-                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Delivery Person</th>
-                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Location</th>
+                              <th 
+                                className="border border-gray-300 px-3 py-2 text-left text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors"
+                                onClick={() => handleGpsSort('customerOrderId')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Order ID
+                                  {getGpsSortIcon('customerOrderId')}
+                                </div>
+                              </th>
+                              <th 
+                                className="border border-gray-300 px-3 py-2 text-left text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors"
+                                onClick={() => handleGpsSort('deliveryPersonName')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Delivery Person
+                                  {getGpsSortIcon('deliveryPersonName')}
+                                </div>
+                              </th>
+                              <th 
+                                className="border border-gray-300 px-3 py-2 text-left text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors"
+                                onClick={() => handleGpsSort('city')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Location
+                                  {getGpsSortIcon('city')}
+                                </div>
+                              </th>
                               <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">GPS Coordinates</th>
-                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Accuracy</th>
-                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Address Match</th>
-                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Verification Time</th>
+                              <th 
+                                className="border border-gray-300 px-3 py-2 text-left text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors"
+                                onClick={() => handleGpsSort('accuracy')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Accuracy
+                                  {getGpsSortIcon('accuracy')}
+                                </div>
+                              </th>
+                              <th 
+                                className="border border-gray-300 px-3 py-2 text-left text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors"
+                                onClick={() => handleGpsSort('addressMatched')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Address Match
+                                  {getGpsSortIcon('addressMatched')}
+                                </div>
+                              </th>
+                              <th 
+                                className="border border-gray-300 px-3 py-2 text-left text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors"
+                                onClick={() => handleGpsSort('verificationTime')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Verification Time
+                                  {getGpsSortIcon('verificationTime')}
+                                </div>
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
-                            {/* First 20 rows */}
-                            {gpsDeliveries.slice(0, 20).map((delivery, index) => (
+                            {/* Display GPS data with sorting and collapsible view */}
+                            {sortedGpsData.slice(0, showAllGpsDeliveries ? sortedGpsData.length : 20).map((delivery, index) => (
                               <tr key={delivery.id || index} className="hover:bg-gray-50">
                                 <td className="border border-gray-300 px-3 py-2 font-medium">
                                   #{delivery.customerOrderId}
@@ -1061,8 +1166,24 @@ export default function GeographicAnalytics() {
                         </table>
                       </div>
 
-                      {/* Expandable section for remaining rows */}
-                      {gpsDeliveries.length > 20 && (
+                      {/* Show more/less button for GPS table */}
+                      {sortedGpsData.length > 20 && (
+                        <div className="mt-4 text-center">
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowAllGpsDeliveries(!showAllGpsDeliveries)}
+                            className="text-sm"
+                          >
+                            {showAllGpsDeliveries 
+                              ? `نمایش کمتر (20 ردیف اول)`
+                              : `نمایش ${sortedGpsData.length - 20} تحویل بیشتر`
+                            }
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Legacy expandable section - remove this */}
+                      {false && gpsDeliveries.length > 20 && (
                         <div id="expanded-gps-table" style={{ display: 'none' }} className="overflow-x-auto">
                           <table className="w-full border-collapse border border-gray-300">
                             <tbody>
@@ -1354,10 +1475,24 @@ export default function GeographicAnalytics() {
                               </button>
                             </div>
                             
+                            {/* Google Maps background with GPS points overlay */}
+                            <div className="relative w-full h-96 rounded-lg overflow-hidden">
+                              <iframe
+                                src="https://www.google.com/maps/embed/v1/view?key=AIzaSyDummyKeyPlaceholder&center=33.3128,44.3661&zoom=6&maptype=roadmap"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                allowFullScreen
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                className="w-full h-full"
+                              ></iframe>
+                            </div>
+                            
                             <svg 
                               id="heat-map-svg"
                               viewBox="0 0 1000 700" 
-                              className="w-full h-96 bg-gradient-to-br from-blue-50 to-cyan-50 cursor-grab active:cursor-grabbing"
+                              className="w-full h-96 bg-transparent absolute inset-0 cursor-grab active:cursor-grabbing pointer-events-none"
                               onMouseDown={(e) => {
                                 const svg = e.currentTarget;
                                 const startPoint = { x: e.clientX, y: e.clientY };
@@ -1427,41 +1562,7 @@ export default function GeographicAnalytics() {
                                 </radialGradient>
                               </defs>
                               
-                              {/* Grid Background */}
-                              <rect width="1000" height="700" fill="url(#gridPattern)"/>
-                              
-                              {/* Country Outlines - Iraq, Iran, Turkey region */}
-                              <g opacity="0.6">
-                                {/* Iraq outline */}
-                                <path d="M 300 350 L 350 320 L 400 330 L 450 350 L 480 400 L 460 480 L 420 520 L 380 510 L 340 480 L 320 420 Z" 
-                                      fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="5,5"/>
-                                <text x="380" y="420" textAnchor="middle" className="text-sm font-semibold fill-blue-600">Iraq</text>
-                                
-                                {/* Iran outline */}
-                                <path d="M 480 300 L 580 280 L 680 320 L 720 380 L 700 450 L 650 500 L 580 480 L 520 440 L 480 380 Z" 
-                                      fill="none" stroke="#059669" strokeWidth="2" strokeDasharray="5,5"/>
-                                <text x="600" y="390" textAnchor="middle" className="text-sm font-semibold fill-green-600">Iran</text>
-                                
-                                {/* Turkey outline */}
-                                <path d="M 200 200 L 400 180 L 500 200 L 520 240 L 480 280 L 400 290 L 300 280 L 200 260 Z" 
-                                      fill="none" stroke="#dc2626" strokeWidth="2" strokeDasharray="5,5"/>
-                                <text x="360" y="240" textAnchor="middle" className="text-sm font-semibold fill-red-600">Turkey</text>
-                              </g>
-                              
-                              {/* Major Cities */}
-                              <g>
-                                <circle cx="380" cy="420" r="6" fill="#1f2937" stroke="white" strokeWidth="2"/>
-                                <text x="390" y="435" className="text-xs font-medium fill-gray-700">Baghdad</text>
-                                
-                                <circle cx="420" cy="350" r="4" fill="#1f2937" stroke="white" strokeWidth="2"/>
-                                <text x="430" y="365" className="text-xs font-medium fill-gray-700">Erbil</text>
-                                
-                                <circle cx="600" cy="360" r="4" fill="#1f2937" stroke="white" strokeWidth="2"/>
-                                <text x="610" y="375" className="text-xs font-medium fill-gray-700">Tehran</text>
-                                
-                                <circle cx="360" cy="220" r="4" fill="#1f2937" stroke="white" strokeWidth="2"/>
-                                <text x="370" y="235" className="text-xs font-medium fill-gray-700">Istanbul</text>
-                              </g>
+                              {/* Clean overlay for GPS points - Google Maps provides the background */}
                               
                               {/* Plot GPS Heat Points */}
                               {(() => {
@@ -1515,7 +1616,7 @@ export default function GeographicAnalytics() {
                                       fill={cluster.avgWeight >= 1 ? "#10b981" : "#f59e0b"}
                                       stroke="white"
                                       strokeWidth="2"
-                                      className="hover:opacity-100 cursor-pointer"
+                                      className="hover:opacity-100 cursor-pointer pointer-events-auto"
                                       onClick={() => {
                                         // Calculate average coordinates for the cluster
                                         const avgLat = cluster.points.reduce((sum: number, p: any) => sum + p.lat, 0) / cluster.points.length;
@@ -1585,7 +1686,7 @@ export default function GeographicAnalytics() {
                                     r="3"
                                     fill={point.weight >= 1 ? "#10b981" : "#f59e0b"}
                                     opacity="0.7"
-                                    className="hover:opacity-100 cursor-pointer"
+                                    className="hover:opacity-100 cursor-pointer pointer-events-auto"
                                     onClick={() => {
                                       // Open Google Maps with exact coordinates
                                       const googleMapsUrl = `https://www.google.com/maps?q=${point.lat},${point.lng}&z=15`;
