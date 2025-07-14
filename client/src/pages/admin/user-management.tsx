@@ -26,10 +26,7 @@ import {
   Trash2,
   Settings,
   UserCog,
-  Save,
-  Eye,
-  EyeOff,
-  RefreshCw
+  Save
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -220,7 +217,6 @@ function UserManagement() {
   const [editingRole, setEditingRole] = useState<AdminRole | null>(null);
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const [showPassword, setShowPassword] = useState(false);
 
   // Get current translations
   const t = translations[language];
@@ -255,7 +251,6 @@ function UserManagement() {
   // Fetch admin permissions
   const { data: permissions = [], isLoading: permissionsLoading } = useQuery<AdminPermission[]>({
     queryKey: ["/api/admin/permissions"],
-    staleTime: 0, // Always fetch fresh data
   });
 
   // Create user mutation
@@ -382,29 +377,6 @@ function UserManagement() {
       apiRequest(`/api/admin/users/${id}/status`, "PUT", { isActive }),
     onSuccess: () => {
       refetchUsers();
-    },
-  });
-
-  // Sync modules mutation
-  const syncModulesMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/sync-modules", "POST", {}),
-    onSuccess: (response: any) => {
-      toast({
-        title: "موفقیت",
-        description: `${response.addedModules?.length || 0} ماژول جدید همگام‌سازی شد`,
-      });
-      // Refresh permissions and roles data immediately
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/permissions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/roles'] });
-      queryClient.refetchQueries({ queryKey: ['/api/admin/permissions'] });
-      queryClient.refetchQueries({ queryKey: ['/api/admin/roles'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا",
-        description: error.message || "خطا در همگام‌سازی ماژول‌ها",
-        variant: "destructive",
-      });
     },
   });
 
@@ -566,27 +538,15 @@ function UserManagement() {
             {t.superAdminOnly}
           </Badge>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => syncModulesMutation.mutate()}
-            variant="outline"
-            size="sm"
-            disabled={syncModulesMutation.isPending}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
-            {language === 'en' ? 'Sync Modules' : 'همگام‌سازی ماژول‌ها'}
-          </Button>
-          <Button
-            onClick={toggleLanguage}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Globe className="h-4 w-4" />
-            {language === 'en' ? 'عربي' : 'English'}
-          </Button>
-        </div>
+        <Button
+          onClick={toggleLanguage}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <Globe className="h-4 w-4" />
+          {language === 'en' ? 'عربي' : 'English'}
+        </Button>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
@@ -655,26 +615,7 @@ function UserManagement() {
                                 {editingUser ? t.newPasswordOptional : t.password}
                               </FormLabel>
                               <FormControl>
-                                <div className="relative">
-                                  <Input 
-                                    type={showPassword ? "text" : "password"} 
-                                    {...field} 
-                                    className="pr-10"
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                  >
-                                    {showPassword ? (
-                                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                                    ) : (
-                                      <Eye className="h-4 w-4 text-muted-foreground" />
-                                    )}
-                                  </Button>
-                                </div>
+                                <Input type="password" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

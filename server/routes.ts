@@ -876,22 +876,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId: req.sessionID
       });
       
-      // Save session explicitly before responding
-      req.session.save((err) => {
-        if (err) {
-          console.error('Session save error:', err);
-          return res.status(500).json({ 
-            success: false, 
-            message: "Session save failed" 
-          });
-        }
-        
-        console.log(`✅ [LOGIN] Session saved successfully for admin ${user.id}`);
-        res.json({ 
-          success: true, 
-          message: "Login successful",
-          user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
-        });
+      // Send response immediately without waiting for session save
+      res.json({ 
+        success: true, 
+        message: "Login successful",
+        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
       });
     } catch (error) {
       console.error("Admin login error:", error);
@@ -3366,7 +3355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
 
-    const canManageUsers = await hasPermission(session.adminId, 'user_management');
+    const canManageUsers = await hasPermission(session.adminId, 'manage_users');
     if (!canManageUsers) {
       return res.status(403).json({ success: false, message: "Super admin access required" });
     }
@@ -13783,8 +13772,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // If no custom user found, check for super admin or legacy permissions
       // Only super admin (id=1) gets all permissions
       if (legacyUser[0].id === 1) {
-        // Get current modules from Site Management dynamically
-        const allModules = await getSiteManagementModules();
+        const allModules = [
+          "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
+          "crm", "seo", "categories", "sms", "factory", "super_admin", "user_management",
+          "shop_management", "procedures", "smtp_test", "order_management", "product_management",
+          "payment_management", "wallet_management", "geography_analytics", "ai_settings",
+          "refresh_control", "department_users", "inventory_management", "content_management",
+          "warehouse-management"
+        ];
 
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, allModules);
 
@@ -13871,66 +13866,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error fetching user permissions:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت دسترسی‌ها" });
-    }
-  });
-
-  // Helper function to get current Site Management modules
-  const getSiteManagementModules = async (): Promise<string[]> => {
-    return [
-      'syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup',
-      'crm', 'seo', 'categories', 'sms', 'factory', 'super_admin', 'user_management',
-      'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management',
-      'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings',
-      'refresh_control', 'department_users', 'inventory_management', 'content_management',
-      'warehouse-management'
-    ];
-  };
-
-  // Sync Site Management modules with User Management permissions
-  app.post('/api/admin/sync-modules', requireSuperAdmin, async (req, res) => {
-    try {
-      // Get current site management modules dynamically
-      const currentModules = await getSiteManagementModules();
-
-      const { pool } = await import('./db');
-
-      // Get existing permissions from database
-      const existingPermissions = await pool.query(`
-        SELECT name FROM admin_permissions
-      `);
-      const existingModules = existingPermissions.rows.map((row: any) => row.name);
-
-      // Find new modules that need to be added
-      const newModules = currentModules.filter(module => !existingModules.includes(module));
-      
-      // Find old modules that should be removed (optional - be careful with this)
-      const removedModules = existingModules.filter(module => !currentModules.includes(module));
-
-      // Add new permissions for new modules
-      for (const module of newModules) {
-        const displayName = module.replace(/_/g, ' ').replace(/-/g, ' ')
-          .split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-        
-        await pool.query(`
-          INSERT INTO admin_permissions (name, display_name, description, module, is_active)
-          VALUES ($1, $2, $3, $4, true)
-          ON CONFLICT (name) DO NOTHING
-        `, [module, displayName, `${displayName} management permissions`, module]);
-      }
-
-      console.log(`✓ Added ${newModules.length} new module permissions:`, newModules);
-      
-      res.json({
-        success: true,
-        message: `Synchronized ${newModules.length} new modules`,
-        addedModules: newModules,
-        removedModules: removedModules,
-        totalModules: currentModules.length
-      });
-
-    } catch (error) {
-      console.error('Error syncing modules:', error);
-      res.status(500).json({ success: false, message: 'Error syncing modules' });
     }
   });
 

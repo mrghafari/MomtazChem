@@ -2,11 +2,9 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response, requestUrl?: string, method?: string) {
   if (!res.ok) {
-    // Clone response to avoid "body stream already read" error
-    const clonedRes = res.clone();
     let text: string;
     try {
-      text = await clonedRes.text();
+      text = await res.text();
     } catch (error) {
       text = res.statusText;
     }
