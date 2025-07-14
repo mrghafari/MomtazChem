@@ -482,81 +482,80 @@ export default function GeographicAnalytics() {
             </CardContent>
           </Card>
 
-          {/* Detailed Product Sales Trends */}
+          {/* Product Sales by Region - Complete Breakdown */}
           <Card>
             <CardHeader>
-              <CardTitle>Product Sales Trends - Daily Performance</CardTitle>
-              <p className="text-sm text-gray-600">Track each product's daily sales performance over the selected period</p>
+              <CardTitle>Product Sales by Region - Complete Breakdown</CardTitle>
+              <p className="text-sm text-gray-600">Detailed analysis of product performance across different regions</p>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {productTrendsData && productTrendsData.length > 0 ? (
-                  // Group product trends by product name to create proper structure
-                  (() => {
-                    const grouped = productTrendsData.reduce((acc: any, item: any) => {
-                      const key = item.productName || item.name || 'Unknown Product';
-                      if (!acc[key]) {
-                        acc[key] = {
-                          name: key,
-                          totalSales: 0,
-                          totalRevenue: 0,
-                          dailyData: []
-                        };
-                      }
-                      acc[key].totalSales += Number(item.quantity || 0);
-                      acc[key].totalRevenue += Number(item.revenue || 0);
-                      acc[key].dailyData.push({
-                        date: item.date,
-                        sales: Number(item.quantity || 0),
-                        revenue: Number(item.revenue || 0)
-                      });
-                      return acc;
-                    }, {});
-                    
-                    return Object.values(grouped).slice(0, 5).map((product: any, index: number) => (
-                      <div key={product.name} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h3 className="text-lg font-semibold">{product.name}</h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              <Badge variant="outline">Chemical Product</Badge>
-                              <span>Total Sales: {product.totalSales || 0} units</span>
-                              <span>Total Revenue: ${(product.totalRevenue || 0).toFixed(2)} IQD</span>
-                            </div>
+                {productData && productData.length > 0 ? (
+                  productData.slice(0, 10).map((product: any, index: number) => (
+                    <div key={product.name} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-lg font-semibold">{product.name}</h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <Badge variant="outline">{product.category || 'Chemical Product'}</Badge>
+                            <span>Total Sales: {product.totalSales || 0} units</span>
+                            <span>Total Revenue: {(product.revenue || 0).toFixed(2)} IQD</span>
                           </div>
                         </div>
+                      </div>
                       
-                      <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={product.dailyData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="date" />
-                          <YAxis />
-                          <Tooltip 
-                            formatter={(value: any, name: string) => [
-                              name === 'sales' ? `${value} units sold` : `$${value.toFixed(2)} revenue`,
-                              name === 'sales' ? 'Daily Sales' : 'Daily Revenue'
-                            ]}
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="sales" 
-                            stroke={COLORS[index % COLORS.length]} 
-                            strokeWidth={2} 
-                            name="sales"
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="revenue" 
-                            stroke={COLORS[(index + 1) % COLORS.length]} 
-                            strokeWidth={2} 
-                            strokeDasharray="5 5"
-                            name="revenue"
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
+                      {/* Regional Breakdown */}
+                      {product.regions && product.regions.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          {product.regions.map((region: any, regionIndex: number) => (
+                            <div key={regionIndex} className="bg-gray-50 p-3 rounded-lg">
+                              <h4 className="font-medium text-sm">{region.region} - {region.city}</h4>
+                              <div className="flex justify-between text-sm text-gray-600 mt-1">
+                                <span>Quantity: {region.quantity} units</span>
+                                <span>Revenue: {region.revenue.toFixed(2)} IQD</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-600 mb-4">
+                          Regional breakdown data is being consolidated. This product has been sold but specific regional data is not yet available.
+                        </div>
+                      )}
+                      
+                      {/* Product Performance Chart */}
+                      {productTrendsData && productTrendsData.filter((trend: any) => trend.productName === product.name).length > 0 && (
+                        <ResponsiveContainer width="100%" height={200}>
+                          <LineChart data={productTrendsData.filter((trend: any) => trend.productName === product.name)}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <Tooltip 
+                              formatter={(value: any, name: string) => [
+                                name === 'quantity' ? `${value} units sold` : `${Number(value).toFixed(2)} IQD revenue`,
+                                name === 'quantity' ? 'Daily Sales' : 'Daily Revenue'
+                              ]}
+                            />
+                            <Line 
+                              type="monotone" 
+                              dataKey="quantity" 
+                              stroke={COLORS[index % COLORS.length]} 
+                              strokeWidth={2} 
+                              name="quantity"
+                            />
+                            <Line 
+                              type="monotone" 
+                              dataKey="revenue" 
+                              stroke={COLORS[(index + 1) % COLORS.length]} 
+                              strokeWidth={2} 
+                              strokeDasharray="5 5"
+                              name="revenue"
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
                     </div>
-                  ));
-                  })()
+                  ))
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     No product trends data available for the selected period
