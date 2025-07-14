@@ -28,7 +28,8 @@ import {
   UserCog,
   Save,
   Eye,
-  EyeOff
+  EyeOff,
+  RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -383,6 +384,27 @@ function UserManagement() {
     },
   });
 
+  // Sync modules mutation
+  const syncModulesMutation = useMutation({
+    mutationFn: () => apiRequest("/api/admin/sync-modules", "POST", {}),
+    onSuccess: (response: any) => {
+      toast({
+        title: "موفقیت",
+        description: `${response.addedModules?.length || 0} ماژول جدید همگام‌سازی شد`,
+      });
+      // Refresh permissions and roles data
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/permissions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/roles'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا",
+        description: error.message || "خطا در همگام‌سازی ماژول‌ها",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: CreateUserForm) => {
     const formData = {
       ...data,
@@ -541,15 +563,27 @@ function UserManagement() {
             {t.superAdminOnly}
           </Badge>
         </div>
-        <Button
-          onClick={toggleLanguage}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <Globe className="h-4 w-4" />
-          {language === 'en' ? 'عربي' : 'English'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => syncModulesMutation.mutate()}
+            variant="outline"
+            size="sm"
+            disabled={syncModulesMutation.isPending}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
+            {language === 'en' ? 'Sync Modules' : 'همگام‌سازی ماژول‌ها'}
+          </Button>
+          <Button
+            onClick={toggleLanguage}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Globe className="h-4 w-4" />
+            {language === 'en' ? 'عربي' : 'English'}
+          </Button>
+        </div>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
