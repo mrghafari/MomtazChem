@@ -13722,69 +13722,98 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // Get user permissions based on role
   app.get('/api/user/permissions', async (req, res) => {
     try {
-      const userId = req.session.departmentUser?.id || req.session.adminId;
+      const adminId = req.session.adminId;
       
-      if (!userId) {
+      if (!adminId) {
         return res.status(401).json({ success: false, message: "احراز هویت نشده" });
       }
 
-      // Get user's role assignments
-      const roleAssignments = await db
+      // Check if this is a custom user from user-management system
+      const customUser = await db
         .select()
-        .from(schema.userRoleAssignments)
-        .where(and(
-          eq(schema.userRoleAssignments.userId, userId.toString()),
-          eq(schema.userRoleAssignments.isActive, true)
-        ));
+        .from(schema.customUsers)
+        .where(eq(schema.customUsers.id, adminId.toString()))
+        .limit(1);
 
-      if (roleAssignments.length === 0) {
-        return res.json({ success: true, permissions: [], modules: [] });
-      }
-
-      // Get all permissions for user's roles
-      const roleIds = roleAssignments.map(ra => ra.roleId);
-      const permissions = [];
-      for (const roleId of roleIds) {
-        const rolePermissions = await db
+      if (customUser.length > 0) {
+        // Get user's role from custom_roles
+        const userRole = await db
           .select()
-          .from(schema.modulePermissions)
-          .where(eq(schema.modulePermissions.roleId, roleId));
-        permissions.push(...rolePermissions);
+          .from(schema.customRoles)
+          .where(eq(schema.customRoles.id, customUser[0].roleId))
+          .limit(1);
+
+        if (userRole.length > 0) {
+          // Parse permissions from JSON array
+          const permissions = Array.isArray(userRole[0].permissions) 
+            ? userRole[0].permissions 
+            : JSON.parse(userRole[0].permissions || '[]');
+
+          console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);
+
+          return res.json({
+            success: true,
+            permissions: permissions.map(moduleId => ({
+              moduleId,
+              canView: true,
+              canCreate: true,
+              canEdit: true,
+              canDelete: true,
+              canApprove: true
+            })),
+            modules: permissions,
+            roles: [userRole[0].id],
+            roleInfo: {
+              name: userRole[0].name,
+              displayName: userRole[0].displayName
+            }
+          });
+        }
       }
 
-      // Group permissions by module
-      const modulePermissions = permissions.reduce((acc, perm) => {
-        if (!acc[perm.moduleId]) {
-          acc[perm.moduleId] = {
-            moduleId: perm.moduleId,
-            canView: false,
-            canCreate: false,
-            canEdit: false,
-            canDelete: false,
-            canApprove: false
-          };
-        }
-        
-        // Combine permissions (if user has multiple roles)
-        acc[perm.moduleId].canView = acc[perm.moduleId].canView || perm.canView;
-        acc[perm.moduleId].canCreate = acc[perm.moduleId].canCreate || perm.canCreate;
-        acc[perm.moduleId].canEdit = acc[perm.moduleId].canEdit || perm.canEdit;
-        acc[perm.moduleId].canDelete = acc[perm.moduleId].canDelete || perm.canDelete;
-        acc[perm.moduleId].canApprove = acc[perm.moduleId].canApprove || perm.canApprove;
-        
-        return acc;
-      }, {});
+      // Fallback for legacy admin users or super admin
+      const legacyUser = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.id, adminId))
+        .limit(1);
 
-      const allowedModules = Object.keys(modulePermissions).filter(moduleId => 
-        modulePermissions[moduleId].canView
-      );
+      if (legacyUser.length > 0) {
+        // For super admin, give access to all modules
+        const allModules = [
+          'syncing_shop', 'inquiry_management', 'barcode_management', 'email_management',
+          'backup_management', 'crm_management', 'seo_management', 'category_management',
+          'sms_management', 'factory_management', 'super_admin', 'user_management',
+          'shop_management', 'procedures_management', 'smtp_test', 'order_management',
+          'product_management', 'payment_management', 'wallet_management', 'geography_analytics',
+          'ai_management', 'refresh_control', 'department_users', 'inventory_management',
+          'content_management', 'ticketing_system'
+        ];
 
-      res.json({ 
-        success: true, 
-        permissions: Object.values(modulePermissions),
-        modules: allowedModules,
-        roles: roleIds
-      });
+        console.log(`✓ [PERMISSIONS] Legacy/Super admin ${legacyUser[0].email} has all modules`);
+
+        return res.json({
+          success: true,
+          permissions: allModules.map(moduleId => ({
+            moduleId,
+            canView: true,
+            canCreate: true,
+            canEdit: true,
+            canDelete: true,
+            canApprove: true
+          })),
+          modules: allModules,
+          roles: ['super_admin'],
+          roleInfo: {
+            name: 'super_admin',
+            displayName: 'مدیر ارشد'
+          }
+        });
+      }
+
+      // No user found
+      return res.status(404).json({ success: false, message: "کاربر یافت نشد" });
+
     } catch (error) {
       console.error('Error fetching user permissions:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت دسترسی‌ها" });

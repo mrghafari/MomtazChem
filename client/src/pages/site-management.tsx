@@ -116,7 +116,7 @@ export default function SiteManagement() {
       icon: DollarSign,
       onClick: () => trackButtonClick("shop", () => setLocation("/admin/shop")),
       className: "border-purple-300 text-purple-600 hover:bg-purple-50",
-      moduleId: "shop"
+      moduleId: "shop_management"
     },
     {
       id: "abandoned-cart",
@@ -140,7 +140,7 @@ export default function SiteManagement() {
       icon: Truck,
       onClick: () => trackButtonClick("order-management", () => setLocation("/admin/finance-orders")),
       className: "border-orange-300 text-orange-600 hover:bg-orange-50",
-      moduleId: "order-management"
+      moduleId: "order_management"
     },
     {
       id: "inventory-management",
@@ -260,7 +260,7 @@ export default function SiteManagement() {
       icon: CreditCard,
       onClick: () => trackButtonClick("payment-settings", () => setLocation("/admin/payment-settings")),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50",
-      moduleId: "payment-settings"
+      moduleId: "payment_management"
     },
     {
       id: "wallet-management",
@@ -268,7 +268,7 @@ export default function SiteManagement() {
       icon: Wallet,
       onClick: () => trackButtonClick("wallet-management", () => setLocation("/admin/wallet-management")),
       className: "border-yellow-300 text-yellow-600 hover:bg-yellow-50",
-      moduleId: "wallet-management"
+      moduleId: "wallet_management"
     },
     {
       id: "geography-analytics", 
