@@ -144,35 +144,32 @@ type Module = {
   color?: string;
 };
 
-// Available modules for permission assignment - using exact names from Site Management
+// Available modules for permission assignment - EXACTLY matching Site Management (25 modules)
 const availableModules: Module[] = [
   { id: 'syncing-shop', name: 'syncing_shop', displayName: 'Syncing Shop', description: 'همگام‌سازی محصولات بین کاردکس و فروشگاه', category: 'operations', isCore: true, icon: Database, color: 'bg-blue-500' },
   { id: 'shop', name: 'shop_management', displayName: 'Shop', description: 'مدیریت فروشگاه آنلاین، محصولات و فروش', category: 'sales', isCore: true, icon: ShoppingCart, color: 'bg-purple-500' },
-  { id: 'abandoned-cart', name: 'abandoned_cart', displayName: 'Abandoned Cart', description: 'مدیریت سبدهای خرید رها شده', category: 'sales', isCore: false, icon: ShoppingCart, color: 'bg-red-500' },
   { id: 'products', name: 'product_management', displayName: 'Products', description: 'مدیریت کاتالوگ محصولات و مشخصات', category: 'sales', isCore: true, icon: Package, color: 'bg-violet-500' },
-  { id: 'crm', name: 'crm_management', displayName: 'CRM', description: 'سیستم مدیریت ارتباط با مشتریان', category: 'customer', isCore: true, icon: Users, color: 'bg-pink-500' },
   { id: 'order-management', name: 'order_management', displayName: 'Order Management', description: 'مدیریت سفارشات و پردازش آن‌ها', category: 'sales', isCore: true, icon: Truck, color: 'bg-orange-500' },
-  { id: 'inventory-management', name: 'inventory_management', displayName: 'Inventory Management', description: 'مدیریت موجودی و کنترل انبار', category: 'operations', isCore: true, icon: Package, color: 'bg-emerald-500' },
-  { id: 'inquiries', name: 'inquiry_management', displayName: 'Inquiries', description: 'مدیریت استعلامات و درخواست‌های مشتریان', category: 'customer', isCore: false, icon: BarChart3, color: 'bg-amber-500' },
-  { id: 'barcode', name: 'barcode_management', displayName: 'Barcode', description: 'مدیریت بارکدهای محصولات', category: 'operations', isCore: false, icon: QrCode, color: 'bg-cyan-500' },
-  { id: 'email-settings', name: 'email_management', displayName: 'Email Settings', description: 'تنظیمات ایمیل و اطلاع‌رسانی', category: 'communication', isCore: false, icon: Mail, color: 'bg-emerald-500' },
-  { id: 'database-backup', name: 'backup_management', displayName: 'Database Backup', description: 'پشتیبان‌گیری از پایگاه داده', category: 'system', isCore: false, icon: Database, color: 'bg-slate-500' },
-  { id: 'seo', name: 'seo_management', displayName: 'SEO', description: 'بهینه‌سازی موتورهای جستجو', category: 'marketing', isCore: false, icon: Globe, color: 'bg-purple-500' },
-  { id: 'categories', name: 'category_management', displayName: 'Categories', description: 'مدیریت دسته‌بندی محصولات', category: 'operations', isCore: false, icon: Package, color: 'bg-blue-500' },
-  { id: 'sms', name: 'sms_management', displayName: 'SMS', description: 'سیستم پیامک و اطلاع‌رسانی', category: 'communication', isCore: false, icon: MessageSquare, color: 'bg-green-500' },
-  { id: 'factory', name: 'factory_management', displayName: 'Factory', description: 'مدیریت خط تولید و کارخانه', category: 'operations', isCore: false, icon: Factory, color: 'bg-purple-500' },
-  { id: 'super-admin', name: 'super_admin', displayName: 'Super Admin', description: 'تنظیمات مدیریت ارشد سیستم', category: 'system', isCore: true, icon: UserCog, color: 'bg-indigo-500' },
+  { id: 'warehouse-management', name: 'warehouse-management', displayName: 'Warehouse Management', description: 'مدیریت انبار و موجودی', category: 'operations', isCore: true, icon: Warehouse, color: 'bg-emerald-500' },
+  { id: 'inquiries', name: 'inquiries', displayName: 'Inquiries', description: 'مدیریت استعلامات و درخواست‌های مشتریان', category: 'customer', isCore: false, icon: BarChart3, color: 'bg-amber-500' },
+  { id: 'crm', name: 'crm', displayName: 'CRM', description: 'سیستم مدیریت ارتباط با مشتریان', category: 'customer', isCore: true, icon: Users, color: 'bg-pink-500' },
+  { id: 'barcode', name: 'barcode', displayName: 'Barcode', description: 'مدیریت بارکدهای محصولات', category: 'operations', isCore: false, icon: QrCode, color: 'bg-cyan-500' },
+  { id: 'email-settings', name: 'email_settings', displayName: 'Email Settings', description: 'تنظیمات ایمیل و اطلاع‌رسانی', category: 'communication', isCore: false, icon: Mail, color: 'bg-emerald-500' },
+  { id: 'database-backup', name: 'database_backup', displayName: 'Database Backup', description: 'پشتیبان‌گیری از پایگاه داده', category: 'system', isCore: false, icon: Database, color: 'bg-slate-500' },
+  { id: 'seo', name: 'seo', displayName: 'SEO', description: 'بهینه‌سازی موتورهای جستجو', category: 'marketing', isCore: false, icon: Globe, color: 'bg-purple-500' },
+  { id: 'categories', name: 'categories', displayName: 'Categories', description: 'مدیریت دسته‌بندی محصولات', category: 'operations', isCore: false, icon: Package, color: 'bg-blue-500' },
+  { id: 'sms', name: 'sms', displayName: 'SMS', description: 'سیستم پیامک و اطلاع‌رسانی', category: 'communication', isCore: false, icon: MessageSquare, color: 'bg-green-500' },
+  { id: 'factory', name: 'factory', displayName: 'Factory', description: 'مدیریت خط تولید و کارخانه', category: 'operations', isCore: false, icon: Factory, color: 'bg-purple-500' },
   { id: 'user-management', name: 'user_management', displayName: 'User Management', description: 'مدیریت کاربران و دسترسی‌ها', category: 'system', isCore: true, icon: Users2, color: 'bg-red-500' },
-  { id: 'procedures', name: 'procedures_management', displayName: 'Procedures', description: 'مدیریت رویه‌ها و فرآیندها', category: 'operations', isCore: false, icon: BookOpen, color: 'bg-amber-500' },
+  { id: 'procedures', name: 'procedures', displayName: 'Procedures', description: 'مدیریت رویه‌ها و فرآیندها', category: 'operations', isCore: false, icon: BookOpen, color: 'bg-amber-500' },
   { id: 'smtp-test', name: 'smtp_test', displayName: 'SMTP Test', description: 'تست تنظیمات سرور ایمیل', category: 'communication', isCore: false, icon: TestTube, color: 'bg-sky-500' },
   { id: 'payment-settings', name: 'payment_management', displayName: 'Payment Settings', description: 'تنظیمات پرداخت و درگاه‌ها', category: 'finance', isCore: false, icon: CreditCard, color: 'bg-blue-500' },
   { id: 'wallet-management', name: 'wallet_management', displayName: 'Wallet Management', description: 'مدیریت کیف پول مشتریان', category: 'finance', isCore: false, icon: Wallet, color: 'bg-yellow-500' },
   { id: 'geography-analytics', name: 'geography_analytics', displayName: 'Geography Analytics', description: 'آنالیتیکس جغرافیایی فروش', category: 'analytics', isCore: false, icon: MapPin, color: 'bg-teal-500' },
-  { id: 'ai-settings', name: 'ai_management', displayName: 'AI Settings', description: 'تنظیمات هوش مصنوعی', category: 'system', isCore: false, icon: Zap, color: 'bg-purple-500' },
+  { id: 'ai-settings', name: 'ai_settings', displayName: 'AI Settings', description: 'تنظیمات هوش مصنوعی', category: 'system', isCore: false, icon: Zap, color: 'bg-purple-500' },
   { id: 'refresh-control', name: 'refresh_control', displayName: 'Refresh Control', description: 'کنترل به‌روزرسانی سیستم', category: 'system', isCore: false, icon: RefreshCw, color: 'bg-indigo-500' },
-
-  { id: 'content-management', name: 'content_management', displayName: 'Content Management', description: 'مدیریت محتوای وب‌سایت', category: 'content', isCore: false, icon: Edit3, color: 'bg-green-500' },
-  { id: 'ticketing-system', name: 'ticketing_system', displayName: 'Ticketing System', description: 'سیستم تیکت و پشتیبانی', category: 'communication', isCore: false, icon: Ticket, color: 'bg-red-500' }
+  { id: 'inventory-management', name: 'inventory_management', displayName: 'Inventory Management', description: 'مدیریت موجودی و کنترل انبار', category: 'operations', isCore: true, icon: Package, color: 'bg-emerald-500' },
+  { id: 'content-management', name: 'content_management', displayName: 'Content Management', description: 'مدیریت محتوای وب‌سایت', category: 'content', isCore: false, icon: Edit3, color: 'bg-green-500' }
 ];
 
 function UserManagement() {
@@ -349,6 +346,10 @@ function UserManagement() {
       });
       // Refresh data if needed
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-roles'] });
+      // Force refresh of the modules display
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     },
     onError: () => {
       toast({ 
