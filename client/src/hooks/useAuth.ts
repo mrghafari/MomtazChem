@@ -34,6 +34,8 @@ export function useAuth() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
       queryClient.clear();
+      // Redirect to login page immediately after logout
+      window.location.href = "/admin/login";
     },
   });
 
