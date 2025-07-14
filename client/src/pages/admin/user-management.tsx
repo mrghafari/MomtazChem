@@ -597,11 +597,23 @@ function UserManagement() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="users">{t.adminUsers}</TabsTrigger>
-          <TabsTrigger value="roles">{t.roles}</TabsTrigger>
-          <TabsTrigger value="permissions">{t.permissions}</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between mb-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="users">{t.adminUsers}</TabsTrigger>
+            <TabsTrigger value="roles">{t.roles}</TabsTrigger>
+            <TabsTrigger value="permissions">{t.permissions}</TabsTrigger>
+          </TabsList>
+          <Button
+            onClick={() => syncModulesMutation.mutate()}
+            disabled={syncModulesMutation.isPending}
+            variant="default"
+            size="sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
+            {t.syncModules}
+          </Button>
+        </div>
 
         {/* Users Tab */}
         <TabsContent value="users" className="space-y-4">
@@ -1113,10 +1125,22 @@ function UserManagement() {
         <TabsContent value="permissions" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" />
-                لیست کامل دسترسی‌ها
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  لیست کامل دسترسی‌ها
+                </CardTitle>
+                <Button
+                  onClick={() => syncModulesMutation.mutate()}
+                  disabled={syncModulesMutation.isPending}
+                  variant="default"
+                  size="sm"
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                >
+                  <RefreshCw className={`h-4 w-4 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
+                  {t.syncModules}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {permissionsLoading ? (
