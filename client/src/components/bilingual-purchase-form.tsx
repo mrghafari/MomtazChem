@@ -603,8 +603,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Submit order mutation
   const submitOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
+      console.log('🚀 [MUTATION] mutationFn called with data:', orderData);
+      console.log('🚀 [MUTATION] About to call apiRequest for endpoint: /api/customers/orders');
+      
       // Handle bank receipt upload separately if file is selected
       if (paymentMethod === 'bank_receipt' && selectedReceiptFile) {
+        console.log('🚀 [MUTATION] Bank receipt path selected');
         // First create the order
         const orderResponse = await apiRequest("/api/customers/orders", "POST", orderData);
         
@@ -636,7 +640,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         return orderResponse;
       } else {
         // Normal order without receipt
-        return apiRequest("/api/customers/orders", "POST", orderData);
+        console.log('🚀 [MUTATION] Normal order path selected');
+        console.log('🚀 [MUTATION] Calling apiRequest with endpoint: /api/customers/orders');
+        const response = await apiRequest("/api/customers/orders", "POST", orderData);
+        console.log('🚀 [MUTATION] apiRequest response received:', response);
+        return response;
       }
     },
     onSuccess: (response: any) => {
