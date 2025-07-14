@@ -19,32 +19,51 @@
     
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    
-    // تنظیم موقعیت چپ برای ویجت چت
-    Tawk_API.customStyle = {
-      visibility : {
-        desktop : {
-          position : 'bl', // bottom-left (bl) به جای bottom-right (br)
-          xOffset : 20,
-          yOffset : 20
-        },
-        mobile : {
-          position : 'bl', // bottom-left (bl) به جای bottom-right (br)
-          xOffset : 10,
-          yOffset : 10
+    try {
+      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+      
+      // تنظیم موقعیت چپ برای ویجت چت
+      Tawk_API.customStyle = {
+        visibility : {
+          desktop : {
+            position : 'bl', // bottom-left (bl) به جای bottom-right (br)
+            xOffset : 20,
+            yOffset : 20
+          },
+          mobile : {
+            position : 'bl', // bottom-left (bl) به جای bottom-right (br)
+            xOffset : 10,
+            yOffset : 10
+          }
         }
-      }
-    };
-    
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/685c68dac3a0c5190ca37508/1iukfj5go';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
+      };
+      
+      // Add error handling for i18next issues
+      Tawk_API.onLoad = function(){
+        try {
+          // Suppress i18next errors if they occur
+          if (typeof Tawk_API.i18next === 'undefined') {
+            console.log('Tawk.to loaded without i18next');
+          }
+        } catch (e) {
+          console.log('Tawk.to i18next error suppressed:', e.message);
+        }
+      };
+      
+      (function(){
+        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+        s1.async=true;
+        s1.src='https://embed.tawk.to/685c68dac3a0c5190ca37508/1iukfj5go';
+        s1.charset='UTF-8';
+        s1.setAttribute('crossorigin','*');
+        s1.onerror = function() {
+          console.log('Tawk.to script failed to load');
+        };
+        s0.parentNode.insertBefore(s1,s0);
+      })();
+    } catch (e) {
+      console.log('Tawk.to initialization error:', e.message);
+    }
     </script>
     <!--End of Tawk.to Script-->
     
