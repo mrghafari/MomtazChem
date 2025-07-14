@@ -22,7 +22,7 @@ import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { walletStorage } from "./wallet-storage";
 import { requireDepartment, attachUserDepartments } from "./department-auth";
-import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests } from "@shared/customer-schema";
+import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests, customerOrders, orderItems } from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients, categoryEmailAssignments, insertCategoryEmailAssignmentSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders, shopProducts } from "@shared/shop-schema";
@@ -15774,7 +15774,7 @@ momtazchem.com
       }
 
       // Get orders with geographic data
-      let query = db.select({
+      let query = customerDb.select({
         country: customerOrders.country,
         city: customerOrders.city,
         totalOrders: sql`count(*)::int`.as('totalOrders'),
@@ -15803,7 +15803,7 @@ momtazchem.com
         const avgOrderValue = Number(region.totalRevenue) / region.totalOrders;
         
         // Get top products for this region
-        const topProducts = await db.select({
+        const topProducts = await customerDb.select({
           name: shopProducts.name,
           quantity: sql`sum(${orderItems.quantity})::int`.as('quantity'),
           revenue: sql`sum(${orderItems.quantity} * ${orderItems.unitPrice})::numeric`.as('revenue')
@@ -15868,7 +15868,7 @@ momtazchem.com
           startDate.setDate(now.getDate() - 30);
       }
 
-      let query = db.select({
+      let query = customerDb.select({
         name: shopProducts.name,
         category: shopProducts.category,
         totalSales: sql`sum(${orderItems.quantity})::int`.as('totalSales'),
@@ -15889,7 +15889,7 @@ momtazchem.com
       
       // Get regional breakdown for each product
       const processedData = await Promise.all(productData.map(async (productInfo) => {
-        const regions = await db.select({
+        const regions = await customerDb.select({
           region: customerOrders.country,
           city: customerOrders.city,
           quantity: sql`sum(${orderItems.quantity})::int`.as('quantity'),
@@ -15960,7 +15960,7 @@ momtazchem.com
           startDate.setDate(now.getDate() - 30);
       }
 
-      const timeSeriesData = await db.select({
+      const timeSeriesData = await customerDb.select({
         date: sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`.as('date'),
         orders: sql`count(*)::int`.as('orders'),
         revenue: sql`sum(${customerOrders.totalAmount})::numeric`.as('revenue')
@@ -15972,7 +15972,7 @@ momtazchem.com
 
       // Get regional breakdown for each time period
       const processedData = await Promise.all(timeSeriesData.map(async (timePoint) => {
-        const regions = await db.select({
+        const regions = await customerDb.select({
           country: customerOrders.country,
           count: sql`count(*)::int`.as('count')
         })
@@ -16034,7 +16034,7 @@ momtazchem.com
           startDate.setDate(now.getDate() - 30);
       }
 
-      let query = db.select({
+      let query = customerDb.select({
         date: sql`to_char(${customerOrders.createdAt}, '${groupByFormat}')`.as('date'),
         productName: shopProducts.name,
         quantity: sql`sum(${orderItems.quantity})::int`.as('quantity'),
