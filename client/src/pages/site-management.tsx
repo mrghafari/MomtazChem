@@ -323,7 +323,8 @@ export default function SiteManagement() {
 
   // Filter buttons based on user permissions
   const getFilteredButtons = () => {
-    if (!userPermissions?.success) return getInitialButtons(); // Show all if no permissions loaded yet
+    // Don't show any buttons until permissions are loaded to prevent flashing all buttons
+    if (isLoadingPermissions || !userPermissions?.success) return [];
     
     const allowedModules = userPermissions.modules || [];
     const allButtons = getInitialButtons();
@@ -568,8 +569,26 @@ export default function SiteManagement() {
                       ref={provided.innerRef}
                       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                     >
-                      {buttons.map((button, index) => {
-                        const IconComponent = button.icon;
+                      {isLoadingPermissions ? (
+                        // Loading skeleton for buttons
+                        Array.from({ length: 6 }).map((_, index) => (
+                          <div key={`skeleton-${index}`} className="animate-pulse">
+                            <Card className="border-2">
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-6 h-6 bg-gray-200 rounded"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                  </div>
+                                  <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        ))
+                      ) : (
+                        buttons.map((button, index) => {
+                          const IconComponent = button.icon;
                         return (
                           <Draggable key={button.id} draggableId={button.id} index={index}>
                             {(provided, snapshot) => (
@@ -602,7 +621,8 @@ export default function SiteManagement() {
                             )}
                           </Draggable>
                         );
-                      })}
+                        })
+                      )}
                       {provided.placeholder}
                     </div>
                   )}
