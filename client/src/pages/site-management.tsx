@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -55,6 +55,12 @@ export default function SiteManagement() {
       return bClicks - aClicks; // Sort in descending order (most clicked first)
     });
   };
+
+  // Fetch user permissions to filter available modules
+  const { data: userPermissions, isLoading: isLoadingPermissions } = useQuery({
+    queryKey: ['/api/user/permissions'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   // Fetch active users data - removed automatic refresh
   const { data: activeUsersData, isLoading: isLoadingActiveUsers, refetch: refetchActiveUsers, error } = useQuery({
@@ -257,6 +263,16 @@ export default function SiteManagement() {
 
   ];
 
+  // Filter buttons based on user permissions
+  const getFilteredButtons = () => {
+    if (!userPermissions?.success) return [];
+    
+    const allowedModules = userPermissions.modules || [];
+    const allButtons = getInitialButtons();
+    
+    return allButtons.filter(button => allowedModules.includes(button.id));
+  };
+
   // State for drag and drop functionality with usage-based sorting
   const [buttons, setButtons] = useState<QuickActionButton[]>(() => {
     const savedOrder = localStorage.getItem('site-management-button-order');
@@ -287,6 +303,14 @@ export default function SiteManagement() {
     }
     return getInitialButtons();
   });
+
+  // Update buttons when permissions change
+  useEffect(() => {
+    if (userPermissions?.success) {
+      const filteredButtons = getFilteredButtons();
+      setButtons(filteredButtons);
+    }
+  }, [userPermissions]);
 
   // Save button order to localStorage whenever it changes
   useEffect(() => {

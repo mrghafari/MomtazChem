@@ -13726,6 +13726,119 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // ============================================================================
+  // ROLE-BASED ACCESS CONTROL API
+  // ============================================================================
+
+  // Get user permissions based on role
+  app.get('/api/user/permissions', async (req, res) => {
+    try {
+      const userId = req.session.departmentUser?.id || req.session.adminId;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+
+      // Get user's role assignments
+      const roleAssignments = await db
+        .select()
+        .from(schema.userRoleAssignments)
+        .where(and(
+          eq(schema.userRoleAssignments.userId, userId.toString()),
+          eq(schema.userRoleAssignments.isActive, true)
+        ));
+
+      if (roleAssignments.length === 0) {
+        return res.json({ success: true, permissions: [], modules: [] });
+      }
+
+      // Get all permissions for user's roles
+      const roleIds = roleAssignments.map(ra => ra.roleId);
+      const permissions = await db
+        .select()
+        .from(schema.modulePermissions)
+        .where(inArray(schema.modulePermissions.roleId, roleIds));
+
+      // Group permissions by module
+      const modulePermissions = permissions.reduce((acc, perm) => {
+        if (!acc[perm.moduleId]) {
+          acc[perm.moduleId] = {
+            moduleId: perm.moduleId,
+            canView: false,
+            canCreate: false,
+            canEdit: false,
+            canDelete: false,
+            canApprove: false
+          };
+        }
+        
+        // Combine permissions (if user has multiple roles)
+        acc[perm.moduleId].canView = acc[perm.moduleId].canView || perm.canView;
+        acc[perm.moduleId].canCreate = acc[perm.moduleId].canCreate || perm.canCreate;
+        acc[perm.moduleId].canEdit = acc[perm.moduleId].canEdit || perm.canEdit;
+        acc[perm.moduleId].canDelete = acc[perm.moduleId].canDelete || perm.canDelete;
+        acc[perm.moduleId].canApprove = acc[perm.moduleId].canApprove || perm.canApprove;
+        
+        return acc;
+      }, {});
+
+      const allowedModules = Object.keys(modulePermissions).filter(moduleId => 
+        modulePermissions[moduleId].canView
+      );
+
+      res.json({ 
+        success: true, 
+        permissions: Object.values(modulePermissions),
+        modules: allowedModules,
+        roles: roleIds
+      });
+    } catch (error) {
+      console.error('Error fetching user permissions:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت دسترسی‌ها" });
+    }
+  });
+
+  // Get all available modules
+  app.get('/api/modules/available', async (req, res) => {
+    try {
+      const modules = [
+        { id: 'kardex-sync', name: 'Syncing Shop', category: 'inventory', icon: 'Database' },
+        { id: 'inquiries', name: 'Inquiries', category: 'customer', icon: 'MessageSquare' },
+        { id: 'barcode', name: 'Barcode', category: 'inventory', icon: 'QrCode' },
+        { id: 'email-settings', name: 'Email Settings', category: 'communication', icon: 'Mail' },
+        { id: 'database-backup', name: 'Database Backup', category: 'system', icon: 'Database' },
+        { id: 'crm', name: 'CRM', category: 'customer', icon: 'Users' },
+        { id: 'seo', name: 'SEO', category: 'marketing', icon: 'Globe' },
+        { id: 'categories', name: 'Categories', category: 'inventory', icon: 'Box' },
+        { id: 'sms', name: 'SMS', category: 'communication', icon: 'Smartphone' },
+        { id: 'factory', name: 'Factory', category: 'operations', icon: 'Factory' },
+        { id: 'super-admin', name: 'Super Admin', category: 'administration', icon: 'UserCog' },
+        { id: 'user-management', name: 'User Management', category: 'administration', icon: 'Users2' },
+        { id: 'shop', name: 'Shop', category: 'sales', icon: 'ShoppingCart' },
+        { id: 'procedures', name: 'Procedures', category: 'operations', icon: 'BookOpen' },
+        { id: 'smtp-test', name: 'SMTP Test', category: 'communication', icon: 'TestTube' },
+        { id: 'order-management', name: 'Order Management', category: 'sales', icon: 'Truck' },
+        { id: 'products', name: 'Products', category: 'inventory', icon: 'Package' },
+        { id: 'payment-settings', name: 'Payment Settings', category: 'financial', icon: 'CreditCard' },
+        { id: 'wallet-management', name: 'Wallet Management', category: 'financial', icon: 'Wallet' },
+        { id: 'geography-analytics', name: 'Geography Analytics', category: 'analytics', icon: 'MapPin' },
+        { id: 'ai-settings', name: 'AI Settings', category: 'system', icon: 'Zap' },
+        { id: 'refresh-control', name: 'Refresh Control', category: 'system', icon: 'RefreshCw' },
+        { id: 'department-users', name: 'Department Users', category: 'administration', icon: 'Users' },
+        { id: 'inventory-management', name: 'Inventory Management', category: 'inventory', icon: 'Package' },
+        { id: 'content-management', name: 'Content Management', category: 'marketing', icon: 'Edit3' },
+        { id: 'ticketing-system', name: 'Ticketing System', category: 'support', icon: 'Ticket' },
+        { id: 'finance-orders', name: 'Financial Orders', category: 'financial', icon: 'DollarSign' },
+        { id: 'warehouse-orders', name: 'Warehouse Orders', category: 'operations', icon: 'Warehouse' }
+      ];
+
+      res.json({ success: true, modules });
+    } catch (error) {
+      console.error('Error fetching available modules:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت ماژول‌ها" });
+    }
+  });
+
+  // ============================================================================
   // WAREHOUSE DEPARTMENT ROUTES
   // ============================================================================
 

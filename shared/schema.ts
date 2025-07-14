@@ -870,3 +870,48 @@ export const insertSmsLogSchema = createInsertSchema(smsLogs).omit({
 
 export type InsertSmsLog = z.infer<typeof insertSmsLogSchema>;
 export type SmsLog = typeof smsLogs.$inferSelect;
+
+// =============================================================================
+// ROLE-BASED ACCESS CONTROL SCHEMA
+// =============================================================================
+
+// Module permissions table
+export const modulePermissions = pgTable("module_permissions", {
+  id: serial("id").primaryKey(),
+  roleId: varchar("role_id", { length: 50 }).notNull(),
+  moduleId: varchar("module_id", { length: 50 }).notNull(),
+  canView: boolean("can_view").default(true),
+  canCreate: boolean("can_create").default(false),
+  canEdit: boolean("can_edit").default(false),
+  canDelete: boolean("can_delete").default(false),
+  canApprove: boolean("can_approve").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// User role assignments table
+export const userRoleAssignments = pgTable("user_role_assignments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 50 }).notNull(),
+  roleId: varchar("role_id", { length: 50 }).notNull(),
+  assignedBy: varchar("assigned_by", { length: 50 }).notNull(),
+  assignedAt: timestamp("assigned_at").notNull().defaultNow(),
+  isActive: boolean("is_active").default(true),
+});
+
+export const insertModulePermissionSchema = createInsertSchema(modulePermissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserRoleAssignmentSchema = createInsertSchema(userRoleAssignments).omit({
+  id: true,
+  assignedAt: true,
+});
+
+export type InsertModulePermission = z.infer<typeof insertModulePermissionSchema>;
+export type ModulePermission = typeof modulePermissions.$inferSelect;
+
+export type InsertUserRoleAssignment = z.infer<typeof insertUserRoleAssignmentSchema>;
+export type UserRoleAssignment = typeof userRoleAssignments.$inferSelect;
