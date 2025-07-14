@@ -3479,9 +3479,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'ai_settings',
         'refresh_control',
         'department_users',
-        'inventory_management',
+        'warehouse-management', // Updated: replaced inventory_management with warehouse-management
         'content_management',
-        'warehouse-management'
+        'security-management'
       ];
 
       // Get super admin role (role_id = '1')
