@@ -13753,10 +13753,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
       // Get all permissions for user's roles
       const roleIds = roleAssignments.map(ra => ra.roleId);
-      const permissions = await db
-        .select()
-        .from(schema.modulePermissions)
-        .where(inArray(schema.modulePermissions.roleId, roleIds));
+      const permissions = [];
+      for (const roleId of roleIds) {
+        const rolePermissions = await db
+          .select()
+          .from(schema.modulePermissions)
+          .where(eq(schema.modulePermissions.roleId, roleId));
+        permissions.push(...rolePermissions);
+      }
 
       // Group permissions by module
       const modulePermissions = permissions.reduce((acc, perm) => {

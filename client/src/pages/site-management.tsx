@@ -17,6 +17,7 @@ interface QuickActionButton {
   icon: React.ComponentType<{ className?: string }>;
   onClick: () => void;
   className: string;
+  moduleId?: string; // Optional module ID for role-based access control
 }
 
 export default function SiteManagement() {
@@ -68,6 +69,34 @@ export default function SiteManagement() {
     enabled: false, // Don't auto-fetch on mount
   });
 
+  // Module ID to button mapping for role-based filtering
+  const moduleButtonMap: Record<string, string> = {
+    'shop': 'shop',
+    'products': 'products', 
+    'order-management': 'order-management',
+    'inventory-management': 'inventory-management',
+    'crm': 'crm',
+    'wallet-management': 'wallet-management',
+    'payment-settings': 'payment-settings',
+    'geography-analytics': 'geography-analytics',
+    'finance-orders': 'order-management',
+    'warehouse-orders': 'order-management',
+    'logistics-orders': 'order-management',
+    'email-settings': 'email-settings',
+    'content-management': 'content-management',
+    'seo': 'seo',
+    'categories': 'categories',
+    'barcode': 'barcode',
+    'database-backup': 'database-backup',
+    'smtp-test': 'smtp-test',
+    'ai-settings': 'ai-settings',
+    'user-management': 'user-management',
+    'security-management': 'security-management',
+    'sms': 'sms',
+    'factory': 'factory',
+    'procedures': 'procedures'
+  };
+
   // Initial button configuration ordered by most frequent usage (top-left priority)
   const getInitialButtons = (): QuickActionButton[] => [
     // Row 1: Most frequently used daily operations
@@ -76,201 +105,232 @@ export default function SiteManagement() {
       label: "Syncing Shop",
       icon: Database,
       onClick: () => trackButtonClick("kardex-sync", () => setShowKardexSync(true)),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "products" // Requires products module access
     },
     {
       id: "shop",
       label: "Shop",
       icon: DollarSign,
       onClick: () => trackButtonClick("shop", () => setLocation("/admin/shop")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "shop"
     },
     {
       id: "abandoned-cart",
       label: "Abandoned Cart",
       icon: ShoppingCart,
       onClick: () => trackButtonClick("abandoned-cart", () => setLocation("/admin/abandoned-cart-management")),
-      className: "border-red-300 text-red-600 hover:bg-red-50"
+      className: "border-red-300 text-red-600 hover:bg-red-50",
+      moduleId: "shop"
     },
     {
       id: "products",
       label: "Products", 
       icon: Box,
       onClick: () => trackButtonClick("products", () => setLocation("/admin/products")),
-      className: "border-violet-300 text-violet-600 hover:bg-violet-50"
+      className: "border-violet-300 text-violet-600 hover:bg-violet-50",
+      moduleId: "products"
     },
     {
       id: "order-management",
       label: "Order Management",
       icon: Truck,
       onClick: () => trackButtonClick("order-management", () => setLocation("/admin/finance-orders")),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50"
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
+      moduleId: "order-management"
     },
     {
       id: "inventory-management",
       label: "Inventory Management",
       icon: Calculator,
       onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
-      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+      moduleId: "inventory-management"
     },
     {
       id: "inquiries",
       label: "Inquiries",
       icon: BarChart3,
       onClick: () => trackButtonClick("inquiries", () => setLocation("/admin/inquiries")),
-      className: "border-amber-300 text-amber-600 hover:bg-amber-50"
+      className: "border-amber-300 text-amber-600 hover:bg-amber-50",
+      moduleId: "crm"
     },
     {
       id: "crm",
       label: "CRM",
       icon: Users,
       onClick: () => trackButtonClick("crm", () => setLocation("/crm")),
-      className: "border-pink-300 text-pink-600 hover:bg-pink-50"
+      className: "border-pink-300 text-pink-600 hover:bg-pink-50",
+      moduleId: "crm"
     },
     {
       id: "barcode",
       label: "Barcode",
       icon: QrCode,
       onClick: () => trackButtonClick("barcode", () => setLocation("/admin/barcode-inventory")),
-      className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50"
+      className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50",
+      moduleId: "barcode"
     },
     {
       id: "email-settings",
       label: "Email Settings",
       icon: Mail,
       onClick: () => trackButtonClick("email-settings", () => setLocation("/admin/advanced-email-settings")),
-      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+      moduleId: "email-settings"
     },
     {
       id: "database-backup",
       label: "Database Backup",
       icon: Database,
       onClick: () => trackButtonClick("database-backup", () => setLocation("/admin/database-management")),
-      className: "border-slate-300 text-slate-600 hover:bg-slate-50"
+      className: "border-slate-300 text-slate-600 hover:bg-slate-50",
+      moduleId: "database-backup"
     },
     {
       id: "seo",
       label: "SEO",
       icon: Globe,
       onClick: () => trackButtonClick("seo", () => setLocation("/seo-management")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "seo"
     },
     {
       id: "categories",
       label: "Categories",
       icon: Package,
       onClick: () => trackButtonClick("categories", () => setLocation("/category-management")),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "categories"
     },
     {
       id: "sms",
       label: "SMS",
       icon: MessageSquare,
       onClick: () => trackButtonClick("sms", () => setLocation("/admin/sms-management")),
-      className: "border-green-300 text-green-600 hover:bg-green-50"
+      className: "border-green-300 text-green-600 hover:bg-green-50",
+      moduleId: "sms"
     },
     {
       id: "factory",
       label: "Factory",
       icon: Factory,
       onClick: () => trackButtonClick("factory", () => setLocation("/admin/factory-management")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "factory"
     },
     {
       id: "super-admin",
       label: "Super Admin",
       icon: UserCog,
       onClick: () => trackButtonClick("super-admin", () => setLocation("/admin/super-admin-settings")),
-      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
+      moduleId: "user-management"
     },
     {
       id: "user-management",
       label: "User Management",
       icon: Users2,
       onClick: () => trackButtonClick("user-management", () => setLocation("/admin/user-management")),
-      className: "border-red-300 text-red-600 hover:bg-red-50"
+      className: "border-red-300 text-red-600 hover:bg-red-50",
+      moduleId: "user-management"
     },
     {
       id: "procedures",
       label: "Procedures",
       icon: BookOpen,
       onClick: () => trackButtonClick("procedures", () => setLocation("/admin/procedures-management")),
-      className: "border-amber-300 text-amber-600 hover:bg-amber-50"
+      className: "border-amber-300 text-amber-600 hover:bg-amber-50",
+      moduleId: "procedures"
     },
     {
       id: "smtp-test",
       label: "SMTP Test",
       icon: TestTube,
       onClick: () => trackButtonClick("smtp-test", () => setLocation("/admin/smtp-test")),
-      className: "border-sky-300 text-sky-600 hover:bg-sky-50"
+      className: "border-sky-300 text-sky-600 hover:bg-sky-50",
+      moduleId: "smtp-test"
     },
     {
       id: "payment-settings",
       label: "Payment Settings",
       icon: CreditCard,
       onClick: () => trackButtonClick("payment-settings", () => setLocation("/admin/payment-settings")),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50"
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "payment-settings"
     },
     {
       id: "wallet-management",
       label: "Wallet Management",
       icon: Wallet,
       onClick: () => trackButtonClick("wallet-management", () => setLocation("/admin/wallet-management")),
-      className: "border-yellow-300 text-yellow-600 hover:bg-yellow-50"
+      className: "border-yellow-300 text-yellow-600 hover:bg-yellow-50",
+      moduleId: "wallet-management"
     },
     {
       id: "geography-analytics", 
       label: "Geography Analytics",
       icon: MapPin,
       onClick: () => trackButtonClick("geography-analytics", () => setLocation("/admin/geographic-analytics")),
-      className: "border-teal-300 text-teal-600 hover:bg-teal-50"
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
+      moduleId: "geography-analytics"
     },
     {
       id: "ai-settings",
       label: "AI Settings",
       icon: Zap,
       onClick: () => trackButtonClick("ai-settings", () => setLocation("/admin/ai-settings")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50"
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "ai-settings"
     },
     {
       id: "refresh-control",
       label: "Refresh Control",
       icon: RefreshCw,
       onClick: () => trackButtonClick("refresh-control", () => setLocation("/admin/global-refresh-settings")),
-      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
+      moduleId: "user-management"
     },
     {
       id: "department-users",
       label: "Department Users",
       icon: Users,
       onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
-      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+      moduleId: "user-management"
     },
     {
       id: "content-management",
       label: "Content Management",
       icon: Edit3,
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
-      className: "border-green-300 text-green-600 hover:bg-green-50"
+      className: "border-green-300 text-green-600 hover:bg-green-50",
+      moduleId: "content-management"
     },
     {
       id: "ticketing-system",
       label: "Ticketing System",
       icon: Ticket,
       onClick: () => trackButtonClick("ticketing-system", () => setLocation("/admin/ticketing-system")),
-      className: "border-red-300 text-red-600 hover:bg-red-50"
+      className: "border-red-300 text-red-600 hover:bg-red-50",
+      moduleId: "user-management"
     },
 
   ];
 
   // Filter buttons based on user permissions
   const getFilteredButtons = () => {
-    if (!userPermissions?.success) return [];
+    if (!userPermissions?.success) return getInitialButtons(); // Show all if no permissions loaded yet
     
     const allowedModules = userPermissions.modules || [];
     const allButtons = getInitialButtons();
     
-    return allButtons.filter(button => allowedModules.includes(button.id));
+    // If no moduleId specified, show button (for universal access buttons)
+    // If moduleId specified, check if user has access to that module
+    return allButtons.filter(button => 
+      !button.moduleId || allowedModules.includes(button.moduleId)
+    );
   };
 
   // State for drag and drop functionality with usage-based sorting
@@ -280,7 +340,7 @@ export default function SiteManagement() {
     
     // Always start with usage-sorted buttons if we have click data
     if (Object.keys(clickCounts).length > 0) {
-      return sortButtonsByUsage(getInitialButtons());
+      return sortButtonsByUsage(getFilteredButtons());
     }
     
     // Otherwise use saved order or default
@@ -308,7 +368,14 @@ export default function SiteManagement() {
   useEffect(() => {
     if (userPermissions?.success) {
       const filteredButtons = getFilteredButtons();
-      setButtons(filteredButtons);
+      const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
+      
+      // Apply usage-based sorting if available
+      if (Object.keys(clickCounts).length > 0) {
+        setButtons(sortButtonsByUsage(filteredButtons));
+      } else {
+        setButtons(filteredButtons);
+      }
     }
   }, [userPermissions]);
 
