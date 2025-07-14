@@ -26,7 +26,9 @@ import {
   Trash2,
   Settings,
   UserCog,
-  Save
+  Save,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -217,6 +219,7 @@ function UserManagement() {
   const [editingRole, setEditingRole] = useState<AdminRole | null>(null);
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Get current translations
   const t = translations[language];
@@ -615,7 +618,26 @@ function UserManagement() {
                                 {editingUser ? t.newPasswordOptional : t.password}
                               </FormLabel>
                               <FormControl>
-                                <Input type="password" {...field} />
+                                <div className="relative">
+                                  <Input 
+                                    type={showPassword ? "text" : "password"} 
+                                    {...field} 
+                                    className="pr-10"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                  >
+                                    {showPassword ? (
+                                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                      <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                  </Button>
+                                </div>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
