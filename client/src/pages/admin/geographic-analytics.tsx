@@ -1169,8 +1169,129 @@ export default function GeographicAnalytics() {
                         </div>
                       </div>
                       
+                      {/* Interactive Delivery Distribution Map */}
+                      <div className="bg-white border rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+                          <MapPin className="h-5 w-5 mr-2 text-blue-600" />
+                          نقشه پراکندگی توزیع تحویل‌ها (Delivery Distribution Map)
+                        </h4>
+                        
+                        {/* Map Container */}
+                        <div className="relative bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50">
+                            {/* Simple Geographic Map Background */}
+                            <svg viewBox="0 0 800 600" className="w-full h-96">
+                              {/* Iraq/Iran/Turkey Region Outline */}
+                              <rect x="0" y="0" width="800" height="600" fill="#e8f4f8" />
+                              
+                              {/* Countries Boundaries */}
+                              <path d="M200 300 L400 280 L600 300 L650 200 L700 150 L750 200 L700 350 L500 400 L300 380 L200 350 Z" 
+                                    fill="#f0f9ff" stroke="#3b82f6" strokeWidth="2" opacity="0.7" />
+                              
+                              {/* Country Labels */}
+                              <text x="350" y="250" textAnchor="middle" className="text-sm font-medium fill-gray-600">Iraq</text>
+                              <text x="550" y="200" textAnchor="middle" className="text-sm font-medium fill-gray-600">Iran</text>
+                              <text x="650" y="150" textAnchor="middle" className="text-sm font-medium fill-gray-600">Turkey</text>
+                              
+                              {/* Major Cities */}
+                              <circle cx="350" cy="280" r="4" fill="#1f2937" />
+                              <text x="355" y="295" className="text-xs fill-gray-700">Baghdad</text>
+                              
+                              <circle cx="380" cy="220" r="3" fill="#1f2937" />
+                              <text x="385" y="235" className="text-xs fill-gray-700">Erbil</text>
+                              
+                              <circle cx="550" cy="180" r="3" fill="#1f2937" />
+                              <text x="555" y="195" className="text-xs fill-gray-700">Tehran</text>
+                              
+                              <circle cx="650" cy="130" r="3" fill="#1f2937" />
+                              <text x="655" y="145" className="text-xs fill-gray-700">Istanbul</text>
+                              
+                              {/* Plot GPS Delivery Points */}
+                              {gpsHeatmap.data.slice(0, 50).map((point: any, index: number) => {
+                                // Convert GPS coordinates to SVG coordinates
+                                const x = ((point.lng + 50) / 100) * 800; // Rough longitude mapping
+                                const y = ((50 - point.lat) / 50) * 600;  // Rough latitude mapping
+                                
+                                return (
+                                  <g key={index}>
+                                    <circle 
+                                      cx={Math.max(50, Math.min(750, x))} 
+                                      cy={Math.max(50, Math.min(550, y))} 
+                                      r={point.weight >= 1 ? "6" : "4"}
+                                      fill={point.weight >= 1 ? "#10b981" : "#f59e0b"}
+                                      stroke="white"
+                                      strokeWidth="2"
+                                      opacity="0.8"
+                                      className="hover:opacity-100 cursor-pointer"
+                                    >
+                                      <title>
+                                        تحویل در موقعیت: {point.lat.toFixed(4)}, {point.lng.toFixed(4)}
+                                        تاریخ: {new Date(point.timestamp).toLocaleDateString('fa-IR')}
+                                        دقت: {point.weight >= 1 ? 'بالا' : 'نیاز به بررسی'}
+                                      </title>
+                                    </circle>
+                                    
+                                    {/* Pulse animation for high-weight points */}
+                                    {point.weight >= 1 && (
+                                      <circle 
+                                        cx={Math.max(50, Math.min(750, x))} 
+                                        cy={Math.max(50, Math.min(550, y))} 
+                                        r="6"
+                                        fill="none"
+                                        stroke="#10b981"
+                                        strokeWidth="2"
+                                        opacity="0.6"
+                                      >
+                                        <animate attributeName="r" values="6;12;6" dur="3s" repeatCount="indefinite" />
+                                        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite" />
+                                      </circle>
+                                    )}
+                                  </g>
+                                );
+                              })}
+                            </svg>
+                          </div>
+                          
+                          {/* Map Legend */}
+                          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-md">
+                            <h5 className="text-sm font-semibold text-gray-800 mb-2">راهنما (Legend)</h5>
+                            <div className="space-y-2">
+                              <div className="flex items-center text-xs">
+                                <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                                <span>تحویل با دقت بالا ({gpsHeatmap.data.filter((p: any) => p.weight >= 1).length})</span>
+                              </div>
+                              <div className="flex items-center text-xs">
+                                <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                                <span>نیاز به بررسی ({gpsHeatmap.data.filter((p: any) => p.weight < 1).length})</span>
+                              </div>
+                              <div className="flex items-center text-xs">
+                                <div className="w-3 h-3 rounded-full bg-gray-400 mr-2"></div>
+                                <span>شهرهای اصلی</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Statistics Overlay */}
+                          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-md">
+                            <h5 className="text-sm font-semibold text-gray-800 mb-2">آمار توزیع</h5>
+                            <div className="space-y-1 text-xs">
+                              <div>کل نقاط: <span className="font-bold text-blue-600">{gpsHeatmap.data.length}</span></div>
+                              <div>تحویل موفق: <span className="font-bold text-green-600">{gpsHeatmap.data.filter((p: any) => p.weight >= 1).length}</span></div>
+                              <div>مناطق منحصر: <span className="font-bold text-purple-600">
+                                {new Set(gpsHeatmap.data.map((point: any) => `${Math.floor(point.lat)},${Math.floor(point.lng)}`)).size}
+                              </span></div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 text-xs text-gray-600 text-center">
+                          <p>🗺️ نقشه نمایش دهنده پراکندگی جغرافیایی {gpsHeatmap.data.length} نقطه تحویل در عراق، ایران و ترکیه است. نقاط سبز نشان‌دهنده تحویل‌های موفق و دقیق هستند.</p>
+                        </div>
+                      </div>
+                      
+                      {/* Detailed GPS Coordinates List */}
                       <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-semibold text-gray-800 mb-3">GPS Coordinates Overview</h4>
+                        <h4 className="font-semibold text-gray-800 mb-3">جزئیات مختصات GPS</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
                           {gpsHeatmap.data.map((point: any, index: number) => (
                             <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
@@ -1186,7 +1307,7 @@ export default function GeographicAnalytics() {
                                 </div>
                               </div>
                               <Badge variant={point.weight >= 1 ? "default" : "secondary"} className="text-xs">
-                                {point.weight >= 1 ? "Accurate" : "Review"}
+                                {point.weight >= 1 ? "دقیق" : "بررسی"}
                               </Badge>
                             </div>
                           ))}
