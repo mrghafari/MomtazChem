@@ -16205,7 +16205,33 @@ momtazchem.com
     }
   });
 
-  // Approve recharge request (admin)
+  // Approve recharge request (admin) - GET version for frontend buttons
+  app.get('/api/admin/wallet/recharge-requests/:id/approve', requireAuth, async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const adminId = req.session.adminId;
+
+      if (!adminId) {
+        return res.status(401).json({ success: false, message: "Admin authentication required" });
+      }
+
+      const result = await walletStorage.processRechargeRequest(requestId, adminId);
+
+      res.json({ 
+        success: true, 
+        message: "Recharge request approved and processed successfully",
+        data: result 
+      });
+    } catch (error) {
+      console.error('Error approving recharge request:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Failed to approve recharge request' 
+      });
+    }
+  });
+
+  // Approve recharge request (admin) - POST version for form submission
   app.post('/api/admin/wallet/recharge-requests/:id/approve', requireAuth, async (req, res) => {
     try {
       const requestId = parseInt(req.params.id);
