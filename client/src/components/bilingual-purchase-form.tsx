@@ -278,16 +278,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Check wallet query conditions with stable memoization
   const walletQueryEnabled = useMemo(() => {
-    return !!(existingCustomer || (customerData?.success && customerData.customer));
+    const isEnabled = !!(existingCustomer || (customerData?.success && customerData.customer));
+    console.log('💳 [WALLET QUERY] Enabled check:', { existingCustomer: !!existingCustomer, customerDataSuccess: !!customerData?.success, enabled: isEnabled });
+    return isEnabled;
   }, [existingCustomer, customerData?.success]);
 
   // Fetch wallet data for logged-in customers using default query function
   const { data: walletData, isLoading: isLoadingWallet, error: walletError } = useQuery({
     queryKey: ['/api/customer/wallet'],
     enabled: walletQueryEnabled,
-    retry: false,
-    staleTime: 30000, // 30 seconds cache to prevent excessive requests
+    retry: 1, // Try once on failure
+    staleTime: 10000, // 10 seconds cache
     refetchOnWindowFocus: false,
+    refetchOnMount: true, // Always refetch on mount for fresh data
   });
 
   // Fetch VAT settings
@@ -553,7 +556,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     walletDataStructure: walletData ? Object.keys(walletData) : 'no data',
     isLoadingWallet,
     walletError: walletError?.message,
-    walletQueryEnabled
+    walletQueryEnabled,
+    'Raw wallet response': walletData,
+    'Wallet success flag': walletData?.success,
+    'Wallet balance path 1': walletData?.data?.wallet?.balance,
+    'Wallet balance path 2': walletData?.wallet?.balance,
+    'Wallet balance path 3': walletData?.balance
   });
 
 
