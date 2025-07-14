@@ -30,15 +30,16 @@ app.use(session({
   store: new MemoryStoreSession({
     checkPeriod: 86400000 // prune expired entries every 24h
   }),
-  resave: false,
-  saveUninitialized: false,
+  resave: true, // Force session save
+  saveUninitialized: true, // Save new sessions immediately
   rolling: true, // Reset maxAge on each request
   cookie: {
     secure: false, // Set to true in production with HTTPS
     httpOnly: false, // Allow frontend access for debugging
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax',
-    path: '/'
+    path: '/',
+    domain: undefined // Let browser handle domain
   },
   name: 'momtazchem.sid'
 }));

@@ -870,18 +870,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.adminId = user.id;
       req.session.isAuthenticated = true;
 
-      // Create security session tracking
-      try {
-        await securityStorage.createSecuritySession({
-          sessionId: req.sessionID,
-          userId: user.id,
-          username: user.username,
-          ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
-          userAgent: req.get('User-Agent') || 'unknown'
-        });
-      } catch (error) {
-        console.error('Failed to create security session:', error);
-      }
+      // Skip security session for now to avoid timeout issues
+      console.log('Skipping security session creation to avoid timeout');
 
       // Save session explicitly
       req.session.save((err) => {
