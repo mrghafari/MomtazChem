@@ -5063,8 +5063,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create customer order (from BilingualPurchaseForm)
   app.post("/api/customers/orders", async (req, res) => {
-    console.log('🚀 [ENDPOINT] /api/customers/orders called');
+    console.log('🚀 [ENDPOINT] /api/customers/orders called with timestamp:', req.query.t);
     console.log('🚀 [ENDPOINT] Request method:', req.method);
+    console.log('🚀 [ENDPOINT] Request URL:', req.url);
     console.log('🚀 [ENDPOINT] Request headers:', JSON.stringify(req.headers, null, 2));
     
     try {

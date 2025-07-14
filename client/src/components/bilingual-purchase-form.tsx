@@ -642,7 +642,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         // Normal order without receipt
         console.log('🚀 [MUTATION] Normal order path selected');
         console.log('🚀 [MUTATION] Calling apiRequest with endpoint: /api/customers/orders');
-        const response = await apiRequest("/api/customers/orders", "POST", orderData);
+        
+        // Force fresh request without cache by adding timestamp
+        const timestamp = Date.now();
+        const freshEndpoint = `/api/customers/orders?t=${timestamp}`;
+        console.log('🚀 [MUTATION] Using fresh endpoint:', freshEndpoint);
+        
+        const response = await apiRequest(freshEndpoint, "POST", orderData);
         console.log('🚀 [MUTATION] apiRequest response received:', response);
         return response;
       }
