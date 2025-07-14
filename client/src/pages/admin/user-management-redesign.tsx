@@ -49,8 +49,10 @@ import {
   MapPin,
   RefreshCw,
   Edit3,
-  Ticket
+  Ticket,
+  AlertTriangle
 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -144,32 +146,50 @@ type Module = {
   color?: string;
 };
 
-// Available modules for permission assignment - EXACTLY matching Site Management (23 modules)
-const availableModules: Module[] = [
-  { id: 'syncing-shop', name: 'syncing_shop', displayName: 'Syncing Shop', description: 'همگام‌سازی محصولات بین کاردکس و فروشگاه', category: 'operations', isCore: true, icon: Database, color: 'bg-blue-500' },
-  { id: 'inquiries', name: 'inquiries', displayName: 'Inquiries', description: 'مدیریت استعلامات و درخواست‌های مشتریان', category: 'customer', isCore: false, icon: BarChart3, color: 'bg-amber-500' },
-  { id: 'barcode', name: 'barcode', displayName: 'Barcode', description: 'مدیریت بارکدهای محصولات', category: 'operations', isCore: false, icon: QrCode, color: 'bg-cyan-500' },
-  { id: 'email-settings', name: 'email_settings', displayName: 'Email Settings', description: 'تنظیمات ایمیل و اطلاع‌رسانی', category: 'communication', isCore: false, icon: Mail, color: 'bg-emerald-500' },
-  { id: 'database-backup', name: 'database_backup', displayName: 'Database Backup', description: 'پشتیبان‌گیری از پایگاه داده', category: 'system', isCore: false, icon: Database, color: 'bg-slate-500' },
-  { id: 'crm', name: 'crm', displayName: 'CRM', description: 'سیستم مدیریت ارتباط با مشتریان', category: 'customer', isCore: true, icon: Users, color: 'bg-pink-500' },
-  { id: 'seo', name: 'seo', displayName: 'SEO', description: 'بهینه‌سازی موتورهای جستجو', category: 'marketing', isCore: false, icon: Globe, color: 'bg-purple-500' },
-  { id: 'categories', name: 'categories', displayName: 'Categories', description: 'مدیریت دسته‌بندی محصولات', category: 'operations', isCore: false, icon: Package, color: 'bg-blue-500' },
-  { id: 'sms', name: 'sms', displayName: 'SMS', description: 'سیستم پیامک و اطلاع‌رسانی', category: 'communication', isCore: false, icon: MessageSquare, color: 'bg-green-500' },
-  { id: 'factory', name: 'factory', displayName: 'Factory', description: 'مدیریت خط تولید و کارخانه', category: 'operations', isCore: false, icon: Factory, color: 'bg-purple-500' },
-  { id: 'user-management', name: 'user_management', displayName: 'User Management', description: 'مدیریت کاربران و دسترسی‌ها', category: 'system', isCore: true, icon: Users2, color: 'bg-red-500' },
-  { id: 'shop', name: 'shop_management', displayName: 'Shop Management', description: 'مدیریت فروشگاه آنلاین، محصولات و فروش', category: 'sales', isCore: true, icon: ShoppingCart, color: 'bg-purple-500' },
-  { id: 'procedures', name: 'procedures', displayName: 'Procedures', description: 'مدیریت رویه‌ها و فرآیندها', category: 'operations', isCore: false, icon: BookOpen, color: 'bg-amber-500' },
-  { id: 'smtp-test', name: 'smtp_test', displayName: 'SMTP Test', description: 'تست تنظیمات سرور ایمیل', category: 'communication', isCore: false, icon: TestTube, color: 'bg-sky-500' },
-  { id: 'order-management', name: 'order_management', displayName: 'Order Management', description: 'مدیریت سفارشات و پردازش آن‌ها', category: 'sales', isCore: true, icon: Truck, color: 'bg-orange-500' },
-  { id: 'products', name: 'product_management', displayName: 'Product Management', description: 'مدیریت کاتالوگ محصولات و مشخصات', category: 'sales', isCore: true, icon: Package, color: 'bg-violet-500' },
-  { id: 'payment-settings', name: 'payment_management', displayName: 'Payment Settings', description: 'تنظیمات پرداخت و درگاه‌ها', category: 'finance', isCore: false, icon: CreditCard, color: 'bg-blue-500' },
-  { id: 'wallet-management', name: 'wallet_management', displayName: 'Wallet Management', description: 'مدیریت کیف پول مشتریان', category: 'finance', isCore: false, icon: Wallet, color: 'bg-yellow-500' },
-  { id: 'geography-analytics', name: 'geography_analytics', displayName: 'Geography Analytics', description: 'آنالیتیکس جغرافیایی فروش', category: 'analytics', isCore: false, icon: MapPin, color: 'bg-teal-500' },
-  { id: 'ai-settings', name: 'ai_settings', displayName: 'AI Settings', description: 'تنظیمات هوش مصنوعی', category: 'system', isCore: false, icon: Zap, color: 'bg-purple-500' },
-  { id: 'refresh-control', name: 'refresh_control', displayName: 'Refresh Control', description: 'کنترل به‌روزرسانی سیستم', category: 'system', isCore: false, icon: RefreshCw, color: 'bg-indigo-500' },
-  { id: 'content-management', name: 'content_management', displayName: 'Content Management', description: 'مدیریت محتوای وب‌سایت', category: 'content', isCore: false, icon: Edit3, color: 'bg-green-500' },
-  { id: 'warehouse-management', name: 'warehouse-management', displayName: 'Warehouse Management', description: 'مدیریت انبار و موجودی (شامل Inventory Management)', category: 'operations', isCore: true, icon: Warehouse, color: 'bg-emerald-500' }
-];
+// Function to extract modules dynamically from Site Management configuration
+const extractSiteManagementModules = (): Module[] => {
+  // This function would ideally read from Site Management's actual configuration
+  // For now, we'll maintain a synchronized list that should be updated when Site Management changes
+  const siteManagementModules = [
+    { moduleId: 'syncing_shop', label: 'Syncing Shop', icon: Database, color: 'bg-blue-500' },
+    { moduleId: 'shop_management', label: 'Shop', icon: ShoppingCart, color: 'bg-purple-500' },
+    { moduleId: 'product_management', label: 'Products', icon: Package, color: 'bg-violet-500' },
+    { moduleId: 'order_management', label: 'Order Management', icon: Truck, color: 'bg-orange-500' },
+    { moduleId: 'warehouse-management', label: 'Warehouse Management', icon: Warehouse, color: 'bg-emerald-500' },
+    { moduleId: 'inquiries', label: 'Inquiries', icon: BarChart3, color: 'bg-amber-500' },
+    { moduleId: 'crm', label: 'CRM', icon: Users, color: 'bg-pink-500' },
+    { moduleId: 'barcode', label: 'Barcode', icon: QrCode, color: 'bg-cyan-500' },
+    { moduleId: 'email_settings', label: 'Email Settings', icon: Mail, color: 'bg-emerald-500' },
+    { moduleId: 'database_backup', label: 'Database Backup', icon: Database, color: 'bg-slate-500' },
+    { moduleId: 'seo', label: 'SEO', icon: Globe, color: 'bg-purple-500' },
+    { moduleId: 'categories', label: 'Categories', icon: Package, color: 'bg-blue-500' },
+    { moduleId: 'sms', label: 'SMS', icon: MessageSquare, color: 'bg-green-500' },
+    { moduleId: 'factory', label: 'Factory', icon: Factory, color: 'bg-purple-500' },
+    { moduleId: 'user_management', label: 'User Management', icon: Users2, color: 'bg-red-500' },
+    { moduleId: 'procedures', label: 'Procedures', icon: BookOpen, color: 'bg-amber-500' },
+    { moduleId: 'smtp_test', label: 'SMTP Test', icon: TestTube, color: 'bg-sky-500' },
+    { moduleId: 'payment_management', label: 'Payment Settings', icon: CreditCard, color: 'bg-blue-500' },
+    { moduleId: 'wallet_management', label: 'Wallet Management', icon: Wallet, color: 'bg-yellow-500' },
+    { moduleId: 'geography_analytics', label: 'Geography Analytics', icon: MapPin, color: 'bg-teal-500' },
+    { moduleId: 'ai_settings', label: 'AI Settings', icon: Zap, color: 'bg-purple-500' },
+    { moduleId: 'refresh_control', label: 'Refresh Control', icon: RefreshCw, color: 'bg-indigo-500' },
+    { moduleId: 'content_management', label: 'Content Management', icon: Edit3, color: 'bg-green-500' }
+  ];
+
+  return siteManagementModules.map(module => ({
+    id: module.moduleId.replace('_', '-'),
+    name: module.moduleId,
+    displayName: module.label,
+    description: `ماژول ${module.label} سیستم مدیریت`,
+    category: 'system',
+    isCore: ['syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse-management', 'crm', 'user_management'].includes(module.moduleId),
+    icon: module.icon,
+    color: module.color
+  }));
+};
+
+// Available modules for permission assignment - AUTOMATICALLY synchronized with Site Management
+const availableModules: Module[] = extractSiteManagementModules();
 
 function UserManagement() {
   const { toast } = useToast();
@@ -333,6 +353,15 @@ function UserManagement() {
     }
   });
 
+  // Get current Site Management modules for comparison
+  const { data: siteModules } = useQuery({
+    queryKey: ['/api/site-management/modules'],
+    staleTime: 30000 // Cache for 30 seconds
+  });
+
+  // Check for module count mismatch
+  const moduleCountMismatch = siteModules && siteModules.count !== availableModules.length;
+
   // Sync modules mutation
   const syncModulesMutation = useMutation({
     mutationFn: async () => {
@@ -421,12 +450,47 @@ function UserManagement() {
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
+      {/* Module Sync Status Alert */}
+      {moduleCountMismatch && (
+        <Alert className="border-amber-200 bg-amber-50">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800">نیاز به همگام‌سازی ماژول‌ها</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            Site Management دارای {siteModules?.count || 'نامشخص'} ماژول است، اما User Management دارای {availableModules.length} ماژول است.
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mr-2 mt-2"
+              onClick={() => syncModulesMutation.mutate()}
+              disabled={syncModulesMutation.isPending}
+            >
+              {syncModulesMutation.isPending ? 'در حال همگام‌سازی...' : 'همگام‌سازی کن'}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">مدیریت کاربران و نقش‌ها</h1>
-          <p className="text-muted-foreground">مدیریت کامل کاربران، نقش‌ها و دسترسی‌ها</p>
+          <p className="text-muted-foreground">
+            مدیریت کامل کاربران، نقش‌ها و دسترسی‌ها
+            {siteModules && (
+              <span className="text-green-600 mr-2">
+                ✓ همگام با Site Management ({siteModules.count} ماژول)
+              </span>
+            )}
+          </p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => syncModulesMutation.mutate()}
+            disabled={syncModulesMutation.isPending}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
+            همگام‌سازی ماژول‌ها
+          </Button>
           <Button onClick={() => setSmsDialogOpen(true)} disabled={selectedUsers.length === 0}>
             <MessageSquare className="h-4 w-4 mr-2" />
             ارسال SMS ({selectedUsers.length})

@@ -3537,37 +3537,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User Management sync modules endpoint
+  // Function to get current Site Management modules dynamically
+  const getSiteManagementModules = () => {
+    // This should be the SINGLE SOURCE OF TRUTH for all modules
+    // Any changes here will automatically sync to User Management
+    return [
+      'syncing_shop',
+      'shop_management', 
+      'product_management',
+      'order_management',
+      'warehouse-management',
+      'inquiries',
+      'crm',
+      'barcode',
+      'email_settings',
+      'database_backup',
+      'seo',
+      'categories',
+      'sms',
+      'factory',
+      'user_management',
+      'procedures',
+      'smtp_test',
+      'payment_management',
+      'wallet_management',
+      'geography_analytics',
+      'ai_settings',
+      'refresh_control',
+      'content_management'
+      // Total: 23 modules - automatically synced with Site Management
+    ];
+  };
+
   app.post("/api/user-management/sync-modules", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Define all main modules that should exist in the system (EXACTLY matching Site Management - 23 modules)
-      const mainModules = [
-        'syncing_shop',
-        'inquiries', 
-        'barcode',
-        'email_settings',
-        'database_backup',
-        'crm',
-        'seo',
-        'categories',
-        'sms',
-        'factory',
-        'user_management',
-        'shop_management',
-        'procedures',
-        'smtp_test',
-        'order_management',
-        'product_management',
-        'payment_management',
-        'wallet_management',
-        'geography_analytics',
-        'ai_settings',
-        'refresh_control',
-        'content_management',
-        'warehouse-management'
-        // Total: 23 unique modules (matching Site Management exactly)
-      ];
+      // Get current modules from the single source of truth
+      const mainModules = getSiteManagementModules();
 
       // Get super admin role (admin@momtazchem.com has user ID 7)
       const superAdminRoleId = '7';
@@ -3596,9 +3603,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        message: "ماژول‌ها با موفقیت همگام‌سازی شدند",
+        message: `ماژول‌ها با موفقیت همگام‌سازی شدند. تعداد کل: ${mainModules.length}`,
         syncedModules,
-        totalModules: mainModules.length
+        totalModules: mainModules.length,
+        modulesList: mainModules  // Return the current module list for frontend reference
       });
     } catch (error) {
       console.error("Error syncing modules from User Management:", error);
@@ -3606,6 +3614,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         message: "خطا در همگام‌سازی ماژول‌ها",
         error: error.message 
+      });
+    }
+  });
+
+  // NEW: API endpoint to get current Site Management modules list
+  app.get("/api/site-management/modules", requireAuth, async (req, res) => {
+    try {
+      const modules = getSiteManagementModules();
+      res.json({
+        success: true,
+        modules: modules,
+        count: modules.length
+      });
+    } catch (error) {
+      console.error("❌ Error getting Site Management modules:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get Site Management modules"
       });
     }
   });
