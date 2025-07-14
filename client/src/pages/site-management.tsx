@@ -342,43 +342,36 @@ export default function SiteManagement() {
   };
 
   // State for drag and drop functionality with usage-based sorting
-  const [buttons, setButtons] = useState<QuickActionButton[]>(() => {
-    const savedOrder = localStorage.getItem('site-management-button-order');
-    const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
-    
-    // Always start with usage-sorted buttons if we have click data
-    if (Object.keys(clickCounts).length > 0) {
-      return sortButtonsByUsage(getFilteredButtons());
-    }
-    
-    // Otherwise use saved order or default
-    if (savedOrder) {
-      try {
-        const savedButtonIds = JSON.parse(savedOrder);
-        const initialButtons = getInitialButtons();
-        const orderedButtons = savedButtonIds
-          .map((id: string) => initialButtons.find(btn => btn.id === id))
-          .filter((btn: QuickActionButton | undefined): btn is QuickActionButton => btn !== undefined);
-        
-        // Add any new buttons that weren't in the saved order
-        const savedIds = new Set(savedButtonIds);
-        const newButtons = initialButtons.filter(btn => !savedIds.has(btn.id));
-        
-        return [...orderedButtons, ...newButtons];
-      } catch {
-        return getInitialButtons();
-      }
-    }
-    return getInitialButtons();
-  });
+  const [buttons, setButtons] = useState<QuickActionButton[]>([]);
 
   // Update buttons when permissions change
   useEffect(() => {
     if (userPermissions?.success) {
       const filteredButtons = getFilteredButtons();
       const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
+      const savedOrder = localStorage.getItem('site-management-button-order');
       
-      // Apply usage-based sorting if available
+      // First try to restore saved order if available
+      if (savedOrder) {
+        try {
+          const savedButtonIds = JSON.parse(savedOrder);
+          // Only include buttons that are authorized for this user
+          const orderedButtons = savedButtonIds
+            .map((id: string) => filteredButtons.find(btn => btn.id === id))
+            .filter((btn: QuickActionButton | undefined): btn is QuickActionButton => btn !== undefined);
+          
+          // Add any new authorized buttons that weren't in the saved order
+          const savedIds = new Set(savedButtonIds);
+          const newButtons = filteredButtons.filter(btn => !savedIds.has(btn.id));
+          
+          setButtons([...orderedButtons, ...newButtons]);
+          return;
+        } catch {
+          // If parsing fails, fall back to default behavior
+        }
+      }
+      
+      // Apply usage-based sorting if available, otherwise use filtered buttons
       if (Object.keys(clickCounts).length > 0) {
         setButtons(sortButtonsByUsage(filteredButtons));
       } else {
@@ -549,8 +542,11 @@ export default function SiteManagement() {
                   size="sm"
                   onClick={() => {
                     localStorage.removeItem('site-management-button-order');
-                    const defaultButtons = getInitialButtons();
-                    setButtons(defaultButtons);
+                    localStorage.removeItem('site-management-click-counts');
+                    
+                    // Reset to filtered buttons (respecting permissions) instead of all buttons
+                    const authorizedButtons = getFilteredButtons();
+                    setButtons(authorizedButtons);
                     
                     toast({
                       title: "ترتیب بازنشانی شد",
