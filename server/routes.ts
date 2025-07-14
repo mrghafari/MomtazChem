@@ -13858,8 +13858,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       }
 
       // If no custom user found, check for super admin or legacy permissions
-      // Only super admin (id=1) gets all permissions
-      if (legacyUser[0].id === 1) {
+      // admin@momtazchem.com (id=7) is the super admin
+      if (legacyUser[0].id === 7 || legacyUser[0].email === 'admin@momtazchem.com') {
         const allModules = [
           "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
           "crm", "seo", "categories", "sms", "factory", "super_admin", "user_management",
