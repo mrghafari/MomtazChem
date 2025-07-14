@@ -13777,7 +13777,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "crm", "seo", "categories", "sms", "factory", "super_admin", "user_management",
           "shop_management", "procedures", "smtp_test", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
-          "refresh_control", "department_users", "inventory_management", "content_management"
+          "refresh_control", "department_users", "inventory_management", "content_management",
+          "warehouse-management"
         ];
 
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, allModules);
