@@ -154,7 +154,7 @@ function Router() {
           <Route path="/admin/widgets" component={WidgetRecommendations} />
           <Route path="/admin/order-management" component={AdminOrderManagement} />
           <Route path="/admin/abandoned-cart-management" component={AbandonedCartManagement} />
-          <Route path="/admin/site-management" component={SiteManagement} />
+          <Route path="/site-management" component={SiteManagement} />
           <Route path="/admin/products" component={ProductsPage} />
           <Route path="/admin/product-variants" component={ProductVariants} />
           <Route path="/admin/geographic-reports" component={GeographicReports} />

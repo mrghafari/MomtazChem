@@ -465,26 +465,7 @@ export default function SiteManagement() {
           </div>
         </div>
 
-        {/* Debug Information */}
-        {permissionsError && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <strong>Permission Error:</strong> {permissionsError.message}
-          </div>
-        )}
-        
-        {isLoadingPermissions && (
-          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
-            Loading permissions...
-          </div>
-        )}
-        
-        {userPermissions && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <strong>Loaded Permissions:</strong> {userPermissions.modules?.length || 0} modules available
-            <br />
-            <small>Modules: {userPermissions.modules?.join(', ') || 'None'}</small>
-          </div>
-        )}
+
 
         {/* Overview Content */}
         <div className="space-y-6">
