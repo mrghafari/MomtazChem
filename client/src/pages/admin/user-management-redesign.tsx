@@ -1030,78 +1030,55 @@ function UserManagement() {
               </p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {Object.entries(getModulesByCategory()).map(([category, modules]) => (
-                  <Card key={category} className="border-2 border-slate-200 hover:border-slate-300 transition-colors">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-lg flex items-center gap-3">
-                        <Badge className={`${getCategoryColor(category)} text-white px-3 py-1`}>
-                          {category === 'sales' && 'ماژول‌های فروش و بازار'}
-                          {category === 'customer' && 'ماژول‌های مشتری و CRM'}
-                          {category === 'operations' && 'ماژول‌های عملیاتی'}
-                          {category === 'finance' && 'ماژول‌های مالی'}
-                          {category === 'analytics' && 'ماژول‌های آنالیتیک'}
-                          {category === 'content' && 'ماژول‌های محتوا'}
-                          {category === 'marketing' && 'ماژول‌های بازاریابی'}
-                          {category === 'communication' && 'ماژول‌های ارتباطات'}
-                          {category === 'system' && 'ماژول‌های سیستم'}
-                        </Badge>
-                        <span className="text-base text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                          {modules.length} ماژول
-                        </span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {modules.map((module) => {
-                          const IconComponent = module.icon || Settings;
-                          return (
-                            <Card
-                              key={module.id}
-                              className="relative overflow-hidden border-2 hover:border-blue-300 transition-all duration-200 hover:shadow-md group"
-                            >
-                              <CardContent className="p-4">
-                                <div className="flex items-start gap-3 mb-3">
-                                  <div className={`p-2 rounded-lg ${module.color || 'bg-gray-500'} text-white`}>
-                                    <IconComponent className="h-5 w-5" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <h4 className="font-semibold text-sm text-gray-900 truncate">
-                                        {module.displayName}
-                                      </h4>
-                                      {module.isCore && (
-                                        <Crown className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                                      )}
-                                    </div>
-                                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                                      {module.description}
-                                    </p>
-                                  </div>
-                                </div>
-                                
-                                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                                  <Badge 
-                                    variant={module.isCore ? "default" : "secondary"}
-                                    className="text-xs px-2 py-1"
-                                  >
-                                    {module.isCore ? 'ماژول هسته‌ای' : 'ماژول اضافی'}
-                                  </Badge>
-                                  <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700 font-mono">
-                                    {module.name}
-                                  </code>
-                                </div>
-                                
-                                {/* Hover effect overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
+              {/* Display total count of modules */}
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-800">Site Management Modules</h3>
+                    <p className="text-blue-600 text-sm">مجموع ماژول‌های قابل تخصیص برای کاربران</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-blue-800">{availableModules.length}</div>
+                    <div className="text-sm text-blue-600">کل ماژول‌ها</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Display all modules in a simple grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                {availableModules.map((module) => {
+                  const IconComponent = module.icon || Settings;
+                  return (
+                    <div key={module.id} className="flex items-center space-x-3 p-3 bg-white rounded border hover:shadow-sm transition-all">
+                      <span className="text-lg">
+                        <IconComponent className="h-5 w-5 text-blue-600" />
+                      </span>
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">{module.displayName}</div>
+                        <div className="text-xs text-gray-500">{module.name}</div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <Checkbox 
+                        disabled
+                        className="opacity-50"
+                        title="تخصیص دسترسی از طریق مدیریت نقش‌ها امکان‌پذیر است"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Note about permission assignment */}
+              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <div className="text-yellow-600">💡</div>
+                  <div>
+                    <h4 className="font-medium text-yellow-800">نحوه تخصیص دسترسی‌ها</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      برای تخصیص این ماژول‌ها به کاربران، به بخش "نقش‌ها" بروید و نقش‌هایی با دسترسی‌های خاص ایجاد یا ویرایش کنید. 
+                      سپس هر کاربر را می‌توانید به نقشی تخصیص دهید که دسترسی او به این 25 ماژول را تعیین می‌کند.
+                    </p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
