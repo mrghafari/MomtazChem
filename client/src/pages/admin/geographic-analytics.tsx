@@ -1315,12 +1315,21 @@ export default function GeographicAnalytics() {
                                       stroke="white"
                                       strokeWidth="2"
                                       className="hover:opacity-100 cursor-pointer"
+                                      onClick={() => {
+                                        // Calculate average coordinates for the cluster
+                                        const avgLat = cluster.points.reduce((sum: number, p: any) => sum + p.lat, 0) / cluster.points.length;
+                                        const avgLng = cluster.points.reduce((sum: number, p: any) => sum + p.lng, 0) / cluster.points.length;
+                                        
+                                        // Open Google Maps with the cluster center coordinates
+                                        const googleMapsUrl = `https://www.google.com/maps?q=${avgLat},${avgLng}&z=15`;
+                                        window.open(googleMapsUrl, '_blank');
+                                      }}
                                     >
                                       <title>
-                                        🎯 منطقه تحویل
+                                        🎯 منطقه تحویل (کلیک برای نمایش در Google Maps)
                                         📊 تعداد نقاط: {cluster.intensity}
                                         ⭐ میانگین دقت: {cluster.avgWeight.toFixed(1)}
-                                        📍 مختصات: {cluster.x.toFixed(0)}, {cluster.y.toFixed(0)}
+                                        📍 کلیک کنید تا در Google Maps ببینید
                                       </title>
                                     </circle>
                                     
@@ -1375,11 +1384,17 @@ export default function GeographicAnalytics() {
                                     r="3"
                                     fill={point.weight >= 1 ? "#10b981" : "#f59e0b"}
                                     opacity="0.7"
-                                    className="hover:opacity-100"
+                                    className="hover:opacity-100 cursor-pointer"
+                                    onClick={() => {
+                                      // Open Google Maps with exact coordinates
+                                      const googleMapsUrl = `https://www.google.com/maps?q=${point.lat},${point.lng}&z=15`;
+                                      window.open(googleMapsUrl, '_blank');
+                                    }}
                                   >
                                     <title>
-                                      📍 تحویل در: {point.lat.toFixed(4)}, {point.lng.toFixed(4)}
+                                      📍 تحویل در: {point.lat.toFixed(4)}, {point.lng.toFixed(4)} (کلیک برای Google Maps)
                                       📅 تاریخ: {new Date(point.timestamp).toLocaleDateString('fa-IR')}
+                                      🗺️ کلیک کنید تا در Google Maps ببینید
                                     </title>
                                   </circle>
                                 );
@@ -1408,8 +1423,22 @@ export default function GeographicAnalytics() {
                                 </div>
                               </div>
                               
-                              <div className="text-xs text-gray-600">
-                                💡 نقاط بزرگ‌تر = تراکم بیشتر تحویل | انیمیشن = مناطق فعال
+                              <div className="flex items-center space-x-4">
+                                <div className="text-xs text-gray-600">
+                                  💡 نقاط بزرگ‌تر = تراکم بیشتر تحویل | انیمیشن = مناطق فعال
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    // Create Google Maps URL with all GPS points
+                                    const allCoords = gpsHeatmap.data.map((point: any) => `${point.lat},${point.lng}`).join('|');
+                                    const firstPoint = gpsHeatmap.data[0];
+                                    const googleMapsUrl = `https://www.google.com/maps/dir/${allCoords}/@${firstPoint.lat},${firstPoint.lng},10z`;
+                                    window.open(googleMapsUrl, '_blank');
+                                  }}
+                                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                                >
+                                  🗺️ نمایش همه در Google Maps
+                                </button>
                               </div>
                             </div>
                           </div>
