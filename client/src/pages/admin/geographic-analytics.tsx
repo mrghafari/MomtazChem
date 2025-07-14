@@ -198,6 +198,32 @@ export default function GeographicAnalytics() {
     }
   });
 
+  // Fetch GPS analytics data
+  const gpsAnalytics = useQuery({
+    queryKey: ['/api/gps-delivery/analytics', 'Iraq'],
+    queryFn: async () => {
+      const response = await fetch('/api/gps-delivery/analytics?country=Iraq', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch GPS analytics');
+      const result = await response.json();
+      return result || { data: [] };
+    }
+  });
+
+  // Fetch GPS heatmap data  
+  const gpsHeatmap = useQuery({
+    queryKey: ['/api/gps-delivery/heatmap', 'Iraq'],
+    queryFn: async () => {
+      const response = await fetch('/api/gps-delivery/heatmap?country=Iraq', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch GPS heatmap');
+      const result = await response.json();
+      return result || { data: [] };
+    }
+  });
+
   // Fetch product trends data
   const { data: productTrendsData, isLoading: trendsLoading } = useQuery({
     queryKey: ['/api/analytics/product-trends', dateRange, selectedProduct],
@@ -1005,20 +1031,166 @@ export default function GeographicAnalytics() {
                 </CardContent>
               </Card>
 
-              {/* GPS Analytics Chart */}
+              {/* GPS Analytics Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* GPS Delivery Performance Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>GPS Delivery Performance</CardTitle>
+                    <p className="text-sm text-gray-600">Success rate and accuracy by region</p>
+                  </CardHeader>
+                  <CardContent>
+                    {gpsAnalytics.data && gpsAnalytics.data.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={gpsAnalytics.data.slice(0, 8)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="city" 
+                            tick={{ fontSize: 12 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                          />
+                          <YAxis />
+                          <Tooltip 
+                            formatter={(value: any, name: string) => [
+                              name === 'deliverySuccessRate' ? `${value}%` : value,
+                              name === 'deliverySuccessRate' ? 'Success Rate' : 
+                              name === 'totalDeliveries' ? 'Total Deliveries' : 
+                              name === 'averageAccuracy' ? 'Average Accuracy (m)' : name
+                            ]}
+                          />
+                          <Bar dataKey="totalDeliveries" fill="#3b82f6" name="Total Deliveries" />
+                          <Bar dataKey="deliverySuccessRate" fill="#10b981" name="Success Rate %" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-gray-500">
+                        <div className="text-center">
+                          <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-lg font-medium">No GPS Analytics Data</p>
+                          <p className="text-sm">Generate analytics to view performance charts</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* GPS Accuracy Distribution */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>GPS Accuracy Distribution</CardTitle>
+                    <p className="text-sm text-gray-600">Delivery accuracy by city</p>
+                  </CardHeader>
+                  <CardContent>
+                    {gpsAnalytics.data && gpsAnalytics.data.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={gpsAnalytics.data.slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="city" 
+                            tick={{ fontSize: 12 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                          />
+                          <YAxis label={{ value: 'Accuracy (meters)', angle: -90, position: 'insideLeft' }} />
+                          <Tooltip 
+                            formatter={(value: any) => [`${value}m`, 'Average Accuracy']}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="averageAccuracy" 
+                            stroke="#f59e0b" 
+                            strokeWidth={3}
+                            dot={{ fill: '#f59e0b', strokeWidth: 2, r: 6 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-gray-500">
+                        <div className="text-center">
+                          <Navigation className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-lg font-medium">No Accuracy Data</p>
+                          <p className="text-sm">GPS accuracy data will appear here</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* GPS Heatmap Visualization */}
               <Card>
                 <CardHeader>
-                  <CardTitle>GPS Delivery Analytics</CardTitle>
-                  <p className="text-sm text-gray-600">Delivery locations and accuracy trends</p>
+                  <CardTitle>GPS Delivery Heatmap</CardTitle>
+                  <p className="text-sm text-gray-600">Geographic distribution of delivery confirmations</p>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center text-gray-500">
-                    <div className="text-center">
-                      <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p className="text-lg font-medium">GPS Analytics Visualization</p>
-                      <p className="text-sm">Advanced GPS tracking charts and heatmaps coming soon</p>
+                  {gpsHeatmap.data && gpsHeatmap.data.length > 0 ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">{gpsHeatmap.data.length}</div>
+                          <div className="text-sm text-blue-700">GPS Points</div>
+                        </div>
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">
+                            {gpsHeatmap.data.filter((point: any) => point.weight >= 1).length}
+                          </div>
+                          <div className="text-sm text-green-700">High Accuracy</div>
+                        </div>
+                        <div className="bg-yellow-50 p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-yellow-600">
+                            {gpsHeatmap.data.filter((point: any) => point.weight < 1).length}
+                          </div>
+                          <div className="text-sm text-yellow-700">Needs Review</div>
+                        </div>
+                        <div className="bg-purple-50 p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {new Set(gpsHeatmap.data.map((point: any) => `${point.lat.toFixed(1)},${point.lng.toFixed(1)}`)).size}
+                          </div>
+                          <div className="text-sm text-purple-700">Unique Areas</div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-800 mb-3">GPS Coordinates Overview</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                          {gpsHeatmap.data.map((point: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
+                              <div className="flex items-center">
+                                <div className={`w-3 h-3 rounded-full mr-2 ${
+                                  point.weight >= 1 ? 'bg-green-500' : 'bg-yellow-500'
+                                }`}></div>
+                                <div className="text-sm">
+                                  <div className="font-medium">{point.lat.toFixed(4)}, {point.lng.toFixed(4)}</div>
+                                  <div className="text-gray-500 text-xs">
+                                    {new Date(point.timestamp).toLocaleDateString('en-US')}
+                                  </div>
+                                </div>
+                              </div>
+                              <Badge variant={point.weight >= 1 ? "default" : "secondary"} className="text-xs">
+                                {point.weight >= 1 ? "Accurate" : "Review"}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-500 mt-4">
+                        <p><strong>Note:</strong> GPS coordinates represent actual delivery confirmation locations in Iraq, Iran, and Turkey. Green indicators show high-accuracy deliveries, yellow indicates locations requiring review.</p>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="h-64 flex items-center justify-center text-gray-500">
+                      <div className="text-center">
+                        <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p className="text-lg font-medium">No GPS Heatmap Data</p>
+                        <p className="text-sm">GPS delivery locations will appear here when confirmations are made</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </>
