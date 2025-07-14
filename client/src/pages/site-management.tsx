@@ -108,7 +108,7 @@ export default function SiteManagement() {
       icon: Database,
       onClick: () => trackButtonClick("kardex-sync", () => setShowKardexSync(true)),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50",
-      moduleId: "products" // Requires products module access
+      moduleId: "syncing_shop"
     },
     {
       id: "shop",
@@ -124,7 +124,7 @@ export default function SiteManagement() {
       icon: ShoppingCart,
       onClick: () => trackButtonClick("abandoned-cart", () => setLocation("/admin/abandoned-cart-management")),
       className: "border-red-300 text-red-600 hover:bg-red-50",
-      moduleId: "shop"
+      moduleId: "shop_management"
     },
     {
       id: "products",
@@ -132,7 +132,7 @@ export default function SiteManagement() {
       icon: Box,
       onClick: () => trackButtonClick("products", () => setLocation("/admin/products")),
       className: "border-violet-300 text-violet-600 hover:bg-violet-50",
-      moduleId: "products"
+      moduleId: "product_management"
     },
     {
       id: "order-management",
@@ -148,7 +148,7 @@ export default function SiteManagement() {
       icon: Calculator,
       onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
-      moduleId: "inventory-management"
+      moduleId: "inventory_management"
     },
     {
       id: "inquiries",
@@ -156,7 +156,7 @@ export default function SiteManagement() {
       icon: BarChart3,
       onClick: () => trackButtonClick("inquiries", () => setLocation("/admin/inquiries")),
       className: "border-amber-300 text-amber-600 hover:bg-amber-50",
-      moduleId: "crm"
+      moduleId: "inquiries"
     },
     {
       id: "crm",
@@ -180,7 +180,7 @@ export default function SiteManagement() {
       icon: Mail,
       onClick: () => trackButtonClick("email-settings", () => setLocation("/admin/advanced-email-settings")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
-      moduleId: "email-settings"
+      moduleId: "email_settings"
     },
     {
       id: "database-backup",
@@ -188,7 +188,7 @@ export default function SiteManagement() {
       icon: Database,
       onClick: () => trackButtonClick("database-backup", () => setLocation("/admin/database-management")),
       className: "border-slate-300 text-slate-600 hover:bg-slate-50",
-      moduleId: "database-backup"
+      moduleId: "database_backup"
     },
     {
       id: "seo",
@@ -252,7 +252,7 @@ export default function SiteManagement() {
       icon: TestTube,
       onClick: () => trackButtonClick("smtp-test", () => setLocation("/admin/smtp-test")),
       className: "border-sky-300 text-sky-600 hover:bg-sky-50",
-      moduleId: "smtp-test"
+      moduleId: "smtp_test"
     },
     {
       id: "payment-settings",
@@ -276,7 +276,7 @@ export default function SiteManagement() {
       icon: MapPin,
       onClick: () => trackButtonClick("geography-analytics", () => setLocation("/admin/geographic-analytics")),
       className: "border-teal-300 text-teal-600 hover:bg-teal-50",
-      moduleId: "geography-analytics"
+      moduleId: "geography_analytics"
     },
     {
       id: "ai-settings",
@@ -284,7 +284,7 @@ export default function SiteManagement() {
       icon: Zap,
       onClick: () => trackButtonClick("ai-settings", () => setLocation("/admin/ai-settings")),
       className: "border-purple-300 text-purple-600 hover:bg-purple-50",
-      moduleId: "ai-settings"
+      moduleId: "ai_settings"
     },
     {
       id: "refresh-control",
@@ -292,7 +292,7 @@ export default function SiteManagement() {
       icon: RefreshCw,
       onClick: () => trackButtonClick("refresh-control", () => setLocation("/admin/global-refresh-settings")),
       className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
-      moduleId: "user-management"
+      moduleId: "refresh_control"
     },
     {
       id: "department-users",
@@ -300,7 +300,7 @@ export default function SiteManagement() {
       icon: Users,
       onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
-      moduleId: "user-management"
+      moduleId: "department_users"
     },
     {
       id: "content-management",
@@ -308,7 +308,7 @@ export default function SiteManagement() {
       icon: Edit3,
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50",
-      moduleId: "content-management"
+      moduleId: "content_management"
     },
     {
       id: "ticketing-system",
@@ -316,7 +316,7 @@ export default function SiteManagement() {
       icon: Ticket,
       onClick: () => trackButtonClick("ticketing-system", () => setLocation("/admin/ticketing-system")),
       className: "border-red-300 text-red-600 hover:bg-red-50",
-      moduleId: "user-management"
+      moduleId: "user_management"
     },
 
   ];
@@ -326,14 +326,24 @@ export default function SiteManagement() {
     // Don't show any buttons until permissions are loaded to prevent flashing all buttons
     if (isLoadingPermissions || !userPermissions?.success) return [];
     
+    // Debug: Log permissions response
+    console.log('🔍 [DEBUG] userPermissions:', userPermissions);
+    console.log('🔍 [DEBUG] permissions array:', userPermissions.permissions);
+    
     const allowedModules = userPermissions.permissions?.map((p: any) => p.moduleId) || [];
+    console.log('🔍 [DEBUG] allowedModules:', allowedModules);
+    
     const allButtons = getInitialButtons();
+    console.log('🔍 [DEBUG] total buttons:', allButtons.length);
     
     // If no moduleId specified, show button (for universal access buttons)
     // If moduleId specified, check if user has access to that module
-    return allButtons.filter(button => 
+    const filteredButtons = allButtons.filter(button => 
       !button.moduleId || allowedModules.includes(button.moduleId)
     );
+    
+    console.log('🔍 [DEBUG] filtered buttons:', filteredButtons.length, filteredButtons.map(b => b.id));
+    return filteredButtons;
   };
 
   // State for drag and drop functionality with usage-based sorting
