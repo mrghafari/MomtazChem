@@ -875,9 +875,7 @@ function UserManagement() {
                                     {category === 'communication' && 'ارتباطات'}
                                     {category === 'system' && 'سیستم'}
                                   </Badge>
-                                  <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
-                                    {modules.length} ماژول
-                                  </span>
+
                                 </div>
                                 <div className="grid grid-cols-1 gap-2">
                                   {modules.map((module) => {
