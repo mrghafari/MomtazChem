@@ -2,7 +2,12 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response, requestUrl?: string, method?: string) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
+    let text: string;
+    try {
+      text = await res.text();
+    } catch (error) {
+      text = res.statusText;
+    }
     
     // Check if response is HTML instead of JSON
     if (text.includes('<!DOCTYPE html>') || text.includes('<html>')) {
@@ -43,9 +48,18 @@ export async function apiRequest(
     credentials: "include",
   });
 
-
-  await throwIfResNotOk(res, url, method);
-  return res.json();
+  // Check if response is ok before parsing
+  if (!res.ok) {
+    await throwIfResNotOk(res, url, method);
+  }
+  
+  // Parse JSON response safely
+  try {
+    return await res.json();
+  } catch (error) {
+    console.error('Failed to parse JSON response:', error);
+    throw new Error('Invalid JSON response from server');
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

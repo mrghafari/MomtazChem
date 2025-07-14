@@ -870,30 +870,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.adminId = user.id;
       req.session.isAuthenticated = true;
 
-      // Skip security session for now to avoid timeout issues
-      console.log('Skipping security session creation to avoid timeout');
-
-      // Save session explicitly
-      req.session.save((err) => {
-        if (err) {
-          console.error('Session save error:', err);
-          return res.status(500).json({ 
-            success: false, 
-            message: "Failed to save session" 
-          });
-        }
-        
-        console.log(`✅ [LOGIN] Session saved for admin ${user.id}:`, {
-          adminId: req.session.adminId,
-          isAuthenticated: req.session.isAuthenticated,
-          sessionId: req.sessionID
-        });
-        
-        res.json({ 
-          success: true, 
-          message: "Login successful",
-          user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
-        });
+      console.log(`✅ [LOGIN] Session configured for admin ${user.id}:`, {
+        adminId: req.session.adminId,
+        isAuthenticated: req.session.isAuthenticated,
+        sessionId: req.sessionID
+      });
+      
+      // Send response immediately without waiting for session save
+      res.json({ 
+        success: true, 
+        message: "Login successful",
+        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
       });
     } catch (error) {
       console.error("Admin login error:", error);
