@@ -255,6 +255,7 @@ function UserManagement() {
   // Fetch admin permissions
   const { data: permissions = [], isLoading: permissionsLoading } = useQuery<AdminPermission[]>({
     queryKey: ["/api/admin/permissions"],
+    staleTime: 0, // Always fetch fresh data
   });
 
   // Create user mutation
@@ -392,9 +393,11 @@ function UserManagement() {
         title: "موفقیت",
         description: `${response.addedModules?.length || 0} ماژول جدید همگام‌سازی شد`,
       });
-      // Refresh permissions and roles data
+      // Refresh permissions and roles data immediately
       queryClient.invalidateQueries({ queryKey: ['/api/admin/permissions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/roles'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/permissions'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/roles'] });
     },
     onError: (error: any) => {
       toast({
