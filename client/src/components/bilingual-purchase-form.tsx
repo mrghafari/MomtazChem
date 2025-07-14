@@ -603,12 +603,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Submit order mutation
   const submitOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      console.log('🚀 [MUTATION] mutationFn called with data:', orderData);
-      console.log('🚀 [MUTATION] About to call apiRequest for endpoint: /api/customers/orders');
-      
       // Handle bank receipt upload separately if file is selected
       if (paymentMethod === 'bank_receipt' && selectedReceiptFile) {
-        console.log('🚀 [MUTATION] Bank receipt path selected');
         // First create the order
         const orderResponse = await apiRequest("/api/customers/orders", {
           method: "POST",
@@ -642,20 +638,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         
         return orderResponse;
       } else {
-        // Normal order without receipt
-        console.log('🚀 [MUTATION] Normal order path selected');
-        console.log('🚀 [MUTATION] Calling apiRequest with endpoint: /api/customers/orders');
-        
-        // Force fresh request without cache by adding timestamp
+        // Normal order without receipt - add timestamp to bypass cache
         const timestamp = Date.now();
-        const freshEndpoint = `/api/customers/orders?t=${timestamp}`;
-        console.log('🚀 [MUTATION] Using fresh endpoint:', freshEndpoint);
+        const endpoint = `/api/customers/orders?t=${timestamp}`;
         
-        const response = await apiRequest(freshEndpoint, {
+        const response = await apiRequest(endpoint, {
           method: "POST",
           body: orderData
         });
-        console.log('🚀 [MUTATION] apiRequest response received:', response);
         return response;
       }
     },
