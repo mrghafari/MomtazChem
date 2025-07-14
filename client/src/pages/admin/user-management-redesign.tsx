@@ -855,7 +855,7 @@ function UserManagement() {
                         <div className="space-y-3">
                           <label className="text-sm font-medium flex items-center gap-2">
                             <Key className="h-4 w-4" />
-                            دسترسی‌های ماژولی
+                            دسترسی‌ها
                             <Badge variant="outline" className="text-xs">
                               {selectedPermissions.length} انتخاب شده
                             </Badge>
