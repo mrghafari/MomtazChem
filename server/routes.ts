@@ -3484,8 +3484,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'security-management'
       ];
 
-      // Get super admin role (role_id = '1')
-      const superAdminRoleId = '1';
+      // Get super admin role (admin@momtazchem.com has user ID 7)
+      const superAdminRoleId = '7';
       
       let syncedModules = 0;
 
