@@ -44,6 +44,14 @@ export default function Header() {
     refetchOnWindowFocus: true,
   });
 
+  // Fetch admin user info for role display
+  const { data: adminUser } = useQuery({
+    queryKey: ['/api/admin/me'],
+    enabled: isAdminAuthenticated,
+    retry: false,
+    staleTime: 30000, // 30 seconds
+  });
+
   const rawBalance = walletData?.balance || walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";
   const walletBalance = typeof rawBalance === 'string' ? parseFloat(rawBalance) : rawBalance;
   const formatCurrency = (amount: number) => {
@@ -53,6 +61,27 @@ export default function Header() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
+  };
+
+  // Function to get admin role display name
+  const getAdminRoleDisplay = () => {
+    if (!isAdminAuthenticated || !adminUser?.user) {
+      return direction === 'rtl' ? 'مدیر' : 'Admin';
+    }
+    
+    const username = adminUser.user.username;
+    if (direction === 'rtl') {
+      return username; // Return Persian username directly
+    } else {
+      // Convert Persian roles to English
+      const roleMap: { [key: string]: string } = {
+        'سوپر ادمین': 'Super Admin',
+        'مدیر مالی': 'Financial Manager',
+        'مدیر انبار': 'Warehouse Manager',
+        'مدیر لجستیک': 'Logistics Manager'
+      };
+      return roleMap[username] || username;
+    }
   };
 
   const navigation = [
@@ -278,7 +307,7 @@ export default function Header() {
                 <div className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full border border-red-200 dark:border-red-800">
                   <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
                   <span className="text-sm font-medium text-red-700 dark:text-red-300">
-                    {direction === 'rtl' ? 'مدیر' : 'Admin'}
+                    {getAdminRoleDisplay()}
                   </span>
                 </div>
                 <Button
@@ -373,7 +402,7 @@ export default function Header() {
                     <div className="flex items-center justify-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-2 rounded-full border border-red-200 dark:border-red-800 mb-2">
                       <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
                       <span className="text-sm font-medium text-red-700 dark:text-red-300">
-                        {direction === 'rtl' ? 'وضعیت مدیریت فعال' : 'Admin Mode Active'}
+                        {direction === 'rtl' ? `وضعیت ${getAdminRoleDisplay()} فعال` : `${getAdminRoleDisplay()} Mode Active`}
                       </span>
                     </div>
                     <div className="flex justify-center">
