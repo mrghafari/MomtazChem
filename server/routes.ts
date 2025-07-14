@@ -876,11 +876,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId: req.sessionID
       });
       
-      // Send response immediately without waiting for session save
-      res.json({ 
-        success: true, 
-        message: "Login successful",
-        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
+      // Save session explicitly before responding
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ 
+            success: false, 
+            message: "Session save failed" 
+          });
+        }
+        
+        console.log(`✅ [LOGIN] Session saved successfully for admin ${user.id}`);
+        res.json({ 
+          success: true, 
+          message: "Login successful",
+          user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
+        });
       });
     } catch (error) {
       console.error("Admin login error:", error);
