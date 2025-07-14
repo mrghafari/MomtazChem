@@ -189,6 +189,7 @@ function Router() {
           <Route path="/test-logistics" component={TestLogistics} />
           <Route path="/super-admin/departments" component={SuperAdminDepartmentManagement} />
           <Route path="/super-admin/settings" component={SuperAdminSettings} />
+          <Route path="/admin/super-admin-settings" component={SuperAdminSettings} />
           
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
