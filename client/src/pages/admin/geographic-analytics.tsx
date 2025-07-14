@@ -963,68 +963,167 @@ export default function GeographicAnalytics() {
                 </CardHeader>
                 <CardContent>
                   {gpsDeliveries && gpsDeliveries.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse border border-gray-300">
-                        <thead>
-                          <tr className="bg-gray-100">
-                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Order ID</th>
-                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Delivery Person</th>
-                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Location</th>
-                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">GPS Coordinates</th>
-                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Accuracy</th>
-                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Address Match</th>
-                            <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Verification Time</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {gpsDeliveries.map((delivery, index) => (
-                            <tr key={delivery.id || index} className="hover:bg-gray-50">
-                              <td className="border border-gray-300 px-3 py-2 font-medium">
-                                #{delivery.customerOrderId}
-                              </td>
-                              <td className="border border-gray-300 px-3 py-2">
-                                <div>
-                                  <p className="font-medium">{delivery.deliveryPersonName}</p>
-                                  <p className="text-xs text-gray-600">{delivery.deliveryPersonPhone}</p>
-                                </div>
-                              </td>
-                              <td className="border border-gray-300 px-3 py-2">
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="h-3 w-3 text-gray-400" />
-                                  <span>{delivery.city}, {delivery.country}</span>
-                                </div>
-                              </td>
-                              <td className="border border-gray-300 px-3 py-2 text-xs">
-                                <div>
-                                  <p>Lat: {parseFloat(delivery.latitude).toFixed(6)}</p>
-                                  <p>Lng: {parseFloat(delivery.longitude).toFixed(6)}</p>
-                                </div>
-                              </td>
-                              <td className="border border-gray-300 px-3 py-2">
-                                <Badge variant={parseFloat(delivery.accuracy) <= 10 ? "default" : "secondary"}>
-                                  ±{delivery.accuracy}m
-                                </Badge>
-                              </td>
-                              <td className="border border-gray-300 px-3 py-2">
-                                {delivery.addressMatched ? (
-                                  <Badge variant="default" className="bg-green-100 text-green-800">
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Match
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                                    <AlertTriangle className="h-3 w-3 mr-1" />
-                                    No Match
-                                  </Badge>
-                                )}
-                              </td>
-                              <td className="border border-gray-300 px-3 py-2 text-xs">
-                                {new Date(delivery.verificationTime).toLocaleString('en-US')}
-                              </td>
+                    <div className="space-y-4">
+                      {/* Stats Summary */}
+                      <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div className="text-sm text-gray-600">
+                          نمایش {Math.min(20, gpsDeliveries.length)} از {gpsDeliveries.length} تحویل
+                        </div>
+                        {gpsDeliveries.length > 20 && (
+                          <button
+                            onClick={() => {
+                              const expandedTable = document.getElementById('expanded-gps-table');
+                              const toggleButton = document.getElementById('toggle-gps-button');
+                              if (expandedTable && toggleButton) {
+                                const isHidden = expandedTable.style.display === 'none' || !expandedTable.style.display;
+                                expandedTable.style.display = isHidden ? 'block' : 'none';
+                                toggleButton.textContent = isHidden ? 'مخفی کردن بقیه' : `نمایش ${gpsDeliveries.length - 20} تحویل بیشتر`;
+                              }
+                            }}
+                            id="toggle-gps-button"
+                            className="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                          >
+                            نمایش {gpsDeliveries.length - 20} تحویل بیشتر
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-gray-300">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Order ID</th>
+                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Delivery Person</th>
+                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Location</th>
+                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">GPS Coordinates</th>
+                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Accuracy</th>
+                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Address Match</th>
+                              <th className="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Verification Time</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {/* First 20 rows */}
+                            {gpsDeliveries.slice(0, 20).map((delivery, index) => (
+                              <tr key={delivery.id || index} className="hover:bg-gray-50">
+                                <td className="border border-gray-300 px-3 py-2 font-medium">
+                                  #{delivery.customerOrderId}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2">
+                                  <div>
+                                    <p className="font-medium">{delivery.deliveryPersonName}</p>
+                                    <p className="text-xs text-gray-600">{delivery.deliveryPersonPhone}</p>
+                                  </div>
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2">
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3 text-gray-400" />
+                                    <span>{delivery.city}, {delivery.country}</span>
+                                  </div>
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2 text-xs">
+                                  <div 
+                                    className="cursor-pointer hover:bg-blue-50 p-1 rounded border-dashed border hover:border-blue-300 transition-colors"
+                                    onClick={() => {
+                                      const googleMapsUrl = `https://www.google.com/maps?q=${parseFloat(delivery.latitude)},${parseFloat(delivery.longitude)}&z=15`;
+                                      window.open(googleMapsUrl, '_blank');
+                                    }}
+                                    title="کلیک برای نمایش در Google Maps"
+                                  >
+                                    <p className="text-blue-600 hover:text-blue-800">📍 Lat: {parseFloat(delivery.latitude).toFixed(6)}</p>
+                                    <p className="text-blue-600 hover:text-blue-800">📍 Lng: {parseFloat(delivery.longitude).toFixed(6)}</p>
+                                    <div className="text-xs text-gray-500 mt-1">🗺️ کلیک = Google Maps</div>
+                                  </div>
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2">
+                                  <Badge variant={parseFloat(delivery.accuracy) <= 10 ? "default" : "secondary"}>
+                                    ±{delivery.accuracy}m
+                                  </Badge>
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2">
+                                  {delivery.addressMatched ? (
+                                    <Badge variant="default" className="bg-green-100 text-green-800">
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                      Match
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                                      <AlertTriangle className="h-3 w-3 mr-1" />
+                                      No Match
+                                    </Badge>
+                                  )}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2 text-xs">
+                                  {new Date(delivery.verificationTime).toLocaleString('en-US')}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Expandable section for remaining rows */}
+                      {gpsDeliveries.length > 20 && (
+                        <div id="expanded-gps-table" style={{ display: 'none' }} className="overflow-x-auto">
+                          <table className="w-full border-collapse border border-gray-300">
+                            <tbody>
+                              {gpsDeliveries.slice(20).map((delivery, index) => (
+                                <tr key={`expanded-${delivery.id || index}`} className="hover:bg-gray-50">
+                                  <td className="border border-gray-300 px-3 py-2 font-medium">
+                                    #{delivery.customerOrderId}
+                                  </td>
+                                  <td className="border border-gray-300 px-3 py-2">
+                                    <div>
+                                      <p className="font-medium">{delivery.deliveryPersonName}</p>
+                                      <p className="text-xs text-gray-600">{delivery.deliveryPersonPhone}</p>
+                                    </div>
+                                  </td>
+                                  <td className="border border-gray-300 px-3 py-2">
+                                    <div className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3 text-gray-400" />
+                                      <span>{delivery.city}, {delivery.country}</span>
+                                    </div>
+                                  </td>
+                                  <td className="border border-gray-300 px-3 py-2 text-xs">
+                                    <div 
+                                      className="cursor-pointer hover:bg-blue-50 p-1 rounded border-dashed border hover:border-blue-300 transition-colors"
+                                      onClick={() => {
+                                        const googleMapsUrl = `https://www.google.com/maps?q=${parseFloat(delivery.latitude)},${parseFloat(delivery.longitude)}&z=15`;
+                                        window.open(googleMapsUrl, '_blank');
+                                      }}
+                                      title="کلیک برای نمایش در Google Maps"
+                                    >
+                                      <p className="text-blue-600 hover:text-blue-800">📍 Lat: {parseFloat(delivery.latitude).toFixed(6)}</p>
+                                      <p className="text-blue-600 hover:text-blue-800">📍 Lng: {parseFloat(delivery.longitude).toFixed(6)}</p>
+                                      <div className="text-xs text-gray-500 mt-1">🗺️ کلیک = Google Maps</div>
+                                    </div>
+                                  </td>
+                                  <td className="border border-gray-300 px-3 py-2">
+                                    <Badge variant={parseFloat(delivery.accuracy) <= 10 ? "default" : "secondary"}>
+                                      ±{delivery.accuracy}m
+                                    </Badge>
+                                  </td>
+                                  <td className="border border-gray-300 px-3 py-2">
+                                    {delivery.addressMatched ? (
+                                      <Badge variant="default" className="bg-green-100 text-green-800">
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                        Match
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                                        <AlertTriangle className="h-3 w-3 mr-1" />
+                                        No Match
+                                      </Badge>
+                                    )}
+                                  </td>
+                                  <td className="border border-gray-300 px-3 py-2 text-xs">
+                                    {new Date(delivery.verificationTime).toLocaleString('en-US')}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
