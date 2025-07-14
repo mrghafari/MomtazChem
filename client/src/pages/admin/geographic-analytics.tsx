@@ -1202,77 +1202,216 @@ export default function GeographicAnalytics() {
                           </div>
                         </div>
                         
-                        {/* Visual Map with GPS Points */}
-                        <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-80 overflow-y-auto">
-                            {gpsHeatmap.data.map((point: any, index: number) => {
-                              // Determine country based on coordinates
-                              let country = 'نامشخص';
-                              let region = '';
+                        {/* Interactive Geographic Heat Map */}
+                        <div className="bg-white rounded-lg border overflow-hidden">
+                          <div className="relative w-full">
+                            <svg viewBox="0 0 1000 700" className="w-full h-96 bg-gradient-to-br from-blue-50 to-cyan-50">
+                              {/* Background Map */}
+                              <defs>
+                                <pattern id="gridPattern" width="50" height="50" patternUnits="userSpaceOnUse">
+                                  <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.5"/>
+                                </pattern>
+                                
+                                {/* Gradient for heat intensity */}
+                                <radialGradient id="heatGradientHigh" cx="50%" cy="50%" r="50%">
+                                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.8"/>
+                                  <stop offset="50%" stopColor="#10b981" stopOpacity="0.4"/>
+                                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.1"/>
+                                </radialGradient>
+                                
+                                <radialGradient id="heatGradientMedium" cx="50%" cy="50%" r="50%">
+                                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.7"/>
+                                  <stop offset="50%" stopColor="#f59e0b" stopOpacity="0.3"/>
+                                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.1"/>
+                                </radialGradient>
+                              </defs>
                               
-                              if (point.lat >= 29 && point.lat <= 37 && point.lng >= 38 && point.lng <= 49) {
-                                country = 'عراق';
-                                if (point.lat >= 35 && point.lng >= 43) region = 'اربیل';
-                                else if (point.lat >= 33 && point.lat <= 34) region = 'بغداد';
-                                else if (point.lat <= 32) region = 'جنوب عراق';
-                              } else if (point.lat >= 25 && point.lat <= 40 && point.lng >= 44 && point.lng <= 64) {
-                                country = 'ایران';
-                                if (point.lat >= 35 && point.lng >= 50) region = 'تهران';
-                                else region = 'سایر شهرها';
-                              } else if (point.lat >= 36 && point.lat <= 42 && point.lng >= 26 && point.lng <= 45) {
-                                country = 'ترکیه';
-                                region = 'استانبول';
-                              }
+                              {/* Grid Background */}
+                              <rect width="1000" height="700" fill="url(#gridPattern)"/>
                               
-                              return (
-                                <div 
-                                  key={index} 
-                                  className={`relative border rounded-lg p-3 transition-all hover:shadow-lg cursor-pointer ${
-                                    point.weight >= 1 
-                                      ? 'bg-green-50 border-green-200 hover:border-green-400' 
-                                      : 'bg-yellow-50 border-yellow-200 hover:border-yellow-400'
-                                  }`}
-                                >
-                                  {/* Status Indicator */}
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className={`flex items-center text-xs font-medium ${
-                                      point.weight >= 1 ? 'text-green-700' : 'text-yellow-700'
-                                    }`}>
-                                      <div className={`w-2 h-2 rounded-full mr-1 ${
-                                        point.weight >= 1 ? 'bg-green-500' : 'bg-yellow-500'
-                                      }`}></div>
-                                      {point.weight >= 1 ? 'موفق' : 'بررسی'}
-                                    </div>
-                                    <div className="text-xs text-gray-500">#{index + 1}</div>
-                                  </div>
+                              {/* Country Outlines - Iraq, Iran, Turkey region */}
+                              <g opacity="0.6">
+                                {/* Iraq outline */}
+                                <path d="M 300 350 L 350 320 L 400 330 L 450 350 L 480 400 L 460 480 L 420 520 L 380 510 L 340 480 L 320 420 Z" 
+                                      fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="5,5"/>
+                                <text x="380" y="420" textAnchor="middle" className="text-sm font-semibold fill-blue-600">Iraq</text>
+                                
+                                {/* Iran outline */}
+                                <path d="M 480 300 L 580 280 L 680 320 L 720 380 L 700 450 L 650 500 L 580 480 L 520 440 L 480 380 Z" 
+                                      fill="none" stroke="#059669" strokeWidth="2" strokeDasharray="5,5"/>
+                                <text x="600" y="390" textAnchor="middle" className="text-sm font-semibold fill-green-600">Iran</text>
+                                
+                                {/* Turkey outline */}
+                                <path d="M 200 200 L 400 180 L 500 200 L 520 240 L 480 280 L 400 290 L 300 280 L 200 260 Z" 
+                                      fill="none" stroke="#dc2626" strokeWidth="2" strokeDasharray="5,5"/>
+                                <text x="360" y="240" textAnchor="middle" className="text-sm font-semibold fill-red-600">Turkey</text>
+                              </g>
+                              
+                              {/* Major Cities */}
+                              <g>
+                                <circle cx="380" cy="420" r="6" fill="#1f2937" stroke="white" strokeWidth="2"/>
+                                <text x="390" y="435" className="text-xs font-medium fill-gray-700">Baghdad</text>
+                                
+                                <circle cx="420" cy="350" r="4" fill="#1f2937" stroke="white" strokeWidth="2"/>
+                                <text x="430" y="365" className="text-xs font-medium fill-gray-700">Erbil</text>
+                                
+                                <circle cx="600" cy="360" r="4" fill="#1f2937" stroke="white" strokeWidth="2"/>
+                                <text x="610" y="375" className="text-xs font-medium fill-gray-700">Tehran</text>
+                                
+                                <circle cx="360" cy="220" r="4" fill="#1f2937" stroke="white" strokeWidth="2"/>
+                                <text x="370" y="235" className="text-xs font-medium fill-gray-700">Istanbul</text>
+                              </g>
+                              
+                              {/* Plot GPS Heat Points */}
+                              {(() => {
+                                // Group points by proximity to create heat intensity
+                                const clusters = new Map();
+                                
+                                gpsHeatmap.data.forEach((point: any, index: number) => {
+                                  // Map GPS coordinates to SVG coordinates
+                                  // Iraq region: lat 29-37, lng 38-48
+                                  // Iran region: lat 25-40, lng 44-64
+                                  // Turkey region: lat 36-42, lng 26-45
+                                  const minLat = 25, maxLat = 42;
+                                  const minLng = 26, maxLng = 64;
                                   
-                                  {/* Location Info */}
-                                  <div className="space-y-1">
-                                    <div className="flex items-center text-sm">
-                                      <MapPin className="h-3 w-3 mr-1 text-blue-600" />
-                                      <span className="font-medium text-gray-800">{country}</span>
-                                      {region && <span className="text-gray-600 mr-1">- {region}</span>}
-                                    </div>
-                                    
-                                    <div className="text-xs text-gray-600">
-                                      <div>عرض: {point.lat.toFixed(4)}°</div>
-                                      <div>طول: {point.lng.toFixed(4)}°</div>
-                                    </div>
-                                    
-                                    <div className="text-xs text-gray-500">
-                                      📅 {new Date(point.timestamp).toLocaleDateString('fa-IR')}
-                                    </div>
-                                  </div>
+                                  const x = ((point.lng - minLng) / (maxLng - minLng)) * 700 + 150;
+                                  const y = ((maxLat - point.lat) / (maxLat - minLat)) * 500 + 100;
                                   
-                                  {/* Pulse Animation for Successful Deliveries */}
-                                  {point.weight >= 1 && (
-                                    <div className="absolute top-1 right-1">
-                                      <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
-                                    </div>
-                                  )}
+                                  const mapX = Math.max(150, Math.min(850, x));
+                                  const mapY = Math.max(100, Math.min(600, y));
+                                  
+                                  // Group nearby points (within 30px radius)
+                                  const clusterKey = `${Math.floor(mapX / 30)}-${Math.floor(mapY / 30)}`;
+                                  if (!clusters.has(clusterKey)) {
+                                    clusters.set(clusterKey, { x: mapX, y: mapY, points: [], avgWeight: 0 });
+                                  }
+                                  clusters.get(clusterKey).points.push(point);
+                                });
+                                
+                                // Calculate average weight for each cluster
+                                clusters.forEach((cluster) => {
+                                  cluster.avgWeight = cluster.points.reduce((sum: number, p: any) => sum + p.weight, 0) / cluster.points.length;
+                                  cluster.intensity = cluster.points.length;
+                                });
+                                
+                                return Array.from(clusters.values()).map((cluster, index) => (
+                                  <g key={`cluster-${index}`}>
+                                    {/* Heat bubble based on cluster intensity */}
+                                    <circle 
+                                      cx={cluster.x} 
+                                      cy={cluster.y} 
+                                      r={Math.min(50, 10 + cluster.intensity * 3)}
+                                      fill={cluster.avgWeight >= 1 ? "url(#heatGradientHigh)" : "url(#heatGradientMedium)"}
+                                      opacity="0.6"
+                                    />
+                                    
+                                    {/* Center point marker */}
+                                    <circle 
+                                      cx={cluster.x} 
+                                      cy={cluster.y} 
+                                      r={Math.min(8, 3 + cluster.intensity)}
+                                      fill={cluster.avgWeight >= 1 ? "#10b981" : "#f59e0b"}
+                                      stroke="white"
+                                      strokeWidth="2"
+                                      className="hover:opacity-100 cursor-pointer"
+                                    >
+                                      <title>
+                                        🎯 منطقه تحویل
+                                        📊 تعداد نقاط: {cluster.intensity}
+                                        ⭐ میانگین دقت: {cluster.avgWeight.toFixed(1)}
+                                        📍 مختصات: {cluster.x.toFixed(0)}, {cluster.y.toFixed(0)}
+                                      </title>
+                                    </circle>
+                                    
+                                    {/* Pulse animation for high-intensity clusters */}
+                                    {cluster.intensity > 3 && (
+                                      <circle 
+                                        cx={cluster.x} 
+                                        cy={cluster.y} 
+                                        r={10 + cluster.intensity * 2}
+                                        fill="none"
+                                        stroke={cluster.avgWeight >= 1 ? "#10b981" : "#f59e0b"}
+                                        strokeWidth="2"
+                                        opacity="0.4"
+                                      >
+                                        <animate attributeName="r" values={`${10 + cluster.intensity * 2};${20 + cluster.intensity * 3};${10 + cluster.intensity * 2}`} dur="3s" repeatCount="indefinite" />
+                                        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="3s" repeatCount="indefinite" />
+                                      </circle>
+                                    )}
+                                    
+                                    {/* Cluster size indicator */}
+                                    {cluster.intensity > 1 && (
+                                      <text 
+                                        x={cluster.x} 
+                                        y={cluster.y + 2} 
+                                        textAnchor="middle" 
+                                        className="text-xs font-bold fill-white"
+                                        style={{ fontSize: '10px' }}
+                                      >
+                                        {cluster.intensity}
+                                      </text>
+                                    )}
+                                  </g>
+                                ));
+                              })()}
+                              
+                              {/* Individual scattered points for low-density areas */}
+                              {gpsHeatmap.data.slice(0, 20).map((point: any, index: number) => {
+                                const minLat = 25, maxLat = 42;
+                                const minLng = 26, maxLng = 64;
+                                
+                                const x = ((point.lng - minLng) / (maxLng - minLng)) * 700 + 150;
+                                const y = ((maxLat - point.lat) / (maxLat - minLat)) * 500 + 100;
+                                
+                                const mapX = Math.max(150, Math.min(850, x));
+                                const mapY = Math.max(100, Math.min(600, y));
+                                
+                                return (
+                                  <circle 
+                                    key={`scatter-${index}`}
+                                    cx={mapX + (Math.random() - 0.5) * 20} 
+                                    cy={mapY + (Math.random() - 0.5) * 20} 
+                                    r="3"
+                                    fill={point.weight >= 1 ? "#10b981" : "#f59e0b"}
+                                    opacity="0.7"
+                                    className="hover:opacity-100"
+                                  >
+                                    <title>
+                                      📍 تحویل در: {point.lat.toFixed(4)}, {point.lng.toFixed(4)}
+                                      📅 تاریخ: {new Date(point.timestamp).toLocaleDateString('fa-IR')}
+                                    </title>
+                                  </circle>
+                                );
+                              })}
+                            </svg>
+                          </div>
+                          
+                          {/* Map Legend and Controls */}
+                          <div className="p-4 bg-gray-50 border-t">
+                            <div className="flex flex-wrap items-center justify-between gap-4">
+                              <div className="flex items-center space-x-6">
+                                <h5 className="font-semibold text-gray-800">راهنمای نقشه:</h5>
+                                <div className="flex items-center space-x-4">
+                                  <div className="flex items-center">
+                                    <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
+                                    <span className="text-sm">تحویل موفق</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <div className="w-4 h-4 rounded-full bg-yellow-500 mr-2"></div>
+                                    <span className="text-sm">نیاز به بررسی</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <div className="w-6 h-6 rounded-full bg-green-200 border-2 border-green-500 mr-2"></div>
+                                    <span className="text-sm">مناطق پرتراکم</span>
+                                  </div>
                                 </div>
-                              );
-                            })}
+                              </div>
+                              
+                              <div className="text-xs text-gray-600">
+                                💡 نقاط بزرگ‌تر = تراکم بیشتر تحویل | انیمیشن = مناطق فعال
+                              </div>
+                            </div>
                           </div>
                         </div>
                         
