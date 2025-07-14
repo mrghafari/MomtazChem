@@ -75,7 +75,7 @@ import FinancialLogin from "@/pages/financial-login";
 import WarehouseLogin from "@/pages/warehouse-login";
 import LogisticsLogin from "@/pages/logistics-login";
 import TicketingSystemFixed from "@/pages/admin/ticketing-system-fixed";
-import SuperAdminDepartmentManagement from "@/pages/super-admin-department-management";
+
 import SuperAdminSettings from "@/pages/super-admin-settings";
 import SiteManagement from "@/pages/site-management";
 import GeographicReports from "@/pages/geographic-reports";
@@ -87,7 +87,7 @@ import WarehouseOrders from "@/pages/admin/warehouse-orders";
 import LogisticsOrders from "@/pages/admin/logistics-orders";
 import DeliveredOrders from "@/pages/admin/delivered-orders";
 import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
-import DepartmentUsers from "@/pages/admin/department-users";
+
 import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
 import InventoryManagement from "@/pages/inventory-management";
 import ContentManagement from "@/pages/content-management";
@@ -168,7 +168,7 @@ function Router() {
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
           <Route path="/admin/delivered-orders" component={DeliveredOrders} />
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
-          <Route path="/admin/department-users" component={DepartmentUsers} />
+
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           <Route path="/admin/inventory-management" component={InventoryManagement} />
 
@@ -188,7 +188,7 @@ function Router() {
           <Route path="/logistics" component={LogisticsSimple} />
           <Route path="/logistics/login" component={LogisticsLogin} />
           <Route path="/test-logistics" component={TestLogistics} />
-          <Route path="/super-admin/departments" component={SuperAdminDepartmentManagement} />
+
           <Route path="/super-admin/settings" component={SuperAdminSettings} />
           <Route path="/admin/super-admin-settings" component={SuperAdminSettings} />
           

@@ -116,10 +116,9 @@ The database is organized into multiple schema files:
 20. **Geography Analytics** - Regional sales tracking and performance analysis (Iraq and Turkey)
 21. **AI Settings** - Smart SKU generation, product recommendations, and OpenAI API integration
 22. **Refresh Control** - Centralized timing management for all department interfaces
-23. **Department Users** - Team management with role assignments and access control
-24. **Inventory Management** - Independent inventory system with alerts, automation, and real-time monitoring
-25. **Content Management** - Dynamic multilingual content editing system (430+ items in 4 languages)
-26. **[Future Enhancement Slot]** - Reserved for additional administrative functionality
+23. **Inventory Management** - Independent inventory system with alerts, automation, and real-time monitoring
+24. **Content Management** - Dynamic multilingual content editing system (430+ items in 4 languages)
+25. **[Future Enhancement Slot]** - Reserved for additional administrative functionality
 
 ## Data Flow
 

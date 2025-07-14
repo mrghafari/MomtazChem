@@ -296,14 +296,7 @@ export default function SiteManagement() {
       className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
       moduleId: "refresh_control"
     },
-    {
-      id: "department-users",
-      label: "Department Users",
-      icon: Users,
-      onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
-      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
-      moduleId: "department_users"
-    },
+
     {
       id: "content-management",
       label: "Content Management",

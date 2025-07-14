@@ -170,7 +170,7 @@ const availableModules: Module[] = [
   { id: 'geography-analytics', name: 'geography_analytics', displayName: 'Geography Analytics', description: 'آنالیتیکس جغرافیایی فروش', category: 'analytics', isCore: false, icon: MapPin, color: 'bg-teal-500' },
   { id: 'ai-settings', name: 'ai_management', displayName: 'AI Settings', description: 'تنظیمات هوش مصنوعی', category: 'system', isCore: false, icon: Zap, color: 'bg-purple-500' },
   { id: 'refresh-control', name: 'refresh_control', displayName: 'Refresh Control', description: 'کنترل به‌روزرسانی سیستم', category: 'system', isCore: false, icon: RefreshCw, color: 'bg-indigo-500' },
-  { id: 'department-users', name: 'department_users', displayName: 'Department Users', description: 'مدیریت کاربران بخش‌ها', category: 'system', isCore: false, icon: Users, color: 'bg-emerald-500' },
+
   { id: 'content-management', name: 'content_management', displayName: 'Content Management', description: 'مدیریت محتوای وب‌سایت', category: 'content', isCore: false, icon: Edit3, color: 'bg-green-500' },
   { id: 'ticketing-system', name: 'ticketing_system', displayName: 'Ticketing System', description: 'سیستم تیکت و پشتیبانی', category: 'communication', isCore: false, icon: Ticket, color: 'bg-red-500' }
 ];
