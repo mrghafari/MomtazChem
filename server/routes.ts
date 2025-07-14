@@ -3573,6 +3573,261 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // ROLE MANAGEMENT ENDPOINTS (SUPER ADMIN ONLY)
+  // =============================================================================
+
+  // Create new role
+  app.post("/api/admin/roles", requireSuperAdmin, async (req, res) => {
+    try {
+      const { name, displayName, description } = req.body;
+      
+      if (!name || !displayName) {
+        return res.status(400).json({ success: false, message: "Name and display name are required" });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        INSERT INTO admin_roles (name, display_name, description, is_active)
+        VALUES ($1, $2, $3, true)
+        RETURNING id, name, display_name, description, is_active, created_at
+      `, [name, displayName, description]);
+
+      res.json({
+        success: true,
+        role: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error creating role:", error);
+      if (error.code === '23505') { // Unique constraint violation
+        res.status(400).json({ success: false, message: "Role name already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // Update role
+  app.put("/api/admin/roles/:id", requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, displayName, description, isActive } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE admin_roles 
+        SET name = $1, display_name = $2, description = $3, is_active = $4, updated_at = NOW()
+        WHERE id = $5
+        RETURNING id, name, display_name, description, is_active, updated_at
+      `, [name, displayName, description, isActive, id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Role not found" });
+      }
+
+      res.json({
+        success: true,
+        role: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error updating role:", error);
+      if (error.code === '23505') {
+        res.status(400).json({ success: false, message: "Role name already exists" });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // Delete role
+  app.delete("/api/admin/roles/:id", requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const { pool } = await import('./db');
+      
+      // Check if role has users assigned
+      const usersCheck = await pool.query(`
+        SELECT COUNT(*) as user_count FROM users WHERE role_id = $1
+      `, [id]);
+      
+      if (parseInt(usersCheck.rows[0].user_count) > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Cannot delete role that has users assigned to it" 
+        });
+      }
+
+      // Delete role permissions first
+      await pool.query(`DELETE FROM role_permissions WHERE role_id = $1`, [id]);
+      
+      // Delete role
+      const result = await pool.query(`
+        DELETE FROM admin_roles WHERE id = $1 RETURNING id
+      `, [id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Role not found" });
+      }
+
+      res.json({
+        success: true,
+        message: "Role deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting role:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get role permissions
+  app.get("/api/admin/roles/:id/permissions", requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT p.id, p.name, p.display_name, p.description, p.module,
+               CASE WHEN rp.permission_id IS NOT NULL THEN true ELSE false END as assigned
+        FROM admin_permissions p
+        LEFT JOIN role_permissions rp ON p.id = rp.permission_id AND rp.role_id = $1
+        WHERE p.is_active = true
+        ORDER BY p.module, p.display_name
+      `, [id]);
+
+      const permissions = result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        displayName: row.display_name,
+        description: row.description,
+        module: row.module,
+        assigned: row.assigned
+      }));
+
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching role permissions:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Update role permissions
+  app.put("/api/admin/roles/:id/permissions", requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { permissionIds } = req.body;
+      
+      if (!Array.isArray(permissionIds)) {
+        return res.status(400).json({ success: false, message: "Permission IDs must be an array" });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Begin transaction
+      await pool.query('BEGIN');
+      
+      try {
+        // Remove all existing permissions for this role
+        await pool.query(`DELETE FROM role_permissions WHERE role_id = $1`, [id]);
+        
+        // Add new permissions
+        for (const permissionId of permissionIds) {
+          await pool.query(`
+            INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)
+          `, [id, permissionId]);
+        }
+        
+        await pool.query('COMMIT');
+        
+        res.json({
+          success: true,
+          message: "Role permissions updated successfully"
+        });
+      } catch (error) {
+        await pool.query('ROLLBACK');
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error updating role permissions:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Assign role to user
+  app.put("/api/admin/users/:id/role", requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { roleId } = req.body;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE users 
+        SET role_id = $1, updated_at = NOW()
+        WHERE id = $2
+        RETURNING id, username, email, role_id
+      `, [roleId, id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      res.json({
+        success: true,
+        user: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error assigning role to user:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get users by role
+  app.get("/api/admin/roles/:id/users", requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT u.id, u.username, u.email, u.is_active, u.created_at,
+               r.display_name as role_name
+        FROM users u
+        JOIN admin_roles r ON u.role_id = r.id
+        WHERE u.role_id = $1
+        ORDER BY u.username
+      `, [id]);
+
+      const users = result.rows.map((row: any) => ({
+        id: row.id,
+        username: row.username,
+        email: row.email,
+        isActive: row.is_active,
+        createdAt: row.created_at,
+        roleName: row.role_name
+      }));
+
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users by role:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get available modules for permissions
+  app.get("/api/admin/modules", requireSuperAdmin, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT DISTINCT module FROM admin_permissions WHERE is_active = true ORDER BY module
+      `);
+
+      const modules = result.rows.map((row: any) => row.module);
+      res.json(modules);
+    } catch (error) {
+      console.error("Error fetching modules:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // =============================================================================
   // FACTORY MANAGEMENT ENDPOINTS
   // =============================================================================
 

@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Users, 
   UserPlus, 
@@ -19,7 +20,11 @@ import {
   Key,
   ArrowLeft,
   Crown,
-  Globe
+  Globe,
+  Plus,
+  Trash2,
+  Settings,
+  UserCog
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -37,7 +42,20 @@ const translations = {
     adminUsers: "Admin Users",
     roles: "Roles",
     permissions: "Permissions",
+    roleManagement: "Role Management",
     addUser: "Add User",
+    addRole: "Add Role",
+    createRole: "Create Role",
+    editRole: "Edit Role",
+    roleName: "Role Name",
+    roleDisplayName: "Role Display Name",
+    roleDescription: "Role Description",
+    assignPermissions: "Assign Permissions",
+    managePermissions: "Manage Permissions",
+    assignRole: "Assign Role",
+    selectUser: "Select User",
+    selectPermissions: "Select Permissions",
+    modulePermissions: "Module Permissions",
     editUser: "Edit User",
     addNewUser: "Add New User",
     username: "Username",
@@ -67,12 +85,25 @@ const translations = {
     updateUserError: "Error Updating",
     updateUserErrorMessage: "There was a problem updating the user",
     adminRoles: "Admin Roles",
-    roleName: "Role Name",
     description: "Description",
     permissionCount: "Permission Count",
     adminPermissions: "Admin Permissions",
     permission: "Permission",
     module: "Module",
+    assigned: "Assigned",
+    notAssigned: "Not Assigned",
+    savePermissions: "Save Permissions",
+    roleCreated: "Role Created",
+    roleCreatedSuccess: "New role created successfully",
+    roleUpdated: "Role Updated", 
+    roleUpdatedSuccess: "Role updated successfully",
+    permissionsUpdated: "Permissions Updated",
+    permissionsUpdatedSuccess: "Role permissions updated successfully",
+    roleAssigned: "Role Assigned",
+    roleAssignedSuccess: "Role assigned to user successfully",
+    deleteRole: "Delete Role",
+    confirmDeleteRole: "Are you sure you want to delete this role?",
+    cannotDeleteRole: "Cannot delete role that has users assigned",
     users: "users",
     products: "products",
     crm: "crm",

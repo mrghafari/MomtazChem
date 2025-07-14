@@ -78,6 +78,7 @@ import TicketingSystemFixed from "@/pages/admin/ticketing-system-fixed";
 import SuperAdminDepartmentManagement from "@/pages/super-admin-department-management";
 import SuperAdminSettings from "@/pages/super-admin-settings";
 import SiteManagement from "@/pages/site-management";
+import ComprehensiveRoleManagement from "@/pages/admin/comprehensive-role-management";
 import GeographicReports from "@/pages/geographic-reports";
 import GeographicAnalytics from "@/pages/admin/geographic-analytics";
 import AISettings from "@/pages/admin/ai-settings";
@@ -125,6 +126,7 @@ function Router() {
           <Route path="/admin/barcode-inventory" component={BarcodeInventory} />
           <Route path="/admin/database-management" component={DatabaseManagement} />
           <Route path="/admin/user-management" component={UserManagement} />
+          <Route path="/admin/comprehensive-role-management" component={ComprehensiveRoleManagement} />
           <Route path="/admin/factory-management" component={FactoryManagement} />
           <Route path="/admin/procedures-management" component={ProceduresManagement} />
           <Route path="/admin/smtp-test" component={SMTPTestPage} />
