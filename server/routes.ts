@@ -3502,15 +3502,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await pool.query(`
             INSERT INTO module_permissions (role_id, module_id, can_view, can_create, can_edit, can_delete, can_approve, created_at, updated_at)
             VALUES ($1, $2, true, true, true, true, true, NOW(), NOW())
-            ON CONFLICT (role_id, module_id) DO UPDATE SET
+          `, [superAdminRoleId, moduleId]);
+          syncedModules++;
+        } else {
+          // Update existing permission to ensure it's active
+          await pool.query(`
+            UPDATE module_permissions SET
               can_view = true,
               can_create = true,
               can_edit = true,
               can_delete = true,
               can_approve = true,
               updated_at = NOW()
+            WHERE role_id = $1 AND module_id = $2
           `, [superAdminRoleId, moduleId]);
-          syncedModules++;
         }
       }
 

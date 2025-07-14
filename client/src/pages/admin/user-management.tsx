@@ -538,6 +538,7 @@ function UserManagement() {
       'system': 'bg-gray-50 text-gray-700 border-gray-200',
       'email': 'bg-emerald-50 text-emerald-700 border-emerald-200',
       'seo': 'bg-violet-50 text-violet-700 border-violet-200',
+      'warehouse-management': 'bg-amber-50 text-amber-700 border-amber-200',
       'inventory': 'bg-amber-50 text-amber-700 border-amber-200',
       'orders': 'bg-rose-50 text-rose-700 border-rose-200',
       'support': 'bg-cyan-50 text-cyan-700 border-cyan-200',
@@ -562,6 +563,7 @@ function UserManagement() {
       'system': 'System',
       'email': 'Email',
       'seo': 'SEO',
+      'warehouse-management': 'Warehouse Management',
       'inventory': 'Inventory',
       'orders': 'Orders',
       'support': 'Support',
@@ -616,6 +618,38 @@ function UserManagement() {
             <Globe className="h-4 w-4" />
             {language === 'en' ? 'عربي' : 'English'}
           </Button>
+        </div>
+      </div>
+
+      {/* Prominent Sync Button Section */}
+      <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-lg p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">
+              {language === 'en' ? 'Module Synchronization Required' : 'مطلوب مزامنة الوحدات'}
+            </h2>
+            <p className="text-red-700 text-sm">
+              {language === 'en' 
+                ? 'Click the button below to sync all modules with the main system and ensure Warehouse Management is properly displayed'
+                : 'انقر على الزر أدناه لمزامنة جميع الوحدات مع النظام الرئيسي وضمان عرض إدارة المستودعات بشكل صحيح'
+              }
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => syncModulesMutation.mutate()}
+              disabled={syncModulesMutation.isPending}
+              variant="default"
+              size="lg"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 text-base"
+            >
+              <RefreshCw className={`h-5 w-5 mr-2 ${syncModulesMutation.isPending ? 'animate-spin' : ''}`} />
+              {language === 'en' ? 'SYNC MODULES NOW' : 'مزامنة الوحدات الآن'}
+            </Button>
+            <div className="text-sm text-red-600">
+              {language === 'en' ? 'Force Update' : 'إجبار التحديث'}
+            </div>
+          </div>
         </div>
       </div>
 
