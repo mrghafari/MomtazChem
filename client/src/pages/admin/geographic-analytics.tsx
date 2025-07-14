@@ -210,7 +210,8 @@ export default function GeographicAnalytics() {
       });
       if (!response.ok) throw new Error('Failed to fetch GPS analytics');
       const result = await response.json();
-      return result || { data: [] };
+      console.log('🔍 [GPS-ANALYTICS] Data received:', result);
+      return result && result.data ? result.data : [];
     }
   });
 
@@ -223,7 +224,8 @@ export default function GeographicAnalytics() {
       });
       if (!response.ok) throw new Error('Failed to fetch GPS heatmap');
       const result = await response.json();
-      return result || { data: [] };
+      console.log('🗺️ [GPS-HEATMAP] Data received:', result);
+      return result && result.data ? result.data : [];
     }
   });
 
@@ -1045,7 +1047,14 @@ export default function GeographicAnalytics() {
                   <CardContent>
                     {gpsAnalytics.data && gpsAnalytics.data.length > 0 ? (
                       <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={gpsAnalytics.data.slice(0, 8)}>
+                        <BarChart data={gpsAnalytics.data.slice(0, 8).map((item: any) => ({
+                          city: item.city,
+                          totalDeliveries: item.totalDeliveries,
+                          successfulDeliveries: item.successfulDeliveries,
+                          deliverySuccessRate: item.totalDeliveries > 0 ? 
+                            ((item.successfulDeliveries / item.totalDeliveries) * 100).toFixed(1) : 0,
+                          averageAccuracy: parseFloat(item.averageAccuracy || '0')
+                        }))}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis 
                             dataKey="city" 
@@ -1088,7 +1097,10 @@ export default function GeographicAnalytics() {
                   <CardContent>
                     {gpsAnalytics.data && gpsAnalytics.data.length > 0 ? (
                       <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={gpsAnalytics.data.slice(0, 10)}>
+                        <LineChart data={gpsAnalytics.data.slice(0, 10).map((item: any) => ({
+                          city: item.city,
+                          averageAccuracy: parseFloat(item.averageAccuracy || '0')
+                        }))}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis 
                             dataKey="city" 
@@ -1130,7 +1142,7 @@ export default function GeographicAnalytics() {
                   <p className="text-sm text-gray-600">Geographic distribution of delivery confirmations</p>
                 </CardHeader>
                 <CardContent>
-                  {gpsHeatmap.data && gpsHeatmap.data.length > 0 ? (
+                  {gpsHeatmap.data && Array.isArray(gpsHeatmap.data) && gpsHeatmap.data.length > 0 ? (
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <div className="bg-blue-50 p-3 rounded-lg">
