@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -136,6 +137,7 @@ const availableModules: Module[] = [
 function UserManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   
   // Dialog states
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
@@ -317,6 +319,43 @@ function UserManagement() {
       return acc;
     }, {} as Record<string, Module[]>);
   };
+
+  // Authentication check
+  if (authLoading) {
+    return (
+      <div className="container mx-auto p-6 text-center" dir="rtl">
+        <div className="py-12">
+          <div className="text-lg">در حال بررسی احراز هویت...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto p-6" dir="rtl">
+        <Card className="max-w-md mx-auto">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2 text-red-600">
+              <Lock className="h-6 w-6" />
+              دسترسی محدود
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-muted-foreground">
+              برای دسترسی به مدیریت کاربران باید ابتدا وارد سیستم شوید.
+            </p>
+            <Button 
+              onClick={() => window.location.href = '/admin/login'} 
+              className="w-full"
+            >
+              ورود به سیستم مدیریت
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
