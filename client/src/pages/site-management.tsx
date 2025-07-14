@@ -9,6 +9,7 @@ import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Pack
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 // Define the structure for Quick Action buttons
 interface QuickActionButton {
@@ -23,6 +24,7 @@ interface QuickActionButton {
 export default function SiteManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showKardexSync, setShowKardexSync] = useState(false);
 
   // Function to track button clicks and sort by usage
