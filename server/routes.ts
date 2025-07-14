@@ -3454,7 +3454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { pool } = await import('./db');
       
-      // Define the main system modules - these are the 26 Site Management modules
+      // Define the main system modules - these are the 25 Site Management modules
       const mainModules = [
         'syncing_shop',
         'inquiries', 
@@ -3466,7 +3466,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'categories',
         'sms',
         'factory',
-
         'user_management',
         'shop_management',
         'procedures',
@@ -3479,9 +3478,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'ai_settings',
         'refresh_control',
         'department_users',
-        'warehouse-management', // Updated: replaced inventory_management with warehouse-management
+        'inventory_management', // Keep as-is: this is correct module name from Site Management
         'content_management',
-        'security-management'
+        'warehouse-management' // Added: warehouse-management module
       ];
 
       // Get super admin role (admin@momtazchem.com has user ID 7)

@@ -552,29 +552,49 @@ function UserManagement() {
     return colors[module] || 'bg-gray-50 text-gray-700 border-gray-200';
   };
 
+  // Site Management modules - all 25 modules that should be displayed
+  const siteManagementModules = [
+    { id: 'syncing_shop', name: 'Syncing Shop', category: 'Core Operations', icon: '🔄' },
+    { id: 'inquiries', name: 'Inquiries', category: 'Customer Service', icon: '📋' },
+    { id: 'barcode', name: 'Barcode Management', category: 'Operations', icon: '📱' },
+    { id: 'email_settings', name: 'Email Settings', category: 'Configuration', icon: '📧' },
+    { id: 'database_backup', name: 'Database Backup', category: 'System', icon: '💾' },
+    { id: 'crm', name: 'CRM', category: 'Customer Management', icon: '👥' },
+    { id: 'seo', name: 'SEO Management', category: 'Marketing', icon: '🌐' },
+    { id: 'categories', name: 'Categories', category: 'Product Management', icon: '📂' },
+    { id: 'sms', name: 'SMS Management', category: 'Communication', icon: '💬' },
+    { id: 'factory', name: 'Factory Management', category: 'Manufacturing', icon: '🏭' },
+    { id: 'user_management', name: 'User Management', category: 'Administration', icon: '👤' },
+    { id: 'shop_management', name: 'Shop Management', category: 'E-commerce', icon: '🛒' },
+    { id: 'procedures', name: 'Procedures', category: 'Documentation', icon: '📖' },
+    { id: 'smtp_test', name: 'SMTP Test', category: 'Testing', icon: '🧪' },
+    { id: 'order_management', name: 'Order Management', category: 'Sales', icon: '📦' },
+    { id: 'product_management', name: 'Product Management', category: 'Catalog', icon: '📄' },
+    { id: 'payment_management', name: 'Payment Settings', category: 'Financial', icon: '💳' },
+    { id: 'wallet_management', name: 'Wallet Management', category: 'Financial', icon: '💰' },
+    { id: 'geography_analytics', name: 'Geography Analytics', category: 'Analytics', icon: '📊' },
+    { id: 'ai_settings', name: 'AI Settings', category: 'Technology', icon: '🤖' },
+    { id: 'refresh_control', name: 'Refresh Control', category: 'System', icon: '🔄' },
+    { id: 'department_users', name: 'Department Users', category: 'Organization', icon: '🏢' },
+    { id: 'inventory_management', name: 'Inventory Management', category: 'Operations', icon: '📋' },
+    { id: 'content_management', name: 'Content Management', category: 'Content', icon: '✏️' },
+    { id: 'warehouse-management', name: 'Warehouse Management', category: 'Operations', icon: '🏬' }
+  ];
+
+  const getModulesByCategory = () => {
+    const categories = {};
+    siteManagementModules.forEach(module => {
+      if (!categories[module.category]) {
+        categories[module.category] = [];
+      }
+      categories[module.category].push(module);
+    });
+    return categories;
+  };
+
   const getModuleTranslation = (module: string) => {
-    const translations = {
-      'users': 'Users',
-      'products': 'Products',
-      'crm': 'CRM',
-      'shop': 'Shop',
-      'analytics': 'Analytics',
-      'content': 'Content',
-      'system': 'System',
-      'email': 'Email',
-      'seo': 'SEO',
-      'warehouse-management': 'Warehouse Management',
-      'inventory': 'Inventory',
-      'orders': 'Orders',
-      'support': 'Support',
-      'site': 'Site Management',
-      'factory': 'Factory',
-      'security': 'Security',
-      'departments': 'Departments',
-      'regional': 'Regional',
-      'quality': 'Quality Control',
-    };
-    return translations[module] || module;
+    const moduleData = siteManagementModules.find(m => m.id === module);
+    return moduleData ? moduleData.name : module;
   };
 
   return (
@@ -1200,6 +1220,61 @@ function UserManagement() {
               </div>
             </CardHeader>
             <CardContent>
+              {/* Display total count of modules */}
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-800">Site Management Modules</h3>
+                    <p className="text-blue-600 text-sm">Total available modules for permission assignment</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-blue-800">{siteManagementModules.length}</div>
+                    <div className="text-sm text-blue-600">Total Modules</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Display modules by category */}
+              <div className="space-y-6">
+                {Object.entries(getModulesByCategory()).map(([category, modules]) => (
+                  <div key={category} className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-md font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-200">
+                      {category} ({modules.length} modules)
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {modules.map((module) => (
+                        <div key={module.id} className="flex items-center space-x-3 p-3 bg-white rounded border hover:shadow-sm transition-all">
+                          <span className="text-lg">{module.icon}</span>
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{module.name}</div>
+                            <div className="text-xs text-gray-500">{module.id}</div>
+                          </div>
+                          <Checkbox 
+                            disabled
+                            className="opacity-50"
+                            title="Permission assignment available in role management"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Note about permission assignment */}
+              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <div className="text-yellow-600">💡</div>
+                  <div>
+                    <h4 className="font-medium text-yellow-800">How to Assign Permissions</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      To assign these modules to users, go to the "Roles" tab and create or edit roles with specific module permissions. 
+                      Each user can then be assigned to a role that determines their access to these 25 modules.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {permissionsLoading ? (
                 <div className="text-center py-8">{t.loading}</div>
               ) : (
