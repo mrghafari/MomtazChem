@@ -3541,10 +3541,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { pool } = await import('./db');
       
-      // Define all main modules that should exist in the system (matching Site Management)
+      // Define all main modules that should exist in the system (EXACTLY matching Site Management - 23 modules)
       const mainModules = [
         'syncing_shop',
-        'inquiries',
+        'inquiries', 
         'barcode',
         'email_settings',
         'database_backup',
@@ -3564,10 +3564,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'geography_analytics',
         'ai_settings',
         'refresh_control',
-        'department_users',
-        'inventory_management',
         'content_management',
         'warehouse-management'
+        // Total: 23 unique modules (matching Site Management exactly)
       ];
 
       // Get super admin role (admin@momtazchem.com has user ID 7)

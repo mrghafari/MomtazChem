@@ -299,15 +299,7 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50",
       moduleId: "content_management"
-    },
-    {
-      id: "ticketing-system",
-      label: "Ticketing System",
-      icon: Ticket,
-      onClick: () => trackButtonClick("ticketing-system", () => setLocation("/admin/ticketing-system")),
-      className: "border-red-300 text-red-600 hover:bg-red-50",
-      moduleId: "user_management"
-    },
+    }
 
   ];
 
