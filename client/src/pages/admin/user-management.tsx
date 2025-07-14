@@ -1234,29 +1234,20 @@ function UserManagement() {
                 </div>
               </div>
 
-              {/* Display modules by category */}
-              <div className="space-y-6">
-                {Object.entries(getModulesByCategory()).map(([category, modules]) => (
-                  <div key={category} className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-md font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-200">
-                      {category} ({modules.length} modules)
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {modules.map((module) => (
-                        <div key={module.id} className="flex items-center space-x-3 p-3 bg-white rounded border hover:shadow-sm transition-all">
-                          <span className="text-lg">{module.icon}</span>
-                          <div className="flex-1">
-                            <div className="font-medium text-sm">{module.name}</div>
-                            <div className="text-xs text-gray-500">{module.id}</div>
-                          </div>
-                          <Checkbox 
-                            disabled
-                            className="opacity-50"
-                            title="Permission assignment available in role management"
-                          />
-                        </div>
-                      ))}
+              {/* Display all modules in a simple grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                {siteManagementModules.map((module) => (
+                  <div key={module.id} className="flex items-center space-x-3 p-3 bg-white rounded border hover:shadow-sm transition-all">
+                    <span className="text-lg">{module.icon}</span>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{module.name}</div>
+                      <div className="text-xs text-gray-500">{module.id}</div>
                     </div>
+                    <Checkbox 
+                      disabled
+                      className="opacity-50"
+                      title="Permission assignment available in role management"
+                    />
                   </div>
                 ))}
               </div>
