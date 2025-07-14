@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Upload, Image, Type, Globe, Palette, Save, RefreshCw, Trash2, Eye, Edit3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ContentItem {
   id: number;
@@ -42,10 +43,14 @@ interface ImageAsset {
 export default function ContentManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ar' | 'ku' | 'tr'>('en');
   const [selectedSection, setSelectedSection] = useState<string>('admin_dashboard');
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
+
+  // Check if user is super admin (id = 1)
+  const isSuperAdmin = user?.id === 1;
 
   // Query for content items
   const { data: contentItems, isLoading: loadingContent } = useQuery({
@@ -182,14 +187,16 @@ export default function ContentManagement() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/admin/site-management")}
-              className="hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Site Management
-            </Button>
+            {isSuperAdmin && (
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/admin/site-management")}
+                className="hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Site Management
+              </Button>
+            )}
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Content Management

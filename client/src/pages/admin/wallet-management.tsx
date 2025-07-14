@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Wallet, CheckCircle, XCircle, Clock, Eye, Users, DollarSign, CreditCard, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 interface WalletRechargeRequest {
   id: number;
@@ -48,11 +49,15 @@ interface WalletStats {
 export default function WalletManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedRequest, setSelectedRequest] = useState<WalletRechargeRequest | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
   const [adminNotes, setAdminNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
+
+  // Check if user is super admin (id = 1)
+  const isSuperAdmin = user?.id === 1;
 
   // Fetch wallet statistics
   const { data: statsData, isLoading: statsLoading } = useQuery<{ success: boolean; data: WalletStats }>({
@@ -164,14 +169,16 @@ export default function WalletManagement() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/site-management")}
-              className="hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Site Management
-            </Button>
+            {isSuperAdmin && (
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/site-management")}
+                className="hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Site Management
+              </Button>
+            )}
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Wallet Management

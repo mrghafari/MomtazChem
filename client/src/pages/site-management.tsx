@@ -326,7 +326,7 @@ export default function SiteManagement() {
     // Don't show any buttons until permissions are loaded to prevent flashing all buttons
     if (isLoadingPermissions || !userPermissions?.success) return [];
     
-    const allowedModules = userPermissions.modules || [];
+    const allowedModules = userPermissions.permissions?.map((p: any) => p.moduleId) || [];
     const allButtons = getInitialButtons();
     
     // If no moduleId specified, show button (for universal access buttons)
