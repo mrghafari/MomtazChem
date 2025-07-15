@@ -325,38 +325,6 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50",
       moduleId: "content_management"
-    },
-    {
-      id: "logistics-management",
-      label: "Logistics Management",
-      icon: Truck,
-      onClick: () => trackButtonClick("logistics-management", () => setLocation("/admin/logistics-management")),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
-      moduleId: "logistics_management"
-    },
-    {
-      id: "ticketing-system",
-      label: "Ticketing System",
-      icon: Ticket,
-      onClick: () => trackButtonClick("ticketing-system", () => setLocation("/admin/ticketing-system")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
-      moduleId: "ticketing_system"
-    },
-    {
-      id: "inventory-management",
-      label: "Inventory Management", 
-      icon: Package,
-      onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
-      moduleId: "inventory_management"
-    },
-    {
-      id: "department-users",
-      label: "Department Users",
-      icon: Users2,
-      onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
-      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
-      moduleId: "department_users"
     }
 
   ];
@@ -369,10 +337,8 @@ export default function SiteManagement() {
     // Debug: Log permissions response
     console.log('🔍 [DEBUG] userPermissions:', userPermissions);
     console.log('🔍 [DEBUG] permissions array:', userPermissions.permissions);
-    console.log('🔍 [DEBUG] modules array:', userPermissions.modules);
     
-    // Use the modules array which contains the direct module names
-    const allowedModules = userPermissions.modules || userPermissions.permissions || [];
+    const allowedModules = userPermissions.permissions?.map((p: any) => p.moduleId) || [];
     console.log('🔍 [DEBUG] allowedModules:', allowedModules);
     
     const allButtons = getInitialButtons();
@@ -448,33 +414,9 @@ export default function SiteManagement() {
     });
   };
 
-  // Debug: Show current state
-  console.log('🔍 [SITE MANAGEMENT DEBUG] Component state:', {
-    authLoading,
-    isAuthenticated,
-    isLoadingPermissions,
-    userPermissions,
-    buttons: buttons.length,
-    user: user?.email
-  });
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto p-6">
-        {/* Debug Panel */}
-        <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded">
-          <h3 className="font-bold text-yellow-800">Debug Info:</h3>
-          <p>Auth Loading: {authLoading ? 'Yes' : 'No'}</p>
-          <p>Is Authenticated: {isAuthenticated ? 'Yes' : 'No'}</p>
-          <p>Permissions Loading: {isLoadingPermissions ? 'Yes' : 'No'}</p>
-          <p>User Permissions Success: {userPermissions?.success ? 'Yes' : 'No'}</p>
-          <p>Permissions Count: {userPermissions?.permissions?.length || 0}</p>
-          <p>Modules Count: {userPermissions?.modules?.length || 0}</p>
-          <p>Buttons Count: {buttons.length}</p>
-          <p>User Email: {user?.email || 'Not logged in'}</p>
-          {permissionsError && <p className="text-red-600">Error: {String(permissionsError)}</p>}
-        </div>
-
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
