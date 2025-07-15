@@ -4277,12 +4277,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create custom user
   app.post("/api/admin/custom-users", requireAuth, async (req, res) => {
     try {
-      const { fullName, email, phone, password, roleId, smsNotifications, emailNotifications, isActive } = req.body;
+      const { fullName, email, phone, password, roleId, smsNotifications, emailNotifications, isActive, modulePermissions } = req.body;
       
       if (!fullName || !email || !phone || !password || !roleId) {
         return res.status(400).json({ 
           success: false, 
-          message: "تمام فیلدها الزامی است" 
+          message: "All fields are required" 
         });
       }
 
@@ -4291,34 +4291,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const passwordHash = await bcrypt.hash(password, 10);
 
       const { pool } = await import('./db');
-      const result = await pool.query(`
-        INSERT INTO custom_users (
-          full_name, email, phone, password_hash, role_id, 
-          sms_notifications, email_notifications, is_active
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id, full_name, email, phone, role_id, is_active, 
-                  sms_notifications, email_notifications, created_at
-      `, [fullName, email, phone, passwordHash, roleId, 
-          smsNotifications ?? true, emailNotifications ?? true, isActive ?? true]);
+      
+      // Start transaction
+      await pool.query('BEGIN');
 
-      res.json({
-        success: true,
-        data: result.rows[0],
-        message: "کاربر جدید با موفقیت ایجاد شد"
-      });
+      try {
+        // Insert user
+        const result = await pool.query(`
+          INSERT INTO custom_users (
+            full_name, email, phone, password_hash, role_id, 
+            sms_notifications, email_notifications, is_active
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          RETURNING id, full_name, email, phone, role_id, is_active, 
+                    sms_notifications, email_notifications, created_at
+        `, [fullName, email, phone, passwordHash, roleId, 
+            smsNotifications ?? true, emailNotifications ?? true, isActive ?? true]);
+
+        const newUser = result.rows[0];
+        const userId = newUser.id;
+
+        // Assign module permissions if provided
+        if (modulePermissions && Array.isArray(modulePermissions) && modulePermissions.length > 0) {
+          console.log(`🔐 [USER CREATION] Assigning ${modulePermissions.length} module permissions to user ${userId}`);
+          
+          for (const moduleId of modulePermissions) {
+            await pool.query(`
+              INSERT INTO custom_user_permissions (user_id, module_id, can_view, can_create, can_edit, can_delete, can_approve)
+              VALUES ($1, $2, true, true, true, true, true)
+              ON CONFLICT (user_id, module_id) DO UPDATE SET
+                can_view = true,
+                can_create = true,
+                can_edit = true,
+                can_delete = true,
+                can_approve = true,
+                updated_at = NOW()
+            `, [userId, moduleId]);
+          }
+          
+          console.log(`✅ [USER CREATION] Successfully assigned module permissions: ${modulePermissions.join(', ')}`);
+        } else {
+          console.log(`⚠️ [USER CREATION] No module permissions provided for user ${userId}`);
+        }
+
+        // Commit transaction
+        await pool.query('COMMIT');
+
+        res.json({
+          success: true,
+          data: newUser,
+          message: "New user created successfully",
+          assignedModules: modulePermissions ? modulePermissions.length : 0
+        });
+      } catch (transactionError) {
+        // Rollback transaction
+        await pool.query('ROLLBACK');
+        throw transactionError;
+      }
     } catch (error: any) {
       console.error("Error creating custom user:", error);
       if (error.code === '23505') {
         if (error.constraint?.includes('email')) {
-          res.status(400).json({ success: false, message: "این ایمیل قبلاً استفاده شده است" });
+          res.status(400).json({ success: false, message: "This email is already in use" });
         } else if (error.constraint?.includes('phone')) {
-          res.status(400).json({ success: false, message: "این شماره تلفن قبلاً استفاده شده است" });
+          res.status(400).json({ success: false, message: "This phone number is already in use" });
         } else {
-          res.status(400).json({ success: false, message: "داده تکراری" });
+          res.status(400).json({ success: false, message: "Duplicate data" });
         }
       } else {
-        res.status(500).json({ success: false, message: "خطا در ایجاد کاربر" });
+        res.status(500).json({ success: false, message: "Error creating user" });
       }
     }
   });
@@ -5062,6 +5103,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching modules:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Fix existing users' permissions - assign all modules to Super Admin users
+  app.post("/api/admin/fix-user-permissions", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get all Super Admin users
+      const superAdminResult = await pool.query(`
+        SELECT cu.id, cu.email, cu.full_name, cr.name as role_name
+        FROM custom_users cu
+        JOIN custom_roles cr ON cu.role_id = cr.id
+        WHERE cr.name = 'Super Admin' OR cu.email = 'admin@momtazchem.com'
+      `);
+
+      if (superAdminResult.rows.length === 0) {
+        return res.json({
+          success: true,
+          message: "No Super Admin users found to fix",
+          processed: 0
+        });
+      }
+
+      const allModules = [
+        'syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm',
+        'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management',
+        'procedures', 'smtp_test', 'order_management', 'product_management', 
+        'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings',
+        'refresh_control', 'department_users', 'inventory_management', 'content_management',
+        'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system'
+      ];
+
+      let processedUsers = 0;
+      let assignedPermissions = 0;
+
+      for (const user of superAdminResult.rows) {
+        console.log(`🔧 [PERMISSIONS FIX] Processing Super Admin: ${user.email}`);
+        
+        for (const moduleId of allModules) {
+          await pool.query(`
+            INSERT INTO custom_user_permissions (user_id, module_id, can_view, can_create, can_edit, can_delete, can_approve)
+            VALUES ($1, $2, true, true, true, true, true)
+            ON CONFLICT (user_id, module_id) DO UPDATE SET
+              can_view = true,
+              can_create = true,
+              can_edit = true,
+              can_delete = true,
+              can_approve = true,
+              updated_at = NOW()
+          `, [user.id, moduleId]);
+          assignedPermissions++;
+        }
+        processedUsers++;
+      }
+
+      console.log(`✅ [PERMISSIONS FIX] Assigned ${assignedPermissions} permissions to ${processedUsers} Super Admin users`);
+
+      res.json({
+        success: true,
+        message: `Successfully assigned all module permissions to ${processedUsers} Super Admin users`,
+        processed: processedUsers,
+        assignedPermissions,
+        users: superAdminResult.rows.map(u => ({ email: u.email, fullName: u.full_name }))
+      });
+    } catch (error) {
+      console.error("Error fixing user permissions:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error fixing permissions" 
+      });
     }
   });
 
@@ -15078,7 +15190,35 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has role: ${customRole.name}`);
         console.log(`✓ [PERMISSIONS] Raw permissions:`, customRole.permissions);
         
-        // Parse permissions from PostgreSQL array format
+        // Check if user is Super Admin - if so, give all permissions
+        if (customRole.name === 'Super Admin' || customUser.email === 'admin@momtazchem.com') {
+          const allModules = [
+            'syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm',
+            'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management',
+            'procedures', 'smtp_test', 'order_management', 'product_management', 
+            'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings',
+            'refresh_control', 'department_users', 'inventory_management', 'content_management',
+            'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system'
+          ];
+          
+          console.log(`✅ [PERMISSIONS] Super Admin detected - granting all ${allModules.length} module access`);
+          console.log('✓ [PERMISSIONS] Parsed permissions:', allModules);
+
+          return res.json({
+            success: true,
+            user: {
+              id: customUser.id,
+              email: customUser.email,
+              fullName: customUser.fullName,
+              role: customRole.name,
+              roleId: customUser.roleId
+            },
+            permissions: allModules,
+            modules: allModules
+          });
+        }
+        
+        // Parse permissions from PostgreSQL array format for non-super-admin users
         let parsedPermissions = [];
         if (customRole.permissions) {
           if (Array.isArray(customRole.permissions)) {
