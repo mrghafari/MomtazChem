@@ -13366,7 +13366,29 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   app.get('/api/logistics/orders', requireDepartmentAuth('logistics'), async (req, res) => {
     try {
       const orders = await orderManagementStorage.getLogisticsPendingOrders();
-      res.json({ success: true, orders });
+      
+      // Calculate total weight for each order
+      const ordersWithWeight = await Promise.all(
+        orders.map(async (order) => {
+          try {
+            const weight = await orderManagementStorage.calculateOrderWeight(order.customerOrderId);
+            return {
+              ...order,
+              calculatedWeight: weight,
+              weightUnit: 'kg'
+            };
+          } catch (error) {
+            console.error(`Error calculating weight for order ${order.customerOrderId}:`, error);
+            return {
+              ...order,
+              calculatedWeight: 0,
+              weightUnit: 'kg'
+            };
+          }
+        })
+      );
+      
+      res.json({ success: true, orders: ordersWithWeight });
     } catch (error) {
       console.error('Error fetching logistics orders:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });

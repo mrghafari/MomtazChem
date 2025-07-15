@@ -23,6 +23,7 @@ import {
 } from "@shared/order-management-schema";
 import { customerOrders, customers, orderItems } from "@shared/customer-schema";
 import { showcaseProducts as products } from "@shared/showcase-schema";
+import { shopProducts } from "@shared/shop-schema";
 import { db } from "./db";
 import { eq, and, desc, asc, inArray } from "drizzle-orm";
 
@@ -1072,16 +1073,17 @@ export class OrderManagementStorage implements IOrderManagementStorage {
 
   async calculateOrderWeight(customerOrderId: number): Promise<number> {
     try {
-      // Get order items
+      // Get order items and join with shop_products to get weight
       const items = await db
         .select({
           productId: orderItems.productId,
           quantity: orderItems.quantity,
-          weight: products.weight
+          weight: shopProducts.weight,
+          weightUnit: shopProducts.weightUnit
         })
         .from(orderItems)
-        .leftJoin(products, eq(orderItems.productId, products.id))
-        .where(eq(orderItems.customerOrderId, customerOrderId));
+        .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
+        .where(eq(orderItems.orderId, customerOrderId));
 
       // Calculate total weight
       let totalWeight = 0;
