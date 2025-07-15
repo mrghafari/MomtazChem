@@ -1237,6 +1237,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoint to change any user's password
+  app.put("/api/admin/users/:id/password", requireAuth, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { newPassword } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid user ID" 
+        });
+      }
+
+      if (!newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "New password is required" 
+        });
+      }
+
+      // Hash new password
+      const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update password in custom_users table
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE custom_users 
+        SET password_hash = $1
+        WHERE id = $2
+        RETURNING id, full_name
+      `, [newPasswordHash, userId]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "User password updated successfully" 
+      });
+    } catch (error) {
+      console.error("Error updating user password:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   app.delete("/api/admin/users/:id", requireAuth, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);

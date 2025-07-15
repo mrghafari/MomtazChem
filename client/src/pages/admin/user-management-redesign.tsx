@@ -204,12 +204,16 @@ function UserManagement() {
   const [userDialogOpen, setUserDialogOpen] = useState(false);
   const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
   const [smsDialogOpen, setSmsDialogOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   
   // Editing states
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [passwordUserId, setPasswordUserId] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [smsMessage, setSmsMessage] = useState('');
   
   // Permission selection
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
@@ -395,6 +399,28 @@ function UserManagement() {
     onSuccess: () => {
       toast({ title: 'User deleted successfully' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-users'] });
+    }
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async ({ userId, newPassword }: { userId: string; newPassword: string }) => {
+      return apiRequest(`/api/admin/users/${userId}/password`, {
+        method: 'PUT',
+        body: { newPassword }
+      });
+    },
+    onSuccess: () => {
+      toast({ title: 'Password changed successfully' });
+      setPasswordDialogOpen(false);
+      setPasswordUserId(null);
+      setNewPassword('');
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to change password',
+        variant: 'destructive' 
+      });
     }
   });
 
@@ -894,6 +920,16 @@ function UserManagement() {
                               }}
                             >
                               <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setPasswordUserId(user.id);
+                                setPasswordDialogOpen(true);
+                              }}
+                            >
+                              <Key className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="destructive"
@@ -1400,6 +1436,49 @@ function UserManagement() {
               >
                 <Send className="h-4 w-4 mr-2" />
                 ارسال پیامک
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Change Dialog */}
+      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="new-password" className="text-sm font-medium">New Password</label>
+              <Input
+                id="new-password"
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => {
+                setPasswordDialogOpen(false);
+                setNewPassword('');
+                setPasswordUserId(null);
+              }}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (newPassword && passwordUserId) {
+                    changePasswordMutation.mutate({ userId: passwordUserId, newPassword });
+                  }
+                }}
+                disabled={changePasswordMutation.isPending || !newPassword}
+              >
+                <Key className="h-4 w-4 mr-2" />
+                Change Password
               </Button>
             </div>
           </div>
