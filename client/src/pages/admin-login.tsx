@@ -48,7 +48,7 @@ export default function AdminLogin() {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Navigate directly using window.location for reliable redirect
-      window.location.href = "/site-management";
+      window.location.href = "/admin";
     },
     onError: (error: any) => {
       toast({ 
