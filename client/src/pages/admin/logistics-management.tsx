@@ -363,22 +363,11 @@ const LogisticsManagement = () => {
                     <div className="font-mono text-2xl bg-white px-4 py-2 rounded border-2 border-green-400 text-green-800 font-bold">
                       {order.deliveryCode || Math.floor(1000 + Math.random() * 9000)}
                     </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="border-green-400 text-green-700 hover:bg-green-100"
-                        onClick={() => {
-                          const newCode = Math.floor(1000 + Math.random() * 9000);
-                          toast({
-                            title: "کد تحویل جدید تولید شد",
-                            description: `کد جدید برای سفارش #${order.customerOrderId}: ${newCode}`,
-                          });
-                        }}
-                      >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        تولید کد جدید
-                      </Button>
+                    <div className="flex flex-col gap-2">
+                      <div className="text-sm text-green-700 text-center">
+                        <p className="font-medium">Delivery Code</p>
+                        <p className="text-xs opacity-80">One-time use only</p>
+                      </div>
                       <Button 
                         size="sm" 
                         className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -488,22 +477,11 @@ const LogisticsManagement = () => {
                     <div className="font-mono text-2xl bg-white px-4 py-2 rounded border-2 border-blue-300 text-blue-800 font-bold">
                       {Math.floor(1000 + Math.random() * 9000)}
                     </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                        onClick={() => {
-                          const newCode = Math.floor(1000 + Math.random() * 9000);
-                          toast({
-                            title: "کد تحویل جدید تولید شد",
-                            description: `کد جدید برای سفارش #${order.customerOrderId}: ${newCode}`,
-                          });
-                        }}
-                      >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        تولید کد جدید
-                      </Button>
+                    <div className="flex flex-col gap-2">
+                      <div className="text-sm text-blue-700 text-center">
+                        <p className="font-medium">Delivery Code</p>
+                        <p className="text-xs opacity-80">One-time use only</p>
+                      </div>
                       <Button 
                         size="sm" 
                         className="bg-green-600 hover:bg-green-700 text-white"
