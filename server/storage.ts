@@ -457,6 +457,22 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getCustomUserByEmail(email: string): Promise<any> {
+    // Check custom_users table for authentication using SQL
+    try {
+      const result = await db.execute(sql`
+        SELECT id, full_name as username, email, password_hash, role_id 
+        FROM custom_users 
+        WHERE email = ${email} AND is_active = true
+      `);
+      
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error('Error fetching custom user:', error);
+      return null;
+    }
+  }
+
   async getUserById(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;

@@ -289,28 +289,37 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     exists: !!req.session,
     isAuthenticated: req.session?.isAuthenticated,
     adminId: req.session?.adminId,
-    sessionID: req.sessionID,
-    fullSession: req.session
+    customUserId: req.session?.customUserId,
+    sessionID: req.sessionID
   });
 
-  // STRICT admin authentication - require valid admin session
-  if (req.session && 
-      req.session.isAuthenticated === true && 
-      req.session.adminId) {
-    
-    console.log(`✅ Admin authentication successful for admin ${req.session.adminId}`);
-    console.log(`🔄 Dual session mode: Admin=${req.session.adminId}, Customer=${req.session.customerId || 'none'}`);
-    next();
+  // Check for valid authentication - either admin or custom user
+  if (req.session && req.session.isAuthenticated === true) {
+    if (req.session.adminId) {
+      console.log(`✅ Admin authentication successful for admin ${req.session.adminId}`);
+      console.log(`🔄 Dual session mode: Admin=${req.session.adminId}, Customer=${req.session.customerId || 'none'}`);
+      next();
+    } else if (req.session.customUserId) {
+      console.log(`✅ Custom user authentication successful for user ${req.session.customUserId}`);
+      next();
+    } else {
+      console.log('❌ Authentication failed - no valid user ID in session');
+      res.status(401).json({ 
+        success: false, 
+        message: "احراز هویت مورد نیاز است" 
+      });
+    }
   } else {
     console.log('❌ Admin authentication failed for:', req.path);
     console.log('❌ Session details:', {
       isAuthenticated: req.session?.isAuthenticated,
       adminId: req.session?.adminId,
+      customUserId: req.session?.customUserId,
       customerId: req.session?.customerId
     });
     
     // If only customer session exists, show specific error
-    if (req.session?.customerId && !req.session?.adminId) {
+    if (req.session?.customerId && !req.session?.adminId && !req.session?.customUserId) {
       return res.status(403).json({ 
         success: false, 
         message: "دسترسی به بخش مدیریت نیاز به ورود مدیر دارد" 
@@ -872,16 +881,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if user exists and verify password
+      // Check for user in standard users table
       const user = await storage.getUserByUsername(username);
+      
       if (!user) {
+        console.log(`❌ No user found for username: ${username}`);
         return res.status(401).json({ 
           success: false, 
           message: "Invalid credentials" 
         });
       }
 
+      console.log(`🔍 Found user:`, { id: user.id, email: user.email, hasPasswordHash: !!user.passwordHash });
+
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      console.log(`🔐 Password validation result: ${isValidPassword}`);
+      
       if (!isValidPassword) {
         return res.status(401).json({ 
           success: false, 
@@ -889,10 +904,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Allow dual session - keep customer session if exists, add admin session
+      // Set up admin session
       req.session.adminId = user.id;
       req.session.isAuthenticated = true;
-
+      
       console.log(`✅ [LOGIN] Session configured for admin ${user.id}:`, {
         adminId: req.session.adminId,
         isAuthenticated: req.session.isAuthenticated,
@@ -903,7 +918,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         success: true, 
         message: "Login successful",
-        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          email: user.email, 
+          roleId: user.roleId
+        }
       });
     } catch (error) {
       console.error("Admin login error:", error);
