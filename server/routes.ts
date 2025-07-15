@@ -9306,7 +9306,7 @@ ${procedure.content}
     }
   });
 
-  app.put("/api/admin/email/templates/:id", express.raw({type: 'application/json', limit: '10mb'}), requireAuth, async (req, res) => {
+  app.put("/api/admin/email/templates/:id", requireAuth, async (req, res) => {
     try {
       const { emailStorage } = await import("./email-storage");
       const id = parseInt(req.params.id);
@@ -9319,29 +9319,10 @@ ${procedure.content}
       }
 
       console.log('📧 Updating template ID:', id);
-      console.log('📧 Raw request body type:', typeof req.body);
+      console.log('📧 Request body keys:', Object.keys(req.body));
       
-      let requestData;
-      try {
-        // Parse the JSON manually to handle escape characters
-        if (Buffer.isBuffer(req.body)) {
-          const bodyString = req.body.toString('utf8');
-          requestData = JSON.parse(bodyString);
-        } else if (typeof req.body === 'string') {
-          requestData = JSON.parse(req.body);
-        } else {
-          requestData = req.body;
-        }
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        console.error('Raw body:', req.body);
-        return res.status(400).json({
-          success: false,
-          message: "Invalid JSON data"
-        });
-      }
-      
-      console.log('📧 Parsed request data keys:', Object.keys(requestData));
+      // Simple approach - just use req.body directly
+      const requestData = req.body;
       
       // Clean and prepare update data
       const updates: any = {};

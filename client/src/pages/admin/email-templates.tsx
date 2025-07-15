@@ -121,18 +121,7 @@ export default function EmailTemplates() {
       console.log('📧 Frontend sending update for template:', id);
       console.log('📧 Frontend data keys:', Object.keys(data));
       
-      return fetch(`/api/admin/email/templates/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      }).then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      });
+      return apiRequest(`/api/admin/email/templates/${id}`, "PUT", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/email/templates"] });
