@@ -9703,12 +9703,55 @@ ${procedure.content}
         }
 
         if (smtp) {
-          // Send follow-up email to customer
-          await transporter.sendMail({
-            from: `${smtp.fromName} <${smtp.fromEmail}>`,
-            to: inquiry.contactEmail,
-            subject: `Follow-up: ${inquiry.subject || 'Your Inquiry'} - ${inquiry.inquiryNumber}`,
-            html: `
+          // Get the "Momtaz Chemical Follow-up Response" template from database
+          let emailTemplate;
+          try {
+            const templates = await emailStorage.getAllTemplates();
+            emailTemplate = templates.find(t => t.templateName === 'Momtaz Chemical Follow-up Response');
+            console.log(`📧 Using template: ${emailTemplate ? emailTemplate.templateName : 'Default hardcoded template'}`);
+          } catch (templateError) {
+            console.log(`❌ Error loading template: ${templateError.message}, using default`);
+          }
+
+          let htmlContent, textContent;
+          
+          if (emailTemplate) {
+            // Use template from database with variable substitution
+            htmlContent = emailTemplate.htmlContent
+              .replace(/\{\{customer_name\}\}/g, inquiry.contactName || 'Valued Customer')
+              .replace(/\{\{inquiry_number\}\}/g, inquiry.inquiryNumber)
+              .replace(/\{\{inquiry_subject\}\}/g, inquiry.subject || 'Product Inquiry')
+              .replace(/\{\{inquiry_category\}\}/g, inquiry.category || 'General')
+              .replace(/\{\{response_text\}\}/g, responseText);
+              
+            textContent = emailTemplate.textContent || `
+Follow-up Response - Momtaz Chemical
+
+Dear ${inquiry.contactName || 'Valued Customer'},
+
+Thank you for your inquiry. We have prepared a follow-up response regarding your request.
+
+Your Original Inquiry:
+Inquiry Number: ${inquiry.inquiryNumber}
+Subject: ${inquiry.subject || 'Product Inquiry'}
+Category: ${inquiry.category || 'General'}
+
+Our Response:
+${responseText}
+
+Need Further Assistance?
+If you have any additional questions or need clarification, please don't hesitate to contact us:
+- Email: info@momtazchem.com
+- Phone: +964 771 234 5678
+- Website: www.momtazchem.com
+
+Best regards,
+Momtaz Chemical Team
+Leading Chemical Solutions Provider
+            `;
+          } else {
+            // Fallback to hardcoded template with updated phone number
+            htmlContent = `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
                   <h1 style="margin: 0; font-size: 24px;">Momtaz Chemical</h1>
@@ -9743,7 +9786,7 @@ ${procedure.content}
                     </p>
                     <ul style="color: #666; margin: 0;">
                       <li>Email: info@momtazchem.com</li>
-                      <li>Phone: +964 XXX XXX XXXX</li>
+                      <li>Phone: +964 771 234 5678</li>
                       <li>Website: www.momtazchem.com</li>
                     </ul>
                   </div>
@@ -9755,8 +9798,9 @@ ${procedure.content}
                   </p>
                 </div>
               </div>
-            `,
-            text: `
+            `;
+            
+            textContent = `
 Follow-up Response - Momtaz Chemical
 
 Dear ${inquiry.contactName || 'Valued Customer'},
@@ -9774,13 +9818,22 @@ ${responseText}
 Need Further Assistance?
 If you have any additional questions or need clarification, please don't hesitate to contact us:
 - Email: info@momtazchem.com
-- Phone: +964 XXX XXX XXXX
+- Phone: +964 771 234 5678
 - Website: www.momtazchem.com
 
 Best regards,
 Momtaz Chemical Team
 Leading Chemical Solutions Provider
-            `
+            `;
+          }
+
+          // Send follow-up email to customer
+          await transporter.sendMail({
+            from: `${smtp.fromName} <${smtp.fromEmail}>`,
+            to: inquiry.contactEmail,
+            subject: `Follow-up: ${inquiry.subject || 'Your Inquiry'} - ${inquiry.inquiryNumber}`,
+            html: htmlContent,
+            text: textContent
           });
 
           console.log(`Follow-up email sent successfully to: ${inquiry.contactEmail}`);

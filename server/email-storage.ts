@@ -375,12 +375,99 @@ export class EmailStorage implements IEmailStorage {
   }
   
   async updateTemplate(id: number, templateUpdate: Partial<InsertEmailTemplate>): Promise<EmailTemplate> {
-    const [template] = await emailDb
-      .update(emailTemplates)
-      .set({ ...templateUpdate, updatedAt: new Date() })
-      .where(eq(emailTemplates.id, id))
-      .returning();
-    return template;
+    try {
+      const { sql } = await import("drizzle-orm");
+      
+      // Map frontend field names to database field names
+      const updateFields: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+      
+      if (templateUpdate.templateName !== undefined) {
+        updateFields.push(`name = $${paramIndex++}`);
+        values.push(templateUpdate.templateName);
+      }
+      
+      if (templateUpdate.categoryName !== undefined) {
+        updateFields.push(`category = $${paramIndex++}`);
+        values.push(templateUpdate.categoryName);
+      }
+      
+      if (templateUpdate.subject !== undefined) {
+        updateFields.push(`subject = $${paramIndex++}`);
+        values.push(templateUpdate.subject);
+      }
+      
+      if (templateUpdate.htmlContent !== undefined) {
+        updateFields.push(`html_content = $${paramIndex++}`);
+        values.push(templateUpdate.htmlContent);
+      }
+      
+      if (templateUpdate.textContent !== undefined) {
+        updateFields.push(`text_content = $${paramIndex++}`);
+        values.push(templateUpdate.textContent);
+      }
+      
+      if (templateUpdate.variables !== undefined) {
+        updateFields.push(`variables = $${paramIndex++}`);
+        values.push(templateUpdate.variables);
+      }
+      
+      if (templateUpdate.isActive !== undefined) {
+        updateFields.push(`is_active = $${paramIndex++}`);
+        values.push(templateUpdate.isActive);
+      }
+      
+      if (templateUpdate.isDefault !== undefined) {
+        updateFields.push(`is_default = $${paramIndex++}`);
+        values.push(templateUpdate.isDefault);
+      }
+      
+      if (templateUpdate.language !== undefined) {
+        updateFields.push(`language = $${paramIndex++}`);
+        values.push(templateUpdate.language);
+      }
+      
+      // Always update the updated_at field
+      updateFields.push(`updated_at = NOW()`);
+      
+      if (updateFields.length === 1) { // Only updated_at field
+        throw new Error('No fields to update');
+      }
+      
+      values.push(id); // Add id for WHERE clause
+      
+      const result = await emailDb.execute(sql.raw(`
+        UPDATE email_templates 
+        SET ${updateFields.join(', ')}
+        WHERE id = $${paramIndex}
+        RETURNING 
+          id, 
+          name as templateName, 
+          category as categoryName,
+          subject, 
+          html_content as htmlContent, 
+          text_content as textContent, 
+          variables, 
+          is_active as isActive, 
+          is_default as isDefault, 
+          language, 
+          created_by as createdBy, 
+          usage_count as usageCount, 
+          last_used as lastUsed, 
+          created_at as createdAt, 
+          updated_at as updatedAt
+      `, values));
+      
+      if (result.rows.length === 0) {
+        throw new Error('Template not found');
+      }
+      
+      return result.rows[0] as EmailTemplate;
+    } catch (error) {
+      console.error('Error updating template:', error);
+      throw error;
+    }
   }
   
   async deleteTemplate(id: number): Promise<void> {
