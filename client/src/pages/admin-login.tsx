@@ -39,16 +39,16 @@ export default function AdminLogin() {
       
       toast({ title: "Success", description: "Admin login successful" });
       
-      // Wait for session to be properly established
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
       // Invalidate queries to refresh authentication state
       queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/permissions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/site-management/modules"] });
       
-      // Navigate to Site Management for role-based access
-      setLocation("/site-management");
+      // Wait a bit for cache invalidation to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Navigate directly using window.location for reliable redirect
+      window.location.href = "/site-management";
     },
     onError: (error: any) => {
       toast({ 

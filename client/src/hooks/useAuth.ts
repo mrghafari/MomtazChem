@@ -35,10 +35,11 @@ export function useAuth() {
   const logout = useMutation({
     mutationFn: () => apiRequest("/api/admin/logout", { method: "POST" }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
       queryClient.clear();
-      // Redirect to login page immediately after logout
-      window.location.href = "/admin/login";
+      // Wait a bit and redirect to login page
+      setTimeout(() => {
+        window.location.href = "/admin/login";
+      }, 200);
     },
   });
 

@@ -29,10 +29,15 @@ export default function SiteManagement() {
 
   // Authentication check - redirect to login if not authenticated
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      console.log("Not authenticated, redirecting to admin login");
-      setLocation("/admin/login");
-    }
+    // Give more time for authentication to load after login
+    const timer = setTimeout(() => {
+      if (!authLoading && !isAuthenticated) {
+        console.log("Not authenticated, redirecting to admin login");
+        setLocation("/admin/login");
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, [authLoading, isAuthenticated, setLocation]);
 
   // Show loading while authenticating
