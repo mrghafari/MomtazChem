@@ -733,9 +733,18 @@ const ShopAdmin = () => {
   // Create discount mutation
   const createDiscountMutation = useMutation({
     mutationFn: async (discountData: any) => {
-      return apiRequest("/api/shop/discounts", "POST", discountData);
+      console.log('🎯 [CREATE DISCOUNT] Mutation started with data:', discountData);
+      try {
+        const result = await apiRequest("/api/shop/discounts", "POST", discountData);
+        console.log('🎯 [CREATE DISCOUNT] API call successful:', result);
+        return result;
+      } catch (error) {
+        console.log('🎯 [CREATE DISCOUNT] API call failed:', error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🎯 [CREATE DISCOUNT] Mutation success:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
       // Also invalidate shop products to refresh discount information on product cards
       queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
@@ -746,7 +755,8 @@ const ShopAdmin = () => {
         description: "New discount has been created successfully.",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.log('🎯 [CREATE DISCOUNT] Mutation error:', error);
       toast({
         title: "Creation Failed",
         description: "Failed to create new discount.",
