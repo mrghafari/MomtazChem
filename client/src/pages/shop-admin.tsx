@@ -484,6 +484,7 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🎯 [DISCOUNT FORM] Form submitted with data:', formData);
     onSave(formData);
   };
 
@@ -1295,12 +1296,17 @@ ${data.data.map((item: any) =>
                   discount={editingDiscount}
                   products={products}
                   onSave={(discountData: any) => {
+                    console.log('🎯 [DISCOUNT FORM] onSave callback called with:', discountData);
+                    console.log('🎯 [DISCOUNT FORM] editingDiscount:', editingDiscount);
+                    
                     if (editingDiscount) {
+                      console.log('🎯 [DISCOUNT FORM] Updating existing discount');
                       updateDiscountMutation.mutate({
                         discountId: editingDiscount.id,
                         updates: discountData
                       });
                     } else {
+                      console.log('🎯 [DISCOUNT FORM] Creating new discount');
                       createDiscountMutation.mutate(discountData);
                     }
                   }}

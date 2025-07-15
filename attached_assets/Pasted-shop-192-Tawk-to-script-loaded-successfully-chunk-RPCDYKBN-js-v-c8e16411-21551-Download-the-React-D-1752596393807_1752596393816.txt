@@ -1,0 +1,44 @@
+shop:192 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=c8e16411:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:26 Auth check result: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+shop:167 Tawk.to Live Chat loaded successfully
+shop-admin.tsx:443 🎯 [DISCOUNT FORM] useEffect triggered with discount: null
+shop-admin.tsx:458 🎯 [DISCOUNT FORM] Resetting form for new discount
+chunk-HOLREUEK.js?v=c8e16411:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-HOLREUEK.js?v=c8e16411:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c8e16411:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c8e16411:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c8e16411:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c8e16411:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c8e16411:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c8e16411:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c8e16411:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=c8e16411:19416
+commitRoot @ chunk-RPCDYKBN.js?v=c8e16411:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c8e16411:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c8e16411:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=c8e16411:18627
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
+shop-admin.tsx:513 🎯 [DISCOUNT FORM] Percentage changed to: 5
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 2
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 3
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 4
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 5
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 6
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 7
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 8
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 9
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 10
+shop-admin.tsx:530 🎯 [DISCOUNT FORM] Quantity changed to: 11
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
