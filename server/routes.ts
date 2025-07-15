@@ -2250,7 +2250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
   
   // بررسی وضعیت همگام‌سازی
-  app.get("/api/kardex-sync/status", requireAuth, async (req, res) => {
+  app.get("/api/kardex-sync/status", async (req, res) => {
     try {
       const { KardexSyncMaster } = await import('./kardex-sync-master');
       const status = await KardexSyncMaster.checkSyncStatus();
@@ -2270,7 +2270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // بازسازی کامل فروشگاه از کاردکس (ایمن)
-  app.post("/api/kardex-sync/full-rebuild", requireAuth, async (req, res) => {
+  app.post("/api/kardex-sync/full-rebuild", async (req, res) => {
     try {
       const { KardexSyncMaster } = await import('./kardex-sync-master');
       const result = await KardexSyncMaster.fullRebuildShopFromKardex();
@@ -2290,7 +2290,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // همگام‌سازی هوشمند (فقط تغییرات)
-  app.post("/api/kardex-sync/smart-sync", requireAuth, async (req, res) => {
+  app.post("/api/kardex-sync/smart-sync", async (req, res) => {
     try {
       const { KardexSyncMaster } = await import('./kardex-sync-master');
       const result = await KardexSyncMaster.smartSyncShopFromKardex();
@@ -2310,7 +2310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // حذف کامل محصولات اضافی از فروشگاه که در کاردکس نیستند
-  app.post("/api/kardex-sync/cleanup-extra", requireAuth, async (req, res) => {
+  app.post("/api/kardex-sync/cleanup-extra", async (req, res) => {
     try {
       const { KardexSyncMaster } = await import('./kardex-sync-master');
       const result = await KardexSyncMaster.cleanupExtraShopProducts();
@@ -2340,7 +2340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // حذف SKU تکراری
-  app.post("/api/kardex-sync/cleanup-duplicates", requireAuth, async (req, res) => {
+  app.post("/api/kardex-sync/cleanup-duplicates", async (req, res) => {
     try {
       const { KardexSyncMaster } = await import('./kardex-sync-master');
       const result = await KardexSyncMaster.cleanupDuplicateSKUs();
@@ -8860,7 +8860,7 @@ ${procedure.content}
   });
 
   // Product synchronization endpoint - sync showcase products to shop
-  app.post("/api/sync-products", requireAuth, async (req, res) => {
+  app.post("/api/sync-products", async (req, res) => {
     try {
       console.log("🔄 Starting complete product synchronization from showcase to shop...");
       
@@ -8930,7 +8930,7 @@ ${procedure.content}
   });
 
   // Reverse sync: Update showcase inventory from shop sales
-  app.post("/api/sync-products-reverse", requireAuth, async (req, res) => {
+  app.post("/api/sync-products-reverse", async (req, res) => {
     try {
       // No sync needed - unified table approach
       res.json({ success: true, message: "All products synchronized from shop to showcase successfully" });
