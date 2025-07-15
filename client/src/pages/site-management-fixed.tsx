@@ -22,6 +22,8 @@ interface QuickActionButton {
 }
 
 export default function SiteManagement() {
+  console.log('🔍 [DEBUG] Site Management component initialized');
+  
   // All hooks at the top - never conditional
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -63,6 +65,7 @@ export default function SiteManagement() {
   }, [refetchPermissions]);
 
   useEffect(() => {
+    console.log('🔍 [DEBUG] useEffect triggered, userPermissions:', userPermissions);
     if (userPermissions?.success) {
       console.log('🔍 [DEBUG] userPermissions modules:', userPermissions.modules);
       const filteredButtons = getFilteredButtons();
