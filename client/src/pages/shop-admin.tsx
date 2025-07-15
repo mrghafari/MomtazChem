@@ -438,6 +438,38 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
     applicableProducts: discount?.applicableProducts || [],
   });
 
+  // Update form data when discount prop changes (for editing existing discounts)
+  useEffect(() => {
+    console.log("🔄 [DISCOUNT FORM] Discount prop changed:", discount);
+    if (discount) {
+      console.log("🔄 [DISCOUNT FORM] Setting form data with discount values:", {
+        discountPercentage: discount.discountPercentage,
+        minQuantity: discount.minQuantity
+      });
+      setFormData({
+        name: discount.name || "",
+        discountPercentage: discount.discountPercentage || "",
+        minQuantity: discount.minQuantity || 1,
+        description: discount.description || "",
+        isActive: discount.isActive ?? true,
+        applyToAllProducts: discount.applyToAllProducts ?? true,
+        applicableProducts: discount.applicableProducts || [],
+      });
+    } else {
+      // Reset form for new discount
+      console.log("🔄 [DISCOUNT FORM] Resetting form for new discount");
+      setFormData({
+        name: "",
+        discountPercentage: "",
+        minQuantity: 1,
+        description: "",
+        isActive: true,
+        applyToAllProducts: true,
+        applicableProducts: [],
+      });
+    }
+  }, [discount]);
+
   const handleProductSelection = (productId: number, checked: boolean) => {
     if (checked) {
       setFormData(prev => ({
@@ -454,6 +486,7 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("🔄 [DISCOUNT FORM] Submitting form data:", formData);
     onSave(formData);
   };
 
@@ -479,7 +512,10 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
             max="100"
             step="0.01"
             value={formData.discountPercentage}
-            onChange={(e) => setFormData(prev => ({ ...prev, discountPercentage: e.target.value }))}
+            onChange={(e) => {
+              console.log("🔄 [DISCOUNT FORM] Percentage changed to:", e.target.value);
+              setFormData(prev => ({ ...prev, discountPercentage: e.target.value }));
+            }}
             required
           />
         </div>
@@ -493,7 +529,10 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
             type="number"
             min="1"
             value={formData.minQuantity}
-            onChange={(e) => setFormData(prev => ({ ...prev, minQuantity: parseInt(e.target.value) }))}
+            onChange={(e) => {
+              console.log("🔄 [DISCOUNT FORM] Quantity changed to:", e.target.value);
+              setFormData(prev => ({ ...prev, minQuantity: parseInt(e.target.value) || 1 }));
+            }}
             required
           />
         </div>
