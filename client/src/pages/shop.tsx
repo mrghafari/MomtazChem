@@ -159,6 +159,33 @@ const Shop = () => {
     queryKey: ["/api/shop/products"],
   });
 
+  // Fetch discount settings to get the highest discount percentage
+  const { data: discountResponse } = useQuery({
+    queryKey: ["/api/shop/discounts"],
+    queryFn: async () => {
+      const response = await fetch("/api/shop/discounts");
+      if (!response.ok) throw new Error("Failed to fetch discounts");
+      return response.json();
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+
+  // Calculate the highest discount percentage
+  const getHighestDiscount = () => {
+    if (!discountResponse?.data) return 25; // Default fallback
+    
+    const activeDiscounts = discountResponse.data.filter((discount: any) => discount.isActive);
+    if (activeDiscounts.length === 0) return 25; // Default fallback
+    
+    const highestDiscount = Math.max(...activeDiscounts.map((discount: any) => 
+      parseFloat(discount.discountPercentage) || 0
+    ));
+    
+    return Math.round(highestDiscount);
+  };
+
+  const highestDiscountPercentage = getHighestDiscount();
+
   // Get data from search results or fallback to regular products
   const currentProducts = searchResults?.data?.products || products;
   
@@ -1048,7 +1075,7 @@ const Shop = () => {
                 <Sparkles className="w-8 h-8 animate-spin text-yellow-300" />
                 <div>
                   <h3 className="text-2xl font-bold mb-1">💰 {t.shop?.maximizeSavings || 'MAXIMIZE YOUR SAVINGS!'}</h3>
-                  <p className="text-purple-100 text-sm">{t.shop?.bulkDiscountMessage || 'Buy more, save more! Up to 25% OFF on bulk orders'}</p>
+                  <p className="text-purple-100 text-sm">{t.shop?.bulkDiscountMessage || `Buy more, save more! Up to ${highestDiscountPercentage}% OFF on bulk orders`}</p>
                 </div>
               </div>
             </div>

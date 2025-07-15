@@ -662,6 +662,8 @@ const ShopAdmin = () => {
       // Also invalidate shop products to refresh discount information on product cards
       queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
       queryClient.invalidateQueries({ queryKey: ["shopSearch"] });
+      // Invalidate discount banners on shop page
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
       setIsDiscountDialogOpen(false);
       setEditingDiscount(null);
       toast({
@@ -711,6 +713,9 @@ const ShopAdmin = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      // Also invalidate shop products to refresh discount banners
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ["shopSearch"] });
       toast({
         title: "Discount Deleted",
         description: "Discount has been deleted successfully.",
