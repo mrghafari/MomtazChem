@@ -54,8 +54,17 @@ export default function AdminPage() {
               {getDashboardMotivation()}
             </p>
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Administrative Dashboard</h2>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">Centralized management and system controls</p>
+              <div className="text-center">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Administrative Dashboard</h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-1 mb-4">Centralized management and system controls</p>
+                <Button 
+                  onClick={() => setLocation("/site-management")}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  Site Management
+                </Button>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -85,7 +94,7 @@ export default function AdminPage() {
           </p>
           
           <div className="mb-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">All 23 Site Management Features:</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">All 24 Site Management Features:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 text-xs text-gray-600">
               <div>• Syncing Shop - Product synchronization</div>
               <div>• Inquiries - Customer inquiry management</div>
@@ -112,20 +121,12 @@ export default function AdminPage() {
               <div>• Inventory Management - Stock control</div>
               <div>• Content Management - Dynamic content</div>
               <div>• Warehouse Management - Order workflow</div>
+              <div>• Logistics Management - Delivery coordination</div>
             </div>
           </div>
         </div>
 
-        {/* Site Management Access */}
-        <div className="text-center">
-          <Button 
-            onClick={() => setLocation("/site-management")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
-          >
-            <Package className="w-5 h-5 mr-2" />
-            Site Management
-          </Button>
-        </div>
+
       </div>
     </div>
   );

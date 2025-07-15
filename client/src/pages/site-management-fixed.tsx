@@ -305,6 +305,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("refresh-control", () => setLocation("/admin/global-refresh-settings")),
       className: "border-green-300 text-green-600 hover:bg-green-50",
       moduleId: "refresh_control"
+    },
+    {
+      id: "logistics",
+      label: "Logistics Management",
+      icon: Truck,
+      onClick: () => trackButtonClick("logistics", () => setLocation("/admin/logistics-management")),
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
+      moduleId: "logistics_management"
     }
   ];
 
