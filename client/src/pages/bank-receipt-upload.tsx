@@ -68,7 +68,7 @@ export default function BankReceiptUpload() {
       
       // Redirect to order status page
       setTimeout(() => {
-        window.location.href = `/customer/orders`;
+        window.location.href = `/customer/profile`;
       }, 2000);
     },
     onError: (error: any) => {

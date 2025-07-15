@@ -410,7 +410,7 @@ export default function CheckoutSuccess() {
           ادامه خرید
         </Button>
         <Button 
-          onClick={() => setLocation('/customer/orders')}
+          onClick={() => setLocation('/customer/profile')}
           className="flex-1"
         >
           مشاهده سفارشات
