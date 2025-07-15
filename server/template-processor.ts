@@ -46,7 +46,7 @@ export class TemplateProcessor {
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       company_name: "Momtazchem",
-      company_email: "info@momtazchem.com",
+      company_email: "admin@momtazchem.com",
       company_phone: "+98 21 1234 5678",
       ...variables
     };

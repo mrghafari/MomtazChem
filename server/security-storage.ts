@@ -477,7 +477,7 @@ export class SecurityStorage implements ISecurityStorage {
       .from(securitySessions)
       .where(and(
         eq(securitySessions.isActive, true),
-        sql`username LIKE '%admin%' OR username = 'info@momtazchem.com'`
+        sql`username LIKE '%admin%' OR username = 'admin@momtazchem.com'`
       ));
     
     // Get latest scan results

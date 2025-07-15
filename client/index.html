@@ -19,51 +19,58 @@
     
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
-    try {
-      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-      
-      // تنظیم موقعیت چپ برای ویجت چت
-      Tawk_API.customStyle = {
-        visibility : {
-          desktop : {
-            position : 'bl', // bottom-left (bl) به جای bottom-right (br)
-            xOffset : 20,
-            yOffset : 20
-          },
-          mobile : {
-            position : 'bl', // bottom-left (bl) به جای bottom-right (br)
-            xOffset : 10,
-            yOffset : 10
-          }
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    
+    // تنظیم موقعیت و ظاهر ویجت چت
+    Tawk_API.customStyle = {
+      visibility : {
+        desktop : {
+          position : 'br',
+          xOffset : 20,
+          yOffset : 20
+        },
+        mobile : {
+          position : 'br',
+          xOffset : 10,
+          yOffset : 10
         }
+      }
+    };
+    
+    // تنظیم زبان فارسی و پیام خوش‌آمدگویی
+    Tawk_API.onLoad = function(){
+      console.log('Tawk.to Live Chat loaded successfully');
+      // تنظیم متن پیش‌فرض
+      Tawk_API.setAttributes({
+        'name': 'مشتری ممتاز شیمی',
+        'email': 'guest@momtazchem.com'
+      });
+    };
+    
+    // وقتی چت باز می‌شود
+    Tawk_API.onChatStarted = function(){
+      console.log('Chat conversation started');
+    };
+    
+    // پیام پیش‌فرض آفلاین
+    Tawk_API.onOfflineSubmit = function(data){
+      console.log('Offline message submitted:', data);
+    };
+    
+    (function(){
+      var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+      s1.async=true;
+      s1.src='https://embed.tawk.to/676b7b952480f5b4f598e8d8/1ig6lkm7f';
+      s1.charset='UTF-8';
+      s1.setAttribute('crossorigin','*');
+      s1.onload = function() {
+        console.log('Tawk.to script loaded successfully');
       };
-      
-      // Add error handling for i18next issues
-      Tawk_API.onLoad = function(){
-        try {
-          // Suppress i18next errors if they occur
-          if (typeof Tawk_API.i18next === 'undefined') {
-            console.log('Tawk.to loaded without i18next');
-          }
-        } catch (e) {
-          console.log('Tawk.to i18next error suppressed:', e.message);
-        }
+      s1.onerror = function(e) {
+        console.error('Failed to load Tawk.to script:', e);
       };
-      
-      (function(){
-        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-        s1.async=true;
-        s1.src='https://embed.tawk.to/685c68dac3a0c5190ca37508/1iukfj5go';
-        s1.charset='UTF-8';
-        s1.setAttribute('crossorigin','*');
-        s1.onerror = function() {
-          console.log('Tawk.to script failed to load');
-        };
-        s0.parentNode.insertBefore(s1,s0);
-      })();
-    } catch (e) {
-      console.log('Tawk.to initialization error:', e.message);
-    }
+      s0.parentNode.insertBefore(s1,s0);
+    })();
     </script>
     <!--End of Tawk.to Script-->
     

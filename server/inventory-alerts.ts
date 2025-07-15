@@ -30,7 +30,7 @@ export class InventoryAlertService {
     emailEnabled: true,
     managerEmail: 'info@momtazchem.com',
     emergencyContacts: [
-      { name: 'Manager', email: 'info@momtazchem.com' },
+      { name: 'Manager', email: 'admin@momtazchem.com' },
       // می‌توانید اعضای دیگر تیم مدیریت را اضافه کنید
     ]
   };

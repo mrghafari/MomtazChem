@@ -34,7 +34,7 @@ export const requireDepartment = (requiredDepartment: string) => {
         .limit(1);
 
       // Super admin has access to all departments
-      if (user.length > 0 && (user[0].username === 'info@momtazchem.com' || user[0].username === 'Omid Mohammad')) {
+      if (user.length > 0 && (user[0].username === 'admin@momtazchem.com' || user[0].username === 'Omid Mohammad')) {
         return next();
       }
 

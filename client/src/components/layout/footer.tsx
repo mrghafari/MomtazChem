@@ -176,10 +176,10 @@ const Footer = () => {
               <div className="flex items-center space-x-2">
                 <i className="fas fa-envelope w-4"></i>
                 <a 
-                  href="mailto:info@momtazchem.com"
+                  href="mailto:admin@momtazchem.com"
                   className="hover:text-white transition-colors duration-200"
                 >
-                  info@momtazchem.com
+                  admin@momtazchem.com
                 </a>
               </div>
               <div className="flex items-center space-x-2">
