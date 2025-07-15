@@ -3564,9 +3564,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'geography_analytics',
       'ai_settings',
       'refresh_control',
-      'content_management',
-      'user-management'
-      // Total: 24 modules - automatically synced with Site Management
+      'content_management'
+      // Total: 23 modules - automatically synced with Site Management
     ];
   };
 
