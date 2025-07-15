@@ -704,6 +704,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   });
 
   const onSubmit = (data: any) => {
+    // Validate shipping method selection
+    if (!selectedShippingMethod) {
+      toast({
+        title: language === 'ar' ? "روش ارسال اجباری است" : "Shipping method is required",
+        description: language === 'ar' ? "لطفاً روش ارسال را انتخاب کنید" : "Please select a shipping method",
+        variant: "destructive"
+      });
+      return;
+    }
+
     let orderData = {
       ...data,
       cart,
@@ -878,7 +888,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               
               {/* Delivery Method Selection */}
               <div className="space-y-3 border-t pt-3">
-                <label className="text-sm font-medium">{t.deliveryMethod}</label>
+                <label className="text-sm font-medium">{t.deliveryMethod} *</label>
                 {isLoadingShippingRates ? (
                   <div className="text-sm text-muted-foreground flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
