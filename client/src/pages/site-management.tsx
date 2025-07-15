@@ -448,9 +448,33 @@ export default function SiteManagement() {
     });
   };
 
+  // Debug: Show current state
+  console.log('🔍 [SITE MANAGEMENT DEBUG] Component state:', {
+    authLoading,
+    isAuthenticated,
+    isLoadingPermissions,
+    userPermissions,
+    buttons: buttons.length,
+    user: user?.email
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto p-6">
+        {/* Debug Panel */}
+        <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded">
+          <h3 className="font-bold text-yellow-800">Debug Info:</h3>
+          <p>Auth Loading: {authLoading ? 'Yes' : 'No'}</p>
+          <p>Is Authenticated: {isAuthenticated ? 'Yes' : 'No'}</p>
+          <p>Permissions Loading: {isLoadingPermissions ? 'Yes' : 'No'}</p>
+          <p>User Permissions Success: {userPermissions?.success ? 'Yes' : 'No'}</p>
+          <p>Permissions Count: {userPermissions?.permissions?.length || 0}</p>
+          <p>Modules Count: {userPermissions?.modules?.length || 0}</p>
+          <p>Buttons Count: {buttons.length}</p>
+          <p>User Email: {user?.email || 'Not logged in'}</p>
+          {permissionsError && <p className="text-red-600">Error: {String(permissionsError)}</p>}
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
