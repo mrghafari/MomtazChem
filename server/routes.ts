@@ -12045,9 +12045,49 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   app.get('/api/order-management/warehouse', requireAuth, async (req, res) => {
     try {
       console.log('📦 [WAREHOUSE] Fetching warehouse orders...');
-      const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
-      console.log('📦 [WAREHOUSE] Found orders:', orders.length);
-      console.log('📦 [WAREHOUSE] Orders data:', JSON.stringify(orders, null, 2));
+      
+      // Get orders that are approved by financial department and ready for warehouse processing
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          o.id,
+          o.customer_name as "customerName",
+          o.customer_email as "customerEmail", 
+          o.total_amount as "totalAmount",
+          o.status,
+          o.created_at as "createdAt",
+          o.shipping_address as "shippingAddress",
+          o.payment_method as "paymentMethod",
+          o.notes,
+          o.warehouse_notes as "warehouseNotes",
+          o.financial_approved_at as "financialApprovedAt",
+          o.fulfilled_at as "fulfilledAt",
+          o.fulfilled_by as "fulfilledBy",
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', oi.id,
+                'name', oi.name,
+                'quantity', oi.quantity,
+                'price', oi.price,
+                'sku', oi.sku,
+                'barcode', oi.barcode
+              )
+            ) FILTER (WHERE oi.id IS NOT NULL),
+            '[]'::json
+          ) as items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        WHERE o.status = 'financial_approved'
+        GROUP BY o.id, o.customer_name, o.customer_email, o.total_amount, o.status, 
+                 o.created_at, o.shipping_address, o.payment_method, o.notes, 
+                 o.warehouse_notes, o.financial_approved_at, o.fulfilled_at, o.fulfilled_by
+        ORDER BY o.financial_approved_at DESC
+      `);
+      
+      const orders = result.rows;
+      console.log('📦 [WAREHOUSE] Found financial approved orders:', orders.length);
+      console.log('📦 [WAREHOUSE] Orders ready for warehouse processing:', JSON.stringify(orders, null, 2));
       res.json({ success: true, orders });
     } catch (error) {
       console.error('❌ [WAREHOUSE] Error fetching warehouse orders:', error);
@@ -12060,19 +12100,38 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     try {
       const { id } = req.params;
       const { status, notes } = req.body;
-      const adminId = req.session?.adminId || 1; // Default admin ID for warehouse operations
+      const adminId = req.session?.adminId || 1;
       
-      const order = await orderManagementStorage.updateOrderStatus(
-        parseInt(id), 
-        status, 
-        adminId,
-        'warehouse',
-        notes
-      );
+      console.log('📦 [WAREHOUSE] Processing order:', { id, status, notes, adminId });
       
-      res.json({ success: true, data: order });
+      // Update order status using direct database query for better control
+      const { pool } = await import('./db');
+      
+      const updateQuery = `
+        UPDATE orders 
+        SET 
+          status = $1, 
+          warehouse_notes = $2,
+          updated_at = NOW(),
+          ${status === 'warehouse_processing' ? 'warehouse_started_at = NOW(),' : ''}
+          ${status === 'warehouse_fulfilled' ? 'warehouse_fulfilled_at = NOW(),' : ''}
+          fulfilled_by = $3
+        WHERE id = $4
+        RETURNING *
+      `;
+      
+      const result = await pool.query(updateQuery, [status, notes, adminId, parseInt(id)]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
+      }
+      
+      const updatedOrder = result.rows[0];
+      console.log('📦 [WAREHOUSE] Order updated successfully:', updatedOrder);
+      
+      res.json({ success: true, data: updatedOrder });
     } catch (error) {
-      console.error('Error processing warehouse order:', error);
+      console.error('❌ [WAREHOUSE] Error processing warehouse order:', error);
       res.status(500).json({ success: false, message: 'خطا در پردازش سفارش' });
     }
   });

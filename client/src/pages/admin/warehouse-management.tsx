@@ -124,7 +124,7 @@ interface InventoryMovement {
 
 const WarehouseManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('financial_approved');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [warehouseNotes, setWarehouseNotes] = useState('');
@@ -157,10 +157,13 @@ const WarehouseManagement: React.FC = () => {
   });
 
   // Fetch orders pending warehouse processing
-  const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
-    queryKey: ['/api/warehouse/orders', selectedStatus],
+  // Fetch orders that are approved by financial department
+  const { data: ordersResponse, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
+    queryKey: ['/api/order-management/warehouse'],
     staleTime: 10000,
   });
+  
+  const orders = ordersResponse?.orders || [];
 
   // Fetch unified products for inventory management
   const { data: unifiedProducts = [], isLoading: productsLoading, refetch: refetchProducts } = useQuery({
@@ -210,17 +213,17 @@ const WarehouseManagement: React.FC = () => {
   // Mutation for updating order status
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, status, notes }: { orderId: number; status: string; notes?: string }) => {
-      return await apiRequest(`/api/warehouse/orders/${orderId}`, {
+      return await apiRequest(`/api/order-management/warehouse/${orderId}/process`, {
         method: 'PATCH',
-        body: { status, warehouseNotes: notes }
+        body: { status, notes }
       });
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
+      refetchOrders();
       toast({
         title: "وضعیت سفارش به‌روزرسانی شد",
-        description: `سفارش با موفقیت ${data.status === 'warehouse_processing' ? 'در حال پردازش' : data.status === 'warehouse_fulfilled' ? 'تکمیل شده' : 'به‌روزرسانی شده'} تنظیم شد.`,
+        description: `سفارش با موفقیت ${data.data?.status === 'warehouse_processing' ? 'در حال پردازش' : data.data?.status === 'warehouse_fulfilled' ? 'آماده ارسال به لجستیک' : 'به‌روزرسانی شده'} تنظیم شد.`,
       });
       setShowOrderDetails(false);
     },
@@ -430,6 +433,15 @@ const WarehouseManagement: React.FC = () => {
     });
   };
 
+  // Handle approve and send to logistics
+  const handleApproveToLogistics = (order: Order) => {
+    updateOrderMutation.mutate({
+      orderId: order.id,
+      status: 'warehouse_fulfilled',
+      notes: warehouseNotes || 'تایید انبار - ارسال به لجستیک'
+    });
+  };
+
   const handleFulfillOrder = () => {
     if (!selectedOrder) return;
     
@@ -448,9 +460,9 @@ const WarehouseManagement: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      'financial_approved': { color: 'bg-yellow-100 text-yellow-800', label: 'تایید مالی' },
-      'warehouse_processing': { color: 'bg-blue-100 text-blue-800', label: 'در حال پردازش' },
-      'warehouse_fulfilled': { color: 'bg-green-100 text-green-800', label: 'تکمیل شده' },
+      'financial_approved': { color: 'bg-yellow-100 text-yellow-800', label: 'تایید مالی - آماده انبار' },
+      'warehouse_processing': { color: 'bg-blue-100 text-blue-800', label: 'در حال پردازش انبار' },
+      'warehouse_fulfilled': { color: 'bg-green-100 text-green-800', label: 'آماده ارسال به لجستیک' },
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || { color: 'bg-gray-100 text-gray-800', label: status };
@@ -568,9 +580,9 @@ const WarehouseManagement: React.FC = () => {
                 onChange={(e) => setSelectedStatus(e.target.value)}
               >
                 <option value="all">همه وضعیت‌ها</option>
-                <option value="financial_approved">تایید مالی</option>
-                <option value="warehouse_processing">در حال پردازش</option>
-                <option value="warehouse_fulfilled">تکمیل شده</option>
+                <option value="financial_approved">تایید مالی - آماده انبار</option>
+                <option value="warehouse_processing">در حال پردازش انبار</option>
+                <option value="warehouse_fulfilled">آماده ارسال به لجستیک</option>
               </select>
             </div>
           </div>
@@ -578,7 +590,13 @@ const WarehouseManagement: React.FC = () => {
           {/* Orders Table */}
           <Card>
             <CardHeader>
-              <CardTitle>سفارشات انبار</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                سفارشات تایید شده توسط واحد مالی
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                سفارشات آماده برای پردازش انبار و ارسال به بخش لجستیک
+              </p>
             </CardHeader>
             <CardContent>
               {ordersLoading ? (
@@ -586,7 +604,7 @@ const WarehouseManagement: React.FC = () => {
               ) : filteredOrders.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p>هیچ سفارشی در انتظار پردازش نیست</p>
+                  <p>هیچ سفارش تایید شده‌ای در انتظار پردازش انبار نیست</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -628,8 +646,21 @@ const WarehouseManagement: React.FC = () => {
                                   size="sm"
                                   onClick={() => handleStartProcessing(order)}
                                   disabled={updateOrderMutation.isPending}
+                                  className="bg-blue-600 hover:bg-blue-700"
                                 >
-                                  <ArrowRight className="w-4 h-4" />
+                                  <ArrowRight className="w-4 h-4 ml-1" />
+                                  شروع پردازش
+                                </Button>
+                              )}
+                              {order.status === 'warehouse_processing' && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleApproveToLogistics(order)}
+                                  disabled={updateOrderMutation.isPending}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <CheckCircle className="w-4 h-4 ml-1" />
+                                  ارسال به لجستیک
                                 </Button>
                               )}
                             </div>
