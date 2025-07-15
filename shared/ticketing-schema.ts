@@ -18,6 +18,7 @@ export const supportTickets = pgTable("support_tickets", {
   department: text("department"), // which department the issue relates to
   assignedTo: integer("assigned_to"), // admin user ID who is handling the ticket
   submittedBy: integer("submitted_by").notNull(), // site manager user ID who submitted the ticket
+  customerUserId: text("customer_user_id"), // custom user ID for role-based access
   submitterName: text("submitter_name").notNull(),
   submitterEmail: text("submitter_email").notNull(),
   submitterDepartment: text("submitter_department"),

@@ -4262,6 +4262,204 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Custom user login endpoint
+  app.post("/api/custom-users/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "ایمیل و رمز عبور الزامی است"
+        });
+      }
+
+      const { pool } = await import('./db');
+      const bcrypt = await import('bcryptjs');
+      
+      // Get custom user by email
+      const result = await pool.query(`
+        SELECT 
+          cu.*,
+          cr.name as role_name,
+          cr.display_name as role_display_name,
+          cr.permissions as role_permissions
+        FROM custom_users cu
+        LEFT JOIN custom_roles cr ON cu.role_id = cr.id
+        WHERE cu.email = $1 AND cu.is_active = true
+      `, [email]);
+
+      if (result.rows.length === 0) {
+        return res.status(401).json({
+          success: false,
+          message: "ایمیل یا رمز عبور اشتباه است"
+        });
+      }
+
+      const user = result.rows[0];
+      
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      if (!isValidPassword) {
+        // Update login attempts
+        await pool.query(`
+          UPDATE custom_users 
+          SET login_attempts = login_attempts + 1, updated_at = NOW()
+          WHERE id = $1
+        `, [user.id]);
+        
+        return res.status(401).json({
+          success: false,
+          message: "ایمیل یا رمز عبور اشتباه است"
+        });
+      }
+
+      // Update last login and reset login attempts
+      await pool.query(`
+        UPDATE custom_users 
+        SET last_login = NOW(), login_attempts = 0, updated_at = NOW()
+        WHERE id = $1
+      `, [user.id]);
+
+      // Set session
+      req.session.customUserId = user.id;
+      req.session.customUserEmail = user.email;
+      req.session.customUserName = user.full_name;
+      req.session.customUserRole = user.role_name;
+      req.session.customUserPermissions = user.role_permissions;
+      req.session.isAuthenticated = true;
+
+      res.json({
+        success: true,
+        message: "ورود موفق",
+        user: {
+          id: user.id,
+          fullName: user.full_name,
+          email: user.email,
+          role: user.role_name,
+          roleDisplayName: user.role_display_name,
+          permissions: user.role_permissions
+        }
+      });
+
+    } catch (error) {
+      console.error("Error in custom user login:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ورود"
+      });
+    }
+  });
+
+  // Custom user logout endpoint
+  app.post("/api/custom-users/logout", async (req, res) => {
+    try {
+      // Clear custom user session data
+      req.session.customUserId = undefined;
+      req.session.customUserEmail = undefined;
+      req.session.customUserName = undefined;
+      req.session.customUserRole = undefined;
+      req.session.customUserPermissions = undefined;
+      
+      // If no admin session exists, destroy entire session
+      if (!req.session.adminId) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error("Error destroying session:", err);
+            return res.status(500).json({
+              success: false,
+              message: "خطا در خروج"
+            });
+          }
+          res.json({
+            success: true,
+            message: "خروج موفق"
+          });
+        });
+      } else {
+        // Save session with custom user data cleared but admin data preserved
+        req.session.save((err) => {
+          if (err) {
+            console.error("Error saving session:", err);
+            return res.status(500).json({
+              success: false,
+              message: "خطا در خروج"
+            });
+          }
+          console.log('🔄 Custom user logout - admin session preserved');
+          res.json({
+            success: true,
+            message: "خروج موفق"
+          });
+        });
+      }
+    } catch (error) {
+      console.error("Error logging out custom user:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در خروج"
+      });
+    }
+  });
+
+  // Get current custom user profile
+  app.get("/api/custom-users/me", async (req, res) => {
+    try {
+      const customUserId = req.session.customUserId;
+      
+      if (!customUserId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت نشده"
+        });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          cu.id, cu.full_name, cu.email, cu.phone, cu.is_active,
+          cu.sms_notifications, cu.email_notifications, cu.last_login,
+          cr.name as role_name, cr.display_name as role_display_name,
+          cr.permissions as role_permissions
+        FROM custom_users cu
+        LEFT JOIN custom_roles cr ON cu.role_id = cr.id
+        WHERE cu.id = $1 AND cu.is_active = true
+      `, [customUserId]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "کاربر یافت نشد"
+        });
+      }
+
+      const user = result.rows[0];
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          fullName: user.full_name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role_name,
+          roleDisplayName: user.role_display_name,
+          permissions: user.role_permissions,
+          isActive: user.is_active,
+          smsNotifications: user.sms_notifications,
+          emailNotifications: user.email_notifications,
+          lastLogin: user.last_login
+        }
+      });
+
+    } catch (error) {
+      console.error("Error fetching custom user profile:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت پروفایل"
+      });
+    }
+  });
+
   // Send SMS to users
   app.post("/api/admin/send-sms", requireAuth, async (req, res) => {
     try {
@@ -17146,26 +17344,36 @@ momtazchem.com
       const validatedData = { title, description, category, priority, department };
       const adminId = req.session.adminId;
       const customerId = req.session.customerId;
+      const customUserId = req.session.customUserId;
 
       // Allow guest ticket creation for demo/testing purposes
-      const isGuestTicket = !adminId && !customerId;
+      const isGuestTicket = !adminId && !customerId && !customUserId;
 
-      // Use admin info, customer info, or guest info
+      // Use admin info, customer info, custom user info, or guest info
       const submitterInfo = adminId ? {
         submittedBy: adminId,
         submitterName: req.session.adminName || 'Admin User',
         submitterEmail: req.session.adminEmail || 'admin@momtazchem.com',
-        submitterDepartment: req.session.adminDepartment || 'Administration'
+        submitterDepartment: req.session.adminDepartment || 'Administration',
+        customerUserId: null
+      } : customUserId ? {
+        submittedBy: 999, // Default ID for custom users
+        submitterName: req.session.customUserName || 'Custom User',
+        submitterEmail: req.session.customUserEmail || 'user@momtazchem.com',
+        submitterDepartment: 'Custom User',
+        customerUserId: customUserId
       } : customerId ? {
         submittedBy: customerId,
         submitterName: req.session.customerEmail || 'Customer',
         submitterEmail: req.session.customerEmail || 'customer@momtazchem.com',
-        submitterDepartment: 'Customer'
+        submitterDepartment: 'Customer',
+        customerUserId: null
       } : {
         submittedBy: 0,  // Guest user
         submitterName: 'Guest User',
         submitterEmail: 'guest@momtazchem.com',
-        submitterDepartment: 'Guest'
+        submitterDepartment: 'Guest',
+        customerUserId: null
       };
 
       // Merge validated data with submitter info, ensuring all required fields are present
@@ -17176,6 +17384,7 @@ momtazchem.com
         priority: validatedData.priority || 'normal',
         department: validatedData.department,
         submittedBy: submitterInfo.submittedBy,
+        customerUserId: submitterInfo.customerUserId,
         submitterName: submitterInfo.submitterName,
         submitterEmail: submitterInfo.submitterEmail,
         submitterDepartment: submitterInfo.submitterDepartment,
@@ -17220,9 +17429,8 @@ momtazchem.com
     }
   });
 
-  // Get all tickets (admin view)
-  app.get('/api/tickets', async (req, res) => {
-    // Allow guest access for demo purposes
+  // Get all tickets (role-based access control)
+  app.get('/api/tickets', requireAuth, async (req, res) => {
     try {
       const { 
         status, 
@@ -17234,7 +17442,13 @@ momtazchem.com
         offset = 0 
       } = req.query;
 
-      const filters = {
+      const adminId = req.session.adminId;
+      const customUserId = req.session.customUserId;
+
+      // Check if user is super admin (ID 7) or admin@momtazchem.com
+      const isSuperAdmin = adminId && (adminId === 7 || req.session.adminEmail === 'admin@momtazchem.com');
+
+      let filters = {
         status: status as string,
         priority: priority as string,
         category: category as string,
@@ -17243,6 +17457,27 @@ momtazchem.com
         limit: parseInt(limit as string),
         offset: parseInt(offset as string)
       };
+
+      // If not super admin, only show tickets submitted by the current user
+      if (!isSuperAdmin) {
+        // For custom users, use the new getTicketsByCustomUser method
+        if (customUserId) {
+          const tickets = await ticketingStorage.getTicketsByCustomUser(customUserId, filters.limit, filters.offset);
+          return res.json({
+            success: true,
+            data: tickets
+          });
+        } else if (adminId) {
+          // For regular admins, show only their own tickets
+          filters.submittedBy = adminId;
+        } else {
+          // No access for non-authenticated users
+          return res.status(403).json({
+            success: false,
+            message: 'دسترسی مجاز نمی‌باشد'
+          });
+        }
+      }
 
       const tickets = await ticketingStorage.getTickets(filters);
 
@@ -17289,7 +17524,7 @@ momtazchem.com
     }
   });
 
-  // Get single ticket by ID
+  // Get single ticket by ID (with access control)
   app.get('/api/tickets/:id', requireAuth, async (req, res) => {
     try {
       const ticketId = parseInt(req.params.id);
@@ -17299,6 +17534,21 @@ momtazchem.com
         return res.status(404).json({
           success: false,
           message: 'تیکت یافت نشد'
+        });
+      }
+
+      const adminId = req.session.adminId;
+      const customUserId = req.session.customUserId;
+
+      // Check if user is super admin or owns this ticket
+      const isSuperAdmin = adminId && (adminId === 7 || req.session.adminEmail === 'admin@momtazchem.com');
+      const isTicketOwner = (customUserId && ticket.submittedBy === customUserId) || 
+                           (adminId && ticket.submittedBy === adminId);
+
+      if (!isSuperAdmin && !isTicketOwner) {
+        return res.status(403).json({
+          success: false,
+          message: 'شما مجاز به مشاهده این تیکت نیستید'
         });
       }
 

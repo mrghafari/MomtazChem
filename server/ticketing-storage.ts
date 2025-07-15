@@ -210,6 +210,15 @@ export class TicketingStorage implements ITicketingStorage {
       .offset(offset);
   }
 
+  async getTicketsByCustomUser(customUserId: string, limit: number = 50, offset: number = 0): Promise<SupportTicket[]> {
+    return await db.select()
+      .from(supportTickets)
+      .where(eq(supportTickets.customerUserId, customUserId))
+      .orderBy(desc(supportTickets.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
   async getAssignedTickets(adminId: number, limit: number = 50, offset: number = 0): Promise<SupportTicket[]> {
     return await db.select()
       .from(supportTickets)
