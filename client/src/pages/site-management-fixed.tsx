@@ -168,7 +168,7 @@ export default function SiteManagement() {
       icon: Warehouse,
       onClick: () => trackButtonClick("warehouse-management", () => setLocation("/admin/warehouse-management")),
       className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
-      moduleId: "warehouse-management"
+      moduleId: "warehouse_management"
     },
 
     {

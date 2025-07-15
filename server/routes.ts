@@ -3503,7 +3503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'department_users',
         'inventory_management', // Keep as-is: this is correct module name from Site Management
         'content_management',
-        'warehouse-management', // Added: warehouse-management module
+        'warehouse_management', // Added: warehouse_management module
         'logistics_management' // Added: logistics-management module
       ];
 
@@ -14473,7 +14473,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "shop_management", "procedures", "smtp_test", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",
-          "warehouse-management", "logistics_management", "ticketing_system"
+          "warehouse_management", "logistics_management", "ticketing_system"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
