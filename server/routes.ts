@@ -8630,7 +8630,7 @@ ${procedure.content}
   app.get("/api/shop/discounts", async (req, res) => {
     try {
       const discounts = await shopStorage.getDiscountSettings();
-      res.json(discounts);
+      res.json({ success: true, data: discounts });
     } catch (error) {
       console.error("Error fetching discounts:", error);
       res.status(500).json({ success: false, message: "Failed to fetch discounts" });
@@ -8640,7 +8640,7 @@ ${procedure.content}
   app.get("/api/shop/discounts/active", async (req, res) => {
     try {
       const discounts = await shopStorage.getActiveDiscountSettings();
-      res.json(discounts);
+      res.json({ success: true, data: discounts });
     } catch (error) {
       console.error("Error fetching active discounts:", error);
       res.status(500).json({ success: false, message: "Failed to fetch active discounts" });
@@ -8680,7 +8680,7 @@ ${procedure.content}
     try {
       const discountData = req.body;
       const discount = await shopStorage.createDiscountSetting(discountData);
-      res.json(discount);
+      res.json({ success: true, data: discount });
     } catch (error) {
       console.error("Error creating discount:", error);
       res.status(500).json({ success: false, message: "Failed to create discount" });
@@ -8700,7 +8700,7 @@ ${procedure.content}
       const discount = await shopStorage.updateDiscountSetting(discountId, updates);
       console.log("Discount updated successfully:", discount);
       
-      res.json(discount);
+      res.json({ success: true, data: discount });
     } catch (error) {
       console.error("Error updating discount:", error);
       console.error("Error details:", error instanceof Error ? error.message : error);
