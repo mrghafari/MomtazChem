@@ -88,19 +88,19 @@ import { Switch } from '@/components/ui/switch';
 
 // Schema definitions
 const roleSchema = z.object({
-  name: z.string().min(2, 'نام نقش باید حداقل 2 کاراکتر باشد'),
-  displayName: z.string().min(2, 'نام نمایشی باید حداقل 2 کاراکتر باشد'),
+  name: z.string().min(2, 'Role name must be at least 2 characters'),
+  displayName: z.string().min(2, 'Display name must be at least 2 characters'),
   description: z.string().optional(),
   color: z.string().default('#3b82f6'),
   priority: z.number().default(1)
 });
 
 const userSchema = z.object({
-  fullName: z.string().min(2, 'نام کامل باید حداقل 2 کاراکتر باشد'),
-  email: z.string().email('ایمیل معتبر وارد کنید'),
-  phone: z.string().min(10, 'شماره تلفن باید حداقل 10 رقم باشد'),
-  password: z.string().min(6, 'پسورد باید حداقل 6 کاراکتر باشد'),
-  roleId: z.string().min(1, 'نقش را انتخاب کنید'),
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email'),
+  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  roleId: z.string().min(1, 'Please select a role'),
   isActive: z.boolean().default(true),
   smsNotifications: z.boolean().default(true),
   emailNotifications: z.boolean().default(true)
@@ -319,7 +319,7 @@ function UserManagement() {
       });
     },
     onSuccess: () => {
-      toast({ title: 'نقش جدید با موفقیت ایجاد شد' });
+      toast({ title: 'New role created successfully' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-roles'] });
       setRoleDialogOpen(false);
       roleForm.reset();
@@ -335,7 +335,7 @@ function UserManagement() {
       });
     },
     onSuccess: () => {
-      toast({ title: 'نقش با موفقیت به‌روزرسانی شد' });
+      toast({ title: 'Role updated successfully' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-roles'] });
       setRoleDialogOpen(false);
       setEditingRole(null);
@@ -349,7 +349,7 @@ function UserManagement() {
       return apiRequest(`/api/admin/custom-roles/${roleId}`, { method: 'DELETE' });
     },
     onSuccess: () => {
-      toast({ title: 'نقش با موفقیت حذف شد' });
+      toast({ title: 'Role deleted successfully' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-roles'] });
     }
   });
@@ -362,7 +362,7 @@ function UserManagement() {
       });
     },
     onSuccess: () => {
-      toast({ title: 'کاربر جدید با موفقیت ایجاد شد' });
+      toast({ title: 'New user created successfully' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-users'] });
       setUserDialogOpen(false);
       userForm.reset();
@@ -377,7 +377,7 @@ function UserManagement() {
       });
     },
     onSuccess: () => {
-      toast({ title: 'کاربر با موفقیت به‌روزرسانی شد' });
+      toast({ title: 'User updated successfully' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-users'] });
       setUserDialogOpen(false);
       setEditingUser(null);
@@ -390,7 +390,7 @@ function UserManagement() {
       return apiRequest(`/api/admin/custom-users/${userId}`, { method: 'DELETE' });
     },
     onSuccess: () => {
-      toast({ title: 'کاربر با موفقیت حذف شد' });
+      toast({ title: 'User deleted successfully' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-users'] });
     }
   });
@@ -403,7 +403,7 @@ function UserManagement() {
       });
     },
     onSuccess: () => {
-      toast({ title: 'پیامک با موفقیت ارسال شد' });
+      toast({ title: 'SMS sent successfully' });
       setSmsDialogOpen(false);
       setSelectedUsers([]);
     }
@@ -425,8 +425,8 @@ function UserManagement() {
     },
     onSuccess: () => {
       toast({ 
-        title: 'همگام‌سازی موفق', 
-        description: 'ماژول‌ها با Site Management همگام‌سازی شدند' 
+        title: 'Sync Successful', 
+        description: 'Modules synchronized with Site Management' 
       });
       // Refresh data if needed
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-roles'] });
@@ -437,8 +437,8 @@ function UserManagement() {
     },
     onError: () => {
       toast({ 
-        title: 'خطا در همگام‌سازی', 
-        description: 'مشکلی در همگام‌سازی ماژول‌ها رخ داد' 
+        title: 'Sync Error', 
+        description: 'Problem occurred during module synchronization' 
       });
     }
   });
@@ -577,19 +577,19 @@ function UserManagement() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  لیست کاربران
+                  User List
                 </CardTitle>
                 <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
                   <DialogTrigger asChild>
                     <Button>
                       <UserPlus className="h-4 w-4 mr-2" />
-                      افزودن کاربر جدید
+                      Add New User
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                       <DialogTitle>
-                        {editingUser ? "ویرایش کاربر" : "افزودن کاربر جدید"}
+                        {editingUser ? "Edit User" : "Add New User"}
                       </DialogTitle>
                     </DialogHeader>
                     <Form {...userForm}>
@@ -605,9 +605,9 @@ function UserManagement() {
                           name="fullName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>نام کامل</FormLabel>
+                              <FormLabel>Full Name</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="نام و نام خانوادگی" />
+                                <Input {...field} placeholder="First and Last Name" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -620,7 +620,7 @@ function UserManagement() {
                             name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>ایمیل</FormLabel>
+                                <FormLabel>Email</FormLabel>
                                 <FormControl>
                                   <Input {...field} type="email" placeholder="user@example.com" />
                                 </FormControl>
@@ -634,9 +634,9 @@ function UserManagement() {
                             name="phone"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>شماره تلفن</FormLabel>
+                                <FormLabel>Phone Number</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="09123456789" />
+                                  <Input {...field} placeholder="+1234567890" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -649,13 +649,13 @@ function UserManagement() {
                           name="password"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>پسورد</FormLabel>
+                              <FormLabel>Password</FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <Input 
                                     {...field} 
                                     type={showPassword ? "text" : "password"} 
-                                    placeholder="رمز عبور"
+                                    placeholder="Password"
                                     className="pl-10" 
                                   />
                                   <button
@@ -681,11 +681,11 @@ function UserManagement() {
                           name="roleId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>نقش کاربر</FormLabel>
+                              <FormLabel>User Role</FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="نقش را انتخاب کنید" />
+                                    <SelectValue placeholder="Select a role" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -714,9 +714,9 @@ function UserManagement() {
                             render={({ field }) => (
                               <FormItem className="flex items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
-                                  <FormLabel className="text-base">اطلاع‌رسانی SMS</FormLabel>
+                                  <FormLabel className="text-base">SMS Notifications</FormLabel>
                                   <div className="text-sm text-muted-foreground">
-                                    دریافت پیامک
+                                    Receive SMS messages
                                   </div>
                                 </div>
                                 <FormControl>
@@ -735,9 +735,9 @@ function UserManagement() {
                             render={({ field }) => (
                               <FormItem className="flex items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
-                                  <FormLabel className="text-base">اطلاع‌رسانی ایمیل</FormLabel>
+                                  <FormLabel className="text-base">Email Notifications</FormLabel>
                                   <div className="text-sm text-muted-foreground">
-                                    دریافت ایمیل
+                                    Receive emails
                                   </div>
                                 </div>
                                 <FormControl>
@@ -757,14 +757,14 @@ function UserManagement() {
                             setEditingUser(null);
                             userForm.reset();
                           }}>
-                            لغو
+                            Cancel
                           </Button>
                           <Button 
                             type="submit" 
                             disabled={createUserMutation.isPending || updateUserMutation.isPending}
                           >
                             <Save className="h-4 w-4 mr-2" />
-                            {editingUser ? "به‌روزرسانی" : "ایجاد"}
+                            {editingUser ? "Update" : "Create"}
                           </Button>
                         </div>
                       </form>
@@ -775,10 +775,10 @@ function UserManagement() {
             </CardHeader>
             <CardContent>
               {usersLoading ? (
-                <div className="text-center py-8">در حال بارگذاری...</div>
+                <div className="text-center py-8">Loading...</div>
               ) : users.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  هیچ کاربری یافت نشد
+                  No users found
                 </div>
               ) : (
                 <Table>
@@ -796,12 +796,12 @@ function UserManagement() {
                           }}
                         />
                       </TableHead>
-                      <TableHead>کاربر</TableHead>
-                      <TableHead>نقش</TableHead>
-                      <TableHead>تماس</TableHead>
-                      <TableHead>اطلاع‌رسانی</TableHead>
-                      <TableHead>وضعیت</TableHead>
-                      <TableHead>عملیات</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Notifications</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -863,7 +863,7 @@ function UserManagement() {
                         </TableCell>
                         <TableCell>
                           <Badge variant={user.isActive ? "default" : "secondary"}>
-                            {user.isActive ? 'فعال' : 'غیرفعال'}
+                            {user.isActive ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -888,7 +888,7 @@ function UserManagement() {
                               variant="destructive"
                               size="sm"
                               onClick={() => {
-                                if (confirm('آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟')) {
+                                if (confirm('Are you sure you want to delete this user?')) {
                                   deleteUserMutation.mutate(user.id);
                                 }
                               }}
@@ -913,13 +913,13 @@ function UserManagement() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5" />
-                  مدیریت نقش‌ها
+                  Role Management
                 </CardTitle>
                 <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      افزودن نقش جدید
+                      Add New Role
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
