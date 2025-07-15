@@ -877,35 +877,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check for user in standard users table
-      const user = await storage.getUserByUsername(username);
+      // Check for user in custom_users table (User Management system)
+      const [user] = await db.select().from(schema.customUsers).where(
+        or(
+          eq(schema.customUsers.email, username),
+          eq(schema.customUsers.fullName, username)
+        )
+      );
       
       if (!user) {
-        console.log(`❌ No user found for username: ${username}`);
+        console.log(`❌ No custom user found for username: ${username}`);
         return res.status(401).json({ 
           success: false, 
           message: "Invalid credentials" 
         });
       }
 
-      console.log(`🔍 Found user:`, { id: user.id, email: user.email, hasPasswordHash: !!user.passwordHash });
+      // Check if user is active
+      if (!user.isActive) {
+        console.log(`❌ User account is deactivated: ${username}`);
+        return res.status(401).json({ 
+          success: false, 
+          message: "Account is deactivated" 
+        });
+      }
+
+      console.log(`🔍 Found custom user:`, { id: user.id, email: user.email, hasPasswordHash: !!user.passwordHash });
 
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
       console.log(`🔐 Password validation result: ${isValidPassword}`);
       
       if (!isValidPassword) {
+        // Increment login attempts
+        await db.update(schema.customUsers)
+          .set({ 
+            loginAttempts: user.loginAttempts + 1,
+            updatedAt: new Date()
+          })
+          .where(eq(schema.customUsers.id, user.id));
+          
         return res.status(401).json({ 
           success: false, 
           message: "Invalid credentials" 
         });
       }
 
+      // Reset login attempts and update last login
+      await db.update(schema.customUsers)
+        .set({ 
+          loginAttempts: 0,
+          lastLogin: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(schema.customUsers.id, user.id));
+
       // Set up admin session
-      req.session.adminId = user.id;
+      req.session.customUserId = user.id;
       req.session.isAuthenticated = true;
       
-      console.log(`✅ [LOGIN] Session configured for admin ${user.id}:`, {
-        adminId: req.session.adminId,
+      console.log(`✅ [LOGIN] Session configured for custom user ${user.id}:`, {
+        customUserId: req.session.customUserId,
         isAuthenticated: req.session.isAuthenticated,
         sessionId: req.sessionID
       });
@@ -916,7 +947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Login successful",
         user: { 
           id: user.id, 
-          username: user.username, 
+          fullName: user.fullName, 
           email: user.email, 
           roleId: user.roleId
         }
@@ -932,8 +963,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   app.post("/api/admin/logout", (req, res) => {
-    // Clear only admin session data, preserve customer session
+    // Clear all admin session data, preserve customer session
     req.session.adminId = undefined;
+    req.session.customUserId = undefined;
     req.session.isAuthenticated = undefined;
     
     // If no customer session exists, destroy entire session
@@ -1009,19 +1041,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/me", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUserById(req.session.adminId!);
-      if (!user) {
+      let user;
+      
+      // Check if we have customUserId (new User Management system)
+      if (req.session.customUserId) {
+        const [customUser] = await db.select().from(schema.customUsers).where(
+          eq(schema.customUsers.id, req.session.customUserId)
+        );
+        
+        if (!customUser) {
+          return res.status(404).json({ 
+            success: false, 
+            message: "Custom user not found" 
+          });
+        }
+        
+        user = {
+          id: customUser.id,
+          fullName: customUser.fullName,
+          email: customUser.email,
+          roleId: customUser.roleId,
+          isActive: customUser.isActive
+        };
+      } 
+      // Fallback to old users table (for backward compatibility)
+      else if (req.session.adminId) {
+        const oldUser = await storage.getUserById(req.session.adminId);
+        if (!oldUser) {
+          return res.status(404).json({ 
+            success: false, 
+            message: "User not found" 
+          });
+        }
+        
+        user = {
+          id: oldUser.id,
+          username: oldUser.username,
+          email: oldUser.email,
+          roleId: oldUser.roleId
+        };
+      } else {
         return res.status(404).json({ 
           success: false, 
-          message: "User not found" 
+          message: "No valid user session" 
         });
       }
       
       res.json({ 
         success: true, 
-        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
+        user: user
       });
     } catch (error) {
+      console.error("Error in /api/admin/me:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
