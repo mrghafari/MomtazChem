@@ -9306,7 +9306,7 @@ ${procedure.content}
     }
   });
 
-  app.put("/api/admin/email/templates/:id", requireAuth, async (req, res) => {
+  app.put("/api/admin/email/templates/:id", express.raw({type: 'application/json', limit: '10mb'}), requireAuth, async (req, res) => {
     try {
       const { emailStorage } = await import("./email-storage");
       const id = parseInt(req.params.id);
@@ -9319,51 +9319,73 @@ ${procedure.content}
       }
 
       console.log('📧 Updating template ID:', id);
-      console.log('📧 Request body keys:', Object.keys(req.body));
+      console.log('📧 Raw request body type:', typeof req.body);
+      
+      let requestData;
+      try {
+        // Parse the JSON manually to handle escape characters
+        if (Buffer.isBuffer(req.body)) {
+          const bodyString = req.body.toString('utf8');
+          requestData = JSON.parse(bodyString);
+        } else if (typeof req.body === 'string') {
+          requestData = JSON.parse(req.body);
+        } else {
+          requestData = req.body;
+        }
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        console.error('Raw body:', req.body);
+        return res.status(400).json({
+          success: false,
+          message: "Invalid JSON data"
+        });
+      }
+      
+      console.log('📧 Parsed request data keys:', Object.keys(requestData));
       
       // Clean and prepare update data
       const updates: any = {};
       
-      if (req.body.templateName !== undefined) {
-        updates.templateName = String(req.body.templateName).trim();
+      if (requestData.templateName !== undefined) {
+        updates.templateName = String(requestData.templateName).trim();
       }
-      if (req.body.name !== undefined) {
-        updates.templateName = String(req.body.name).trim();
+      if (requestData.name !== undefined) {
+        updates.templateName = String(requestData.name).trim();
       }
-      if (req.body.categoryName !== undefined) {
-        updates.categoryName = String(req.body.categoryName).trim();
+      if (requestData.categoryName !== undefined) {
+        updates.categoryName = String(requestData.categoryName).trim();
       }
-      if (req.body.category !== undefined) {
-        updates.categoryName = String(req.body.category).trim();
+      if (requestData.category !== undefined) {
+        updates.categoryName = String(requestData.category).trim();
       }
-      if (req.body.subject !== undefined) {
-        updates.subject = String(req.body.subject).trim();
+      if (requestData.subject !== undefined) {
+        updates.subject = String(requestData.subject).trim();
       }
-      if (req.body.htmlContent !== undefined) {
-        updates.htmlContent = String(req.body.htmlContent);
+      if (requestData.htmlContent !== undefined) {
+        updates.htmlContent = String(requestData.htmlContent);
       }
-      if (req.body.textContent !== undefined) {
-        updates.textContent = String(req.body.textContent);
+      if (requestData.textContent !== undefined) {
+        updates.textContent = String(requestData.textContent);
       }
-      if (req.body.variables !== undefined) {
-        if (Array.isArray(req.body.variables)) {
-          updates.variables = req.body.variables;
-        } else if (typeof req.body.variables === 'string') {
+      if (requestData.variables !== undefined) {
+        if (Array.isArray(requestData.variables)) {
+          updates.variables = requestData.variables;
+        } else if (typeof requestData.variables === 'string') {
           // Parse comma-separated string into array
-          updates.variables = req.body.variables.split(',').map((v: string) => v.trim()).filter((v: string) => v.length > 0);
+          updates.variables = requestData.variables.split(',').map((v: string) => v.trim()).filter((v: string) => v.length > 0);
         }
       }
-      if (req.body.isActive !== undefined) {
-        updates.isActive = Boolean(req.body.isActive);
+      if (requestData.isActive !== undefined) {
+        updates.isActive = Boolean(requestData.isActive);
       }
-      if (req.body.isDefault !== undefined) {
-        updates.isDefault = Boolean(req.body.isDefault);
+      if (requestData.isDefault !== undefined) {
+        updates.isDefault = Boolean(requestData.isDefault);
       }
-      if (req.body.language !== undefined) {
-        updates.language = String(req.body.language).trim();
+      if (requestData.language !== undefined) {
+        updates.language = String(requestData.language).trim();
       }
 
-      console.log('📧 Cleaned update data:', JSON.stringify(updates, null, 2));
+      console.log('📧 Cleaned update data fields:', Object.keys(updates));
 
       const template = await emailStorage.updateTemplate(id, updates);
       

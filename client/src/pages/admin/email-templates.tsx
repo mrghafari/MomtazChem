@@ -117,8 +117,23 @@ export default function EmailTemplates() {
   });
 
   const updateTemplateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<TemplateFormData> }) =>
-      apiRequest(`/api/admin/email/templates/${id}`, "PUT", data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<TemplateFormData> }) => {
+      console.log('📧 Frontend sending update for template:', id);
+      console.log('📧 Frontend data keys:', Object.keys(data));
+      
+      return fetch(`/api/admin/email/templates/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/email/templates"] });
       setEditingTemplate(null);
