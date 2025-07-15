@@ -172,7 +172,8 @@ const extractSiteManagementModules = (): Module[] => {
     { moduleId: 'sms', label: 'SMS Management', icon: Smartphone, color: 'bg-gray-500' },
     { moduleId: 'factory', label: 'Factory Management', icon: Factory, color: 'bg-neutral-500' },
     { moduleId: 'procedures', label: 'Procedures', icon: BookOpen, color: 'bg-zinc-500' },
-    { moduleId: 'refresh_control', label: 'Refresh Control', icon: RefreshCw, color: 'bg-green-500' }
+    { moduleId: 'refresh_control', label: 'Refresh Control', icon: RefreshCw, color: 'bg-green-500' },
+    { moduleId: 'ticketing_system', label: 'Ticketing System', icon: Ticket, color: 'bg-rose-500' }
   ];
 
   return siteManagementModules.map(module => ({
@@ -257,34 +258,57 @@ function UserManagement() {
     }
   });
 
-  // Dynamic modules fetching from Site Management
-  const { data: siteManagementModules = [], isLoading: modulesLoading } = useQuery({
+  // Fetch modules directly from the synchronized API endpoint
+  const { data: modulesData, isLoading: modulesLoading } = useQuery({
+    queryKey: ['/api/custom-modules'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/custom-modules');
+      return response;
+    },
+    staleTime: 0, // Always fetch fresh data to stay synchronized
+    refetchInterval: 10000 // Refresh every 10 seconds to catch Site Management changes
+  });
+
+  // Also fetch Site Management modules for comparison
+  const { data: siteManagementModules = [], isLoading: siteModulesLoading } = useQuery({
     queryKey: ['/api/site-management/modules'],
     queryFn: async () => {
       const response = await apiRequest('/api/site-management/modules');
       return response.modules || [];
     },
-    staleTime: 0 // Always fetch fresh data to stay synchronized
+    staleTime: 0,
+    refetchInterval: 10000
   });
 
-  // Update availableModules when siteManagementModules changes
-  React.useEffect(() => {
-    if (siteManagementModules.length > 0) {
-      availableModules = siteManagementModules.map((moduleId: string) => {
-        const staticModule = extractSiteManagementModules().find(m => m.moduleId === moduleId);
-        return staticModule || {
-          id: moduleId.replace(/_/g, '-'),
-          name: moduleId,
-          displayName: moduleId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-          description: `ماژول ${moduleId} سیستم مدیریت`,
-          category: 'system',
-          isCore: false,
-          icon: Package,
-          color: 'bg-gray-500'
-        };
-      });
-    }
-  }, [siteManagementModules]);
+  // Build availableModules from the synchronized API
+  const availableModules = React.useMemo(() => {
+    if (!modulesData?.modules) return [];
+    
+    return modulesData.modules.map((module: any) => {
+      const staticModule = extractSiteManagementModules().find(m => m.moduleId === module.id);
+      return {
+        id: module.id,
+        name: module.name,
+        displayName: module.name,
+        description: module.description,
+        category: module.category,
+        isCore: true,
+        icon: staticModule?.icon || Package,
+        color: staticModule?.color || 'bg-gray-500',
+        moduleId: module.id
+      };
+    });
+  }, [modulesData]);
+
+  // Check if modules are out of sync and show warning
+  const isOutOfSync = React.useMemo(() => {
+    if (!siteManagementModules.length || !modulesData?.modules) return false;
+    
+    const siteModuleIds = siteManagementModules.sort();
+    const customModuleIds = modulesData.modules.map((m: any) => m.id).sort();
+    
+    return JSON.stringify(siteModuleIds) !== JSON.stringify(customModuleIds);
+  }, [siteManagementModules, modulesData]);
 
   // Mutations
   const createRoleMutation = useMutation({

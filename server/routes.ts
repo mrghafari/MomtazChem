@@ -3589,8 +3589,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'geography_analytics',
       'ai_settings',
       'refresh_control',
-      'content_management'
-      // Total: 24 modules - automatically synced with Site Management
+      'content_management',
+      'ticketing_system'
+      // Total: 25 modules - automatically synced with Site Management
     ];
   };
 
@@ -4598,23 +4599,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get available modules/permissions
+  // Get available modules/permissions - synchronized with Site Management modules
   app.get("/api/custom-modules", requireAdmin, async (req, res) => {
     try {
-      const modules = [
-        { id: 'shop_management', name: 'مدیریت فروشگاه', description: 'مدیریت محصولات، سفارشات و فروش', category: 'commerce' },
-        { id: 'crm_management', name: 'مدیریت CRM', description: 'مدیریت مشتریان و روابط', category: 'customer' },
-        { id: 'inventory_management', name: 'مدیریت انبار', description: 'کنترل موجودی و انبارداری', category: 'warehouse' },
-        { id: 'order_management', name: 'مدیریت سفارشات', description: 'پردازش و تایید سفارشات', category: 'commerce' },
-        { id: 'finance_management', name: 'مدیریت مالی', description: 'حسابداری و امور مالی', category: 'finance' },
-        { id: 'content_management', name: 'مدیریت محتوا', description: 'ویرایش محتوای وبسایت', category: 'content' },
-        { id: 'seo_management', name: 'مدیریت SEO', description: 'بهینه‌سازی موتورهای جستجو', category: 'content' },
-        { id: 'email_management', name: 'مدیریت ایمیل', description: 'ارسال و مدیریت ایمیل‌ها', category: 'communication' },
-        { id: 'sms_management', name: 'مدیریت پیامک', description: 'ارسال و مدیریت پیامک‌ها', category: 'communication' },
-        { id: 'analytics_view', name: 'مشاهده آمار', description: 'دسترسی به گزارشات و آمار', category: 'analytics' },
-        { id: 'warehouse_management', name: 'عملیات انبار', description: 'مدیریت عملیات روزانه انبار', category: 'warehouse' },
-        { id: 'user_management', name: 'مدیریت کاربران', description: 'ایجاد و مدیریت کاربران سیستم', category: 'admin' }
-      ];
+      // Get current modules from the single source of truth
+      const currentModules = getSiteManagementModules();
+      
+      // Map module IDs to their display information
+      const moduleMapping = {
+        'syncing_shop': { name: 'همگام‌سازی فروشگاه', description: 'همگام‌سازی محصولات کاردکس با فروشگاه', category: 'commerce' },
+        'shop_management': { name: 'مدیریت فروشگاه', description: 'مدیریت محصولات، سفارشات و فروش', category: 'commerce' },
+        'product_management': { name: 'مدیریت محصولات', description: 'مدیریت کاردکس و محصولات', category: 'commerce' },
+        'order_management': { name: 'مدیریت سفارشات', description: 'پردازش و تایید سفارشات', category: 'commerce' },
+        'warehouse-management': { name: 'مدیریت انبار', description: 'کنترل موجودی و انبارداری', category: 'warehouse' },
+        'logistics_management': { name: 'مدیریت لجستیک', description: 'مدیریت حمل و نقل و تحویل', category: 'logistics' },
+        'inquiries': { name: 'مدیریت استعلامات', description: 'پاسخ به استعلامات مشتریان', category: 'customer' },
+        'crm': { name: 'مدیریت CRM', description: 'مدیریت مشتریان و روابط', category: 'customer' },
+        'barcode': { name: 'مدیریت بارکد', description: 'تولید و مدیریت بارکدها', category: 'inventory' },
+        'email_settings': { name: 'تنظیمات ایمیل', description: 'پیکربندی سیستم ایمیل', category: 'communication' },
+        'database_backup': { name: 'پشتیبان‌گیری پایگاه داده', description: 'مدیریت پشتیبان‌گیری', category: 'system' },
+        'seo': { name: 'مدیریت SEO', description: 'بهینه‌سازی موتورهای جستجو', category: 'content' },
+        'categories': { name: 'مدیریت دسته‌بندی‌ها', description: 'تنظیم دسته‌بندی محصولات', category: 'content' },
+        'sms': { name: 'مدیریت پیامک', description: 'ارسال و مدیریت پیامک‌ها', category: 'communication' },
+        'factory': { name: 'مدیریت کارخانه', description: 'مدیریت خط تولید', category: 'production' },
+        'user_management': { name: 'مدیریت کاربران', description: 'ایجاد و مدیریت کاربران سیستم', category: 'admin' },
+        'procedures': { name: 'مدیریت روش‌ها', description: 'مدیریت اسناد و روش‌های کاری', category: 'content' },
+        'smtp_test': { name: 'تست SMTP', description: 'آزمایش اتصال ایمیل', category: 'communication' },
+        'payment_management': { name: 'مدیریت پرداخت', description: 'تنظیمات درگاه پرداخت', category: 'finance' },
+        'wallet_management': { name: 'مدیریت کیف پول', description: 'مدیریت کیف پول مشتریان', category: 'finance' },
+        'geography_analytics': { name: 'آمار جغرافیایی', description: 'تحلیل آمار منطقه‌ای', category: 'analytics' },
+        'ai_settings': { name: 'تنظیمات هوش مصنوعی', description: 'پیکربندی AI و SKU', category: 'system' },
+        'refresh_control': { name: 'کنترل تازه‌سازی', description: 'تنظیمات تازه‌سازی خودکار', category: 'system' },
+        'content_management': { name: 'مدیریت محتوا', description: 'ویرایش محتوای وبسایت', category: 'content' },
+        'ticketing_system': { name: 'سیستم تیکتینگ', description: 'مدیریت تیکت‌ها و پشتیبانی', category: 'support' }
+      };
+      
+      // Build modules array from current active modules
+      const modules = currentModules.map(moduleId => ({
+        id: moduleId,
+        name: moduleMapping[moduleId]?.name || moduleId,
+        description: moduleMapping[moduleId]?.description || `ماژول ${moduleId}`,
+        category: moduleMapping[moduleId]?.category || 'general'
+      }));
 
       res.json({
         success: true,
