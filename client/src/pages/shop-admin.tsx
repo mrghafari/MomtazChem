@@ -689,23 +689,36 @@ const ShopAdmin = () => {
   // Update discount mutation
   const updateDiscountMutation = useMutation({
     mutationFn: async ({ discountId, updates }: { discountId: number; updates: any }) => {
+      console.log('🎯 [MUTATION] Sending update request:', { discountId, updates });
       return apiRequest(`/api/shop/discounts/${discountId}`, "PATCH", updates);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🎯 [MUTATION] Update successful, response:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
       // Also invalidate shop products to refresh discount information on product cards
       queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
       queryClient.invalidateQueries({ queryKey: ["shopSearch"] });
       // Invalidate discount banners on shop page
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
-      setIsDiscountDialogOpen(false);
-      setEditingDiscount(null);
+      
+      // Update the editingDiscount with new data instead of clearing it
+      if (data?.data) {
+        setEditingDiscount(data.data);
+      }
+      
       toast({
         title: "Discount Updated",
         description: "Discount settings have been updated successfully.",
       });
+      
+      // Don't close dialog immediately, let user see the updated values
+      setTimeout(() => {
+        setIsDiscountDialogOpen(false);
+        setEditingDiscount(null);
+      }, 1500);
     },
     onError: (error: any) => {
+      console.log('🎯 [MUTATION] Update failed:', error);
       toast({
         title: "Update Failed",
         description: `Failed to update discount settings: ${error?.message || 'Unknown error'}`,
