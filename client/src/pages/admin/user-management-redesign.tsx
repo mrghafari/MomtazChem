@@ -488,7 +488,7 @@ function UserManagement() {
           <AlertTriangle className="h-4 w-4 text-amber-600" />
           <AlertTitle className="text-amber-800">نیاز به همگام‌سازی ماژول‌ها</AlertTitle>
           <AlertDescription className="text-amber-700">
-            Site Management دارای {siteModules?.count || 'نامشخص'} ماژول است، اما User Management دارای {availableModules.length} ماژول است.
+            Site Management دارای {siteManagementModules.length || 'نامشخص'} ماژول است، اما User Management دارای {availableModules.length} ماژول است.
             <Button 
               variant="outline" 
               size="sm" 
@@ -507,9 +507,9 @@ function UserManagement() {
           <h1 className="text-3xl font-bold">مدیریت کاربران و نقش‌ها</h1>
           <p className="text-muted-foreground">
             مدیریت کامل کاربران، نقش‌ها و دسترسی‌ها
-            {siteModules && (
+            {siteManagementModules.length > 0 && (
               <span className="text-green-600 mr-2">
-                ✓ همگام با Site Management ({siteModules.count} ماژول)
+                ✓ همگام با Site Management ({siteManagementModules.length} ماژول)
               </span>
             )}
           </p>
