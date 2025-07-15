@@ -14660,11 +14660,46 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             ? userRole[0].permissions 
             : JSON.parse(userRole[0].permissions || '[]');
 
+          // Map Persian display names to technical module IDs
+          const persianToTechnicalMap = {
+            'تنظیمات ایمیل': 'email_settings',
+            'پشتیبان‌گیری پایگاه داده': 'database_backup',
+            'مدیریت SEO': 'seo',
+            'مدیریت پیامک': 'sms',
+            'تست SMTP': 'smtp_test',
+            'تنظیمات هوش مصنوعی': 'ai_settings',
+            'کنترل تازه‌سازی': 'refresh_control',
+            'سیستم تیکتینگ': 'ticketing_system',
+            'مدیریت محتوا': 'content_management',
+            'مدیریت بارکد': 'barcode',
+            'همگام‌سازی فروشگاه': 'syncing_shop',
+            'مدیریت فروشگاه': 'shop_management',
+            'مدیریت محصولات': 'product_management',
+            'مدیریت سفارشات': 'order_management',
+            'مدیریت انبار': 'warehouse-management',
+            'مدیریت لجستیک': 'logistics_management',
+            'مدیریت استعلامات': 'inquiries',
+            'مدیریت CRM': 'crm',
+            'مدیریت کارخانه': 'factory',
+            'مدیریت کاربران': 'user_management',
+            'مدیریت روش‌ها': 'procedures',
+            'مدیریت پرداخت': 'payment_management',
+            'مدیریت کیف پول': 'wallet_management',
+            'تحلیل جغرافیایی': 'geography_analytics',
+            'مدیریت دسته‌بندی‌ها': 'categories'
+          };
+
+          // Convert Persian names to technical IDs
+          const technicalModules = permissions.map(perm => 
+            persianToTechnicalMap[perm] || perm
+          ).filter(Boolean);
+
           console.log(`✓ [PERMISSIONS] User ${customUser[0].email} has modules:`, permissions);
+          console.log(`✓ [PERMISSIONS] Converted to technical IDs:`, technicalModules);
 
           return res.json({
             success: true,
-            permissions: permissions.map(moduleId => ({
+            permissions: technicalModules.map(moduleId => ({
               moduleId,
               canView: true,
               canCreate: true,
@@ -14672,7 +14707,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               canDelete: true,
               canApprove: true
             })),
-            modules: permissions,
+            modules: technicalModules,
             roles: [userRole[0].id],
             roleInfo: {
               name: userRole[0].name,
