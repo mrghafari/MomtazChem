@@ -103,6 +103,9 @@ export interface IOrderManagementStorage {
     cancelledToday: number;
   }>;
 
+  // Get all orders with details for tracking
+  getAllOrdersWithDetails(): Promise<any[]>;
+
   // Shipping rates management
   getShippingRates(filters?: { cityName?: string; isActive?: boolean }): Promise<ShippingRate[]>;
   createShippingRate(rateData: InsertShippingRate): Promise<ShippingRate>;
@@ -897,6 +900,63 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       .returning();
 
     return updatedOrder;
+  }
+
+  // Get all orders with detailed customer information for tracking
+  async getAllOrdersWithDetails(): Promise<any[]> {
+    try {
+      // First get all order management records
+      const allOrders = await db
+        .select()
+        .from(orderManagement)
+        .orderBy(desc(orderManagement.createdAt));
+
+      const ordersWithDetails = [];
+
+      for (const order of allOrders) {
+        let customerInfo = null;
+        
+        // Try to get customer info from customer_orders first
+        if (order.customerOrderId) {
+          try {
+            const [customerOrder] = await db
+              .select()
+              .from(customerOrders)
+              .where(eq(customerOrders.id, order.customerOrderId));
+            
+            if (customerOrder) {
+              customerInfo = {
+                customerName: customerOrder.customerName,
+                customerEmail: customerOrder.customerEmail,
+                customerPhone: customerOrder.customerPhone,
+              };
+            }
+          } catch (error) {
+            console.log('Error fetching customer order:', error);
+          }
+        }
+
+        // If no customer info found, use order management data
+        if (!customerInfo) {
+          customerInfo = {
+            customerName: order.customerName || 'نامشخص',
+            customerEmail: order.customerEmail || '',
+            customerPhone: order.customerPhone || '',
+          };
+        }
+
+        ordersWithDetails.push({
+          ...order,
+          ...customerInfo,
+        });
+      }
+
+      return ordersWithDetails;
+    } catch (error) {
+      console.error('Error in getAllOrdersWithDetails:', error);
+      // Return empty array with proper structure for frontend
+      return [];
+    }
   }
 }
 
