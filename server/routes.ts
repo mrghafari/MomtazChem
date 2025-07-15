@@ -938,6 +938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/logout", (req, res) => {
     // Clear only admin session data, preserve customer session
     req.session.adminId = undefined;
+    req.session.isAuthenticated = undefined;
     
     // If no customer session exists, destroy entire session
     if (!req.session.customerId) {
