@@ -49,6 +49,7 @@ export interface IShopStorage {
   
   // Shop products with inventory management
   getShopProducts(): Promise<ShopProduct[]>;
+  getAllShopProducts(): Promise<ShopProduct[]>;
   getShopProductsByCategory(category: string): Promise<ShopProduct[]>;
   getShopProductById(id: number): Promise<ShopProduct | undefined>;
   searchShopProducts(query: string, filters?: {
@@ -234,6 +235,13 @@ export class ShopStorage implements IShopStorage {
   }
 
   // Shop Products
+  async getAllShopProducts(): Promise<ShopProduct[]> {
+    return await shopDb
+      .select()
+      .from(shopProducts)
+      .orderBy(shopProducts.name);
+  }
+
   async getShopProducts(): Promise<ShopProduct[]> {
     const products = await shopDb
       .select()

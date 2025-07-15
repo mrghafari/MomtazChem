@@ -30,7 +30,7 @@ export class KardexSyncMaster {
       console.log(`📋 [KARDEX-SYNC] ${kardexProducts.length} محصول در کاردکس یافت شد`);
       
       // مرحله 2: پاک کردن کامل فروشگاه با تأیید
-      const existingShopProducts = await shopStorage.getShopProducts();
+      const existingShopProducts = await shopStorage.getAllShopProducts();
       const deletedCount = existingShopProducts.length;
       
       console.log(`🗑️ [KARDEX-SYNC] در حال حذف ${deletedCount} محصول از فروشگاه...`);
@@ -173,7 +173,7 @@ export class KardexSyncMaster {
       
       // دریافت محصولات کاردکس و فروشگاه
       const kardexProducts = await storage.getProducts();
-      const shopProducts = await shopStorage.getShopProducts();
+      const shopProducts = await shopStorage.getAllShopProducts();
       
       // ایجاد لیست نام‌های محصولات کاردکس
       const kardexProductNames = new Set(kardexProducts.map(p => p.name.trim()));
@@ -231,7 +231,7 @@ export class KardexSyncMaster {
       console.log("🔄 [KARDEX-SYNC] شروع همگام‌سازی هوشمند...");
       
       const kardexProducts = await storage.getProducts();
-      const shopProducts = await shopStorage.getShopProducts();
+      const shopProducts = await shopStorage.getAllShopProducts();
       
       let added = 0, updated = 0, removed = 0, unchanged = 0;
       
@@ -254,7 +254,9 @@ export class KardexSyncMaster {
       
       // اضافه کردن یا بروزرسانی محصولات که syncWithShop فعال دارند (بر اساس بارکد)
       for (const kardexProduct of syncEnabledKardex) {
-        const existingShopProduct = shopProducts.find(p => 
+        // دریافت مجدد لیست محصولات فروشگاه برای اطمینان از تازگی داده‌ها
+        const currentShopProducts = await shopStorage.getAllShopProducts();
+        const existingShopProduct = currentShopProducts.find(p => 
           p.barcode && p.barcode.trim() === kardexProduct.barcode.trim()
         );
         
@@ -316,6 +318,16 @@ export class KardexSyncMaster {
     
     if (existingProduct) {
       console.log(`⚠️ [KARDEX-SYNC] محصول با بارکد ${kardexProduct.barcode} قبلاً در فروشگاه موجود است: ${kardexProduct.name}`);
+      return;
+    }
+    
+    // بررسی اضافی برای SKU
+    const existingSkuProduct = existingShopProducts.find(p => 
+      p.sku && p.sku.trim() === kardexProduct.sku?.trim()
+    );
+    
+    if (existingSkuProduct) {
+      console.log(`⚠️ [KARDEX-SYNC] محصول با SKU ${kardexProduct.sku} قبلاً در فروشگاه موجود است: ${kardexProduct.name}`);
       return;
     }
     try {
@@ -453,7 +465,7 @@ export class KardexSyncMaster {
   }> {
     try {
       const kardexProducts = await storage.getProducts();
-      const shopProducts = await shopStorage.getShopProducts();
+      const shopProducts = await shopStorage.getAllShopProducts();
       
       // فیلتر کردن محصولات که بارکد دارند (همه محصولات کاردکس باید sync شوند)
       const syncEnabledKardex = kardexProducts.filter(p => 
@@ -477,6 +489,9 @@ export class KardexSyncMaster {
         .filter(p => p.barcode && p.barcode.trim() !== '' && !kardexBarcodes.has(p.barcode.trim()))
         .map(p => p.name);
       
+      // اصلاح محاسبه تعداد محصولات موجود در فروشگاه (فقط محصولاتی که بارکد دارند)
+      const shopProductsWithBarcode = shopProducts.filter(p => p.barcode && p.barcode.trim() !== '').length;
+      
       // منطق جدید همگام‌سازی: اگر مجموع محصولات همگام‌شده و مخفی‌ها برابر کل کاردکس باشد
       const totalAccountedProducts = (syncEnabledKardex.length - missingInShop.length) + hiddenKardexProducts.length;
       const inSync = totalAccountedProducts === syncEnabledKardex.length && extraInShop.length === 0;
@@ -487,7 +502,7 @@ export class KardexSyncMaster {
       
       return {
         kardexCount: syncEnabledKardex.length,
-        shopCount: shopProducts.length,
+        shopCount: shopProductsWithBarcode,
         hiddenCount: hiddenKardexProducts.length,
         inSync,
         missingInShop,
