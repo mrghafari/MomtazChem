@@ -8647,6 +8647,35 @@ ${procedure.content}
     }
   });
 
+  // Get specific discount by ID
+  app.get("/api/shop/discounts/:id", async (req, res) => {
+    try {
+      const discountId = parseInt(req.params.id);
+      if (!discountId || isNaN(discountId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Valid discount ID is required" 
+        });
+      }
+
+      const discount = await shopStorage.getDiscountSettingById(discountId);
+      if (!discount) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Discount not found" 
+        });
+      }
+
+      res.json({ success: true, data: discount });
+    } catch (error) {
+      console.error('Error fetching discount:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch discount" 
+      });
+    }
+  });
+
   app.post("/api/shop/discounts", async (req, res) => {
     try {
       const discountData = req.body;
