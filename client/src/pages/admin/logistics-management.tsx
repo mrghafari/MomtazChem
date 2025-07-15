@@ -331,9 +331,6 @@ const LogisticsManagement = () => {
                       📞 تلفن: {order.customerPhone}
                     </p>
                     <p className="text-sm text-green-600">
-                      💰 مبلغ: {order.orderTotal} دینار
-                    </p>
-                    <p className="text-sm text-green-600">
                       ⚖️ وزن: {order.weight || 0} کیلوگرم
                     </p>
                     <p className="text-sm text-green-600">
@@ -445,9 +442,6 @@ const LogisticsManagement = () => {
                     </p>
                     <p className="text-sm text-blue-700">
                       📞 تلفن: {order.customerPhone || 'نامشخص'}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      💰 مبلغ: {order.totalAmount} {order.currency}
                     </p>
                     <p className="text-sm text-gray-600">
                       ⚖️ وزن: {order.weight || 0} کیلوگرم
