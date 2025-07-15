@@ -1030,6 +1030,42 @@ const Shop = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Global Volume Discount Incentive Banner */}
+        <div className="mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-2xl p-4 shadow-2xl border border-purple-300 overflow-hidden relative">
+          {/* Animated Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute -top-8 -right-8 w-24 h-24 bg-yellow-400/20 rounded-full animate-bounce"></div>
+            <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-orange-400/20 rounded-full animate-pulse"></div>
+            <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-pink-400/20 rounded-full animate-ping"></div>
+          </div>
+          
+          {/* Glassmorphism Overlay */}
+          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+          
+          <div className="relative z-10 flex items-center justify-between text-white">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-8 h-8 animate-spin text-yellow-300" />
+                <div>
+                  <h3 className="text-2xl font-bold mb-1">💰 MAXIMIZE YOUR SAVINGS!</h3>
+                  <p className="text-purple-100 text-sm">Buy more, save more! Up to 25% OFF on bulk orders</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full font-bold text-sm animate-pulse shadow-lg">
+                🔥 VOLUME DISCOUNTS ACTIVE
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/30">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="font-semibold">Check product cards below!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="flex gap-8">
           {/* Sidebar Filters */}
@@ -1393,38 +1429,61 @@ const Shop = () => {
                                           })}
                                         </div>
                                         
-                                        {/* Status Display */}
-                                        {currentDiscount ? (
-                                          <div className="bg-green-50 backdrop-blur-sm rounded-lg p-2 border border-green-100">
-                                            <div className="flex items-center justify-between text-xs">
-                                              <div className="flex items-center gap-1">
-                                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                                <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                        {/* Smart Promotional Banner for Maximum Discount */}
+                                        {(() => {
+                                          const highestDiscount = product.quantityDiscounts.reduce((max: any, discount: any) => 
+                                            discount.discount > max.discount ? discount : max, product.quantityDiscounts[0]);
+                                          
+                                          // Show maximum discount incentive if no current discount
+                                          if (!currentDiscount && nextDiscount) {
+                                            return (
+                                              <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg p-1.5 border border-red-400 shadow-lg animate-pulse">
+                                                <div className="flex items-center justify-between text-xs">
+                                                  <div className="flex items-center gap-1">
+                                                    <Sparkles className="w-2.5 h-2.5 animate-spin" />
+                                                    <span className="font-bold">🔥 MAX {(highestDiscount.discount * 100).toFixed(0)}% OFF!</span>
+                                                  </div>
+                                                  <span className="font-bold text-yellow-200">
+                                                    Buy {highestDiscount.minQty}+
+                                                  </span>
+                                                </div>
                                               </div>
-                                              <span className="font-semibold text-green-700">
-                                                ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} OFF
-                                              </span>
+                                            );
+                                          }
+                                          
+                                          // Regular status display
+                                          return currentDiscount ? (
+                                            <div className="bg-green-50 backdrop-blur-sm rounded-lg p-2 border border-green-100">
+                                              <div className="flex items-center justify-between text-xs">
+                                                <div className="flex items-center gap-1">
+                                                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                  <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
+                                                </div>
+                                                <span className="font-semibold text-green-700">
+                                                  ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} OFF
+                                                </span>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ) : nextDiscount ? (
-                                          <div className="bg-orange-50 backdrop-blur-sm rounded-lg p-2 border border-orange-100">
-                                            <div className="flex items-center gap-1 text-xs">
-                                              <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
-                                              <span className="font-semibold text-orange-700">
-                                                +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
-                                              </span>
+                                          ) : nextDiscount ? (
+                                            <div className="bg-orange-50 backdrop-blur-sm rounded-lg p-2 border border-orange-100">
+                                              <div className="flex items-center gap-1 text-xs">
+                                                <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                                                <span className="font-semibold text-orange-700">
+                                                  +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
+                                                </span>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ) : (
-                                          <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
-                                            <div className="flex items-center gap-1 text-xs">
-                                              <div className="w-2 h-2 bg-white/70 rounded-full"></div>
-                                              <span className="font-bold text-white/90">
-                                                {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
-                                              </span>
+                                          ) : (
+                                            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
+                                              <div className="flex items-center gap-1 text-xs">
+                                                <div className="w-2 h-2 bg-white/70 rounded-full"></div>
+                                                <span className="font-bold text-white/90">
+                                                  {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
+                                                </span>
+                                              </div>
                                             </div>
-                                          </div>
-                                        )}
+                                          );
+                                        })()}
                                       </div>
                                     );
                                   })()}
@@ -1648,15 +1707,36 @@ const Shop = () => {
                                           </div>
                                         </div>
                                         
-                                        {(() => {
-                                          const currentQty = getProductQuantity(product.id);
-                                          const currentDiscount = getCurrentDiscountInfo(product, currentQty);
-                                          const nextDiscount = getNextDiscountInfo(product, currentQty);
-                                          
-                                          return (
-                                            <div className="flex-1 ml-4">
-                                              {/* Status Display */}
-                                              {currentDiscount ? (
+                                        {/* Smart Discount Incentive Banner */}
+                                        <div className="flex-1 ml-4 relative">
+                                          {(() => {
+                                            const currentQty = getProductQuantity(product.id);
+                                            const currentDiscount = getCurrentDiscountInfo(product, currentQty);
+                                            const nextDiscount = getNextDiscountInfo(product, currentQty);
+                                            const highestDiscount = product.quantityDiscounts.reduce((max: any, discount: any) => 
+                                              discount.discount > max.discount ? discount : max, product.quantityDiscounts[0]);
+                                            
+                                            // Show maximum discount incentive if no current discount
+                                            if (!currentDiscount && nextDiscount) {
+                                              return (
+                                                <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg p-2 border border-red-400 shadow-lg animate-pulse">
+                                                  <div className="flex items-center justify-between text-sm">
+                                                    <div className="flex items-center gap-1">
+                                                      <Sparkles className="w-3 h-3 animate-spin" />
+                                                      <span className="font-bold">🔥 MAX SAVE: {(highestDiscount.discount * 100).toFixed(0)}% OFF!</span>
+                                                    </div>
+                                                    <span className="font-bold text-yellow-200">
+                                                      Buy {highestDiscount.minQty}+ items
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              );
+                                            }
+                                            
+                                            return (
+                                              <div>
+                                                {/* Status Display */}
+                                                {currentDiscount ? (
                                                 <div className="bg-green-50 backdrop-blur-sm rounded-lg p-2 border border-green-100">
                                                   <div className="flex items-center justify-between text-sm">
                                                     <div className="flex items-center gap-1">
@@ -1668,28 +1748,29 @@ const Shop = () => {
                                                     </span>
                                                   </div>
                                                 </div>
-                                              ) : nextDiscount ? (
-                                                <div className="bg-orange-50 backdrop-blur-sm rounded-lg p-2 border border-orange-100">
-                                                  <div className="flex items-center gap-1 text-sm">
-                                                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
-                                                    <span className="font-semibold text-orange-700">
-                                                      +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
-                                                    </span>
+                                                ) : nextDiscount ? (
+                                                  <div className="bg-orange-50 backdrop-blur-sm rounded-lg p-2 border border-orange-100">
+                                                    <div className="flex items-center gap-1 text-sm">
+                                                      <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                                                      <span className="font-semibold text-orange-700">
+                                                        +{nextDiscount.remaining} more → {(nextDiscount.discount * 100).toFixed(0)}% OFF
+                                                      </span>
+                                                    </div>
                                                   </div>
-                                                </div>
-                                              ) : (
-                                                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
-                                                  <div className="flex items-center gap-1 text-sm">
-                                                    <div className="w-2 h-2 bg-white/70 rounded-full"></div>
-                                                    <span className="font-bold text-white/90">
-                                                      {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
-                                                    </span>
+                                                ) : (
+                                                  <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
+                                                    <div className="flex items-center gap-1 text-sm">
+                                                      <div className="w-2 h-2 bg-white/70 rounded-full"></div>
+                                                      <span className="font-bold text-white/90">
+                                                        {product.quantityDiscounts[0].minQty}+ items: {(product.quantityDiscounts[0].discount * 100).toFixed(0)}% OFF
+                                                      </span>
+                                                    </div>
                                                   </div>
-                                                </div>
-                                              )}
-                                            </div>
-                                          );
-                                        })()}
+                                                )}
+                                              </div>
+                                            );
+                                          })()}
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
