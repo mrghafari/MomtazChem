@@ -414,10 +414,13 @@ export default function OrderTrackingManagement() {
                           </td>
                           <td className="p-3">
                             <div className="font-medium">
-                              {typeof order.totalAmount === 'string' 
-                                ? parseFloat(order.totalAmount).toLocaleString('fa-IR')
-                                : order.totalAmount.toLocaleString('fa-IR')
-                              } {order.currency}
+                              {order.totalAmount 
+                                ? (typeof order.totalAmount === 'string' 
+                                    ? parseFloat(order.totalAmount).toLocaleString('en-US')
+                                    : order.totalAmount.toLocaleString('en-US')
+                                  )
+                                : '0'
+                              } {order.currency || 'IQD'}
                             </div>
                           </td>
                           <td className="p-3">
