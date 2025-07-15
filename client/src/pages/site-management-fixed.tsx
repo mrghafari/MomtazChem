@@ -333,9 +333,17 @@ export default function SiteManagement() {
     const allowedModules = userPermissions.permissions?.map((p: any) => p.moduleId) || [];
     const allButtons = getInitialButtons();
     
-    return allButtons.filter(button => 
+    console.log('🔍 [DEBUG] allowedModules:', allowedModules);
+    console.log('🔍 [DEBUG] ticketing_system in allowedModules?', allowedModules.includes('ticketing_system'));
+    
+    const filtered = allButtons.filter(button => 
       !button.moduleId || allowedModules.includes(button.moduleId)
     );
+    
+    console.log('🔍 [DEBUG] ticketing button found in allButtons?', allButtons.find(b => b.moduleId === 'ticketing_system'));
+    console.log('🔍 [DEBUG] ticketing button in filtered?', filtered.find(b => b.moduleId === 'ticketing_system'));
+    
+    return filtered;
   };
 
   const resetButtonOrder = () => {
