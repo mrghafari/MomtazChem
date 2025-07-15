@@ -326,6 +326,9 @@ export class EmailStorage implements IEmailStorage {
         ORDER BY is_default DESC, name ASC
       `);
       
+      console.log('📧 Email templates found:', result.rows.length);
+      console.log('📧 Template names:', result.rows.map((t: any) => t.templateName));
+      
       return result.rows as EmailTemplate[];
     } catch (error) {
       console.error('Error fetching all templates:', error);
