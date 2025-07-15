@@ -50,7 +50,9 @@ import {
   RefreshCw,
   Edit3,
   Ticket,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle,
+  X
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { apiRequest } from '@/lib/queryClient';
@@ -148,23 +150,24 @@ type Module = {
 
 // Function to extract modules dynamically from Site Management configuration
 const extractSiteManagementModules = (): Module[] => {
-  // Complete synchronized list with ALL 23 modules from Site Management
+  // Complete synchronized list with ALL 25 modules from Site Management - using original English names
   const siteManagementModules = [
     { moduleId: 'syncing_shop', label: 'Syncing Shop', icon: Database, color: 'bg-blue-500' },
-    { moduleId: 'shop_management', label: 'Shop', icon: ShoppingCart, color: 'bg-purple-500' },
-    { moduleId: 'product_management', label: 'Products', icon: Package, color: 'bg-violet-500' },
+    { moduleId: 'shop_management', label: 'Shop Management', icon: ShoppingCart, color: 'bg-purple-500' },
+    { moduleId: 'product_management', label: 'Product Management', icon: Package, color: 'bg-violet-500' },
     { moduleId: 'order_management', label: 'Order Management', icon: Truck, color: 'bg-orange-500' },
     { moduleId: 'warehouse-management', label: 'Warehouse Management', icon: Warehouse, color: 'bg-emerald-500' },
+    { moduleId: 'logistics_management', label: 'Logistics Management', icon: Truck, color: 'bg-indigo-500' },
     { moduleId: 'crm', label: 'CRM', icon: Users, color: 'bg-pink-500' },
     { moduleId: 'wallet_management', label: 'Wallet Management', icon: Wallet, color: 'bg-yellow-500' },
-    { moduleId: 'payment_management', label: 'Payment Settings', icon: CreditCard, color: 'bg-red-500' },
+    { moduleId: 'payment_settings', label: 'Payment Settings', icon: CreditCard, color: 'bg-red-500' },
     { moduleId: 'geography_analytics', label: 'Geography Analytics', icon: MapPin, color: 'bg-teal-500' },
     { moduleId: 'inquiries', label: 'Inquiries', icon: BarChart3, color: 'bg-amber-500' },
     { moduleId: 'email_settings', label: 'Email Settings', icon: Mail, color: 'bg-cyan-500' },
     { moduleId: 'content_management', label: 'Content Management', icon: Edit3, color: 'bg-lime-500' },
     { moduleId: 'seo', label: 'SEO Management', icon: Globe, color: 'bg-emerald-500' },
     { moduleId: 'categories', label: 'Categories', icon: Package, color: 'bg-violet-500' },
-    { moduleId: 'barcode', label: 'Barcode', icon: QrCode, color: 'bg-rose-500' },
+    { moduleId: 'barcode', label: 'Barcode Management', icon: QrCode, color: 'bg-rose-500' },
     { moduleId: 'database_backup', label: 'Database Backup', icon: Database, color: 'bg-stone-500' },
     { moduleId: 'smtp_test', label: 'SMTP Test', icon: TestTube, color: 'bg-amber-500' },
     { moduleId: 'ai_settings', label: 'AI Settings', icon: Zap, color: 'bg-sky-500' },
@@ -180,7 +183,7 @@ const extractSiteManagementModules = (): Module[] => {
     id: module.moduleId.replace('_', '-'),
     name: module.moduleId,
     displayName: module.label,
-    description: `ماژول ${module.label} سیستم مدیریت`,
+    description: `${module.label} Module`,
     category: 'system',
     isCore: ['syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse-management', 'crm', 'user_management'].includes(module.moduleId),
     icon: module.icon,
@@ -1011,68 +1014,152 @@ function UserManagement() {
                           />
                         </div>
                         
-                        <div className="space-y-3">
+                        {/* Drag and Drop Module Assignment Interface */}
+                        <div className="space-y-4">
                           <label className="text-sm font-medium flex items-center gap-2">
                             <Key className="h-4 w-4" />
-                            دسترسی‌ها
+                            Module Assignment
                             <Badge variant="outline" className="text-xs">
-                              {selectedPermissions.length} انتخاب شده
+                              {selectedPermissions.length} assigned
                             </Badge>
                           </label>
-                          <div className="space-y-4 max-h-60 overflow-y-auto border rounded-lg p-4 bg-gray-50">
-                            {Object.entries(getModulesByCategory()).map(([category, modules]) => (
-                              <div key={category} className="space-y-3">
-                                <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
-                                  <Badge className={`${getCategoryColor(category)} text-white px-2 py-1`}>
-                                    {category === 'sales' && 'فروش و بازار'}
-                                    {category === 'customer' && 'مشتری و CRM'}
-                                    {category === 'operations' && 'عملیات'}
-                                    {category === 'finance' && 'مالی'}
-                                    {category === 'analytics' && 'آنالیتیک'}
-                                    {category === 'content' && 'محتوا'}
-                                    {category === 'marketing' && 'بازاریابی'}
-                                    {category === 'communication' && 'ارتباطات'}
-                                    {category === 'system' && 'سیستم'}
-                                  </Badge>
-
+                          
+                          <div className="grid grid-cols-2 gap-6 min-h-[400px]">
+                            {/* Available Modules Section */}
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <Package className="h-4 w-4 text-blue-600" />
+                                <h3 className="font-medium text-blue-800">Available Modules</h3>
+                                <Badge variant="secondary" className="ml-auto">
+                                  {availableModules.filter(m => !selectedPermissions.includes(m.name)).length}
+                                </Badge>
+                              </div>
+                              
+                              <div className="max-h-80 overflow-y-auto p-3 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+                                <div className="space-y-2">
+                                  {availableModules
+                                    .filter(module => !selectedPermissions.includes(module.name))
+                                    .map((module) => {
+                                      const IconComponent = module.icon || Settings;
+                                      return (
+                                        <div 
+                                          key={`available-${module.id}`}
+                                          className="flex items-center gap-3 p-2 bg-white rounded border hover:border-blue-300 transition-colors cursor-pointer group"
+                                          onClick={() => {
+                                            setSelectedPermissions(prev => [...prev, module.name]);
+                                          }}
+                                        >
+                                          <div className={`p-1.5 rounded ${module.color || 'bg-gray-500'} text-white`}>
+                                            <IconComponent className="h-3 w-3" />
+                                          </div>
+                                          <div className="flex-1">
+                                            <div className="text-sm font-medium">{module.displayName}</div>
+                                            <div className="text-xs text-gray-500">{module.name}</div>
+                                          </div>
+                                          <Plus className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                        </div>
+                                      );
+                                    })}
                                 </div>
-                                <div className="grid grid-cols-1 gap-2">
-                                  {modules.map((module) => {
+                                {availableModules.filter(m => !selectedPermissions.includes(m.name)).length === 0 && (
+                                  <div className="text-center text-gray-500 py-8">
+                                    <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">All modules assigned</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Assigned Modules Section */}
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                <h3 className="font-medium text-green-800">Assigned Modules</h3>
+                                <Badge variant="secondary" className="ml-auto">
+                                  {selectedPermissions.length}
+                                </Badge>
+                              </div>
+                              
+                              <div className="max-h-80 overflow-y-auto p-3 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+                                <div className="space-y-2">
+                                  {selectedPermissions.map((permissionName) => {
+                                    const module = availableModules.find(m => m.name === permissionName);
+                                    if (!module) return null;
+                                    
                                     const IconComponent = module.icon || Settings;
                                     return (
                                       <div 
-                                        key={module.id} 
-                                        className="flex items-center gap-3 p-2 bg-white rounded border hover:border-blue-300 transition-colors"
+                                        key={`assigned-${module.id}`}
+                                        className="flex items-center gap-3 p-2 bg-white rounded border hover:border-red-300 transition-colors cursor-pointer group"
+                                        onClick={() => {
+                                          setSelectedPermissions(prev => prev.filter(p => p !== module.name));
+                                        }}
                                       >
-                                        <Checkbox
-                                          id={`module-${module.id}`}
-                                          checked={selectedPermissions.includes(module.name)}
-                                          onCheckedChange={(checked) => {
-                                            if (checked) {
-                                              setSelectedPermissions(prev => [...prev, module.name]);
-                                            } else {
-                                              setSelectedPermissions(prev => prev.filter(p => p !== module.name));
-                                            }
-                                          }}
-                                        />
-                                        <div className={`p-1 rounded ${module.color || 'bg-gray-500'} text-white`}>
+                                        <div className={`p-1.5 rounded ${module.color || 'bg-gray-500'} text-white`}>
                                           <IconComponent className="h-3 w-3" />
                                         </div>
-                                        <label 
-                                          htmlFor={`module-${module.id}`}
-                                          className="text-xs cursor-pointer flex items-center gap-2 flex-1"
-                                        >
-                                          <span className="font-medium">{module.displayName}</span>
-                                          {module.isCore && (
-                                            <Crown className="h-3 w-3 text-yellow-500" />
-                                          )}
-                                        </label>
+                                        <div className="flex-1">
+                                          <div className="text-sm font-medium">{module.displayName}</div>
+                                          <div className="text-xs text-gray-500">{module.name}</div>
+                                        </div>
+                                        {module.isCore && (
+                                          <Crown className="h-3 w-3 text-yellow-500" />
+                                        )}
+                                        <X className="h-4 w-4 text-gray-400 group-hover:text-red-500 transition-colors" />
                                       </div>
                                     );
                                   })}
                                 </div>
+                                {selectedPermissions.length === 0 && (
+                                  <div className="text-center text-gray-500 py-8">
+                                    <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">No modules assigned</p>
+                                    <p className="text-xs mt-1">Click modules from Available list to assign</p>
+                                  </div>
+                                )}
                               </div>
-                            ))}
+                            </div>
+                          </div>
+                          
+                          {/* Quick Actions */}
+                          <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg border border-amber-200">
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const coreModules = availableModules.filter(m => m.isCore).map(m => m.name);
+                                  setSelectedPermissions(coreModules);
+                                }}
+                                className="text-xs"
+                              >
+                                <Crown className="h-3 w-3 mr-1" />
+                                Assign Core Only
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedPermissions(availableModules.map(m => m.name));
+                                }}
+                                className="text-xs"
+                              >
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Assign All
+                              </Button>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedPermissions([])}
+                              className="text-xs text-red-600 hover:text-red-700"
+                            >
+                              <X className="h-3 w-3 mr-1" />
+                              Clear All
+                            </Button>
                           </div>
                         </div>
                         
