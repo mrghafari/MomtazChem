@@ -30,11 +30,13 @@ export default function SiteManagement() {
   const [buttons, setButtons] = useState<QuickActionButton[]>([]);
 
   // All useQuery hooks - never conditional
-  const { data: userPermissions, isLoading: isLoadingPermissions, error: permissionsError } = useQuery({
-    queryKey: ['/api/user/permissions'],
+  const { data: userPermissions, isLoading: isLoadingPermissions, error: permissionsError, refetch: refetchPermissions } = useQuery({
+    queryKey: ['/api/user/permissions', Date.now()], // Force cache refresh with timestamp
     staleTime: 0,
     retry: 3,
     retryDelay: 1000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
   });
 
   const { data: activeUsersData, isLoading: isLoadingActiveUsers, refetch: refetchActiveUsers, error } = useQuery({
@@ -53,6 +55,12 @@ export default function SiteManagement() {
 
     return () => clearTimeout(timer);
   }, [authLoading, isAuthenticated, setLocation]);
+
+  useEffect(() => {
+    // Clear cache and refetch permissions on mount
+    queryClient.invalidateQueries({ queryKey: ['/api/user/permissions'] });
+    refetchPermissions();
+  }, [refetchPermissions]);
 
   useEffect(() => {
     if (userPermissions?.success) {
