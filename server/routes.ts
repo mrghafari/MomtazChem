@@ -66,6 +66,29 @@ import {
   type AbandonedCartNotification
 } from "@shared/cart-schema";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
+import { logisticsStorage } from "./logistics-storage";
+import { 
+  transportationCompanies,
+  deliveryVehicles,
+  deliveryPersonnel,
+  deliveryRoutes,
+  deliveryVerificationCodes,
+  logisticsAnalytics,
+  insertTransportationCompanySchema,
+  insertDeliveryVehicleSchema,
+  insertDeliveryPersonnelSchema,
+  insertDeliveryRouteSchema,
+  insertDeliveryVerificationCodeSchema,
+  type TransportationCompany,
+  type DeliveryVehicle,
+  type DeliveryPersonnel,
+  type DeliveryRoute,
+  type DeliveryVerificationCode,
+  VEHICLE_TYPES,
+  DELIVERY_STATUS,
+  ROUTE_STATUS,
+  SMS_STATUS
+} from "@shared/logistics-schema";
 import { 
   gpsDeliveryConfirmations,
   gpsDeliveryAnalytics,
@@ -3480,7 +3503,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'department_users',
         'inventory_management', // Keep as-is: this is correct module name from Site Management
         'content_management',
-        'warehouse-management' // Added: warehouse-management module
+        'warehouse-management', // Added: warehouse-management module
+        'logistics_management' // Added: logistics-management module
       ];
 
       // Get super admin role (admin@momtazchem.com has user ID 7)
@@ -3547,6 +3571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'product_management',
       'order_management',
       'warehouse-management',
+      'logistics_management',
       'inquiries',
       'crm',
       'barcode',
@@ -3565,7 +3590,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'ai_settings',
       'refresh_control',
       'content_management'
-      // Total: 23 modules - automatically synced with Site Management
+      // Total: 24 modules - automatically synced with Site Management
     ];
   };
 
@@ -14394,7 +14419,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "shop_management", "procedures", "smtp_test", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",
-          "warehouse-management"
+          "warehouse-management", "logistics_management"
         ];
 
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, allModules);
@@ -22730,6 +22755,559 @@ momtazchem.com
     } catch (error) {
       console.error("Error validating delivery location:", error);
       res.status(500).json({ success: false, message: "Failed to validate location" });
+    }
+  });
+
+  // =============================================================================
+  // LOGISTICS MANAGEMENT API ENDPOINTS
+  // =============================================================================
+
+  // Transportation Companies
+  app.get('/api/logistics/companies', requireAuth, async (req, res) => {
+    try {
+      const { isActive } = req.query;
+      const companies = await logisticsStorage.getTransportationCompanies({
+        isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined
+      });
+      res.json({ success: true, data: companies });
+    } catch (error) {
+      console.error('Error fetching transportation companies:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت شرکت‌های حمل و نقل' });
+    }
+  });
+
+  app.get('/api/logistics/companies/:id', requireAuth, async (req, res) => {
+    try {
+      const company = await logisticsStorage.getTransportationCompanyById(parseInt(req.params.id));
+      if (!company) {
+        return res.status(404).json({ success: false, message: 'شرکت حمل و نقل یافت نشد' });
+      }
+      res.json({ success: true, data: company });
+    } catch (error) {
+      console.error('Error fetching transportation company:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت اطلاعات شرکت' });
+    }
+  });
+
+  app.post('/api/logistics/companies', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertTransportationCompanySchema.parse(req.body);
+      const company = await logisticsStorage.createTransportationCompany(validatedData);
+      res.status(201).json({ success: true, data: company });
+    } catch (error) {
+      console.error('Error creating transportation company:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد شرکت حمل و نقل' });
+    }
+  });
+
+  app.put('/api/logistics/companies/:id', requireAuth, async (req, res) => {
+    try {
+      const company = await logisticsStorage.updateTransportationCompany(
+        parseInt(req.params.id),
+        req.body
+      );
+      res.json({ success: true, data: company });
+    } catch (error) {
+      console.error('Error updating transportation company:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی شرکت' });
+    }
+  });
+
+  app.delete('/api/logistics/companies/:id', requireAuth, async (req, res) => {
+    try {
+      await logisticsStorage.deleteTransportationCompany(parseInt(req.params.id));
+      res.json({ success: true, message: 'شرکت حمل و نقل حذف شد' });
+    } catch (error) {
+      console.error('Error deleting transportation company:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف شرکت' });
+    }
+  });
+
+  // Delivery Vehicles
+  app.get('/api/logistics/vehicles', requireAuth, async (req, res) => {
+    try {
+      const { companyId, vehicleType, currentStatus, isActive } = req.query;
+      const vehicles = await logisticsStorage.getDeliveryVehicles({
+        companyId: companyId ? parseInt(companyId as string) : undefined,
+        vehicleType: vehicleType as string,
+        currentStatus: currentStatus as string,
+        isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined
+      });
+      res.json({ success: true, data: vehicles });
+    } catch (error) {
+      console.error('Error fetching delivery vehicles:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت وسایل نقلیه' });
+    }
+  });
+
+  app.get('/api/logistics/vehicles/available', requireAuth, async (req, res) => {
+    try {
+      const { vehicleType, minWeight, minVolume } = req.query;
+      const vehicles = await logisticsStorage.getAvailableVehicles({
+        vehicleType: vehicleType as string,
+        minWeight: minWeight ? parseFloat(minWeight as string) : undefined,
+        minVolume: minVolume ? parseFloat(minVolume as string) : undefined
+      });
+      res.json({ success: true, data: vehicles });
+    } catch (error) {
+      console.error('Error fetching available vehicles:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت وسایل نقلیه آزاد' });
+    }
+  });
+
+  app.post('/api/logistics/vehicles', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertDeliveryVehicleSchema.parse(req.body);
+      const vehicle = await logisticsStorage.createDeliveryVehicle(validatedData);
+      res.status(201).json({ success: true, data: vehicle });
+    } catch (error) {
+      console.error('Error creating delivery vehicle:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد وسیله نقلیه' });
+    }
+  });
+
+  app.put('/api/logistics/vehicles/:id', requireAuth, async (req, res) => {
+    try {
+      const vehicle = await logisticsStorage.updateDeliveryVehicle(
+        parseInt(req.params.id),
+        req.body
+      );
+      res.json({ success: true, data: vehicle });
+    } catch (error) {
+      console.error('Error updating delivery vehicle:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی وسیله نقلیه' });
+    }
+  });
+
+  app.patch('/api/logistics/vehicles/:id/status', requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const vehicle = await logisticsStorage.updateVehicleStatus(parseInt(req.params.id), status);
+      res.json({ success: true, data: vehicle });
+    } catch (error) {
+      console.error('Error updating vehicle status:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی وضعیت وسیله نقلیه' });
+    }
+  });
+
+  // Delivery Personnel
+  app.get('/api/logistics/personnel', requireAuth, async (req, res) => {
+    try {
+      const { companyId, currentStatus, isActive } = req.query;
+      const personnel = await logisticsStorage.getDeliveryPersonnel({
+        companyId: companyId ? parseInt(companyId as string) : undefined,
+        currentStatus: currentStatus as string,
+        isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined
+      });
+      res.json({ success: true, data: personnel });
+    } catch (error) {
+      console.error('Error fetching delivery personnel:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت پرسنل تحویل' });
+    }
+  });
+
+  app.get('/api/logistics/personnel/available', requireAuth, async (req, res) => {
+    try {
+      const { serviceArea, vehicleType } = req.query;
+      const drivers = await logisticsStorage.getAvailableDrivers({
+        serviceArea: serviceArea as string,
+        vehicleType: vehicleType as string
+      });
+      res.json({ success: true, data: drivers });
+    } catch (error) {
+      console.error('Error fetching available drivers:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت رانندگان آزاد' });
+    }
+  });
+
+  app.post('/api/logistics/personnel', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertDeliveryPersonnelSchema.parse(req.body);
+      const personnel = await logisticsStorage.createDeliveryPersonnel(validatedData);
+      res.status(201).json({ success: true, data: personnel });
+    } catch (error) {
+      console.error('Error creating delivery personnel:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد پرسنل تحویل' });
+    }
+  });
+
+  app.put('/api/logistics/personnel/:id', requireAuth, async (req, res) => {
+    try {
+      const personnel = await logisticsStorage.updateDeliveryPersonnel(
+        parseInt(req.params.id),
+        req.body
+      );
+      res.json({ success: true, data: personnel });
+    } catch (error) {
+      console.error('Error updating delivery personnel:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی پرسنل' });
+    }
+  });
+
+  app.patch('/api/logistics/personnel/:id/status', requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const personnel = await logisticsStorage.updateDriverStatus(parseInt(req.params.id), status);
+      res.json({ success: true, data: personnel });
+    } catch (error) {
+      console.error('Error updating driver status:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی وضعیت راننده' });
+    }
+  });
+
+  app.patch('/api/logistics/personnel/:id/location', requireAuth, async (req, res) => {
+    try {
+      const { latitude, longitude } = req.body;
+      const personnel = await logisticsStorage.updateDriverLocation(
+        parseInt(req.params.id),
+        parseFloat(latitude),
+        parseFloat(longitude)
+      );
+      res.json({ success: true, data: personnel });
+    } catch (error) {
+      console.error('Error updating driver location:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی موقعیت راننده' });
+    }
+  });
+
+  // Delivery Routes
+  app.get('/api/logistics/routes', requireAuth, async (req, res) => {
+    try {
+      const { driverId, vehicleId, status, startDate, endDate } = req.query;
+      const routes = await logisticsStorage.getDeliveryRoutes({
+        driverId: driverId ? parseInt(driverId as string) : undefined,
+        vehicleId: vehicleId ? parseInt(vehicleId as string) : undefined,
+        status: status as string,
+        dateRange: startDate && endDate ? {
+          start: new Date(startDate as string),
+          end: new Date(endDate as string)
+        } : undefined
+      });
+      res.json({ success: true, data: routes });
+    } catch (error) {
+      console.error('Error fetching delivery routes:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت مسیرهای تحویل' });
+    }
+  });
+
+  app.post('/api/logistics/routes', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertDeliveryRouteSchema.parse(req.body);
+      const route = await logisticsStorage.createDeliveryRoute(validatedData);
+      res.status(201).json({ success: true, data: route });
+    } catch (error) {
+      console.error('Error creating delivery route:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد مسیر تحویل' });
+    }
+  });
+
+  app.patch('/api/logistics/routes/:id/status', requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const route = await logisticsStorage.updateRouteStatus(parseInt(req.params.id), status);
+      res.json({ success: true, data: route });
+    } catch (error) {
+      console.error('Error updating route status:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی وضعیت مسیر' });
+    }
+  });
+
+  app.post('/api/logistics/routes/:id/orders', requireAuth, async (req, res) => {
+    try {
+      const { orderId } = req.body;
+      const route = await logisticsStorage.addOrderToRoute(parseInt(req.params.id), orderId);
+      res.json({ success: true, data: route });
+    } catch (error) {
+      console.error('Error adding order to route:', error);
+      res.status(500).json({ success: false, message: 'خطا در اضافه کردن سفارش به مسیر' });
+    }
+  });
+
+  app.delete('/api/logistics/routes/:id/orders/:orderId', requireAuth, async (req, res) => {
+    try {
+      const route = await logisticsStorage.removeOrderFromRoute(
+        parseInt(req.params.id),
+        parseInt(req.params.orderId)
+      );
+      res.json({ success: true, data: route });
+    } catch (error) {
+      console.error('Error removing order from route:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف سفارش از مسیر' });
+    }
+  });
+
+  app.post('/api/logistics/routes/:id/complete-stop', requireAuth, async (req, res) => {
+    try {
+      const { orderId } = req.body;
+      const route = await logisticsStorage.completeRouteStop(parseInt(req.params.id), orderId);
+      res.json({ success: true, data: route });
+    } catch (error) {
+      console.error('Error completing route stop:', error);
+      res.status(500).json({ success: false, message: 'خطا در تکمیل توقف مسیر' });
+    }
+  });
+
+  // Delivery Verification Codes (4-digit SMS codes)
+  app.get('/api/logistics/verification-codes', requireAuth, async (req, res) => {
+    try {
+      const { customerOrderId, isVerified, smsStatus } = req.query;
+      const codes = await logisticsStorage.getDeliveryVerificationCodes({
+        customerOrderId: customerOrderId ? parseInt(customerOrderId as string) : undefined,
+        isVerified: isVerified === 'true' ? true : isVerified === 'false' ? false : undefined,
+        smsStatus: smsStatus as string
+      });
+      res.json({ success: true, data: codes });
+    } catch (error) {
+      console.error('Error fetching verification codes:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت کدهای تایید' });
+    }
+  });
+
+  app.get('/api/logistics/verification-codes/order/:orderId', requireAuth, async (req, res) => {
+    try {
+      const code = await logisticsStorage.getDeliveryCodeByOrderId(parseInt(req.params.orderId));
+      if (!code) {
+        return res.status(404).json({ success: false, message: 'کد تایید برای این سفارش یافت نشد' });
+      }
+      res.json({ success: true, data: code });
+    } catch (error) {
+      console.error('Error fetching verification code:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت کد تایید' });
+    }
+  });
+
+  app.post('/api/logistics/verification-codes/generate', requireAuth, async (req, res) => {
+    try {
+      const { customerOrderId, customerPhone, customerName } = req.body;
+      
+      if (!customerOrderId || !customerPhone || !customerName) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'شماره سفارش، تلفن و نام مشتری الزامی است' 
+        });
+      }
+
+      const code = await logisticsStorage.generateVerificationCode(
+        customerOrderId, 
+        customerPhone, 
+        customerName
+      );
+
+      // Send SMS notification
+      try {
+        const smsResult = await smsService.sendDeliveryVerificationSms(
+          customerPhone,
+          code.verificationCode,
+          customerName,
+          code.id
+        );
+
+        if (smsResult.success) {
+          await logisticsStorage.updateSmsStatus(code.id, 'sent', { 
+            messageId: smsResult.messageId,
+            provider: 'kavenegar'
+          });
+        }
+      } catch (smsError) {
+        console.error('SMS sending failed:', smsError);
+        // Continue even if SMS fails
+      }
+
+      res.status(201).json({ success: true, data: code });
+    } catch (error) {
+      console.error('Error generating verification code:', error);
+      res.status(500).json({ success: false, message: 'خطا در تولید کد تایید' });
+    }
+  });
+
+  app.post('/api/logistics/verification-codes/verify', requireAuth, async (req, res) => {
+    try {
+      const { customerOrderId, code, verifiedBy, verificationLocation, latitude, longitude } = req.body;
+      
+      if (!customerOrderId || !code || !verifiedBy) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'شماره سفارش، کد تایید و نام تایید کننده الزامی است' 
+        });
+      }
+
+      const isValid = await logisticsStorage.verifyDeliveryCode(customerOrderId, code, {
+        verifiedBy,
+        verificationLocation,
+        latitude: latitude ? parseFloat(latitude) : undefined,
+        longitude: longitude ? parseFloat(longitude) : undefined
+      });
+
+      if (isValid) {
+        res.json({ success: true, message: 'کد تایید با موفقیت تایید شد' });
+      } else {
+        res.status(400).json({ success: false, message: 'کد تایید نامعتبر یا منقضی شده است' });
+      }
+    } catch (error) {
+      console.error('Error verifying delivery code:', error);
+      res.status(500).json({ success: false, message: 'خطا در تایید کد' });
+    }
+  });
+
+  app.post('/api/logistics/verification-codes/:id/resend', requireAuth, async (req, res) => {
+    try {
+      const code = await logisticsStorage.resendVerificationCode(parseInt(req.params.id));
+      
+      // Send new SMS
+      try {
+        const smsResult = await smsService.sendDeliveryVerificationSms(
+          code.customerPhone,
+          code.verificationCode,
+          code.customerName,
+          code.id
+        );
+
+        if (smsResult.success) {
+          await logisticsStorage.updateSmsStatus(code.id, 'sent', { 
+            messageId: smsResult.messageId 
+          });
+        }
+      } catch (smsError) {
+        console.error('SMS resend failed:', smsError);
+      }
+
+      res.json({ success: true, data: code });
+    } catch (error) {
+      console.error('Error resending verification code:', error);
+      res.status(500).json({ success: false, message: 'خطا در ارسال مجدد کد' });
+    }
+  });
+
+  // Logistics Analytics
+  app.get('/api/logistics/analytics', requireAuth, async (req, res) => {
+    try {
+      const { period, startDate, endDate } = req.query;
+      const analytics = await logisticsStorage.getLogisticsAnalytics({
+        period: period as string,
+        dateRange: startDate && endDate ? {
+          start: new Date(startDate as string),
+          end: new Date(endDate as string)
+        } : undefined
+      });
+      res.json({ success: true, data: analytics });
+    } catch (error) {
+      console.error('Error fetching logistics analytics:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت تحلیل‌های لجستیک' });
+    }
+  });
+
+  app.get('/api/logistics/analytics/performance', requireAuth, async (req, res) => {
+    try {
+      const { period = 30 } = req.query;
+      const metrics = await logisticsStorage.getPerformanceMetrics(parseInt(period as string));
+      res.json({ success: true, data: metrics });
+    } catch (error) {
+      console.error('Error fetching performance metrics:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت معیارهای عملکرد' });
+    }
+  });
+
+  app.get('/api/logistics/analytics/drivers/:driverId?', requireAuth, async (req, res) => {
+    try {
+      const { period = 30 } = req.query;
+      const { driverId } = req.params;
+      const driverStats = await logisticsStorage.getDriverPerformance(
+        driverId ? parseInt(driverId) : undefined,
+        parseInt(period as string)
+      );
+      res.json({ success: true, data: driverStats });
+    } catch (error) {
+      console.error('Error fetching driver performance:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت عملکرد راننده' });
+    }
+  });
+
+  app.get('/api/logistics/analytics/vehicles/:vehicleId?', requireAuth, async (req, res) => {
+    try {
+      const { period = 30 } = req.query;
+      const { vehicleId } = req.params;
+      const vehicleStats = await logisticsStorage.getVehicleUtilization(
+        vehicleId ? parseInt(vehicleId) : undefined,
+        parseInt(period as string)
+      );
+      res.json({ success: true, data: vehicleStats });
+    } catch (error) {
+      console.error('Error fetching vehicle utilization:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت بهره‌وری وسیله نقلیه' });
+    }
+  });
+
+  app.get('/api/logistics/analytics/costs', requireAuth, async (req, res) => {
+    try {
+      const { period = 30 } = req.query;
+      const costAnalysis = await logisticsStorage.getCostAnalysis(parseInt(period as string));
+      res.json({ success: true, data: costAnalysis });
+    } catch (error) {
+      console.error('Error fetching cost analysis:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت تحلیل هزینه‌ها' });
+    }
+  });
+
+  // Get warehouse-approved orders ready for logistics processing
+  app.get('/api/logistics/orders/pending', requireAuth, async (req, res) => {
+    try {
+      const pendingOrders = await orderManagementStorage.getOrdersByStatus('warehouse_approved');
+      
+      // Calculate total weight for each order
+      const ordersWithWeight = await Promise.all(
+        pendingOrders.map(async (order) => {
+          try {
+            const weight = await orderManagementStorage.calculateOrderWeight(order.customerOrderId);
+            return {
+              ...order,
+              calculatedWeight: weight,
+              weightUnit: 'kg'
+            };
+          } catch (error) {
+            console.error(`Error calculating weight for order ${order.customerOrderId}:`, error);
+            return {
+              ...order,
+              calculatedWeight: 0,
+              weightUnit: 'kg'
+            };
+          }
+        })
+      );
+
+      res.json({ success: true, data: ordersWithWeight });
+    } catch (error) {
+      console.error('Error fetching pending logistics orders:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات در انتظار لجستیک' });
+    }
+  });
+
+  // Assign logistics personnel to order
+  app.post('/api/logistics/orders/:orderId/assign', requireAuth, async (req, res) => {
+    try {
+      const { logisticsAssigneeId, deliveryMethod, transportationType, estimatedDeliveryDate, notes } = req.body;
+      
+      const updatedOrder = await orderManagementStorage.updateOrderStatus(
+        parseInt(req.params.orderId),
+        'logistics_assigned',
+        {
+          logisticsAssigneeId,
+          logisticsNotes: notes,
+          estimatedDeliveryDate: estimatedDeliveryDate ? new Date(estimatedDeliveryDate) : undefined
+        }
+      );
+
+      // Update delivery information
+      if (deliveryMethod || transportationType) {
+        await orderManagementStorage.updateDeliveryInfo(parseInt(req.params.orderId), {
+          deliveryMethod,
+          transportationType
+        });
+      }
+
+      res.json({ success: true, data: updatedOrder });
+    } catch (error) {
+      console.error('Error assigning logistics personnel:', error);
+      res.status(500).json({ success: false, message: 'خطا در اختصاص پرسنل لجستیک' });
     }
   });
 

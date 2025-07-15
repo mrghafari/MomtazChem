@@ -155,6 +155,14 @@ export default function SiteManagement() {
       moduleId: "warehouse-management"
     },
     {
+      id: "logistics-management",
+      label: "Logistics Management",
+      icon: Truck,
+      onClick: () => trackButtonClick("logistics-management", () => setLocation("/admin/logistics-management")),
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+      moduleId: "logistics_management"
+    },
+    {
       id: "crm",
       label: "CRM",
       icon: Users,

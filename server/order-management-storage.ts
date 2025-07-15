@@ -40,6 +40,7 @@ export interface IOrderManagementStorage {
   
   // Department filtering (respects sequence)
   getOrdersByDepartment(department: Department, status?: OrderStatus[]): Promise<OrderManagement[]>;
+  getOrdersByStatus(status: OrderStatus | OrderStatus[]): Promise<OrderManagement[]>;
   getFinancialPendingOrders(): Promise<OrderManagement[]>;
   getWarehousePendingOrders(): Promise<OrderManagement[]>;
   getLogisticsPendingOrders(): Promise<OrderManagement[]>;
@@ -469,6 +470,113 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     return this.getOrdersByDepartment('warehouse');
   }
   
+  async getOrdersByStatus(status: OrderStatus | OrderStatus[]): Promise<OrderManagement[]> {
+    const statuses = Array.isArray(status) ? status : [status];
+    
+    const query = db.select({
+      // Order Management fields
+      id: orderManagement.id,
+      customerOrderId: orderManagement.customerOrderId,
+      currentStatus: orderManagement.currentStatus,
+      deliveryCode: orderManagement.deliveryCode,
+      financialReviewerId: orderManagement.financialReviewerId,
+      financialReviewedAt: orderManagement.financialReviewedAt,
+      financialNotes: orderManagement.financialNotes,
+      paymentReceiptUrl: orderManagement.paymentReceiptUrl,
+      createdAt: orderManagement.createdAt,
+      updatedAt: orderManagement.updatedAt,
+      
+      // Weight and delivery information
+      totalWeight: orderManagement.totalWeight,
+      weightUnit: orderManagement.weightUnit,
+      deliveryMethod: orderManagement.deliveryMethod,
+      transportationType: orderManagement.transportationType,
+      trackingNumber: orderManagement.trackingNumber,
+      estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
+      actualDeliveryDate: orderManagement.actualDeliveryDate,
+      deliveryPersonName: orderManagement.deliveryPersonName,
+      deliveryPersonPhone: orderManagement.deliveryPersonPhone,
+      postalServiceName: orderManagement.postalServiceName,
+      postalTrackingCode: orderManagement.postalTrackingCode,
+      vehicleType: orderManagement.vehicleType,
+      vehiclePlate: orderManagement.vehiclePlate,
+      vehicleModel: orderManagement.vehicleModel,
+      vehicleColor: orderManagement.vehicleColor,
+      driverName: orderManagement.driverName,
+      driverPhone: orderManagement.driverPhone,
+      deliveryCompanyName: orderManagement.deliveryCompanyName,
+      deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
+      
+      // Customer Order fields
+      totalAmount: customerOrders.totalAmount,
+      currency: customerOrders.currency,
+      
+      // Customer info
+      customerFirstName: customers.firstName,
+      customerLastName: customers.lastName,
+      customerEmail: customers.email,
+      customerPhone: customers.phone,
+      
+      // Payment Receipt info
+      receiptUrl: paymentReceipts.receiptUrl,
+      receiptFileName: paymentReceipts.originalFileName,
+      receiptMimeType: paymentReceipts.mimeType,
+    })
+    .from(orderManagement)
+    .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+    .leftJoin(customers, eq(customerOrders.customerId, customers.id))
+    .leftJoin(paymentReceipts, eq(paymentReceipts.customerOrderId, customerOrders.id))
+    .where(inArray(orderManagement.currentStatus, statuses))
+    .orderBy(desc(orderManagement.createdAt));
+    
+    const results = await query;
+    
+    // Transform results
+    return results.map(row => ({
+      id: row.id,
+      customerOrderId: row.customerOrderId,
+      currentStatus: row.currentStatus,
+      deliveryCode: row.deliveryCode,
+      totalAmount: row.totalAmount,
+      currency: row.currency,
+      
+      // Weight and delivery information
+      totalWeight: row.totalWeight,
+      weightUnit: row.weightUnit,
+      deliveryMethod: row.deliveryMethod,
+      transportationType: row.transportationType,
+      trackingNumber: row.trackingNumber,
+      estimatedDeliveryDate: row.estimatedDeliveryDate,
+      actualDeliveryDate: row.actualDeliveryDate,
+      deliveryPersonName: row.deliveryPersonName,
+      deliveryPersonPhone: row.deliveryPersonPhone,
+      postalServiceName: row.postalServiceName,
+      postalTrackingCode: row.postalTrackingCode,
+      vehicleType: row.vehicleType,
+      vehiclePlate: row.vehiclePlate,
+      vehicleModel: row.vehicleModel,
+      vehicleColor: row.vehicleColor,
+      driverName: row.driverName,
+      driverPhone: row.driverPhone,
+      deliveryCompanyName: row.deliveryCompanyName,
+      deliveryCompanyPhone: row.deliveryCompanyPhone,
+      
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      customer: {
+        firstName: row.customerFirstName,
+        lastName: row.customerLastName,
+        email: row.customerEmail,
+        phone: row.customerPhone,
+      },
+      receipt: row.receiptUrl ? {
+        url: row.receiptUrl,
+        fileName: row.receiptFileName,
+        mimeType: row.receiptMimeType,
+      } : null
+    }));
+  }
+
   async getLogisticsPendingOrders(): Promise<OrderManagement[]> {
     const orders = await this.getOrdersByDepartment('logistics');
     

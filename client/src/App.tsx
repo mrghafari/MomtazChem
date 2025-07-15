@@ -85,6 +85,7 @@ import FinanceOrders from "@/pages/admin/finance-orders";
 import DocumentationPage from "@/pages/documentation";
 import WarehouseOrders from "@/pages/admin/warehouse-orders";
 import LogisticsOrders from "@/pages/admin/logistics-orders";
+import LogisticsManagement from "@/pages/admin/logistics-management";
 import DeliveredOrders from "@/pages/admin/delivered-orders";
 import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
 
@@ -169,6 +170,7 @@ function Router() {
           <Route path="/admin/finance-orders" component={FinanceOrders} />
           <Route path="/admin/warehouse-orders" component={WarehouseOrders} />
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
+          <Route path="/admin/logistics-management" component={LogisticsManagement} />
           <Route path="/admin/delivered-orders" component={DeliveredOrders} />
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
 
