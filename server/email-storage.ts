@@ -307,29 +307,48 @@ export class EmailStorage implements IEmailStorage {
       const result = await emailDb.execute(sql`
         SELECT 
           id, 
-          name as templateName, 
-          category as categoryName,
+          name, 
+          category,
           subject, 
-          html_content as htmlContent, 
-          text_content as textContent, 
+          html_content, 
+          text_content, 
           variables, 
-          is_active as isActive, 
-          is_default as isDefault, 
+          is_active, 
+          is_default, 
           language, 
-          created_by as createdBy, 
-          usage_count as usageCount, 
-          last_used as lastUsed, 
-          created_at as createdAt, 
-          updated_at as updatedAt
+          created_by, 
+          usage_count, 
+          last_used, 
+          created_at, 
+          updated_at
         FROM email_templates 
         WHERE is_active = true
         ORDER BY is_default DESC, name ASC
       `);
       
-      console.log('📧 Email templates found:', result.rows.length);
-      console.log('📧 Template names:', result.rows.map((t: any) => t.templateName));
+      // Convert database field names to expected interface field names
+      const templates = result.rows.map((row: any) => ({
+        id: row.id,
+        templateName: row.name,
+        categoryName: row.category,
+        subject: row.subject,
+        htmlContent: row.html_content,
+        textContent: row.text_content,
+        variables: row.variables,
+        isActive: row.is_active,
+        isDefault: row.is_default,
+        language: row.language,
+        createdBy: row.created_by,
+        usageCount: row.usage_count,
+        lastUsed: row.last_used,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
       
-      return result.rows as EmailTemplate[];
+      console.log('📧 Email templates found:', templates.length);
+      console.log('📧 Template names:', templates.map(t => t.templateName));
+      
+      return templates;
     } catch (error) {
       console.error('Error fetching all templates:', error);
       return [];
