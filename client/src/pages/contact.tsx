@@ -70,7 +70,7 @@ const Contact = () => {
 
   const contactMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/contact", "POST", data);
+      return await apiRequest("/api/contact", { method: "POST", body: data });
     },
     onSuccess: () => {
       toast({
