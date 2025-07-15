@@ -311,7 +311,7 @@ export default function SiteManagement() {
       id: "ticketing",
       label: "Ticketing System",
       icon: Ticket,
-      onClick: () => trackButtonClick("ticketing", () => setLocation("/admin/ticketing")),
+      onClick: () => trackButtonClick("ticketing", () => setLocation("/admin/ticketing-system")),
       className: "border-rose-300 text-rose-600 hover:bg-rose-50",
       moduleId: "ticketing_system"
     }

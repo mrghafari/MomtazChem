@@ -14445,7 +14445,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "shop_management", "procedures", "smtp_test", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",
-          "warehouse-management", "logistics_management"
+          "warehouse-management", "logistics_management", "ticketing_system"
         ];
 
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, allModules);
