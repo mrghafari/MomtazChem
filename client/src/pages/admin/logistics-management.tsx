@@ -334,6 +334,9 @@ const LogisticsManagement = () => {
                       💰 مبلغ: {order.orderTotal} دینار
                     </p>
                     <p className="text-sm text-green-600">
+                      ⚖️ وزن: {order.weight || 0} کیلوگرم
+                    </p>
+                    <p className="text-sm text-green-600">
                       📅 تاریخ انبار: {new Date(order.warehouseProcessedAt).toLocaleDateString('en-US')}
                     </p>
                   </div>
@@ -446,12 +449,9 @@ const LogisticsManagement = () => {
                     <p className="text-sm text-gray-600">
                       💰 مبلغ: {order.totalAmount} {order.currency}
                     </p>
-                    {order.calculatedWeight && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <Weight className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">وزن: {order.calculatedWeight} {order.weightUnit}</span>
-                      </div>
-                    )}
+                    <p className="text-sm text-gray-600">
+                      ⚖️ وزن: {order.weight || 0} کیلوگرم
+                    </p>
                   </div>
                   <div className="text-right">
                     {getStatusBadge(order.currentStatus)}
