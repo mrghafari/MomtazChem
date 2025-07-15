@@ -32,7 +32,8 @@ import {
   Weight,
   RefreshCw,
   Send,
-  Shield
+  Shield,
+  User
 } from 'lucide-react';
 
 // Types
@@ -321,82 +322,79 @@ const LogisticsManagement = () => {
           logisticsOrders.map((order: any) => (
             <Card key={order.id} className="border-r-4 border-r-green-500 bg-green-50">
               <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h4 className="font-semibold text-green-800">سفارش #{order.customerOrderId}</h4>
-                    <p className="text-sm text-green-700">
-                      دریافت کننده: {order.customerName}
-                    </p>
-                    <p className="text-sm text-green-700">
-                      📞 تلفن: {order.customerPhone}
-                    </p>
-                    <p className="text-sm text-green-600">
-                      ⚖️ وزن: {order.weight || 0} کیلوگرم
-                    </p>
-                    <p className="text-sm text-green-600">
-                      📅 تاریخ انبار: {new Date(order.warehouseProcessedAt).toLocaleDateString('en-US')}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="default" className="bg-green-600 text-white mb-2">
-                      تایید شده انبار
-                    </Badge>
-                    <p className="text-xs text-green-500">
-                      {new Date(order.createdAt).toLocaleDateString('en-US')}
-                    </p>
-                  </div>
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-semibold text-green-800 text-lg">سفارش #{order.customerOrderId}</h4>
+                  <Badge variant="default" className="bg-green-600 text-white">
+                    تایید شده انبار
+                  </Badge>
                 </div>
-
-                {/* کد تحویل مخصوص این سفارش */}
-                <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-green-700" />
-                      <span className="font-medium text-green-800">کد تحویل سفارش #{order.customerOrderId}</span>
-                    </div>
-                    <Badge variant="outline" className="bg-green-200 text-green-800">
-                      یکبار مصرف
-                    </Badge>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  {/* Customer Info Block */}
+                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                    <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                      <User className="w-4 h-4 mr-2" />
+                      اطلاعات گیرنده
+                    </h5>
+                    <p className="text-sm text-gray-700">{order.customerName}</p>
+                    <p className="text-sm text-gray-600 flex items-center mt-1">
+                      <Phone className="w-3 h-3 mr-1" />
+                      {order.customerPhone}
+                    </p>
                   </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="font-mono text-2xl bg-white px-4 py-2 rounded border-2 border-green-400 text-green-800 font-bold">
+
+                  {/* Shipment Details Block */}
+                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                    <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                      <Package className="w-4 h-4 mr-2" />
+                      جزئیات محموله
+                    </h5>
+                    <p className="text-sm text-gray-700 flex items-center">
+                      <Weight className="w-3 h-3 mr-1" />
+                      وزن: {order.weight || 0} کیلوگرم
+                    </p>
+                  </div>
+
+                  {/* Processing Dates Block */}
+                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                    <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      تاریخ‌های پردازش
+                    </h5>
+                    <p className="text-xs text-gray-600">سفارش: {new Date(order.createdAt).toLocaleDateString('en-US')}</p>
+                    <p className="text-xs text-gray-600">انبار: {new Date(order.warehouseProcessedAt).toLocaleDateString('en-US')}</p>
+                  </div>
+
+                  {/* Delivery Code Block */}
+                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                    <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                      <Shield className="w-4 h-4 mr-2" />
+                      کد تحویل
+                    </h5>
+                    <div className="font-mono text-lg font-bold text-green-700 bg-green-50 px-2 py-1 rounded text-center">
                       {order.deliveryCode || Math.floor(1000 + Math.random() * 9000)}
                     </div>
-                    <div className="flex flex-col gap-2">
-                      <div className="text-sm text-green-700 text-center">
-                        <p className="font-medium">Delivery Code</p>
-                        <p className="text-xs opacity-80">One-time use only</p>
-                      </div>
-                      <Button 
-                        size="sm" 
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                        onClick={() => {
-                          toast({
-                            title: "کد ارسال شد",
-                            description: `کد تحویل برای سفارش #${order.customerOrderId} به ${order.customerPhone} ارسال شد`,
-                          });
-                        }}
-                      >
-                        <Send className="w-4 h-4 mr-2" />
-                        ارسال به مشتری
-                      </Button>
-                    </div>
                   </div>
-                  
-                  <p className="text-xs text-green-700 mt-2">
-                    🔒 این کد فقط برای سفارش #{order.customerOrderId} معتبر است و پس از تحویل غیرفعال می‌شود
-                  </p>
                 </div>
 
-                <div className="flex gap-2">
+                {/* Action Buttons */}
+                <div className="flex gap-2 flex-wrap">
+                  <Button 
+                    size="sm" 
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={() => {
+                      toast({
+                        title: "کد ارسال شد",
+                        description: `کد تحویل برای سفارش #${order.customerOrderId} به ${order.customerPhone} ارسال شد`,
+                      });
+                    }}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    ارسال کد به مشتری
+                  </Button>
                   <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
                     <Users className="w-4 h-4 mr-2" />
                     اختصاص راننده
-                  </Button>
-                  <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
-                    <Eye className="w-4 h-4 mr-2" />
-                    جزئیات
                   </Button>
                   <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
                     <MapPin className="w-4 h-4 mr-2" />
@@ -434,70 +432,49 @@ const LogisticsManagement = () => {
           pendingOrders.map((order: LogisticsOrder) => (
             <Card key={order.id} className="border-r-4 border-r-blue-500">
               <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h4 className="font-semibold">سفارش #{order.customerOrderId}</h4>
-                    <p className="text-sm text-blue-700">
-                      دریافت کننده: {order.customerName || 'نامشخص'}
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      📞 تلفن: {order.customerPhone || 'نامشخص'}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      ⚖️ وزن: {order.weight || 0} کیلوگرم
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-semibold text-blue-800 text-lg">سفارش #{order.customerOrderId}</h4>
+                  {getStatusBadge(order.currentStatus)}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {/* Customer Info Block */}
+                  <div className="bg-white rounded-lg p-3 border border-blue-200">
+                    <h5 className="font-medium text-blue-800 mb-2 flex items-center">
+                      <User className="w-4 h-4 mr-2" />
+                      اطلاعات گیرنده
+                    </h5>
+                    <p className="text-sm text-gray-700">{order.customerName || 'نامشخص'}</p>
+                    <p className="text-sm text-gray-600 flex items-center mt-1">
+                      <Phone className="w-3 h-3 mr-1" />
+                      {order.customerPhone || 'نامشخص'}
                     </p>
                   </div>
-                  <div className="text-right">
-                    {getStatusBadge(order.currentStatus)}
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(order.createdAt).toLocaleDateString('en-US')}
+
+                  {/* Shipment Details Block */}
+                  <div className="bg-white rounded-lg p-3 border border-blue-200">
+                    <h5 className="font-medium text-blue-800 mb-2 flex items-center">
+                      <Package className="w-4 h-4 mr-2" />
+                      جزئیات محموله
+                    </h5>
+                    <p className="text-sm text-gray-700 flex items-center">
+                      <Weight className="w-3 h-3 mr-1" />
+                      وزن: {order.weight || 0} کیلوگرم
                     </p>
+                  </div>
+
+                  {/* Order Date Block */}
+                  <div className="bg-white rounded-lg p-3 border border-blue-200">
+                    <h5 className="font-medium text-blue-800 mb-2 flex items-center">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      تاریخ سفارش
+                    </h5>
+                    <p className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleDateString('en-US')}</p>
                   </div>
                 </div>
 
-                {/* کد تحویل مخصوص این سفارش */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-blue-600" />
-                      <span className="font-medium text-blue-800">کد تحویل سفارش #{order.customerOrderId}</span>
-                    </div>
-                    <Badge variant="outline" className="bg-blue-100 text-blue-700">
-                      یکبار مصرف
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="font-mono text-2xl bg-white px-4 py-2 rounded border-2 border-blue-300 text-blue-800 font-bold">
-                      {Math.floor(1000 + Math.random() * 9000)}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <div className="text-sm text-blue-700 text-center">
-                        <p className="font-medium">Delivery Code</p>
-                        <p className="text-xs opacity-80">One-time use only</p>
-                      </div>
-                      <Button 
-                        size="sm" 
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => {
-                          toast({
-                            title: "کد ارسال شد",
-                            description: `کد تحویل برای سفارش #${order.customerOrderId} به مشتری ارسال شد`,
-                          });
-                        }}
-                      >
-                        <Send className="w-4 h-4 mr-2" />
-                        ارسال به مشتری
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <p className="text-xs text-blue-600 mt-2">
-                    🔒 این کد فقط برای سفارش #{order.customerOrderId} معتبر است و پس از تحویل غیرفعال می‌شود
-                  </p>
-                </div>
-
-                <div className="flex gap-2">
+                {/* Action Buttons */}
+                <div className="flex gap-2 flex-wrap">
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button size="sm" variant="outline">
