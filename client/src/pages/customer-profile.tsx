@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit } from "lucide-react";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -48,6 +48,108 @@ const CustomerProfile = () => {
         variant: "destructive",
         title: t.error,
         description: t.logoutError,
+      });
+    }
+  };
+
+  const handleGenerateOfficialInvoice = async (orderId: number) => {
+    try {
+      // First, generate invoice from order
+      const generateResponse = await fetch(`/api/invoices/generate/${orderId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!generateResponse.ok) {
+        throw new Error('Failed to generate invoice');
+      }
+
+      const generateResult = await generateResponse.json();
+      const invoiceId = generateResult.data.id;
+
+      // Then, request official invoice
+      const officialResponse = await fetch(`/api/invoices/${invoiceId}/request-official`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language: language })
+      });
+
+      if (!officialResponse.ok) {
+        throw new Error('Failed to request official invoice');
+      }
+
+      toast({
+        title: "درخواست فاکتور رسمی",
+        description: "درخواست فاکتور رسمی با موفقیت ثبت شد. فاکتور پس از تایید برای شما ارسال خواهد شد.",
+      });
+
+    } catch (error) {
+      console.error('Error generating official invoice:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در صدور فاکتور",
+        description: "امکان صدور فاکتور رسمی وجود ندارد. لطفاً دوباره تلاش کنید.",
+      });
+    }
+  };
+
+  const handleDownloadInvoice = async (orderId: number) => {
+    try {
+      // First, generate invoice from order if doesn't exist
+      const generateResponse = await fetch(`/api/invoices/generate/${orderId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!generateResponse.ok) {
+        throw new Error('Failed to generate invoice');
+      }
+
+      const generateResult = await generateResponse.json();
+      const invoiceId = generateResult.data.id;
+
+      // Download the invoice PDF
+      const downloadResponse = await fetch(`/api/invoices/${invoiceId}/download`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!downloadResponse.ok) {
+        throw new Error('Failed to download invoice');
+      }
+
+      const blob = await downloadResponse.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${orderId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "دانلود موفق",
+        description: "فاکتور با موفقیت دانلود شد",
+      });
+
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در دانلود",
+        description: "امکان دانلود فاکتور وجود ندارد",
       });
     }
   };
@@ -325,6 +427,27 @@ const CustomerProfile = () => {
                             </p>
                           </div>
                         )}
+
+                        {/* Invoice Actions */}
+                        <div className="mt-4 pt-3 border-t flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDownloadInvoice(order.id)}
+                            className="flex items-center gap-2"
+                          >
+                            <Download className="w-4 h-4" />
+                            دانلود فاکتور
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleGenerateOfficialInvoice(order.id)}
+                            className="flex items-center gap-2"
+                          >
+                            <FileText className="w-4 h-4" />
+                            درخواست فاکتور رسمی
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
