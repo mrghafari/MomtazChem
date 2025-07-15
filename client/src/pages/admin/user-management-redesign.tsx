@@ -148,32 +148,31 @@ type Module = {
 
 // Function to extract modules dynamically from Site Management configuration
 const extractSiteManagementModules = (): Module[] => {
-  // This function would ideally read from Site Management's actual configuration
-  // For now, we'll maintain a synchronized list that should be updated when Site Management changes
+  // Complete synchronized list with ALL 23 modules from Site Management
   const siteManagementModules = [
     { moduleId: 'syncing_shop', label: 'Syncing Shop', icon: Database, color: 'bg-blue-500' },
     { moduleId: 'shop_management', label: 'Shop', icon: ShoppingCart, color: 'bg-purple-500' },
     { moduleId: 'product_management', label: 'Products', icon: Package, color: 'bg-violet-500' },
     { moduleId: 'order_management', label: 'Order Management', icon: Truck, color: 'bg-orange-500' },
     { moduleId: 'warehouse-management', label: 'Warehouse Management', icon: Warehouse, color: 'bg-emerald-500' },
-    { moduleId: 'inquiries', label: 'Inquiries', icon: BarChart3, color: 'bg-amber-500' },
     { moduleId: 'crm', label: 'CRM', icon: Users, color: 'bg-pink-500' },
-    { moduleId: 'barcode', label: 'Barcode', icon: QrCode, color: 'bg-cyan-500' },
-    { moduleId: 'email_settings', label: 'Email Settings', icon: Mail, color: 'bg-emerald-500' },
-    { moduleId: 'database_backup', label: 'Database Backup', icon: Database, color: 'bg-slate-500' },
-    { moduleId: 'seo', label: 'SEO', icon: Globe, color: 'bg-purple-500' },
-    { moduleId: 'categories', label: 'Categories', icon: Package, color: 'bg-blue-500' },
-    { moduleId: 'sms', label: 'SMS', icon: MessageSquare, color: 'bg-green-500' },
-    { moduleId: 'factory', label: 'Factory', icon: Factory, color: 'bg-purple-500' },
-    { moduleId: 'user_management', label: 'User Management', icon: Users2, color: 'bg-red-500' },
-    { moduleId: 'procedures', label: 'Procedures', icon: BookOpen, color: 'bg-amber-500' },
-    { moduleId: 'smtp_test', label: 'SMTP Test', icon: TestTube, color: 'bg-sky-500' },
-    { moduleId: 'payment_management', label: 'Payment Settings', icon: CreditCard, color: 'bg-blue-500' },
     { moduleId: 'wallet_management', label: 'Wallet Management', icon: Wallet, color: 'bg-yellow-500' },
+    { moduleId: 'payment_management', label: 'Payment Settings', icon: CreditCard, color: 'bg-red-500' },
     { moduleId: 'geography_analytics', label: 'Geography Analytics', icon: MapPin, color: 'bg-teal-500' },
-    { moduleId: 'ai_settings', label: 'AI Settings', icon: Zap, color: 'bg-purple-500' },
-    { moduleId: 'refresh_control', label: 'Refresh Control', icon: RefreshCw, color: 'bg-indigo-500' },
-    { moduleId: 'content_management', label: 'Content Management', icon: Edit3, color: 'bg-green-500' }
+    { moduleId: 'inquiries', label: 'Inquiries', icon: BarChart3, color: 'bg-amber-500' },
+    { moduleId: 'email_settings', label: 'Email Settings', icon: Mail, color: 'bg-cyan-500' },
+    { moduleId: 'content_management', label: 'Content Management', icon: Edit3, color: 'bg-lime-500' },
+    { moduleId: 'seo', label: 'SEO Management', icon: Globe, color: 'bg-emerald-500' },
+    { moduleId: 'categories', label: 'Categories', icon: Package, color: 'bg-violet-500' },
+    { moduleId: 'barcode', label: 'Barcode', icon: QrCode, color: 'bg-rose-500' },
+    { moduleId: 'database_backup', label: 'Database Backup', icon: Database, color: 'bg-stone-500' },
+    { moduleId: 'smtp_test', label: 'SMTP Test', icon: TestTube, color: 'bg-amber-500' },
+    { moduleId: 'ai_settings', label: 'AI Settings', icon: Zap, color: 'bg-sky-500' },
+    { moduleId: 'user_management', label: 'User Management', icon: UserCog, color: 'bg-slate-500' },
+    { moduleId: 'sms', label: 'SMS Management', icon: Smartphone, color: 'bg-gray-500' },
+    { moduleId: 'factory', label: 'Factory Management', icon: Factory, color: 'bg-neutral-500' },
+    { moduleId: 'procedures', label: 'Procedures', icon: BookOpen, color: 'bg-zinc-500' },
+    { moduleId: 'refresh_control', label: 'Refresh Control', icon: RefreshCw, color: 'bg-green-500' }
   ];
 
   return siteManagementModules.map(module => ({
@@ -188,8 +187,8 @@ const extractSiteManagementModules = (): Module[] => {
   }));
 };
 
-// Available modules for permission assignment - AUTOMATICALLY synchronized with Site Management
-const availableModules: Module[] = extractSiteManagementModules();
+// This will be populated dynamically from the API
+let availableModules: Module[] = [];
 
 function UserManagement() {
   const { toast } = useToast();
@@ -257,6 +256,35 @@ function UserManagement() {
       return response.data || [];
     }
   });
+
+  // Dynamic modules fetching from Site Management
+  const { data: siteManagementModules = [], isLoading: modulesLoading } = useQuery({
+    queryKey: ['/api/site-management/modules'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/site-management/modules');
+      return response.modules || [];
+    },
+    staleTime: 0 // Always fetch fresh data to stay synchronized
+  });
+
+  // Update availableModules when siteManagementModules changes
+  React.useEffect(() => {
+    if (siteManagementModules.length > 0) {
+      availableModules = siteManagementModules.map((moduleId: string) => {
+        const staticModule = extractSiteManagementModules().find(m => m.moduleId === moduleId);
+        return staticModule || {
+          id: moduleId.replace(/_/g, '-'),
+          name: moduleId,
+          displayName: moduleId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          description: `ماژول ${moduleId} سیستم مدیریت`,
+          category: 'system',
+          isCore: false,
+          icon: Package,
+          color: 'bg-gray-500'
+        };
+      });
+    }
+  }, [siteManagementModules]);
 
   // Mutations
   const createRoleMutation = useMutation({
