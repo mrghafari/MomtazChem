@@ -1047,20 +1047,20 @@ const Shop = () => {
               <div className="flex items-center gap-3">
                 <Sparkles className="w-8 h-8 animate-spin text-yellow-300" />
                 <div>
-                  <h3 className="text-2xl font-bold mb-1">💰 MAXIMIZE YOUR SAVINGS!</h3>
-                  <p className="text-purple-100 text-sm">Buy more, save more! Up to 25% OFF on bulk orders</p>
+                  <h3 className="text-2xl font-bold mb-1">💰 {t.shop?.maximizeSavings || 'MAXIMIZE YOUR SAVINGS!'}</h3>
+                  <p className="text-purple-100 text-sm">{t.shop?.bulkDiscountMessage || 'Buy more, save more! Up to 25% OFF on bulk orders'}</p>
                 </div>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
               <div className="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full font-bold text-sm animate-pulse shadow-lg">
-                🔥 VOLUME DISCOUNTS ACTIVE
+                🔥 {t.shop?.volumeDiscountsActive || 'VOLUME DISCOUNTS ACTIVE'}
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/30">
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="font-semibold">Check product cards below!</span>
+                  <span className="font-semibold">{t.shop?.checkProductCards || 'Check product cards below!'}</span>
                 </div>
               </div>
             </div>
@@ -1441,10 +1441,10 @@ const Shop = () => {
                                                 <div className="flex items-center justify-between text-xs">
                                                   <div className="flex items-center gap-1">
                                                     <Sparkles className="w-2.5 h-2.5 animate-spin" />
-                                                    <span className="font-bold">🔥 MAX {(highestDiscount.discount * 100).toFixed(0)}% OFF!</span>
+                                                    <span className="font-bold">🔥 {t.shop?.max || 'MAX'} {(highestDiscount.discount * 100).toFixed(0)}% {t.shop?.off || 'OFF'}!</span>
                                                   </div>
                                                   <span className="font-bold text-yellow-200">
-                                                    Buy {highestDiscount.minQty}+
+                                                    {t.shop?.buy || 'Buy'} {highestDiscount.minQty}+
                                                   </span>
                                                 </div>
                                               </div>
@@ -1723,10 +1723,10 @@ const Shop = () => {
                                                   <div className="flex items-center justify-between text-sm">
                                                     <div className="flex items-center gap-1">
                                                       <Sparkles className="w-3 h-3 animate-spin" />
-                                                      <span className="font-bold">🔥 MAX SAVE: {(highestDiscount.discount * 100).toFixed(0)}% OFF!</span>
+                                                      <span className="font-bold">🔥 {t.shop?.maxSave || 'MAX SAVE'}: {(highestDiscount.discount * 100).toFixed(0)}% {t.shop?.off || 'OFF'}!</span>
                                                     </div>
                                                     <span className="font-bold text-yellow-200">
-                                                      Buy {highestDiscount.minQty}+ items
+                                                      {t.shop?.buy || 'Buy'} {highestDiscount.minQty}+ {t.shop?.items || 'items'}
                                                     </span>
                                                   </div>
                                                 </div>

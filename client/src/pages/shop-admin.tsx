@@ -611,10 +611,12 @@ const ShopAdmin = () => {
     enabled: isAuthenticated,
   });
 
-  const { data: discounts = [] } = useQuery({
+  const { data: discountsResponse = {} } = useQuery({
     queryKey: ["/api/shop/discounts"],
     enabled: isAuthenticated,
   });
+
+  const discounts = discountsResponse?.data || [];
 
   const { data: accountingStats = {} } = useQuery({
     queryKey: ["/api/shop/accounting-stats"],
