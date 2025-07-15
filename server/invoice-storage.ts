@@ -282,24 +282,50 @@ export class InvoiceStorage implements IInvoiceStorage {
   }
 
   private async generateInvoiceNumber(): Promise<string> {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
+    let attempt = 0;
+    const maxAttempts = 100;
     
-    // Get count of invoices for this month
-    const startOfMonth = new Date(year, today.getMonth(), 1);
-    const endOfMonth = new Date(year, today.getMonth() + 1, 0);
-    
-    const existingInvoices = await shopDb
-      .select()
-      .from(invoices)
-      .where(and(
-        eq(invoices.issueDate, startOfMonth),
-        eq(invoices.issueDate, endOfMonth)
-      ));
+    while (attempt < maxAttempts) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      
+      // Get all invoices for this month to calculate sequence
+      const monthPrefix = `INV-${year}${month}-`;
+      
+      const existingInvoices = await shopDb
+        .select({ invoiceNumber: invoices.invoiceNumber })
+        .from(invoices);
 
-    const sequence = existingInvoices.length + 1;
-    return `INV-${year}${month}-${String(sequence).padStart(4, '0')}`;
+      // Filter invoices for this month and find the highest sequence
+      let maxSequence = 0;
+      for (const invoice of existingInvoices) {
+        if (invoice.invoiceNumber.startsWith(monthPrefix)) {
+          const parts = invoice.invoiceNumber.split('-');
+          if (parts.length >= 3) {
+            const sequenceNum = parseInt(parts[2]) || 0;
+            if (sequenceNum > maxSequence) {
+              maxSequence = sequenceNum;
+            }
+          }
+        }
+      }
+
+      const nextSequence = maxSequence + 1;
+      const proposedNumber = `INV-${year}${month}-${String(nextSequence).padStart(4, '0')}`;
+      
+      // Check if this number already exists
+      const existingInvoice = await this.getInvoiceByNumber(proposedNumber);
+      if (!existingInvoice) {
+        return proposedNumber;
+      }
+      
+      attempt++;
+    }
+    
+    // Fallback with timestamp if all attempts fail
+    const timestamp = Date.now();
+    return `INV-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${timestamp}`;
   }
 
   async getInvoiceStats(): Promise<{
