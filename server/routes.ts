@@ -9314,22 +9314,71 @@ ${procedure.content}
       if (isNaN(id)) {
         return res.status(400).json({ 
           success: false, 
-          message: "شناسه قالب نامعتبر است" 
+          message: "Invalid template ID" 
         });
       }
 
-      const updates = req.body;
+      console.log('📧 Updating template ID:', id);
+      console.log('📧 Request body keys:', Object.keys(req.body));
+      
+      // Clean and prepare update data
+      const updates: any = {};
+      
+      if (req.body.templateName !== undefined) {
+        updates.templateName = String(req.body.templateName).trim();
+      }
+      if (req.body.name !== undefined) {
+        updates.templateName = String(req.body.name).trim();
+      }
+      if (req.body.categoryName !== undefined) {
+        updates.categoryName = String(req.body.categoryName).trim();
+      }
+      if (req.body.category !== undefined) {
+        updates.categoryName = String(req.body.category).trim();
+      }
+      if (req.body.subject !== undefined) {
+        updates.subject = String(req.body.subject).trim();
+      }
+      if (req.body.htmlContent !== undefined) {
+        updates.htmlContent = String(req.body.htmlContent);
+      }
+      if (req.body.textContent !== undefined) {
+        updates.textContent = String(req.body.textContent);
+      }
+      if (req.body.variables !== undefined) {
+        if (Array.isArray(req.body.variables)) {
+          updates.variables = req.body.variables;
+        } else if (typeof req.body.variables === 'string') {
+          // Parse comma-separated string into array
+          updates.variables = req.body.variables.split(',').map((v: string) => v.trim()).filter((v: string) => v.length > 0);
+        }
+      }
+      if (req.body.isActive !== undefined) {
+        updates.isActive = Boolean(req.body.isActive);
+      }
+      if (req.body.isDefault !== undefined) {
+        updates.isDefault = Boolean(req.body.isDefault);
+      }
+      if (req.body.language !== undefined) {
+        updates.language = String(req.body.language).trim();
+      }
+
+      console.log('📧 Cleaned update data:', JSON.stringify(updates, null, 2));
+
       const template = await emailStorage.updateTemplate(id, updates);
+      
+      console.log('📧 Template updated successfully:', template.templateName);
+      
       res.json({ 
         success: true, 
-        message: "قالب ایمیل با موفقیت بروزرسانی شد",
+        message: "Email template updated successfully",
         template 
       });
     } catch (error) {
       console.error("Error updating admin email template:", error);
       res.status(500).json({ 
         success: false, 
-        message: "خطا در بروزرسانی قالب ایمیل" 
+        message: "Error updating email template: " + error.message 
       });
     }
   });
