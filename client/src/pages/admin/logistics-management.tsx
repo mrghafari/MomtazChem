@@ -372,15 +372,192 @@ const LogisticsManagement = () => {
     </div>
   );
 
-  const CompaniesTab = () => (
+  const CompaniesTab = () => {
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [companyFormData, setCompanyFormData] = useState({
+      name: '',
+      contactPerson: '',
+      phone: '',
+      email: '',
+      address: '',
+      contractEndDate: '',
+      serviceTypes: [] as string[],
+      coverageAreas: [] as string[],
+      maxWeight: '',
+      maxVolume: '',
+      baseRate: '',
+      ratePerKm: '',
+      ratePerKg: ''
+    });
+
+    const addCompanyMutation = useMutation({
+      mutationFn: async (data: any) => {
+        const response = await fetch('/api/logistics/companies', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('Failed to create company');
+        return response.json();
+      },
+      onSuccess: () => {
+        setShowAddForm(false);
+        setCompanyFormData({
+          name: '',
+          contactPerson: '',
+          phone: '',
+          email: '',
+          address: '',
+          contractEndDate: '',
+          serviceTypes: [],
+          coverageAreas: [],
+          maxWeight: '',
+          maxVolume: '',
+          baseRate: '',
+          ratePerKm: '',
+          ratePerKg: ''
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/companies'] });
+      }
+    });
+
+    const handleSubmitCompany = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!companyFormData.name || !companyFormData.phone || !companyFormData.contractEndDate) {
+        alert('لطفاً نام شرکت، شماره تماس و پایان قرارداد را وارد کنید');
+        return;
+      }
+      addCompanyMutation.mutate(companyFormData);
+    };
+
+    return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">شرکت‌های حمل و نقل</h3>
-        <Button>
+        <Button onClick={() => setShowAddForm(true)}>
           <Plus className="w-4 h-4 mr-2" />
           شرکت جدید
         </Button>
       </div>
+
+      {showAddForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>ثبت شرکت حمل و نقل جدید</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmitCompany} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">نام شرکت *</Label>
+                  <Input
+                    id="name"
+                    value={companyFormData.name}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="نام شرکت حمل و نقل"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contactPerson">نام مسئول</Label>
+                  <Input
+                    id="contactPerson"
+                    value={companyFormData.contactPerson}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, contactPerson: e.target.value }))}
+                    placeholder="نام شخص رابط"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="phone">شماره تماس *</Label>
+                  <Input
+                    id="phone"
+                    value={companyFormData.phone}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="شماره تماس شرکت"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">ایمیل</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={companyFormData.email}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="آدرس ایمیل"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="address">آدرس</Label>
+                <Input
+                  id="address"
+                  value={companyFormData.address}
+                  onChange={(e) => setCompanyFormData(prev => ({ ...prev, address: e.target.value }))}
+                  placeholder="آدرس کامل شرکت"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="contractEndDate">پایان قرارداد *</Label>
+                <Input
+                  id="contractEndDate"
+                  type="date"
+                  value={companyFormData.contractEndDate}
+                  onChange={(e) => setCompanyFormData(prev => ({ ...prev, contractEndDate: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="maxWeight">حداکثر وزن (کیلوگرم)</Label>
+                  <Input
+                    id="maxWeight"
+                    type="number"
+                    value={companyFormData.maxWeight}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, maxWeight: e.target.value }))}
+                    placeholder="1000"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="baseRate">نرخ پایه (دینار)</Label>
+                  <Input
+                    id="baseRate"
+                    type="number"
+                    value={companyFormData.baseRate}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, baseRate: e.target.value }))}
+                    placeholder="5000"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ratePerKm">نرخ هر کیلومتر</Label>
+                  <Input
+                    id="ratePerKm"
+                    type="number"
+                    value={companyFormData.ratePerKm}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, ratePerKm: e.target.value }))}
+                    placeholder="100"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button type="submit" disabled={addCompanyMutation.isPending}>
+                  {addCompanyMutation.isPending ? 'در حال ثبت...' : 'ثبت شرکت'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                  لغو
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4">
         {loadingCompanies ? (
@@ -433,7 +610,8 @@ const LogisticsManagement = () => {
         )}
       </div>
     </div>
-  );
+    );
+  };
 
   const VehiclesTab = () => (
     <div className="space-y-6">

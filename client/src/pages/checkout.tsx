@@ -45,7 +45,7 @@ const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
   shippingCountry: z.string().optional(),
   
   // Order Details
-  shippingMethod: z.string().min(1, "Please select a shipping method"),
+  shippingMethod: z.string().optional(),
   paymentMethod: z.string().min(1, "Please select a payment method"),
   notes: z.string().optional(),
 });
@@ -606,7 +606,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       name="shippingMethod"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>انتخاب روش ارسال *</FormLabel>
+                          <FormLabel>انتخاب روش ارسال (اختیاری)</FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger>
