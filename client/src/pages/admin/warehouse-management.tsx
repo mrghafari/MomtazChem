@@ -338,8 +338,8 @@ const WarehouseManagement: React.FC = () => {
 
   // Filter orders based on search and status
   const filteredOrders = orders?.filter(order => {
-    const matchesSearch = order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = (order.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (order.customerEmail || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.id.toString().includes(searchTerm);
     
     const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
@@ -625,8 +625,8 @@ const WarehouseManagement: React.FC = () => {
                           <td className="p-4 font-medium">#{order.id}</td>
                           <td className="p-4">
                             <div>
-                              <p className="font-medium">{order.customerName}</p>
-                              <p className="text-sm text-gray-500">{order.customerEmail}</p>
+                              <p className="font-medium">{order.customerName || 'نامشخص'}</p>
+                              <p className="text-sm text-gray-500">{order.customerEmail || 'ایمیل نامشخص'}</p>
                             </div>
                           </td>
                           <td className="p-4">{formatCurrency(order.totalAmount)}</td>
