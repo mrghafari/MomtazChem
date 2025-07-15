@@ -768,7 +768,15 @@ const ShopAdmin = () => {
   // Delete discount mutation
   const deleteDiscountMutation = useMutation({
     mutationFn: async (discountId: number) => {
-      return apiRequest(`/api/shop/discounts/${discountId}`, "DELETE");
+      console.log('🎯 [DELETE DISCOUNT] Mutation started for ID:', discountId);
+      try {
+        const result = await apiRequest(`/api/shop/discounts/${discountId}`, { method: "DELETE" });
+        console.log('🎯 [DELETE DISCOUNT] API call successful:', result);
+        return result;
+      } catch (error) {
+        console.log('🎯 [DELETE DISCOUNT] API call failed:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });

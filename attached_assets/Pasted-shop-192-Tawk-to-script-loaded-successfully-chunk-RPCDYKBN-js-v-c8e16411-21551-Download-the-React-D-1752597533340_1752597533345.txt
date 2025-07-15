@@ -1,0 +1,226 @@
+shop:192 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=c8e16411:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=c8e16411:840
+run @ @tanstack_react-query.js?v=c8e16411:494
+start @ @tanstack_react-query.js?v=c8e16411:536
+fetch @ @tanstack_react-query.js?v=c8e16411:926
+executeFetch_fn @ @tanstack_react-query.js?v=c8e16411:2211
+onSubscribe @ @tanstack_react-query.js?v=c8e16411:1898
+subscribe @ @tanstack_react-query.js?v=c8e16411:24
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=c8e16411:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c8e16411:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c8e16411:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c8e16411:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c8e16411:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c8e16411:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c8e16411:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c8e16411:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c8e16411:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c8e16411:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c8e16411:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c8e16411:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c8e16411:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c8e16411:18718
+workLoop @ chunk-RPCDYKBN.js?v=c8e16411:197
+flushWork @ chunk-RPCDYKBN.js?v=c8e16411:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c8e16411:384
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+shop:167 Tawk.to Live Chat loaded successfully
+queryClient.ts:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=c8e16411:840
+run @ @tanstack_react-query.js?v=c8e16411:494
+start @ @tanstack_react-query.js?v=c8e16411:536
+fetch @ @tanstack_react-query.js?v=c8e16411:926
+executeFetch_fn @ @tanstack_react-query.js?v=c8e16411:2211
+fetch @ @tanstack_react-query.js?v=c8e16411:2011
+refetch @ @tanstack_react-query.js?v=c8e16411:2001
+onFocus @ @tanstack_react-query.js?v=c8e16411:749
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1112
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1111
+batch @ @tanstack_react-query.js?v=c8e16411:583
+onFocus @ @tanstack_react-query.js?v=c8e16411:1110
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:313
+onFocus @ @tanstack_react-query.js?v=c8e16411:312
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:299
+listener @ @tanstack_react-query.js?v=c8e16411:270
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
+queryClient.ts:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=c8e16411:840
+run @ @tanstack_react-query.js?v=c8e16411:494
+start @ @tanstack_react-query.js?v=c8e16411:536
+fetch @ @tanstack_react-query.js?v=c8e16411:926
+executeFetch_fn @ @tanstack_react-query.js?v=c8e16411:2211
+fetch @ @tanstack_react-query.js?v=c8e16411:2011
+refetch @ @tanstack_react-query.js?v=c8e16411:2001
+onFocus @ @tanstack_react-query.js?v=c8e16411:749
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1112
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1111
+batch @ @tanstack_react-query.js?v=c8e16411:583
+onFocus @ @tanstack_react-query.js?v=c8e16411:1110
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:313
+onFocus @ @tanstack_react-query.js?v=c8e16411:312
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:299
+listener @ @tanstack_react-query.js?v=c8e16411:270
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
+shop-admin.tsx:443 🎯 [DISCOUNT FORM] useEffect triggered with discount: {id: 3, name: 'Bulk Discount 50+', type: 'quantity', minQuantity: 70, discountPercentage: '35.00', …}
+shop-admin.tsx:454 🎯 [DISCOUNT FORM] Setting form data to: {name: 'Bulk Discount 50+', discountPercentage: '35.00', minQuantity: 70, description: 'خرید عمده - 35% تخفیف برای 70 عدد یا بیشتر', isActive: true, …}
+chunk-HOLREUEK.js?v=c8e16411:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-HOLREUEK.js?v=c8e16411:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c8e16411:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c8e16411:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c8e16411:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c8e16411:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c8e16411:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c8e16411:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c8e16411:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=c8e16411:19416
+commitRoot @ chunk-RPCDYKBN.js?v=c8e16411:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c8e16411:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c8e16411:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=c8e16411:18627
+shop:1 Uncaught (in promise) AbortError: The play() request was interrupted by a call to pause(). https://goo.gl/LdLk22
+shop-admin.tsx:514 🎯 [DISCOUNT FORM] Percentage changed to: 35.01
+shop-admin.tsx:514 🎯 [DISCOUNT FORM] Percentage changed to: 2
+shop-admin.tsx:514 🎯 [DISCOUNT FORM] Percentage changed to: 22
+shop-admin.tsx:531 🎯 [DISCOUNT FORM] Quantity changed to: 5
+shop-admin.tsx:531 🎯 [DISCOUNT FORM] Quantity changed to: 55
+shop-admin.tsx:487 🎯 [DISCOUNT FORM] Form submitted with data: {name: 'Bulk Discount 50+', discountPercentage: '22', minQuantity: 55, description: 'خرید عمده - 35% تخفیف برای 70 عدد یا بیشتر', isActive: true, …}
+shop-admin.tsx:1309 🎯 [DISCOUNT FORM] onSave callback called with: {name: 'Bulk Discount 50+', discountPercentage: '22', minQuantity: 55, description: 'خرید عمده - 35% تخفیف برای 70 عدد یا بیشتر', isActive: true, …}
+shop-admin.tsx:1310 🎯 [DISCOUNT FORM] editingDiscount: {id: 3, name: 'Bulk Discount 50+', type: 'quantity', minQuantity: 70, discountPercentage: '35.00', …}
+shop-admin.tsx:1313 🎯 [DISCOUNT FORM] Updating existing discount
+shop-admin.tsx:693 🎯 [MUTATION] Sending update request: {discountId: 3, updates: {…}}
+shop-admin.tsx:697 🎯 [MUTATION] Update successful, response: {success: true, data: {…}}
+shop-admin.tsx:701 🎯 [MUTATION] Updating editingDiscount with new data: {id: 3, name: 'Bulk Discount 50+', type: 'quantity', minQuantity: 55, discountPercentage: '22.00', …}
+shop-admin.tsx:443 🎯 [DISCOUNT FORM] useEffect triggered with discount: {id: 3, name: 'Bulk Discount 50+', type: 'quantity', minQuantity: 55, discountPercentage: '22.00', …}
+shop-admin.tsx:454 🎯 [DISCOUNT FORM] Setting form data to: {name: 'Bulk Discount 50+', discountPercentage: '22.00', minQuantity: 55, description: 'خرید عمده - 22% تخفیف برای 55 عدد یا بیشتر', isActive: true, …}
+shop-admin.tsx:443 🎯 [DISCOUNT FORM] useEffect triggered with discount: null
+shop-admin.tsx:458 🎯 [DISCOUNT FORM] Resetting form for new discount
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
+queryClient.ts:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=c8e16411:840
+run @ @tanstack_react-query.js?v=c8e16411:494
+start @ @tanstack_react-query.js?v=c8e16411:536
+fetch @ @tanstack_react-query.js?v=c8e16411:926
+executeFetch_fn @ @tanstack_react-query.js?v=c8e16411:2211
+fetch @ @tanstack_react-query.js?v=c8e16411:2011
+refetch @ @tanstack_react-query.js?v=c8e16411:2001
+onFocus @ @tanstack_react-query.js?v=c8e16411:749
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1112
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1111
+batch @ @tanstack_react-query.js?v=c8e16411:583
+onFocus @ @tanstack_react-query.js?v=c8e16411:1110
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:313
+onFocus @ @tanstack_react-query.js?v=c8e16411:312
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:299
+listener @ @tanstack_react-query.js?v=c8e16411:270
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
+shop-admin.tsx:443 🎯 [DISCOUNT FORM] useEffect triggered with discount: {id: 3, name: 'Bulk Discount 50+', type: 'quantity', minQuantity: 55, discountPercentage: '22.00', …}
+shop-admin.tsx:454 🎯 [DISCOUNT FORM] Setting form data to: {name: 'Bulk Discount 50+', discountPercentage: '22.00', minQuantity: 55, description: 'خرید عمده - 22% تخفیف برای 55 عدد یا بیشتر', isActive: true, …}
+chunk-HOLREUEK.js?v=c8e16411:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-HOLREUEK.js?v=c8e16411:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c8e16411:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c8e16411:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c8e16411:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c8e16411:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c8e16411:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c8e16411:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c8e16411:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=c8e16411:19416
+commitRoot @ chunk-RPCDYKBN.js?v=c8e16411:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c8e16411:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c8e16411:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=c8e16411:18627
+shop-admin.tsx:514 🎯 [DISCOUNT FORM] Percentage changed to: 2
+shop-admin.tsx:514 🎯 [DISCOUNT FORM] Percentage changed to: 20
+shop-admin.tsx:487 🎯 [DISCOUNT FORM] Form submitted with data: {name: 'Bulk Discount 50+', discountPercentage: '20', minQuantity: 55, description: 'خرید عمده - 22% تخفیف برای 55 عدد یا بیشتر', isActive: true, …}
+shop-admin.tsx:1309 🎯 [DISCOUNT FORM] onSave callback called with: {name: 'Bulk Discount 50+', discountPercentage: '20', minQuantity: 55, description: 'خرید عمده - 22% تخفیف برای 55 عدد یا بیشتر', isActive: true, …}
+shop-admin.tsx:1310 🎯 [DISCOUNT FORM] editingDiscount: {id: 3, name: 'Bulk Discount 50+', type: 'quantity', minQuantity: 55, discountPercentage: '22.00', …}
+shop-admin.tsx:1313 🎯 [DISCOUNT FORM] Updating existing discount
+shop-admin.tsx:693 🎯 [MUTATION] Sending update request: {discountId: 3, updates: {…}}
+shop-admin.tsx:697 🎯 [MUTATION] Update successful, response: {success: true, data: {…}}
+shop-admin.tsx:701 🎯 [MUTATION] Updating editingDiscount with new data: {id: 3, name: 'Bulk Discount 50+', type: 'quantity', minQuantity: 55, discountPercentage: '20.00', …}
+shop-admin.tsx:443 🎯 [DISCOUNT FORM] useEffect triggered with discount: {id: 3, name: 'Bulk Discount 50+', type: 'quantity', minQuantity: 55, discountPercentage: '20.00', …}
+shop-admin.tsx:454 🎯 [DISCOUNT FORM] Setting form data to: {name: 'Bulk Discount 50+', discountPercentage: '20.00', minQuantity: 55, description: 'خرید عمده - 20% تخفیف برای 55 عدد یا بیشتر', isActive: true, …}
+shop-admin.tsx:443 🎯 [DISCOUNT FORM] useEffect triggered with discount: null
+shop-admin.tsx:458 🎯 [DISCOUNT FORM] Resetting form for new discount
+queryClient.ts:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=c8e16411:840
+run @ @tanstack_react-query.js?v=c8e16411:494
+start @ @tanstack_react-query.js?v=c8e16411:536
+fetch @ @tanstack_react-query.js?v=c8e16411:926
+executeFetch_fn @ @tanstack_react-query.js?v=c8e16411:2211
+fetch @ @tanstack_react-query.js?v=c8e16411:2011
+refetch @ @tanstack_react-query.js?v=c8e16411:2001
+onFocus @ @tanstack_react-query.js?v=c8e16411:749
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1112
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1111
+batch @ @tanstack_react-query.js?v=c8e16411:583
+onFocus @ @tanstack_react-query.js?v=c8e16411:1110
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:313
+onFocus @ @tanstack_react-query.js?v=c8e16411:312
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:299
+listener @ @tanstack_react-query.js?v=c8e16411:270
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
+queryClient.ts:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=c8e16411:840
+run @ @tanstack_react-query.js?v=c8e16411:494
+start @ @tanstack_react-query.js?v=c8e16411:536
+fetch @ @tanstack_react-query.js?v=c8e16411:926
+executeFetch_fn @ @tanstack_react-query.js?v=c8e16411:2211
+fetch @ @tanstack_react-query.js?v=c8e16411:2011
+refetch @ @tanstack_react-query.js?v=c8e16411:2001
+onFocus @ @tanstack_react-query.js?v=c8e16411:749
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1112
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1111
+batch @ @tanstack_react-query.js?v=c8e16411:583
+onFocus @ @tanstack_react-query.js?v=c8e16411:1110
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:313
+onFocus @ @tanstack_react-query.js?v=c8e16411:312
+(anonymous) @ @tanstack_react-query.js?v=c8e16411:299
+listener @ @tanstack_react-query.js?v=c8e16411:270
+useAuth.ts:26 Auth check result: {success: true, user: {…}}
