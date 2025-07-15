@@ -679,11 +679,9 @@ const ShopAdmin = () => {
   // Update discount mutation
   const updateDiscountMutation = useMutation({
     mutationFn: async ({ discountId, updates }: { discountId: number; updates: any }) => {
-      console.log("Frontend: Updating discount", discountId, "with updates:", updates);
       return apiRequest(`/api/shop/discounts/${discountId}`, "PATCH", updates);
     },
-    onSuccess: (data) => {
-      console.log("Frontend: Discount update successful:", data);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
       // Also invalidate shop products to refresh discount information on product cards
       queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
@@ -698,7 +696,6 @@ const ShopAdmin = () => {
       });
     },
     onError: (error: any) => {
-      console.error("Frontend: Discount update failed:", error);
       toast({
         title: "Update Failed",
         description: `Failed to update discount settings: ${error?.message || 'Unknown error'}`,
