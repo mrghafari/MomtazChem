@@ -182,10 +182,12 @@ const LogisticsManagement = () => {
   const queryClient = useQueryClient();
 
   // Queries
-  const { data: pendingOrders = [], isLoading: loadingOrders } = useQuery({
+  const { data: pendingOrdersResponse, isLoading: loadingOrders } = useQuery({
     queryKey: ['/api/logistics/orders/pending'],
     enabled: activeTab === 'orders'
   });
+  
+  const pendingOrders = pendingOrdersResponse?.data || [];
 
   const { data: companies = [], isLoading: loadingCompanies } = useQuery({
     queryKey: ['/api/logistics/companies'],
