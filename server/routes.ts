@@ -9306,6 +9306,83 @@ ${procedure.content}
     }
   });
 
+  // Simple endpoint to update phone number in template
+  app.put("/api/admin/email/templates/:id/phone", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { phoneNumber } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid template ID" 
+        });
+      }
+
+      console.log('📧 Updating phone number for template ID:', id);
+      console.log('📧 New phone number:', phoneNumber);
+      
+      // Update phone number in HTML content using direct SQL
+      const result = await sql`
+        UPDATE email_templates 
+        SET html_content = replace(html_content, '+964 771 234 5678', ${phoneNumber}),
+            text_content = replace(text_content, '+964 770 999 6771', ${phoneNumber})
+        WHERE id = ${id}
+      `;
+      
+      console.log('📧 Phone number updated successfully');
+      
+      res.json({ 
+        success: true, 
+        message: "Phone number updated successfully" 
+      });
+    } catch (error) {
+      console.error("Error updating phone number:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error updating phone number: " + error.message 
+      });
+    }
+  });
+
+  // Simple endpoint to update subject
+  app.put("/api/admin/email/templates/:id/subject", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { subject } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid template ID" 
+        });
+      }
+
+      console.log('📧 Updating subject for template ID:', id);
+      console.log('📧 New subject:', subject);
+      
+      // Update subject using direct SQL
+      const result = await sql`
+        UPDATE email_templates 
+        SET subject = ${subject}
+        WHERE id = ${id}
+      `;
+      
+      console.log('📧 Subject updated successfully');
+      
+      res.json({ 
+        success: true, 
+        message: "Subject updated successfully" 
+      });
+    } catch (error) {
+      console.error("Error updating subject:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error updating subject: " + error.message 
+      });
+    }
+  });
+
   app.put("/api/admin/email/templates/:id", requireAuth, async (req, res) => {
     try {
       const { emailStorage } = await import("./email-storage");
