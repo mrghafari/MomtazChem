@@ -440,12 +440,7 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
 
   // Update form data when discount prop changes (for editing existing discounts)
   useEffect(() => {
-    console.log("🔄 [DISCOUNT FORM] Discount prop changed:", discount);
     if (discount) {
-      console.log("🔄 [DISCOUNT FORM] Setting form data with discount values:", {
-        discountPercentage: discount.discountPercentage,
-        minQuantity: discount.minQuantity
-      });
       setFormData({
         name: discount.name || "",
         discountPercentage: discount.discountPercentage || "",
@@ -457,7 +452,6 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
       });
     } else {
       // Reset form for new discount
-      console.log("🔄 [DISCOUNT FORM] Resetting form for new discount");
       setFormData({
         name: "",
         discountPercentage: "",
@@ -486,7 +480,6 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("🔄 [DISCOUNT FORM] Submitting form data:", formData);
     onSave(formData);
   };
 
@@ -512,10 +505,7 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
             max="100"
             step="0.01"
             value={formData.discountPercentage}
-            onChange={(e) => {
-              console.log("🔄 [DISCOUNT FORM] Percentage changed to:", e.target.value);
-              setFormData(prev => ({ ...prev, discountPercentage: e.target.value }));
-            }}
+            onChange={(e) => setFormData(prev => ({ ...prev, discountPercentage: e.target.value }))}
             required
           />
         </div>
@@ -529,10 +519,7 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
             type="number"
             min="1"
             value={formData.minQuantity}
-            onChange={(e) => {
-              console.log("🔄 [DISCOUNT FORM] Quantity changed to:", e.target.value);
-              setFormData(prev => ({ ...prev, minQuantity: parseInt(e.target.value) || 1 }));
-            }}
+            onChange={(e) => setFormData(prev => ({ ...prev, minQuantity: parseInt(e.target.value) || 1 }))}
             required
           />
         </div>
