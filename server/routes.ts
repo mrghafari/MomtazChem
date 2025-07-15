@@ -8677,18 +8677,27 @@ ${procedure.content}
     }
   });
 
-  app.post("/api/shop/discounts", async (req, res) => {
+  app.post("/api/shop/discounts", requireAuth, async (req, res) => {
     try {
       const discountData = req.body;
+      console.log("🎯 [DISCOUNT API] Creating new discount with data:", discountData);
+      
       const discount = await shopStorage.createDiscountSetting(discountData);
+      console.log("🎯 [DISCOUNT API] Discount created successfully:", discount);
+      
       res.json({ success: true, data: discount });
     } catch (error) {
-      console.error("Error creating discount:", error);
-      res.status(500).json({ success: false, message: "Failed to create discount" });
+      console.error("🎯 [DISCOUNT API] Error creating discount:", error);
+      console.error("🎯 [DISCOUNT API] Error details:", error instanceof Error ? error.message : error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create discount",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
-  app.patch("/api/shop/discounts/:id", async (req, res) => {
+  app.patch("/api/shop/discounts/:id", requireAuth, async (req, res) => {
     try {
       const discountId = parseInt(req.params.id);
       if (isNaN(discountId)) {
@@ -8717,7 +8726,7 @@ ${procedure.content}
     }
   });
 
-  app.delete("/api/shop/discounts/:id", async (req, res) => {
+  app.delete("/api/shop/discounts/:id", requireAuth, async (req, res) => {
     try {
       const discountId = parseInt(req.params.id);
       if (isNaN(discountId)) {
