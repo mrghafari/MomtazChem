@@ -74,6 +74,9 @@ export interface IOrderManagementStorage {
   uploadPaymentReceipt(receiptData: InsertPaymentReceipt): Promise<PaymentReceipt>;
   getPaymentReceiptsByOrder(customerOrderId: number): Promise<PaymentReceipt[]>;
   
+  // Weight calculation
+  calculateOrderWeight(customerOrderId: number): Promise<number>;
+  
   // Department assignments
   assignUserToDepartment(assignmentData: InsertDepartmentAssignment): Promise<DepartmentAssignment>;
   getUserDepartments(adminUserId: number): Promise<DepartmentAssignment[]>;
@@ -1064,6 +1067,34 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.error('Error in getAllOrdersWithDetails:', error);
       // Return empty array with proper structure for frontend
       return [];
+    }
+  }
+
+  async calculateOrderWeight(customerOrderId: number): Promise<number> {
+    try {
+      // Get order items
+      const items = await db
+        .select({
+          productId: orderItems.productId,
+          quantity: orderItems.quantity,
+          weight: products.weight
+        })
+        .from(orderItems)
+        .leftJoin(products, eq(orderItems.productId, products.id))
+        .where(eq(orderItems.customerOrderId, customerOrderId));
+
+      // Calculate total weight
+      let totalWeight = 0;
+      for (const item of items) {
+        const productWeight = item.weight ? parseFloat(item.weight.toString()) : 0;
+        const quantity = item.quantity || 1;
+        totalWeight += productWeight * quantity;
+      }
+
+      return Math.round(totalWeight * 100) / 100; // Round to 2 decimal places
+    } catch (error) {
+      console.error(`Error calculating weight for order ${customerOrderId}:`, error);
+      return 0;
     }
   }
 }
