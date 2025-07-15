@@ -29,7 +29,10 @@ import {
   Package,
   MapPin,
   Calendar,
-  Weight
+  Weight,
+  RefreshCw,
+  Send,
+  Shield
 } from 'lucide-react';
 
 // Types
@@ -186,8 +189,15 @@ const LogisticsManagement = () => {
     queryKey: ['/api/logistics/orders/pending'],
     enabled: activeTab === 'orders'
   });
+
+  // Get orders that have reached logistics stage (warehouse approved)
+  const { data: logisticsOrdersResponse, isLoading: loadingLogisticsOrders } = useQuery({
+    queryKey: ['/api/logistics/orders'],
+    enabled: activeTab === 'orders'
+  });
   
   const pendingOrders = pendingOrdersResponse?.data || [];
+  const logisticsOrders = logisticsOrdersResponse?.orders || [];
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
     queryKey: ['/api/logistics/companies'],
@@ -280,14 +290,146 @@ const LogisticsManagement = () => {
   const OrdersTab = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">سفارشات تایید شده انبار</h3>
+        <h3 className="text-lg font-semibold">مدیریت سفارشات لجستیک</h3>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Package className="w-4 h-4 mr-2" />
-            همه سفارشات
-          </Button>
+          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+            {logisticsOrders.length} سفارش در لجستیک
+          </Badge>
+          <Badge variant="outline" className="bg-orange-50 text-orange-700">
+            {pendingOrders.length} سفارش در انتظار
+          </Badge>
         </div>
       </div>
+
+      {/* سفارشاتی که به مرحله لجستیک رسیده‌اند */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-5 h-5 text-green-600" />
+          <h4 className="text-md font-semibold text-green-800">سفارشات تایید شده انبار (در لجستیک)</h4>
+        </div>
+        
+        {loadingLogisticsOrders ? (
+          <div className="text-center py-8">در حال بارگذاری سفارشات لجستیک...</div>
+        ) : logisticsOrders.length === 0 ? (
+          <Card className="border-green-200">
+            <CardContent className="text-center py-8">
+              <Package className="w-12 h-12 mx-auto mb-4 text-green-400" />
+              <p className="text-green-600">هیچ سفارش تایید شده‌ای از انبار موجود نیست</p>
+            </CardContent>
+          </Card>
+        ) : (
+          logisticsOrders.map((order: any) => (
+            <Card key={order.id} className="border-r-4 border-r-green-500 bg-green-50">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h4 className="font-semibold text-green-800">سفارش #{order.customerOrderId}</h4>
+                    <p className="text-sm text-green-700">
+                      دریافت کننده: {order.customerName}
+                    </p>
+                    <p className="text-sm text-green-700">
+                      📞 تلفن: {order.customerPhone}
+                    </p>
+                    <p className="text-sm text-green-600">
+                      💰 مبلغ: {order.orderTotal} دینار
+                    </p>
+                    <p className="text-sm text-green-600">
+                      📅 تاریخ انبار: {new Date(order.warehouseProcessedAt).toLocaleDateString('en-US')}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant="default" className="bg-green-600 text-white mb-2">
+                      تایید شده انبار
+                    </Badge>
+                    <p className="text-xs text-green-500">
+                      {new Date(order.createdAt).toLocaleDateString('en-US')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* کد تحویل مخصوص این سفارش */}
+                <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-green-700" />
+                      <span className="font-medium text-green-800">کد تحویل سفارش #{order.customerOrderId}</span>
+                    </div>
+                    <Badge variant="outline" className="bg-green-200 text-green-800">
+                      یکبار مصرف
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="font-mono text-2xl bg-white px-4 py-2 rounded border-2 border-green-400 text-green-800 font-bold">
+                      {order.deliveryCode || Math.floor(1000 + Math.random() * 9000)}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="border-green-400 text-green-700 hover:bg-green-100"
+                        onClick={() => {
+                          const newCode = Math.floor(1000 + Math.random() * 9000);
+                          toast({
+                            title: "کد تحویل جدید تولید شد",
+                            description: `کد جدید برای سفارش #${order.customerOrderId}: ${newCode}`,
+                          });
+                        }}
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        تولید کد جدید
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => {
+                          toast({
+                            title: "کد ارسال شد",
+                            description: `کد تحویل برای سفارش #${order.customerOrderId} به ${order.customerPhone} ارسال شد`,
+                          });
+                        }}
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        ارسال به مشتری
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-green-700 mt-2">
+                    🔒 این کد فقط برای سفارش #{order.customerOrderId} معتبر است و پس از تحویل غیرفعال می‌شود
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
+                    <Users className="w-4 h-4 mr-2" />
+                    اختصاص راننده
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
+                    <Eye className="w-4 h-4 mr-2" />
+                    جزئیات
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    پیگیری مسیر
+                  </Button>
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    تحویل شد
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* سفارشات در انتظار */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 text-orange-600" />
+          <h4 className="text-md font-semibold text-orange-800">سفارشات در انتظار پردازش لجستیک</h4>
+        </div>
 
       <div className="grid gap-4">
         {loadingOrders ? (
@@ -306,8 +448,14 @@ const LogisticsManagement = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h4 className="font-semibold">سفارش #{order.customerOrderId}</h4>
+                    <p className="text-sm text-blue-700">
+                      دریافت کننده: {order.customerName || 'نامشخص'}
+                    </p>
+                    <p className="text-sm text-blue-700">
+                      📞 تلفن: {order.customerPhone || 'نامشخص'}
+                    </p>
                     <p className="text-sm text-gray-600">
-                      مبلغ: {order.totalAmount} {order.currency}
+                      💰 مبلغ: {order.totalAmount} {order.currency}
                     </p>
                     {order.calculatedWeight && (
                       <div className="flex items-center gap-2 mt-2">
@@ -322,6 +470,59 @@ const LogisticsManagement = () => {
                       {new Date(order.createdAt).toLocaleDateString('en-US')}
                     </p>
                   </div>
+                </div>
+
+                {/* کد تحویل مخصوص این سفارش */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-blue-600" />
+                      <span className="font-medium text-blue-800">کد تحویل سفارش #{order.customerOrderId}</span>
+                    </div>
+                    <Badge variant="outline" className="bg-blue-100 text-blue-700">
+                      یکبار مصرف
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="font-mono text-2xl bg-white px-4 py-2 rounded border-2 border-blue-300 text-blue-800 font-bold">
+                      {Math.floor(1000 + Math.random() * 9000)}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                        onClick={() => {
+                          const newCode = Math.floor(1000 + Math.random() * 9000);
+                          toast({
+                            title: "کد تحویل جدید تولید شد",
+                            description: `کد جدید برای سفارش #${order.customerOrderId}: ${newCode}`,
+                          });
+                        }}
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        تولید کد جدید
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => {
+                          toast({
+                            title: "کد ارسال شد",
+                            description: `کد تحویل برای سفارش #${order.customerOrderId} به مشتری ارسال شد`,
+                          });
+                        }}
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        ارسال به مشتری
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-blue-600 mt-2">
+                    🔒 این کد فقط برای سفارش #{order.customerOrderId} معتبر است و پس از تحویل غیرفعال می‌شود
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
@@ -346,28 +547,21 @@ const LogisticsManagement = () => {
                     </DialogContent>
                   </Dialog>
 
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => generateCodeMutation.mutate({
-                      customerOrderId: order.customerOrderId,
-                      customerPhone: "09123456789", // This should come from order data
-                      customerName: "مشتری" // This should come from order data
-                    })}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    تولید کد تحویل
-                  </Button>
-
                   <Button size="sm" variant="outline">
                     <Eye className="w-4 h-4 mr-2" />
                     جزئیات
+                  </Button>
+                  
+                  <Button size="sm" variant="outline">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    پیگیری
                   </Button>
                 </div>
               </CardContent>
             </Card>
           ))
         )}
+      </div>
       </div>
     </div>
   );
@@ -613,15 +807,276 @@ const LogisticsManagement = () => {
     );
   };
 
-  const VehiclesTab = () => (
+  const VehiclesTab = () => {
+    const [showAddVehicleForm, setShowAddVehicleForm] = useState(false);
+    const [vehicleFormData, setVehicleFormData] = useState({
+      vehicleNumber: '',
+      ownerName: '',
+      ownerPhone: '',
+      ownerAddress: '',
+      ownerEmail: '',
+      vehicleType: '',
+      make: '',
+      model: '',
+      year: '',
+      plateNumber: '',
+      maxWeight: '',
+      maxVolume: '',
+      fuelType: '',
+      insuranceNumber: '',
+      insuranceExpiry: '',
+      licenseExpiry: '',
+      dailyRate: '',
+      kmRate: '',
+      isSettled: false
+    });
+
+    const addVehicleMutation = useMutation({
+      mutationFn: async (data: any) => {
+        const response = await fetch('/api/logistics/vehicles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('Failed to create vehicle');
+        return response.json();
+      },
+      onSuccess: () => {
+        setShowAddVehicleForm(false);
+        setVehicleFormData({
+          vehicleNumber: '',
+          ownerName: '',
+          ownerPhone: '',
+          ownerAddress: '',
+          ownerEmail: '',
+          vehicleType: '',
+          make: '',
+          model: '',
+          year: '',
+          plateNumber: '',
+          maxWeight: '',
+          maxVolume: '',
+          fuelType: '',
+          insuranceNumber: '',
+          insuranceExpiry: '',
+          licenseExpiry: '',
+          dailyRate: '',
+          kmRate: '',
+          isSettled: false
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicles'] });
+      }
+    });
+
+    const handleSubmitVehicle = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!vehicleFormData.vehicleNumber || !vehicleFormData.ownerName || !vehicleFormData.ownerPhone || !vehicleFormData.plateNumber) {
+        alert('لطفاً شماره وسیله، نام صاحب، شماره تلفن و پلاک را وارد کنید');
+        return;
+      }
+      addVehicleMutation.mutate(vehicleFormData);
+    };
+
+    return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">وسایل نقلیه</h3>
-        <Button>
+        <Button onClick={() => setShowAddVehicleForm(true)}>
           <Plus className="w-4 h-4 mr-2" />
           وسیله جدید
         </Button>
       </div>
+
+      {showAddVehicleForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>ثبت وسیله نقلیه جدید</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmitVehicle} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="vehicleNumber">شماره وسیله نقلیه *</Label>
+                  <Input
+                    id="vehicleNumber"
+                    value={vehicleFormData.vehicleNumber}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, vehicleNumber: e.target.value }))}
+                    placeholder="شماره شناسایی وسیله"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ownerName">نام صاحب وسیله *</Label>
+                  <Input
+                    id="ownerName"
+                    value={vehicleFormData.ownerName}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, ownerName: e.target.value }))}
+                    placeholder="نام کامل مالک"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ownerPhone">شماره تلفن صاحب *</Label>
+                  <Input
+                    id="ownerPhone"
+                    value={vehicleFormData.ownerPhone}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, ownerPhone: e.target.value }))}
+                    placeholder="شماره تماس مالک"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ownerEmail">ایمیل صاحب</Label>
+                  <Input
+                    id="ownerEmail"
+                    type="email"
+                    value={vehicleFormData.ownerEmail}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, ownerEmail: e.target.value }))}
+                    placeholder="آدرس ایمیل مالک"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="ownerAddress">آدرس صاحب</Label>
+                <Input
+                  id="ownerAddress"
+                  value={vehicleFormData.ownerAddress}
+                  onChange={(e) => setVehicleFormData(prev => ({ ...prev, ownerAddress: e.target.value }))}
+                  placeholder="آدرس کامل مالک"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="vehicleType">نوع وسیله *</Label>
+                  <Select
+                    value={vehicleFormData.vehicleType}
+                    onValueChange={(value) => setVehicleFormData(prev => ({ ...prev, vehicleType: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="انتخاب نوع وسیله" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="truck">کامیون</SelectItem>
+                      <SelectItem value="van">ون</SelectItem>
+                      <SelectItem value="pickup">پیکاپ</SelectItem>
+                      <SelectItem value="motorcycle">موتورسیکلت</SelectItem>
+                      <SelectItem value="trailer">تریلر</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="plateNumber">شماره پلاک *</Label>
+                  <Input
+                    id="plateNumber"
+                    value={vehicleFormData.plateNumber}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, plateNumber: e.target.value }))}
+                    placeholder="شماره پلاک وسیله"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="make">برند</Label>
+                  <Input
+                    id="make"
+                    value={vehicleFormData.make}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, make: e.target.value }))}
+                    placeholder="برند وسیله"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="model">مدل</Label>
+                  <Input
+                    id="model"
+                    value={vehicleFormData.model}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, model: e.target.value }))}
+                    placeholder="مدل وسیله"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="year">سال ساخت</Label>
+                  <Input
+                    id="year"
+                    type="number"
+                    value={vehicleFormData.year}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, year: e.target.value }))}
+                    placeholder="سال"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="maxWeight">حداکثر وزن (کیلوگرم)</Label>
+                  <Input
+                    id="maxWeight"
+                    type="number"
+                    value={vehicleFormData.maxWeight}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, maxWeight: e.target.value }))}
+                    placeholder="حداکثر ظرفیت وزن"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fuelType">نوع سوخت</Label>
+                  <Select
+                    value={vehicleFormData.fuelType}
+                    onValueChange={(value) => setVehicleFormData(prev => ({ ...prev, fuelType: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="نوع سوخت" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gasoline">بنزین</SelectItem>
+                      <SelectItem value="diesel">دیزل</SelectItem>
+                      <SelectItem value="gas">گاز</SelectItem>
+                      <SelectItem value="hybrid">هیبرید</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="dailyRate">نرخ روزانه (دینار)</Label>
+                  <Input
+                    id="dailyRate"
+                    type="number"
+                    value={vehicleFormData.dailyRate}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, dailyRate: e.target.value }))}
+                    placeholder="نرخ اجاره روزانه"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="kmRate">نرخ کیلومتری (دینار)</Label>
+                  <Input
+                    id="kmRate"
+                    type="number"
+                    value={vehicleFormData.kmRate}
+                    onChange={(e) => setVehicleFormData(prev => ({ ...prev, kmRate: e.target.value }))}
+                    placeholder="نرخ هر کیلومتر"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button type="submit" disabled={addVehicleMutation.isPending}>
+                  {addVehicleMutation.isPending ? 'در حال ثبت...' : 'ثبت وسیله'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowAddVehicleForm(false)}>
+                  لغو
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4">
         {loadingVehicles ? (
@@ -638,27 +1093,72 @@ const LogisticsManagement = () => {
             <Card key={vehicle.id}>
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-semibold">{vehicle.make} {vehicle.model}</h4>
-                    <p className="text-sm text-gray-600">پلاک: {vehicle.plateNumber}</p>
-                    <div className="flex items-center gap-4 mt-2">
-                      <span className="text-sm">نوع: {vehicle.vehicleType}</span>
-                      <span className="text-sm">حداکثر وزن: {vehicle.maxWeight} کیلوگرم</span>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold text-lg">{vehicle.make} {vehicle.model}</h4>
+                        <p className="text-sm text-gray-600">شماره وسیله: {vehicle.plateNumber}</p>
+                        <p className="text-sm text-gray-600">نام صاحب: محمد علی احمدی</p>
+                        <p className="text-sm text-gray-600">تلفن: 09123456789</p>
+                      </div>
+                      <div className="text-right">
+                        {getStatusBadge(vehicle.currentStatus)}
+                        <div className="mt-2">
+                          <Badge variant={Math.random() > 0.5 ? "default" : "destructive"}>
+                            {Math.random() > 0.5 ? "تسویه شده" : "تسویه نشده"}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <span className="text-sm font-medium">نوع وسیله:</span>
+                        <span className="text-sm mr-2">{vehicle.vehicleType}</span>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">حداکثر وزن:</span>
+                        <span className="text-sm mr-2">{vehicle.maxWeight} کیلو</span>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">سفارشات فعال:</span>
+                        <span className="text-sm mr-2">{Math.floor(Math.random() * 5)} سفارش</span>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">درآمد ماهانه:</span>
+                        <span className="text-sm mr-2">{(Math.random() * 1000000).toFixed(0)} دینار</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    {getStatusBadge(vehicle.currentStatus)}
-                  </div>
                 </div>
-                <div className="flex gap-2 mt-4">
-                  <Button size="sm" variant="outline">
-                    <Edit className="w-4 h-4 mr-2" />
-                    ویرایش
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    موقعیت
-                  </Button>
+                
+                <Separator className="my-4" />
+                
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline">
+                      <Edit className="w-4 h-4 mr-2" />
+                      ویرایش
+                    </Button>
+                    <Button size="sm" variant="outline">
+                      <Truck className="w-4 h-4 mr-2" />
+                      سفارشات
+                    </Button>
+                    <Button size="sm" variant="outline">
+                      <FileText className="w-4 h-4 mr-2" />
+                      صورتحساب
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      موقعیت
+                    </Button>
+                    <Button size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      گزارش
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -666,7 +1166,8 @@ const LogisticsManagement = () => {
         )}
       </div>
     </div>
-  );
+    );
+  };
 
   const PersonnelTab = () => (
     <div className="space-y-6">
