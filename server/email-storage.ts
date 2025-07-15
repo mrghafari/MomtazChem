@@ -301,31 +301,36 @@ export class EmailStorage implements IEmailStorage {
   }
 
   async getAllTemplates(): Promise<EmailTemplate[]> {
-    const { desc } = await import("drizzle-orm");
-    const { sql } = await import("drizzle-orm");
-    
-    const result = await emailDb.execute(sql`
-      SELECT 
-        id, 
-        name as templateName, 
-        category as categoryName,
-        subject, 
-        html_content as htmlContent, 
-        text_content as textContent, 
-        variables, 
-        is_active as isActive, 
-        is_default as isDefault, 
-        language, 
-        created_by as createdBy, 
-        usage_count as usageCount, 
-        last_used as lastUsed, 
-        created_at as createdAt, 
-        updated_at as updatedAt
-      FROM email_templates 
-      ORDER BY is_default DESC, name ASC
-    `);
-    
-    return result.rows as EmailTemplate[];
+    try {
+      const { sql } = await import("drizzle-orm");
+      
+      const result = await emailDb.execute(sql`
+        SELECT 
+          id, 
+          name as templateName, 
+          category as categoryName,
+          subject, 
+          html_content as htmlContent, 
+          text_content as textContent, 
+          variables, 
+          is_active as isActive, 
+          is_default as isDefault, 
+          language, 
+          created_by as createdBy, 
+          usage_count as usageCount, 
+          last_used as lastUsed, 
+          created_at as createdAt, 
+          updated_at as updatedAt
+        FROM email_templates 
+        WHERE is_active = true
+        ORDER BY is_default DESC, name ASC
+      `);
+      
+      return result.rows as EmailTemplate[];
+    } catch (error) {
+      console.error('Error fetching all templates:', error);
+      return [];
+    }
   }
   
   async getTemplatesByCategory(categoryId: number): Promise<EmailTemplate[]> {
