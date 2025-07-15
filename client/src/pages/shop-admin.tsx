@@ -694,28 +694,30 @@ const ShopAdmin = () => {
     },
     onSuccess: (data) => {
       console.log('🎯 [MUTATION] Update successful, response:', data);
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
-      // Also invalidate shop products to refresh discount information on product cards
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
-      queryClient.invalidateQueries({ queryKey: ["shopSearch"] });
-      // Invalidate discount banners on shop page
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
       
-      // Update the editingDiscount with new data instead of clearing it
+      // Update the editingDiscount with new data BEFORE invalidating queries
       if (data?.data) {
+        console.log('🎯 [MUTATION] Updating editingDiscount with new data:', data.data);
         setEditingDiscount(data.data);
       }
+      
+      // Delay query invalidation to prevent immediate reset
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+        queryClient.invalidateQueries({ queryKey: ["shopSearch"] });
+      }, 500);
       
       toast({
         title: "Discount Updated",
         description: "Discount settings have been updated successfully.",
       });
       
-      // Don't close dialog immediately, let user see the updated values
+      // Close dialog after showing updated values
       setTimeout(() => {
         setIsDiscountDialogOpen(false);
         setEditingDiscount(null);
-      }, 1500);
+      }, 2000);
     },
     onError: (error: any) => {
       console.log('🎯 [MUTATION] Update failed:', error);
