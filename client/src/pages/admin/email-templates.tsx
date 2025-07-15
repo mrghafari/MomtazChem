@@ -94,13 +94,13 @@ export default function EmailTemplates() {
   const queryClient = useQueryClient();
 
   const { data: templates = [], isLoading } = useQuery({
-    queryKey: ["/api/email-templates"],
+    queryKey: ["/api/admin/email/templates"],
   });
 
   const createTemplateMutation = useMutation({
-    mutationFn: (data: TemplateFormData) => apiRequest("/api/email-templates", "POST", data),
+    mutationFn: (data: TemplateFormData) => apiRequest("/api/admin/email/templates", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/email-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/templates"] });
       setIsCreateDialogOpen(false);
       toast({
         title: "Template Created",
@@ -118,9 +118,9 @@ export default function EmailTemplates() {
 
   const updateTemplateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<TemplateFormData> }) =>
-      apiRequest(`/api/email-templates/${id}`, "PATCH", data),
+      apiRequest(`/api/admin/email/templates/${id}`, "PUT", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/email-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/templates"] });
       setEditingTemplate(null);
       toast({
         title: "Template Updated",
@@ -137,9 +137,9 @@ export default function EmailTemplates() {
   });
 
   const deleteTemplateMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/email-templates/${id}`, "DELETE"),
+    mutationFn: (id: number) => apiRequest(`/api/admin/email/templates/${id}`, "DELETE"),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/email-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/templates"] });
       toast({
         title: "Template Deleted",
         description: "Email template has been deleted successfully.",
@@ -156,9 +156,9 @@ export default function EmailTemplates() {
 
   const setDefaultMutation = useMutation({
     mutationFn: ({ id, category }: { id: number; category: string }) =>
-      apiRequest(`/api/email-templates/${id}/set-default`, "POST", { category }),
+      apiRequest(`/api/admin/email/templates/${id}/set-default`, "POST", { category }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/email-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/templates"] });
       toast({
         title: "Default Template Set",
         description: "Template has been set as default for this category.",
