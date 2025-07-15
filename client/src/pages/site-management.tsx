@@ -325,6 +325,38 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50",
       moduleId: "content_management"
+    },
+    {
+      id: "logistics-management",
+      label: "Logistics Management",
+      icon: Truck,
+      onClick: () => trackButtonClick("logistics-management", () => setLocation("/admin/logistics-management")),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "logistics_management"
+    },
+    {
+      id: "ticketing-system",
+      label: "Ticketing System",
+      icon: Ticket,
+      onClick: () => trackButtonClick("ticketing-system", () => setLocation("/admin/ticketing-system")),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "ticketing_system"
+    },
+    {
+      id: "inventory-management",
+      label: "Inventory Management", 
+      icon: Package,
+      onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
+      moduleId: "inventory_management"
+    },
+    {
+      id: "department-users",
+      label: "Department Users",
+      icon: Users2,
+      onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
+      moduleId: "department_users"
     }
 
   ];
@@ -337,8 +369,10 @@ export default function SiteManagement() {
     // Debug: Log permissions response
     console.log('🔍 [DEBUG] userPermissions:', userPermissions);
     console.log('🔍 [DEBUG] permissions array:', userPermissions.permissions);
+    console.log('🔍 [DEBUG] modules array:', userPermissions.modules);
     
-    const allowedModules = userPermissions.permissions?.map((p: any) => p.moduleId) || [];
+    // Use the modules array which contains the direct module names
+    const allowedModules = userPermissions.modules || userPermissions.permissions || [];
     console.log('🔍 [DEBUG] allowedModules:', allowedModules);
     
     const allButtons = getInitialButtons();
