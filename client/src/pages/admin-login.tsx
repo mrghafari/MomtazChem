@@ -37,21 +37,18 @@ export default function AdminLogin() {
     onSuccess: async (response) => {
       console.log("Login response:", response);
       
-      // Clear all existing cache
-      queryClient.clear();
-      
-      // Wait longer for session to be properly established
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       toast({ title: "Success", description: "Admin login successful" });
+      
+      // Wait for session to be properly established
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Invalidate queries to refresh authentication state
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/permissions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/site-management/modules"] });
       
       // Navigate to Site Management for role-based access
       setLocation("/site-management");
-      
-      // Force refresh after navigation to ensure permissions are loaded
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
     },
     onError: (error: any) => {
       toast({ 

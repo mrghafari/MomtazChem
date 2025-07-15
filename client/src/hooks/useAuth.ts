@@ -4,9 +4,10 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 export function useAuth() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/admin/me"],
-    retry: false,
-    staleTime: 0, // Always fetch fresh data to avoid authentication issues
-    refetchOnWindowFocus: false,
+    retry: 1,
+    staleTime: 5000, // Cache for 5 seconds to avoid excessive requests
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000, // Refetch every 30 seconds to maintain session
     queryFn: async () => {
       try {
         const response = await fetch("/api/admin/me", {
@@ -21,7 +22,9 @@ export function useAuth() {
           throw new Error(`HTTP ${response.status}`);
         }
         
-        return await response.json();
+        const result = await response.json();
+        console.log("Auth check result:", result);
+        return result;
       } catch (error) {
         console.error("Auth check failed:", error);
         return { success: false, message: "Authentication check failed" };
