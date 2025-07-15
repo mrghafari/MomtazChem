@@ -189,30 +189,36 @@ const LogisticsManagement = () => {
   
   const pendingOrders = pendingOrdersResponse?.data || [];
 
-  const { data: companies = [], isLoading: loadingCompanies } = useQuery({
+  const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
     queryKey: ['/api/logistics/companies'],
     enabled: activeTab === 'companies'
   });
 
-  const { data: vehicles = [], isLoading: loadingVehicles } = useQuery({
+  const { data: vehiclesResponse, isLoading: loadingVehicles } = useQuery({
     queryKey: ['/api/logistics/vehicles'],
     enabled: activeTab === 'vehicles'
   });
 
-  const { data: personnel = [], isLoading: loadingPersonnel } = useQuery({
+  const { data: personnelResponse, isLoading: loadingPersonnel } = useQuery({
     queryKey: ['/api/logistics/personnel'],
     enabled: activeTab === 'personnel'
   });
 
-  const { data: routes = [], isLoading: loadingRoutes } = useQuery({
+  const { data: routesResponse, isLoading: loadingRoutes } = useQuery({
     queryKey: ['/api/logistics/routes'],
     enabled: activeTab === 'routes'
   });
 
-  const { data: verificationCodes = [], isLoading: loadingCodes } = useQuery({
+  const { data: verificationCodesResponse, isLoading: loadingCodes } = useQuery({
     queryKey: ['/api/logistics/verification-codes'],
     enabled: activeTab === 'verification'
   });
+
+  const companies = companiesResponse?.data || [];
+  const vehicles = vehiclesResponse?.data || [];
+  const personnel = personnelResponse?.data || [];
+  const routes = routesResponse?.data || [];
+  const verificationCodes = verificationCodesResponse?.data || [];
 
   // Generate verification code mutation
   const generateCodeMutation = useMutation({
