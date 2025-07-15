@@ -8696,15 +8696,19 @@ ${procedure.content}
       }
       
       const updates = req.body;
-      console.log("Updating discount", discountId, "with updates:", updates);
+      console.log("🎯 [DISCOUNT API] Updating discount", discountId, "with updates:", updates);
       
       const discount = await shopStorage.updateDiscountSetting(discountId, updates);
-      console.log("Discount updated successfully:", discount);
+      console.log("🎯 [DISCOUNT API] Discount updated successfully:", discount);
       
-      res.json({ success: true, data: discount });
+      // Fetch the updated discount to ensure we return the latest data
+      const updatedDiscount = await shopStorage.getDiscountSettingById(discountId);
+      console.log("🎯 [DISCOUNT API] Fresh discount data:", updatedDiscount);
+      
+      res.json({ success: true, data: updatedDiscount });
     } catch (error) {
-      console.error("Error updating discount:", error);
-      console.error("Error details:", error instanceof Error ? error.message : error);
+      console.error("🎯 [DISCOUNT API] Error updating discount:", error);
+      console.error("🎯 [DISCOUNT API] Error details:", error instanceof Error ? error.message : error);
       res.status(500).json({ 
         success: false, 
         message: "Failed to update discount",
