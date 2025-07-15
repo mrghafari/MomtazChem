@@ -4897,6 +4897,188 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // ORDER TRACKING MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get all orders for tracking (read-only)
+  app.get("/api/orders/tracking/all", requireAuth, async (req, res) => {
+    try {
+      const orders = await orderManagementStorage.getAllOrdersWithDetails();
+      
+      const formattedOrders = orders.map(order => ({
+        id: order.id,
+        customerOrderId: order.customerOrderId || order.id,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        totalAmount: order.totalAmount,
+        currency: order.currency || 'IQD',
+        status: order.status,
+        paymentMethod: order.paymentMethod,
+        paymentReceiptUrl: order.paymentReceiptUrl,
+        trackingNumber: order.trackingNumber,
+        deliveryCode: order.deliveryCode,
+        estimatedDeliveryDate: order.estimatedDeliveryDate,
+        actualDeliveryDate: order.actualDeliveryDate,
+        deliveryPersonName: order.deliveryPersonName,
+        deliveryPersonPhone: order.deliveryPersonPhone,
+        financialNotes: order.financialNotes,
+        warehouseNotes: order.warehouseNotes,
+        logisticsNotes: order.logisticsNotes,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt
+      }));
+
+      res.json({ 
+        success: true, 
+        orders: formattedOrders 
+      });
+    } catch (error) {
+      console.error("Error fetching tracking orders:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Get order statistics for tracking dashboard
+  app.get("/api/order-management/statistics", requireAuth, async (req, res) => {
+    try {
+      const orders = await orderManagementStorage.getAllOrdersWithDetails();
+      
+      const totalOrders = orders.length;
+      const pendingOrders = orders.filter(order => 
+        ['pending', 'pending_payment', 'financial_review', 'warehouse_processing'].includes(order.status)
+      ).length;
+      const completedOrders = orders.filter(order => 
+        ['completed', 'delivered'].includes(order.status)
+      ).length;
+      
+      // Calculate total revenue (only completed orders)
+      const totalRevenue = orders
+        .filter(order => ['completed', 'delivered'].includes(order.status))
+        .reduce((sum, order) => {
+          const amount = typeof order.totalAmount === 'string' 
+            ? parseFloat(order.totalAmount) 
+            : order.totalAmount || 0;
+          return sum + amount;
+        }, 0);
+      
+      const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+      
+      // Today's orders
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todaysOrders = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        orderDate.setHours(0, 0, 0, 0);
+        return orderDate.getTime() === today.getTime();
+      }).length;
+
+      res.json({
+        totalOrders,
+        pendingOrders,
+        completedOrders,
+        totalRevenue,
+        averageOrderValue,
+        todaysOrders
+      });
+    } catch (error) {
+      console.error("Error fetching order statistics:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Get financial orders (orders requiring financial review)
+  app.get("/api/order-management/financial", requireAuth, async (req, res) => {
+    try {
+      const orders = await orderManagementStorage.getAllOrdersWithDetails();
+      
+      // Filter for financial-related orders
+      const financialOrders = orders.filter(order => 
+        ['pending_payment', 'payment_uploaded', 'financial_review'].includes(order.status)
+      );
+
+      const formattedOrders = financialOrders.map(order => ({
+        id: order.id,
+        customerOrderId: order.customerOrderId || order.id,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        totalAmount: order.totalAmount,
+        currency: order.currency || 'IQD',
+        status: order.status,
+        paymentMethod: order.paymentMethod,
+        paymentReceiptUrl: order.paymentReceiptUrl,
+        trackingNumber: order.trackingNumber,
+        deliveryCode: order.deliveryCode,
+        estimatedDeliveryDate: order.estimatedDeliveryDate,
+        actualDeliveryDate: order.actualDeliveryDate,
+        deliveryPersonName: order.deliveryPersonName,
+        deliveryPersonPhone: order.deliveryPersonPhone,
+        financialNotes: order.financialNotes,
+        warehouseNotes: order.warehouseNotes,
+        logisticsNotes: order.logisticsNotes,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt
+      }));
+
+      res.json({ 
+        success: true, 
+        orders: formattedOrders 
+      });
+    } catch (error) {
+      console.error("Error fetching financial orders:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Get order status history
+  app.get("/api/orders/:orderId/status-history", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid order ID" 
+        });
+      }
+
+      // For now, return empty history - can be implemented later with proper status history table
+      const history = [
+        {
+          id: 1,
+          fromStatus: null,
+          toStatus: 'pending',
+          changedBy: null,
+          changedByDepartment: 'system',
+          notes: 'سفارش ایجاد شد',
+          createdAt: new Date().toISOString()
+        }
+      ];
+
+      res.json({ 
+        success: true, 
+        history 
+      });
+    } catch (error) {
+      console.error("Error fetching order status history:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // =============================================================================
   // PROCEDURES MANAGEMENT ENDPOINTS
   // =============================================================================
 
@@ -11985,6 +12167,193 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error(`Error fetching ${req.params.department} orders:`, error);
       res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات' });
+    }
+  });
+
+  // =============================================================================
+  // ORDER TRACKING MANAGEMENT API ROUTES (Read-Only System)
+  // =============================================================================
+
+  // Get all orders for tracking (read-only overview)
+  app.get('/api/orders/tracking/all', async (req, res) => {
+    try {
+      if (!req.session?.adminId) {
+        return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Get all orders with complete information for tracking
+      const query = `
+        SELECT DISTINCT
+          o.id,
+          o.order_number as customerOrderId,
+          crm.first_name || ' ' || crm.last_name as customerName,
+          crm.email as customerEmail,
+          crm.phone as customerPhone,
+          o.total_amount as totalAmount,
+          o.currency,
+          o.status,
+          o.payment_method as paymentMethod,
+          o.payment_receipt_url as paymentReceiptUrl,
+          o.tracking_number as trackingNumber,
+          o.delivery_code as deliveryCode,
+          o.estimated_delivery_date as estimatedDeliveryDate,
+          o.actual_delivery_date as actualDeliveryDate,
+          o.delivery_person_name as deliveryPersonName,
+          o.delivery_person_phone as deliveryPersonPhone,
+          om.financial_notes as financialNotes,
+          om.warehouse_notes as warehouseNotes,
+          om.logistics_notes as logisticsNotes,
+          o.created_at as createdAt,
+          o.updated_at as updatedAt
+        FROM customer_orders o
+        LEFT JOIN crm_customers crm ON o.customer_id = crm.id
+        LEFT JOIN order_management om ON o.id = om.customer_order_id
+        ORDER BY o.created_at DESC
+        LIMIT 1000
+      `;
+      
+      const result = await pool.query(query);
+      console.log('📋 [ORDER TRACKING] Retrieved', result.rows.length, 'orders for tracking');
+      
+      res.json({ success: true, orders: result.rows });
+    } catch (error) {
+      console.error('❌ [ORDER TRACKING] Error fetching tracking orders:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات پیگیری' });
+    }
+  });
+
+  // Get order statistics for dashboard
+  app.get('/api/orders/statistics', async (req, res) => {
+    try {
+      if (!req.session?.adminId) {
+        return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Get comprehensive order statistics
+      const statsQuery = `
+        SELECT
+          COUNT(*) as total_orders,
+          COUNT(CASE WHEN status IN ('pending_payment', 'payment_uploaded', 'financial_reviewing', 'warehouse_processing', 'logistics_processing') THEN 1 END) as pending_orders,
+          COUNT(CASE WHEN status IN ('delivered', 'completed') THEN 1 END) as completed_orders,
+          COALESCE(SUM(CASE WHEN status IN ('delivered', 'completed') THEN total_amount ELSE 0 END), 0) as total_revenue,
+          COALESCE(AVG(CASE WHEN status IN ('delivered', 'completed') THEN total_amount ELSE NULL END), 0) as average_order_value,
+          COUNT(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 END) as todays_orders
+        FROM customer_orders
+        WHERE created_at >= CURRENT_DATE - INTERVAL '1 year'
+      `;
+      
+      const result = await pool.query(statsQuery);
+      const stats = result.rows[0];
+      
+      console.log('📊 [ORDER STATS] Retrieved order statistics:', stats);
+      
+      res.json({ 
+        success: true, 
+        stats: {
+          totalOrders: parseInt(stats.total_orders) || 0,
+          pendingOrders: parseInt(stats.pending_orders) || 0,
+          completedOrders: parseInt(stats.completed_orders) || 0,
+          totalRevenue: parseFloat(stats.total_revenue) || 0,
+          averageOrderValue: parseFloat(stats.average_order_value) || 0,
+          todaysOrders: parseInt(stats.todays_orders) || 0
+        }
+      });
+    } catch (error) {
+      console.error('❌ [ORDER STATS] Error fetching order statistics:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگیری آمار سفارشات' });
+    }
+  });
+
+  // Get order history for specific order
+  app.get('/api/orders/:id/history', async (req, res) => {
+    try {
+      if (!req.session?.adminId) {
+        return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
+      }
+
+      const orderId = parseInt(req.params.id);
+      const { pool } = await import('./db');
+      
+      // Get order status history
+      const historyQuery = `
+        SELECT 
+          osh.id,
+          osh.from_status as fromStatus,
+          osh.to_status as toStatus,
+          osh.changed_by as changedBy,
+          osh.changed_by_department as changedByDepartment,
+          osh.notes,
+          osh.created_at as createdAt
+        FROM order_status_history osh
+        WHERE osh.order_management_id = (
+          SELECT id FROM order_management WHERE customer_order_id = $1
+        )
+        ORDER BY osh.created_at DESC
+      `;
+      
+      const result = await pool.query(historyQuery, [orderId]);
+      console.log('📜 [ORDER HISTORY] Retrieved', result.rows.length, 'history items for order', orderId);
+      
+      res.json({ success: true, history: result.rows });
+    } catch (error) {
+      console.error('❌ [ORDER HISTORY] Error fetching order history:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگیری تاریخچه سفارش' });
+    }
+  });
+
+  // Get financial department orders (pending payment & uploaded receipts)
+  app.get('/api/order-management/financial', async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get orders that need financial review or are pending payment
+      const query = `
+        SELECT DISTINCT
+          o.id,
+          o.order_number as customerOrderId,
+          crm.first_name || ' ' || crm.last_name as customerName,
+          crm.email as customerEmail,
+          crm.phone as customerPhone,
+          o.total_amount as totalAmount,
+          o.currency,
+          o.status,
+          o.payment_method as paymentMethod,
+          o.payment_receipt_url as paymentReceiptUrl,
+          om.financial_notes as financialNotes,
+          o.created_at as createdAt,
+          o.updated_at as updatedAt,
+          CASE 
+            WHEN o.status = 'pending_payment' THEN 'orphaned'
+            WHEN o.status = 'payment_uploaded' THEN 'needs_review'
+            WHEN o.status = 'financial_reviewing' THEN 'under_review'
+            ELSE 'processed'
+          END as financial_status
+        FROM customer_orders o
+        LEFT JOIN crm_customers crm ON o.customer_id = crm.id
+        LEFT JOIN order_management om ON o.id = om.customer_order_id
+        WHERE o.status IN ('pending_payment', 'payment_uploaded', 'financial_reviewing', 'financial_rejected')
+        ORDER BY 
+          CASE 
+            WHEN o.status = 'pending_payment' THEN 1  -- Orphaned orders first
+            WHEN o.status = 'payment_uploaded' THEN 2 -- Needs review second
+            WHEN o.status = 'financial_reviewing' THEN 3 -- Under review third
+            ELSE 4
+          END,
+          o.created_at DESC
+        LIMIT 500
+      `;
+      
+      const result = await pool.query(query);
+      console.log('💰 [FINANCIAL] Retrieved', result.rows.length, 'financial orders');
+      
+      res.json({ success: true, orders: result.rows });
+    } catch (error) {
+      console.error('❌ [FINANCIAL] Error fetching financial orders:', error);
+      res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات مالی' });
     }
   });
 

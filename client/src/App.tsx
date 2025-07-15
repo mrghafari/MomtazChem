@@ -93,6 +93,7 @@ import WarehouseManagement from "@/pages/admin/warehouse-management";
 import ContentManagement from "@/pages/content-management";
 import EmailTemplates from "@/pages/email-templates";
 import SecurityManagement from "@/pages/security-management-new";
+import OrderTrackingManagement from "@/pages/admin/order-tracking-management";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
@@ -152,7 +153,9 @@ function Router() {
           <Route path="/admin/sms-management" component={AdminSmsManagement} />
           <Route path="/admin/sms" component={AdminSmsManagement} />
           <Route path="/admin/widgets" component={WidgetRecommendations} />
-          <Route path="/admin/order-management" component={AdminOrderManagement} />
+          <Route path="/admin/order-management" component={OrderTrackingManagement} />
+          <Route path="/admin/order-tracking" component={OrderTrackingManagement} />
+          <Route path="/admin/order-tracking-management" component={OrderTrackingManagement} />
           <Route path="/admin/abandoned-cart-management" component={AbandonedCartManagement} />
           <Route path="/site-management" component={SiteManagementFixed} />
           <Route path="/admin/products" component={ProductsPage} />
