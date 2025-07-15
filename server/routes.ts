@@ -3949,6 +3949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         color: row.color,
         priority: row.priority,
         permissions: row.permissions || [],
+        permissionCount: (row.permissions || []).length, // شمارش دقیق دسترسی‌ها
         userCount: parseInt(row.user_count),
         isActive: row.is_active,
         createdAt: row.created_at

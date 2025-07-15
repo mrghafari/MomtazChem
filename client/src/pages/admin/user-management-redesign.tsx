@@ -243,7 +243,8 @@ function UserManagement() {
     queryFn: async () => {
       const response = await apiRequest('/api/admin/custom-roles');
       return response.data || [];
-    }
+    },
+    staleTime: 0 // Force fresh data to see permission count fix
   });
 
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
@@ -1056,7 +1057,7 @@ function UserManagement() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-sm">دسترسی‌ها:</span>
-                          <Badge variant="outline">{role.permissions.length}</Badge>
+                          <Badge variant="outline">{role.permissionCount || role.permissions?.length || 0}</Badge>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-sm">وضعیت:</span>
