@@ -64,7 +64,9 @@ export default function SiteManagement() {
 
   useEffect(() => {
     if (userPermissions?.success) {
+      console.log('🔍 [DEBUG] userPermissions modules:', userPermissions.modules);
       const filteredButtons = getFilteredButtons();
+      console.log('🔍 [DEBUG] filtered buttons count:', filteredButtons.length);
       const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
       const savedOrder = localStorage.getItem('site-management-button-order');
       

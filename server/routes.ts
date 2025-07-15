@@ -14451,6 +14451,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "refresh_control", "department_users", "inventory_management", "content_management",
           "warehouse-management", "logistics_management", "ticketing_system"
         ];
+        
+        console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
+        console.log('🔍 [DEBUG] ticketing_system included?', allModules.includes('ticketing_system'));
 
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, allModules);
 
@@ -14469,7 +14472,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           roleInfo: {
             name: "super_admin",
             displayName: "مدیر ارشد"
-          }
+          },
+          timestamp: Date.now() // Force cache refresh
         });
       }
 
