@@ -668,7 +668,7 @@ const ShopAdmin = () => {
   // Update order status mutation
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, updates }: { orderId: number; updates: any }) => {
-      return apiRequest(`/api/shop/orders/${orderId}`, "PATCH", updates);
+      return apiRequest(`/api/shop/orders/${orderId}`, { method: "PATCH", body: updates });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
@@ -691,7 +691,7 @@ const ShopAdmin = () => {
   const updateDiscountMutation = useMutation({
     mutationFn: async ({ discountId, updates }: { discountId: number; updates: any }) => {
       console.log('🎯 [MUTATION] Sending update request:', { discountId, updates });
-      return apiRequest(`/api/shop/discounts/${discountId}`, "PATCH", updates);
+      return apiRequest(`/api/shop/discounts/${discountId}`, { method: "PATCH", body: updates });
     },
     onSuccess: (data) => {
       console.log('🎯 [MUTATION] Update successful, response:', data);
@@ -735,7 +735,7 @@ const ShopAdmin = () => {
     mutationFn: async (discountData: any) => {
       console.log('🎯 [CREATE DISCOUNT] Mutation started with data:', discountData);
       try {
-        const result = await apiRequest("/api/shop/discounts", "POST", discountData);
+        const result = await apiRequest("/api/shop/discounts", { method: "POST", body: discountData });
         console.log('🎯 [CREATE DISCOUNT] API call successful:', result);
         return result;
       } catch (error) {
