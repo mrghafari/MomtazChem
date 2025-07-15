@@ -15052,6 +15052,66 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     try {
+      // Check for custom user authentication first (new User Management system)
+      if (req.session.customUserId) {
+        const [customUser] = await db
+          .select()
+          .from(schema.customUsers)
+          .where(eq(schema.customUsers.id, req.session.customUserId))
+          .limit(1);
+
+        if (!customUser) {
+          return res.status(404).json({ success: false, message: "کاربر یافت نشد" });
+        }
+
+        // Get role permissions for custom user
+        const [customRole] = await db
+          .select()
+          .from(schema.customRoles)
+          .where(eq(schema.customRoles.id, customUser.roleId))
+          .limit(1);
+
+        if (!customRole) {
+          return res.status(404).json({ success: false, message: "نقش کاربر یافت نشد" });
+        }
+
+        console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has role: ${customRole.name}`);
+        console.log(`✓ [PERMISSIONS] Raw permissions:`, customRole.permissions);
+        
+        // Parse permissions from PostgreSQL array format
+        let parsedPermissions = [];
+        if (customRole.permissions) {
+          if (Array.isArray(customRole.permissions)) {
+            parsedPermissions = customRole.permissions;
+          } else if (typeof customRole.permissions === 'string') {
+            // Handle PostgreSQL array format: {item1,item2,item3}
+            const cleanedPermissions = customRole.permissions
+              .replace(/^\{/, '')  // Remove opening brace
+              .replace(/\}$/, '')  // Remove closing brace
+              .split(',')          // Split by comma
+              .map(p => p.trim())  // Trim whitespace
+              .filter(p => p);     // Remove empty items
+            parsedPermissions = cleanedPermissions;
+          }
+        }
+        
+        console.log(`✓ [PERMISSIONS] Parsed permissions:`, parsedPermissions);
+        
+        return res.json({
+          success: true,
+          user: {
+            id: customUser.id,
+            email: customUser.email,
+            fullName: customUser.fullName,
+            role: customRole.name,
+            roleId: customUser.roleId
+          },
+          permissions: parsedPermissions,
+          modules: parsedPermissions
+        });
+      }
+      
+      // Fallback to legacy adminId system for backward compatibility
       const adminId = req.session.adminId;
       
       if (!adminId) {
