@@ -1,6 +1,9 @@
 import { shopDb } from "./shop-db";
+import { db } from "./db";
 import { invoices, invoiceItems, orders, orderItems, customers, type Invoice, type InvoiceItem, type InsertInvoice, type InsertInvoiceItem } from "@shared/shop-schema";
-import { eq, desc, and } from "drizzle-orm";
+import { orderManagement } from "@shared/order-management-schema";
+import { customerOrders } from "@shared/customer-schema";
+import { eq, desc, and, isNotNull } from "drizzle-orm";
 
 export interface IInvoiceStorage {
   // Invoice management
@@ -20,11 +23,12 @@ export interface IInvoiceStorage {
   deleteInvoiceItem(id: number): Promise<void>;
 
   // Invoice operations
-  generateInvoiceFromOrder(orderId: number): Promise<Invoice>;
-  requestOfficialInvoice(invoiceId: number): Promise<Invoice>;
+  generateInvoiceFromOrder(orderId: number, language?: string): Promise<Invoice>;
+  requestOfficialInvoice(invoiceId: number, language?: string): Promise<Invoice>;
   processOfficialInvoice(invoiceId: number, companyInfo: any, taxInfo: any): Promise<Invoice>;
   markInvoiceAsPaid(invoiceId: number, paymentDate?: Date): Promise<Invoice>;
   sendInvoiceEmail(invoiceId: number): Promise<boolean>;
+  updateInvoiceLanguage(invoiceId: number, language: string): Promise<Invoice>;
 
   // Invoice statistics
   getInvoiceStats(): Promise<{
@@ -126,15 +130,72 @@ export class InvoiceStorage implements IInvoiceStorage {
     await shopDb.delete(invoiceItems).where(eq(invoiceItems.id, id));
   }
 
-  async generateInvoiceFromOrder(orderId: number): Promise<Invoice> {
-    // Get order details
+  async generateInvoiceFromOrder(orderId: number, language: string = 'ar'): Promise<Invoice> {
+    // First, check if orderId refers to customer_orders or shop orders
+    // Try customer_orders first
+    const [customerOrder] = await db
+      .select()
+      .from(customerOrders)
+      .where(eq(customerOrders.id, orderId));
+
+    if (customerOrder) {
+      // Check financial approval and payment status for customer order
+      const [orderMgmt] = await db
+        .select()
+        .from(orderManagement)
+        .where(eq(orderManagement.customerOrderId, orderId));
+
+      if (!orderMgmt) {
+        throw new Error("سفارش در سیستم مدیریت سفارشات یافت نشد");
+      }
+
+      // Check financial approval
+      if (!orderMgmt.financialReviewedAt) {
+        throw new Error("این سفارش هنوز تایید مالی نگرفته است. فاکتور فقط برای سفارشات تایید شده مالی صادر می‌شود.");
+      }
+
+      // Check payment status
+      if (customerOrder.paymentStatus !== 'paid') {
+        throw new Error("این سفارش هنوز پرداخت نشده است. فاکتور فقط برای سفارشات پرداخت شده صادر می‌شود.");
+      }
+
+      // Generate invoice number
+      const invoiceNumber = await this.generateInvoiceNumber();
+
+      // Create invoice for customer order
+      const invoiceData: InsertInvoice = {
+        invoiceNumber,
+        orderId: customerOrder.id,
+        customerId: customerOrder.customerId,
+        status: 'paid',
+        subtotal: customerOrder.totalAmount,
+        taxAmount: 0,
+        discountAmount: 0,
+        totalAmount: customerOrder.totalAmount,
+        currency: customerOrder.currency || 'IQD',
+        billingAddress: customerOrder.billingAddress,
+        notes: customerOrder.notes,
+        language: language,
+        paymentDate: new Date(),
+      };
+
+      const invoice = await this.createInvoice(invoiceData);
+      return invoice;
+    }
+
+    // If not found in customer_orders, try shop orders (legacy)
     const [order] = await shopDb
       .select()
       .from(orders)
       .where(eq(orders.id, orderId));
 
     if (!order) {
-      throw new Error("Order not found");
+      throw new Error("سفارش یافت نشد");
+    }
+
+    // For shop orders, check payment status
+    if (order.paymentStatus !== 'paid') {
+      throw new Error("این سفارش هنوز پرداخت نشده است. فاکتور فقط برای سفارشات پرداخت شده صادر می‌شود.");
     }
 
     // Get order items
@@ -146,12 +207,12 @@ export class InvoiceStorage implements IInvoiceStorage {
     // Generate invoice number
     const invoiceNumber = await this.generateInvoiceNumber();
 
-    // Create invoice
+    // Create invoice with language support
     const invoiceData: InsertInvoice = {
       invoiceNumber,
       orderId: order.id,
       customerId: order.customerId,
-      status: order.paymentStatus === 'paid' ? 'paid' : 'sent',
+      status: 'paid',
       subtotal: order.subtotal,
       taxAmount: order.taxAmount,
       discountAmount: order.discountAmount,
@@ -159,7 +220,8 @@ export class InvoiceStorage implements IInvoiceStorage {
       currency: order.currency,
       billingAddress: order.billingAddress,
       notes: order.notes,
-      paymentDate: order.paymentStatus === 'paid' ? new Date() : undefined,
+      language: language,
+      paymentDate: new Date(),
     };
 
     const invoice = await this.createInvoice(invoiceData);
@@ -180,9 +242,15 @@ export class InvoiceStorage implements IInvoiceStorage {
     return invoice;
   }
 
-  async requestOfficialInvoice(invoiceId: number, language: 'ar' | 'en' = 'ar'): Promise<Invoice> {
+  async requestOfficialInvoice(invoiceId: number, language: string = 'ar'): Promise<Invoice> {
     return await this.updateInvoice(invoiceId, {
       officialRequestedAt: new Date(),
+      language: language,
+    });
+  }
+
+  async updateInvoiceLanguage(invoiceId: number, language: string): Promise<Invoice> {
+    return await this.updateInvoice(invoiceId, {
       language: language,
     });
   }

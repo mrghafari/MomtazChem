@@ -29,15 +29,12 @@ import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, ord
 import { sendContactEmail, sendProductInquiryEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
-import * as nodemailer from "nodemailer";
 import { db } from "./db";
 import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
-import puppeteer from "puppeteer";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
 import { orderManagement, shippingRates, vatSettings, deliveryMethods } from "@shared/order-management-schema";
-import nodemailer from "nodemailer";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
@@ -46,7 +43,6 @@ import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema
 import { smsService } from "./sms-service";
 import { ticketingStorage } from "./ticketing-storage";
 import { supportTickets } from "../shared/ticketing-schema";
-import { db } from "./db";
 import { 
   insertSupportTicketSchema, 
   insertTicketResponseSchema,
@@ -16458,26 +16454,103 @@ momtazchem.com
     }
   });
 
-  // Generate invoice from order
-  app.post('/api/invoices/generate/:orderId', requireAuth, async (req, res) => {
+  // Generate invoice from order (accessible by customers and admins)
+  app.post('/api/invoices/generate/:orderId', async (req, res) => {
     try {
       const orderId = parseInt(req.params.orderId);
+      const { language = 'ar' } = req.body; // Default to Arabic, supports: ar, ku, tr, en
+      
+      // Try to find order in customer_orders first, then shop orders
+      let order = null;
+      let isCustomerOrder = false;
+      
+      // First check customer_orders directly
+      try {
+        console.log(`Looking for customer order with ID: ${orderId}`);
+        const [customerOrder] = await db
+          .select()
+          .from(customerOrders)
+          .where(eq(customerOrders.id, orderId));
+        
+        console.log('Customer order found:', customerOrder);
+        if (customerOrder) {
+          order = customerOrder;
+          isCustomerOrder = true;
+        }
+      } catch (e) {
+        console.log('Error checking customer_orders:', e);
+      }
+      
+      // If not found in customer_orders, try shop orders
+      if (!order) {
+        order = await shopStorage.getOrderById(orderId);
+      }
+      
+      if (!order) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Order not found' 
+        });
+      }
+
+      // Check if customer has access to this order (either customer themselves or admin)
+      const isCustomer = req.session?.customerId;
+      const isAdmin = req.session?.adminId;
+      
+      if (isCustomer && order.customerId !== isCustomer) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Access denied to this order' 
+        });
+      }
       
       // Check if invoice already exists for this order
       const existingInvoices = await invoiceStorage.getInvoicesByOrder(orderId);
       if (existingInvoices.length > 0) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Invoice already exists for this order',
+        // Update language if different
+        if (existingInvoices[0].language !== language) {
+          const updatedInvoice = await invoiceStorage.updateInvoiceLanguage(existingInvoices[0].id, language);
+          return res.json({ 
+            success: true, 
+            message: 'Invoice language updated',
+            data: updatedInvoice
+          });
+        }
+        
+        return res.json({ 
+          success: true, 
+          message: 'Invoice already exists',
           data: existingInvoices[0]
         });
       }
 
-      const invoice = await invoiceStorage.generateInvoiceFromOrder(orderId);
-      res.json({ success: true, data: invoice });
+      // Generate new invoice with specified language
+      const invoice = await invoiceStorage.generateInvoiceFromOrder(orderId, language);
+      res.json({ 
+        success: true, 
+        message: 'Invoice generated successfully',
+        data: invoice 
+      });
     } catch (error) {
       console.error('Error generating invoice:', error);
-      res.status(500).json({ success: false, message: 'Failed to generate invoice' });
+      
+      // Return specific error message if it's a validation error
+      if (error instanceof Error && error.message.includes('تایید مالی')) {
+        res.status(400).json({ 
+          success: false, 
+          message: error.message 
+        });
+      } else if (error instanceof Error && error.message.includes('پرداخت نشده')) {
+        res.status(400).json({ 
+          success: false, 
+          message: error.message 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: 'خطا در تولید فاکتور' 
+        });
+      }
     }
   });
 
@@ -16538,158 +16611,387 @@ momtazchem.com
         return res.status(404).json({ success: false, message: 'Order or customer not found' });
       }
 
-      // Generate PDF content based on language
-      const isArabic = invoice.language === 'ar';
-      const direction = isArabic ? 'rtl' : 'ltr';
-      const font = isArabic ? 'Arial' : 'Arial';
+      // Generate PDF content based on language with multi-language support
+      const isRTL = ['ar', 'ku'].includes(invoice.language); // Arabic and Kurdish are RTL
+      const direction = isRTL ? 'rtl' : 'ltr';
+      
+      // Enhanced font selection for better multilingual support
+      const fontFamily = isRTL ? 
+        "'Noto Sans Arabic', 'Tahoma', 'Arial Unicode MS', Arial, sans-serif" : 
+        "'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif";
+      
+      // Language-specific translations
+      const getTranslation = (key) => {
+        const translations = {
+          'ar': {
+            companyName: 'شركة مُمتاز للمواد الكيميائية',
+            location: 'العراق - بغداد',
+            phone: 'الهاتف',
+            email: 'البريد الإلكتروني',
+            invoice: 'فاتورة',
+            official: '(رسمية)',
+            invoiceInfo: 'معلومات الفاتورة',
+            customerInfo: 'معلومات العميل',
+            invoiceNumber: 'رقم الفاتورة',
+            issueDate: 'تاريخ الإصدار',
+            paymentStatus: 'حالة الدفع',
+            orderNumber: 'رقم الطلب',
+            name: 'الاسم',
+            address: 'العنوان',
+            company: 'الشركة',
+            product: 'المنتج',
+            quantity: 'الكمية',
+            unitPrice: 'السعر',
+            total: 'الإجمالي',
+            subtotal: 'المجموع الفرعي',
+            discount: 'الخصم',
+            tax: 'الضريبة',
+            finalTotal: 'المجموع النهائي',
+            paid: 'مدفوعة',
+            due: 'مستحقة',
+            notes: 'ملاحظات'
+          },
+          'ku': {
+            companyName: 'کۆمپانیای مومتاز بۆ مادە کیمیاییەکان',
+            location: 'عێراق - بەغدا',
+            phone: 'تەلەفۆن',
+            email: 'ئیمەیل',
+            invoice: 'پسوڵە',
+            official: '(فەرمی)',
+            invoiceInfo: 'زانیاری پسوڵە',
+            customerInfo: 'زانیاری کڕیار',
+            invoiceNumber: 'ژمارەی پسوڵە',
+            issueDate: 'بەرواری دەرچوون',
+            paymentStatus: 'حاڵەتی پارەدان',
+            orderNumber: 'ژمارەی داواکاری',
+            name: 'ناو',
+            address: 'ناونیشان',
+            company: 'کۆمپانیا',
+            product: 'بەرهەم',
+            quantity: 'بڕ',
+            unitPrice: 'نرخی یەکە',
+            total: 'کۆی گشتی',
+            subtotal: 'کۆی لاوەکی',
+            discount: 'داشکاندن',
+            tax: 'باج',
+            finalTotal: 'کۆی کۆتایی',
+            paid: 'پێدراو',
+            due: 'بەدوایە',
+            notes: 'تێبینیەکان'
+          },
+          'tr': {
+            companyName: 'Mümtaz Kimyasal Çözümler',
+            location: 'Irak - Bağdat',
+            phone: 'Telefon',
+            email: 'E-posta',
+            invoice: 'FATURA',
+            official: '(Resmi)',
+            invoiceInfo: 'Fatura Bilgileri',
+            customerInfo: 'Müşteri Bilgileri',
+            invoiceNumber: 'Fatura Numarası',
+            issueDate: 'Düzenleme Tarihi',
+            paymentStatus: 'Ödeme Durumu',
+            orderNumber: 'Sipariş Numarası',
+            name: 'İsim',
+            address: 'Adres',
+            company: 'Şirket',
+            product: 'Ürün',
+            quantity: 'Miktar',
+            unitPrice: 'Birim Fiyat',
+            total: 'Toplam',
+            subtotal: 'Ara Toplam',
+            discount: 'İndirim',
+            tax: 'Vergi',
+            finalTotal: 'Genel Toplam',
+            paid: 'Ödendi',
+            due: 'Ödenmedi',
+            notes: 'Notlar'
+          },
+          'en': {
+            companyName: 'Momtaz Chemical Solutions',
+            location: 'Iraq - Baghdad',
+            phone: 'Phone',
+            email: 'Email',
+            invoice: 'INVOICE',
+            official: '(Official)',
+            invoiceInfo: 'Invoice Information',
+            customerInfo: 'Customer Information',
+            invoiceNumber: 'Invoice Number',
+            issueDate: 'Issue Date',
+            paymentStatus: 'Payment Status',
+            orderNumber: 'Order Number',
+            name: 'Name',
+            address: 'Address',
+            company: 'Company',
+            product: 'Product',
+            quantity: 'Quantity',
+            unitPrice: 'Unit Price',
+            total: 'Total',
+            subtotal: 'Subtotal',
+            discount: 'Discount',
+            tax: 'Tax',
+            finalTotal: 'Final Total',
+            paid: 'Paid',
+            due: 'Due',
+            notes: 'Notes'
+          }
+        };
+        return translations[invoice.language] || translations['en'];
+      };
+      
+      const t = getTranslation();
       
       const htmlContent = `
         <!DOCTYPE html>
         <html dir="${direction}" lang="${invoice.language}">
         <head>
             <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
             <style>
+                @page {
+                    margin: 20mm;
+                    size: A4;
+                }
+                
                 body { 
-                    font-family: ${font}, sans-serif; 
+                    font-family: ${fontFamily}; 
                     line-height: 1.6; 
                     margin: 0; 
                     padding: 20px;
                     direction: ${direction};
+                    background: white;
+                    color: #333;
+                    font-size: 14px;
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
                 }
+                
+                /* Prevent font fallback issues for multilingual text */
+                .multilingual-text {
+                    font-family: ${fontFamily};
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
+                    unicode-bidi: bidi-override;
+                }
+                
                 .header { 
                     text-align: center; 
-                    border-bottom: 2px solid #333; 
+                    border-bottom: 3px solid #2c5aa0; 
                     padding-bottom: 20px; 
                     margin-bottom: 30px; 
                 }
+                
                 .company-info { 
                     text-align: center; 
                     margin-bottom: 20px; 
                 }
+                
+                .company-info h1 {
+                    color: #2c5aa0;
+                    margin-bottom: 10px;
+                    font-size: 24px;
+                    font-weight: 700;
+                }
+                
                 .invoice-details { 
                     display: flex; 
                     justify-content: space-between; 
                     margin-bottom: 30px; 
+                    gap: 20px;
                 }
+                
                 .invoice-info, .customer-info { 
                     width: 48%; 
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 5px;
                 }
+                
+                .invoice-info h3, .customer-info h3 {
+                    color: #2c5aa0;
+                    border-bottom: 1px solid #dee2e6;
+                    padding-bottom: 8px;
+                    margin-bottom: 15px;
+                }
+                
                 table { 
                     width: 100%; 
                     border-collapse: collapse; 
                     margin-bottom: 20px; 
+                    border: 1px solid #dee2e6;
                 }
+                
                 th, td { 
-                    border: 1px solid #ddd; 
+                    border: 1px solid #dee2e6; 
                     padding: 12px; 
-                    text-align: ${isArabic ? 'right' : 'left'}; 
+                    text-align: ${isRTL ? 'right' : 'left'}; 
+                    vertical-align: top;
                 }
+                
                 th { 
-                    background-color: #f5f5f5; 
-                    font-weight: bold; 
+                    background-color: #2c5aa0; 
+                    color: white;
+                    font-weight: 700; 
+                    font-size: 13px;
                 }
+                
                 .total-section { 
-                    text-align: ${isArabic ? 'right' : 'left'}; 
+                    text-align: ${isRTL ? 'right' : 'left'}; 
                     margin-top: 20px; 
                 }
-                .total-row { 
-                    font-size: 18px; 
-                    font-weight: bold; 
-                    background-color: #f0f0f0; 
+                
+                .total-section table {
+                    width: 300px; 
+                    margin-${isRTL ? 'right' : 'left'}: auto;
+                    border: 2px solid #2c5aa0;
                 }
+                
+                .total-row { 
+                    font-size: 16px; 
+                    font-weight: bold; 
+                    background-color: #e7f3ff; 
+                }
+                
                 .footer { 
                     margin-top: 40px; 
                     text-align: center; 
                     font-size: 12px; 
                     color: #666; 
+                    border-top: 1px solid #dee2e6;
+                    padding-top: 20px;
+                }
+                
+                /* RTL-specific adjustments */
+                ${isRTL ? `
+                .invoice-details {
+                    flex-direction: row-reverse;
+                }
+                
+                table {
+                    direction: rtl;
+                }
+                
+                .total-section table {
+                    margin-right: auto;
+                    margin-left: unset;
+                }
+                ` : ''}
+                
+                /* Print-specific styles */
+                @media print {
+                    body {
+                        padding: 0;
+                        margin: 0;
+                        font-size: 12px;
+                    }
+                    
+                    .header {
+                        border-bottom: 3px solid #000 !important;
+                    }
+                    
+                    th {
+                        background-color: #000 !important;
+                        color: #fff !important;
+                    }
                 }
             </style>
         </head>
         <body>
             <div class="header">
                 <div class="company-info">
-                    <h1>${isArabic ? 'شركة مُمتاز للمواد الكيميائية' : 'Momtaz Chemical Solutions'}</h1>
-                    <p>${isArabic ? 'العراق - بغداد' : 'Iraq - Baghdad'}</p>
-                    <p>${isArabic ? 'الهاتف' : 'Phone'}: +964 XXX XXX XXXX</p>
-                    <p>${isArabic ? 'البريد الإلكتروني' : 'Email'}: info@momtazchem.com</p>
+                    <h1 class="multilingual-text">${t.companyName}</h1>
+                    <p class="multilingual-text">${t.location}</p>
+                    <p class="multilingual-text">${t.phone}: +964 770 999 6771</p>
+                    <p class="multilingual-text">${t.email}: info@momtazchem.com</p>
                 </div>
-                <h2>${isArabic ? 'فاتورة' : 'INVOICE'} ${invoice.isOfficial ? (isArabic ? '(رسمية)' : '(Official)') : ''}</h2>
+                <h2 class="multilingual-text">${t.invoice} ${invoice.isOfficial ? t.official : ''}</h2>
             </div>
 
             <div class="invoice-details">
                 <div class="invoice-info">
-                    <h3>${isArabic ? 'معلومات الفاتورة' : 'Invoice Information'}</h3>
-                    <p><strong>${isArabic ? 'رقم الفاتورة' : 'Invoice Number'}:</strong> ${invoice.invoiceNumber}</p>
-                    <p><strong>${isArabic ? 'تاريخ الإصدار' : 'Issue Date'}:</strong> ${new Date(invoice.createdAt).toLocaleDateString(isArabic ? 'ar-IQ' : 'en-US')}</p>
-                    <p><strong>${isArabic ? 'حالة الدفع' : 'Payment Status'}:</strong> ${invoice.status === 'paid' ? (isArabic ? 'مدفوعة' : 'Paid') : (isArabic ? 'مستحقة' : 'Due')}</p>
-                    <p><strong>${isArabic ? 'رقم الطلب' : 'Order Number'}:</strong> ${order.orderNumber}</p>
+                    <h3 class="multilingual-text">${t.invoiceInfo}</h3>
+                    <p class="multilingual-text"><strong>${t.invoiceNumber}:</strong> ${invoice.invoiceNumber}</p>
+                    <p class="multilingual-text"><strong>${t.issueDate}:</strong> ${new Date(invoice.createdAt).toLocaleDateString(invoice.language === 'ar' ? 'ar-IQ' : invoice.language === 'ku' ? 'ckb-IQ' : invoice.language === 'tr' ? 'tr-TR' : 'en-US')}</p>
+                    <p class="multilingual-text"><strong>${t.paymentStatus}:</strong> ${invoice.status === 'paid' ? t.paid : t.due}</p>
+                    <p class="multilingual-text"><strong>${t.orderNumber}:</strong> ${order.orderNumber}</p>
                 </div>
                 <div class="customer-info">
-                    <h3>${isArabic ? 'معلومات العميل' : 'Customer Information'}</h3>
-                    <p><strong>${isArabic ? 'الاسم' : 'Name'}:</strong> ${customer.firstName} ${customer.lastName}</p>
-                    <p><strong>${isArabic ? 'البريد الإلكتروني' : 'Email'}:</strong> ${customer.email}</p>
-                    <p><strong>${isArabic ? 'الهاتف' : 'Phone'}:</strong> ${customer.phone}</p>
-                    <p><strong>${isArabic ? 'العنوان' : 'Address'}:</strong> ${customer.address}, ${customer.city}, ${customer.country}</p>
-                    ${customer.company ? `<p><strong>${isArabic ? 'الشركة' : 'Company'}:</strong> ${customer.company}</p>` : ''}
+                    <h3 class="multilingual-text">${t.customerInfo}</h3>
+                    <p class="multilingual-text"><strong>${t.name}:</strong> ${customer.firstName} ${customer.lastName}</p>
+                    <p class="multilingual-text"><strong>${t.email}:</strong> ${customer.email}</p>
+                    <p class="multilingual-text"><strong>${t.phone}:</strong> ${customer.phone}</p>
+                    <p class="multilingual-text"><strong>${t.address}:</strong> ${customer.address}, ${customer.city}, ${customer.country}</p>
+                    ${customer.company ? `<p class="multilingual-text"><strong>${t.company}:</strong> ${customer.company}</p>` : ''}
                 </div>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th>${isArabic ? 'المنتج' : 'Product'}</th>
-                        <th>${isArabic ? 'الكمية' : 'Quantity'}</th>
-                        <th>${isArabic ? 'السعر' : 'Unit Price'}</th>
-                        <th>${isArabic ? 'الإجمالي' : 'Total'}</th>
+                        <th class="multilingual-text">${t.product}</th>
+                        <th class="multilingual-text">${t.quantity}</th>
+                        <th class="multilingual-text">${t.unitPrice}</th>
+                        <th class="multilingual-text">${t.total}</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${items.map(item => `
                         <tr>
-                            <td>${item.productName}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.unitPrice} ${invoice.currency}</td>
-                            <td>${item.totalPrice} ${invoice.currency}</td>
+                            <td class="multilingual-text">${item.productName}</td>
+                            <td class="multilingual-text">${item.quantity}</td>
+                            <td class="multilingual-text">${item.unitPrice} ${invoice.currency}</td>
+                            <td class="multilingual-text">${item.totalPrice} ${invoice.currency}</td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
 
             <div class="total-section">
-                <table style="width: 300px; margin-left: auto;">
+                <table>
                     <tr>
-                        <td><strong>${isArabic ? 'المجموع الفرعي' : 'Subtotal'}:</strong></td>
-                        <td><strong>${invoice.subtotal} ${invoice.currency}</strong></td>
+                        <td class="multilingual-text"><strong>${t.subtotal}:</strong></td>
+                        <td class="multilingual-text"><strong>${invoice.subtotal} ${invoice.currency}</strong></td>
                     </tr>
                     ${invoice.discountAmount && parseFloat(invoice.discountAmount) > 0 ? `
                     <tr>
-                        <td><strong>${isArabic ? 'الخصم' : 'Discount'}:</strong></td>
-                        <td><strong>-${invoice.discountAmount} ${invoice.currency}</strong></td>
+                        <td class="multilingual-text"><strong>${t.discount}:</strong></td>
+                        <td class="multilingual-text"><strong>-${invoice.discountAmount} ${invoice.currency}</strong></td>
                     </tr>
                     ` : ''}
                     ${invoice.taxAmount && parseFloat(invoice.taxAmount) > 0 ? `
                     <tr>
-                        <td><strong>${isArabic ? 'الضريبة' : 'Tax'}:</strong></td>
-                        <td><strong>${invoice.taxAmount} ${invoice.currency}</strong></td>
+                        <td class="multilingual-text"><strong>${t.tax}:</strong></td>
+                        <td class="multilingual-text"><strong>${invoice.taxAmount} ${invoice.currency}</strong></td>
                     </tr>
                     ` : ''}
                     <tr class="total-row">
-                        <td><strong>${isArabic ? 'الإجمالي النهائي' : 'Total Amount'}:</strong></td>
-                        <td><strong>${invoice.totalAmount} ${invoice.currency}</strong></td>
+                        <td class="multilingual-text"><strong>${t.finalTotal}:</strong></td>
+                        <td class="multilingual-text"><strong>${invoice.totalAmount} ${invoice.currency}</strong></td>
                     </tr>
                 </table>
             </div>
 
             ${invoice.notes ? `
-            <div style="margin-top: 30px;">
-                <h3>${isArabic ? 'ملاحظات' : 'Notes'}</h3>
-                <p>${invoice.notes}</p>
+            <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                <h3 class="multilingual-text" style="color: #2c5aa0; margin-bottom: 10px;">${t.notes}</h3>
+                <p class="multilingual-text">${invoice.notes}</p>
             </div>
             ` : ''}
 
             <div class="footer">
-                <p>${isArabic ? 'شكراً لاختيارك شركة مُمتاز للمواد الكيميائية' : 'Thank you for choosing Momtaz Chemical Solutions'}</p>
-                <p>${isArabic ? 'موقعنا الإلكتروني' : 'Website'}: momtazchem.com</p>
+                <p class="multilingual-text">
+                    ${invoice.language === 'ar' ? 'شكراً لاختيارك شركة مُمتاز للمواد الكيميائية' :
+                      invoice.language === 'ku' ? 'سوپاس بۆ هەڵبژاردنتان کۆمپانیای مومتاز بۆ مادە کیمیاییەکان' :
+                      invoice.language === 'tr' ? 'Mümtaz Kimyasal Çözümler\'i tercih ettiğiniz için teşekkür ederiz' :
+                      'Thank you for choosing Momtaz Chemical Solutions'}
+                </p>
+                <p class="multilingual-text">
+                    ${invoice.language === 'ar' ? 'موقعنا الإلكتروني' :
+                      invoice.language === 'ku' ? 'ماڵپەڕەکەمان' :
+                      invoice.language === 'tr' ? 'Web sitemiz' :
+                      'Website'}: momtazchem.com
+                </p>
             </div>
         </body>
         </html>
