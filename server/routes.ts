@@ -14375,6 +14375,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Get user permissions based on role
   app.get('/api/user/permissions', async (req, res) => {
+    // Prevent caching for this endpoint
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     try {
       const adminId = req.session.adminId;
       
