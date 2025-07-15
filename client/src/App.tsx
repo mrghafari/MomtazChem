@@ -77,7 +77,7 @@ import LogisticsLogin from "@/pages/logistics-login";
 import TicketingSystemFixed from "@/pages/admin/ticketing-system-fixed";
 
 import SuperAdminSettings from "@/pages/super-admin-settings";
-import SiteManagement from "@/pages/site-management";
+import SiteManagementFixed from "@/pages/site-management-fixed";
 import GeographicReports from "@/pages/geographic-reports";
 import GeographicAnalytics from "@/pages/admin/geographic-analytics";
 import AISettings from "@/pages/admin/ai-settings";
@@ -154,7 +154,7 @@ function Router() {
           <Route path="/admin/widgets" component={WidgetRecommendations} />
           <Route path="/admin/order-management" component={AdminOrderManagement} />
           <Route path="/admin/abandoned-cart-management" component={AbandonedCartManagement} />
-          <Route path="/site-management" component={SiteManagement} />
+          <Route path="/site-management" component={SiteManagementFixed} />
           <Route path="/admin/products" component={ProductsPage} />
           <Route path="/admin/product-variants" component={ProductVariants} />
           <Route path="/admin/geographic-reports" component={GeographicReports} />

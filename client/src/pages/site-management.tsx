@@ -26,6 +26,7 @@ export default function SiteManagement() {
   const { toast } = useToast();
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const [showKardexSync, setShowKardexSync] = useState(false);
+  const [buttons, setButtons] = useState<QuickActionButton[]>([]);
 
 
 
@@ -353,8 +354,7 @@ export default function SiteManagement() {
     return filteredButtons;
   };
 
-  // State for drag and drop functionality with usage-based sorting
-  const [buttons, setButtons] = useState<QuickActionButton[]>([]);
+
 
   // Update buttons when permissions change
   useEffect(() => {
