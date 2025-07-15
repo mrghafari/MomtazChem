@@ -11477,6 +11477,92 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // =============================================================================
+  // AI SEO ASSISTANT ROUTES
+  // =============================================================================
+
+  // AI Content Generation
+  app.post('/api/ai/seo/generate', requireAuth, async (req, res) => {
+    try {
+      const { generateAISeoContent } = await import('./ai-seo-generator');
+      const result = await generateAISeoContent(req.body);
+      
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error generating AI SEO content:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to generate AI content'
+      });
+    }
+  });
+
+  // AI Keyword Research
+  app.post('/api/ai/seo/keywords', requireAuth, async (req, res) => {
+    try {
+      const { generateKeywordSuggestions } = await import('./ai-seo-generator');
+      const { seedKeywords, language, industry, targetMarket } = req.body;
+      
+      const result = await generateKeywordSuggestions(seedKeywords, language, industry);
+      
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error researching keywords:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to research keywords'
+      });
+    }
+  });
+
+  // AI Content Optimization
+  app.post('/api/ai/seo/optimize', requireAuth, async (req, res) => {
+    try {
+      const { optimizeContentForSeo } = await import('./ai-seo-generator');
+      const { content, targetKeywords, language } = req.body;
+      
+      const result = await optimizeContentForSeo(content, targetKeywords, language);
+      
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error optimizing content:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to optimize content'
+      });
+    }
+  });
+
+  // AI SEO Performance Analysis
+  app.post('/api/ai/seo/analyze', requireAuth, async (req, res) => {
+    try {
+      const { analyzeSeoPerformance } = await import('./ai-seo-generator');
+      const { url, targetKeywords } = req.body;
+      
+      const result = await analyzeSeoPerformance(url, targetKeywords);
+      
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error analyzing SEO performance:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to analyze SEO performance'
+      });
+    }
+  });
+
+  // =============================================================================
   // SEO MANAGEMENT ROUTES
   // =============================================================================
 

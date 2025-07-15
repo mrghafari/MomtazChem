@@ -95,6 +95,7 @@ import ContentManagement from "@/pages/content-management";
 import EmailTemplates from "@/pages/email-templates";
 import SecurityManagement from "@/pages/security-management-new";
 import OrderTrackingManagement from "@/pages/admin/order-tracking-management";
+import AiSeoAssistant from "@/pages/admin/ai-seo-assistant";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
@@ -182,6 +183,7 @@ function Router() {
           <Route path="/admin/email-templates" component={EmailTemplates} />
           <Route path="/admin/security-management" component={SecurityManagement} />
           <Route path="/admin/ticketing-system" component={TicketingSystemFixed} />
+          <Route path="/admin/ai-seo-assistant" component={AiSeoAssistant} />
 
           
           {/* Department-specific routes */}

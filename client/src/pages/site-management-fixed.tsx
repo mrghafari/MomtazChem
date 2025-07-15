@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -330,6 +330,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("ticketing", () => setLocation("/admin/ticketing-system")),
       className: "border-rose-300 text-rose-600 hover:bg-rose-50",
       moduleId: "ticketing_system"
+    },
+    {
+      id: "ai-seo-assistant",
+      label: "AI SEO Assistant",
+      icon: Brain,
+      onClick: () => trackButtonClick("ai-seo-assistant", () => setLocation("/admin/ai-seo-assistant")),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "seo_management"
     }
   ];
 
