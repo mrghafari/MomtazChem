@@ -85,14 +85,33 @@ export default function AdminPage() {
           </p>
           
           <div className="mb-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Site Management Features:</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
-              <div>• 23 integrated administrative functions</div>
-              <div>• Product catalog and inventory management</div>
-              <div>• CRM and customer relationship management</div>
-              <div>• Email and SMS communication systems</div>
-              <div>• User management and security settings</div>
-              <div>• Database backup and system maintenance</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">All 23 Site Management Features:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 text-xs text-gray-600">
+              <div>• Syncing Shop - Product synchronization</div>
+              <div>• Inquiries - Customer inquiry management</div>
+              <div>• Barcode - EAN-13 barcode generation</div>
+              <div>• Email Settings - Multi-SMTP configuration</div>
+              <div>• Database Backup - System backup tools</div>
+              <div>• CRM - Customer relationship management</div>
+              <div>• SEO - Multilingual SEO optimization</div>
+              <div>• Categories - Product categorization</div>
+              <div>• SMS - Customer notification system</div>
+              <div>• Factory - Production management</div>
+              <div>• User Management - Admin user control</div>
+              <div>• Shop - E-commerce administration</div>
+              <div>• Procedures - Document management</div>
+              <div>• SMTP Test - Email connectivity testing</div>
+              <div>• Order Management - Order tracking system</div>
+              <div>• Products - Catalog management</div>
+              <div>• Payment Settings - Banking integration</div>
+              <div>• Wallet Management - Digital wallet system</div>
+              <div>• Geography Analytics - Regional analysis</div>
+              <div>• AI Settings - Smart automation tools</div>
+              <div>• Refresh Control - System timing settings</div>
+              <div>• Department Users - Role-based access</div>
+              <div>• Inventory Management - Stock control</div>
+              <div>• Content Management - Dynamic content</div>
+              <div>• Warehouse Management - Order workflow</div>
             </div>
           </div>
         </div>
