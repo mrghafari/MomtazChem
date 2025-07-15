@@ -440,18 +440,22 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
 
   // Update form data when discount prop changes (for editing existing discounts)
   useEffect(() => {
+    console.log('🎯 [DISCOUNT FORM] useEffect triggered with discount:', discount);
     if (discount) {
-      setFormData({
+      const newFormData = {
         name: discount.name || "",
-        discountPercentage: discount.discountPercentage || "",
-        minQuantity: discount.minQuantity || 1,
+        discountPercentage: String(discount.discountPercentage || ""),
+        minQuantity: Number(discount.minQuantity || 1),
         description: discount.description || "",
         isActive: discount.isActive ?? true,
         applyToAllProducts: discount.applyToAllProducts ?? true,
         applicableProducts: discount.applicableProducts || [],
-      });
+      };
+      console.log('🎯 [DISCOUNT FORM] Setting form data to:', newFormData);
+      setFormData(newFormData);
     } else {
       // Reset form for new discount
+      console.log('🎯 [DISCOUNT FORM] Resetting form for new discount');
       setFormData({
         name: "",
         discountPercentage: "",
@@ -505,7 +509,10 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
             max="100"
             step="0.01"
             value={formData.discountPercentage}
-            onChange={(e) => setFormData(prev => ({ ...prev, discountPercentage: e.target.value }))}
+            onChange={(e) => {
+              console.log('🎯 [DISCOUNT FORM] Percentage changed to:', e.target.value);
+              setFormData(prev => ({ ...prev, discountPercentage: e.target.value }));
+            }}
             required
           />
         </div>
@@ -519,7 +526,10 @@ const DiscountForm = ({ discount, products, onSave, onCancel }: {
             type="number"
             min="1"
             value={formData.minQuantity}
-            onChange={(e) => setFormData(prev => ({ ...prev, minQuantity: parseInt(e.target.value) || 1 }))}
+            onChange={(e) => {
+              console.log('🎯 [DISCOUNT FORM] Quantity changed to:', e.target.value);
+              setFormData(prev => ({ ...prev, minQuantity: parseInt(e.target.value) || 1 }));
+            }}
             required
           />
         </div>
