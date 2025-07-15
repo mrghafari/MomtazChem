@@ -877,8 +877,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check for user in standard users table
-      const user = await storage.getUserByUsername(username);
+      let user = null;
+      let isCustomUser = false;
+
+      // First check standard users table
+      user = await storage.getUserByUsername(username);
+      
+      if (!user) {
+        // Check custom_users table
+        const { pool } = await import('./db');
+        const result = await pool.query(`
+          SELECT id, full_name, email, password_hash, role_id, is_active
+          FROM custom_users 
+          WHERE email = $1 AND is_active = true
+        `, [username]);
+        
+        if (result.rows.length > 0) {
+          const customUser = result.rows[0];
+          user = {
+            id: customUser.id,
+            username: customUser.email,
+            email: customUser.email,
+            passwordHash: customUser.password_hash,
+            roleId: customUser.role_id,
+            isActive: customUser.is_active
+          };
+          isCustomUser = true;
+          console.log(`🔍 Found custom user:`, { id: user.id, email: user.email, roleId: user.roleId });
+        }
+      }
       
       if (!user) {
         console.log(`❌ No user found for username: ${username}`);
@@ -888,7 +915,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log(`🔍 Found user:`, { id: user.id, email: user.email, hasPasswordHash: !!user.passwordHash });
+      console.log(`🔍 Found ${isCustomUser ? 'custom' : 'standard'} user:`, { 
+        id: user.id, 
+        email: user.email, 
+        hasPasswordHash: !!user.passwordHash,
+        roleId: user.roleId
+      });
 
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
       console.log(`🔐 Password validation result: ${isValidPassword}`);
@@ -900,15 +932,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Set up admin session
-      req.session.adminId = user.id;
-      req.session.isAuthenticated = true;
-      
-      console.log(`✅ [LOGIN] Session configured for admin ${user.id}:`, {
-        adminId: req.session.adminId,
-        isAuthenticated: req.session.isAuthenticated,
-        sessionId: req.sessionID
-      });
+      // Set up session with appropriate user type
+      if (isCustomUser) {
+        req.session.customUserId = user.id;
+        req.session.isAuthenticated = true;
+        console.log(`✅ [LOGIN] Session configured for custom user ${user.id}:`, {
+          customUserId: req.session.customUserId,
+          isAuthenticated: req.session.isAuthenticated,
+          sessionId: req.sessionID
+        });
+      } else {
+        req.session.adminId = user.id;
+        req.session.isAuthenticated = true;
+        console.log(`✅ [LOGIN] Session configured for admin ${user.id}:`, {
+          adminId: req.session.adminId,
+          isAuthenticated: req.session.isAuthenticated,
+          sessionId: req.sessionID
+        });
+      }
       
       // Send response immediately without waiting for session save
       res.json({ 
@@ -918,7 +959,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: user.id, 
           username: user.username, 
           email: user.email, 
-          roleId: user.roleId
+          roleId: user.roleId,
+          userType: isCustomUser ? 'custom' : 'admin'
         }
       });
     } catch (error) {
@@ -1009,7 +1051,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/me", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUserById(req.session.adminId!);
+      let user = null;
+      let userType = 'admin';
+      
+      if (req.session.adminId) {
+        // Standard admin user
+        user = await storage.getUserById(req.session.adminId);
+        userType = 'admin';
+      } else if (req.session.customUserId) {
+        // Custom user from custom_users table
+        const { pool } = await import('./db');
+        const result = await pool.query(`
+          SELECT cu.id, cu.full_name, cu.email, cu.role_id, cu.is_active,
+                 cr.name as role_name, cr.display_name as role_display_name
+          FROM custom_users cu
+          LEFT JOIN custom_roles cr ON cu.role_id = cr.id
+          WHERE cu.id = $1 AND cu.is_active = true
+        `, [req.session.customUserId]);
+        
+        if (result.rows.length > 0) {
+          const customUser = result.rows[0];
+          user = {
+            id: customUser.id,
+            username: customUser.email,
+            email: customUser.email,
+            roleId: customUser.role_id,
+            roleName: customUser.role_name,
+            roleDisplayName: customUser.role_display_name,
+            isActive: customUser.is_active
+          };
+          userType = 'custom';
+        }
+      }
+      
       if (!user) {
         return res.status(404).json({ 
           success: false, 
@@ -1019,9 +1093,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ 
         success: true, 
-        user: { id: user.id, username: user.username, email: user.email, roleId: user.roleId }
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          email: user.email, 
+          roleId: user.roleId,
+          roleName: user.roleName || 'admin',
+          roleDisplayName: user.roleDisplayName || 'Administrator',
+          userType
+        }
       });
     } catch (error) {
+      console.error("Error in /api/admin/me:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -1279,6 +1362,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error updating user password:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Admin endpoint to send password reset link to a user
+  app.post("/api/admin/users/:id/send-reset-link", requireAuth, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      
+      if (!userId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid user ID" 
+        });
+      }
+
+      // Get user from custom_users table
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT id, full_name, email 
+        FROM custom_users 
+        WHERE id = $1
+      `, [userId]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+
+      const user = result.rows[0];
+
+      // Generate reset token
+      const resetToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+
+      // Save reset token in password_resets table
+      await pool.query(`
+        INSERT INTO password_resets (email, token, expires_at, used)
+        VALUES ($1, $2, $3, $4)
+      `, [user.email, resetToken, expiresAt, false]);
+
+      // Generate reset link
+      const resetLink = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+
+      // TODO: Send email with reset link
+      // For now, we'll log it and return in response
+      console.log(`Password reset link for ${user.email}: ${resetLink}`);
+
+      res.json({ 
+        success: true, 
+        message: `Password reset link sent to ${user.email}`,
+        resetLink, // In production, this would be sent via email
+        resetToken // For testing purposes
+      });
+    } catch (error) {
+      console.error("Error sending password reset link:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -14981,10 +15125,94 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     try {
-      const adminId = req.session.adminId;
-      
-      if (!adminId) {
+      // Check for valid authentication - either admin or custom user
+      if (!req.session || !req.session.isAuthenticated) {
         return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+      
+      const adminId = req.session.adminId;
+      const customUserId = req.session.customUserId;
+      
+      if (!adminId && !customUserId) {
+        return res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      }
+
+      // Handle custom users directly
+      if (customUserId) {
+        const { pool } = await import('./db');
+        const result = await pool.query(`
+          SELECT cu.id, cu.full_name, cu.email, cu.role_id,
+                 cr.name as role_name, cr.display_name as role_display_name, cr.permissions
+          FROM custom_users cu
+          LEFT JOIN custom_roles cr ON cu.role_id = cr.id
+          WHERE cu.id = $1 AND cu.is_active = true
+        `, [customUserId]);
+        
+        if (result.rows.length > 0) {
+          const customUser = result.rows[0];
+          
+          // Parse permissions from JSON array
+          const permissions = Array.isArray(customUser.permissions) 
+            ? customUser.permissions 
+            : JSON.parse(customUser.permissions || '[]');
+
+          // Map Persian display names to technical module IDs
+          const persianToTechnicalMap = {
+            'تنظیمات ایمیل': 'email_settings',
+            'پشتیبان‌گیری پایگاه داده': 'database_backup',
+            'مدیریت SEO': 'seo',
+            'مدیریت پیامک': 'sms',
+            'تست SMTP': 'smtp_test',
+            'تنظیمات هوش مصنوعی': 'ai_settings',
+            'کنترل تازه‌سازی': 'refresh_control',
+            'سیستم تیکتینگ': 'ticketing_system',
+            'مدیریت محتوا': 'content_management',
+            'مدیریت بارکد': 'barcode',
+            'همگام‌سازی فروشگاه': 'syncing_shop',
+            'مدیریت فروشگاه': 'shop_management',
+            'مدیریت محصولات': 'product_management',
+            'مدیریت سفارشات': 'order_management',
+            'مدیریت انبار': 'warehouse-management',
+            'مدیریت لجستیک': 'logistics_management',
+            'مدیریت استعلامات': 'inquiries',
+            'مدیریت CRM': 'crm',
+            'مدیریت کارخانه': 'factory',
+            'مدیریت کاربران': 'user_management',
+            'مدیریت روش‌ها': 'procedures',
+            'مدیریت پرداخت': 'payment_management',
+            'مدیریت کیف پول': 'wallet_management',
+            'تحلیل جغرافیایی': 'geography_analytics',
+            'مدیریت دسته‌بندی‌ها': 'categories'
+          };
+
+          // Convert Persian names to technical IDs
+          const technicalModules = permissions.map(perm => 
+            persianToTechnicalMap[perm] || perm
+          ).filter(Boolean);
+
+          console.log(`✓ [PERMISSIONS] Custom user ${customUser.email} has modules:`, permissions);
+          console.log(`✓ [PERMISSIONS] Converted to technical IDs:`, technicalModules);
+
+          return res.json({
+            success: true,
+            permissions: technicalModules.map(moduleId => ({
+              moduleId,
+              canView: true,
+              canCreate: true,
+              canEdit: true,
+              canDelete: true,
+              canApprove: true
+            })),
+            modules: technicalModules,
+            roles: [customUser.role_id],
+            roleInfo: {
+              name: customUser.role_name,
+              displayName: customUser.role_display_name
+            }
+          });
+        }
+        
+        return res.status(404).json({ success: false, message: "کاربر یافت نشد" });
       }
 
       // Get legacy user by adminId to find email
