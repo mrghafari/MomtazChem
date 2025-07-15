@@ -5,6 +5,7 @@ import {
   deliveryVehicles, 
   deliveryPersonnel,
   deliveryRoutes,
+  deliveryCodeCounter,
   deliveryVerificationCodes,
   logisticsAnalytics,
   type TransportationCompany,
@@ -15,6 +16,8 @@ import {
   type InsertDeliveryPersonnel,
   type DeliveryRoute,
   type InsertDeliveryRoute,
+  type DeliveryCodeCounter,
+  type InsertDeliveryCodeCounter,
   type DeliveryVerificationCode,
   type InsertDeliveryVerificationCode,
   type LogisticsAnalytics,
@@ -573,9 +576,49 @@ export class LogisticsStorage implements ILogisticsStorage {
     return code;
   }
 
+  // Get next sequential delivery code (1111-9999)
+  private async getNextSequentialCode(): Promise<string> {
+    // Get current code from counter table
+    const counterResult = await db
+      .select()
+      .from(deliveryCodeCounter)
+      .limit(1);
+    
+    let currentCode = 1111;
+    
+    if (counterResult.length > 0) {
+      currentCode = counterResult[0].currentCode;
+    } else {
+      // Initialize counter if not exists
+      await db
+        .insert(deliveryCodeCounter)
+        .values({ currentCode: 1111 });
+    }
+    
+    // Calculate next code
+    let nextCode = currentCode + 1;
+    
+    // If we reach 10000, cycle back to 1111
+    if (nextCode > 9999) {
+      nextCode = 1111;
+    }
+    
+    // Update counter in database
+    await db
+      .update(deliveryCodeCounter)
+      .set({ 
+        currentCode: nextCode,
+        lastUpdated: new Date()
+      })
+      .where(eq(deliveryCodeCounter.id, counterResult[0]?.id || 1));
+    
+    // Return next code as 4-digit string
+    return nextCode.toString();
+  }
+
   async generateVerificationCode(customerOrderId: number, customerPhone: string, customerName: string): Promise<DeliveryVerificationCode> {
-    // Generate random 4-digit code
-    const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
+    // Generate sequential 4-digit code
+    const verificationCode = await this.getNextSequentialCode();
     
     // Code expires in 48 hours
     const expiresAt = new Date();

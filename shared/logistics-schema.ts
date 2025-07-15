@@ -168,6 +168,13 @@ export const deliveryRoutes = pgTable("delivery_routes", {
   index("delivery_routes_date_idx").on(table.plannedStartTime),
 ]);
 
+// Sequential delivery code counter (1111-9999)
+export const deliveryCodeCounter = pgTable("delivery_code_counter", {
+  id: serial("id").primaryKey(),
+  currentCode: integer("current_code").notNull().default(1111),
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+});
+
 // 4-digit delivery verification codes
 export const deliveryVerificationCodes = pgTable("delivery_verification_codes", {
   id: serial("id").primaryKey(),
@@ -255,6 +262,7 @@ export const insertTransportationCompanySchema = createInsertSchema(transportati
 export const insertDeliveryVehicleSchema = createInsertSchema(deliveryVehicles);
 export const insertDeliveryPersonnelSchema = createInsertSchema(deliveryPersonnel);
 export const insertDeliveryRouteSchema = createInsertSchema(deliveryRoutes);
+export const insertDeliveryCodeCounterSchema = createInsertSchema(deliveryCodeCounter);
 export const insertDeliveryVerificationCodeSchema = createInsertSchema(deliveryVerificationCodes);
 export const insertLogisticsAnalyticsSchema = createInsertSchema(logisticsAnalytics);
 
@@ -273,6 +281,9 @@ export type InsertDeliveryPersonnel = z.infer<typeof insertDeliveryPersonnelSche
 
 export type DeliveryRoute = typeof deliveryRoutes.$inferSelect;
 export type InsertDeliveryRoute = z.infer<typeof insertDeliveryRouteSchema>;
+
+export type DeliveryCodeCounter = typeof deliveryCodeCounter.$inferSelect;
+export type InsertDeliveryCodeCounter = z.infer<typeof insertDeliveryCodeCounterSchema>;
 
 export type DeliveryVerificationCode = typeof deliveryVerificationCodes.$inferSelect;
 export type InsertDeliveryVerificationCode = z.infer<typeof insertDeliveryVerificationCodeSchema>;

@@ -12574,6 +12574,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+
+
   // Shipping rates management endpoints (removed duplicates)
 
   // Shipping cost calculation endpoint
@@ -23375,6 +23377,39 @@ momtazchem.com
       path: req.originalUrl,
       method: req.method
     });
+  });
+
+  // Test sequential delivery code generation
+  app.post("/api/test/sequential-code", async (req, res) => {
+    try {
+      const { customerOrderId, customerPhone, customerName } = req.body;
+      
+      if (!customerOrderId || !customerPhone || !customerName) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields: customerOrderId, customerPhone, customerName"
+        });
+      }
+
+      const result = await logisticsStorage.generateVerificationCode(
+        customerOrderId,
+        customerPhone,
+        customerName
+      );
+
+      res.json({
+        success: true,
+        data: result,
+        message: "Sequential delivery code generated successfully"
+      });
+    } catch (error) {
+      console.error("Error generating sequential code:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to generate sequential code",
+        error: error.message
+      });
+    }
   });
 
   // Global error handler for all API routes
