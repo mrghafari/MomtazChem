@@ -152,6 +152,7 @@ export default function ProductsPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { t, language, direction } = useLanguage();
@@ -440,6 +441,35 @@ export default function ProductsPage() {
     },
   });
 
+  // Function to validate fields and set errors
+  const validateRequiredFields = (data: InsertShowcaseProduct) => {
+    const errors: Record<string, string> = {};
+    
+    // Validate Pricing & Inventory section
+    if (!data.sku?.trim()) errors.sku = "فیلد SKU اجباری است";
+    if (!data.barcode?.trim()) errors.barcode = "فیلد بارکد اجباری است";
+    if (!data.unitPrice || Number(data.unitPrice) <= 0) errors.unitPrice = "قیمت واحد اجباری است";
+    if (data.stockQuantity === undefined || data.stockQuantity === null || Number(data.stockQuantity) < 0) errors.stockQuantity = "موجودی اجباری است";
+    if (data.minStockLevel === undefined || data.minStockLevel === null || Number(data.minStockLevel) < 0) errors.minStockLevel = "حداقل موجودی اجباری است";
+    if (data.maxStockLevel === undefined || data.maxStockLevel === null || Number(data.maxStockLevel) < 0) errors.maxStockLevel = "حداکثر موجودی اجباری است";
+    
+    // Validate Weights & Batch section
+    if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
+    if (!data.grossWeight || Number(data.grossWeight) <= 0) errors.grossWeight = "وزن ناخالص اجباری است";
+    if (!data.batchNumber?.trim()) errors.batchNumber = "شماره دسته اجباری است";
+    
+    // Logical consistency validation
+    if (data.grossWeight && data.netWeight && Number(data.grossWeight) < Number(data.netWeight)) {
+      errors.grossWeight = "وزن ناخالص باید بیشتر یا مساوی وزن خالص باشد";
+    }
+    
+    if (data.minStockLevel && data.maxStockLevel && Number(data.minStockLevel) > Number(data.maxStockLevel)) {
+      errors.minStockLevel = "حداقل موجودی نمی‌تواند بیشتر از حداکثر موجودی باشد";
+    }
+    
+    return errors;
+  };
+
   const onSubmit = (data: InsertShowcaseProduct) => {
     console.log('🔍 [DEBUG] Form submission - Raw form data:', data);
     console.log('🔍 [DEBUG] Tags in form data:', data.tags, 'Type:', typeof data.tags);
@@ -447,54 +477,13 @@ export default function ProductsPage() {
     console.log('🔍 [DEBUG] editingProduct state:', editingProduct?.id);
 
     // Complete validation for both create and update operations
-    // Validate Pricing & Inventory section - All fields required
-    const missingPricingFields = [];
-    if (!data.sku?.trim()) missingPricingFields.push("SKU");
-    if (!data.barcode?.trim()) missingPricingFields.push("بارکد");
-    if (!data.unitPrice || Number(data.unitPrice) <= 0) missingPricingFields.push("قیمت واحد");
-    if (data.stockQuantity === undefined || data.stockQuantity === null || Number(data.stockQuantity) < 0) missingPricingFields.push("موجودی");
-    if (data.minStockLevel === undefined || data.minStockLevel === null || Number(data.minStockLevel) < 0) missingPricingFields.push("حداقل موجودی");
-    if (data.maxStockLevel === undefined || data.maxStockLevel === null || Number(data.maxStockLevel) < 0) missingPricingFields.push("حداکثر موجودی");
-
-    if (missingPricingFields.length > 0) {
+    const errors = validateRequiredFields(data);
+    setValidationErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
       toast({
-        title: "❌ بخش شناسایی و قیمت‌گذاری ناقص",
-        description: `فیلدهای ضروری: ${missingPricingFields.join("، ")}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate Weights & Batch section - All fields required
-    const missingWeightFields = [];
-    if (!data.netWeight || Number(data.netWeight) <= 0) missingWeightFields.push("وزن خالص");
-    if (!data.grossWeight || Number(data.grossWeight) <= 0) missingWeightFields.push("وزن ناخالص");
-    if (!data.batchNumber?.trim()) missingWeightFields.push("شماره دسته");
-
-    if (missingWeightFields.length > 0) {
-      toast({
-        title: "❌ بخش وزن و دسته‌بندی تولید ناقص",
-        description: `فیلدهای ضروری: ${missingWeightFields.join("، ")}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Additional validation: Check logical consistency
-    if (Number(data.grossWeight) < Number(data.netWeight)) {
-      toast({
-        title: "❌ خطا در وزن‌ها",
-        description: "وزن ناخالص باید بیشتر یا مساوی وزن خالص باشد",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate min/max stock levels consistency
-    if (Number(data.minStockLevel) > Number(data.maxStockLevel)) {
-      toast({
-        title: "❌ خطا در سطوح موجودی",
-        description: "حداقل موجودی نمی‌تواند بیشتر از حداکثر موجودی باشد",
+        title: "❌ لطفاً فیلدهای قرمز را تکمیل کنید",
+        description: "تمام فیلدهای اجباری باید پر شوند",
         variant: "destructive",
       });
       return;
@@ -694,6 +683,7 @@ export default function ProductsPage() {
 
   const openEditDialog = (product: ShowcaseProduct) => {
     setEditingProduct(product);
+    setValidationErrors({}); // Clear validation errors
     setImagePreview(product.imageUrl || null);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
@@ -1503,7 +1493,7 @@ export default function ProductsPage() {
                       name="sku"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <FormLabel className={`flex items-center gap-2 text-sm font-medium ${validationErrors.sku ? 'text-red-600' : ''}`}>
 {t.productSku}
                             {(editingProduct || field.value) && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
@@ -1519,7 +1509,7 @@ export default function ProductsPage() {
                             <div className="flex gap-2">
                               <Input 
                                 placeholder="کد محصول" 
-                                className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""}`}
+                                className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.sku ? "border-red-500 focus:border-red-500" : ""}`}
                                 {...field}
                                 readOnly={!!(editingProduct || field.value)}
                               />
@@ -1611,6 +1601,9 @@ export default function ProductsPage() {
                             </div>
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.sku && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.sku}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -1620,7 +1613,7 @@ export default function ProductsPage() {
                       name="barcode"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <FormLabel className={`flex items-center gap-2 text-sm font-medium ${validationErrors.barcode ? 'text-red-600' : ''}`}>
 {t.productBarcode}
                             {/* Subtle barcode visualization next to label */}
                             <svg width="120" height="24" viewBox="0 0 120 24" className="opacity-30 ml-1">
@@ -1657,12 +1650,15 @@ export default function ProductsPage() {
                           <FormControl>
                             <Input 
                               placeholder="بارکد 13 رقمی" 
-                              className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""}`}
+                              className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.barcode ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               readOnly={!!(editingProduct || field.value)}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.barcode && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.barcode}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -1672,7 +1668,7 @@ export default function ProductsPage() {
                       name="batchNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.batchNumber ? 'text-red-600' : ''}`}>
 {t.batchNumber}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1686,12 +1682,15 @@ export default function ProductsPage() {
                           <FormControl>
                             <Input 
                               placeholder="BATCH-2025-001" 
-                              className="h-9"
+                              className={`h-9 ${validationErrors.batchNumber ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.batchNumber && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.batchNumber}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -1703,7 +1702,7 @@ export default function ProductsPage() {
                       name="unitPrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.unitPrice ? 'text-red-600' : ''}`}>
 {t.unitPrice}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1719,13 +1718,16 @@ export default function ProductsPage() {
                               type="number" 
                               step="0.01"
                               placeholder="0.00" 
-                              className="h-9"
+                              className={`h-9 ${validationErrors.unitPrice ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.unitPrice && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.unitPrice}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -1770,7 +1772,7 @@ export default function ProductsPage() {
                       name="stockQuantity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.stockQuantity ? 'text-red-600' : ''}`}>
 {t.stockQuantity}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1785,13 +1787,16 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               placeholder="0" 
-                              className="h-9"
+                              className={`h-9 ${validationErrors.stockQuantity ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.stockQuantity && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.stockQuantity}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -1801,7 +1806,7 @@ export default function ProductsPage() {
                       name="minStockLevel"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.minStockLevel ? 'text-red-600' : ''}`}>
 {t.minStockLevel}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1816,13 +1821,16 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               placeholder="0" 
-                              className="h-9"
+                              className={`h-9 ${validationErrors.minStockLevel ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.minStockLevel && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.minStockLevel}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -1832,7 +1840,7 @@ export default function ProductsPage() {
                       name="maxStockLevel"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.maxStockLevel ? 'text-red-600' : ''}`}>
 {t.maxStockLevel}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1847,13 +1855,16 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               placeholder="0" 
-                              className="h-9"
+                              className={`h-9 ${validationErrors.maxStockLevel ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.maxStockLevel && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.maxStockLevel}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -1866,7 +1877,7 @@ export default function ProductsPage() {
                       name="netWeight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.netWeight ? 'text-red-600' : ''}`}>
 {t.netWeight}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1882,13 +1893,16 @@ export default function ProductsPage() {
                               type="number" 
                               step="0.01"
                               placeholder="0.00" 
-                              className="h-9"
+                              className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.netWeight && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.netWeight}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -1898,7 +1912,7 @@ export default function ProductsPage() {
                       name="grossWeight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.grossWeight ? 'text-red-600' : ''}`}>
 {t.grossWeight}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1914,13 +1928,16 @@ export default function ProductsPage() {
                               type="number" 
                               step="0.01"
                               placeholder="0.00" 
-                              className="h-9"
+                              className={`h-9 ${validationErrors.grossWeight ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
+                          {validationErrors.grossWeight && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.grossWeight}</p>
+                          )}
                         </FormItem>
                       )}
                     />
