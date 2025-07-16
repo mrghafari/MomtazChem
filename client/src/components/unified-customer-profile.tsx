@@ -171,7 +171,9 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
     }).format(numAmount);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined | null) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
+    
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
       case 'vip': return 'bg-purple-100 text-purple-800';
@@ -264,10 +266,10 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
             ) : (
               <>
                 <Badge className={getStatusColor(customer.customerStatus)}>
-                  {customer.customerStatus.toUpperCase()}
+                  {customer.customerStatus ? customer.customerStatus.toUpperCase() : 'UNKNOWN'}
                 </Badge>
                 <Badge variant="outline">
-                  {customer.customerType.toUpperCase()}
+                  {customer.customerType ? customer.customerType.toUpperCase() : 'UNKNOWN'}
                 </Badge>
               </>
             )}
