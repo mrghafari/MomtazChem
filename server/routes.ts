@@ -6,6 +6,8 @@ import path from "path";
 import fs from "fs";
 import puppeteer from "puppeteer";
 import nodemailer from "nodemailer";
+import crypto from "crypto";
+import { emailService } from "./email-service";
 import { storage } from "./storage";
 import { insertLeadSchema, insertLeadActivitySchema } from "@shared/schema";
 import { insertContactSchema, insertShowcaseProductSchema, showcaseProducts } from "@shared/showcase-schema";
@@ -15111,6 +15113,155 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error rejecting financial order:', error);
       res.status(500).json({ success: false, message: "خطا در رد واریزی" });
+    }
+  });
+
+  // ============================================================================
+  // PASSWORD MANAGEMENT API
+  // ============================================================================
+
+  // Get customer password (admin only)
+  app.get('/api/admin/customers/:id/password', requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        data: { 
+          hasPassword: !!customer.password,
+          password: customer.password // Only return to admin
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching customer password:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات" });
+    }
+  });
+
+  // Change customer password (admin only)
+  app.post('/api/admin/customers/:id/change-password', requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const { newPassword, sendEmail = true, sendSMS = false } = req.body;
+      
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+      
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password in database
+      await crmStorage.updateCrmCustomer(customerId, { password: hashedPassword });
+      
+      // Send email notification if requested
+      if (sendEmail) {
+        await emailService.sendPasswordChangeNotification(
+          customer.email,
+          `${customer.firstName} ${customer.lastName}`,
+          newPassword
+        );
+      }
+      
+      // Log activity
+      await crmStorage.logActivity({
+        customerId: customerId,
+        activityType: 'password_changed',
+        description: 'رمز عبور توسط مدیر سیستم تغییر یافت',
+        performedBy: req.session.adminId || 'system'
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "رمز عبور با موفقیت تغییر یافت" + (sendEmail ? " و ایمیل اطلاع‌رسانی ارسال شد" : "")
+      });
+    } catch (error) {
+      console.error('Error changing customer password:', error);
+      res.status(500).json({ success: false, message: "خطا در تغییر رمز عبور" });
+    }
+  });
+
+  // Request password reset (customer)
+  app.post('/api/customers/request-password-reset', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      const customer = await crmStorage.getCrmCustomerByEmail(email);
+      if (!customer) {
+        // Don't reveal if email exists or not
+        return res.json({ success: true, message: "در صورت وجود حساب کاربری، لینک تغییر رمز عبور ارسال شد" });
+      }
+      
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      
+      // Update customer with reset token
+      await crmStorage.updateCrmCustomer(customer.id, {
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: resetExpires.toISOString()
+      });
+      
+      // Send reset email
+      await emailService.sendPasswordResetEmail(
+        customer.email,
+        resetToken,
+        `${customer.firstName} ${customer.lastName}`
+      );
+      
+      res.json({ success: true, message: "لینک تغییر رمز عبور به ایمیل شما ارسال شد" });
+    } catch (error) {
+      console.error('Error requesting password reset:', error);
+      res.status(500).json({ success: false, message: "خطا در ارسال لینک تغییر رمز عبور" });
+    }
+  });
+
+  // Reset password with token (customer)
+  app.post('/api/customers/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      // Find customer by reset token
+      const customer = await crmStorage.getCrmCustomerByResetToken(token);
+      if (!customer) {
+        return res.status(400).json({ success: false, message: "لینک تغییر رمز عبور نامعتبر یا منقضی شده است" });
+      }
+      
+      // Check if token is expired
+      const now = new Date();
+      const tokenExpiry = new Date(customer.resetPasswordExpires);
+      if (now > tokenExpiry) {
+        return res.status(400).json({ success: false, message: "لینک تغییر رمز عبور منقضی شده است" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password and clear reset token
+      await crmStorage.updateCrmCustomer(customer.id, {
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null
+      });
+      
+      // Log activity
+      await crmStorage.logActivity({
+        customerId: customer.id,
+        activityType: 'password_reset',
+        description: 'رمز عبور توسط مشتری تغییر یافت',
+        performedBy: 'customer'
+      });
+      
+      res.json({ success: true, message: "رمز عبور با موفقیت تغییر یافت" });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      res.status(500).json({ success: false, message: "خطا در تغییر رمز عبور" });
     }
   });
 

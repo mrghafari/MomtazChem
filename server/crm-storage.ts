@@ -652,6 +652,30 @@ export class CrmStorage implements ICrmStorage {
     
     return !!customer;
   }
+
+  async getCrmCustomerByResetToken(token: string): Promise<CrmCustomer | null> {
+    const [customer] = await crmDb
+      .select()
+      .from(crmCustomers)
+      .where(eq(crmCustomers.resetPasswordToken, token))
+      .limit(1);
+    
+    return customer || null;
+  }
+
+  async updateCrmCustomer(customerId: number, updates: Partial<CrmCustomer>): Promise<CrmCustomer> {
+    const [updatedCustomer] = await crmDb
+      .update(crmCustomers)
+      .set(updates)
+      .where(eq(crmCustomers.id, customerId))
+      .returning();
+    
+    if (!updatedCustomer) {
+      throw new Error('Customer not found');
+    }
+    
+    return updatedCustomer;
+  }
 }
 
 export const crmStorage = new CrmStorage();
