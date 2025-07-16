@@ -1548,6 +1548,37 @@ export default function ProductsPage() {
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
+                          
+                          {/* Subtle barcode visualization */}
+                          <div className="mb-1">
+                            <svg width="60" height="12" viewBox="0 0 60 12" className="opacity-40">
+                              <rect x="0" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="2" y="0" width="2" height="12" fill="#333"/>
+                              <rect x="5" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="7" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="9" y="0" width="3" height="12" fill="#333"/>
+                              <rect x="13" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="15" y="0" width="2" height="12" fill="#333"/>
+                              <rect x="18" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="20" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="22" y="0" width="2" height="12" fill="#333"/>
+                              <rect x="25" y="0" width="3" height="12" fill="#333"/>
+                              <rect x="29" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="31" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="33" y="0" width="2" height="12" fill="#333"/>
+                              <rect x="36" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="38" y="0" width="3" height="12" fill="#333"/>
+                              <rect x="42" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="44" y="0" width="2" height="12" fill="#333"/>
+                              <rect x="47" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="49" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="51" y="0" width="2" height="12" fill="#333"/>
+                              <rect x="54" y="0" width="1" height="12" fill="#333"/>
+                              <rect x="56" y="0" width="2" height="12" fill="#333"/>
+                              <rect x="59" y="0" width="1" height="12" fill="#333"/>
+                            </svg>
+                          </div>
+                          
                           <FormControl>
                             <Input 
                               placeholder="بارکد 13 رقمی" 
