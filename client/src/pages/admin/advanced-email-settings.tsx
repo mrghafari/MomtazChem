@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Mail, Settings, TestTube, Save, Plus, Trash2, Edit, Check, X, AlertCircle, CheckCircle, Clock, Eye, EyeOff, XCircle, BookOpen } from "lucide-react";
+import { ArrowLeft, Mail, Settings, TestTube, Save, Plus, Trash2, Edit, Check, X, AlertCircle, CheckCircle, Clock, Eye, EyeOff, XCircle, BookOpen, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
