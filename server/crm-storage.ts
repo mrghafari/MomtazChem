@@ -225,62 +225,24 @@ export class CrmStorage implements ICrmStorage {
     }
   }
 
-  async searchCrmCustomers(query: string): Promise<Customer[]> {
+  async searchCrmCustomers(query: string): Promise<CrmCustomer[]> {
     const searchTerm = `%${query}%`;
-    const customerData = await customerDb
-      .select({
-        id: customers.id,
-        email: customers.email,
-        firstName: customers.firstName,
-        lastName: customers.lastName,
-        company: customers.company,
-        phone: customers.phone,
-        country: customers.country,
-        city: customers.city,
-        customerType: customers.customerType,
-        customerStatus: customers.customerStatus,
-        customerSource: customers.customerSource,
-        lastOrderDate: customers.lastOrderDate,
-        createdAt: customers.createdAt,
-        isActive: customers.isActive,
-        totalOrdersCount: sql<number>`COUNT(${customerOrders.id})`,
-        totalSpent: sql<string>`COALESCE(SUM(${customerOrders.totalAmount}), 0)`,
-        averageOrderValue: sql<string>`CASE 
-          WHEN COUNT(${customerOrders.id}) > 0 THEN COALESCE(SUM(${customerOrders.totalAmount}), 0) / COUNT(${customerOrders.id})
-          ELSE 0 
-        END`,
-      })
-      .from(customers)
-      .leftJoin(customerOrders, eq(customers.id, customerOrders.customerId))
+    const customerData = await crmDb
+      .select()
+      .from(crmCustomers)
       .where(
         and(
-          eq(customers.isActive, true),
+          eq(crmCustomers.isActive, true),
           or(
-            sql`${customers.firstName} ILIKE ${searchTerm}`,
-            sql`${customers.lastName} ILIKE ${searchTerm}`,
-            sql`${customers.email} ILIKE ${searchTerm}`,
-            sql`${customers.company} ILIKE ${searchTerm}`,
-            sql`${customers.phone} ILIKE ${searchTerm}`
+            sql`${crmCustomers.firstName} ILIKE ${searchTerm}`,
+            sql`${crmCustomers.lastName} ILIKE ${searchTerm}`,
+            sql`${crmCustomers.email} ILIKE ${searchTerm}`,
+            sql`${crmCustomers.company} ILIKE ${searchTerm}`,
+            sql`${crmCustomers.phone} ILIKE ${searchTerm}`
           )
         )
       )
-      .groupBy(
-        customers.id,
-        customers.email,
-        customers.firstName,
-        customers.lastName,
-        customers.company,
-        customers.phone,
-        customers.country,
-        customers.city,
-        customers.customerType,
-        customers.customerStatus,
-        customers.customerSource,
-        customers.lastOrderDate,
-        customers.createdAt,
-        customers.isActive
-      )
-      .orderBy(sql`COALESCE(SUM(${customerOrders.totalAmount}), 0) DESC`)
+      .orderBy(desc(crmCustomers.updatedAt))
       .limit(50);
 
     return customerData;

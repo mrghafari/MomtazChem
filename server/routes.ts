@@ -15796,37 +15796,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       });
 
       if (sendNotification) {
-        // Send email notification
+        // Send email notification using the email service
         try {
-          const transporter = nodemailer.createTransporter({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS
-            }
-          });
-
-          const mailOptions = {
-            from: process.env.SMTP_USER,
-            to: customer.email,
-            subject: 'رمز عبور جدید - ممتاز شیمی',
-            html: `
-              <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
-                <h2>رمز عبور جدید</h2>
-                <p>سلام ${customer.firstName} ${customer.lastName} عزیز،</p>
-                <p>رمز عبور جدید شما توسط مدیر سیستم تنظیم شده است:</p>
-                <div style="background-color: #f0f0f0; padding: 10px; margin: 20px 0; border-radius: 5px;">
-                  <strong>رمز عبور جدید: ${newPassword}</strong>
-                </div>
-                <p>لطفاً این رمز عبور را در جای امن نگهداری کنید.</p>
-                <p>با تشکر،<br>تیم ممتاز شیمی</p>
-              </div>
-            `
-          };
-
-          await transporter.sendMail(mailOptions);
+          await emailService.sendPasswordChangeEmail(
+            customer.email,
+            customer.firstName,
+            customer.lastName,
+            newPassword
+          );
           console.log(`✓ Password change email sent to ${customer.email}`);
         } catch (emailError) {
           console.error('Error sending password change email:', emailError);

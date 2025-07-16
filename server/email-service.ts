@@ -80,7 +80,7 @@ class EmailService {
       throw new Error('No SMTP configuration found');
     }
 
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
       secure: config.secure,
@@ -176,6 +176,10 @@ class EmailService {
       console.error('Error sending password reset email:', error);
       return false;
     }
+  }
+
+  async sendPasswordChangeEmail(email: string, firstName: string, lastName: string, newPassword: string) {
+    return this.sendPasswordChangeNotification(email, `${firstName} ${lastName}`, newPassword);
   }
 
   async sendPasswordChangeNotification(email: string, customerName: string, newPassword?: string) {
