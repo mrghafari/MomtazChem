@@ -934,11 +934,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Clear any existing customer session first (single session mode)
+      req.session.customerId = undefined;
+      req.session.customerEmail = undefined;
+      req.session.crmCustomerId = undefined;
+      
       // Set up session with appropriate user type
       if (isCustomUser) {
         req.session.customUserId = user.id;
         req.session.isAuthenticated = true;
-        console.log(`✅ [LOGIN] Session configured for custom user ${user.id}:`, {
+        console.log(`✅ [LOGIN] Session configured for custom user ${user.id} (customer session cleared):`, {
           customUserId: req.session.customUserId,
           isAuthenticated: req.session.isAuthenticated,
           sessionId: req.sessionID
@@ -946,7 +951,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         req.session.adminId = user.id;
         req.session.isAuthenticated = true;
-        console.log(`✅ [LOGIN] Session configured for admin ${user.id}:`, {
+        console.log(`✅ [LOGIN] Session configured for admin ${user.id} (customer session cleared):`, {
           adminId: req.session.adminId,
           isAuthenticated: req.session.isAuthenticated,
           sessionId: req.sessionID
@@ -976,34 +981,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   app.post("/api/admin/logout", (req, res) => {
-    // Clear only admin session data, preserve customer session
+    // Clear all session data (single session mode)
     req.session.adminId = undefined;
+    req.session.customUserId = undefined;
+    req.session.customerId = undefined;
+    req.session.customerEmail = undefined;
+    req.session.crmCustomerId = undefined;
     req.session.isAuthenticated = undefined;
     
-    // If no customer session exists, destroy entire session
-    if (!req.session.customerId) {
-      req.session.destroy((err) => {
-        if (err) {
-          return res.status(500).json({ 
-            success: false, 
-            message: "Could not log out" 
-          });
-        }
-        res.json({ success: true, message: "Logged out successfully" });
-      });
-    } else {
-      // Save session with admin data cleared but customer data preserved
-      req.session.save((err) => {
-        if (err) {
-          return res.status(500).json({ 
-            success: false, 
-            message: "Could not log out" 
-          });
-        }
-        console.log('🔄 Admin logout - customer session preserved');
-        res.json({ success: true, message: "Logged out successfully" });
-      });
-    }
+    // Always destroy entire session for clean logout
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "Could not log out" 
+        });
+      }
+      console.log('🔄 Complete admin logout - all sessions cleared');
+      res.json({ success: true, message: "Logged out successfully" });
+    });
   });
 
   app.post("/api/admin/register", async (req, res) => {
@@ -4569,45 +4565,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Custom user logout endpoint
   app.post("/api/custom-users/logout", async (req, res) => {
     try {
-      // Clear custom user session data
+      // Clear all session data (single session mode)
       req.session.customUserId = undefined;
       req.session.customUserEmail = undefined;
       req.session.customUserName = undefined;
       req.session.customUserRole = undefined;
       req.session.customUserPermissions = undefined;
+      req.session.adminId = undefined;
+      req.session.customerId = undefined;
+      req.session.customerEmail = undefined;
+      req.session.crmCustomerId = undefined;
+      req.session.isAuthenticated = undefined;
       
-      // If no admin session exists, destroy entire session
-      if (!req.session.adminId) {
-        req.session.destroy((err) => {
-          if (err) {
-            console.error("Error destroying session:", err);
-            return res.status(500).json({
-              success: false,
-              message: "خطا در خروج"
-            });
-          }
-          res.json({
-            success: true,
-            message: "خروج موفق"
+      // Always destroy entire session for clean logout
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+          return res.status(500).json({
+            success: false,
+            message: "خطا در خروج"
           });
+        }
+        console.log('🔄 Complete custom user logout - all sessions cleared');
+        res.json({
+          success: true,
+          message: "خروج موفق"
         });
-      } else {
-        // Save session with custom user data cleared but admin data preserved
-        req.session.save((err) => {
-          if (err) {
-            console.error("Error saving session:", err);
-            return res.status(500).json({
-              success: false,
-              message: "خطا در خروج"
-            });
-          }
-          console.log('🔄 Custom user logout - admin session preserved');
-          res.json({
-            success: true,
-            message: "خروج موفق"
-          });
-        });
-      }
+      });
     } catch (error) {
       console.error("Error logging out custom user:", error);
       res.status(500).json({
@@ -6296,11 +6280,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Clear any existing admin session first (single session mode)
+      req.session.adminId = undefined;
+      req.session.customUserId = undefined;
+      
       // Store customer session using CRM ID as primary
       (req.session as any).customerId = crmCustomer.id;
       (req.session as any).customerEmail = crmCustomer.email;
       (req.session as any).crmCustomerId = crmCustomer.id;
       (req.session as any).isAuthenticated = true;
+      
+      console.log(`✅ [CUSTOMER LOGIN] Session configured for customer ${crmCustomer.id} (admin session cleared):`, {
+        customerId: crmCustomer.id,
+        customerEmail: crmCustomer.email,
+        sessionId: req.sessionID
+      });
 
       // Log login activity in CRM
       await crmStorage.logCustomerActivity({
@@ -6343,43 +6337,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/customers/logout", async (req, res) => {
     try {
-      // Clear only customer session data, preserve admin session
+      // Clear all session data (single session mode)
       req.session.customerId = undefined;
       req.session.customerEmail = undefined;
       req.session.crmCustomerId = undefined;
+      req.session.adminId = undefined;
+      req.session.customUserId = undefined;
+      req.session.isAuthenticated = undefined;
       
-      // If no admin session exists, destroy entire session
-      if (!req.session.adminId) {
-        req.session.destroy((err) => {
-          if (err) {
-            console.error("Error destroying session:", err);
-            return res.status(500).json({ 
-              success: false, 
-              message: "خطا در خروج" 
-            });
-          }
-          res.json({
-            success: true,
-            message: "خروج موفق"
+      // Always destroy entire session for clean logout
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+          return res.status(500).json({ 
+            success: false, 
+            message: "خطا در خروج" 
           });
+        }
+        console.log('🔄 Complete customer logout - all sessions cleared');
+        res.json({
+          success: true,
+          message: "خروج موفق"
         });
-      } else {
-        // Save session with customer data cleared but admin data preserved
-        req.session.save((err) => {
-          if (err) {
-            console.error("Error saving session:", err);
-            return res.status(500).json({ 
-              success: false, 
-              message: "خطا در خروج" 
-            });
-          }
-          console.log('🔄 Customer logout - admin session preserved');
-          res.json({
-            success: true,
-            message: "خروج موفق"
-          });
-        });
-      }
+      });
     } catch (error) {
       console.error("Error logging out customer:", error);
       res.status(500).json({ 
