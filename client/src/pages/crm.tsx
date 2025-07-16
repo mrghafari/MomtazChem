@@ -629,7 +629,7 @@ export default function CRM() {
                   <TableHeader>
                     <TableRow>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-gray-50 select-none py-2 px-3"
                         onClick={() => handleSort("name")}
                       >
                         <div className="flex items-center gap-2">
@@ -638,7 +638,7 @@ export default function CRM() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-gray-50 select-none py-2 px-3"
                         onClick={() => handleSort("email")}
                       >
                         <div className="flex items-center gap-2">
@@ -647,7 +647,7 @@ export default function CRM() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-gray-50 select-none py-2 px-3"
                         onClick={() => handleSort("company")}
                       >
                         <div className="flex items-center gap-2">
@@ -655,9 +655,9 @@ export default function CRM() {
                           {getSortIcon("company")}
                         </div>
                       </TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead className="py-2 px-3">Type</TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-gray-50 select-none py-2 px-3"
                         onClick={() => handleSort("customerStatus")}
                       >
                         <div className="flex items-center gap-2">
@@ -666,7 +666,7 @@ export default function CRM() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-gray-50 select-none py-2 px-3"
                         onClick={() => handleSort("totalSpent")}
                       >
                         <div className="flex items-center gap-2">
@@ -675,7 +675,7 @@ export default function CRM() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 select-none"
+                        className="cursor-pointer hover:bg-gray-50 select-none py-2 px-3"
                         onClick={() => handleSort("createdAt")}
                       >
                         <div className="flex items-center gap-2">
@@ -683,51 +683,57 @@ export default function CRM() {
                           {getSortIcon("createdAt")}
                         </div>
                       </TableHead>
-                      <TableHead className="min-w-[180px]">Actions</TableHead>
+                      <TableHead className="min-w-[140px] py-2 px-3">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sortedCustomers.map((customer) => (
-                      <TableRow key={customer.id}>
-                        <TableCell className="font-medium">
-                          {customer.firstName} {customer.lastName}
+                      <TableRow key={customer.id} className="h-12">
+                        <TableCell className="font-medium py-2 px-3">
+                          <div className="truncate max-w-[120px]">
+                            {customer.firstName} {customer.lastName}
+                          </div>
                         </TableCell>
-                        <TableCell>{customer.email}</TableCell>
-                        <TableCell>{customer.company || '-'}</TableCell>
-                        <TableCell>
-                          <Badge className={getTypeBadgeColor(customer.customerType)}>
+                        <TableCell className="py-2 px-3">
+                          <div className="truncate max-w-[150px]">
+                            {customer.email}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-2 px-3">
+                          <div className="truncate max-w-[100px]">
+                            {customer.company || '-'}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-2 px-3">
+                          <Badge className={`${getTypeBadgeColor(customer.customerType)} text-xs px-2 py-1`}>
                             {customer.customerType}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <Badge className={getStatusBadgeColor(customer.customerStatus)}>
+                        <TableCell className="py-2 px-3">
+                          <Badge className={`${getStatusBadgeColor(customer.customerStatus)} text-xs px-2 py-1`}>
                             {customer.customerStatus}
                           </Badge>
                         </TableCell>
-                        <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
-                        <TableCell>
-                          {formatDate(customer.createdAt)}
+                        <TableCell className="py-2 px-3">
+                          <div className="truncate max-w-[100px]">
+                            {formatCurrency(customer.totalSpent)}
+                          </div>
                         </TableCell>
-                        <TableCell className="min-w-[180px]">
+                        <TableCell className="py-2 px-3">
+                          <div className="truncate max-w-[100px] text-sm">
+                            {formatDate(customer.createdAt)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="min-w-[140px] py-2 px-3">
                           <div className="flex items-center gap-1 justify-start">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedCustomer(customer);
-                                setIsCustomerDetailDialogOpen(true);
-                              }}
-                              title="View customer details"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditCustomer(customer)}
                               title="Edit customer"
+                              className="h-8 w-8 p-0"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-3 w-3" />
                             </Button>
                             <Button
                               variant="outline"
@@ -737,26 +743,27 @@ export default function CRM() {
                                 setIsCustomerDetailDialogOpen(true);
                               }}
                               title="Manage customer password"
-                              className="text-blue-600 hover:text-blue-700"
+                              className="text-blue-600 hover:text-blue-700 h-8 w-8 p-0"
                             >
-                              <Shield className="h-4 w-4" />
+                              <Shield className="h-3 w-3" />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleExportCustomer(customer.id)}
                               title="Export customer report to PDF"
+                              className="h-8 w-8 p-0"
                             >
-                              <FileText className="h-4 w-4" />
+                              <FileText className="h-3 w-3" />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleDeleteCustomer(customer.id)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
                               title="Delete customer"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
                         </TableCell>
