@@ -377,7 +377,7 @@ const RemoteDesktop: React.FC = () => {
                   سریع، امن و کاملاً رایگان
                 </p>
                 <Button className="w-full" asChild>
-                  <a href="https://rustdesk.com/download/" target="_blank">
+                  <a href="https://rustdesk.com/" target="_blank">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     دانلود RustDesk
                   </a>

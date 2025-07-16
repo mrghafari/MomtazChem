@@ -63,7 +63,7 @@
 - پشتیبانی از همه سیستم‌عامل‌ها
 
 **نحوه استفاده:**
-1. کاربر: دانلود از https://rustdesk.com/download/
+1. کاربر: دانلود از https://rustdesk.com/
 2. اجرای مستقیم بدون نصب
 3. ارسال ID و Password موقت به شما
 4. اتصال فوری و امن
@@ -88,7 +88,7 @@
 #### گام 1: دانلود نرم‌افزار
 ```
 RustDesk (پیشنهاد اول):
-https://rustdesk.com/download/
+https://rustdesk.com/
 
 TeamViewer: 
 https://www.teamviewer.com/en/download/
