@@ -376,12 +376,32 @@ export default function AdvancedEmailSettingsPage() {
   const getTestStatusIcon = (status: string) => {
     switch (status) {
       case "success":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg border-2 border-green-300 animate-pulse" title="ایمیل به درستی کار می‌کند" />;
       case "failed":
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
+        return <div className="w-3 h-3 bg-red-500 rounded-full shadow-lg border-2 border-red-300 animate-pulse" title="تنظیمات ایمیل اشتباه است" />;
       default:
-        return <Clock className="w-4 h-4 text-gray-400" />;
+        return <div className="w-3 h-3 bg-gray-400 rounded-full shadow-sm border-2 border-gray-300" title="وضعیت نامشخص" />;
     }
+  }
+
+  // Function to get email status light based on SMTP configuration
+  const getEmailStatusLight = (category: EmailCategory) => {
+    if (!category.smtp) {
+      return <div className="w-3 h-3 bg-gray-400 rounded-full shadow-sm border-2 border-gray-300" title="SMTP تنظیم نشده" />;
+    }
+    
+    // Check if all required SMTP fields are configured
+    const isFullyConfigured = category.smtp.host && 
+                              category.smtp.username && 
+                              category.smtp.password && 
+                              category.smtp.fromEmail;
+    
+    if (!isFullyConfigured) {
+      return <div className="w-3 h-3 bg-yellow-500 rounded-full shadow-lg border-2 border-yellow-300 animate-pulse" title="تنظیمات SMTP ناکامل" />;
+    }
+    
+    // Return status based on test result
+    return getTestStatusIcon(category.smtp.testStatus || "untested");
   };
 
   const getCategoryColor = (categoryKey: string) => {
@@ -476,11 +496,22 @@ export default function AdvancedEmailSettingsPage() {
                   }`}
                   onClick={() => setSelectedCategory(category)}
                 >
+                  {/* Status Light at Top */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {getEmailStatusLight(category)}
+                      <span className="text-xs text-gray-500">
+                        {category.smtp?.testStatus === "success" ? "آماده" : 
+                         category.smtp?.testStatus === "failed" ? "خرابی" : 
+                         category.smtp ? "ناکامل" : "تنظیم نشده"}
+                      </span>
+                    </div>
+                  </div>
+                  
                   <div className="flex items-center justify-between mb-2">
                     <Badge className={getCategoryColor(category.categoryKey)}>
                       {category.categoryName}
                     </Badge>
-                    {category.smtp && getTestStatusIcon(category.smtp.testStatus)}
                   </div>
                   <p className="text-sm text-gray-600">{category.description}</p>
                   <div className="mt-2 flex gap-2">
