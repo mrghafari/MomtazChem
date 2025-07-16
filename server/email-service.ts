@@ -184,9 +184,15 @@ class EmailService {
 
   async sendPasswordChangeNotification(email: string, customerName: string, newPassword?: string) {
     try {
+      console.log(`[EMAIL DEBUG] Starting password change notification for ${email}`);
       const { transporter, config } = await this.createTransporter('admin');
+      console.log(`[EMAIL DEBUG] Using SMTP config: ${config.username} (${config.host}:${config.port})`);
 
       const template = await this.getEmailTemplate('Password Management Template');
+      console.log(`[EMAIL DEBUG] Template found: ${template ? 'Yes' : 'No'}`);
+      if (template) {
+        console.log(`[EMAIL DEBUG] Template subject: ${template.subject}`);
+      }
       
       if (template) {
         const variables = {
@@ -203,7 +209,8 @@ class EmailService {
         const htmlContent = this.processTemplate(template.html_content || template.htmlContent, variables);
         const textContent = this.processTemplate(template.text_content || template.bodyText || template.html_content || template.htmlContent, variables);
 
-        await transporter.sendMail({
+        console.log(`[EMAIL DEBUG] Sending email to ${email} with template`);
+        const result = await transporter.sendMail({
           from: `"شرکت ممتاز شیمی" <${config.username}>`,
           to: email,
           subject: template.subject,
@@ -211,6 +218,7 @@ class EmailService {
           html: htmlContent,
         });
 
+        console.log(`[EMAIL DEBUG] Email sent successfully! Message ID: ${result.messageId}`);
         console.log(`Password change notification sent to ${email} using template`);
         return true;
       }
@@ -273,7 +281,13 @@ class EmailService {
       console.log(`Password change notification sent to ${email}`);
       return true;
     } catch (error) {
-      console.error('Error sending password change notification:', error);
+      console.error('[EMAIL ERROR] Error sending password change notification:', error);
+      console.error('[EMAIL ERROR] Error details:', {
+        message: error.message,
+        code: error.code,
+        responseCode: error.responseCode,
+        response: error.response
+      });
       return false;
     }
   }

@@ -15162,11 +15162,13 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       // Send email notification if requested
       if (sendEmail) {
-        await emailService.sendPasswordChangeNotification(
+        console.log(`[PASSWORD CHANGE] Sending email to ${customer.email} for customer ${customer.firstName} ${customer.lastName}`);
+        const emailResult = await emailService.sendPasswordChangeNotification(
           customer.email,
           `${customer.firstName} ${customer.lastName}`,
           newPassword
         );
+        console.log(`[PASSWORD CHANGE] Email result: ${emailResult ? 'Success' : 'Failed'}`);
       }
       
       // Log activity
