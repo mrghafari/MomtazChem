@@ -220,22 +220,6 @@ export default function SiteManagement() {
       moduleId: "email_settings"
     },
     {
-      id: "email-service-guide",
-      label: "Email Service Guide",
-      icon: FileText,
-      onClick: () => trackButtonClick("email-service-guide", () => setLocation("/admin/email-service-guide")),
-      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
-      moduleId: "email_settings"
-    },
-    {
-      id: "email-address-manager",
-      label: "Email Address Manager",
-      icon: Edit,
-      onClick: () => trackButtonClick("email-address-manager", () => setLocation("/admin/email-address-manager")),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
-      moduleId: "email_settings"
-    },
-    {
       id: "content-management",
       label: "Content Management",
       icon: Edit3,

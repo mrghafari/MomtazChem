@@ -515,32 +515,63 @@ export default function AdvancedEmailSettingsPage() {
         </Card>
       )}
 
+      {/* Sub-modules section */}
+      <div className="mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">زیرماژول‌های تنظیمات ایمیل</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/admin/email-address-manager")}>
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
+                  <Edit className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">مدیریت آدرس‌های ایمیل</h3>
+                  <p className="text-sm text-gray-600">Email Address Manager</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500">تنظیم آدرس‌های ایمیل برای هر نوع نوتیفیکیشن و کاربرد سیستم</p>
+            </div>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/admin/email-service-guide")}>
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">راهنمای سرویس ایمیل</h3>
+                  <p className="text-sm text-gray-600">Email Service Guide</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500">راهنمای کامل استفاده از سرویس ایمیل یونیورسال و 15 دسته‌بندی آن</p>
+            </div>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/admin/email-progress")}>
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Progress Tracker</h3>
+                  <p className="text-sm text-gray-600">Email Configuration Progress</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500">نمایش پیشرفت تنظیمات SMTP و وضعیت دسته‌بندی‌های ایمیل</p>
+            </div>
+          </Card>
+        </div>
+      </div>
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-semibold">Email Categories</h2>
           <p className="text-gray-600">Configure SMTP settings and recipients for each category</p>
-        </div>
-        <div className="flex gap-3">
-          <Button
-            onClick={() => setLocation("/admin/email-address-manager")}
-            className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
-          >
-            <Edit className="w-4 h-4" />
-            مدیریت آدرس‌های ایمیل
-          </Button>
-          <Button
-            onClick={() => setLocation("/admin/email-service-guide")}
-            className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
-          >
-            <BookOpen className="w-4 h-4" />
-            راهنمای سرویس ایمیل
-          </Button>
-          <Button
-            onClick={() => setLocation("/admin/email-progress")}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-          >
-            🎯 Progress Tracker
-          </Button>
         </div>
       </div>
 
