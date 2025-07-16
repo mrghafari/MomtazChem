@@ -150,6 +150,7 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
@@ -201,8 +202,12 @@ export default function ProductsPage() {
   }, [refetch]);
 
   const { mutate: createProduct } = useMutation({
-    mutationFn: (data: InsertShowcaseProduct) => apiRequest("/api/products", { method: "POST", body: data }),
+    mutationFn: (data: InsertShowcaseProduct) => {
+      setIsSubmitting(true);
+      return apiRequest("/api/products", { method: "POST", body: data });
+    },
     onSuccess: () => {
+      setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
       setDialogOpen(false);
@@ -218,6 +223,7 @@ export default function ProductsPage() {
       window.location.reload();
     },
     onError: (error: any) => {
+      setIsSubmitting(false);
       toast({
         title: "Error",
         description: error.message || "Failed to create product",
@@ -228,11 +234,12 @@ export default function ProductsPage() {
 
   const { mutate: updateProduct } = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) => {
-
+      setIsSubmitting(true);
       return apiRequest(`/api/products/${id}`, { method: "PUT", body: data });
     },
     onSuccess: (result) => {
       console.log('✅ [DEBUG] Update mutation successful, result:', result);
+      setIsSubmitting(false);
       
       // Close dialog and reset form
       setDialogOpen(false);
@@ -251,6 +258,7 @@ export default function ProductsPage() {
     },
     onError: (error: any) => {
       console.error('❌ [DEBUG] Update mutation failed:', error);
+      setIsSubmitting(false);
       
       // Show user-friendly error message
       let errorMessage = "بروزرسانی محصول ناموفق بود";
