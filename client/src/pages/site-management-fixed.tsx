@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -215,8 +215,16 @@ export default function SiteManagement() {
       id: "email-settings",
       label: "Email Settings",
       icon: Mail,
-      onClick: () => trackButtonClick("email-settings", () => setLocation("/admin/advanced-email-settings")),
+      onClick: () => trackButtonClick("email-settings", () => setLocation("/admin/email-settings")),
       className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50",
+      moduleId: "email_settings"
+    },
+    {
+      id: "email-service-guide",
+      label: "Email Service Guide",
+      icon: FileText,
+      onClick: () => trackButtonClick("email-service-guide", () => setLocation("/admin/email-service-guide")),
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
       moduleId: "email_settings"
     },
     {
