@@ -102,8 +102,9 @@ export default function EmailAddressManagerPage() {
       isActive: true
     }
   ].map(assignment => {
-    // Find corresponding category with SMTP status (with null check)
-    const category = categories?.find((cat: any) => cat.categoryKey === assignment.categoryKey);
+    // Find corresponding category with SMTP status (categories.data is the array)
+    const categoriesArray = categories?.categories || [];
+    const category = categoriesArray.find((cat: any) => cat.categoryKey === assignment.categoryKey);
     return {
       ...assignment,
       smtpConfigured: !!category?.smtp,
