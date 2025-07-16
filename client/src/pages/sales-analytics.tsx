@@ -49,7 +49,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function SalesAnalytics() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   // Authentication check
   useEffect(() => {
