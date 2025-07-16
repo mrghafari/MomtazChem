@@ -18,7 +18,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
 
@@ -1304,129 +1305,158 @@ export default function ProductsPage() {
 
       {/* Product Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingProduct ? "Edit Product" : "Add New Product"}
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader className="pb-4 border-b">
+            <DialogTitle className="text-2xl font-bold text-center text-blue-700 flex items-center justify-center gap-2">
+              <Package className="h-6 w-6" />
+              {editingProduct ? "ویرایش محصول" : "افزودن محصول جدید"}
             </DialogTitle>
-            <DialogDescription>
-              {editingProduct ? "Update product information" : "Add a new product to your inventory"}
+            <DialogDescription className="text-center text-gray-600">
+              {editingProduct ? "ویرایش اطلاعات محصول موجود" : "افزودن محصول جدید به کاردکس"}
             </DialogDescription>
           </DialogHeader>
           
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-              console.log('❌ [DEBUG] Form validation failed:', errors);
-            })} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Basic Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Basic Information</h3>
-                  
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter product name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <TooltipProvider>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                console.log('❌ [DEBUG] Form validation failed:', errors);
+              })} className="space-y-4">
+                
+                {/* اطلاعات پایه محصول */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    اطلاعات پایه محصول
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            نام محصول *
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>نام کامل محصول را وارد کنید. این نام در کاردکس و فروشگاه نمایش داده می‌شود</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
+                            <Input 
+                              placeholder="نام محصول را وارد کنید" 
+                              className="h-9"
+                              {...field} 
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {categories.map((category: CategoryOption) => (
-                              <SelectItem key={category.value} value={category.value}>
-                                <div className="flex items-center gap-2">
-                                  {category.icon}
-                                  {category.label}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Enter product description" 
-                            className="min-h-[100px]"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            دسته‌بندی *
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>دسته‌بندی محصول برای طبقه‌بندی و جستجوی بهتر</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="h-9">
+                                <SelectValue placeholder="دسته‌بندی را انتخاب کنید" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories.map((category: CategoryOption) => (
+                                <SelectItem key={category.value} value={category.value}>
+                                  <div className="flex items-center gap-2">
+                                    {category.icon}
+                                    {category.label}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="tags"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tags (برچسب‌ها)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter tags separated by commas (e.g., شیمیایی, صنعتی, پاک‌کننده)" 
-                            {...field}
-                            value={field.value || ''}
-                            onChange={(e) => {
-                              console.log('Tags input changed:', e.target.value);
-                              field.onChange(e.target.value);
-                            }}
-                          />
-                        </FormControl>
-                        <div className="text-xs text-muted-foreground">
-                          برچسب‌ها را با کاما از هم جدا کنید. این برچسب‌ها در فروشگاه نمایش داده خواهند شد.
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="mt-3">
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            توضیحات محصول
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>توضیحات کامل درباره محصول، کاربرد و ویژگی‌های آن</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="توضیحات محصول..." 
+                              className="min-h-[80px] resize-none"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
-                {/* Inventory & Pricing */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Inventory & Pricing</h3>
-                  
-                  <div className="grid grid-cols-3 gap-4">
+                {/* شناسایی و قیمت‌گذاری */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+                  <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center gap-2">
+                    <QrCode className="h-5 w-5" />
+                    شناسایی و قیمت‌گذاری
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3">
                     <FormField
                       control={form.control}
-                      name="stockQuantity"
+                      name="sku"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Current Stock</FormLabel>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                            کد محصول (SKU)
+                            {editingProduct && <Lock className="h-3 w-3 text-gray-400" />}
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>کد یکتای محصول برای شناسایی در سیستم. بعد از ایجاد قابل تغییر نیست</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <FormControl>
                             <Input 
-                              type="number" 
-                              placeholder="0" 
+                              placeholder="کد محصول" 
+                              className={`h-9 ${editingProduct ? "bg-gray-50 text-gray-500" : ""}`}
                               {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                              readOnly={!!editingProduct}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1436,17 +1466,27 @@ export default function ProductsPage() {
 
                     <FormField
                       control={form.control}
-                      name="minStockLevel"
+                      name="barcode"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Min Level</FormLabel>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                            بارکد (EAN-13)
+                            {editingProduct && <Lock className="h-3 w-3 text-gray-400" />}
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>بارکد استاندارد 13 رقمی محصول. بعد از ایجاد قابل تغییر نیست</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <FormControl>
                             <Input 
-                              type="number" 
-                              placeholder="0" 
+                              placeholder="بارکد 13 رقمی" 
+                              className={`h-9 ${editingProduct ? "bg-gray-50 text-gray-500" : ""}`}
                               {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                              readOnly={!!editingProduct}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1456,17 +1496,26 @@ export default function ProductsPage() {
 
                     <FormField
                       control={form.control}
-                      name="maxStockLevel"
+                      name="batchNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Max Level</FormLabel>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            شماره بچ
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>شماره دسته تولید برای ردیابی محصولات</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <FormControl>
                             <Input 
-                              type="number" 
-                              placeholder="0" 
+                              placeholder="BATCH-2025-001" 
+                              className="h-9"
                               {...field}
                               value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1475,18 +1524,29 @@ export default function ProductsPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 mt-3">
                     <FormField
                       control={form.control}
                       name="unitPrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Unit Price</FormLabel>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            قیمت واحد
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>قیمت هر واحد محصول به واحد پولی انتخابی</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
                               step="0.01"
                               placeholder="0.00" 
+                              className="h-9"
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
@@ -1502,15 +1562,18 @@ export default function ProductsPage() {
                       name="currency"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Currency</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormLabel className="text-sm font-medium">واحد پول</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value || "IQD"}>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select currency" />
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="IQD">IQD (دینار عراقی)</SelectItem>
+                              <SelectItem value="IQD">دینار عراقی (IQD)</SelectItem>
+                              <SelectItem value="USD">دلار آمریکا (USD)</SelectItem>
+                              <SelectItem value="EUR">یورو (EUR)</SelectItem>
+                              <SelectItem value="TRY">لیر ترکیه (TRY)</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1518,20 +1581,135 @@ export default function ProductsPage() {
                       )}
                     />
                   </div>
+                </div>
 
-                  {/* Weight Fields */}
-                  <div className="grid grid-cols-3 gap-4">
+                {/* مدیریت موجودی و وزن */}
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-4 rounded-lg border border-orange-200">
+                  <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    مدیریت موجودی و وزن
+                  </h3>
+                  
+                  {/* ردیف موجودی */}
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <FormField
+                      control={form.control}
+                      name="stockQuantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            موجودی فعلی
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>تعداد موجودی فعلی محصول در انبار</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              className="h-9"
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="minStockLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            حداقل موجودی
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>حداقل موجودی برای هشدار کمبود</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              className="h-9"
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="maxStockLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            حداکثر موجودی
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>حداکثر ظرفیت نگهداری محصول در انبار</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              className="h-9"
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* ردیف وزن */}
+                  <div className="grid grid-cols-3 gap-3">
                     <FormField
                       control={form.control}
                       name="netWeight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>وزن خالص (Net Weight)</FormLabel>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            وزن خالص
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>وزن خالص محصول بدون بسته‌بندی</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
                               step="0.01"
                               placeholder="0.00" 
+                              className="h-9"
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
@@ -1547,12 +1725,23 @@ export default function ProductsPage() {
                       name="grossWeight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>وزن ناخالص (Gross Weight)</FormLabel>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            وزن ناخالص
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>وزن کل محصول همراه با بسته‌بندی (برای حمل و نقل)</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
                               step="0.01"
                               placeholder="0.00" 
+                              className="h-9"
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
@@ -1568,19 +1757,19 @@ export default function ProductsPage() {
                       name="weightUnit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Weight Unit</FormLabel>
+                          <FormLabel className="text-sm font-medium">واحد وزن</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value || "kg"}>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select weight unit" />
+                              <SelectTrigger className="h-9">
+                                <SelectValue placeholder="انتخاب واحد" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="kg">kg</SelectItem>
-                              <SelectItem value="g">g</SelectItem>
-                              <SelectItem value="lb">lb</SelectItem>
-                              <SelectItem value="oz">oz</SelectItem>
-                              <SelectItem value="t">Ton</SelectItem>
+                              <SelectItem value="kg">کیلوگرم (kg)</SelectItem>
+                              <SelectItem value="g">گرم (g)</SelectItem>
+                              <SelectItem value="lb">پوند (lb)</SelectItem>
+                              <SelectItem value="oz">اونس (oz)</SelectItem>
+                              <SelectItem value="t">تن (t)</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1588,19 +1777,41 @@ export default function ProductsPage() {
                       )}
                     />
                   </div>
+                </div>
 
-                  {/* Batch Number Field */}
+                {/* برچسب‌ها و تنظیمات اضافی */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                  <h3 className="text-lg font-semibold text-purple-800 mb-3 flex items-center gap-2">
+                    <Tag className="h-5 w-5" />
+                    برچسب‌ها و تنظیمات
+                  </h3>
+                  
                   <FormField
                     control={form.control}
-                    name="batchNumber"
+                    name="tags"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>شماره بچ (Batch Number)</FormLabel>
+                        <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          برچسب‌ها
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <HelpCircle className="h-3 w-3 text-gray-400" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>برچسب‌ها را با کاما از هم جدا کنید. این برچسب‌ها در فروشگاه نمایش داده می‌شوند</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="مثال: BATCH-2025-001" 
+                            placeholder="مثال: شیمیایی, صنعتی, پاک‌کننده" 
+                            className="h-9"
                             {...field}
                             value={field.value || ''}
+                            onChange={(e) => {
+                              console.log('Tags input changed:', e.target.value);
+                              field.onChange(e.target.value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1608,782 +1819,75 @@ export default function ProductsPage() {
                     )}
                   />
 
-                  {/* Shop Sync Control */}
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="grid grid-cols-2 gap-3 mt-3">
                     <FormField
                       control={form.control}
                       name="syncWithShop"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <div className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="h-5 w-5"
-                              />
-                            </FormControl>
-                            <div className="flex flex-col">
-                              <FormLabel className="text-sm font-medium text-blue-900">
-                                🏪 نمایش در فروشگاه (Shop Visibility)
-                              </FormLabel>
-                              <div className="text-xs text-blue-700 mt-1">
-                                {field.value ? (
-                                  "✓ این محصول در فروشگاه آنلاین نمایش داده می‌شود"
-                                ) : (
-                                  "⨯ این محصول در فروشگاه آنلاین مخفی است"
-                                )}
-                              </div>
-                            </div>
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">نمایش در فروشگاه</FormLabel>
+                            <div className="text-xs text-gray-500">محصول در فروشگاه آنلاین نمایش داده شود</div>
                           </div>
-                          <div className="text-xs text-gray-600 bg-white p-2 rounded border-l-2 border-blue-400">
-                            <strong>توضیح:</strong> با فعال بودن این گزینه، محصول در فروشگاه آنلاین قابل مشاهده و خرید خواهد بود. 
-                            اگر غیرفعال باشد، محصول فقط در کاردکس نمایشی موجود است و در فروشگاه نمایش داده نمی‌شود.
-                          </div>
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
                         </FormItem>
                       )}
                     />
-                  </div>
-                  
-                  {/* Show When Out of Stock Control */}
-                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+
                     <FormField
                       control={form.control}
                       name="showWhenOutOfStock"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <div className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="h-5 w-5"
-                              />
-                            </FormControl>
-                            <div className="flex flex-col">
-                              <FormLabel className="text-sm font-medium text-orange-900">
-                                📦 نمایش در هنگام اتمام موجودی (Out of Stock Display)
-                              </FormLabel>
-                              <div className="text-xs text-orange-700 mt-1">
-                                {field.value ? (
-                                  "✓ این محصول حتی در صورت اتمام موجودی نمایش داده می‌شود"
-                                ) : (
-                                  "⨯ این محصول در صورت اتمام موجودی مخفی می‌شود"
-                                )}
-                              </div>
-                            </div>
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">نمایش در زمان اتمام</FormLabel>
+                            <div className="text-xs text-gray-500">حتی در صورت تمام شدن موجودی نمایش داده شود</div>
                           </div>
-                          <div className="text-xs text-gray-600 bg-white p-2 rounded border-l-2 border-orange-400">
-                            <strong>توضیح:</strong> با فعال بودن این گزینه، محصول حتی در صورت صفر بودن موجودی در فروشگاه نمایش داده می‌شود. 
-                            اگر غیرفعال باشد، محصول در صورت اتمام موجودی از فروشگاه حذف می‌شود.
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Product Codes */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="sku"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SKU</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter SKU" 
-                            {...field} 
-                            readOnly={!!field.value && editingProduct}
-                            className={!!field.value && editingProduct ? "bg-gray-100 cursor-not-allowed" : ""}
-                          />
-                        </FormControl>
-                        {(!field.value || !editingProduct) && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={generateSmartSKU}
-                            disabled={generateSKUMutation.isPending}
-                            className="whitespace-nowrap"
-                          >
-                            {generateSKUMutation.isPending ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                            ) : (
-                              "🤖 AI SKU"
-                            )}
-                          </Button>
-                        )}
-                        {field.value && editingProduct && (
-                          <div className="flex items-center text-sm text-green-600 px-3 py-2 bg-green-50 rounded border">
-                            ✓ قفل شده
-                          </div>
-                        )}
-                      </div>
-                      {field.value && editingProduct && (
-                        <p className="text-xs text-muted-foreground">
-                          SKU بعد از تولید قابل تغییر نیست
-                        </p>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="barcode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Barcode (EAN-13)</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input 
-                            placeholder="Auto-generated or enter manually" 
-                            {...field}
-                            readOnly={!!field.value && editingProduct}
-                            className={!!field.value && editingProduct ? "bg-gray-100 cursor-not-allowed" : ""}
-                            onChange={async (e) => {
-                              // Prevent editing if it's an existing product with barcode
-                              if (!!field.value && editingProduct) {
-                                return;
-                              }
-                              
-                              const newBarcode = e.target.value;
-                              field.onChange(e);
-                              
-                              // Check for duplicate barcode if barcode is entered
-                              if (newBarcode && newBarcode.length >= 8) {
-                                try {
-                                  const excludeId = editingProduct?.id;
-                                  const response = await fetch(`/api/barcode/check-duplicate/${newBarcode}${excludeId ? `?excludeProductId=${excludeId}` : ''}`, {
-                                    credentials: 'include'
-                                  });
-                                  
-                                  if (response.ok) {
-                                    const result = await response.json();
-                                    if (result.data.isDuplicate) {
-                                      toast({
-                                        title: "Duplicate Barcode!",
-                                        description: `This barcode is already used by: ${result.data.duplicateProduct.name}`,
-                                        variant: "destructive"
-                                      });
-                                      form.setError("barcode", {
-                                        type: "manual",
-                                        message: "This barcode is already in use"
-                                      });
-                                    } else {
-                                      form.clearErrors("barcode");
-                                    }
-                                  }
-                                } catch (error) {
-                                  console.error('Error checking barcode duplicate:', error);
-                                }
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        {(!field.value || !editingProduct) && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={async () => {
-                              const currentBarcode = form.getValues("barcode");
-                              
-                              // Protect existing barcodes - don't allow overwriting
-                              if (currentBarcode && currentBarcode.trim() !== "") {
-                                toast({
-                                  title: "Barcode Exists",
-                                  description: "This product already has a barcode. Clear the field first if you want to generate a new one.",
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-                              
-                              const productName = form.getValues("name");
-                              const category = form.getValues("category");
-                            
-                            if (!productName || !category) {
-                              toast({
-                                title: "Missing Information",
-                                description: "Please enter product name and select category first",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
-                            
-                            // Generate unique barcode with duplicate checking
-                            try {
-                              const { generateUniqueEAN13Barcode } = await import('@shared/barcode-utils');
-                              const excludeId = editingProduct?.id;
-                              const generatedBarcode = await generateUniqueEAN13Barcode(productName, category, excludeId);
-                              
-                              console.log('Generated unique barcode:', {
-                                productName,
-                                category,
-                                generated: generatedBarcode,
-                                isValid: validateEAN13(generatedBarcode)
-                              });
-                              
-                              form.setValue("barcode", generatedBarcode);
-                              
-                              toast({
-                                title: "Barcode Generated",
-                                description: "Unique EAN-13 barcode created successfully",
-                                variant: "default"
-                              });
-                            } catch (error) {
-                              console.error('Error generating unique barcode:', error);
-                              toast({
-                                title: "Generation Failed",
-                                description: "Failed to generate unique barcode",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
-                            
-                            // Generate barcode image immediately
-                            setTimeout(() => {
-                              if (barcodeCanvasRef.current) {
-                                try {
-                                  const currentBarcode = form.getValues("barcode");
-                                  console.log('Generating barcode in button click:', currentBarcode);
-                                  
-                                  // Set canvas dimensions first
-                                  const canvas = barcodeCanvasRef.current;
-                                  canvas.width = 200;
-                                  canvas.height = 100;
-                                  
-                                  JsBarcode(canvas, currentBarcode, {
-                                    format: "EAN13",
-                                    width: 2,
-                                    height: 80,
-                                    displayValue: false, // We'll show the number separately
-                                    fontSize: 12,
-                                    textMargin: 5,
-                                    marginTop: 5,
-                                    marginBottom: 5,
-                                    marginLeft: 5,
-                                    marginRight: 5,
-                                  });
-                                } catch (error) {
-                                  console.error('Immediate barcode generation error:', error);
-                                }
-                              }
-                            }, 100);
-                          }}
-                          className="whitespace-nowrap"
-                        >
-                          <QrCode className="w-4 h-4 mr-1" />
-                          Generate
-                        </Button>
-                        )}
-                        {field.value && editingProduct && (
-                          <div className="flex items-center text-sm text-green-600 px-3 py-2 bg-green-50 rounded border">
-                            ✓ قفل شده
-                          </div>
-                        )}
-                      </div>
-                      {field.value && editingProduct && (
-                        <p className="text-xs text-muted-foreground">
-                          بارکد بعد از تولید قابل تغییر نیست
-                        </p>
-                      )}
-                      {(!field.value || !editingProduct) && (
-                        <div className="text-xs text-muted-foreground">
-                          Click "Generate" to create GS1-compliant EAN-13 barcode automatically. 
-                          <span className="text-amber-600 font-medium">Note: Existing barcodes are protected from overwriting.</span>
-                        </div>
-                      )}
-                      
-                      {/* Barcode Display - Canvas always rendered for stable ref */}
-                      <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                        <div className="text-sm font-medium text-gray-700 mb-2">Barcode Preview:</div>
-                        <div className="flex flex-col items-center">
-                          {/* Canvas is always rendered for stable ref */}
-                          <canvas 
-                            ref={barcodeCanvasRef} 
-                            className="border border-gray-300 rounded mb-2"
-                            width="200"
-                            height="100"
-                            style={{ display: form.watch("barcode") ? 'block' : 'none' }}
-                          />
-                          {form.watch("barcode") && (
-                            <div 
-                              className="cursor-pointer hover:bg-gray-100 transition-colors rounded p-2"
-                              onClick={() => {
-                                const barcode = form.watch("barcode");
-                                if (barcode) {
-                                  navigator.clipboard.writeText(barcode).then(() => {
-                                    toast({
-                                      title: "کپی شد!",
-                                      description: "بارکد در کلیپ‌بورد کپی شد",
-                                      variant: "default"
-                                    });
-                                  }).catch(() => {
-                                    toast({
-                                      title: "خطا در کپی",
-                                      description: "امکان کپی بارکد وجود ندارد",
-                                      variant: "destructive"
-                                    });
-                                  });
-                                }
-                              }}
-                              title="برای کپی کردن کلیک کنید"
-                            >
-                              <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
-                                {form.watch("barcode")}
-                              </code>
-                              <div className="text-xs text-gray-500 mt-1">برای کپی کردن کلیک کنید</div>
-                            </div>
-                          )}
-                          {!form.watch("barcode") && (
-                            <div className="text-sm text-gray-500 italic py-4">
-                              No barcode generated yet - click "Generate" to create one
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Product Variants Section */}
-              <div className="space-y-4 border-t pt-6">
-                <h3 className="text-lg font-semibold">Product Variants</h3>
-                
-                <FormField
-                  control={form.control}
-                  name="isVariant"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Is Product Variant
-                        </FormLabel>
-                        <div className="text-sm text-muted-foreground">
-                          This product is a variant of another product (different packaging/quantity)
-                        </div>
-                      </div>
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          className="w-4 h-4"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch("isVariant") && (
-                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-                    <FormField
-                      control={form.control}
-                      name="parentProductId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Parent Product</FormLabel>
-                          <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select parent product" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {products && Array.isArray(products) && products
-                                .filter((p: any) => !p.isVariant && p.id !== editingProduct?.id)
-                                .map((p: any) => (
-                                  <SelectItem key={p.id} value={p.id.toString()}>
-                                    {p.name}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="variantType"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Variant Type</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select variant type" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="packaging">Packaging</SelectItem>
-                                <SelectItem value="size">Size</SelectItem>
-                                <SelectItem value="concentration">Concentration</SelectItem>
-                                <SelectItem value="quantity">Quantity</SelectItem>
-                                <SelectItem value="weight">Weight</SelectItem>
-                                <SelectItem value="volume">Volume</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="variantValue"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Variant Value</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., 1kg, 5L, 25kg bag" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Additional Information */}
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="features"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Features</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Enter product features (one per line)" 
-                          className="min-h-[80px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="applications"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Applications</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Enter product applications (one per line)" 
-                          className="min-h-[80px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="specifications"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Specifications</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Enter technical specifications" 
-                          className="min-h-[80px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tags"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tags</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter tags separated by commas" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* File Uploads */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <FormLabel>Product Image</FormLabel>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    {imagePreview ? (
-                      <div className="space-y-2">
-                        <img 
-                          src={imagePreview} 
-                          alt="Preview" 
-                          className="w-full h-32 object-cover rounded"
-                        />
-                        <Button 
-                          type="button"
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setImagePreview(null)}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <Image className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-2">
-                          <label htmlFor="image-upload" className="cursor-pointer">
-                            <span className="text-sm text-blue-600 hover:text-blue-500">
-                              {uploadingImage ? 'Uploading...' : 'Upload image'}
-                            </span>
-                            <input
-                              id="image-upload"
-                              type="file"
-                              className="sr-only"
-                              accept="image/jpeg,image/jpg,image/png,image/webp"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleImageUpload(file);
-                              }}
-                              disabled={uploadingImage}
-                            />
-                          </label>
-                          <div className="mt-2 text-xs text-gray-500">
-                            <p>Optimal sizes: 350x350px (cards), 600x600px (details)</p>
-                            <p>Formats: JPEG, PNG, WebP | Max: 2MB</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-
-
-                {/* MSDS Upload Section */}
-                <div className="space-y-2">
-                  <FormLabel>MSDS (Material Safety Data Sheet)</FormLabel>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    {msdsPreview ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                          <FileText className="w-4 h-4" />
-                          <span className="text-sm truncate">
-                            {form.getValues('msdsFileName') || 'MSDS uploaded'}
-                          </span>
-                        </div>
-                        <Button 
-                          type="button"
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setMsdsPreview(null);
-                            form.setValue('msdsUrl', '');
-                            form.setValue('msdsFileName', '');
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-2">
-                          <label htmlFor="msds-upload" className="cursor-pointer">
-                            <span className="text-sm text-blue-600 hover:text-blue-500">
-                              {uploadingMsds ? 'Uploading...' : 'Upload MSDS'}
-                            </span>
-                            <input
-                              id="msds-upload"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.doc,.docx"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleMsdsUpload(file);
-                              }}
-                              disabled={uploadingMsds}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* MSDS Visibility Control */}
-                  <div className="flex items-center space-x-2">
-                    <FormField
-                      control={form.control}
-                      name="showMsdsToCustomers"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                           <FormControl>
                             <Checkbox
                               checked={field.value}
                               onCheckedChange={field.onChange}
                             />
                           </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            Show MSDS to customers
-                          </FormLabel>
                         </FormItem>
                       )}
                     />
                   </div>
                 </div>
 
-                {/* Catalog Upload Section */}
-                <div className="space-y-2">
-                  <FormLabel>Product Catalog PDF</FormLabel>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    {catalogPreview ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                          <FileText className="w-4 h-4" />
-                          <span className="text-sm truncate">
-                            {form.getValues('catalogFileName') || 'Catalog uploaded'}
-                          </span>
-                        </div>
-                        <Button 
-                          type="button"
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setCatalogPreview(null);
-                            form.setValue('pdfCatalogUrl', '');
-                            form.setValue('catalogFileName', '');
-                          }}
-                        >
-                          Remove Catalog
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-2">
-                          <label htmlFor="catalog-upload" className="cursor-pointer">
-                            <span className="text-sm text-blue-600 hover:text-blue-500">
-                              {uploadingCatalog ? 'Uploading...' : 'Upload Catalog'}
-                            </span>
-                            <input
-                              id="catalog-upload"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleCatalogUpload(file);
-                              }}
-                              disabled={uploadingCatalog}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Catalog Visibility Control */}
-                  <div className="flex items-center space-x-2">
-                    <FormField
-                      control={form.control}
-                      name="showCatalogToCustomers"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-normal">
-                            Show Catalog to customers
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                {/* دکمه‌های عمل */}
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setDialogOpen(false);
+                      setEditingProduct(null);
+                      form.reset();
+                    }}
+                    className="px-6"
+                  >
+                    انصراف
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="px-6 bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isSubmitting && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
+                    {editingProduct ? "به‌روزرسانی محصول" : "افزودن محصول"}
+                  </Button>
                 </div>
-              </div>
-
-              <div className="flex justify-end gap-4 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit"
-                  onClick={(e) => {
-                    console.log('🔥 [DEBUG] Submit button clicked!');
-                    console.log('🔥 [DEBUG] Form state:', form.formState.isValid);
-                    console.log('🔥 [DEBUG] Form errors:', form.formState.errors);
-                  }}
-                >
-                  {editingProduct ? "Update Product" : "Create Product"}
-                </Button>
-              </div>
-            </form>
-          </Form>
+              </form>
+            </Form>
+          </TooltipProvider>
         </DialogContent>
       </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingProduct} onOpenChange={() => setDeletingProduct(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>تأیید حذف محصول</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              <div>
-                آیا از حذف محصول "<strong>{deletingProduct?.name}</strong>" مطمئن هستید؟
-              </div>
-              <div className="text-sm bg-blue-50 p-3 rounded">
-                <strong>ℹ️ اطمینان:</strong> حذف این محصول تأثیری بر سوابق خرید مشتریان نخواهد داشت. 
-                تمام سفارشات قبلی و اطلاعات فروش حفظ خواهد شد.
-              </div>
-              <div className="text-sm text-gray-600">
-                SKU: {deletingProduct?.sku || "تعریف نشده"} | 
-                موجودی: {deletingProduct?.stockQuantity || 0} عدد
-              </div>
-              <div className="text-sm text-red-600 font-semibold">
-                ⚠️ این عمل قابل بازگشت نیست.
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>لغو</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDeleteProduct}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              حذف محصول
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
