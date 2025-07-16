@@ -445,6 +445,60 @@ export default function ProductsPage() {
     console.log('🔍 [DEBUG] Tags in form data:', data.tags, 'Type:', typeof data.tags);
     console.log('🔍 [DEBUG] Description in form data:', data.description);
     console.log('🔍 [DEBUG] editingProduct state:', editingProduct?.id);
+
+    // Complete validation for both create and update operations
+    // Validate Pricing & Inventory section - All fields required
+    const missingPricingFields = [];
+    if (!data.sku?.trim()) missingPricingFields.push("SKU");
+    if (!data.barcode?.trim()) missingPricingFields.push("بارکد");
+    if (!data.unitPrice || Number(data.unitPrice) <= 0) missingPricingFields.push("قیمت واحد");
+    if (data.stockQuantity === undefined || data.stockQuantity === null || Number(data.stockQuantity) < 0) missingPricingFields.push("موجودی");
+    if (data.minStockLevel === undefined || data.minStockLevel === null || Number(data.minStockLevel) < 0) missingPricingFields.push("حداقل موجودی");
+    if (data.maxStockLevel === undefined || data.maxStockLevel === null || Number(data.maxStockLevel) < 0) missingPricingFields.push("حداکثر موجودی");
+
+    if (missingPricingFields.length > 0) {
+      toast({
+        title: "❌ بخش شناسایی و قیمت‌گذاری ناقص",
+        description: `فیلدهای ضروری: ${missingPricingFields.join("، ")}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate Weights & Batch section - All fields required
+    const missingWeightFields = [];
+    if (!data.netWeight || Number(data.netWeight) <= 0) missingWeightFields.push("وزن خالص");
+    if (!data.grossWeight || Number(data.grossWeight) <= 0) missingWeightFields.push("وزن ناخالص");
+    if (!data.batchNumber?.trim()) missingWeightFields.push("شماره دسته");
+
+    if (missingWeightFields.length > 0) {
+      toast({
+        title: "❌ بخش وزن و دسته‌بندی تولید ناقص",
+        description: `فیلدهای ضروری: ${missingWeightFields.join("، ")}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Additional validation: Check logical consistency
+    if (Number(data.grossWeight) < Number(data.netWeight)) {
+      toast({
+        title: "❌ خطا در وزن‌ها",
+        description: "وزن ناخالص باید بیشتر یا مساوی وزن خالص باشد",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate min/max stock levels consistency
+    if (Number(data.minStockLevel) > Number(data.maxStockLevel)) {
+      toast({
+        title: "❌ خطا در سطوح موجودی",
+        description: "حداقل موجودی نمی‌تواند بیشتر از حداکثر موجودی باشد",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Convert numeric fields to strings for API compatibility
     const processedData = {
