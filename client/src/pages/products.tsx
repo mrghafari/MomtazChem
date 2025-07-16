@@ -1538,6 +1538,27 @@ export default function ProductsPage() {
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-sm font-medium">
 {t.productBarcode}
+                            {/* Subtle barcode visualization next to label */}
+                            <svg width="40" height="8" viewBox="0 0 40 8" className="opacity-30 ml-1">
+                              <rect x="0" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="2" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="4" y="0" width="2" height="8" fill="#333"/>
+                              <rect x="7" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="9" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="11" y="0" width="2" height="8" fill="#333"/>
+                              <rect x="14" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="16" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="18" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="20" y="0" width="2" height="8" fill="#333"/>
+                              <rect x="23" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="25" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="27" y="0" width="2" height="8" fill="#333"/>
+                              <rect x="30" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="32" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="34" y="0" width="2" height="8" fill="#333"/>
+                              <rect x="37" y="0" width="1" height="8" fill="#333"/>
+                              <rect x="39" y="0" width="1" height="8" fill="#333"/>
+                            </svg>
                             {editingProduct && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1548,36 +1569,6 @@ export default function ProductsPage() {
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
-                          
-                          {/* Subtle barcode visualization */}
-                          <div className="mb-1">
-                            <svg width="60" height="12" viewBox="0 0 60 12" className="opacity-40">
-                              <rect x="0" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="2" y="0" width="2" height="12" fill="#333"/>
-                              <rect x="5" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="7" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="9" y="0" width="3" height="12" fill="#333"/>
-                              <rect x="13" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="15" y="0" width="2" height="12" fill="#333"/>
-                              <rect x="18" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="20" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="22" y="0" width="2" height="12" fill="#333"/>
-                              <rect x="25" y="0" width="3" height="12" fill="#333"/>
-                              <rect x="29" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="31" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="33" y="0" width="2" height="12" fill="#333"/>
-                              <rect x="36" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="38" y="0" width="3" height="12" fill="#333"/>
-                              <rect x="42" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="44" y="0" width="2" height="12" fill="#333"/>
-                              <rect x="47" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="49" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="51" y="0" width="2" height="12" fill="#333"/>
-                              <rect x="54" y="0" width="1" height="12" fill="#333"/>
-                              <rect x="56" y="0" width="2" height="12" fill="#333"/>
-                              <rect x="59" y="0" width="1" height="12" fill="#333"/>
-                            </svg>
-                          </div>
                           
                           <FormControl>
                             <Input 
