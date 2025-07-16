@@ -394,13 +394,16 @@ export default function AdvancedEmailSettingsPage() {
   };
 
   const getTestStatusIcon = (status: string) => {
+    console.log("getTestStatusIcon called with status:", status);
     switch (status) {
       case "success":
-        return <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg border-2 border-green-300 animate-pulse" title="ایمیل به درستی کار می‌کند" />;
+        return <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg border-2 border-green-300" title="ایمیل به درستی کار می‌کند" />;
       case "failed":
-        return <div className="w-3 h-3 bg-red-500 rounded-full shadow-lg border-2 border-red-300 animate-pulse" title="تنظیمات ایمیل اشتباه است" />;
+        return <div className="w-3 h-3 bg-red-500 rounded-full shadow-lg border-2 border-red-300" title="تنظیمات ایمیل اشتباه است" />;
+      case "untested":
+        return <div className="w-3 h-3 bg-orange-500 rounded-full shadow-lg border-2 border-orange-300" title="تست نشده" />;
       default:
-        return <div className="w-3 h-3 bg-gray-400 rounded-full shadow-sm border-2 border-gray-300" title="وضعیت نامشخص" />;
+        return <div className="w-3 h-3 bg-gray-400 rounded-full shadow-sm border-2 border-gray-300" title={`وضعیت نامشخص: ${status}`} />;
     }
   }
 
@@ -434,7 +437,9 @@ export default function AdvancedEmailSettingsPage() {
     }
     
     // Return status based on test result
-    return getTestStatusIcon(smtp.testStatus || smtp.test_status || "untested");
+    const status = smtp.testStatus || smtp.test_status || "untested";
+    console.log("Final status for", category.categoryName, ":", status);
+    return getTestStatusIcon(status);
   };
 
   const getCategoryColor = (categoryKey: string) => {
