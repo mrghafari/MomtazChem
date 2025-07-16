@@ -1,8 +1,5 @@
 import { shopStorage } from "./shop-storage";
-import { emailStorage } from "./email-storage";
-import nodemailer from "nodemailer";
-
-// SMS Service Interface - REMOVED per requirements
+import { UniversalEmailService } from "./universal-email-service";
 
 interface InventoryAlert {
   productId: number;
@@ -15,22 +12,12 @@ interface InventoryAlert {
 }
 
 export class InventoryAlertService {
-  private static transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
   // Configuration for notifications
   private static notificationConfig = {
     emailEnabled: true,
-    managerEmail: 'info@momtazchem.com',
+    categoryKey: 'inventory-alerts', // Use universal email service  
     emergencyContacts: [
-      { name: 'Manager', email: 'admin@momtazchem.com' },
+      { name: 'Manager', email: 'inventory@momtazchem.com' },
       // می‌توانید اعضای دیگر تیم مدیریت را اضافه کنید
     ]
   };
@@ -97,41 +84,23 @@ export class InventoryAlertService {
    */
   private static async sendEmailAlert(alerts: InventoryAlert[]): Promise<void> {
     try {
-      const fromEmail = process.env.SMTP_USER || '';
-      const toEmail = this.notificationConfig.managerEmail;
-      
-      // Skip sending email if sender and recipient are the same to avoid duplicate issue
-      if (fromEmail.toLowerCase() === toEmail.toLowerCase()) {
-        console.log('Skipping inventory alert email - sender is same as recipient');
-        return;
-      }
-
       const htmlContent = this.generateAlertEmailHtml(alerts);
       const textContent = this.generateAlertEmailText(alerts);
 
-      // Smart CC: only add info@momtazchem.com if it's not already the sender or recipient
-      const ccEmail = 'info@momtazchem.com';
-      const ccList = (fromEmail.toLowerCase() !== ccEmail.toLowerCase() && 
-                      toEmail.toLowerCase() !== ccEmail.toLowerCase()) 
-                      ? ccEmail : undefined;
-
-      const mailOptions = {
-        from: `"Momtazchem Inventory System" <${fromEmail}>`,
-        to: toEmail,
-        cc: ccList,
+      // Use Universal Email Service for inventory alerts
+      await UniversalEmailService.sendEmail({
+        categoryKey: this.notificationConfig.categoryKey,
+        to: ['inventory@momtazchem.com'],
         subject: `🚨 Inventory Alert - ${alerts.length} Product${alerts.length > 1 ? 's' : ''} Need Attention`,
         html: htmlContent,
         text: textContent,
-        encoding: 'utf-8',
-        charset: 'utf-8'
-      };
+        variables: {
+          alertCount: alerts.length.toString(),
+          productCount: alerts.length.toString()
+        }
+      });
 
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        await this.transporter.sendMail(mailOptions);
-        console.log(`Inventory alert sent for ${alerts.length} products`);
-      } else {
-        console.log('SMTP configuration missing - would send inventory alert:', mailOptions);
-      }
+      console.log(`Inventory alert sent for ${alerts.length} products via Universal Email Service`);
     } catch (error) {
       console.error('Error sending inventory alert email:', error);
     }

@@ -98,6 +98,7 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
     .map((r: any) => r.email);
   
   // Add smart CC for monitoring (info@momtazchem.com) if not already present
+  // This is now managed by Universal Email Service configuration
   const monitoringEmail = 'info@momtazchem.com';
   const isMonitoringEmailPresent = 
     smtp.fromEmail.toLowerCase() === monitoringEmail.toLowerCase() ||
@@ -241,7 +242,7 @@ async function sendWithCategoryEmailAssignment(formData: ContactFormData): Promi
     const mailOptions = {
       from: adminSettings.smtp.fromEmail,
       to: formData.categoryEmail,
-      cc: ['info@momtazchem.com'], // Always CC to main company email
+      cc: ['info@momtazchem.com'], // Always CC to main company email (now managed by Universal Email Service)
       subject: `درخواست جدید از فرم تماس - ${formData.firstName} ${formData.lastName}`,
       html: `
         <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">

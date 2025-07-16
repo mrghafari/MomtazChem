@@ -455,7 +455,17 @@ export default function AdvancedEmailSettingsPage() {
       "agricultural-fertilizers": "bg-green-100 text-green-800",
       "paint-thinner": "bg-purple-100 text-purple-800",
       "orders": "bg-yellow-100 text-yellow-800",
-      "notifications": "bg-gray-100 text-gray-800"
+      "notifications": "bg-gray-100 text-gray-800",
+      "password-reset": "bg-red-100 text-red-800",
+      "account-verification": "bg-emerald-100 text-emerald-800",
+      "order-confirmations": "bg-indigo-100 text-indigo-800",
+      "payment-notifications": "bg-teal-100 text-teal-800",
+      "inventory-alerts": "bg-amber-100 text-amber-800",
+      "system-notifications": "bg-slate-100 text-slate-800",
+      "backup-reports": "bg-lime-100 text-lime-800",
+      "security-alerts": "bg-rose-100 text-rose-800",
+      "user-management": "bg-violet-100 text-violet-800",
+      "crm-notifications": "bg-pink-100 text-pink-800"
     };
     return colors[categoryKey as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };

@@ -28,7 +28,7 @@ import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerS
 import { customerDb } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients, categoryEmailAssignments, insertCategoryEmailAssignmentSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders, shopProducts } from "@shared/shop-schema";
-import { sendContactEmail, sendProductInquiryEmail } from "./email";
+import { sendContactEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
 import { db } from "./db";
@@ -1177,14 +1177,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         used: false,
       });
 
-      // TODO: Send email with reset link
-      // For now, log the token (in production, this would be sent via email)
-      console.log(`Password reset token for ${email}: ${resetToken}`);
+      // Send password reset email using Universal Email Service
+      const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+      
+      const { UniversalEmailService } = await import('./universal-email-service');
+      await UniversalEmailService.sendPasswordResetEmail(
+        user.email,
+        resetLink,
+        user.username
+      );
 
       res.json({ 
         success: true, 
-        message: "If an account with this email exists, a password reset link has been sent",
-        resetToken // In production, remove this and send via email
+        message: "If an account with this email exists, a password reset link has been sent"
       });
     } catch (error) {
       res.status(500).json({ 
@@ -7745,6 +7750,7 @@ ${procedure.content}
           }
         }
 
+        // Data for Universal Email Service
         const emailData = {
           contactEmail: inquiryData.contactEmail,
           contactPhone: inquiryData.contactPhone,
@@ -7758,8 +7764,60 @@ ${procedure.content}
           inquiryNumber: inquiry.inquiryNumber,
         };
 
-        await sendProductInquiryEmail(emailData);
-        console.log(`Product inquiry email sent for category: ${inquiryData.category}`);
+        // Send inquiry email using Universal Email Service
+        const { UniversalEmailService } = await import('./universal-email-service');
+        
+        // Map inquiry category to email category
+        const categoryMap: { [key: string]: string } = {
+          'fuel-additives': 'fuel-additives',
+          'water-treatment': 'water-treatment', 
+          'paint-solvents': 'paint-thinner',
+          'agricultural-products': 'agricultural-fertilizers',
+          'agricultural-fertilizers': 'agricultural-fertilizers',
+          'industrial-chemicals': 'admin',
+          'paint-thinner': 'paint-thinner',
+          'technical-equipment': 'admin',
+          'commercial-goods': 'orders',
+          'general': 'admin',
+          'support': 'notifications'
+        };
+        
+        const emailCategory = categoryMap[inquiryData.category] || 'admin';
+        
+        await UniversalEmailService.sendEmail({
+          categoryKey: emailCategory,
+          to: [],
+          cc: [],
+          subject: `New Product Inquiry: ${inquiryData.subject || 'General Inquiry'}`,
+          html: `
+            <h2>New Product Inquiry</h2>
+            <p><strong>Inquiry Number:</strong> ${inquiry.inquiryNumber}</p>
+            <p><strong>Product:</strong> ${productName || 'General'}</p>
+            <p><strong>Contact Email:</strong> ${inquiryData.contactEmail}</p>
+            <p><strong>Contact Phone:</strong> ${inquiryData.contactPhone || 'Not provided'}</p>
+            <p><strong>Company:</strong> ${inquiryData.company || 'Not provided'}</p>
+            <p><strong>Category:</strong> ${inquiryData.category}</p>
+            <p><strong>Type:</strong> ${inquiryData.type}</p>
+            <p><strong>Priority:</strong> ${inquiryData.priority}</p>
+            <p><strong>Message:</strong></p>
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+              ${(inquiryData.message || '').replace(/\n/g, '<br>')}
+            </div>
+          `,
+          variables: {
+            inquiryNumber: inquiry.inquiryNumber,
+            productName: productName || 'General',
+            contactEmail: inquiryData.contactEmail,
+            contactPhone: inquiryData.contactPhone || 'Not provided',
+            company: inquiryData.company || 'Not provided',
+            category: inquiryData.category,
+            type: inquiryData.type,
+            priority: inquiryData.priority,
+            message: inquiryData.message || ''
+          }
+        });
+        
+        console.log(`Product inquiry email sent via Universal Email Service for category: ${inquiryData.category} → ${emailCategory}`);
       } catch (emailError) {
         console.error("Failed to send inquiry email:", emailError);
         // Don't fail the inquiry creation if email fails
