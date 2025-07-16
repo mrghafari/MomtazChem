@@ -10409,19 +10409,25 @@ Leading Chemical Solutions Provider
       
       // Update database with test result if categoryId is provided
       if (categoryId) {
+        console.log(`🔄 Attempting to update SMTP test status for category ${categoryId}`);
         const { emailStorage } = await import("./email-storage");
         try {
           const smtp = await emailStorage.getSmtpSettingByCategory(categoryId);
+          console.log(`📧 Found SMTP setting:`, smtp);
           if (smtp) {
-            await emailStorage.updateSmtpSetting(smtp.id, {
+            const updateResult = await emailStorage.updateSmtpSetting(smtp.id, {
               testStatus: result.isValid ? "success" : "failed",
               lastTested: new Date()
             });
-            console.log(`✅ Updated SMTP test status for category ${categoryId}: ${result.isValid ? "success" : "failed"}`);
+            console.log(`✅ Updated SMTP test status for category ${categoryId}: ${result.isValid ? "success" : "failed"}`, updateResult);
+          } else {
+            console.log(`❌ No SMTP setting found for category ${categoryId}`);
           }
         } catch (dbError) {
-          console.error("Error updating SMTP test status:", dbError);
+          console.error("❌ Error updating SMTP test status:", dbError);
         }
+      } else {
+        console.log("⚠️ No categoryId provided for SMTP test update");
       }
       
       res.json({

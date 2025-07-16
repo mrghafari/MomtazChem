@@ -235,7 +235,7 @@ export default function AdvancedEmailSettingsPage() {
           password: smtpForm.password,
           customHost: smtpForm.host || undefined,
           customPort: smtpForm.port || undefined,
-          categoryId: selectedCategoryId, // Include categoryId to update database
+          categoryId: selectedCategory?.id, // Include categoryId to update database
         })
       });
       
