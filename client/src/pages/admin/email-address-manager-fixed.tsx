@@ -38,8 +38,38 @@ export default function EmailAddressManagerPage() {
     queryKey: ["/api/admin/email/categories"],
   });
 
-  // Create a merged view of assignments with SMTP status
-  const categoryAssignments: EmailCategoryAssignment[] = [
+  // Mutation to update email assignment
+  const updateEmailMutation = useMutation({
+    mutationFn: async (data: { categoryKey: string; newEmail: string }) => {
+      const response = await fetch('/api/admin/email/update-category-assignment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'خطا در به‌روزرسانی آدرس ایمیل');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "آدرس ایمیل با موفقیت به‌روزرسانی شد" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/category-assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
+      setEditingCategory(null);
+      setEditForm({});
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا در به‌روزرسانی", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Default assignments
+  const defaultAssignments: EmailCategoryAssignment[] = [
     {
       categoryKey: 'password-reset',
       categoryName: 'بازیابی رمز عبور',
@@ -89,7 +119,10 @@ export default function EmailAddressManagerPage() {
       assignedEmail: 'crm@momtazchem.com',
       isActive: true
     }
-  ].map(assignment => {
+  ];
+
+  // Create category assignments with SMTP status
+  const categoryAssignments = defaultAssignments.map(assignment => {
     // Find corresponding category with SMTP status (categories.data is the array)
     const categoriesArray = categories?.categories || [];
     const category = categoriesArray.find((cat: any) => cat.categoryKey === assignment.categoryKey);
@@ -99,36 +132,6 @@ export default function EmailAddressManagerPage() {
       testStatus: category?.smtp?.testStatus || 'untested',
       lastTested: category?.smtp?.lastTested
     };
-  });
-
-  // Mutation to update email assignment
-  const updateEmailMutation = useMutation({
-    mutationFn: async (data: { categoryKey: string; newEmail: string }) => {
-      const response = await fetch('/api/admin/email/update-category-assignment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'خطا در به‌روزرسانی آدرس ایمیل');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({ title: "آدرس ایمیل با موفقیت به‌روزرسانی شد" });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/category-assignments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
-      setEditingCategory(null);
-      setEditForm({});
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "خطا در به‌روزرسانی", 
-        description: error.message,
-        variant: "destructive" 
-      });
-    }
   });
 
   const startEditing = (categoryKey: string, currentEmail: string) => {
@@ -210,72 +213,67 @@ export default function EmailAddressManagerPage() {
         {categoryAssignments.map((assignment) => (
           <Card key={assignment.categoryKey} className="border-l-4 border-l-blue-500">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold">{assignment.categoryName}</h3>
-                    <p className="text-sm text-gray-600">{assignment.description}</p>
-                    <Badge variant="outline" className="mt-1 text-xs">
-                      {assignment.categoryKey}
-                    </Badge>
-                  </div>
-                </div>
-                {getStatusBadge(assignment)}
-              </div>
-
-              <div className="flex items-center gap-4">
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <Label className="text-sm font-medium">آدرس ایمیل فعلی</Label>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-semibold">{assignment.categoryName}</h3>
+                    {getStatusBadge(assignment)}
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">{assignment.description}</p>
+                  
                   {editingCategory === assignment.categoryKey ? (
-                    <div className="flex gap-2 mt-1">
-                      <Input
-                        type="email"
-                        value={editForm[assignment.categoryKey] || ''}
-                        onChange={(e) => setEditForm({
-                          ...editForm,
-                          [assignment.categoryKey]: e.target.value
-                        })}
-                        placeholder="آدرس ایمیل جدید..."
-                        className="flex-1"
-                      />
-                      <Button
-                        onClick={() => saveEmail(assignment.categoryKey)}
-                        disabled={updateEmailMutation.isPending}
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <Save className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={cancelEditing}
-                        size="sm"
-                      >
-                        انصراف
-                      </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <Label htmlFor={`email-${assignment.categoryKey}`} className="text-sm font-medium">
+                          آدرس ایمیل جدید
+                        </Label>
+                        <Input
+                          id={`email-${assignment.categoryKey}`}
+                          type="email"
+                          value={editForm[assignment.categoryKey] || ''}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, [assignment.categoryKey]: e.target.value }))}
+                          placeholder="example@momtazchem.com"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => saveEmail(assignment.categoryKey)}
+                          disabled={updateEmailMutation.isPending}
+                          className="gap-2"
+                        >
+                          <Save className="w-4 h-4" />
+                          ذخیره
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={cancelEditing}
+                          disabled={updateEmailMutation.isPending}
+                        >
+                          لغو
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between mt-1 p-3 bg-gray-50 rounded-lg">
-                      <span className="font-mono text-blue-600">{assignment.assignedEmail}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="bg-gray-50 px-3 py-2 rounded border">
+                        <span className="font-mono text-sm">{assignment.assignedEmail}</span>
+                      </div>
                       <Button
-                        variant="outline"
                         size="sm"
+                        variant="outline"
                         onClick={() => startEditing(assignment.categoryKey, assignment.assignedEmail)}
-                        className="flex items-center gap-1"
+                        className="gap-2"
                       >
                         <Edit className="w-4 h-4" />
-                        تغییر
+                        ویرایش
                       </Button>
                     </div>
                   )}
                 </div>
               </div>
-
-              {assignment.lastTested && (
-                <p className="text-xs text-gray-500 mt-2">
-                  آخرین تست: {new Date(assignment.lastTested).toLocaleDateString('fa-IR')}
-                </p>
-              )}
             </CardContent>
           </Card>
         ))}
@@ -287,8 +285,8 @@ export default function EmailAddressManagerPage() {
           <span className="font-medium text-amber-900">نکته مهم</span>
         </div>
         <p className="text-amber-700 text-sm">
-          پس از تغییر هر آدرس ایمیل، حتماً به صفحه "Advanced Email Settings" بروید و SMTP را برای آن دسته‌بندی 
-          تنظیم و تست کنید تا اطمینان حاصل شود که ایمیل‌ها درست ارسال می‌شوند.
+          پس از تغییر آدرس ایمیل هر دسته‌بندی، حتماً از بخش "تنظیمات پیشرفته ایمیل" SMTP مربوط به آن آدرس را 
+          پیکربندی و تست کنید تا ایمیل‌ها به درستی ارسال شوند.
         </p>
       </div>
     </div>

@@ -138,7 +138,7 @@ function Router() {
           <Route path="/admin/smtp-test" component={SMTPTestPage} />
           <Route path="/admin/email-settings" component={EmailSettingsPage} />
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />
-          <Route path="/admin/email-address-manager" component={EmailAddressManagerPage} />
+          <Route path="/admin/email-address-manager" component={lazy(() => import("./pages/admin/email-address-manager-fixed"))} />
           <Route path="/admin/email-progress" component={EmailProgressPage} />
           <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
           <Route path="/admin/email-service-guide" component={EmailServiceGuide} />
