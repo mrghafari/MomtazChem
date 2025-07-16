@@ -34,9 +34,21 @@ export default function EmailAddressManagerPage() {
   });
 
   // Query to get email categories with SMTP status
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/admin/email/categories"],
   });
+
+  // Show loading state
+  if (isLoading || categoriesLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>در حال بارگذاری...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Create a merged view of assignments with SMTP status
   const categoryAssignments: EmailCategoryAssignment[] = [
@@ -90,8 +102,8 @@ export default function EmailAddressManagerPage() {
       isActive: true
     }
   ].map(assignment => {
-    // Find corresponding category with SMTP status
-    const category = categories.find((cat: any) => cat.categoryKey === assignment.categoryKey);
+    // Find corresponding category with SMTP status (with null check)
+    const category = categories?.find((cat: any) => cat.categoryKey === assignment.categoryKey);
     return {
       ...assignment,
       smtpConfigured: !!category?.smtp,
