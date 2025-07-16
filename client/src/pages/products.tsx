@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -153,6 +154,7 @@ export default function ProductsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
+  const { t, language, direction } = useLanguage();
   const { toast } = useToast();
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -900,7 +902,7 @@ export default function ProductsPage() {
         <div className="mb-6 flex gap-3">
           <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 h-12 text-sm">
             <Plus className="w-4 h-4 mr-2" />
-            Add Product
+            {t.addProduct}
           </Button>
           
           <Button 
@@ -1048,7 +1050,7 @@ export default function ProductsPage() {
               )}
               <Button onClick={openCreateDialog}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Product
+                {t.addProduct}
               </Button>
             </div>
           ) : (
@@ -1317,7 +1319,7 @@ export default function ProductsPage() {
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="text-2xl font-bold text-center text-blue-700 flex items-center justify-center gap-2">
               <Package className="h-6 w-6" />
-              {editingProduct ? "ویرایش محصول" : "افزودن محصول جدید"}
+{editingProduct ? t.editProduct : t.addProduct}
             </DialogTitle>
             <DialogDescription className="text-center text-gray-600">
               {editingProduct ? "ویرایش اطلاعات محصول موجود" : "افزودن محصول جدید به کاردکس"}
@@ -1334,7 +1336,7 @@ export default function ProductsPage() {
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
                   <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
                     <Package className="h-5 w-5" />
-                    اطلاعات پایه محصول
+{t.basicInfo}
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -1343,7 +1345,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            نام محصول *
+{t.productName} *
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1371,7 +1373,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            دسته‌بندی *
+{t.productCategory} *
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1411,7 +1413,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            توضیحات محصول
+{t.productDescription}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1439,7 +1441,7 @@ export default function ProductsPage() {
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
                   <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center gap-2">
                     <QrCode className="h-5 w-5" />
-                    شناسایی و قیمت‌گذاری
+{t.pricingInventory}
                   </h3>
                   <div className="grid grid-cols-3 gap-3">
                     <FormField
@@ -1448,7 +1450,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-sm font-medium">
-                            کد محصول (SKU)
+{t.productSku}
                             {editingProduct && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1478,7 +1480,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-sm font-medium">
-                            بارکد (EAN-13)
+{t.productBarcode}
                             {editingProduct && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1508,7 +1510,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            شماره بچ
+{t.batchNumber}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1539,7 +1541,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            قیمت واحد
+{t.unitPrice}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1570,7 +1572,7 @@ export default function ProductsPage() {
                       name="currency"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">واحد پول</FormLabel>
+                          <FormLabel className="text-sm font-medium">{t.currency}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value || "IQD"}>
                             <FormControl>
                               <SelectTrigger className="h-9">
@@ -1595,7 +1597,7 @@ export default function ProductsPage() {
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-4 rounded-lg border border-orange-200">
                   <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />
-                    مدیریت موجودی و وزن
+{t.weightsAndBatch}
                   </h3>
                   
                   {/* ردیف موجودی */}
@@ -1606,7 +1608,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            موجودی فعلی
+{t.stockQuantity}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1637,7 +1639,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            حداقل موجودی
+{t.minStockLevel}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1668,7 +1670,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            حداکثر موجودی
+{t.maxStockLevel}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1702,7 +1704,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            وزن خالص
+{t.netWeight}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1734,7 +1736,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-                            وزن ناخالص
+{t.grossWeight}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1765,7 +1767,7 @@ export default function ProductsPage() {
                       name="weightUnit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">واحد وزن</FormLabel>
+                          <FormLabel className="text-sm font-medium">{t.weightUnit}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value || "kg"}>
                             <FormControl>
                               <SelectTrigger className="h-9">
@@ -1791,7 +1793,7 @@ export default function ProductsPage() {
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
                   <h3 className="text-lg font-semibold text-purple-800 mb-3 flex items-center gap-2">
                     <Tag className="h-5 w-5" />
-                    برچسب‌ها و تنظیمات
+{t.shopSettings}
                   </h3>
                   
                   <FormField
@@ -1800,7 +1802,7 @@ export default function ProductsPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium flex items-center gap-2">
-                          برچسب‌ها
+{t.productTags}
                           <Tooltip>
                             <TooltipTrigger>
                               <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1834,7 +1836,7 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                           <div className="space-y-0.5">
-                            <FormLabel className="text-sm font-medium">نمایش در فروشگاه</FormLabel>
+                            <FormLabel className="text-sm font-medium">{t.syncWithShop}</FormLabel>
                             <div className="text-xs text-gray-500">محصول در فروشگاه آنلاین نمایش داده شود</div>
                           </div>
                           <FormControl>

@@ -248,6 +248,49 @@ export interface Translation {
   rdScientists: string;
   manufacturingSites: string;
   qualityRate: string;
+  
+  // Product Form
+  productManagement: string;
+  addProduct: string;
+  editProduct: string;
+  productName: string;
+  shortDescription: string;
+  productDescription: string;
+  priceRange: string;
+  productCategory: string;
+  productSpecifications: string;
+  productFeatures: string;
+  productApplications: string;
+  productTags: string;
+  productImage: string;
+  productCatalog: string;
+  msdsDocument: string;
+  stockQuantity: string;
+  minStockLevel: string;
+  maxStockLevel: string;
+  unitPrice: string;
+  netWeight: string;
+  grossWeight: string;
+  weightUnit: string;
+  batchNumber: string;
+  productSku: string;
+  productBarcode: string;
+  isVariant: string;
+  parentProduct: string;
+  variantType: string;
+  variantValue: string;
+  syncWithShop: string;
+  showWhenOutOfStock: string;
+  showCatalogToCustomers: string;
+  showMsdsToCustomers: string;
+  basicInfo: string;
+  pricingInventory: string;
+  specifications: string;
+  documentsMedia: string;
+  variantSettings: string;
+  shopSettings: string;
+  weightsAndBatch: string;
+  productDetails: string;
 }
 
 export const translations: Record<Language, Translation> = {
@@ -506,6 +549,48 @@ export const translations: Record<Language, Translation> = {
     rdScientists: 'R&D Scientists',
     manufacturingSites: 'Manufacturing Sites',
     qualityRate: 'Quality Rate',
+    
+    // Product Form
+    productManagement: 'Product Management',
+    addProduct: 'Add Product',
+    editProduct: 'Edit Product',
+    productName: 'Product Name',
+    shortDescription: 'Short Description',
+    productDescription: 'Product Description',
+    priceRange: 'Price Range',
+    productCategory: 'Product Category',
+    productSpecifications: 'Product Specifications',
+    productFeatures: 'Product Features',
+    productApplications: 'Product Applications',
+    productTags: 'Product Tags',
+    productImage: 'Product Image',
+    productCatalog: 'Product Catalog',
+    msdsDocument: 'MSDS Document',
+    stockQuantity: 'Stock Quantity',
+    minStockLevel: 'Minimum Stock Level',
+    maxStockLevel: 'Maximum Stock Level',
+    unitPrice: 'Unit Price',
+    netWeight: 'Net Weight',
+    grossWeight: 'Gross Weight',
+    weightUnit: 'Weight Unit',
+    batchNumber: 'Batch Number',
+    productSku: 'Product SKU',
+    productBarcode: 'Product Barcode',
+    isVariant: 'Is Product Variant',
+    parentProduct: 'Parent Product',
+    variantType: 'Variant Type',
+    variantValue: 'Variant Value',
+    syncWithShop: 'Sync with Shop',
+    showWhenOutOfStock: 'Show When Out of Stock',
+    showCatalogToCustomers: 'Show Catalog to Customers',
+    showMsdsToCustomers: 'Show MSDS to Customers',
+    basicInfo: 'Basic Information',
+    pricingInventory: 'Pricing & Inventory',
+    documentsMedia: 'Documents & Media',
+    variantSettings: 'Variant Settings',
+    shopSettings: 'Shop Settings',
+    weightsAndBatch: 'Weights & Batch',
+    productDetails: 'Product Details',
   },
   
   ar: {
@@ -762,6 +847,48 @@ export const translations: Record<Language, Translation> = {
     rdScientists: 'علماء البحث والتطوير',
     manufacturingSites: 'مواقع التصنيع',
     qualityRate: 'معدل الجودة',
+    
+    // Product Form
+    productManagement: 'إدارة المنتجات',
+    addProduct: 'إضافة منتج',
+    editProduct: 'تحرير منتج',
+    productName: 'اسم المنتج',
+    shortDescription: 'وصف مختصر',
+    productDescription: 'وصف المنتج',
+    priceRange: 'نطاق السعر',
+    productCategory: 'فئة المنتج',
+    productSpecifications: 'مواصفات المنتج',
+    productFeatures: 'ميزات المنتج',
+    productApplications: 'تطبيقات المنتج',
+    productTags: 'علامات المنتج',
+    productImage: 'صورة المنتج',
+    productCatalog: 'كتالوج المنتج',
+    msdsDocument: 'وثيقة MSDS',
+    stockQuantity: 'كمية المخزون',
+    minStockLevel: 'الحد الأدنى للمخزون',
+    maxStockLevel: 'الحد الأقصى للمخزون',
+    unitPrice: 'سعر الوحدة',
+    netWeight: 'الوزن الصافي',
+    grossWeight: 'الوزن الإجمالي',
+    weightUnit: 'وحدة الوزن',
+    batchNumber: 'رقم الدفعة',
+    productSku: 'رمز المنتج',
+    productBarcode: 'الباركود',
+    isVariant: 'هو متغير منتج',
+    parentProduct: 'المنتج الأساسي',
+    variantType: 'نوع المتغير',
+    variantValue: 'قيمة المتغير',
+    syncWithShop: 'مزامنة مع المتجر',
+    showWhenOutOfStock: 'إظهار عند عدم التوفر',
+    showCatalogToCustomers: 'إظهار الكتالوج للعملاء',
+    showMsdsToCustomers: 'إظهار MSDS للعملاء',
+    basicInfo: 'المعلومات الأساسية',
+    pricingInventory: 'الأسعار والمخزون',
+    documentsMedia: 'الوثائق والوسائط',
+    variantSettings: 'إعدادات المتغيرات',
+    shopSettings: 'إعدادات المتجر',
+    weightsAndBatch: 'الأوزان والدفعة',
+    productDetails: 'تفاصيل المنتج',
   },
 
   ku: {
