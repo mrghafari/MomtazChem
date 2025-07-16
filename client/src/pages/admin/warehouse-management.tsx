@@ -171,16 +171,33 @@ const WarehouseManagement: React.FC = () => {
     retry: false,
   });
 
+  // Get warehouse refresh interval from global settings
+  const getWarehouseRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const warehouseSettings = settings.departments.warehouse;
+      
+      if (warehouseSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : warehouseSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 30000; // Default 30 seconds if no settings found
+  };
+
   // Query for goods in transit
   const { data: goodsInTransit, isLoading: transitLoading, refetch: refetchTransit } = useQuery({
     queryKey: ['/api/shop/goods-in-transit'],
-    refetchInterval: 30000
+    refetchInterval: getWarehouseRefreshInterval()
   });
 
   // Query for inventory movements
   const { data: inventoryMovements, isLoading: movementsLoading } = useQuery({
     queryKey: ['/api/shop/inventory-movements'],
-    refetchInterval: 30000
+    refetchInterval: getWarehouseRefreshInterval()
   });
 
   // Fetch threshold settings

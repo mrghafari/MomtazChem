@@ -304,7 +304,10 @@ export default function GlobalRefreshSettings() {
       {/* Department Settings */}
       <div className="grid gap-6 md:grid-cols-3">
         {DEPARTMENTS.map((dept) => {
-          const deptSettings = globalSettings.departments[dept.key as keyof typeof globalSettings.departments];
+          const deptSettings = globalSettings.departments[dept.key as keyof typeof globalSettings.departments] || {
+            autoRefresh: false,
+            interval: 300
+          };
           const IconComponent = dept.icon;
           
           return (

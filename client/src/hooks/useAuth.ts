@@ -2,12 +2,29 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
 export function useAuth() {
+  // Get auth refresh interval from global settings
+  const getAuthRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const securitySettings = settings.departments.security;
+      
+      if (securitySettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : securitySettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 30000; // Default 30 seconds if no settings found
+  };
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/admin/me"],
     retry: 1,
     staleTime: 5000, // Cache for 5 seconds to avoid excessive requests
     refetchOnWindowFocus: true,
-    refetchInterval: 30000, // Refetch every 30 seconds to maintain session
+    refetchInterval: getAuthRefreshInterval(), // Use global refresh settings for auth
     queryFn: async () => {
       try {
         const response = await fetch("/api/admin/me", {
