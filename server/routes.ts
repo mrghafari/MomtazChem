@@ -9734,9 +9734,37 @@ ${procedure.content}
     try {
       const { emailStorage } = await import("./email-storage");
       const categories = await emailStorage.getCategories();
+      
+      // Enhanced categories with SMTP settings and recipients
+      const enhancedCategories = await Promise.all(
+        categories.map(async (category) => {
+          const smtp = await emailStorage.getSmtpSettingByCategory(category.id);
+          const recipients = await emailStorage.getRecipientsByCategory(category.id);
+          
+          console.log(`[EMAIL API] Category ${category.categoryName}:`, {
+            hasSmtp: !!smtp,
+            smtpData: smtp ? {
+              id: smtp.id,
+              host: smtp.host,
+              port: smtp.port,
+              username: smtp.username,
+              fromName: smtp.fromName,
+              fromEmail: smtp.fromEmail,
+              testStatus: smtp.testStatus
+            } : null
+          });
+          
+          return {
+            ...category,
+            smtp,
+            recipients
+          };
+        })
+      );
+      
       res.json({ 
         success: true, 
-        categories 
+        categories: enhancedCategories 
       });
     } catch (error) {
       console.error("Error fetching email categories:", error);
