@@ -325,17 +325,17 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
               <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <ShoppingBag className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-blue-600">{customer.totalOrdersCount}</p>
+                  <p className="text-2xl font-bold text-blue-600">{customer.totalOrdersCount || 0}</p>
                   <p className="text-sm text-gray-600">Total Orders</p>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <CreditCard className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(customer.totalSpent)}</p>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(customer.totalSpent || '0')}</p>
                   <p className="text-sm text-gray-600">Total Spent</p>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-purple-600">{formatCurrency(customer.averageOrderValue)}</p>
+                  <p className="text-2xl font-bold text-purple-600">{formatCurrency(customer.averageOrderValue || '0')}</p>
                   <p className="text-sm text-gray-600">Avg Order Value</p>
                 </div>
               </CardContent>
@@ -359,11 +359,11 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
                 )}
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Source</Label>
-                  <p className="font-medium capitalize">{customer.customerSource.replace('_', ' ')}</p>
+                  <p className="font-medium capitalize">{customer.customerSource ? customer.customerSource.replace('_', ' ') : 'Unknown'}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Payment Terms</Label>
-                  <p className="font-medium capitalize">{customer.paymentTerms.replace('_', ' ')}</p>
+                  <p className="font-medium capitalize">{customer.paymentTerms ? customer.paymentTerms.replace('_', ' ') : 'Not specified'}</p>
                 </div>
               </CardContent>
             </Card>
