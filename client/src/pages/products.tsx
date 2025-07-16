@@ -59,6 +59,8 @@ const formSchema = insertShowcaseProductSchema.extend({
   syncWithShop: z.boolean().default(true),
   // Out of stock display control
   showWhenOutOfStock: z.boolean().default(false),
+  // Non-chemical product flag
+  isNonChemical: z.boolean().default(false),
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -433,6 +435,8 @@ export default function ProductsPage() {
       // Shop visibility control
       syncWithShop: true,
       showWhenOutOfStock: false,
+      // Non-chemical product flag
+      isNonChemical: false,
       // Weight fields
       netWeight: 0,
       grossWeight: 0,
@@ -453,12 +457,16 @@ export default function ProductsPage() {
     if (data.minStockLevel === undefined || data.minStockLevel === null || Number(data.minStockLevel) < 0) errors.minStockLevel = "حداقل موجودی اجباری است";
     if (data.maxStockLevel === undefined || data.maxStockLevel === null || Number(data.maxStockLevel) < 0) errors.maxStockLevel = "حداکثر موجودی اجباری است";
     
-    // Validate Weights & Batch section
-    if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
-    if (!data.grossWeight || Number(data.grossWeight) <= 0) errors.grossWeight = "وزن ناخالص اجباری است";
-    if (!data.batchNumber?.trim()) errors.batchNumber = "شماره دسته اجباری است";
+    // Validate Weights & Batch section - skip for non-chemical products
+    if (!data.isNonChemical) {
+      if (!data.netWeight || Number(data.netWeight) <= 0) errors.netWeight = "وزن خالص اجباری است";
+      if (!data.batchNumber?.trim()) errors.batchNumber = "شماره دسته اجباری است";
+    }
     
-    // Logical consistency validation
+    // Gross weight is required for all products
+    if (!data.grossWeight || Number(data.grossWeight) <= 0) errors.grossWeight = "وزن ناخالص اجباری است";
+    
+    // Logical consistency validation (only if both weights exist)
     if (data.grossWeight && data.netWeight && Number(data.grossWeight) < Number(data.netWeight)) {
       errors.grossWeight = "وزن ناخالص باید بیشتر یا مساوی وزن خالص باشد";
     }
@@ -718,6 +726,7 @@ export default function ProductsPage() {
       showCatalogToCustomers: product.showCatalogToCustomers || false,
       syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       showWhenOutOfStock: product.showWhenOutOfStock ?? false,
+      isNonChemical: product.isNonChemical ?? false,
       isActive: product.isActive !== false,
     });
     setDialogOpen(true);
@@ -1376,9 +1385,32 @@ export default function ProductsPage() {
                 console.log('❌ [DEBUG] Form validation failed:', errors);
               })} className="space-y-4">
                 
+                {/* چک‌باکس کالای غیر شیمیایی */}
+                <div className="mb-4">
+                  <FormField
+                    control={form.control}
+                    name="isNonChemical"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-amber-50 border-amber-200">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-sm font-medium text-amber-800">کالای غیر شیمیایی</FormLabel>
+                          <div className="text-xs text-amber-600">این محصول جزو مواد شیمیایی نیست</div>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="border-amber-400"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 {/* اطلاعات پایه محصول */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                <div className={`p-4 rounded-lg border ${form.watch('isNonChemical') ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'}`}>
+                  <h3 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${form.watch('isNonChemical') ? 'text-green-800' : 'text-blue-800'}`}>
                     <Package className="h-5 w-5" />
 {t.basicInfo}
                   </h3>
@@ -1668,7 +1700,7 @@ export default function ProductsPage() {
                       name="batchNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.batchNumber ? 'text-red-600' : ''}`}>
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.batchNumber ? 'text-red-600' : ''} ${form.watch('isNonChemical') ? 'text-gray-400' : ''}`}>
 {t.batchNumber}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1682,13 +1714,14 @@ export default function ProductsPage() {
                           <FormControl>
                             <Input 
                               placeholder="BATCH-2025-001" 
-                              className={`h-9 ${validationErrors.batchNumber ? "border-red-500 focus:border-red-500" : ""}`}
+                              className={`h-9 ${validationErrors.batchNumber ? "border-red-500 focus:border-red-500" : ""} ${form.watch('isNonChemical') ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={field.value || ''}
+                              disabled={form.watch('isNonChemical')}
                             />
                           </FormControl>
                           <FormMessage />
-                          {validationErrors.batchNumber && (
+                          {validationErrors.batchNumber && !form.watch('isNonChemical') && (
                             <p className="text-sm text-red-600 mt-1">{validationErrors.batchNumber}</p>
                           )}
                         </FormItem>
@@ -1877,7 +1910,7 @@ export default function ProductsPage() {
                       name="netWeight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.netWeight ? 'text-red-600' : ''}`}>
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.netWeight ? 'text-red-600' : ''} ${form.watch('isNonChemical') ? 'text-gray-400' : ''}`}>
 {t.netWeight}
                             <Tooltip>
                               <TooltipTrigger>
@@ -1893,14 +1926,15 @@ export default function ProductsPage() {
                               type="number" 
                               step="0.01"
                               placeholder="0.00" 
-                              className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""}`}
+                              className={`h-9 ${validationErrors.netWeight ? "border-red-500 focus:border-red-500" : ""} ${form.watch('isNonChemical') ? 'bg-gray-100 text-gray-400' : ''}`}
                               {...field}
                               value={field.value || ''}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
+                              disabled={form.watch('isNonChemical')}
                             />
                           </FormControl>
                           <FormMessage />
-                          {validationErrors.netWeight && (
+                          {validationErrors.netWeight && !form.watch('isNonChemical') && (
                             <p className="text-sm text-red-600 mt-1">{validationErrors.netWeight}</p>
                           )}
                         </FormItem>
@@ -2262,7 +2296,8 @@ export default function ProductsPage() {
                       </div>
                     </div>
 
-                    {/* آپلود MSDS */}
+                    {/* آپلود MSDS - مخفی برای کالای غیر شیمیایی */}
+                    {!form.watch('isNonChemical') && (
                     <div className="space-y-3 border-t pt-4">
                       <FormLabel className="text-sm font-medium flex items-center gap-2">
                         <FileText className="h-4 w-4" />
@@ -2377,6 +2412,7 @@ export default function ProductsPage() {
                         </div>
                       </div>
                     </div>
+                    )}
                   </div>
                 </div>
 
