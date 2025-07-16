@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Mail, Settings, TestTube, Save, Plus, Trash2, Edit, Check, X, AlertCircle, CheckCircle, Clock, Eye, EyeOff, XCircle } from "lucide-react";
+import { ArrowLeft, Mail, Settings, TestTube, Save, Plus, Trash2, Edit, Check, X, AlertCircle, CheckCircle, Clock, Eye, EyeOff, XCircle, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -520,12 +520,21 @@ export default function AdvancedEmailSettingsPage() {
           <h2 className="text-2xl font-semibold">Email Categories</h2>
           <p className="text-gray-600">Configure SMTP settings and recipients for each category</p>
         </div>
-        <Button
-          onClick={() => setLocation("/admin/email-progress")}
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-        >
-          🎯 Progress Tracker
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setLocation("/admin/email-service-guide")}
+            className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
+          >
+            <BookOpen className="w-4 h-4" />
+            راهنمای سرویس ایمیل
+          </Button>
+          <Button
+            onClick={() => setLocation("/admin/email-progress")}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+          >
+            🎯 Progress Tracker
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

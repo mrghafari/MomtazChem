@@ -215,7 +215,7 @@ export default function SiteManagement() {
       id: "email-settings",
       label: "Email Settings",
       icon: Mail,
-      onClick: () => trackButtonClick("email-settings", () => setLocation("/admin/email-settings")),
+      onClick: () => trackButtonClick("email-settings", () => setLocation("/admin/advanced-email-settings")),
       className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50",
       moduleId: "email_settings"
     },
