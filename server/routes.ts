@@ -10390,7 +10390,7 @@ Leading Chemical Solutions Provider
   // SMTP Configuration Validator
   app.post("/api/admin/validate-smtp", requireAuth, async (req, res) => {
     try {
-      const { email, password, customHost, customPort } = req.body;
+      const { email, password, customHost, customPort, categoryId } = req.body;
       
       if (!email || !password) {
         return res.status(400).json({
@@ -10406,6 +10406,23 @@ Leading Chemical Solutions Provider
         customHost, 
         customPort
       );
+      
+      // Update database with test result if categoryId is provided
+      if (categoryId) {
+        const { emailStorage } = await import("./email-storage");
+        try {
+          const smtp = await emailStorage.getSmtpSettingByCategory(categoryId);
+          if (smtp) {
+            await emailStorage.updateSmtpSetting(smtp.id, {
+              testStatus: result.isValid ? "success" : "failed",
+              lastTested: new Date()
+            });
+            console.log(`✅ Updated SMTP test status for category ${categoryId}: ${result.isValid ? "success" : "failed"}`);
+          }
+        } catch (dbError) {
+          console.error("Error updating SMTP test status:", dbError);
+        }
+      }
       
       res.json({
         success: result.isValid,

@@ -235,6 +235,7 @@ export default function AdvancedEmailSettingsPage() {
           password: smtpForm.password,
           customHost: smtpForm.host || undefined,
           customPort: smtpForm.port || undefined,
+          categoryId: selectedCategoryId, // Include categoryId to update database
         })
       });
       
@@ -245,12 +246,16 @@ export default function AdvancedEmailSettingsPage() {
           title: "SMTP Connection Successful!", 
           description: "Your email settings are working correctly." 
         });
+        // Refresh categories to show updated status
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
       } else {
         toast({ 
           title: "SMTP Connection Failed", 
           description: result.errors?.[0] || "Connection test failed",
           variant: "destructive" 
         });
+        // Refresh categories to show updated status
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
       }
     } catch (error: any) {
       toast({ 
