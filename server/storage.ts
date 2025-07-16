@@ -350,6 +350,7 @@ export class DatabaseStorage implements IStorage {
           showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,
           pdfCatalogUrl: showcaseProduct.pdfCatalogUrl || null,
           msdsUrl: showcaseProduct.msdsUrl || null,
+          // NOTE: isNonChemical field is intentionally NOT synced - remains showcase-only per user requirement
         });
       } else {
         // Create new shop product with real inventory data AND document fields
@@ -380,6 +381,7 @@ export class DatabaseStorage implements IStorage {
           showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,
           pdfCatalogUrl: showcaseProduct.pdfCatalogUrl || null,
           msdsUrl: showcaseProduct.msdsUrl || null,
+          // NOTE: isNonChemical field is intentionally NOT synced - remains showcase-only per user requirement
         });
       }
     } catch (error) {

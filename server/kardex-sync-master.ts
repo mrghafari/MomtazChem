@@ -334,6 +334,7 @@ export class KardexSyncMaster {
       // Generate unique SKU to avoid duplicates
       const uniqueSku = kardexProduct.sku || `SP-${kardexProduct.id}-${Date.now().toString().slice(-6)}`;
       
+      // NOTE: isNonChemical field is intentionally NOT synced - remains showcase-only per user requirement
       const shopProductData = {
         name: kardexProduct.name,
         category: kardexProduct.category,
