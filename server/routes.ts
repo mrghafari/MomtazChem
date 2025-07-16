@@ -16405,6 +16405,72 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Update category email assignment
+  app.post("/api/admin/email/update-category-assignment", requireAuth, async (req, res) => {
+    try {
+      const { categoryKey, newEmail } = req.body;
+      
+      if (!categoryKey || !newEmail) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Category key and new email are required" 
+        });
+      }
+
+      // Update SMTP settings from_email if exists
+      const { pool } = await import('./db');
+      
+      // Update email_categories table (which stores default from_email for each category)
+      await pool.query(`
+        UPDATE email_categories 
+        SET updated_at = NOW()
+        WHERE category_key = $1
+      `, [categoryKey]);
+
+      // Update smtp_settings from_email for this category if it exists
+      await pool.query(`
+        UPDATE smtp_settings 
+        SET from_email = $1, updated_at = NOW()
+        WHERE category_id = (
+          SELECT id FROM email_categories WHERE category_key = $2
+        )
+      `, [newEmail, categoryKey]);
+
+      // Update category email assignment
+      await db
+        .insert(categoryEmailAssignments)
+        .values({
+          categoryKey,
+          categoryName: categoryKey, // Use categoryKey as default name
+          assignedEmail: newEmail,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .onConflictDoUpdate({
+          target: categoryEmailAssignments.categoryKey,
+          set: {
+            assignedEmail: newEmail,
+            updatedAt: new Date()
+          }
+        });
+
+      console.log(`📧 Updated email assignment for category '${categoryKey}' to '${newEmail}'`);
+      
+      res.json({ 
+        success: true, 
+        message: "آدرس ایمیل با موفقیت به‌روزرسانی شد",
+        categoryKey,
+        newEmail
+      });
+    } catch (error) {
+      console.error("Error updating category email assignment:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در به‌روزرسانی آدرس ایمیل" 
+      });
+    }
+  });
+
   // Send verification code
   app.post('/api/super-admin/send-verification', requireAuth, async (req, res) => {
     try {

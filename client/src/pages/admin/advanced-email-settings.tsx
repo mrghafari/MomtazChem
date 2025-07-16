@@ -522,6 +522,13 @@ export default function AdvancedEmailSettingsPage() {
         </div>
         <div className="flex gap-3">
           <Button
+            onClick={() => setLocation("/admin/email-address-manager")}
+            className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
+          >
+            <Edit className="w-4 h-4" />
+            مدیریت آدرس‌های ایمیل
+          </Button>
+          <Button
             onClick={() => setLocation("/admin/email-service-guide")}
             className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
           >

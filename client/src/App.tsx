@@ -31,6 +31,7 @@ import ProceduresManagement from "@/pages/admin/procedures-management";
 import SMTPTestPage from "@/pages/admin/smtp-test";
 import EmailSettingsPage from "@/pages/admin/email-settings";
 import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
+import EmailAddressManagerPage from "@/pages/admin/email-address-manager";
 import EmailProgressPage from "@/pages/admin/email-progress";
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import ForgotPassword from "@/pages/forgot-password";
@@ -137,6 +138,7 @@ function Router() {
           <Route path="/admin/smtp-test" component={SMTPTestPage} />
           <Route path="/admin/email-settings" component={EmailSettingsPage} />
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />
+          <Route path="/admin/email-address-manager" component={EmailAddressManagerPage} />
           <Route path="/admin/email-progress" component={EmailProgressPage} />
           <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
           <Route path="/admin/email-service-guide" component={EmailServiceGuide} />
