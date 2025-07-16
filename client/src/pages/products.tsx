@@ -1393,8 +1393,8 @@ export default function ProductsPage() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-amber-50 border-amber-200">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-sm font-medium text-amber-800">کالای غیر شیمیایی</FormLabel>
-                          <div className="text-xs text-amber-600">این محصول جزو مواد شیمیایی نیست</div>
+                          <FormLabel className="text-sm font-medium text-amber-700">کالای غیر شیمیایی</FormLabel>
+                          <div className="text-xs text-amber-500">محصول غیر شیمیایی</div>
                         </div>
                         <FormControl>
                           <Checkbox
