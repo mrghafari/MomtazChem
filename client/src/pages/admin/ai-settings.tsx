@@ -13,11 +13,13 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Bot, Zap, Settings, Activity, TrendingUp, Save, TestTube, Sparkles, Brain, Database } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
 export default function AISettings() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [aiEnabled, setAiEnabled] = useState(true);
   const [skuGeneration, setSkuGeneration] = useState(true);
   const [smartRecommendations, setSmartRecommendations] = useState(true);
