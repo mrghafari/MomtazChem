@@ -1,49 +1,57 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { 
-  RefreshCw, 
-  Database, 
-  ArrowRight, 
-  CheckCircle, 
-  AlertTriangle,
-  Eye
-} from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, Zap, RefreshCw, Trash2, Settings } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface SyncStatus {
   kardexCount: number;
   shopCount: number;
-  hiddenCount: number;
   inSync: boolean;
-  missingInShop: string[];
-  extraInShop: string[];
+  extraProducts: number;
+  missingProducts: number;
 }
 
 interface SyncResult {
   added: number;
   updated: number;
   removed: number;
-  unchanged: number;
-  deletedFromShop?: number;
   addedToShop?: number;
-  kardexProducts?: number;
 }
 
 export function KardexSyncPanel() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Get refresh interval from global settings
+  const getRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const inventorySettings = settings.departments.inventory;
+      
+      if (inventorySettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : inventorySettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 300000; // Default 5 minutes if no settings found
+  };
+
+  // Get quick refresh delay from global settings (1/10th of main interval)
+  const getQuickRefreshDelay = () => {
+    const baseInterval = getRefreshInterval();
+    return Math.min(baseInterval / 10, 1000); // Maximum 1 second delay
+  };
 
   // Query for sync status
   const { data: syncStatus, isLoading: statusLoading, error: statusError } = useQuery({
     queryKey: ['/api/kardex-sync/status'],
     queryFn: () => apiRequest<{ data: SyncStatus }>('/api/kardex-sync/status'),
-    refetchInterval: 30000, // بررسی هر 30 ثانیه
+    refetchInterval: getRefreshInterval(),
     retry: false, // Don't retry on auth errors
   });
 
@@ -61,10 +69,10 @@ export function KardexSyncPanel() {
       queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      // رفرش فوری وضعیت
+      // رفرش فوری وضعیت بر اساس تنظیمات گلوبال
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
-      }, 500);
+      }, getQuickRefreshDelay());
       // Immediate refresh to show changes
       window.location.reload();
     },
@@ -91,10 +99,10 @@ export function KardexSyncPanel() {
       queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      // رفرش فوری وضعیت
+      // رفرش فوری وضعیت بر اساس تنظیمات گلوبال
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
-      }, 500);
+      }, getQuickRefreshDelay());
       // Immediate refresh to show changes
       window.location.reload();
     },
@@ -121,10 +129,10 @@ export function KardexSyncPanel() {
       queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      // رفرش فوری وضعیت
+      // رفرش فوری وضعیت بر اساس تنظیمات گلوبال
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
-      }, 500);
+      }, getQuickRefreshDelay());
       // Immediate refresh to show changes
       window.location.reload();
     },
@@ -152,249 +160,181 @@ export function KardexSyncPanel() {
       queryClient.invalidateQueries({ queryKey: ['/api/kardex-sync/status'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      // رفرش فوری وضعیت
+      // رفرش فوری وضعیت بر اساس تنظیمات گلوبال
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/kardex-sync/status'] });
-      }, 500);
+      }, getQuickRefreshDelay());
+      // Immediate refresh to show changes
+      window.location.reload();
     },
     onError: () => {
       toast({
-        title: "خطا در حذف SKU تکراری",
+        title: "خطا در حذف محصولات تکراری",
         description: "لطفاً مجدداً تلاش کنید",
         variant: "destructive",
       });
     }
   });
 
-  const status = syncStatus?.data;
-  const isInSync = status?.inSync;
-  const hasMissingProducts = status?.missingInShop?.length > 0;
-  const hasExtraProducts = status?.extraInShop?.length > 0;
-  const isAuthError = statusError && String(statusError).includes('احراز هویت');
+  if (statusLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            بررسی وضعیت همگام‌سازی...
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  if (statusError || !syncStatus?.data) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-red-500">خطا در بارگیری وضعیت همگام‌سازی</CardTitle>
+          <CardDescription>
+            امکان اتصال به سرور همگام‌سازی وجود ندارد. لطفاً وارد سیستم مدیریت شوید.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const { kardexCount, shopCount, inSync, extraProducts, missingProducts } = syncStatus.data;
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Database className="h-5 w-5 text-blue-600" />
-            <CardTitle>همگام‌سازی کاردکس ↔ فروشگاه</CardTitle>
-            {isInSync ? (
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                همگام
-              </Badge>
-            ) : (
-              <Badge variant="destructive">
-                <AlertTriangle className="h-3 w-3 mr-1" />
-                نیاز به همگام‌سازی
-              </Badge>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <Eye className="h-4 w-4" />
-            {isExpanded ? 'بستن' : 'جزئیات'}
-          </Button>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <Settings className="h-5 w-5" />
+          وضعیت همگام‌سازی کاردکس و فروشگاه
+        </CardTitle>
         <CardDescription>
-          کاردکس منبع اصلی است - فروشگاه باید همیشه کپی کاردکس باشد
+          مدیریت همگام‌سازی محصولات بین سیستم کاردکس و فروشگاه آنلاین
         </CardDescription>
       </CardHeader>
-
       <CardContent className="space-y-4">
-        {/* Authentication Error */}
-        {isAuthError && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center text-red-800 mb-2">
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              <span className="font-medium">نیاز به ورود به پنل ادمین</span>
-            </div>
-            <p className="text-sm text-red-700">
-              برای استفاده از سیستم همگام‌سازی، ابتدا باید وارد پنل ادمین شوید.
-            </p>
-            <Button 
-              className="mt-3" 
-              size="sm" 
-              onClick={() => window.location.href = '/admin/login'}
-            >
-              ورود به پنل ادمین
-            </Button>
-          </div>
-        )}
-
         {/* Status Overview */}
-        {!isAuthError && (
-          <>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <span className="text-sm font-medium">کاردکس</span>
-                <span className="text-lg font-bold text-blue-600">
-                  {statusLoading ? "..." : status?.kardexCount || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <span className="text-sm font-medium">فروشگاه</span>
-                <span className="text-lg font-bold text-green-600">
-                  {statusLoading ? "..." : status?.shopCount || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium">مخفی</span>
-                <span className="text-lg font-bold text-gray-600">
-                  {statusLoading ? "..." : status?.hiddenCount || 0}
-                </span>
-              </div>
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="p-3 border rounded-lg">
+            <div className="text-2xl font-bold text-blue-600">{kardexCount}</div>
+            <div className="text-sm text-gray-600">کاردکس</div>
+          </div>
+          <div className="p-3 border rounded-lg">
+            <div className="text-2xl font-bold text-green-600">{shopCount}</div>
+            <div className="text-sm text-gray-600">فروشگاه</div>
+          </div>
+          <div className="p-3 border rounded-lg">
+            <div className={`text-2xl font-bold ${inSync ? 'text-green-600' : 'text-red-600'}`}>
+              {inSync ? '✓' : '✗'}
             </div>
-            
-            {/* Sync Status Hint */}
-            {!statusLoading && status && (
-              <div className={`p-3 rounded-lg border ${
-                isInSync 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-orange-50 border-orange-200'
-              }`}>
-                <div className="flex items-center text-sm">
-                  {isInSync ? (
-                    <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                  ) : (
-                    <AlertTriangle className="h-4 w-4 mr-2 text-orange-600" />
-                  )}
-                  <span className={isInSync ? 'text-green-700' : 'text-orange-700'}>
-                    {isInSync 
-                      ? `همگام‌سازی کامل: ${status.shopCount} محصول فعال + ${status.hiddenCount} محصول مخفی = ${status.kardexCount} کاردکس`
-                      : `نیاز به همگام‌سازی: ${status.missingInShop?.length || 0} محصول کمبود، ${status.extraInShop?.length || 0} محصول اضافی، ${status.hiddenCount} محصول مخفی`
-                    }
-                  </span>
-                </div>
-              </div>
-            )}
-          </>
-        )}
+            <div className="text-sm text-gray-600">همگام‌سازی</div>
+          </div>
+        </div>
 
-        {/* Sync Actions */}
-        {!isAuthError && (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Button
-                onClick={() => smartSyncMutation.mutate()}
-                disabled={smartSyncMutation.isPending || statusLoading}
-                className="flex-1"
-                variant={isInSync ? "secondary" : "default"}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {smartSyncMutation.isPending ? "در حال همگام‌سازی..." : "همگام‌سازی هوشمند"}
-              </Button>
-              
-              <Button
-                onClick={() => fullRebuildMutation.mutate()}
-                disabled={fullRebuildMutation.isPending || statusLoading}
-                variant="outline"
-                className="flex-1"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {fullRebuildMutation.isPending ? "در حال بازسازی..." : "بازسازی کامل"}
-              </Button>
+        {/* Sync Status */}
+        {!inSync && (
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="text-yellow-800">
+              <strong>نیاز به همگام‌سازی:</strong>
+              {missingProducts > 0 && <div>• {missingProducts} محصول در فروشگاه موجود نیست</div>}
+              {extraProducts > 0 && <div>• {extraProducts} محصول اضافی در فروشگاه وجود دارد</div>}
             </div>
-            
-            {/* Cleanup Extra Products Button */}
-            {hasExtraProducts && (
-              <Button
-                onClick={() => cleanupMutation.mutate()}
-                disabled={cleanupMutation.isPending || statusLoading}
-                variant="outline"
-                className="w-full border-red-300 text-red-600 hover:bg-red-50"
-              >
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                {cleanupMutation.isPending ? "در حال حذف..." : `حذف ${status?.extraInShop?.length || 0} محصول اضافی از فروشگاه`}
-              </Button>
-            )}
-            
-            {/* دکمه حذف SKU تکراری */}
-            <Button
-              onClick={() => cleanupDuplicatesMutation.mutate()}
-              disabled={cleanupDuplicatesMutation.isPending || statusLoading}
-              variant="outline"
-              className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
-            >
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              {cleanupDuplicatesMutation.isPending ? "در حال بررسی SKU تکراری..." : "بررسی و حذف SKU تکراری"}
-            </Button>
           </div>
         )}
 
-        {/* Detailed Status (Expandable) */}
-        {!isAuthError && isExpanded && status && (
-          <>
-            <Separator />
-            <div className="space-y-3">
-              {hasMissingProducts && (
-                <div className="p-3 bg-orange-50 rounded-lg">
-                  <h4 className="font-medium text-orange-800 mb-2">
-                    محصولات موجود در کاردکس ولی غایب در فروشگاه ({status.missingInShop.length})
-                  </h4>
-                  <div className="space-y-1">
-                    {status.missingInShop.slice(0, 3).map((name, index) => (
-                      <div key={index} className="text-sm text-orange-700 flex items-center">
-                        <ArrowRight className="h-3 w-3 mr-1" />
-                        {name}
-                      </div>
-                    ))}
-                    {status.missingInShop.length > 3 && (
-                      <div className="text-sm text-orange-600 font-medium">
-                        و {status.missingInShop.length - 3} محصول دیگر...
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Button
+            onClick={() => smartSyncMutation.mutate()}
+            disabled={smartSyncMutation.isPending}
+            className="w-full"
+          >
+            {smartSyncMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                در حال همگام‌سازی...
+              </>
+            ) : (
+              <>
+                <Zap className="h-4 w-4 ml-2" />
+                همگام‌سازی هوشمند
+              </>
+            )}
+          </Button>
 
-              {hasExtraProducts && (
-                <div className="p-3 bg-red-50 rounded-lg">
-                  <h4 className="font-medium text-red-800 mb-2">
-                    محصولات اضافی در فروشگاه که در کاردکس نیستند ({status.extraInShop.length})
-                  </h4>
-                  <div className="space-y-1">
-                    {status.extraInShop.slice(0, 3).map((name, index) => (
-                      <div key={index} className="text-sm text-red-700 flex items-center">
-                        <ArrowRight className="h-3 w-3 mr-1" />
-                        {name}
-                      </div>
-                    ))}
-                    {status.extraInShop.length > 3 && (
-                      <div className="text-sm text-red-600 font-medium">
-                        و {status.extraInShop.length - 3} محصول دیگر...
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+          <Button
+            onClick={() => fullRebuildMutation.mutate()}
+            disabled={fullRebuildMutation.isPending}
+            variant="outline"
+            className="w-full"
+          >
+            {fullRebuildMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                در حال بازسازی...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4 ml-2" />
+                بازسازی کامل
+              </>
+            )}
+          </Button>
 
-              {isInSync && (
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center text-green-800">
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    <span className="font-medium">همه چیز همگام است!</span>
-                  </div>
-                  <p className="text-sm text-green-700 mt-1">
-                    فروشگاه کاملاً با کاردکس هماهنگ است
-                  </p>
-                </div>
+          {extraProducts > 0 && (
+            <Button
+              onClick={() => cleanupMutation.mutate()}
+              disabled={cleanupMutation.isPending}
+              variant="destructive"
+              className="w-full"
+            >
+              {cleanupMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                  در حال حذف...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 ml-2" />
+                  حذف محصولات اضافی ({extraProducts})
+                </>
               )}
-            </div>
-          </>
-        )}
+            </Button>
+          )}
+
+          <Button
+            onClick={() => cleanupDuplicatesMutation.mutate()}
+            disabled={cleanupDuplicatesMutation.isPending}
+            variant="outline"
+            className="w-full"
+          >
+            {cleanupDuplicatesMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                در حال حذف تکراری...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4 ml-2" />
+                حذف SKU تکراری
+              </>
+            )}
+          </Button>
+        </div>
 
         {/* Help Text */}
-        {!isAuthError && (
-          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-            <strong>همگام‌سازی هوشمند:</strong> فقط تغییرات را اعمال می‌کند<br />
-            <strong>بازسازی کامل:</strong> فروشگاه را پاک کرده و از کاردکس بازسازی می‌کند
-          </div>
-        )}
+        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+          <strong>راهنما:</strong>
+          <ul className="mt-1 space-y-1">
+            <li>• <strong>همگام‌سازی هوشمند:</strong> فقط تغییرات ضروری را اعمال می‌کند</li>
+            <li>• <strong>بازسازی کامل:</strong> تمام محصولات کاردکس را به فروشگاه کپی می‌کند</li>
+            <li>• <strong>حذف محصولات اضافی:</strong> محصولاتی که در کاردکس نیستند را از فروشگاه حذف می‌کند</li>
+            <li>• <strong>حذف SKU تکراری:</strong> محصولات با SKU یکسان را شناسایی و حذف می‌کند</li>
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

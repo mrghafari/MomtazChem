@@ -107,11 +107,28 @@ export default function FinancialDepartment() {
     checkAuth();
   }, [setLocation]);
 
+  // Get refresh interval from global settings
+  const getRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const financialSettings = settings.departments.financial;
+      
+      if (financialSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : financialSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 600000; // Default 10 minutes if no settings found
+  };
+
   // Fetch financial pending orders - only orders needing financial review
   const { data: ordersData, isLoading, refetch } = useQuery({
     queryKey: ["/api/financial/orders"],
     enabled: !!user,
-    refetchInterval: 300000, // Auto-refresh every 5 minutes
+    refetchInterval: getRefreshInterval(),
   });
 
   const orders = ordersData?.orders || [];

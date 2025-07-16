@@ -65,10 +65,27 @@ export default function SecurityManagement() {
     smsAlerts: false
   });
 
+  // Get refresh interval from global settings
+  const getSecurityRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const securitySettings = settings.departments.security;
+      
+      if (securitySettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : securitySettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 600000; // Default 10 minutes if no settings found
+  };
+
   // Security metrics with default values
   const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useQuery<SecurityMetrics>({
     queryKey: ['/api/security/metrics'],
-    refetchInterval: 30000,
+    refetchInterval: getSecurityRefreshInterval(),
   });
 
   // Use default values when data is not available
@@ -85,7 +102,7 @@ export default function SecurityManagement() {
   // Security logs query
   const { data: logs = [], isLoading: logsLoading } = useQuery<SecurityLog[]>({
     queryKey: ['/api/security/logs'],
-    refetchInterval: 10000,
+    refetchInterval: getSecurityRefreshInterval(),
   });
 
   // Load security settings on mount

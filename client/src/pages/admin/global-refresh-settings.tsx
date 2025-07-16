@@ -49,6 +49,41 @@ const DEPARTMENTS = [
     icon: Truck, 
     color: 'text-purple-600',
     bgColor: 'bg-purple-50'
+  },
+  { 
+    key: 'email', 
+    name: 'سیستم ایمیل', 
+    icon: RefreshCw, 
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50'
+  },
+  { 
+    key: 'inventory', 
+    name: 'مدیریت موجودی', 
+    icon: Package, 
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-50'
+  },
+  { 
+    key: 'crm', 
+    name: 'مدیریت مشتریان', 
+    icon: RefreshCw, 
+    color: 'text-pink-600',
+    bgColor: 'bg-pink-50'
+  },
+  { 
+    key: 'orders', 
+    name: 'مدیریت سفارشات', 
+    icon: RefreshCw, 
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50'
+  },
+  { 
+    key: 'inquiries', 
+    name: 'پیگیری استعلامات', 
+    icon: RefreshCw, 
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-50'
   }
 ];
 
@@ -56,11 +91,16 @@ export default function GlobalRefreshSettings() {
   const { toast } = useToast();
   const [globalSettings, setGlobalSettings] = useState({
     syncEnabled: true,
-    globalInterval: 30,
+    globalInterval: 300,
     departments: {
-      finance: { autoRefresh: true, interval: 30 },
-      warehouse: { autoRefresh: true, interval: 30 },
-      logistics: { autoRefresh: true, interval: 30 }
+      finance: { autoRefresh: true, interval: 300 },
+      warehouse: { autoRefresh: true, interval: 300 },
+      logistics: { autoRefresh: true, interval: 300 },
+      email: { autoRefresh: true, interval: 30 },
+      inventory: { autoRefresh: true, interval: 180 },
+      crm: { autoRefresh: true, interval: 300 },
+      orders: { autoRefresh: true, interval: 30 },
+      inquiries: { autoRefresh: true, interval: 240 }
     }
   });
 
@@ -96,7 +136,12 @@ export default function GlobalRefreshSettings() {
       departments: globalSettings.syncEnabled ? {
         finance: { ...prev.departments.finance, interval: newInterval },
         warehouse: { ...prev.departments.warehouse, interval: newInterval },
-        logistics: { ...prev.departments.logistics, interval: newInterval }
+        logistics: { ...prev.departments.logistics, interval: newInterval },
+        email: { ...prev.departments.email, interval: newInterval },
+        inventory: { ...prev.departments.inventory, interval: newInterval },
+        crm: { ...prev.departments.crm, interval: newInterval },
+        orders: { ...prev.departments.orders, interval: newInterval },
+        inquiries: { ...prev.departments.inquiries, interval: newInterval }
       } : prev.departments
     }));
     
@@ -113,7 +158,12 @@ export default function GlobalRefreshSettings() {
       departments: enabled ? {
         finance: { ...prev.departments.finance, interval: prev.globalInterval },
         warehouse: { ...prev.departments.warehouse, interval: prev.globalInterval },
-        logistics: { ...prev.departments.logistics, interval: prev.globalInterval }
+        logistics: { ...prev.departments.logistics, interval: prev.globalInterval },
+        email: { ...prev.departments.email, interval: prev.globalInterval },
+        inventory: { ...prev.departments.inventory, interval: prev.globalInterval },
+        crm: { ...prev.departments.crm, interval: prev.globalInterval },
+        orders: { ...prev.departments.orders, interval: prev.globalInterval },
+        inquiries: { ...prev.departments.inquiries, interval: prev.globalInterval }
       } : prev.departments
     }));
 

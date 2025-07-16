@@ -177,10 +177,27 @@ export default function LogisticsDepartment() {
     checkAuth();
   }, [setLocation]);
 
+  // Get refresh interval from global settings
+  const getRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const logisticsSettings = settings.departments.logistics;
+      
+      if (logisticsSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : logisticsSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 600000; // Default 10 minutes if no settings found
+  };
+
   // Fetch logistics orders
   const { data: ordersData, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
     queryKey: ["/api/order-management/logistics"],
-    refetchInterval: 300000, // 5 minutes
+    refetchInterval: getRefreshInterval(),
   });
 
   // Fetch shipping rates

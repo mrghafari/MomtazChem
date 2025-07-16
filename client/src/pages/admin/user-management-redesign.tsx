@@ -265,6 +265,23 @@ function UserManagement() {
     }
   });
 
+  // Get refresh interval from global settings for CRM modules
+  const getCrmRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const crmSettings = settings.departments.crm;
+      
+      if (crmSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : crmSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 300000; // Default 5 minutes if no settings found
+  };
+
   // Fetch modules directly from the synchronized API endpoint
   const { data: modulesData, isLoading: modulesLoading } = useQuery({
     queryKey: ['/api/custom-modules'],
@@ -273,7 +290,7 @@ function UserManagement() {
       return response;
     },
     staleTime: 0, // Always fetch fresh data to stay synchronized
-    refetchInterval: 10000 // Refresh every 10 seconds to catch Site Management changes
+    refetchInterval: getCrmRefreshInterval()
   });
 
   // Also fetch Site Management modules for comparison
@@ -284,7 +301,7 @@ function UserManagement() {
       return response.modules || [];
     },
     staleTime: 0,
-    refetchInterval: 10000
+    refetchInterval: getCrmRefreshInterval()
   });
 
   // Build availableModules from the synchronized API
@@ -441,7 +458,7 @@ function UserManagement() {
   // Get current Site Management modules for comparison
   const { data: siteModules } = useQuery({
     queryKey: ['/api/site-management/modules'],
-    staleTime: 30000 // Cache for 30 seconds
+    staleTime: getCrmRefreshInterval() / 1000 // Use same interval as other CRM data
   });
 
   // Check for module count mismatch
@@ -459,10 +476,27 @@ function UserManagement() {
       });
       // Refresh data if needed
       queryClient.invalidateQueries({ queryKey: ['/api/admin/custom-roles'] });
-      // Force refresh of the modules display
+      // Force refresh of the modules display based on global settings
+      const getCrmRefreshInterval = () => {
+        const globalSettings = localStorage.getItem('global-refresh-settings');
+        if (globalSettings) {
+          const settings = JSON.parse(globalSettings);
+          const crmSettings = settings.departments.crm;
+          
+          if (crmSettings?.autoRefresh) {
+            const refreshInterval = settings.syncEnabled 
+              ? settings.globalInterval 
+              : crmSettings.interval;
+            return refreshInterval * 1000; // Convert seconds to milliseconds
+          }
+        }
+        return 300000; // Default 5 minutes if no settings found
+      };
+
+      const delayMs = Math.min(getCrmRefreshInterval() / 10, 2000); // Maximum 2 seconds delay
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, delayMs);
     },
     onError: () => {
       toast({ 

@@ -83,25 +83,42 @@ export default function CustomerWallet() {
   const { language, t, direction } = useLanguage();
   const isRTL = direction === 'rtl';
 
+  // Get refresh interval from global settings
+  const getWalletRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const shopSettings = settings.departments.shop;
+      
+      if (shopSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : shopSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 300000; // Default 5 minutes if no settings found
+  };
+
   // Fetch wallet summary - only when authenticated
   const { data: walletData, isLoading } = useQuery<{ success: boolean; data: WalletSummary }>({
     queryKey: ['/api/customer/wallet'],
     enabled: isAuthenticated, // Only fetch when authenticated
-    refetchInterval: 60000 // Refresh every 1 minute for wallet balance
+    refetchInterval: getWalletRefreshInterval()
   });
 
   // Fetch all recharge requests - only when authenticated
   const { data: rechargeRequestsData } = useQuery<{ success: boolean; data: RechargeRequest[] }>({
     queryKey: ['/api/customer/wallet/recharge-requests'],
     enabled: isAuthenticated, // Only fetch when authenticated
-    refetchInterval: 30000
+    refetchInterval: getWalletRefreshInterval()
   });
 
   // Fetch all transactions - only when authenticated
   const { data: transactionsData } = useQuery<{ success: boolean; data: any[] }>({
     queryKey: ['/api/customer/wallet/transactions'],
     enabled: isAuthenticated, // Only fetch when authenticated
-    refetchInterval: 30000
+    refetchInterval: getWalletRefreshInterval()
   });
 
   // Create recharge request mutation

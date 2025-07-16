@@ -126,10 +126,27 @@ export default function SecurityManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get refresh interval from global settings
+  const getSecurityRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const securitySettings = settings.departments.security;
+      
+      if (securitySettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : securitySettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 600000; // Default 10 minutes if no settings found
+  };
+
   // Fetch security dashboard data
   const { data: dashboard, isLoading: dashboardLoading } = useQuery({
     queryKey: ["/api/security/dashboard"],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: getSecurityRefreshInterval(),
   });
 
   // Fetch security logs

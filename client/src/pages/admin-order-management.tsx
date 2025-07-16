@@ -120,6 +120,31 @@ export default function AdminOrderManagement() {
 
 
 
+  // Get refresh interval from global settings
+  const getRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      // Use appropriate department settings based on selectedDepartment
+      const departmentMap: {[key: string]: string} = {
+        'financial': 'financial',
+        'warehouse': 'warehouse',
+        'logistics': 'logistics',
+        'delivered': 'logistics'
+      };
+      const deptKey = departmentMap[selectedDepartment] || 'crm';
+      const deptSettings = settings.departments[deptKey];
+      
+      if (deptSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : deptSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 600000; // Default 10 minutes if no settings found
+  };
+
   // Fetch orders for selected department
   const { data: orders, isLoading } = useQuery({
     queryKey: ['orders', selectedDepartment],
@@ -141,7 +166,7 @@ export default function AdminOrderManagement() {
       const data = await response.json();
       return data.orders as OrderManagement[];
     },
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: getRefreshInterval(),
     refetchIntervalInBackground: true
   });
 

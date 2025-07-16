@@ -104,6 +104,23 @@ export default function OrderTrackingManagement() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState('all'); // all, financial, orphaned
 
+  // Get refresh interval from global settings
+  const getOrderTrackingRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const crmSettings = settings.departments.crm;
+      
+      if (crmSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : crmSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 600000; // Default 10 minutes if no settings found
+  };
+
   // Fetch all orders for tracking
   const { data: orders, isLoading } = useQuery({
     queryKey: ['tracking-orders'],
@@ -117,7 +134,7 @@ export default function OrderTrackingManagement() {
       const data = await response.json();
       return data.orders as Order[];
     },
-    refetchInterval: 30000
+    refetchInterval: getOrderTrackingRefreshInterval()
   });
 
   // Fetch financial orders
@@ -133,7 +150,7 @@ export default function OrderTrackingManagement() {
       const data = await response.json();
       return data.orders as Order[];
     },
-    refetchInterval: 30000
+    refetchInterval: getOrderTrackingRefreshInterval()
   });
 
   // Fetch order statistics
@@ -149,7 +166,7 @@ export default function OrderTrackingManagement() {
       const data = await response.json();
       return data as OrderStats;
     },
-    refetchInterval: 60000
+    refetchInterval: getOrderTrackingRefreshInterval()
   });
 
   // Fetch status history for selected order

@@ -97,7 +97,15 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: true, // Refetch when window gains focus
-      staleTime: 0, // Always consider data stale for immediate updates
+      staleTime: () => {
+        // Get stale time from global refresh settings
+        const globalSettings = localStorage.getItem('global-refresh-settings');
+        if (globalSettings) {
+          const settings = JSON.parse(globalSettings);
+          return settings.globalInterval * 1000; // Convert seconds to milliseconds
+        }
+        return 300000; // Default 5 minutes
+      },
       cacheTime: 0, // Don't cache queries at all
       retry: false,
       onError: (error: any) => {

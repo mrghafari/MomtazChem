@@ -30,10 +30,27 @@ export default function WarehouseDepartment() {
   const [processingNotes, setProcessingNotes] = useState("");
   const { toast } = useToast();
 
+  // Get refresh interval from global settings
+  const getRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const warehouseSettings = settings.departments.warehouse;
+      
+      if (warehouseSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : warehouseSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 600000; // Default 10 minutes if no settings found
+  };
+
   // Fetch orders approved by financial department
   const { data: response, isLoading, error, refetch } = useQuery({
     queryKey: ['/api/order-management/warehouse'],
-    refetchInterval: 30000,
+    refetchInterval: getRefreshInterval(),
     retry: false
   });
 

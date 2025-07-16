@@ -318,15 +318,28 @@ export class InventoryAlertService {
    * Schedule daily inventory checks
    */
   static startInventoryMonitoring(): void {
-    // Check inventory every hour during business hours (8 AM to 6 PM)
+    // Get monitoring interval from global settings or use default
+    const getMonitoringInterval = () => {
+      try {
+        // This could be extended to read from database or config file
+        // For now, default to hourly checks during business hours
+        return 60 * 60 * 1000; // Every hour in milliseconds
+      } catch (error) {
+        return 60 * 60 * 1000; // Default hourly interval
+      }
+    };
+
+    const monitoringInterval = getMonitoringInterval();
+    
+    // Check inventory at specified intervals during business hours (8 AM to 6 PM)
     setInterval(async () => {
       const hour = new Date().getHours();
       if (hour >= 8 && hour <= 18) {
         await this.checkInventoryLevels();
       }
-    }, 60 * 60 * 1000); // Every hour
+    }, monitoringInterval);
 
-    console.log('Inventory monitoring started - checking every hour during business hours');
+    console.log(`Inventory monitoring started - checking every ${monitoringInterval / 60000} minutes during business hours`);
   }
 }
 

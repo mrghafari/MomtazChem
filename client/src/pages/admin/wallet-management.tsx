@@ -59,22 +59,39 @@ export default function WalletManagement() {
   // Check if user is super admin (id = 1)
   const isSuperAdmin = user?.id === 1;
 
+  // Get refresh interval from global settings
+  const getRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const crmSettings = settings.departments.crm;
+      
+      if (crmSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : crmSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 300000; // Default 5 minutes if no settings found
+  };
+
   // Fetch wallet statistics
   const { data: statsData, isLoading: statsLoading } = useQuery<{ success: boolean; data: WalletStats }>({
     queryKey: ['/api/wallet/stats'],
-    refetchInterval: 30000
+    refetchInterval: getRefreshInterval()
   });
 
   // Fetch pending recharge requests
   const { data: pendingRequestsData, isLoading: pendingLoading } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
     queryKey: ['/api/wallet/recharge-requests/pending'],
-    refetchInterval: 30000
+    refetchInterval: getRefreshInterval()
   });
 
   // Fetch all recharge requests
   const { data: allRequestsData, isLoading: allLoading } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
     queryKey: ['/api/wallet/recharge-requests'],
-    refetchInterval: 30000
+    refetchInterval: getRefreshInterval()
   });
 
   // Approve recharge request

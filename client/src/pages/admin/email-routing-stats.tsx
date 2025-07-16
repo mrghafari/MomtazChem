@@ -29,9 +29,26 @@ interface EmailRouteStats {
 const EmailRoutingStats = () => {
   const [autoRefresh, setAutoRefresh] = useState(false);
 
+  // Get refresh interval from global settings
+  const getRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const emailSettings = settings.departments.email;
+      
+      if (emailSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : emailSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return false; // Disable auto-refresh if no settings found
+  };
+
   const { data: routingStats, isLoading, refetch } = useQuery({
     queryKey: ['/api/admin/email/routing-stats'],
-    refetchInterval: autoRefresh ? 30000 : false,
+    refetchInterval: autoRefresh ? getRefreshInterval() : false,
   });
 
   const { data: categories } = useQuery({
