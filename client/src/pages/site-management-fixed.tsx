@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -275,14 +275,7 @@ export default function SiteManagement() {
       className: "border-stone-300 text-stone-600 hover:bg-stone-50",
       moduleId: "database_backup"
     },
-    {
-      id: "smtp-test",
-      label: "SMTP Test",
-      icon: TestTube,
-      onClick: () => trackButtonClick("smtp-test", () => setLocation("/admin/smtp-test")),
-      className: "border-amber-300 text-amber-600 hover:bg-amber-50",
-      moduleId: "smtp_test"
-    },
+
     {
       id: "ai-settings",
       label: "AI Settings",

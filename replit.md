@@ -92,7 +92,7 @@ The database is organized into multiple schema files:
 - **Automated Barcode Generation**: Bulk barcode processing for existing products
 
 #### Site Management Features
-- **25 integrated administrative functions** centralized in unified Site Management interface with drag-and-drop Quick Actions layout:
+- **24 integrated administrative functions** centralized in unified Site Management interface with drag-and-drop Quick Actions layout:
 
 1. **Sync Shop** - Product synchronization between showcase and shop catalogs
 2. **Inquiries** - Customer inquiry management and response tracking
@@ -108,18 +108,17 @@ The database is organized into multiple schema files:
 11. **User Management** - Multi-role admin system with department-based access control
 12. **Shop** - E-commerce administration with inventory tracking and pricing management
 13. **Procedures** - Document management system for operational procedures and methods
-14. **SMTP Test** - Comprehensive email connectivity testing and validation systems
-15. **Order Management** - 3-department sequential workflow (Financial → Warehouse → Logistics)
-16. **Products** - Showcase and shop product catalogs with variant support and specifications
-17. **Payment Settings** - Iraqi banking system integration with 3 major banks and invoice generation
-18. **Wallet Management** - Digital wallet system with recharge requests and balance management
-19. **Geography Analytics** - Regional sales tracking and performance analysis (Iraq and Turkey)
-20. **AI Settings** - Smart SKU generation, product recommendations, and OpenAI API integration
-21. **Refresh Control** - Centralized timing management for all department interfaces
-22. **Content Management** - Dynamic multilingual content editing system (430+ items in 4 languages)
-23. **Warehouse Management** - Unified warehouse operations with inventory, orders, and goods tracking
-24. **Logistics Management** - Complete carrier management, delivery verification, and vehicle tracking
-25. **Ticketing System** - Support ticket management with status tracking and admin controls
+14. **Order Management** - 3-department sequential workflow (Financial → Warehouse → Logistics)
+15. **Products** - Showcase and shop product catalogs with variant support and specifications
+16. **Payment Settings** - Iraqi banking system integration with 3 major banks and invoice generation
+17. **Wallet Management** - Digital wallet system with recharge requests and balance management
+18. **Geography Analytics** - Regional sales tracking and performance analysis (Iraq and Turkey)
+19. **AI Settings** - Smart SKU generation, product recommendations, and OpenAI API integration
+20. **Refresh Control** - Centralized timing management for all department interfaces
+21. **Content Management** - Dynamic multilingual content editing system (430+ items in 4 languages)
+22. **Warehouse Management** - Unified warehouse operations with inventory, orders, and goods tracking
+23. **Logistics Management** - Complete carrier management, delivery verification, and vehicle tracking
+24. **Ticketing System** - Support ticket management with status tracking and admin controls
 
 ## Data Flow
 
@@ -224,6 +223,7 @@ The database is organized into multiple schema files:
 
 ```
 Changelog:
+- July 16, 2025: REMOVED SMTP Test module per user request - eliminated redundant SMTP Test module from Site Management interface since comprehensive SMTP testing functionality exists in Advanced Email Settings page, updated module count from 25 to 24 total administrative functions, reduced system complexity by removing duplicate functionality while maintaining all testing capabilities in the primary email settings interface
 - July 16, 2025: COMPLETED COMPREHENSIVE UNIVERSAL EMAIL SERVICE USAGE GUIDE - Created complete interactive documentation system for Universal Email Service usage and deployment, implemented email-service-usage-guide.ts with detailed explanations of all 15 email categories and their specific use cases, built interactive admin interface email-service-guide.tsx with 4 comprehensive tabs (Categories, Rules, Automatic Emails, Developer Guide), added direct access button in Email Settings page and new "Email Service Guide" button in Site Management for easy access, created complete migration documentation in email-migration-complete.ts showing successful removal of 47 hardcoded email addresses, system now provides comprehensive usage scenarios, best practices, code examples, and troubleshooting guidance for all email categories with proper priority levels and automatic routing rules
 - July 16, 2025: COMPLETELY MIGRATED ALL HARDCODED EMAIL ADDRESSES TO UNIVERSAL EMAIL SERVICE - Successfully replaced all hardcoded email addresses throughout the entire codebase with Universal Email Service category-based routing system, eliminated hardcoded email addresses in inventory-alerts.ts, email.ts, routes.ts, and universal-email-service.ts itself, enhanced product inquiry email routing to use Universal Email Service with intelligent category mapping (fuel-additives → fuel@momtazchem.com, water-treatment → water@momtazchem.com, paint-solvents → thinner@momtazchem.com, etc.), updated all email service methods to use empty recipient arrays [] allowing Universal Email Service to determine recipients based on category configurations, created comprehensive email-migration-complete.ts documentation confirming 100% migration completion, system now provides centralized email management with 15 categories (admin, agricultural-fertilizers, fuel-additives, paint-thinner, water-treatment, sales, support, inventory-alerts, order-confirmations, payment-notifications, password-reset, system-notifications, security-alerts, user-management, crm-notifications), all email functionality now routes through Universal Email Service with proper category-based SMTP configurations eliminating maintenance burden of hardcoded email addresses
 - July 16, 2025: COMPLETELY RESOLVED Email System Category-Based Routing - Fixed all SMTP status light issues through comprehensive debugging, cleaned up outdated database test statuses, enhanced SMTP validator to properly save test results, fixed frontend selectedCategoryId undefined error by using selectedCategory?.id, added comprehensive debug logging for status mapping, verified all 7 email categories working with "success" status (Admin, Agricultural Fertilizers, Fuel Additives, Paint & Thinner, Sales, Support, Water Treatment), confirmed email routing system fully operational with category-specific SMTP configurations routing inquiries to appropriate department emails (water-treatment → water@momtazchem.com, fuel-additives → fuel@momtazchem.com, etc.), system now provides complete email automation with intelligent department routing based on inquiry categories
