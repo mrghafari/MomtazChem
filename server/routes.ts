@@ -6277,100 +6277,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // First, try to authenticate via CRM (primary source)
+      // ONLY authenticate via CRM (single source of truth)
       const crmCustomer = await crmStorage.getCrmCustomerByEmail(email);
-      let authenticatedCustomer = null;
       
-      // Check CRM customer authentication first
-      if (crmCustomer && crmCustomer.passwordHash) {
-        const isValidPassword = await bcrypt.compare(password, crmCustomer.passwordHash);
-        if (isValidPassword) {
-          authenticatedCustomer = crmCustomer;
-        }
+      if (!crmCustomer || !crmCustomer.passwordHash) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "ایمیل یا رمز عبور اشتباه است" 
+        });
       }
       
-      // Fallback: Check customer portal for legacy accounts
-      if (!authenticatedCustomer) {
-        const portalCustomer = await customerStorage.verifyCustomerPassword(email, password);
-        if (portalCustomer) {
-          authenticatedCustomer = portalCustomer;
-          // If portal customer exists but no CRM customer, migrate to CRM
-          if (!crmCustomer) {
-            try {
-              const migratedCrmCustomer = await crmStorage.createCrmCustomer({
-                email: portalCustomer.email,
-                firstName: portalCustomer.firstName,
-                lastName: portalCustomer.lastName,
-                company: portalCustomer.company || '',
-                phone: portalCustomer.phone || '',
-                country: portalCustomer.country || '',
-                city: portalCustomer.city || '',
-                address: portalCustomer.address || '',
-                postalCode: portalCustomer.postalCode,
-                customerSource: 'legacy_migration',
-                customerType: 'retail',
-                customerStatus: 'active',
-                isActive: true,
-                internalNotes: 'Migrated from legacy customer portal',
-              });
-              (authenticatedCustomer as any).migratedCrmId = migratedCrmCustomer.id;
-            } catch (migrationError) {
-              console.log('CRM migration failed for legacy customer');
-            }
-          }
-        }
-      }
-
-      if (!authenticatedCustomer) {
+      // Check password against CRM customer only
+      const isValidPassword = await bcrypt.compare(password, crmCustomer.passwordHash);
+      if (!isValidPassword) {
         return res.status(401).json({ 
           success: false, 
           message: "ایمیل یا رمز عبور اشتباه است" 
         });
       }
 
-      // Store customer session - use CRM ID as primary
-      const finalCrmCustomer = crmCustomer || (authenticatedCustomer as any).migratedCrmId ? 
-        await crmStorage.getCrmCustomerById((authenticatedCustomer as any).migratedCrmId) : null;
-        
-      // Allow dual session - keep admin session if exists, add customer session
-      (req.session as any).customerId = authenticatedCustomer.id;
-      (req.session as any).customerEmail = authenticatedCustomer.email;
-      (req.session as any).crmCustomerId = finalCrmCustomer?.id || crmCustomer?.id;
+      // Store customer session using CRM ID as primary
+      (req.session as any).customerId = crmCustomer.id;
+      (req.session as any).customerEmail = crmCustomer.email;
+      (req.session as any).crmCustomerId = crmCustomer.id;
       (req.session as any).isAuthenticated = true;
 
       // Log login activity in CRM
-      if (finalCrmCustomer || crmCustomer) {
-        const crmId = finalCrmCustomer?.id || crmCustomer?.id;
-        if (crmId) {
-          await crmStorage.logCustomerActivity({
-            customerId: crmId,
-          activityType: 'login',
-          description: 'مشتری وارد فروشگاه آنلاین شد',
-          performedBy: 'customer',
-          activityData: {
-            source: 'website',
-            loginDate: new Date().toISOString(),
-            userAgent: req.headers['user-agent'] || 'unknown',
-            loginMethod: crmCustomer ? 'crm_direct' : 'portal_fallback'
-          }
-          });
+      await crmStorage.logCustomerActivity({
+        customerId: crmCustomer.id,
+        activityType: 'login',
+        description: 'مشتری وارد فروشگاه آنلاین شد',
+        performedBy: 'customer',
+        activityData: {
+          source: 'website',
+          loginDate: new Date().toISOString(),
+          userAgent: req.headers['user-agent'] || 'unknown',
+          loginMethod: 'crm_direct'
         }
-      }
+      });
 
       res.json({
         success: true,
         message: "ورود موفق",
         customer: {
-          id: authenticatedCustomer.id,
-          firstName: authenticatedCustomer.firstName,
-          lastName: authenticatedCustomer.lastName,
-          email: authenticatedCustomer.email,
-          company: authenticatedCustomer.company,
-          phone: authenticatedCustomer.phone,
-          country: authenticatedCustomer.country,
-          city: authenticatedCustomer.city,
-          address: authenticatedCustomer.address,
-          crmId: finalCrmCustomer?.id || crmCustomer?.id,
+          id: crmCustomer.id,
+          firstName: crmCustomer.firstName,
+          lastName: crmCustomer.lastName,
+          email: crmCustomer.email,
+          company: crmCustomer.company,
+          phone: crmCustomer.phone,
+          country: crmCustomer.country,
+          city: crmCustomer.city,
+          address: crmCustomer.address,
+          crmId: crmCustomer.id,
         }
       });
     } catch (error) {
