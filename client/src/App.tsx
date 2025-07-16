@@ -35,6 +35,7 @@ import EmailProgressPage from "@/pages/admin/email-progress";
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
+import PasswordReset from "@/pages/password-reset";
 import CustomerForgotPassword from "@/pages/customer-forgot-password";
 import CustomerResetPassword from "@/pages/customer-reset-password";
 import CRMPage from "@/pages/crm";
@@ -142,7 +143,8 @@ function Router() {
           <Route path="/admin/inquiries" component={Dashboard} />
           <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />
-          <Route path="/reset-password" component={ResetPassword} />
+          <Route path="/reset-password/:token" component={ResetPassword} />
+          <Route path="/password-reset" component={PasswordReset} />
           <Route path="/customer/forgot-password" component={CustomerForgotPassword} />
           <Route path="/customer/reset-password" component={CustomerResetPassword} />
           <Route path="/customer/register" component={CustomerRegister} />

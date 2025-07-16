@@ -13,8 +13,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown, Shield } from "lucide-react";
 import UnifiedCustomerProfile from "@/components/unified-customer-profile";
+import { PasswordManagement } from "@/components/PasswordManagement";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CrmCustomer {
@@ -731,6 +732,18 @@ export default function CRM() {
                             <Button
                               variant="outline"
                               size="sm"
+                              onClick={() => {
+                                setSelectedCustomer(customer);
+                                setIsCustomerDetailDialogOpen(true);
+                              }}
+                              title="Manage customer password"
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Shield className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => handleExportCustomer(customer.id)}
                               title="Export customer report to PDF"
                             >
@@ -964,48 +977,69 @@ export default function CRM() {
 
       {/* Customer Detail Dialog */}
       <Dialog open={isCustomerDetailDialogOpen} onOpenChange={setIsCustomerDetailDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Customer Details</DialogTitle>
-            <DialogDescription>Complete customer information</DialogDescription>
+            <DialogDescription>Complete customer information and management</DialogDescription>
           </DialogHeader>
           {selectedCustomer && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Full Name</Label>
-                  <p className="font-medium">{selectedCustomer.firstName} {selectedCustomer.lastName}</p>
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="details">Customer Details</TabsTrigger>
+                <TabsTrigger value="password">Password Management</TabsTrigger>
+                <TabsTrigger value="profile">Unified Profile</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="details" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Full Name</Label>
+                    <p className="font-medium">{selectedCustomer.firstName} {selectedCustomer.lastName}</p>
+                  </div>
+                  <div>
+                    <Label>Email</Label>
+                    <p className="font-medium">{selectedCustomer.email}</p>
+                  </div>
+                  <div>
+                    <Label>Company</Label>
+                    <p className="font-medium">{selectedCustomer.company || '-'}</p>
+                  </div>
+                  <div>
+                    <Label>Phone</Label>
+                    <p className="font-medium">{selectedCustomer.phone || '-'}</p>
+                  </div>
+                  <div>
+                    <Label>Total Purchases</Label>
+                    <p className="font-medium">{formatCurrency(selectedCustomer.totalSpent)}</p>
+                  </div>
+                  <div>
+                    <Label>Number of Orders</Label>
+                    <p className="font-medium">{selectedCustomer.totalOrdersCount}</p>
+                  </div>
+                  <div>
+                    <Label>Average Order Value</Label>
+                    <p className="font-medium">{formatCurrency(selectedCustomer.averageOrderValue)}</p>
+                  </div>
+                  <div>
+                    <Label>Join Date</Label>
+                    <p className="font-medium">{formatDate(selectedCustomer.createdAt)}</p>
+                  </div>
                 </div>
-                <div>
-                  <Label>Email</Label>
-                  <p className="font-medium">{selectedCustomer.email}</p>
-                </div>
-                <div>
-                  <Label>Company</Label>
-                  <p className="font-medium">{selectedCustomer.company || '-'}</p>
-                </div>
-                <div>
-                  <Label>Phone</Label>
-                  <p className="font-medium">{selectedCustomer.phone || '-'}</p>
-                </div>
-                <div>
-                  <Label>Total Purchases</Label>
-                  <p className="font-medium">{formatCurrency(selectedCustomer.totalSpent)}</p>
-                </div>
-                <div>
-                  <Label>Number of Orders</Label>
-                  <p className="font-medium">{selectedCustomer.totalOrdersCount}</p>
-                </div>
-                <div>
-                  <Label>Average Order Value</Label>
-                  <p className="font-medium">{formatCurrency(selectedCustomer.averageOrderValue)}</p>
-                </div>
-                <div>
-                  <Label>Join Date</Label>
-                  <p className="font-medium">{formatDate(selectedCustomer.createdAt)}</p>
-                </div>
-              </div>
-            </div>
+              </TabsContent>
+              
+              <TabsContent value="password" className="space-y-4">
+                <PasswordManagement
+                  customerId={selectedCustomer.id}
+                  customerEmail={selectedCustomer.email}
+                  customerName={`${selectedCustomer.firstName} ${selectedCustomer.lastName}`}
+                  customerPhone={selectedCustomer.phone}
+                />
+              </TabsContent>
+              
+              <TabsContent value="profile" className="space-y-4">
+                <UnifiedCustomerProfile customerId={selectedCustomer.id} />
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>

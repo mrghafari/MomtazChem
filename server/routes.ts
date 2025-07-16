@@ -15569,6 +15569,391 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
 
   // ============================================================================
+  // CUSTOMER PASSWORD MANAGEMENT SYSTEM
+  // ============================================================================
+
+  // Generate random password for customer
+  function generateRandomPassword(length: number = 8): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      password += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return password;
+  }
+
+  // Get customer password status (for admin viewing)
+  app.get('/api/crm/customers/:id/password-status', requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+
+      const hasPassword = !!customer.passwordHash;
+      const maskedPassword = hasPassword ? '••••••••' : 'رمز عبور تنظیم نشده';
+      
+      res.json({
+        success: true,
+        data: {
+          customerId: customer.id,
+          email: customer.email,
+          hasPassword,
+          maskedPassword,
+          lastPasswordChange: customer.updatedAt
+        }
+      });
+    } catch (error) {
+      console.error('Error getting customer password status:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت وضعیت رمز عبور" });
+    }
+  });
+
+  // Change customer password (admin only)
+  app.post('/api/crm/customers/:id/change-password', requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const { newPassword, sendNotification = true } = req.body;
+      
+      if (!newPassword) {
+        return res.status(400).json({ success: false, message: "رمز عبور جدید الزامی است" });
+      }
+
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update customer password
+      await crmStorage.updateCrmCustomer(customerId, {
+        passwordHash: hashedPassword,
+        updatedAt: new Date()
+      });
+
+      // Log activity
+      await crmStorage.logCustomerActivity({
+        customerId: customerId,
+        activityType: "password_changed",
+        description: `رمز عبور توسط مدیر تغییر یافت`,
+        performedBy: "admin",
+        activityData: { changedBy: "admin" }
+      });
+
+      if (sendNotification) {
+        // Send email notification
+        try {
+          const transporter = nodemailer.createTransporter({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS
+            }
+          });
+
+          const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: customer.email,
+            subject: 'رمز عبور جدید - ممتاز شیمی',
+            html: `
+              <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+                <h2>رمز عبور جدید</h2>
+                <p>سلام ${customer.firstName} ${customer.lastName} عزیز،</p>
+                <p>رمز عبور جدید شما توسط مدیر سیستم تنظیم شده است:</p>
+                <div style="background-color: #f0f0f0; padding: 10px; margin: 20px 0; border-radius: 5px;">
+                  <strong>رمز عبور جدید: ${newPassword}</strong>
+                </div>
+                <p>لطفاً این رمز عبور را در جای امن نگهداری کنید.</p>
+                <p>با تشکر،<br>تیم ممتاز شیمی</p>
+              </div>
+            `
+          };
+
+          await transporter.sendMail(mailOptions);
+          console.log(`✓ Password change email sent to ${customer.email}`);
+        } catch (emailError) {
+          console.error('Error sending password change email:', emailError);
+        }
+
+        // Send SMS notification if phone number exists
+        if (customer.phone) {
+          try {
+            await smsService.sendSMS(
+              customer.phone,
+              `سلام ${customer.firstName} عزیز، رمز عبور جدید شما: ${newPassword} - ممتاز شیمی`
+            );
+            console.log(`✓ Password change SMS sent to ${customer.phone}`);
+          } catch (smsError) {
+            console.error('Error sending password change SMS:', smsError);
+          }
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: "رمز عبور با موفقیت تغییر یافت", 
+        data: { 
+          customerId, 
+          email: customer.email,
+          notificationSent: sendNotification 
+        } 
+      });
+    } catch (error) {
+      console.error('Error changing customer password:', error);
+      res.status(500).json({ success: false, message: "خطا در تغییر رمز عبور" });
+    }
+  });
+
+  // Generate and set random password for customer
+  app.post('/api/crm/customers/:id/generate-password', requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const { sendNotification = true } = req.body;
+      
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+
+      // Generate random password
+      const newPassword = generateRandomPassword(8);
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update customer password
+      await crmStorage.updateCrmCustomer(customerId, {
+        passwordHash: hashedPassword,
+        updatedAt: new Date()
+      });
+
+      // Log activity
+      await crmStorage.logCustomerActivity({
+        customerId: customerId,
+        activityType: "password_generated",
+        description: `رمز عبور تصادفی توسط مدیر تولید شد`,
+        performedBy: "admin",
+        activityData: { generatedBy: "admin" }
+      });
+
+      if (sendNotification) {
+        // Send email notification
+        try {
+          const transporter = nodemailer.createTransporter({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS
+            }
+          });
+
+          const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: customer.email,
+            subject: 'رمز عبور تصادفی - ممتاز شیمی',
+            html: `
+              <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+                <h2>رمز عبور تصادفی</h2>
+                <p>سلام ${customer.firstName} ${customer.lastName} عزیز،</p>
+                <p>رمز عبور تصادفی جدید برای شما تولید شده است:</p>
+                <div style="background-color: #f0f0f0; padding: 10px; margin: 20px 0; border-radius: 5px;">
+                  <strong>رمز عبور: ${newPassword}</strong>
+                </div>
+                <p>لطفاً این رمز عبور را در جای امن نگهداری کنید.</p>
+                <p>با تشکر،<br>تیم ممتاز شیمی</p>
+              </div>
+            `
+          };
+
+          await transporter.sendMail(mailOptions);
+          console.log(`✓ Generated password email sent to ${customer.email}`);
+        } catch (emailError) {
+          console.error('Error sending generated password email:', emailError);
+        }
+
+        // Send SMS notification if phone number exists
+        if (customer.phone) {
+          try {
+            await smsService.sendSMS(
+              customer.phone,
+              `سلام ${customer.firstName} عزیز، رمز عبور جدید شما: ${newPassword} - ممتاز شیمی`
+            );
+            console.log(`✓ Generated password SMS sent to ${customer.phone}`);
+          } catch (smsError) {
+            console.error('Error sending generated password SMS:', smsError);
+          }
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: "رمز عبور تصادفی با موفقیت تولید شد", 
+        data: { 
+          customerId, 
+          email: customer.email,
+          generatedPassword: newPassword,
+          notificationSent: sendNotification 
+        } 
+      });
+    } catch (error) {
+      console.error('Error generating customer password:', error);
+      res.status(500).json({ success: false, message: "خطا در تولید رمز عبور تصادفی" });
+    }
+  });
+
+  // Customer password reset request
+  app.post('/api/customers/password-reset-request', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ success: false, message: "ایمیل الزامی است" });
+      }
+
+      const customer = await crmStorage.getCrmCustomerByEmail(email);
+      if (!customer) {
+        // Don't reveal if email exists or not for security
+        return res.json({ 
+          success: true, 
+          message: "اگر ایمیل شما در سیستم موجود باشد، لینک بازیابی رمز عبور ارسال خواهد شد" 
+        });
+      }
+
+      // Generate reset token
+      const resetToken = require('crypto').randomBytes(32).toString('hex');
+      const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
+      
+      // Save reset token to customer
+      await crmStorage.updateCrmCustomer(customer.id, {
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: resetExpires
+      });
+
+      // Send reset email
+      try {
+        const transporter = nodemailer.createTransporter({
+          host: process.env.SMTP_HOST || 'smtp.gmail.com',
+          port: 587,
+          secure: false,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+          }
+        });
+
+        const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password/${resetToken}`;
+        
+        const mailOptions = {
+          from: process.env.SMTP_USER,
+          to: customer.email,
+          subject: 'بازیابی رمز عبور - ممتاز شیمی',
+          html: `
+            <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+              <h2>بازیابی رمز عبور</h2>
+              <p>سلام ${customer.firstName} ${customer.lastName} عزیز،</p>
+              <p>درخواست بازیابی رمز عبور شما دریافت شد. برای تنظیم رمز عبور جدید، روی لینک زیر کلیک کنید:</p>
+              <div style="margin: 20px 0;">
+                <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                  بازیابی رمز عبور
+                </a>
+              </div>
+              <p>این لینک تا 1 ساعت دیگر معتبر است.</p>
+              <p>اگر درخواست بازیابی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید.</p>
+              <p>با تشکر،<br>تیم ممتاز شیمی</p>
+            </div>
+          `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`✓ Password reset email sent to ${customer.email}`);
+      } catch (emailError) {
+        console.error('Error sending password reset email:', emailError);
+      }
+
+      // Log activity
+      await crmStorage.logCustomerActivity({
+        customerId: customer.id,
+        activityType: "password_reset_requested",
+        description: `درخواست بازیابی رمز عبور`,
+        performedBy: "customer",
+        activityData: { requestedAt: new Date() }
+      });
+
+      res.json({ 
+        success: true, 
+        message: "اگر ایمیل شما در سیستم موجود باشد، لینک بازیابی رمز عبور ارسال خواهد شد" 
+      });
+    } catch (error) {
+      console.error('Error processing password reset request:', error);
+      res.status(500).json({ success: false, message: "خطا در پردازش درخواست بازیابی رمز عبور" });
+    }
+  });
+
+  // Customer password reset with token
+  app.post('/api/customers/password-reset', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({ success: false, message: "توکن و رمز عبور جدید الزامی است" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: "رمز عبور باید حداقل 6 کاراکتر باشد" });
+      }
+
+      // Find customer by reset token
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT * FROM crm_customers 
+        WHERE reset_password_token = $1 
+        AND reset_password_expires > $2
+        AND is_active = true
+      `, [token, new Date()]);
+
+      if (result.rows.length === 0) {
+        return res.status(400).json({ success: false, message: "توکن نامعتبر یا منقضی شده است" });
+      }
+
+      const customer = result.rows[0];
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update customer password and clear reset token
+      await crmStorage.updateCrmCustomer(customer.id, {
+        passwordHash: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+        updatedAt: new Date()
+      });
+
+      // Log activity
+      await crmStorage.logCustomerActivity({
+        customerId: customer.id,
+        activityType: "password_reset_completed",
+        description: `رمز عبور با موفقیت بازیابی شد`,
+        performedBy: "customer",
+        activityData: { completedAt: new Date() }
+      });
+
+      res.json({ 
+        success: true, 
+        message: "رمز عبور با موفقیت تغییر یافت. اکنون می‌توانید وارد شوید" 
+      });
+    } catch (error) {
+      console.error('Error resetting customer password:', error);
+      res.status(500).json({ success: false, message: "خطا در بازیابی رمز عبور" });
+    }
+  });
+
+  // ============================================================================
   // SUPER ADMIN VERIFICATION SYSTEM
   // ============================================================================
 

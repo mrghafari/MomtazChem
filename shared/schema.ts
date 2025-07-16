@@ -528,6 +528,8 @@ export const crmCustomers = pgTable("crm_customers", {
   
   // System fields
   isActive: boolean("is_active").default(true),
+  resetPasswordToken: text("reset_password_token"),
+  resetPasswordExpires: timestamp("reset_password_expires"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   createdBy: text("created_by"),
