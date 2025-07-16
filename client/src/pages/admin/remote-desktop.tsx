@@ -366,6 +366,29 @@ const RemoteDesktop: React.FC = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Download className="h-5 w-5" />
+                  RustDesk
+                </CardTitle>
+                <CardDescription>
+                  نرم‌افزار متن‌باز و امن دسترسی از راه دور
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  سریع، امن و کاملاً رایگان
+                </p>
+                <Button className="w-full" asChild>
+                  <a href="https://rustdesk.com/download/" target="_blank">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    دانلود RustDesk
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="h-5 w-5" />
                   Microsoft Remote Desktop
                 </CardTitle>
                 <CardDescription>
