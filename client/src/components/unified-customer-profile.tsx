@@ -678,7 +678,7 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
                       </SelectContent>
                     </Select>
                   ) : (
-                    <p className="mt-1 font-medium capitalize">{customer.paymentTerms.replace('_', ' ')}</p>
+                    <p className="mt-1 font-medium capitalize">{customer.paymentTerms ? customer.paymentTerms.replace('_', ' ') : 'Not specified'}</p>
                   )}
                 </div>
 
@@ -742,7 +742,7 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
                         <div className="text-right">
                           <p className="font-semibold">{formatCurrency(order.totalAmount)}</p>
                           <Badge variant="outline" className="mt-1">
-                            {order.status.toUpperCase()}
+                            {order.status ? order.status.toUpperCase() : 'UNKNOWN'}
                           </Badge>
                         </div>
                       </div>
@@ -783,7 +783,7 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
                   {activities.map((activity) => (
                     <div key={activity.id} className="border-l-4 border-blue-200 pl-4">
                       <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-medium capitalize">{activity.activityType.replace('_', ' ')}</h3>
+                        <h3 className="font-medium capitalize">{activity.activityType ? activity.activityType.replace('_', ' ') : 'Unknown activity'}</h3>
                         <span className="text-sm text-gray-500">{formatDate(activity.createdAt)}</span>
                       </div>
                       <p className="text-gray-700">{activity.description}</p>
