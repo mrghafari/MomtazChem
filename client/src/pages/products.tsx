@@ -1451,7 +1451,7 @@ export default function ProductsPage() {
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-sm font-medium">
 {t.productSku}
-                            {editingProduct && <Lock className="h-3 w-3 text-gray-400" />}
+                            {(editingProduct || field.value) && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1465,11 +1465,11 @@ export default function ProductsPage() {
                             <div className="flex gap-2">
                               <Input 
                                 placeholder="کد محصول" 
-                                className={`h-9 ${editingProduct ? "bg-gray-50 text-gray-500" : ""}`}
+                                className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""}`}
                                 {...field}
-                                readOnly={!!editingProduct}
+                                readOnly={!!(editingProduct || field.value)}
                               />
-                              {!editingProduct && (
+                              {!editingProduct && !field.value && (
                                 <Button
                                   type="button"
                                   size="sm"
@@ -1506,10 +1506,40 @@ export default function ProductsPage() {
                                       const result = await response.json();
                                       form.setValue('sku', result.data.sku);
                                       
-                                      toast({
-                                        title: "✨ SKU تولید شد",
-                                        description: `کد محصول: ${result.data.sku}`,
-                                      });
+                                      // Generate barcode automatically after SKU
+                                      try {
+                                        const barcodeResponse = await fetch('/api/products/generate-barcode', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({
+                                            name: productName,
+                                            category: category
+                                          })
+                                        });
+
+                                        if (barcodeResponse.ok) {
+                                          const barcodeResult = await barcodeResponse.json();
+                                          form.setValue('barcode', barcodeResult.data.barcode);
+                                          
+                                          toast({
+                                            title: "✨ SKU و بارکد تولید شدند",
+                                            description: `کد محصول: ${result.data.sku} | بارکد: ${barcodeResult.data.barcode}`,
+                                          });
+                                        } else {
+                                          form.setValue('barcode', '');
+                                          toast({
+                                            title: "✨ SKU تولید شد",
+                                            description: `کد محصول: ${result.data.sku} (بارکد دستی وارد کنید)`,
+                                          });
+                                        }
+                                      } catch (barcodeError) {
+                                        console.error('Error generating barcode:', barcodeError);
+                                        form.setValue('barcode', '');
+                                        toast({
+                                          title: "✨ SKU تولید شد",
+                                          description: `کد محصول: ${result.data.sku} (بارکد دستی وارد کنید)`,
+                                        });
+                                      }
                                     } catch (error) {
                                       console.error('Error generating SKU:', error);
                                       toast({
@@ -1559,7 +1589,7 @@ export default function ProductsPage() {
                               <rect x="111" y="0" width="3" height="24" fill="#333"/>
                               <rect x="117" y="0" width="3" height="24" fill="#333"/>
                             </svg>
-                            {editingProduct && <Lock className="h-3 w-3 text-gray-400" />}
+                            {(editingProduct || field.value) && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -1573,9 +1603,9 @@ export default function ProductsPage() {
                           <FormControl>
                             <Input 
                               placeholder="بارکد 13 رقمی" 
-                              className={`h-9 ${editingProduct ? "bg-gray-50 text-gray-500" : ""}`}
+                              className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""}`}
                               {...field}
-                              readOnly={!!editingProduct}
+                              readOnly={!!(editingProduct || field.value)}
                             />
                           </FormControl>
                           <FormMessage />

@@ -21070,6 +21070,40 @@ momtazchem.com
     }
   });
 
+  // Generate barcode endpoint
+  app.post("/api/products/generate-barcode", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { name, category } = req.body;
+      
+      if (!name || !category) {
+        return res.status(400).json({
+          success: false,
+          message: "Product name and category are required"
+        });
+      }
+
+      console.log("Generating EAN-13 barcode for product:", name);
+      
+      const { generateEAN13Barcode } = await import('../shared/barcode-utils');
+      const barcode = await generateEAN13Barcode(name, category);
+      
+      console.log("Generated barcode:", barcode);
+      
+      res.json({
+        success: true,
+        data: { barcode }
+      });
+      
+    } catch (error) {
+      console.error("Error generating barcode:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to generate barcode",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // AI Test Connection endpoint
   app.post("/api/ai/test-connection", requireAuth, async (req: Request, res: Response) => {
     try {
