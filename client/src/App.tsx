@@ -98,6 +98,7 @@ import SecurityManagement from "@/pages/security-management-new";
 import OrderTrackingManagement from "@/pages/admin/order-tracking-management";
 import AiSeoAssistant from "@/pages/admin/ai-seo-assistant";
 import RemoteDesktop from "@/pages/admin/remote-desktop";
+import EmailServiceGuide from "@/pages/admin/email-service-guide";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
@@ -138,6 +139,7 @@ function Router() {
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />
           <Route path="/admin/email-progress" component={EmailProgressPage} />
           <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
+          <Route path="/admin/email-service-guide" component={EmailServiceGuide} />
           <Route path="/admin/invoice-management" component={InvoiceManagement} />
           <Route path="/admin/payment-settings" component={PaymentSettings} />
           <Route path="/admin/wallet-management" component={WalletManagement} />
