@@ -88,7 +88,7 @@ export const generateUniqueEAN13Barcode = async (productName: string, category: 
   const maxAttempts = 10;
   
   while (attempts < maxAttempts) {
-    const barcode = generateEAN13BarcodeWithIncrement(productName, category, attempts);
+    const barcode = await generateEAN13BarcodeWithIncrement(productName, category, attempts);
     const uniquenessCheck = await checkBarcodeUniqueness(barcode, excludeProductId);
     
     if (uniquenessCheck.isUnique) {

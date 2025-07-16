@@ -21084,8 +21084,8 @@ momtazchem.com
 
       console.log("Generating EAN-13 barcode for product:", name);
       
-      const { generateEAN13Barcode } = await import('../shared/barcode-utils');
-      const barcode = await generateEAN13Barcode(name, category);
+      // Generate barcode server-side with database access
+      const barcode = await generateServerSideEAN13Barcode(name, category);
       
       console.log("Generated barcode:", barcode);
       
@@ -21103,6 +21103,78 @@ momtazchem.com
       });
     }
   });
+
+  // Server-side EAN-13 barcode generation with database access
+  const generateServerSideEAN13Barcode = async (productName: string, category: string): Promise<string> => {
+    // Iraq GS1 country code
+    const countryCode = '864';
+    
+    // Momtazchem company code
+    const companyCode = '96771';
+    
+    // Generate unique 4-digit product code
+    let attempts = 0;
+    const maxAttempts = 100;
+    let productCode = '';
+    
+    while (attempts < maxAttempts) {
+      // Generate random 4-digit code (1000-9999)
+      const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      // Check if this barcode would be unique
+      const testBarcode12 = countryCode + companyCode + randomCode;
+      const testCheckDigit = calculateEAN13CheckDigit(testBarcode12);
+      const testBarcode = testBarcode12 + testCheckDigit;
+      
+      // Check both showcase and shop products for uniqueness
+      const existingShowcase = await db.select().from(showcaseProducts).where(eq(showcaseProducts.barcode, testBarcode));
+      const existingShop = await db.select().from(shopProducts).where(eq(shopProducts.barcode, testBarcode));
+      
+      if (existingShowcase.length === 0 && existingShop.length === 0) {
+        productCode = randomCode;
+        break;
+      }
+      
+      attempts++;
+    }
+    
+    // If all random attempts failed, use timestamp-based code
+    if (!productCode) {
+      productCode = Date.now().toString().slice(-4);
+    }
+    
+    // Build 12-digit code: 864 + 96771 + XXXX
+    const barcode12 = countryCode + companyCode + productCode;
+    
+    // Calculate and append check digit
+    const checkDigit = calculateEAN13CheckDigit(barcode12);
+    const fullBarcode = barcode12 + checkDigit;
+    
+    console.log('Server-side barcode generation:', {
+      productName,
+      category,
+      countryCode,
+      companyCode,
+      productCode,
+      barcode12,
+      checkDigit,
+      fullBarcode,
+      length: fullBarcode.length
+    });
+    
+    return fullBarcode;
+  };
+
+  // Calculate EAN-13 check digit
+  const calculateEAN13CheckDigit = (barcode12: string): string => {
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+      const digit = parseInt(barcode12[i]);
+      sum += i % 2 === 0 ? digit : digit * 3;
+    }
+    const checkDigit = (10 - (sum % 10)) % 10;
+    return checkDigit.toString();
+  };
 
   // AI Test Connection endpoint
   app.post("/api/ai/test-connection", requireAuth, async (req: Request, res: Response) => {
