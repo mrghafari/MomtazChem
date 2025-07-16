@@ -13,12 +13,28 @@ interface EmailOptions {
 class EmailService {
   private async getSMTPConfig(category: string = 'admin') {
     try {
+      // Map category strings to category IDs
+      const categoryMap: { [key: string]: number } = {
+        'admin': 1,
+        'fuel-additives': 2,
+        'water-treatment': 3,
+        'agricultural-fertilizers': 4,
+        'paint-thinner': 5,
+        'orders': 6,
+        'notifications': 7,
+        'support': 7 // Support uses same category as notifications
+      };
+
+      const categoryId = categoryMap[category] || 1; // Default to admin if not found
+      
+      console.log(`[EMAIL DEBUG] Looking for SMTP config for category: ${category} (ID: ${categoryId})`);
+      
       const [config] = await db
         .select()
         .from(smtpSettings)
         .where(
           and(
-            eq(smtpSettings.categoryId, 1), // Use categoryId instead of category
+            eq(smtpSettings.categoryId, categoryId),
             eq(smtpSettings.isActive, true)
           )
         )
@@ -29,7 +45,12 @@ class EmailService {
         const [adminConfig] = await db
           .select()
           .from(smtpSettings)
-          .where(eq(smtpSettings.isActive, true))
+          .where(
+            and(
+              eq(smtpSettings.categoryId, 1), // Admin category
+              eq(smtpSettings.isActive, true)
+            )
+          )
           .limit(1);
         
         return adminConfig;
@@ -189,7 +210,7 @@ class EmailService {
   async sendPasswordChangeNotification(email: string, customerName: string, newPassword?: string) {
     try {
       console.log(`[EMAIL DEBUG] Starting password change notification for ${email}`);
-      const { transporter, config } = await this.createTransporter('admin');
+      const { transporter, config } = await this.createTransporter('support');
       console.log(`[EMAIL DEBUG] Using SMTP config: ${config.username} (${config.host}:${config.port})`);
 
       // Skip template system for now and use hardcoded template
