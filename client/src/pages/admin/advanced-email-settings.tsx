@@ -40,6 +40,13 @@ interface SmtpSetting {
   isActive: boolean;
   testStatus: string;
   lastTested?: string;
+  // Include database field names for compatibility
+  category_id?: number;
+  from_name?: string;
+  from_email?: string;
+  is_active?: boolean;
+  test_status?: string;
+  last_tested?: string;
 }
 
 interface EmailRecipient {
@@ -143,9 +150,14 @@ export default function AdvancedEmailSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data.smtp)
       }).then(res => res.json()),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("SMTP save success:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
       toast({ title: "SMTP settings saved successfully" });
+      // Force reload the categories to get updated SMTP data
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/admin/email/categories"] });
+      }, 100);
     },
     onError: () => {
       toast({ title: "Failed to save SMTP settings", variant: "destructive" });
@@ -309,15 +321,18 @@ export default function AdvancedEmailSettingsPage() {
 
   // Load selected category data
   useEffect(() => {
+    console.log("Loading category data:", selectedCategory?.categoryName, selectedCategory?.smtp);
+    
     if (selectedCategory?.smtp) {
+      const smtp = selectedCategory.smtp;
       setSmtpForm({
-        host: selectedCategory.smtp.host,
-        port: selectedCategory.smtp.port,
-        secure: selectedCategory.smtp.secure,
-        username: selectedCategory.smtp.username,
-        password: selectedCategory.smtp.password || "", // Show actual password
-        fromName: selectedCategory.smtp.fromName,
-        fromEmail: selectedCategory.smtp.fromEmail
+        host: smtp.host || "",
+        port: smtp.port || 587,
+        secure: smtp.secure || false,
+        username: smtp.username || "",
+        password: smtp.password || "", // Show actual password
+        fromName: smtp.fromName || smtp.from_name || "",
+        fromEmail: smtp.fromEmail || smtp.from_email || ""
       });
     } else {
       setSmtpForm({
@@ -394,21 +409,32 @@ export default function AdvancedEmailSettingsPage() {
     console.log("Email Status Light Debug:", category.categoryName, category.smtp);
     
     if (!category.smtp) {
+      console.log("No SMTP data for category:", category.categoryName);
       return <div className="w-3 h-3 bg-gray-400 rounded-full shadow-sm border-2 border-gray-300" title="SMTP تنظیم نشده" />;
     }
     
     // Check if all required SMTP fields are configured
-    const isFullyConfigured = category.smtp.host && 
-                              category.smtp.username && 
-                              category.smtp.password && 
-                              category.smtp.fromEmail;
+    const smtp = category.smtp;
+    const isFullyConfigured = smtp.host && 
+                              smtp.username && 
+                              smtp.password && 
+                              (smtp.fromEmail || smtp.from_email);
+    
+    console.log("SMTP Configuration Check for", category.categoryName, {
+      host: smtp.host,
+      username: smtp.username,
+      password: smtp.password ? "SET" : "NOT_SET",
+      fromEmail: smtp.fromEmail || smtp.from_email,
+      testStatus: smtp.testStatus || smtp.test_status,
+      isFullyConfigured
+    });
     
     if (!isFullyConfigured) {
       return <div className="w-3 h-3 bg-yellow-500 rounded-full shadow-lg border-2 border-yellow-300 animate-pulse" title="تنظیمات SMTP ناکامل" />;
     }
     
     // Return status based on test result
-    return getTestStatusIcon(category.smtp.testStatus || "untested");
+    return getTestStatusIcon(smtp.testStatus || smtp.test_status || "untested");
   };
 
   const getCategoryColor = (categoryKey: string) => {
