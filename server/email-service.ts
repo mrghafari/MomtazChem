@@ -49,7 +49,7 @@ class EmailService {
         .from(emailTemplates)
         .where(
           and(
-            eq(emailTemplates.name, templateName),
+            eq(emailTemplates.templateName, templateName),
             eq(emailTemplates.isActive, true)
           )
         )
@@ -83,11 +83,15 @@ class EmailService {
     const transporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
-      secure: config.secure,
+      secure: config.port === 465, // Use secure only for port 465
+      requireTLS: true,
       auth: {
         user: config.username,
         pass: config.password,
       },
+      tls: {
+        rejectUnauthorized: false // Allow self-signed certificates
+      }
     });
 
     return { transporter, config };
@@ -188,13 +192,10 @@ class EmailService {
       const { transporter, config } = await this.createTransporter('admin');
       console.log(`[EMAIL DEBUG] Using SMTP config: ${config.username} (${config.host}:${config.port})`);
 
-      const template = await this.getEmailTemplate('Password Management Template');
-      console.log(`[EMAIL DEBUG] Template found: ${template ? 'Yes' : 'No'}`);
-      if (template) {
-        console.log(`[EMAIL DEBUG] Template subject: ${template.subject}`);
-      }
+      // Skip template system for now and use hardcoded template
+      console.log(`[EMAIL DEBUG] Using hardcoded template for password change notification`);
       
-      if (template) {
+      if (false) { // Disable template system temporarily
         const variables = {
           customer_name: customerName,
           email_type: 'تغییر رمز عبور',

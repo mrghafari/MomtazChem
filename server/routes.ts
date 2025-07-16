@@ -15158,7 +15158,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       
       // Update password in database
-      await crmStorage.updateCrmCustomer(customerId, { password: hashedPassword });
+      await crmStorage.updateCrmCustomer(customerId, { passwordHash: hashedPassword });
       
       // Send email notification if requested
       if (sendEmail) {

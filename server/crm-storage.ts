@@ -626,17 +626,67 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async updateCrmCustomer(customerId: number, updates: Partial<CrmCustomer>): Promise<CrmCustomer> {
-    const [updatedCustomer] = await crmDb
-      .update(crmCustomers)
-      .set(updates)
-      .where(eq(crmCustomers.id, customerId))
-      .returning();
+    console.log(`[CRM UPDATE] Updating customer ${customerId} with:`, updates);
     
-    if (!updatedCustomer) {
-      throw new Error('Customer not found');
+    try {
+      const [updatedCustomer] = await crmDb
+        .update(crmCustomers)
+        .set(updates)
+        .where(eq(crmCustomers.id, customerId))
+        .returning();
+      
+      if (!updatedCustomer) {
+        throw new Error('Customer not found');
+      }
+      
+      console.log(`[CRM UPDATE] Successfully updated customer ${customerId}`);
+      return updatedCustomer;
+    } catch (error) {
+      console.error(`[CRM UPDATE] Error updating customer ${customerId}:`, error);
+      
+      // If Drizzle ORM update fails, try direct SQL as fallback
+      if (updates.passwordHash) {
+        await crmDb.execute(
+          sql`UPDATE crm_customers SET password_hash = ${updates.passwordHash} WHERE id = ${customerId}`
+        );
+        
+        // Fetch updated customer
+        const [customer] = await crmDb
+          .select()
+          .from(crmCustomers)
+          .where(eq(crmCustomers.id, customerId))
+          .limit(1);
+          
+        if (!customer) {
+          throw new Error('Customer not found');
+        }
+        
+        console.log(`[CRM UPDATE] Successfully updated customer ${customerId} using direct SQL`);
+        return customer;
+      }
+      
+      throw error;
     }
-    
-    return updatedCustomer;
+  }
+
+  async logActivity(customerId: number, activityType: string, description: string, metadata?: any): Promise<void> {
+    try {
+      // Implementation for logging customer activities
+      // This would normally insert into a customer_activities table
+      console.log(`[CRM ACTIVITY] Customer ${customerId}: ${activityType} - ${description}`);
+      
+      // For now, we'll just log it since we don't have a customer_activities table in the CRM schema
+      // In a full implementation, this would be:
+      // await crmDb.insert(customerActivities).values({
+      //   customerId,
+      //   activityType,
+      //   description,
+      //   metadata: metadata ? JSON.stringify(metadata) : null,
+      //   createdAt: new Date()
+      // });
+    } catch (error) {
+      console.error(`[CRM ACTIVITY] Error logging activity for customer ${customerId}:`, error);
+    }
   }
 }
 
