@@ -121,7 +121,12 @@ export default function AdvancedEmailSettingsPage() {
   // Load categories
   const { data: categoriesData, isLoading } = useQuery({
     queryKey: ["/api/admin/email/categories"],
-    queryFn: () => fetch("/api/admin/email/categories").then(res => res.json())
+    queryFn: async () => {
+      const response = await fetch("/api/admin/email/categories");
+      const data = await response.json();
+      console.log("Categories API Response:", data);
+      return data;
+    }
   });
 
   // Load category email assignments
@@ -386,6 +391,8 @@ export default function AdvancedEmailSettingsPage() {
 
   // Function to get email status light based on SMTP configuration
   const getEmailStatusLight = (category: EmailCategory) => {
+    console.log("Email Status Light Debug:", category.categoryName, category.smtp);
+    
     if (!category.smtp) {
       return <div className="w-3 h-3 bg-gray-400 rounded-full shadow-sm border-2 border-gray-300" title="SMTP تنظیم نشده" />;
     }
