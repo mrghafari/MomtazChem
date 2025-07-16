@@ -2050,6 +2050,336 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
+                {/* مدیریت فایل‌ها و اسناد */}
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 rounded-lg border border-indigo-200">
+                  <h3 className="text-lg font-semibold text-indigo-800 mb-3 flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    مدیریت فایل‌ها و اسناد
+                  </h3>
+                  
+                  {/* آپلود تصویر محصول */}
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <FormLabel className="text-sm font-medium flex items-center gap-2">
+                        <Image className="h-4 w-4" />
+                        تصویر محصول
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3 w-3 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>تصویر اصلی محصول برای نمایش در کاردکس و فروشگاه. حداکثر حجم: 2MB</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </FormLabel>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* آپلود تصویر */}
+                        <div className="space-y-2">
+                          <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            {imagePreview ? (
+                              <div className="relative">
+                                <img 
+                                  src={imagePreview} 
+                                  alt="پیش‌نمای تصویر" 
+                                  className="w-full h-32 object-cover rounded-lg"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="absolute top-2 right-2 h-6 w-6 p-0"
+                                  onClick={() => {
+                                    setImagePreview(null);
+                                    form.setValue('imageUrl', '');
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="py-4">
+                                <Image className="mx-auto h-12 w-12 text-gray-400" />
+                                <p className="mt-2 text-sm text-gray-600">کلیک کنید تا تصویر انتخاب کنید</p>
+                                <p className="text-xs text-gray-500">JPG, PNG, WebP - حداکثر 2MB</p>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/jpg,image/png,image/webp"
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(file);
+                              }}
+                            />
+                          </div>
+                          {uploadingImage && (
+                            <div className="flex items-center justify-center text-sm text-blue-600">
+                              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                              در حال آپلود...
+                            </div>
+                          )}
+                        </div>
+
+                        {/* نمایش تصویر فعلی */}
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm text-gray-600">URL تصویر</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="https://..." 
+                                    className="h-9 text-sm"
+                                    {...field}
+                                    value={field.value || ''}
+                                    readOnly
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* آپلود کاتالوگ PDF */}
+                    <div className="space-y-3 border-t pt-4">
+                      <FormLabel className="text-sm font-medium flex items-center gap-2">
+                        <Eye className="h-4 w-4" />
+                        کاتالوگ محصول (PDF)
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3 w-3 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>کاتالوگ یا بروشور محصول به فرمت PDF برای ارائه اطلاعات تکمیلی</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </FormLabel>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* آپلود کاتالوگ */}
+                        <div className="space-y-2">
+                          <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            {catalogPreview ? (
+                              <div className="relative">
+                                <div className="bg-red-50 p-4 rounded-lg">
+                                  <FileText className="mx-auto h-12 w-12 text-red-600" />
+                                  <p className="mt-2 text-sm text-gray-700">{form.getValues('catalogFileName') || 'catalog.pdf'}</p>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2"
+                                    onClick={() => window.open(catalogPreview, '_blank')}
+                                  >
+                                    مشاهده PDF
+                                  </Button>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="absolute top-2 right-2 h-6 w-6 p-0"
+                                  onClick={() => {
+                                    setCatalogPreview(null);
+                                    form.setValue('pdfCatalogUrl', '');
+                                    form.setValue('catalogFileName', '');
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="py-4">
+                                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                                <p className="mt-2 text-sm text-gray-600">کلیک کنید تا کاتالوگ PDF انتخاب کنید</p>
+                                <p className="text-xs text-gray-500">فقط فایل‌های PDF</p>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="application/pdf"
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleCatalogUpload(file);
+                              }}
+                            />
+                          </div>
+                          {uploadingCatalog && (
+                            <div className="flex items-center justify-center text-sm text-blue-600">
+                              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                              در حال آپلود...
+                            </div>
+                          )}
+                        </div>
+
+                        {/* تنظیمات کاتالوگ */}
+                        <div className="space-y-3">
+                          <FormField
+                            control={form.control}
+                            name="showCatalogToCustomers"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-sm font-medium">نمایش به مشتریان</FormLabel>
+                                  <div className="text-xs text-gray-500">کاتالوگ در فروشگاه قابل دانلود باشد</div>
+                                </div>
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="pdfCatalogUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm text-gray-600">URL کاتالوگ</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="https://..." 
+                                    className="h-9 text-sm"
+                                    {...field}
+                                    value={field.value || ''}
+                                    readOnly
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* آپلود MSDS */}
+                    <div className="space-y-3 border-t pt-4">
+                      <FormLabel className="text-sm font-medium flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        برگه اطلاعات ایمنی (MSDS)
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3 w-3 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>برگه اطلاعات ایمنی محصول (Material Safety Data Sheet) برای اطلاعات ایمنی</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </FormLabel>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* آپلود MSDS */}
+                        <div className="space-y-2">
+                          <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            {msdsPreview ? (
+                              <div className="relative">
+                                <div className="bg-orange-50 p-4 rounded-lg">
+                                  <FileText className="mx-auto h-12 w-12 text-orange-600" />
+                                  <p className="mt-2 text-sm text-gray-700">{form.getValues('msdsFileName') || 'msds.pdf'}</p>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2"
+                                    onClick={() => window.open(msdsPreview, '_blank')}
+                                  >
+                                    مشاهده MSDS
+                                  </Button>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="absolute top-2 right-2 h-6 w-6 p-0"
+                                  onClick={() => {
+                                    setMsdsPreview(null);
+                                    form.setValue('msdsUrl', '');
+                                    form.setValue('msdsFileName', '');
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="py-4">
+                                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                                <p className="mt-2 text-sm text-gray-600">کلیک کنید تا فایل MSDS انتخاب کنید</p>
+                                <p className="text-xs text-gray-500">فقط فایل‌های PDF</p>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="application/pdf"
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleMsdsUpload(file);
+                              }}
+                            />
+                          </div>
+                          {uploadingMsds && (
+                            <div className="flex items-center justify-center text-sm text-blue-600">
+                              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                              در حال آپلود...
+                            </div>
+                          )}
+                        </div>
+
+                        {/* تنظیمات MSDS */}
+                        <div className="space-y-3">
+                          <FormField
+                            control={form.control}
+                            name="showMsdsToCustomers"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-sm font-medium">نمایش به مشتریان</FormLabel>
+                                  <div className="text-xs text-gray-500">MSDS در فروشگاه قابل دانلود باشد</div>
+                                </div>
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="msdsUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm text-gray-600">URL فایل MSDS</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="https://..." 
+                                    className="h-9 text-sm"
+                                    {...field}
+                                    value={field.value || ''}
+                                    readOnly
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* دکمه‌های عمل */}
                 <div className="flex justify-end gap-3 pt-4 border-t">
                   <Button
