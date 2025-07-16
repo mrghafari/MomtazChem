@@ -338,6 +338,13 @@ export class DatabaseStorage implements IStorage {
           thumbnailUrl: showcaseProduct.imageUrl || null,
           isActive: showcaseProduct.isActive,
           tags: showcaseProduct.tags || ["شیمیایی"],
+          // Weight fields sync - prioritize new weight fields
+          netWeight: showcaseProduct.netWeight || null,
+          grossWeight: showcaseProduct.grossWeight || null,
+          weight: showcaseProduct.weight || showcaseProduct.grossWeight || null,
+          weightUnit: showcaseProduct.weightUnit || 'kg',
+          // Batch tracking
+          batchNumber: showcaseProduct.batchNumber || null,
           // Document fields sync
           showCatalogToCustomers: showcaseProduct.showCatalogToCustomers || false,
           showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,
@@ -361,6 +368,13 @@ export class DatabaseStorage implements IStorage {
           isFeatured: false,
           visibleInShop: showcaseProduct.syncWithShop || false,
           tags: showcaseProduct.tags || ["شیمیایی"],
+          // Weight fields sync - prioritize new weight fields
+          netWeight: showcaseProduct.netWeight || null,
+          grossWeight: showcaseProduct.grossWeight || null,
+          weight: showcaseProduct.weight || showcaseProduct.grossWeight || null,
+          weightUnit: showcaseProduct.weightUnit || 'kg',
+          // Batch tracking
+          batchNumber: showcaseProduct.batchNumber || null,
           // Document fields sync
           showCatalogToCustomers: showcaseProduct.showCatalogToCustomers || false,
           showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,

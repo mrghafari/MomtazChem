@@ -28,9 +28,14 @@ const formSchema = insertShowcaseProductSchema.extend({
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
-  // Weight fields
-  weight: z.string().optional(),
+  // Weight fields - Enhanced with net and gross weights
+  netWeight: z.coerce.number().min(0).optional(),
+  grossWeight: z.coerce.number().min(0).optional(),
   weightUnit: z.string().default("kg"),
+  // Legacy weight field for backward compatibility
+  weight: z.string().optional(),
+  // Batch tracking
+  batchNumber: z.string().optional(),
   // Text fields for array handling
   features: z.string().optional(),
   applications: z.string().optional(),
@@ -416,6 +421,11 @@ export default function ProductsPage() {
       // Shop visibility control
       syncWithShop: true,
       showWhenOutOfStock: false,
+      // Weight fields
+      netWeight: 0,
+      grossWeight: 0,
+      // Batch tracking
+      batchNumber: "",
     },
   });
 
@@ -432,6 +442,10 @@ export default function ProductsPage() {
       stockQuantity: Number(data.stockQuantity) || 0,
       minStockLevel: Number(data.minStockLevel) || 0,
       maxStockLevel: Number(data.maxStockLevel) || 0,
+      // Process weight fields - use gross weight for calculations
+      netWeight: data.netWeight ? data.netWeight.toString() : null,
+      grossWeight: data.grossWeight ? data.grossWeight.toString() : null,
+      batchNumber: data.batchNumber?.trim() || null,
       // Convert string fields to arrays for backend compatibility
       features: typeof data.features === 'string' && data.features.trim() 
         ? data.features.split('\n').map(f => f.trim()).filter(f => f.length > 0)
@@ -637,6 +651,9 @@ export default function ProductsPage() {
       priceRange: product.priceRange || "",
       weight: product.weight || "",
       weightUnit: product.weightUnit || "kg",
+      netWeight: Number(product.netWeight) || 0,
+      grossWeight: Number(product.grossWeight) || 0,
+      batchNumber: product.batchNumber || "",
       imageUrl: product.imageUrl || "",
       pdfCatalogUrl: product.pdfCatalogUrl || "",
       msdsUrl: product.msdsUrl || "",
@@ -1153,12 +1170,36 @@ export default function ProductsPage() {
                         </div>
                       )}
 
-                      {/* Product Weight */}
-                      {product.weight && parseFloat(product.weight) > 0 && (
+                      {/* Product Weight Information */}
+                      {(product.netWeight || product.grossWeight || (product.weight && parseFloat(product.weight) > 0)) && (
+                        <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                          {product.netWeight && product.netWeight > 0 && (
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">وزن خالص:</span>
+                              <span>{Number(product.netWeight).toFixed(1)} {product.weightUnit || 'kg'}</span>
+                            </div>
+                          )}
+                          {product.grossWeight && product.grossWeight > 0 && (
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">وزن ناخالص:</span>
+                              <span>{Number(product.grossWeight).toFixed(1)} {product.weightUnit || 'kg'}</span>
+                            </div>
+                          )}
+                          {!product.netWeight && !product.grossWeight && product.weight && parseFloat(product.weight) > 0 && (
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">وزن:</span>
+                              <span>{parseFloat(product.weight).toFixed(1)} {product.weightUnit || 'kg'}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Batch Number */}
+                      {product.batchNumber && (
                         <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">وزن:</span>
-                          <span>
-                            {parseFloat(product.weight).toFixed(1)} {product.weightUnit || 'kg'}
+                          <span className="font-medium">شماره بچ:</span>
+                          <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
+                            {product.batchNumber}
                           </span>
                         </div>
                       )}
@@ -1479,13 +1520,13 @@ export default function ProductsPage() {
                   </div>
 
                   {/* Weight Fields */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
-                      name="weight"
+                      name="netWeight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Weight</FormLabel>
+                          <FormLabel>وزن خالص (Net Weight)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -1493,7 +1534,28 @@ export default function ProductsPage() {
                               placeholder="0.00" 
                               {...field}
                               value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value)}
+                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="grossWeight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>وزن ناخالص (Gross Weight)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0.00" 
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : '')}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1526,6 +1588,25 @@ export default function ProductsPage() {
                       )}
                     />
                   </div>
+
+                  {/* Batch Number Field */}
+                  <FormField
+                    control={form.control}
+                    name="batchNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>شماره بچ (Batch Number)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="مثال: BATCH-2025-001" 
+                            {...field}
+                            value={field.value || ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Shop Sync Control */}
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">

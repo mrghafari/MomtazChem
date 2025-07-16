@@ -58,8 +58,12 @@ export const shopProducts = pgTable("shop_products", {
   maxStockLevel: integer("max_stock_level").default(1000), // حداکثر موجودی مجاز
   sku: text("sku").unique().notNull(),
   barcode: text("barcode"),
-  weight: decimal("weight", { precision: 8, scale: 2 }), // Product weight
-  weightUnit: text("weight_unit").default("kg"),
+  // Weight fields - Enhanced with net and gross weights
+  netWeight: decimal("net_weight", { precision: 8, scale: 2 }), // وزن خالص - Net weight (product only)
+  grossWeight: decimal("gross_weight", { precision: 8, scale: 2 }), // وزن ناخالص - Gross weight (product + packaging)
+  weightUnit: text("weight_unit").default("kg"), // Weight unit (kg, g, lb, oz, t)
+  // Legacy weight field for backward compatibility
+  weight: decimal("weight", { precision: 8, scale: 2 }), // Deprecated: use grossWeight for calculations
   dimensions: json("dimensions"), // {length, width, height}
   imageUrls: json("image_urls"), // Array of product images
   thumbnailUrl: text("thumbnail_url"),

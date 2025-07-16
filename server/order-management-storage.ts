@@ -1078,6 +1078,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         .select({
           productId: orderItems.productId,
           quantity: orderItems.quantity,
+          grossWeight: shopProducts.grossWeight,
+          netWeight: shopProducts.netWeight,
           weight: shopProducts.weight,
           weightUnit: shopProducts.weightUnit
         })
@@ -1085,10 +1087,18 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
         .where(eq(orderItems.orderId, customerOrderId));
 
-      // Calculate total weight
+      // Calculate total weight using gross weight (وزن ناخالص) for logistics calculations
       let totalWeight = 0;
       for (const item of items) {
-        const productWeight = item.weight ? parseFloat(item.weight.toString()) : 0;
+        let productWeight = 0;
+        
+        // Priority: Use gross weight if available, otherwise fallback to legacy weight
+        if (item.grossWeight) {
+          productWeight = parseFloat(item.grossWeight.toString());
+        } else if (item.weight) {
+          productWeight = parseFloat(item.weight.toString());
+        }
+        
         const quantity = item.quantity || 1;
         totalWeight += productWeight * quantity;
       }
