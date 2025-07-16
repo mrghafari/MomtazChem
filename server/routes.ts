@@ -3688,7 +3688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { pool } = await import('./db');
       
-      // Define the main system modules - these are the 25 Site Management modules
+      // Define the main system modules - these are the 26 Site Management modules
       const mainModules = [
         'syncing_shop',
         'inquiries', 
@@ -3715,7 +3715,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'inventory_management', // Keep as-is: this is correct module name from Site Management
         'content_management',
         'warehouse_management', // Added: warehouse_management module
-        'logistics_management' // Added: logistics-management module
+        'logistics_management', // Added: logistics-management module
+        'remote_desktop' // Added: remote desktop management module
       ];
 
       // Get super admin role (admin@momtazchem.com has user ID 7)
@@ -3801,8 +3802,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'ai_settings',
       'refresh_control',
       'content_management',
-      'ticketing_system'
-      // Total: 25 modules - automatically synced with Site Management
+      'ticketing_system',
+      'remote_desktop'
+      // Total: 26 modules - automatically synced with Site Management
     ];
   };
 
@@ -15397,15 +15399,15 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       }
 
       // If no custom user found, check for super admin or legacy permissions
-      // admin@momtazchem.com (id=7) is the super admin
-      if (legacyUser[0].id === 7 || legacyUser[0].email === 'admin@momtazchem.com') {
+      // admin@momtazchem.com (id=15) is the super admin
+      if (legacyUser[0].id === 15 || legacyUser[0].email === 'admin@momtazchem.com') {
         const allModules = [
           "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
           "crm", "seo", "categories", "sms", "factory", "user_management",
           "shop_management", "procedures", "smtp_test", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",
-          "warehouse_management", "logistics_management", "ticketing_system"
+          "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
