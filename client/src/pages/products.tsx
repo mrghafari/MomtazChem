@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
@@ -1462,12 +1462,69 @@ export default function ProductsPage() {
                             </Tooltip>
                           </FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="کد محصول" 
-                              className={`h-9 ${editingProduct ? "bg-gray-50 text-gray-500" : ""}`}
-                              {...field}
-                              readOnly={!!editingProduct}
-                            />
+                            <div className="flex gap-2">
+                              <Input 
+                                placeholder="کد محصول" 
+                                className={`h-9 ${editingProduct ? "bg-gray-50 text-gray-500" : ""}`}
+                                {...field}
+                                readOnly={!!editingProduct}
+                              />
+                              {!editingProduct && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-9 px-3 bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700"
+                                  onClick={async () => {
+                                    const productName = form.getValues('name');
+                                    const category = form.getValues('category');
+                                    
+                                    if (!productName || !category) {
+                                      toast({
+                                        title: "⚠️ اطلاعات ناقص",
+                                        description: "لطفاً ابتدا نام محصول و دسته‌بندی را وارد کنید",
+                                        variant: "destructive",
+                                      });
+                                      return;
+                                    }
+
+                                    try {
+                                      const response = await fetch('/api/products/generate-sku', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          name: productName,
+                                          category: category,
+                                          description: form.getValues('description') || ''
+                                        })
+                                      });
+
+                                      if (!response.ok) {
+                                        throw new Error('Failed to generate SKU');
+                                      }
+
+                                      const result = await response.json();
+                                      form.setValue('sku', result.data.sku);
+                                      
+                                      toast({
+                                        title: "✨ SKU تولید شد",
+                                        description: `کد محصول: ${result.data.sku}`,
+                                      });
+                                    } catch (error) {
+                                      console.error('Error generating SKU:', error);
+                                      toast({
+                                        title: "❌ خطا در تولید SKU",
+                                        description: "امکان تولید خودکار SKU وجود ندارد",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <Sparkles className="h-4 w-4 mr-1" />
+                                  AI
+                                </Button>
+                              )}
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

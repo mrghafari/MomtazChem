@@ -621,26 +621,34 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       // Calculate total weight from all products in the order
       for (const item of orderItemsData) {
         if (item.productId) {
-          // Get product weight from products table
+          // Get product weight from shop_products table - prioritize gross weight for logistics
           const productWeight = await db
             .select({
-              weight: products.weight,
-              weightUnit: products.weightUnit,
+              grossWeight: shopProducts.grossWeight,
+              netWeight: shopProducts.netWeight,
+              weight: shopProducts.weight, // Legacy fallback
+              weightUnit: shopProducts.weightUnit,
             })
-            .from(products)
-            .where(eq(products.id, item.productId))
+            .from(shopProducts)
+            .where(eq(shopProducts.id, item.productId))
             .limit(1);
           
-          if (productWeight.length > 0 && productWeight[0].weight && productWeight[0].weight !== '') {
-            const weightValue = productWeight[0].weight;
-            const parsedWeight = parseFloat(weightValue);
+          if (productWeight.length > 0) {
+            let weight = 0;
             
-            // Skip if weight is not a valid number
-            if (isNaN(parsedWeight) || parsedWeight <= 0) {
-              continue;
+            // Priority: Use gross weight (وزن ناخالص) for logistics calculations
+            if (productWeight[0].grossWeight) {
+              weight = parseFloat(productWeight[0].grossWeight.toString());
+            } else if (productWeight[0].weight) {
+              weight = parseFloat(productWeight[0].weight.toString());
+            } else {
+              continue; // Skip if no weight available
             }
             
-            const weight = parsedWeight;
+            // Skip if weight is not a valid number
+            if (isNaN(weight) || weight <= 0) {
+              continue;
+            }
             const unit = productWeight[0].weightUnit || 'kg';
             const quantity = parseFloat(item.quantity);
             
