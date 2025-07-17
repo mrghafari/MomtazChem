@@ -13849,7 +13849,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Support both admin and custom users - convert UUID to numeric for database compatibility
       const userId = req.session?.adminId || (req.session?.customUserId ? 2 : 1); // Use 2 for custom users, 1 for fallback
       
-      console.log('📦 [WAREHOUSE] Processing order:', { id, status, notes, userId, sessionType: req.session?.adminId ? 'admin' : 'custom' });
+      console.log('📦 [WAREHOUSE] Processing order:', { 
+        id, 
+        status, 
+        notes, 
+        userId,
+        originalCustomUserId: req.session?.customUserId,
+        sessionType: req.session?.adminId ? 'admin' : 'custom' 
+      });
       
       // Use order management storage to update order status
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
