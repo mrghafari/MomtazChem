@@ -174,19 +174,21 @@ const WarehouseManagement: React.FC = () => {
 
   // Initialize product batches (simulate existing batches)
   React.useEffect(() => {
-    if (unifiedProducts && unifiedProducts.length > 0) {
+    if (unifiedProducts && Array.isArray(unifiedProducts) && unifiedProducts.length > 0) {
       const initialBatches: {[productId: number]: ProductBatch[]} = {};
       unifiedProducts.forEach((product: UnifiedProduct) => {
-        if (product.batchNumber) {
-          initialBatches[product.id] = [{
-            id: `${product.id}-batch-1`,
-            batchNumber: product.batchNumber,
-            stockQuantity: product.stockQuantity,
-            productionDate: '2025-01-01',
-            notes: 'بچ اصلی'
-          }];
-        } else {
-          initialBatches[product.id] = [];
+        if (product && product.id) {
+          if (product.batchNumber) {
+            initialBatches[product.id] = [{
+              id: `${product.id}-batch-1`,
+              batchNumber: product.batchNumber,
+              stockQuantity: product.stockQuantity,
+              productionDate: '2025-01-01',
+              notes: 'بچ اصلی'
+            }];
+          } else {
+            initialBatches[product.id] = [];
+          }
         }
       });
       setProductBatches(initialBatches);
@@ -666,22 +668,24 @@ const WarehouseManagement: React.FC = () => {
   }) || [];
 
   // Filter products based on search term
-  const filteredProducts = unifiedProducts?.filter((product: UnifiedProduct) => {
-    if (!product) return false;
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      product.name?.toLowerCase().includes(searchLower) ||
-      product.category?.toLowerCase().includes(searchLower) ||
-      product.shopSku?.toLowerCase().includes(searchLower)
-    );
-  }) || [];
+  const filteredProducts = (unifiedProducts && Array.isArray(unifiedProducts)) 
+    ? unifiedProducts.filter((product: UnifiedProduct) => {
+        if (!product) return false;
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          product.name?.toLowerCase().includes(searchLower) ||
+          product.category?.toLowerCase().includes(searchLower) ||
+          product.shopSku?.toLowerCase().includes(searchLower)
+        );
+      }) 
+    : [];
 
   // Calculate inventory statistics
   const inventoryStats = {
-    totalProducts: unifiedProducts?.length || 0,
-    outOfStock: unifiedProducts?.filter((p: UnifiedProduct) => p.stockQuantity <= 0).length || 0,
-    lowStock: unifiedProducts?.filter((p: UnifiedProduct) => p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold || 10)).length || 0,
-    criticalStock: unifiedProducts?.filter((p: UnifiedProduct) => p.stockQuantity > 0 && p.stockQuantity <= (p.minStockLevel || 5)).length || 0,
+    totalProducts: (unifiedProducts && Array.isArray(unifiedProducts)) ? unifiedProducts.length : 0,
+    outOfStock: (unifiedProducts && Array.isArray(unifiedProducts)) ? unifiedProducts.filter((p: UnifiedProduct) => p && p.stockQuantity <= 0).length : 0,
+    lowStock: (unifiedProducts && Array.isArray(unifiedProducts)) ? unifiedProducts.filter((p: UnifiedProduct) => p && p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold || 10)).length : 0,
+    criticalStock: (unifiedProducts && Array.isArray(unifiedProducts)) ? unifiedProducts.filter((p: UnifiedProduct) => p && p.stockQuantity > 0 && p.stockQuantity <= (p.minStockLevel || 5)).length : 0,
   };
 
   // Helper functions for inventory management
