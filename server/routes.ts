@@ -2556,6 +2556,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Sync warehouse calculated quantities to Kardex and Shop (Reference endpoint)
+  // Get warehouse inventory endpoint
+  app.get("/api/warehouse/inventory", async (req, res) => {
+    try {
+      console.log("📦 [WAREHOUSE-INVENTORY] Fetching warehouse inventory...");
+      
+      const inventory = await db.execute(sql`
+        SELECT 
+          wi.id,
+          wi.product_id as productId,
+          sp.name as productName,
+          sp.sku as productSku,
+          wi.batch_number as batchNumber,
+          'production' as batchType,
+          wi.quantity,
+          0 as unitPrice,
+          0 as totalValue,
+          '' as location,
+          NULL as expiryDate,
+          wi.created_at as receivedDate,
+          'approved' as qualityStatus,
+          false as isNonChemical,
+          '' as notes,
+          wi.created_at as createdAt,
+          wi.updated_at as updatedAt
+        FROM warehouse_inventory wi
+        LEFT JOIN showcase_products sp ON wi.product_id = sp.id
+        WHERE wi.quantity > 0
+        ORDER BY sp.name, wi.batch_number
+      `);
+
+      console.log(`📦 [WAREHOUSE-INVENTORY] Found ${inventory.length} inventory items`);
+      res.json({ success: true, data: inventory.rows || inventory });
+    } catch (error) {
+      console.error("❌ [WAREHOUSE-INVENTORY] Error fetching inventory:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت موجودی انبار" });
+    }
+  });
+
+  // Get warehouse stats endpoint
+  app.get("/api/warehouse/stats", async (req, res) => {
+    try {
+      console.log("📊 [WAREHOUSE-STATS] Calculating warehouse statistics...");
+      
+      // Get order counts by status
+      const orderCounts = await db.execute(sql`
+        SELECT 
+          current_status,
+          COUNT(*) as count
+        FROM order_management 
+        WHERE current_status IN ('warehouse_pending', 'financial_approved', 'warehouse_processing', 'warehouse_approved', 'warehouse_rejected')
+        GROUP BY current_status
+      `);
+
+      // Get total revenue from completed orders
+      const revenueResult = [{ total_revenue: 0 }]; // Simplified for now
+
+      // Get low stock items count
+      const lowStockResult = await db.execute(sql`
+        SELECT COUNT(*) as low_stock_count
+        FROM warehouse_inventory wi
+        WHERE wi.quantity < 10
+      `);
+
+      const stats = {
+        pendingOrders: 0,
+        processingOrders: 0,
+        fulfilledOrders: 0,
+        totalRevenue: parseFloat(revenueResult[0]?.total_revenue || '0'),
+        averageProcessingTime: 24, // hours
+        lowStockItems: parseInt(lowStockResult[0]?.low_stock_count || '0')
+      };
+
+      // Map order counts
+      orderCounts.forEach((row: any) => {
+        switch (row.current_status) {
+          case 'warehouse_pending':
+          case 'financial_approved':
+            stats.pendingOrders += parseInt(row.count);
+            break;
+          case 'warehouse_processing':
+            stats.processingOrders += parseInt(row.count);
+            break;
+          case 'warehouse_approved':
+            stats.fulfilledOrders += parseInt(row.count);
+            break;
+        }
+      });
+
+      console.log("📊 [WAREHOUSE-STATS] Statistics calculated:", stats);
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("❌ [WAREHOUSE-STATS] Error calculating stats:", error);
+      res.status(500).json({ success: false, message: "خطا در محاسبه آمار انبار" });
+    }
+  });
+
   app.post("/api/warehouse/sync-quantities", async (req, res) => {
     try {
       console.log("🔄 [WAREHOUSE-SYNC] Starting warehouse quantity synchronization...");
