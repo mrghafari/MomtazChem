@@ -179,7 +179,7 @@ export default function SiteManagement() {
       icon: Warehouse,
       onClick: () => trackButtonClick("warehouse-management", () => setLocation("/admin/warehouse-management")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
-      moduleId: "warehouse-management"
+      moduleId: "warehouse_management"
     },
     {
       id: "inquiries",
@@ -399,11 +399,14 @@ export default function SiteManagement() {
       !button.moduleId || allowedModules.includes(button.moduleId)
     );
     
+    console.log('🔍 [DEBUG] total buttons defined:', allButtons.length);
     console.log('🔍 [DEBUG] filtered buttons count:', filteredButtons.length);
-    console.log('🔍 [DEBUG] filtered button IDs:', filteredButtons.map(b => b.id));
-    console.log('🔍 [DEBUG] missing buttons:', allButtons.filter(btn => 
+    console.log('🔍 [DEBUG] all button moduleIds:', allButtons.map(b => b.moduleId).filter(Boolean).sort());
+    console.log('🔍 [DEBUG] allowed modules:', allowedModules.sort());
+    console.log('🔍 [DEBUG] missing buttons (not in permissions):', allButtons.filter(btn => 
       btn.moduleId && !allowedModules.includes(btn.moduleId)
     ).map(b => ({ id: b.id, moduleId: b.moduleId })));
+    console.log('🔍 [DEBUG] buttons without moduleId:', allButtons.filter(btn => !btn.moduleId).map(b => b.id));
     return filteredButtons;
   };
 
