@@ -1543,10 +1543,92 @@ export default function ProductsPage() {
                                   )}
                                 </div>
                               ))}
+                              
+                              {/* آخرین ردیف: موجودی کل انبار */}
+                              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700 mt-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Package className="w-4 h-4 text-blue-600" />
+                                    <span className="font-bold text-blue-800 dark:text-blue-200">موجودی کل انبار:</span>
+                                  </div>
+                                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                    {product.stockQuantity || 0} {product.stockUnit || 'واحد'}
+                                  </span>
+                                </div>
+                                
+                                {/* اطلاعات بچ اولیه با موجودی */}
+                                {batchHistory[product.id] && batchHistory[product.id].length > 0 && (
+                                  <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-700">
+                                    <div className="text-xs text-blue-700 dark:text-blue-300 mb-2 font-medium">
+                                      🏷️ بچ اولیه با موجودی:
+                                    </div>
+                                    {(() => {
+                                      // پیدا کردن اولین بچی که موجودی دارد
+                                      const activeBatch = batchHistory[product.id].find(batch => 
+                                        (batch.quantity - (batch.wasteQuantity || 0) - (batch.inTransitQuantity || 0)) > 0
+                                      );
+                                      
+                                      if (activeBatch) {
+                                        const remainingQuantity = activeBatch.quantity - (activeBatch.wasteQuantity || 0) - (activeBatch.inTransitQuantity || 0);
+                                        return (
+                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs bg-white dark:bg-gray-800 p-2 rounded border">
+                                            <div>
+                                              <span className="font-medium text-gray-600">شماره بچ:</span>
+                                              <span className="ml-1 font-mono bg-green-100 px-1 rounded text-green-800">
+                                                {activeBatch.batchNumber}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-gray-600">موجودی باقی‌مانده:</span>
+                                              <span className="ml-1 text-green-600 font-bold">{remainingQuantity}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-gray-600">مقدار اصلی:</span>
+                                              <span className="ml-1 text-blue-600">{activeBatch.quantity}</span>
+                                            </div>
+                                            {activeBatch.productionDate && (
+                                              <div>
+                                                <span className="font-medium text-gray-600">تاریخ تولید:</span>
+                                                <span className="ml-1 text-gray-700 text-xs">
+                                                  {new Date(activeBatch.productionDate).toLocaleDateString('fa-IR')}
+                                                </span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      } else {
+                                        return (
+                                          <div className="text-center py-2 text-gray-500 text-xs bg-white dark:bg-gray-800 rounded border">
+                                            هیچ بچی با موجودی فعال یافت نشد
+                                          </div>
+                                        );
+                                      }
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           ) : (
-                            <div className="text-center py-4 text-gray-500 text-sm">
-                              هیچ بچی برای این محصول ثبت نشده است
+                            <div className="space-y-2">
+                              <div className="text-center py-4 text-gray-500 text-sm">
+                                هیچ بچی برای این محصول ثبت نشده است
+                              </div>
+                              
+                              {/* ردیف موجودی کل حتی بدون بچ */}
+                              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Package className="w-4 h-4 text-blue-600" />
+                                    <span className="font-bold text-blue-800 dark:text-blue-200">موجودی کل انبار:</span>
+                                  </div>
+                                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                    {product.stockQuantity || 0} {product.stockUnit || 'واحد'}
+                                  </span>
+                                </div>
+                                <div className="mt-2 text-xs text-gray-600">
+                                  💡 برای ایجاد بچ جدید از دکمه "+" استفاده کنید
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
