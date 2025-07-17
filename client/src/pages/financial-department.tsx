@@ -327,16 +327,16 @@ export default function FinancialDepartment() {
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-2">اطلاعات مشتری</h4>
                           <p className="text-sm text-gray-600 font-medium">
-                            {order.customer?.firstName && order.customer?.lastName 
-                              ? `${order.customer.firstName} ${order.customer.lastName}`
+                            {order.customerFirstName && order.customerLastName 
+                              ? `${order.customerFirstName} ${order.customerLastName}`
                               : 'نام مشتری ناشناس'
                             }
                           </p>
                           <p className="text-sm text-gray-600">
-                            {order.customer?.email || 'ایمیل ثبت نشده'}
+                            {order.customerEmail || 'ایمیل ثبت نشده'}
                           </p>
                           <p className="text-sm text-gray-600">
-                            {order.customer?.phone || 'شماره تلفن ثبت نشده'}
+                            {order.customerPhone || 'شماره تلفن ثبت نشده'}
                           </p>
                         </div>
                         

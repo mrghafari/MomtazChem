@@ -184,11 +184,25 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     department: Department, 
     notes?: string
   ): Promise<OrderManagement> {
-    // Get current order
-    const currentOrder = await this.getOrderManagementById(id);
+    console.log('🔍 [ORDER STATUS] Looking for order with ID:', id);
+    
+    // Try to get current order by ID first, then by customerOrderId
+    let currentOrder = await this.getOrderManagementById(id);
     if (!currentOrder) {
+      console.log('🔍 [ORDER STATUS] Not found by ID, trying customerOrderId:', id);
+      currentOrder = await this.getOrderManagementByCustomerOrderId(id);
+    }
+    
+    if (!currentOrder) {
+      console.log('❌ [ORDER STATUS] Order not found by ID or customerOrderId:', id);
       throw new Error('Order not found');
     }
+    
+    console.log('✅ [ORDER STATUS] Found order:', { 
+      id: currentOrder.id, 
+      customerOrderId: currentOrder.customerOrderId, 
+      currentStatus: currentOrder.currentStatus 
+    });
     
     // Update order status and department-specific fields
     const updateData: Partial<OrderManagement> = {
@@ -221,11 +235,17 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     const [updatedOrder] = await db
       .update(orderManagement)
       .set(updateData)
-      .where(eq(orderManagement.id, id))
+      .where(eq(orderManagement.id, currentOrder.id))
       .returning();
     
+    console.log('✅ [ORDER STATUS] Order updated successfully:', { 
+      id: updatedOrder.id, 
+      customerOrderId: updatedOrder.customerOrderId, 
+      newStatus: updatedOrder.currentStatus 
+    });
+    
     // Log status change
-    await this.logStatusChange(id, currentOrder.currentStatus as OrderStatus, newStatus, changedBy, department, notes);
+    await this.logStatusChange(currentOrder.id, currentOrder.currentStatus as OrderStatus, newStatus, changedBy, department, notes);
     
     return updatedOrder;
   }
