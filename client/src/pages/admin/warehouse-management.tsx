@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Package, 
   Clock, 
@@ -138,6 +139,50 @@ const WarehouseManagement: React.FC = () => {
   const [showOrderItems, setShowOrderItems] = useState(false);
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
+  
+  // Authentication check
+  const { user, isLoading: authLoading } = useAuth();
+  
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      window.location.href = '/admin/login';
+    }
+  }, [user, authLoading]);
+  
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-lg text-gray-600">بررسی احراز هویت...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">دسترسی به مدیریت انبار</CardTitle>
+            <p className="text-gray-600">لطفا وارد شوید</p>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => window.location.href = '/admin/login'}
+              className="w-full"
+            >
+              ورود به سیستم
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   // Threshold settings state
   const [thresholdSettings, setThresholdSettings] = useState({
