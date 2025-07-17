@@ -168,6 +168,7 @@ interface LogisticsOrder {
   currentStatus: string;
   calculatedWeight?: number;
   weightUnit?: string;
+  totalWeight?: string;
   totalAmount: string;
   currency: string;
   deliveryMethod?: string;
@@ -177,6 +178,7 @@ interface LogisticsOrder {
   actualDeliveryDate?: string;
   deliveryPersonName?: string;
   deliveryPersonPhone?: string;
+  warehouseProcessedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -351,25 +353,34 @@ const LogisticsManagement = () => {
                   </div>
 
                   {/* Shipment Details Block */}
-                  <div className="bg-white rounded-lg p-3 border border-green-200">
-                    <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                    <h5 className="font-medium text-blue-800 mb-2 flex items-center">
                       <Package className="w-4 h-4 mr-2" />
-                      جزئیات محموله
+                      وزن محموله
                     </h5>
-                    <p className="text-sm text-gray-700 flex items-center">
-                      <Weight className="w-3 h-3 mr-1" />
-                      وزن: {order.weight || 0} کیلوگرم
+                    <p className="text-lg font-bold text-blue-700 flex items-center">
+                      <Weight className="w-4 h-4 mr-1" />
+                      {order.totalWeight ? `${order.totalWeight} ${order.weightUnit || 'kg'}` : 'محاسبه نشده'}
                     </p>
+                    <p className="text-xs text-blue-600 mt-1">برای انتخاب وسیله حمل</p>
                   </div>
 
-                  {/* Processing Dates Block */}
-                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                  {/* Warehouse Processing Date Block */}
+                  <div className="bg-green-50 rounded-lg p-3 border border-green-200">
                     <h5 className="font-medium text-green-800 mb-2 flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
-                      تاریخ‌های پردازش
+                      تاریخ پردازش انبار
                     </h5>
-                    <p className="text-xs text-gray-600">سفارش: {new Date(order.createdAt).toLocaleDateString('en-US')}</p>
-                    <p className="text-xs text-gray-600">انبار: {new Date(order.warehouseProcessedAt).toLocaleDateString('en-US')}</p>
+                    <p className="text-lg font-bold text-green-700">
+                      {order.warehouseProcessedAt ? 
+                        new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        }) : 'در انتظار پردازش'
+                      }
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">زمان آماده‌سازی سفارش</p>
                   </div>
 
                   {/* Delivery Code Block */}
@@ -459,24 +470,34 @@ const LogisticsManagement = () => {
                   </div>
 
                   {/* Shipment Details Block */}
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
+                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                     <h5 className="font-medium text-blue-800 mb-2 flex items-center">
                       <Package className="w-4 h-4 mr-2" />
-                      جزئیات محموله
+                      وزن محموله
                     </h5>
-                    <p className="text-sm text-gray-700 flex items-center">
-                      <Weight className="w-3 h-3 mr-1" />
-                      وزن: {order.weight || 0} کیلوگرم
+                    <p className="text-lg font-bold text-blue-700 flex items-center">
+                      <Weight className="w-4 h-4 mr-1" />
+                      {order.totalWeight ? `${order.totalWeight} ${order.weightUnit || 'kg'}` : 'محاسبه نشده'}
                     </p>
+                    <p className="text-xs text-blue-600 mt-1">برای انتخاب وسیله حمل</p>
                   </div>
 
-                  {/* Order Date Block */}
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
-                    <h5 className="font-medium text-blue-800 mb-2 flex items-center">
+                  {/* Warehouse Processing Date Block */}
+                  <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                    <h5 className="font-medium text-green-800 mb-2 flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
-                      تاریخ سفارش
+                      تاریخ پردازش انبار
                     </h5>
-                    <p className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleDateString('en-US')}</p>
+                    <p className="text-lg font-bold text-green-700">
+                      {order.warehouseProcessedAt ? 
+                        new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        }) : 'در انتظار پردازش'
+                      }
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">زمان آماده‌سازی سفارش</p>
                   </div>
                 </div>
 
