@@ -1923,6 +1923,46 @@ const VerificationCodeForm = ({ orderId, expectedCode, isVerified, onSubmit }: {
 }) => {
   const [enteredCode, setEnteredCode] = useState('');
   const [customerLocation, setCustomerLocation] = useState('');
+  const [carrierLocation, setCarrierLocation] = useState<{
+    latitude: number | null;
+    longitude: number | null;
+    accuracy: number | null;
+  }>({ latitude: null, longitude: null, accuracy: null });
+  const [locationCaptured, setLocationCaptured] = useState(false);
+
+  // Function to capture carrier's current location
+  const captureCarrierLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCarrierLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy
+          });
+          setLocationCaptured(true);
+          toast({
+            title: "موقعیت مکانی ثبت شد",
+            description: `عرض جغرافیایی: ${position.coords.latitude.toFixed(6)}, طول جغرافیایی: ${position.coords.longitude.toFixed(6)}`,
+          });
+        },
+        (error) => {
+          toast({
+            title: "خطا در دریافت موقعیت",
+            description: "امکان دریافت موقعیت مکانی وجود ندارد",
+            variant: "destructive",
+          });
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      toast({
+        title: "خطا",
+        description: "مرورگر شما از GPS پشتیبانی نمی‌کند",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1931,7 +1971,13 @@ const VerificationCodeForm = ({ orderId, expectedCode, isVerified, onSubmit }: {
         verificationCode: enteredCode,
         isVerified: true,
         verifiedAt: new Date().toISOString(),
-        customerLocation: customerLocation
+        customerLocation: customerLocation,
+        // Include carrier location data for geography analytics
+        carrierLatitude: carrierLocation.latitude,
+        carrierLongitude: carrierLocation.longitude,
+        carrierLocationAccuracy: carrierLocation.accuracy,
+        carrierLocationCapturedAt: locationCaptured ? new Date().toISOString() : null,
+        carrierLocationSource: 'mobile'
       });
     } else {
       onSubmit({
@@ -1986,6 +2032,41 @@ const VerificationCodeForm = ({ orderId, expectedCode, isVerified, onSubmit }: {
           onChange={(e) => setCustomerLocation(e.target.value)}
           placeholder="آدرس دقیق محل تحویل"
         />
+      </div>
+
+      {/* GPS Location Capture Section */}
+      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="flex items-center justify-between mb-2">
+          <Label className="text-blue-800 font-medium flex items-center">
+            <MapPin className="w-4 h-4 mr-2" />
+            موقعیت مکانی حمل‌کننده
+          </Label>
+          <Button 
+            type="button"
+            size="sm"
+            variant={locationCaptured ? "default" : "outline"}
+            onClick={captureCarrierLocation}
+            className={locationCaptured ? "bg-green-600 hover:bg-green-700" : ""}
+            disabled={locationCaptured}
+          >
+            <MapPin className="w-4 h-4 mr-2" />
+            {locationCaptured ? 'موقعیت ثبت شد ✓' : 'ثبت موقعیت GPS'}
+          </Button>
+        </div>
+        
+        {locationCaptured && carrierLocation.latitude && carrierLocation.longitude && (
+          <div className="text-xs text-blue-600 space-y-1">
+            <p>عرض جغرافیایی: {carrierLocation.latitude.toFixed(6)}</p>
+            <p>طول جغرافیایی: {carrierLocation.longitude.toFixed(6)}</p>
+            <p>دقت: {carrierLocation.accuracy ? `${carrierLocation.accuracy.toFixed(1)} متر` : 'نامشخص'}</p>
+          </div>
+        )}
+        
+        {!locationCaptured && (
+          <p className="text-xs text-blue-600">
+            برای ارسال موقعیت به بخش تحلیل جغرافیایی، ابتدا موقعیت GPS خود را ثبت کنید
+          </p>
+        )}
       </div>
 
       <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">

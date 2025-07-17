@@ -26234,7 +26234,19 @@ momtazchem.com
   app.post('/api/order-management/:orderId/verify-delivery', requireAuth, async (req, res) => {
     try {
       const orderId = parseInt(req.params.orderId);
-      const { verificationCode, customerLocation, isVerified, verifiedAt, failureReason } = req.body;
+      const { 
+        verificationCode, 
+        customerLocation, 
+        isVerified, 
+        verifiedAt, 
+        failureReason,
+        // Carrier location data for geography analytics
+        carrierLatitude,
+        carrierLongitude,
+        carrierLocationAccuracy,
+        carrierLocationCapturedAt,
+        carrierLocationSource
+      } = req.body;
       
       console.log(`✅ [VERIFICATION] Processing delivery verification for order ${orderId}`);
       
@@ -26265,7 +26277,7 @@ momtazchem.com
         });
       }
 
-      // Update order with verification status
+      // Update order with verification status and carrier location data
       const [updatedOrder] = await db.update(orderManagement)
         .set({
           isVerified: true,
@@ -26273,10 +26285,60 @@ momtazchem.com
           verificationLocation: customerLocation,
           actualDeliveryDate: new Date(),
           currentStatus: 'delivered',
+          // Save carrier location data for geography analytics
+          carrierLatitude: carrierLatitude || null,
+          carrierLongitude: carrierLongitude || null,
+          carrierLocationAccuracy: carrierLocationAccuracy || null,
+          carrierLocationCapturedAt: carrierLocationCapturedAt ? new Date(carrierLocationCapturedAt) : null,
+          carrierLocationSource: carrierLocationSource || 'mobile',
           updatedAt: new Date()
         })
         .where(eq(orderManagement.id, orderId))
         .returning();
+
+      // Send carrier location data to geography analytics if available
+      if (carrierLatitude && carrierLongitude && updatedOrder) {
+        try {
+          console.log(`🌍 [GEOGRAPHY] Sending carrier location data to analytics for order ${orderId}`);
+          console.log(`📍 [GEOGRAPHY] Latitude: ${carrierLatitude}, Longitude: ${carrierLongitude}, Accuracy: ${carrierLocationAccuracy}m`);
+          
+          // Here you would typically send to geography analytics service
+          // For now, we'll just log the data that would be sent
+          const geographyData = {
+            orderId: orderId,
+            customerOrderId: updatedOrder.customerOrderId,
+            carrierLocation: {
+              latitude: carrierLatitude,
+              longitude: carrierLongitude,
+              accuracy: carrierLocationAccuracy,
+              capturedAt: carrierLocationCapturedAt,
+              source: carrierLocationSource
+            },
+            deliveryInfo: {
+              deliveredAt: updatedOrder.actualDeliveryDate,
+              customerLocation: customerLocation,
+              verificationCode: verificationCode
+            },
+            customerInfo: {
+              name: `${updatedOrder.customerFirstName || ''} ${updatedOrder.customerLastName || ''}`.trim(),
+              email: updatedOrder.customerEmail,
+              phone: updatedOrder.customerPhone
+            }
+          };
+          
+          console.log(`📊 [GEOGRAPHY] Data prepared for analytics:`, JSON.stringify(geographyData, null, 2));
+          
+          // In a real implementation, you would:
+          // 1. Send to a geography analytics database
+          // 2. Trigger analytics processing
+          // 3. Update delivery route optimization
+          // 4. Update carrier performance metrics
+          
+        } catch (geoError) {
+          console.error('Error sending location data to geography analytics:', geoError);
+          // Don't fail the main delivery verification if geography analytics fails
+        }
+      }
 
       res.json({
         success: true,

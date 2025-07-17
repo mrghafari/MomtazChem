@@ -81,6 +81,13 @@ export const orderManagement = pgTable("order_management", {
   verifiedAt: timestamp("verified_at"),
   verificationLocation: text("verification_location"),
   
+  // Carrier location tracking for geography analytics
+  carrierLatitude: decimal("carrier_latitude", { precision: 10, scale: 8 }), // GPS latitude coordinates
+  carrierLongitude: decimal("carrier_longitude", { precision: 11, scale: 8 }), // GPS longitude coordinates
+  carrierLocationAccuracy: decimal("carrier_location_accuracy", { precision: 6, scale: 2 }), // GPS accuracy in meters
+  carrierLocationCapturedAt: timestamp("carrier_location_captured_at"), // When location was captured
+  carrierLocationSource: varchar("carrier_location_source", { length: 20 }).default("mobile"), // mobile, gps_device, manual
+  
   // Delivery method and transportation details
   deliveryMethod: varchar("delivery_method", { length: 50 }).default("courier"), // post, courier, truck, personal_pickup
   transportationType: varchar("transportation_type", { length: 50 }), // motorcycle, car, truck, van
