@@ -6,9 +6,25 @@ import { Button } from "@/components/ui/button";
 import { LogOut, User, Package } from "lucide-react";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 
+// Function to get the actual Site Management modules count
+const getSiteManagementModulesCount = () => {
+  const modules = [
+    "syncing_shop", "shop_management", "product_management", "order_management", 
+    "warehouse_management", "crm", "wallet_management", "finance", "payment_management",
+    "geography_analytics", "inquiries", "email_settings", "content_management", 
+    "seo", "categories", "barcode", "database_backup", "ai_settings", 
+    "user_management", "sms", "factory", "procedures", "refresh_control", 
+    "logistics_management", "ticketing_system", "remote_desktop", "server_config"
+  ];
+  return modules.length;
+};
+
 export default function AdminPage() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
+  
+  // Get the actual module count dynamically
+  const moduleCount = getSiteManagementModulesCount();
   
   // Fetch admin dashboard content from Content Management
   const { data: adminContent, isLoading: contentLoading } = useQuery({
@@ -90,11 +106,11 @@ export default function AdminPage() {
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 mb-6">
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to Comprehensive Site Management System</h2>
           <p className="text-gray-600 mb-4">
-            Access the complete enterprise-grade administrative platform featuring 26 integrated modules for full business operations management. This centralized system provides comprehensive control over all aspects of your chemical solutions business - from production to customer delivery.
+            Access the complete enterprise-grade administrative platform featuring {moduleCount} integrated modules for full business operations management. This centralized system provides comprehensive control over all aspects of your chemical solutions business - from production to customer delivery.
           </p>
           
           <div className="mb-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Complete 26-Module Administrative Suite:</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Complete {moduleCount}-Module Administrative Suite:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 text-xs text-gray-600">
               <div>• <strong>Syncing Shop</strong> - کاردکس/فروشگاه synchronization</div>
               <div>• <strong>Inquiries</strong> - Customer inquiry & response management</div>
@@ -134,11 +150,7 @@ export default function AdminPage() {
             </p>
           </div>
           
-          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-            <p className="text-sm text-green-800">
-              <strong>🔐 نحوه تخصیص دسترسی‌ها:</strong> برای تخصیص این ماژول‌ها به کاربران، به بخش "نقش‌ها" بروید و نقش‌هایی با دسترسی‌های خاص ایجاد یا ویرایش کنید. سپس هر کاربر را می‌توانید به نقشی تخصیص دهید که دسترسی او به این 26 ماژول را تعیین می‌کند.
-            </p>
-          </div>
+
         </div>
 
 
