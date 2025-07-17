@@ -187,9 +187,9 @@ const WarehouseManagement: React.FC = () => {
           'وضعیت': finalInventory <= 0 ? 'تمام شده' : 
                    finalInventory <= (product.lowStockThreshold || 0) ? 'بحرانی' :
                    finalInventory <= (product.minStockLevel || 0) ? 'موجودی کم' : 'موجود',
-          'قیمت واحد': product.shopPrice ? `${product.shopPrice} دینار` : 'نامشخص',
-          'ارزش کل': product.shopPrice ? 
-            `${(parseFloat(product.shopPrice) * finalInventory).toLocaleString()} دینار` : 'نامشخص'
+          'قیمت واحد (دینار)': product.shopPrice ? parseFloat(product.shopPrice) : 'نامشخص',
+          'ارزش کل (دینار)': product.shopPrice ? 
+            (parseFloat(product.shopPrice) * finalInventory) : 'نامشخص'
         };
       });
 
