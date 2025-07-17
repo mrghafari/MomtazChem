@@ -21875,59 +21875,23 @@ momtazchem.com
   });
 
   // Warehouse Department - Get orders approved by finance
-  app.get("/api/warehouse/orders", requireAuth, attachUserDepartments, requireDepartment('warehouse'), async (req: Request, res: Response) => {
+  app.get("/api/warehouse/orders", requireAuth, async (req: Request, res: Response) => {
     try {
-      const { db } = await import("./db");
-      const { orderManagement } = await import("../shared/order-management-schema");
-      const { customerOrders } = await import("../shared/customer-schema");
-      const { orderItems } = await import("../shared/shop-schema");
-      const { crmCustomers } = await import("../shared/schema");
-      const { eq, inArray } = await import("drizzle-orm");
-
-      // Get orders approved by finance, pending warehouse processing
-      const orders = await db
-        .select({
-          id: orderManagement.id,
-          customerOrderId: orderManagement.customerOrderId,
-          currentStatus: orderManagement.currentStatus,
-          financialNotes: orderManagement.financialNotes,
-          financialReviewedAt: orderManagement.financialReviewedAt,
-          warehouseNotes: orderManagement.warehouseNotes,
-          warehouseProcessedAt: orderManagement.warehouseProcessedAt,
-          createdAt: orderManagement.createdAt,
-          orderTotal: customerOrders.total,
-          orderDate: customerOrders.createdAt,
-          customerName: crmCustomers.firstName,
-          customerLastName: crmCustomers.lastName,
-          customerEmail: crmCustomers.email,
-          customerPhone: crmCustomers.phone,
-          customerAddress: crmCustomers.address,
-        })
-        .from(orderManagement)
-        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(eq(orderManagement.currentStatus, 'financial_approved'))
-        .orderBy(orderManagement.financialReviewedAt); // Oldest approved first
-
-      // Get order items for each order
-      const ordersWithItems = await Promise.all(orders.map(async (order) => {
-        const items = await db
-          .select()
-          .from(orderItems)
-          .where(eq(orderItems.orderId, order.customerOrderId));
-
-        return {
-          ...order,
-          customerName: `${order.customerName} ${order.customerLastName}`,
-          orderItems: items
-        };
-      }));
-
-      res.json({ success: true, orders: ordersWithItems });
+      console.log('📦 [WAREHOUSE] Getting warehouse orders...');
+      
+      // Use the getOrdersByDepartment method to get warehouse orders
+      const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
+      
+      console.log('📦 [WAREHOUSE] Retrieved', orders.length, 'orders for warehouse');
+      if (orders.length > 0) {
+        console.log('📦 [WAREHOUSE] First order sample:', JSON.stringify(orders[0], null, 2));
+      }
+      
+      res.json({ success: true, orders });
     } catch (error) {
-      console.error("Error fetching warehouse orders:", error);
-      res.status(500).json({
-        success: false,
+      console.error('📦 [WAREHOUSE] Error fetching orders:', error);
+      res.status(500).json({ 
+        success: false, 
         message: "خطا در دریافت سفارشات انبار",
         error: error instanceof Error ? error.message : 'Unknown error'
       });

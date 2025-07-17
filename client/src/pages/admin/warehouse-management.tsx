@@ -164,9 +164,9 @@ const WarehouseManagement: React.FC = () => {
   });
 
   // Fetch orders pending warehouse processing
-  // Fetch orders that are approved by financial department
+  // Fetch orders that are approved by financial department  
   const { data: ordersResponse, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
-    queryKey: ['/api/order-management/warehouse'],
+    queryKey: ['/api/warehouse/orders'],
     staleTime: 10000,
   });
   
