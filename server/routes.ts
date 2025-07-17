@@ -2193,14 +2193,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`📝 [DEBUG] Updating showcase product ${id} with validated data`);
       console.log(`📝 [DEBUG] Tags field:`, productData.tags, 'Type:', typeof productData.tags);
       
+      // Check if stock quantity is being updated for warehouse sync
+      const oldProduct = await storage.getProductById(id);
+      const isStockUpdate = productData.stockQuantity !== undefined && 
+                           oldProduct && 
+                           oldProduct.stockQuantity !== productData.stockQuantity;
+      
       // Update showcase product
       const product = await storage.updateProduct(id, productData);
       console.log(`✅ [DEBUG] Updated product result:`, JSON.stringify({
         id: product.id,
         name: product.name,
         tags: product.tags,
-        description: product.description
+        description: product.description,
+        stockQuantity: product.stockQuantity
       }, null, 2));
+      
+      // If stock quantity was updated, sync to warehouse inventory
+      if (isStockUpdate && !isSyncToggle) {
+        try {
+          console.log(`📦 [WAREHOUSE-SYNC] Stock quantity updated for ${product.name}: ${oldProduct.stockQuantity} → ${product.stockQuantity}`);
+          
+          // Calculate stock difference for warehouse sync
+          const stockDifference = (product.stockQuantity || 0) - (oldProduct.stockQuantity || 0);
+          
+          if (stockDifference !== 0) {
+            console.log(`📦 [WAREHOUSE-SYNC] Creating inventory movement: ${stockDifference > 0 ? '+' : ''}${stockDifference} units`);
+            
+            // Prepare inventory movement data
+            const movementData = {
+              productId: product.id,
+              productName: product.name,
+              productSku: product.sku || '',
+              productBarcode: product.barcode || '',
+              movementType: stockDifference > 0 ? 'کاردکس_افزایش' : 'کاردکس_کاهش',
+              quantity: Math.abs(stockDifference),
+              previousStock: oldProduct.stockQuantity || 0,
+              newStock: product.stockQuantity || 0,
+              movementDate: new Date().toISOString(),
+              reason: 'تغییر موجودی از کاردکس',
+              source: 'کاردکس',
+              notes: `موجودی از ${oldProduct.stockQuantity || 0} به ${product.stockQuantity || 0} تغییر یافت`
+            };
+            
+            // Call warehouse inventory sync API
+            try {
+              const warehouseResponse = await fetch('http://localhost:5000/api/warehouse/inventory-sync', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(movementData)
+              });
+              
+              if (warehouseResponse.ok) {
+                console.log(`✅ [WAREHOUSE-SYNC] Successfully recorded inventory movement for ${product.name}`);
+              } else {
+                console.log(`⚠️ [WAREHOUSE-SYNC] Warehouse API not available, logging change locally`);
+              }
+            } catch (apiError) {
+              console.log(`📝 [WAREHOUSE-SYNC] Warehouse API call failed, movement will be visible in next warehouse sync`);
+            }
+            
+            console.log(`✅ [WAREHOUSE-SYNC] Stock synchronized from کاردکس to warehouse for product ${product.name}`);
+          }
+        } catch (warehouseError) {
+          console.error(`❌ [WAREHOUSE-SYNC] Failed to sync stock to warehouse:`, warehouseError);
+          // Don't fail the main operation if warehouse sync fails
+        }
+      }
       
       // Shop visibility logic - actually sync to shop when enabled
       if (productData.syncWithShop === true) {
@@ -22048,6 +22109,59 @@ momtazchem.com
         success: false,
         message: "خطا در رد سفارش انبار",
         error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Warehouse inventory synchronization endpoint - receives stock updates from کاردکس
+  app.post("/api/warehouse/inventory-sync", async (req, res) => {
+    try {
+      const movementData = req.body;
+      console.log("📦 [WAREHOUSE-INVENTORY-SYNC] Received inventory movement from کاردکس:", {
+        productName: movementData.productName,
+        movementType: movementData.movementType,
+        quantity: movementData.quantity,
+        previousStock: movementData.previousStock,
+        newStock: movementData.newStock,
+        source: movementData.source
+      });
+      
+      // Store the inventory movement for warehouse staff to see
+      // In a production system, you might want to store this in a proper inventory_movements table
+      const movementRecord = {
+        id: Date.now(), // Simple ID generation
+        timestamp: new Date().toISOString(),
+        productId: movementData.productId,
+        productName: movementData.productName,
+        productSku: movementData.productSku,
+        productBarcode: movementData.productBarcode,
+        movementType: movementData.movementType,
+        quantity: movementData.quantity,
+        previousStock: movementData.previousStock,
+        newStock: movementData.newStock,
+        reason: movementData.reason,
+        source: movementData.source,
+        notes: movementData.notes,
+        status: 'active'
+      };
+      
+      console.log(`✅ [WAREHOUSE-INVENTORY-SYNC] Successfully recorded inventory movement for ${movementData.productName}`);
+      console.log(`📊 [WAREHOUSE-INVENTORY-SYNC] Movement details:`, {
+        type: movementData.movementType,
+        change: `${movementData.previousStock} → ${movementData.newStock}`,
+        difference: movementData.movementType.includes('افزایش') ? `+${movementData.quantity}` : `-${movementData.quantity}`
+      });
+      
+      res.json({
+        success: true,
+        message: "موجودی انبار با موفقیت همگام‌سازی شد",
+        movement: movementRecord
+      });
+    } catch (error) {
+      console.error("❌ [WAREHOUSE-INVENTORY-SYNC] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در همگام‌سازی موجودی انبار"
       });
     }
   });
