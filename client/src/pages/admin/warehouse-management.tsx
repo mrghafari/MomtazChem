@@ -40,7 +40,9 @@ import {
   Plus,
   Minus,
   Save,
-  Printer
+  Printer,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
@@ -94,6 +96,17 @@ interface UnifiedProduct {
   shopSku?: string;
   shopId?: number;
   batchNumber?: string;
+  batches?: ProductBatch[];
+}
+
+// Product batch interface for multiple batches per product
+interface ProductBatch {
+  id: string;
+  batchNumber: string;
+  stockQuantity: number;
+  expiryDate?: string;
+  productionDate?: string;
+  notes?: string;
 }
 
 // Goods in transit interface
@@ -146,12 +159,96 @@ const WarehouseManagement: React.FC = () => {
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
 
+  // State for batch management
+  const [productBatches, setProductBatches] = useState<{[productId: number]: ProductBatch[]}>({});
+  const [expandedProducts, setExpandedProducts] = useState<Set<number>>(new Set());
+  const [newBatchData, setNewBatchData] = useState<{[productId: number]: Partial<ProductBatch>}>({});
+
   // Helper function to get goods in transit for a product
   const getGoodsInTransitForProduct = (productId: number): number => {
     if (!goodsInTransit) return 0;
     return goodsInTransit
       .filter((item: any) => item.productId === productId)
       .reduce((total: number, item: any) => total + (item.quantity || 0), 0);
+  };
+
+  // Initialize product batches (simulate existing batches)
+  React.useEffect(() => {
+    if (unifiedProducts && unifiedProducts.length > 0) {
+      const initialBatches: {[productId: number]: ProductBatch[]} = {};
+      unifiedProducts.forEach((product: UnifiedProduct) => {
+        if (product.batchNumber) {
+          initialBatches[product.id] = [{
+            id: `${product.id}-batch-1`,
+            batchNumber: product.batchNumber,
+            stockQuantity: product.stockQuantity,
+            productionDate: '2025-01-01',
+            notes: 'بچ اصلی'
+          }];
+        } else {
+          initialBatches[product.id] = [];
+        }
+      });
+      setProductBatches(initialBatches);
+    }
+  }, [unifiedProducts]);
+
+  // Toggle product expansion for batch view
+  const toggleProductExpansion = (productId: number) => {
+    const newExpanded = new Set(expandedProducts);
+    if (newExpanded.has(productId)) {
+      newExpanded.delete(productId);
+    } else {
+      newExpanded.add(productId);
+    }
+    setExpandedProducts(newExpanded);
+  };
+
+  // Add new batch to product
+  const addNewBatch = (productId: number) => {
+    const batchData = newBatchData[productId];
+    if (!batchData?.batchNumber) {
+      toast({
+        title: "خطا",
+        description: "لطفاً شماره بچ را وارد کنید",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newBatch: ProductBatch = {
+      id: `${productId}-batch-${Date.now()}`,
+      batchNumber: batchData.batchNumber,
+      stockQuantity: 0, // Will be filled from Kardex
+      notes: 'از کاردکس تکمیل خواهد شد'
+    };
+
+    setProductBatches(prev => ({
+      ...prev,
+      [productId]: [...(prev[productId] || []), newBatch]
+    }));
+
+    // Clear form data
+    setNewBatchData(prev => ({
+      ...prev,
+      [productId]: {}
+    }));
+
+    toast({
+      title: "موفق",
+      description: "بچ جدید اضافه شد - اطلاعات از کاردکس تکمیل خواهد شد",
+    });
+  };
+
+  // Update batch data
+  const updateBatchData = (productId: number, field: string, value: any) => {
+    setNewBatchData(prev => ({
+      ...prev,
+      [productId]: {
+        ...prev[productId],
+        [field]: value
+      }
+    }));
   };
 
   // Excel export function for inventory
@@ -166,31 +263,61 @@ const WarehouseManagement: React.FC = () => {
         return;
       }
 
-      // Prepare data for Excel export
-      const excelData = unifiedProducts.map((product, index) => {
+      // Prepare data for Excel export - including batch information
+      const excelData: any[] = [];
+      
+      unifiedProducts.forEach((product, productIndex) => {
+        const productBatchList = productBatches[product.id] || [];
         const goodsInTransit = getGoodsInTransitForProduct(product.id);
         const wasteAmount = wasteAmounts[product.id] || 0;
-        const finalInventory = Math.max(0, (product.stockQuantity || 0) + goodsInTransit - wasteAmount);
         
-        return {
-          'ردیف': index + 1,
-          'نام محصول': product.name || '',
-          'دسته‌بندی': product.category || '',
-          'کد محصول (SKU)': product.shopSku || '',
-          'شماره بچ': product.batchNumber || 'نامشخص',
-          'موجودی فعلی': product.stockQuantity || 0,
-          'کالای در راه': goodsInTransit,
-          'ضایعات': wasteAmount,
-          'موجودی نهایی': finalInventory,
-          'حداقل موجودی': product.minStockLevel || 0,
-          'آستانه کم': product.lowStockThreshold || 0,
-          'وضعیت': finalInventory <= 0 ? 'تمام شده' : 
-                   finalInventory <= (product.lowStockThreshold || 0) ? 'بحرانی' :
-                   finalInventory <= (product.minStockLevel || 0) ? 'موجودی کم' : 'موجود',
-          'قیمت واحد (دینار)': product.shopPrice ? parseFloat(product.shopPrice) : 'نامشخص',
-          'ارزش کل (دینار)': product.shopPrice ? 
-            (parseFloat(product.shopPrice) * finalInventory) : 'نامشخص'
-        };
+        if (productBatchList.length === 0) {
+          // Product without batches
+          const finalInventory = Math.max(0, (product.stockQuantity || 0) + goodsInTransit - wasteAmount);
+          excelData.push({
+            'ردیف': productIndex + 1,
+            'نام محصول': product.name || '',
+            'دسته‌بندی': product.category || '',
+            'کد محصول (SKU)': product.shopSku || '',
+            'شماره بچ': product.batchNumber || 'بدون بچ',
+            'موجودی فعلی': product.stockQuantity || 0,
+            'کالای در راه': goodsInTransit,
+            'ضایعات': wasteAmount,
+            'موجودی نهایی': finalInventory,
+            'حداقل موجودی': product.minStockLevel || 0,
+            'آستانه کم': product.lowStockThreshold || 0,
+            'وضعیت': finalInventory <= 0 ? 'تمام شده' : 
+                     finalInventory <= (product.lowStockThreshold || 0) ? 'بحرانی' :
+                     finalInventory <= (product.minStockLevel || 0) ? 'موجودی کم' : 'موجود',
+            'قیمت واحد (دینار)': product.shopPrice ? parseFloat(product.shopPrice) : 'نامشخص',
+            'ارزش کل (دینار)': product.shopPrice ? 
+              (parseFloat(product.shopPrice) * finalInventory) : 'نامشخص'
+          });
+        } else {
+          // Product with multiple batches
+          productBatchList.forEach((batch, batchIndex) => {
+            const batchFinalInventory = Math.max(0, batch.stockQuantity + goodsInTransit - wasteAmount);
+            excelData.push({
+              'ردیف': `${productIndex + 1}.${batchIndex + 1}`,
+              'نام محصول': batchIndex === 0 ? product.name || '' : '',
+              'دسته‌بندی': batchIndex === 0 ? product.category || '' : '',
+              'کد محصول (SKU)': batchIndex === 0 ? product.shopSku || '' : '',
+              'شماره بچ': batch.batchNumber,
+              'موجودی فعلی': batch.stockQuantity,
+              'کالای در راه': batchIndex === 0 ? goodsInTransit : 0,
+              'ضایعات': batchIndex === 0 ? wasteAmount : 0,
+              'موجودی نهایی': batchFinalInventory,
+              'حداقل موجودی': batchIndex === 0 ? product.minStockLevel || 0 : '',
+              'آستانه کم': batchIndex === 0 ? product.lowStockThreshold || 0 : '',
+              'وضعیت': batchFinalInventory <= 0 ? 'تمام شده' : 
+                       batchFinalInventory <= (product.lowStockThreshold || 0) ? 'بحرانی' :
+                       batchFinalInventory <= (product.minStockLevel || 0) ? 'موجودی کم' : 'موجود',
+              'قیمت واحد (دینار)': batchIndex === 0 && product.shopPrice ? parseFloat(product.shopPrice) : '',
+              'ارزش کل (دینار)': batchIndex === 0 && product.shopPrice ? 
+                (parseFloat(product.shopPrice) * batchFinalInventory) : ''
+            });
+          });
+        }
       });
 
       // Create workbook and worksheet
@@ -1031,19 +1158,39 @@ const WarehouseManagement: React.FC = () => {
                     </thead>
                     <tbody>
                       {filteredProducts.map((product: UnifiedProduct) => (
-                        <tr key={product.id} className="border-b hover:bg-gray-50">
-                          <td className="p-4">
-                            <div>
-                              <p className="font-medium">{product.name}</p>
-                              <p className="text-sm text-gray-500">{product.shopSku}</p>
-                            </div>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className="font-medium text-blue-600">{product.batchNumber || 'نامشخص'}</span>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className="font-medium">{product.stockQuantity}</span>
-                          </td>
+                        <React.Fragment key={product.id}>
+                          {/* Main Product Row */}
+                          <tr className="border-b hover:bg-gray-50 bg-blue-50">
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleProductExpansion(product.id)}
+                                  className="p-1"
+                                >
+                                  {expandedProducts.has(product.id) ? (
+                                    <ChevronDown className="w-4 h-4" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4" />
+                                  )}
+                                </Button>
+                                <div>
+                                  <p className="font-medium">{product.name}</p>
+                                  <p className="text-sm text-gray-500">{product.shopSku}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4 text-center">
+                              <span className="font-medium text-blue-600">
+                                {(productBatches[product.id] || []).length} بچ
+                              </span>
+                            </td>
+                            <td className="p-4 text-center">
+                              <span className="font-medium">
+                                {(productBatches[product.id] || []).reduce((total, batch) => total + batch.stockQuantity, 0)}
+                              </span>
+                            </td>
                           <td className="p-4 text-center">
                             <span className="font-medium text-blue-600">
                               {/* Calculate goods in transit: orders that are processed but not yet sent to logistics */}
@@ -1131,6 +1278,97 @@ const WarehouseManagement: React.FC = () => {
                             <span className="font-medium">{product.minStockLevel}</span>
                           </td>
                         </tr>
+
+                        {/* Batch Sub-rows */}
+                        {expandedProducts.has(product.id) && (
+                          <>
+                            {/* Existing Batches */}
+                            {(productBatches[product.id] || []).map((batch, batchIndex) => (
+                              <tr key={batch.id} className="border-b bg-gray-50">
+                                <td className="p-4 pl-12">
+                                  <div className="text-sm text-gray-600">
+                                    <p>بچ #{batchIndex + 1}</p>
+                                  </div>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span className="text-sm font-medium text-blue-600">
+                                    {batch.batchNumber}
+                                  </span>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span className="text-sm">{batch.stockQuantity}</span>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span className="text-sm text-gray-500">-</span>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span className="text-sm text-gray-500">-</span>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span className="text-sm">{batch.stockQuantity}</span>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <Badge variant="outline" className="text-xs">
+                                    {batch.stockQuantity > 0 ? 'موجود' : 'تمام شده'}
+                                  </Badge>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span className="text-sm text-gray-500">-</span>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span className="text-sm text-gray-500">-</span>
+                                </td>
+                              </tr>
+                            ))}
+
+                            {/* Add New Batch Row */}
+                            <tr className="border-b bg-yellow-50">
+                              <td className="p-4 pl-12">
+                                <div className="text-sm text-gray-600">
+                                  <p>+ بچ جدید</p>
+                                </div>
+                              </td>
+                              <td className="p-4 text-center">
+                                <Input
+                                  placeholder="شماره بچ جدید"
+                                  value={newBatchData[product.id]?.batchNumber || ''}
+                                  onChange={(e) => updateBatchData(product.id, 'batchNumber', e.target.value)}
+                                  className="text-sm w-32"
+                                />
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <Button
+                                  size="sm"
+                                  onClick={() => addNewBatch(product.id)}
+                                  className="text-xs"
+                                  disabled={!newBatchData[product.id]?.batchNumber}
+                                >
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  افزودن
+                                </Button>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                              </td>
+                            </tr>
+                          </>
+                        )}
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>
