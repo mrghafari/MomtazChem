@@ -186,7 +186,7 @@ interface LogisticsOrder {
 const LogisticsManagement = () => {
   const [activeTab, setActiveTab] = useState('orders');
   const [sentCodes, setSentCodes] = useState<Set<number>>(new Set()); // Track which orders have codes sent
-  const [existingCodes, setExistingCodes] = useState<Map<number, string>>(new Map()); // Track existing codes per order
+  const [existingCodes, setExistingCodes] = useState<{[orderId: number]: string}>({}); // Track existing codes per order
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -208,12 +208,12 @@ const LogisticsManagement = () => {
         });
 
         const codes = await Promise.all(codePromises);
-        const newExistingCodes = new Map<number, string>();
+        const newExistingCodes: {[orderId: number]: string} = {};
         const newSentCodes = new Set<number>();
 
         codes.forEach(result => {
           if (result) {
-            newExistingCodes.set(result.orderId, result.code);
+            newExistingCodes[result.orderId] = result.code;
             newSentCodes.add(result.orderId);
           }
         });
@@ -354,7 +354,10 @@ const LogisticsManagement = () => {
       setSentCodes(prev => new Set(prev.add(result.customerOrderId)));
       
       // Track the existing code for this order
-      setExistingCodes(prev => new Map(prev.set(result.customerOrderId, result.code)));
+      setExistingCodes(prev => ({
+        ...prev,
+        [result.customerOrderId]: result.code
+      }));
       
       toast({ 
         title: result.isExisting ? "کد مجدداً ارسال شد" : "کد جدید تولید و ارسال شد", 
@@ -552,7 +555,7 @@ const LogisticsManagement = () => {
                 <div className="flex gap-2 flex-wrap">
                   <Button 
                     size="sm" 
-                    className={existingCodes.has(order.customerOrderId) || sentCodes.has(order.customerOrderId)
+                    className={existingCodes[order.customerOrderId] || sentCodes.has(order.customerOrderId)
                       ? "bg-red-600 hover:bg-red-700 text-white" 
                       : "bg-blue-600 hover:bg-blue-700 text-white"
                     }
@@ -569,8 +572,8 @@ const LogisticsManagement = () => {
                     <Send className="w-4 h-4 mr-2" />
                     {generateCodeMutation.isPending 
                       ? "در حال ارسال..." 
-                      : existingCodes.has(order.customerOrderId) || sentCodes.has(order.customerOrderId)
-                        ? `ارسال مجدد کد ${existingCodes.get(order.customerOrderId) || ''}`
+                      : existingCodes[order.customerOrderId] || sentCodes.has(order.customerOrderId)
+                        ? `ارسال مجدد کد ${existingCodes[order.customerOrderId] || ''}`
                         : "ارسال کد به مشتری"
                     }
                   </Button>
