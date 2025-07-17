@@ -114,7 +114,9 @@ export class UnifiedInventoryManager {
           shopSku: shopProduct.sku,
           shopId: shopProduct.id,
           priceUnit: shopProduct.priceUnit,
-          description: shopProduct.description
+          description: shopProduct.description,
+          // Batch number from showcase products
+          batchNumber: showcaseProduct?.batchNumber || null
         };
       });
       

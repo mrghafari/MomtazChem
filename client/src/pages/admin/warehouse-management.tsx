@@ -93,6 +93,7 @@ interface UnifiedProduct {
   shopPrice?: number;
   shopSku?: string;
   shopId?: number;
+  batchNumber?: string;
 }
 
 // Goods in transit interface
@@ -176,6 +177,7 @@ const WarehouseManagement: React.FC = () => {
           'نام محصول': product.name || '',
           'دسته‌بندی': product.category || '',
           'کد محصول (SKU)': product.shopSku || '',
+          'شماره بچ': product.batchNumber || 'نامشخص',
           'موجودی فعلی': product.stockQuantity || 0,
           'کالای در راه': goodsInTransit,
           'ضایعات': wasteAmount,
@@ -201,6 +203,7 @@ const WarehouseManagement: React.FC = () => {
         { wch: 25 },  // نام محصول
         { wch: 15 },  // دسته‌بندی
         { wch: 15 },  // کد محصول
+        { wch: 15 },  // شماره بچ
         { wch: 12 },  // موجودی فعلی
         { wch: 12 },  // کالای در راه
         { wch: 10 },  // ضایعات
@@ -1016,6 +1019,7 @@ const WarehouseManagement: React.FC = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="text-right p-4 min-w-[200px]">محصول</th>
+                        <th className="text-center p-4 min-w-[120px]">شماره بچ</th>
                         <th className="text-center p-4 min-w-[120px]">موجودی</th>
                         <th className="text-center p-4 min-w-[100px]">کالای در راه</th>
                         <th className="text-center p-4 min-w-[100px]">ضایعات</th>
@@ -1034,6 +1038,9 @@ const WarehouseManagement: React.FC = () => {
                               <p className="font-medium">{product.name}</p>
                               <p className="text-sm text-gray-500">{product.shopSku}</p>
                             </div>
+                          </td>
+                          <td className="p-4 text-center">
+                            <span className="font-medium text-blue-600">{product.batchNumber || 'نامشخص'}</span>
                           </td>
                           <td className="p-4 text-center">
                             <span className="font-medium">{product.stockQuantity}</span>
