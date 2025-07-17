@@ -72,6 +72,15 @@ export const orderManagement = pgTable("order_management", {
   deliveryPersonName: text("delivery_person_name"),
   deliveryPersonPhone: text("delivery_person_phone"),
   
+  // Carrier delivery and verification status
+  isCarrierDispatched: boolean("is_carrier_dispatched").default(false),
+  carrierDispatchedAt: timestamp("carrier_dispatched_at"),
+  carrierName: text("carrier_name"),
+  carrierPhone: text("carrier_phone"),
+  isVerified: boolean("is_verified").default(false),
+  verifiedAt: timestamp("verified_at"),
+  verificationLocation: text("verification_location"),
+  
   // Delivery method and transportation details
   deliveryMethod: varchar("delivery_method", { length: 50 }).default("courier"), // post, courier, truck, personal_pickup
   transportationType: varchar("transportation_type", { length: 50 }), // motorcycle, car, truck, van

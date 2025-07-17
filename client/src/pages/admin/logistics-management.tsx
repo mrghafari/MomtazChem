@@ -281,6 +281,46 @@ const LogisticsManagement = () => {
     }
   });
 
+  // Carrier delivery mutation
+  const carrierDeliveryMutation = useMutation({
+    mutationFn: async ({ orderId, data }: { orderId: number; data: any }) => {
+      const response = await fetch(`/api/order-management/${orderId}/carrier-delivery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to mark carrier delivery');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "موفق", description: "ارسال توسط حمل‌کننده ثبت شد" });
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+    },
+    onError: () => {
+      toast({ title: "خطا", description: "خطا در ثبت ارسال", variant: "destructive" });
+    },
+  });
+
+  // Verification mutation
+  const verificationMutation = useMutation({
+    mutationFn: async ({ orderId, data }: { orderId: number; data: any }) => {
+      const response = await fetch(`/api/order-management/${orderId}/verify-delivery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to verify delivery code');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "موفق", description: "کد تحویل با موفقیت تایید شد" });
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+    },
+    onError: () => {
+      toast({ title: "خطا", description: "کد تحویل اشتباه است", variant: "destructive" });
+    },
+  });
+
   const getStatusBadge = (status: string) => {
     const statusMap = {
       'warehouse_approved': { color: 'bg-blue-500', text: 'تایید انبار' },
@@ -582,8 +622,81 @@ const LogisticsManagement = () => {
                   </div>
                 </div>
 
+                {/* Delivery Verification Section */}
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <h6 className="font-medium text-gray-800 mb-2 flex items-center">
+                    <Shield className="w-4 h-4 mr-2" />
+                    تحویل و تایید کد
+                  </h6>
+                  <div className="flex gap-2 flex-wrap">
+                    {/* Carrier Delivery Button */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="bg-blue-50 hover:bg-blue-100">
+                          <Truck className="w-4 h-4 mr-2" />
+                          ارسال توسط حمل‌کننده
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>ارسال محموله</DialogTitle>
+                          <DialogDescription>
+                            سفارش #{order.customerOrderId} - تایید ارسال توسط حمل‌کننده
+                          </DialogDescription>
+                        </DialogHeader>
+                        <CarrierDeliveryForm 
+                          orderId={order.customerOrderId}
+                          deliveryCode={order.deliveryCode}
+                          onSubmit={(data) => carrierDeliveryMutation.mutate({ orderId: order.customerOrderId, data })}
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Code Verification Button */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          variant={order.isVerified ? "default" : "outline"}
+                          className={order.isVerified 
+                            ? "bg-green-600 hover:bg-green-700 text-white" 
+                            : "bg-gray-200 hover:bg-gray-300 text-gray-600"
+                          }
+                        >
+                          <CheckCircle className={`w-4 h-4 mr-2 ${order.isVerified ? 'text-white' : 'text-gray-400'}`} />
+                          {order.isVerified ? 'تحویل شد ✓' : 'تایید کد تحویل'}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>تایید کد تحویل</DialogTitle>
+                          <DialogDescription>
+                            سفارش #{order.customerOrderId} - ورود کد تایید مشتری
+                          </DialogDescription>
+                        </DialogHeader>
+                        <VerificationCodeForm 
+                          orderId={order.customerOrderId}
+                          expectedCode={order.deliveryCode}
+                          isVerified={order.isVerified}
+                          onSubmit={(data) => verificationMutation.mutate({ orderId: order.customerOrderId, data })}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  
+                  {/* Delivery Status Display */}
+                  <div className="mt-2 text-xs text-gray-600">
+                    کد تحویل: <span className="font-mono bg-gray-200 px-2 py-1 rounded">{order.deliveryCode || 'تولید نشده'}</span>
+                    {order.isVerified && (
+                      <span className="mr-4 text-green-600 font-semibold">
+                        ✓ تحویل تایید شده
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 {/* Action Buttons */}
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap mt-4">
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button size="sm" variant="outline">
@@ -1683,6 +1796,216 @@ const AssignPersonnelForm = ({ orderId, onSubmit }: { orderId: number; onSubmit:
 
       <Button type="submit" className="w-full">
         اختصاص پرسنل
+      </Button>
+    </form>
+  );
+};
+
+// Carrier Delivery Form Component
+const CarrierDeliveryForm = ({ orderId, deliveryCode, onSubmit }: { 
+  orderId: number; 
+  deliveryCode?: string; 
+  onSubmit: (data: any) => void 
+}) => {
+  const [formData, setFormData] = useState({
+    carrierName: '',
+    carrierPhone: '',
+    vehicleType: '',
+    vehiclePlate: '',
+    estimatedDeliveryTime: '',
+    notes: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      ...formData,
+      deliveryCode: deliveryCode,
+      carriageDispatched: true
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="carrierName">نام حمل‌کننده</Label>
+        <Input 
+          id="carrierName"
+          value={formData.carrierName}
+          onChange={(e) => setFormData(prev => ({ ...prev, carrierName: e.target.value }))}
+          placeholder="نام و نام خانوادگی حمل‌کننده"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="carrierPhone">شماره تلفن حمل‌کننده</Label>
+        <Input 
+          id="carrierPhone"
+          value={formData.carrierPhone}
+          onChange={(e) => setFormData(prev => ({ ...prev, carrierPhone: e.target.value }))}
+          placeholder="شماره موبایل حمل‌کننده"
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="vehicleType">نوع وسیله نقلیه</Label>
+          <Select 
+            value={formData.vehicleType} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, vehicleType: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="نوع وسیله" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="motorcycle">موتورسیکلت</SelectItem>
+              <SelectItem value="car">خودرو</SelectItem>
+              <SelectItem value="van">ون</SelectItem>
+              <SelectItem value="truck">کامیون</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="vehiclePlate">پلاک وسیله</Label>
+          <Input 
+            id="vehiclePlate"
+            value={formData.vehiclePlate}
+            onChange={(e) => setFormData(prev => ({ ...prev, vehiclePlate: e.target.value }))}
+            placeholder="پلاک وسیله نقلیه"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="estimatedDeliveryTime">زمان تحویل تخمینی</Label>
+        <Input 
+          type="datetime-local"
+          id="estimatedDeliveryTime"
+          value={formData.estimatedDeliveryTime}
+          onChange={(e) => setFormData(prev => ({ ...prev, estimatedDeliveryTime: e.target.value }))}
+        />
+      </div>
+
+      {deliveryCode && (
+        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <Label className="text-blue-800 font-medium">کد تحویل برای مشتری:</Label>
+          <p className="text-2xl font-mono font-bold text-blue-900 mt-1">{deliveryCode}</p>
+          <p className="text-xs text-blue-600 mt-1">این کد را به مشتری اعلام کنید</p>
+        </div>
+      )}
+
+      <div>
+        <Label htmlFor="notes">یادداشت</Label>
+        <Textarea 
+          id="notes"
+          value={formData.notes}
+          onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+          placeholder="یادداشت درباره ارسال..."
+        />
+      </div>
+
+      <Button type="submit" className="w-full">
+        تایید ارسال توسط حمل‌کننده
+      </Button>
+    </form>
+  );
+};
+
+// Verification Code Form Component
+const VerificationCodeForm = ({ orderId, expectedCode, isVerified, onSubmit }: { 
+  orderId: number; 
+  expectedCode?: string;
+  isVerified?: boolean;
+  onSubmit: (data: any) => void 
+}) => {
+  const [enteredCode, setEnteredCode] = useState('');
+  const [customerLocation, setCustomerLocation] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (enteredCode === expectedCode) {
+      onSubmit({
+        verificationCode: enteredCode,
+        isVerified: true,
+        verifiedAt: new Date().toISOString(),
+        customerLocation: customerLocation
+      });
+    } else {
+      onSubmit({
+        verificationCode: enteredCode,
+        isVerified: false,
+        failureReason: 'کد وارد شده اشتباه است'
+      });
+    }
+  };
+
+  if (isVerified) {
+    return (
+      <div className="text-center py-6">
+        <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-green-800 mb-2">تحویل تایید شده</h3>
+        <p className="text-green-600">این سفارش با موفقیت تحویل داده شده است</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="expectedCode">کد مورد انتظار</Label>
+        <Input 
+          id="expectedCode"
+          value={expectedCode || 'تولید نشده'}
+          disabled
+          className="bg-gray-100 font-mono text-lg text-center"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="enteredCode">کد وارد شده توسط مشتری</Label>
+        <Input 
+          id="enteredCode"
+          value={enteredCode}
+          onChange={(e) => setEnteredCode(e.target.value)}
+          placeholder="کد 4 رقمی مشتری را وارد کنید"
+          maxLength={4}
+          pattern="[0-9]{4}"
+          className="font-mono text-lg text-center"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="customerLocation">محل تحویل</Label>
+        <Input 
+          id="customerLocation"
+          value={customerLocation}
+          onChange={(e) => setCustomerLocation(e.target.value)}
+          placeholder="آدرس دقیق محل تحویل"
+        />
+      </div>
+
+      <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div>
+            <p className="text-sm text-yellow-800 font-medium">توجه:</p>
+            <p className="text-xs text-yellow-700">
+              کد وارد شده باید دقیقاً مطابق با کد مشتری باشد. در صورت عدم تطبیق، تحویل انجام نشود.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Button 
+        type="submit" 
+        className={`w-full ${enteredCode === expectedCode ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400'}`}
+        disabled={!enteredCode || enteredCode.length !== 4}
+      >
+        {enteredCode === expectedCode ? '✓ تایید تحویل' : 'بررسی کد'}
       </Button>
     </form>
   );

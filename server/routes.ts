@@ -26177,6 +26177,121 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // CARRIER DELIVERY AND VERIFICATION API ENDPOINTS
+  // =============================================================================
+
+  // Mark order as dispatched by carrier
+  app.post('/api/order-management/:orderId/carrier-delivery', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { carrierName, carrierPhone, vehicleType, vehiclePlate, estimatedDeliveryTime, notes, deliveryCode } = req.body;
+      
+      console.log(`🚚 [CARRIER] Marking order ${orderId} as dispatched by carrier`);
+      
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      const { orderManagement } = await import('../shared/order-management-schema');
+      
+      // Update order with carrier dispatch information
+      const [updatedOrder] = await db.update(orderManagement)
+        .set({
+          isCarrierDispatched: true,
+          carrierDispatchedAt: new Date(),
+          carrierName,
+          carrierPhone,
+          vehicleType,
+          vehiclePlate,
+          estimatedDeliveryDate: estimatedDeliveryTime ? new Date(estimatedDeliveryTime) : undefined,
+          logisticsNotes: notes,
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.id, orderId))
+        .returning();
+
+      if (!updatedOrder) {
+        return res.status(404).json({
+          success: false,
+          message: 'سفارش یافت نشد'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'ارسال توسط حمل‌کننده ثبت شد',
+        data: updatedOrder
+      });
+    } catch (error) {
+      console.error('Error marking carrier delivery:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در ثبت ارسال توسط حمل‌کننده'
+      });
+    }
+  });
+
+  // Verify delivery with customer code
+  app.post('/api/order-management/:orderId/verify-delivery', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { verificationCode, customerLocation, isVerified, verifiedAt, failureReason } = req.body;
+      
+      console.log(`✅ [VERIFICATION] Processing delivery verification for order ${orderId}`);
+      
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      const { orderManagement } = await import('../shared/order-management-schema');
+      
+      // Get current delivery code for this order
+      const [currentOrder] = await db.select()
+        .from(orderManagement)
+        .where(eq(orderManagement.id, orderId))
+        .limit(1);
+
+      if (!currentOrder) {
+        return res.status(404).json({
+          success: false,
+          message: 'سفارش یافت نشد'
+        });
+      }
+
+      // Check if verification code matches expected code
+      const codeMatches = verificationCode === currentOrder.deliveryCode;
+      
+      if (!codeMatches) {
+        return res.status(400).json({
+          success: false,
+          message: 'کد تحویل اشتباه است'
+        });
+      }
+
+      // Update order with verification status
+      const [updatedOrder] = await db.update(orderManagement)
+        .set({
+          isVerified: true,
+          verifiedAt: new Date(),
+          verificationLocation: customerLocation,
+          actualDeliveryDate: new Date(),
+          currentStatus: 'delivered',
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.id, orderId))
+        .returning();
+
+      res.json({
+        success: true,
+        message: 'تحویل با موفقیت تایید شد',
+        data: updatedOrder
+      });
+    } catch (error) {
+      console.error('Error verifying delivery:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تایید تحویل'
+      });
+    }
+  });
+
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     res.status(404).json({
