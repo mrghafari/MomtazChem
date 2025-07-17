@@ -38,6 +38,7 @@ import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
 import { kardexBatches } from "@shared/kardex-batch-schema";
 import { orderManagement, shippingRates, vatSettings, deliveryMethods } from "@shared/order-management-schema";
+import { warehouseLocations, warehouseProducts, warehouseItems, warehouseReceipts, warehouseIssues } from "@shared/warehouse-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
@@ -387,11 +388,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sync products from Kardex to warehouse products and items (batch-based)
   app.post("/api/warehouse/sync-from-kardex", async (req: Request, res: Response) => {
     try {
-      const showcaseProducts = await db.select().from(products).where(eq(products.isActive, true));
+      const showcaseProductsList = await db.select().from(showcaseProducts).where(eq(showcaseProducts.isActive, true));
       let syncedProductsCount = 0;
       let syncedBatchesCount = 0;
       
-      for (const showcaseProduct of showcaseProducts) {
+      for (const showcaseProduct of showcaseProductsList) {
         // Check if warehouse product already exists
         const existingProduct = await db.select().from(warehouseProducts)
           .where(eq(warehouseProducts.productCode, showcaseProduct.sku || showcaseProduct.name))
@@ -435,9 +436,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(warehouseProducts.id, warehouseProductId));
         }
         
-        // Handle batch/item sync
-        if (showcaseProduct.batchNumber && showcaseProduct.stockQuantity > 0) {
-          const batchCode = `${showcaseProduct.sku || showcaseProduct.name.substring(0, 10)}-${showcaseProduct.batchNumber}`;
+        // Create initial batch with current stock
+        if (warehouseProductId && showcaseProduct.stockQuantity > 0) {
+          const batchCode = `${showcaseProduct.sku || showcaseProduct.name.substring(0, 10)}-1`;
           
           // Check if batch already exists
           const existingBatch = await db.select().from(warehouseItems)
@@ -445,31 +446,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .limit(1);
           
           if (existingBatch.length === 0) {
-            // Create new batch item
+            // Create new batch item with all required fields
             await db.insert(warehouseItems).values({
+              productCode: showcaseProduct.sku || showcaseProduct.name.substring(0, 10),
+              productName: showcaseProduct.name,
+              productType: showcaseProduct.category || 'محصول شیمیایی',
+              unit: 'عدد',
               warehouseProductId: warehouseProductId,
-              batchNumber: showcaseProduct.batchNumber,
+              batchNumber: '1',
               batchCode: batchCode,
               currentStock: showcaseProduct.stockQuantity,
-              unitPrice: showcaseProduct.unitPrice || showcaseProduct.price || 0,
-              totalValue: (showcaseProduct.stockQuantity * (showcaseProduct.unitPrice || showcaseProduct.price || 0)),
-              productionDate: showcaseProduct.lastRestockDate ? new Date(showcaseProduct.lastRestockDate) : null,
-              expiryDate: showcaseProduct.expiryDate ? new Date(showcaseProduct.expiryDate) : null,
-              notes: `همگام‌سازی شده از کاردکس - ${new Date().toLocaleDateString('fa-IR')}`
+              unitPrice: showcaseProduct.unitPrice || 0,
+              totalValue: (showcaseProduct.stockQuantity * (showcaseProduct.unitPrice || 0)),
+              supplierName: 'ممتاز شیمی',
+              qualityGrade: 'A',
+              notes: `همگام‌سازی شده از کاردکس - ${new Date().toLocaleDateString('en-US')}`
             });
             syncedBatchesCount++;
-          } else {
-            // Update existing batch item
-            await db.update(warehouseItems)
-              .set({
-                currentStock: showcaseProduct.stockQuantity,
-                unitPrice: showcaseProduct.unitPrice || showcaseProduct.price || 0,
-                totalValue: (showcaseProduct.stockQuantity * (showcaseProduct.unitPrice || showcaseProduct.price || 0)),
-                productionDate: showcaseProduct.lastRestockDate ? new Date(showcaseProduct.lastRestockDate) : null,
-                expiryDate: showcaseProduct.expiryDate ? new Date(showcaseProduct.expiryDate) : null,
-                updatedAt: new Date()
-              })
-              .where(eq(warehouseItems.id, existingBatch[0].id));
           }
         }
       }
@@ -486,16 +479,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get warehouse products (کالاها اصلی)
+  // Get warehouse products with total stock from all batches (کالاها اصلی با مجموع موجودی)
   app.get("/api/warehouse/products", async (req: Request, res: Response) => {
     try {
       const { category, type } = req.query;
       
-      let query = db.select().from(warehouseProducts).where(eq(warehouseProducts.isActive, true));
-      const warehouseProductsList = await query;
+      // Get products with sum of all batches stock
+      const productsWithTotalStock = await db
+        .select({
+          id: warehouseProducts.id,
+          productCode: warehouseProducts.productCode,
+          productName: warehouseProducts.productName,
+          productType: warehouseProducts.productType,
+          unit: warehouseProducts.unit,
+          minStockLevel: warehouseProducts.minStockLevel,
+          maxStockLevel: warehouseProducts.maxStockLevel,
+          standardUnitPrice: warehouseProducts.standardUnitPrice,
+          category: warehouseProducts.category,
+          subcategory: warehouseProducts.subcategory,
+          totalStock: sql<number>`COALESCE(SUM(${warehouseItems.currentStock}), 0)`,
+          batchCount: sql<number>`COUNT(${warehouseItems.id})`,
+        })
+        .from(warehouseProducts)
+        .leftJoin(warehouseItems, eq(warehouseProducts.id, warehouseItems.warehouseProductId))
+        .where(eq(warehouseProducts.isActive, true))
+        .groupBy(warehouseProducts.id);
       
       // Apply filters
-      let filteredProducts = warehouseProductsList;
+      let filteredProducts = productsWithTotalStock;
       if (category) {
         filteredProducts = filteredProducts.filter(product => product.category === category);
       }
