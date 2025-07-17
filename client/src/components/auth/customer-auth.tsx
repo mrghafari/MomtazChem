@@ -597,9 +597,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                   name="secondaryAddress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>آدرس دوم (اختیاری)</FormLabel>
+                      <FormLabel>Secondary Address (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="آدرس دوم (اختیاری)" {...field} />
+                        <Input placeholder="Secondary address (optional)" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -611,9 +611,9 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                   name="postalCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>کد پستی (اختیاری)</FormLabel>
+                      <FormLabel>Postal Code (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="کد پستی" {...field} />
+                        <Input placeholder="Postal code" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
