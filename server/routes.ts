@@ -5578,9 +5578,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const orders = await orderManagementStorage.getAllOrdersWithDetails();
       
-      // Filter for financial-related orders
+      // Filter for financial-related orders - include pending orders that need financial review
       const financialOrders = orders.filter(order => 
-        ['pending_payment', 'payment_uploaded', 'financial_review'].includes(order.status)
+        ['pending', 'pending_payment', 'payment_uploaded', 'financial_review'].includes(order.status)
       );
 
       const formattedOrders = financialOrders.map(order => ({

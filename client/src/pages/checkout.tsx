@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, ShoppingCart, CreditCard, Truck, User } from "lucide-react";
+import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -64,12 +64,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [orderNumber, setOrderNumber] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [useSecondaryAddress, setUseSecondaryAddress] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [walletBalance, setWalletBalance] = useState(0);
   const [walletAmountToUse, setWalletAmountToUse] = useState(0);
   const [useWallet, setUseWallet] = useState(false);
   const [secondaryPaymentMethod, setSecondaryPaymentMethod] = useState('');
+  const [customerInfo, setCustomerInfo] = useState<any>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -175,6 +177,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     }
   };
 
+
+
   // Auto-enable wallet usage when wallet payment methods are selected
   useEffect(() => {
     const paymentMethod = form.watch('paymentMethod');
@@ -195,6 +199,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       fetchWalletBalance();
     }
   }, [isUserLoggedIn]);
+
+  // Set customer info from query data
+  useEffect(() => {
+    if (customerData && customerData.user) {
+      setCustomerInfo(customerData.user);
+    }
+  }, [customerData]);
 
   // Calculate order totals
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {
@@ -532,18 +543,64 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   </CardHeader>
                   <CardContent>
                     {isUserLoggedIn ? (
-                      <AddressSelector
-                        selectedAddressId={selectedAddress?.id}
-                        onAddressSelect={(address) => {
-                          setSelectedAddress(address);
-                          // Auto-fill form fields from selected address
-                          form.setValue('billingAddress1', address.address);
-                          form.setValue('billingCity', address.city);
-                          form.setValue('billingState', address.state || '');
-                          form.setValue('billingPostalCode', address.postalCode || '');
-                          form.setValue('billingCountry', address.country);
-                        }}
-                      />
+                      <div className="space-y-6">
+                        <AddressSelector
+                          selectedAddressId={selectedAddress?.id}
+                          onAddressSelect={(address) => {
+                            setSelectedAddress(address);
+                            // Auto-fill form fields from selected address
+                            form.setValue('billingAddress1', address.address);
+                            form.setValue('billingCity', address.city);
+                            form.setValue('billingState', address.state || '');
+                            form.setValue('billingPostalCode', address.postalCode || '');
+                            form.setValue('billingCountry', address.country);
+                          }}
+                        />
+                        
+                        {/* Secondary Address Option */}
+                        {customerInfo?.secondaryAddress && (
+                          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div className="flex items-center space-x-2 space-x-reverse">
+                              <input
+                                type="checkbox"
+                                id="useSecondaryAddress"
+                                checked={useSecondaryAddress}
+                                onChange={(e) => {
+                                  setUseSecondaryAddress(e.target.checked);
+                                  if (e.target.checked && customerInfo?.secondaryAddress) {
+                                    // Auto-fill with secondary address
+                                    form.setValue('billingAddress1', customerInfo.secondaryAddress);
+                                    form.setValue('billingCity', customerInfo.city || '');
+                                    form.setValue('billingState', customerInfo.state || '');
+                                    form.setValue('billingPostalCode', customerInfo.postalCode || '');
+                                    form.setValue('billingCountry', customerInfo.country || 'Iraq');
+                                  } else if (selectedAddress) {
+                                    // Revert to selected primary address
+                                    form.setValue('billingAddress1', selectedAddress.address);
+                                    form.setValue('billingCity', selectedAddress.city);
+                                    form.setValue('billingState', selectedAddress.state || '');
+                                    form.setValue('billingPostalCode', selectedAddress.postalCode || '');
+                                    form.setValue('billingCountry', selectedAddress.country);
+                                  }
+                                }}
+                                className="rounded"
+                              />
+                              <label htmlFor="useSecondaryAddress" className="text-sm font-medium text-blue-700 dark:text-blue-300 cursor-pointer">
+                                استفاده از آدرس دوم (Secondary Address)
+                              </label>
+                            </div>
+                            {useSecondaryAddress && (
+                              <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded border text-sm">
+                                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                  <MapPin className="w-4 h-4" />
+                                  <span className="font-medium">آدرس دوم انتخاب شده:</span>
+                                </div>
+                                <p className="mt-1 text-gray-700 dark:text-gray-300">{customerInfo.secondaryAddress}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <div className="space-y-4">
                         <FormField
