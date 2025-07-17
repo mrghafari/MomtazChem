@@ -174,7 +174,7 @@ const WarehouseManagement: React.FC = () => {
 
   // Initialize product batches (simulate existing batches)
   React.useEffect(() => {
-    if (unifiedProducts && Array.isArray(unifiedProducts) && unifiedProducts.length > 0) {
+    if (productsLoaded && unifiedProducts && Array.isArray(unifiedProducts) && unifiedProducts.length > 0) {
       const initialBatches: {[productId: number]: ProductBatch[]} = {};
       unifiedProducts.forEach((product: UnifiedProduct) => {
         if (product && product.id) {
@@ -193,7 +193,7 @@ const WarehouseManagement: React.FC = () => {
       });
       setProductBatches(initialBatches);
     }
-  }, [unifiedProducts]);
+  }, [productsLoaded, unifiedProducts]);
 
   // Toggle product expansion for batch view
   const toggleProductExpansion = (productId: number) => {
@@ -457,7 +457,7 @@ const WarehouseManagement: React.FC = () => {
   const orders = ordersResponse?.orders || [];
 
   // Fetch unified products for inventory management
-  const { data: unifiedProducts = [], isLoading: productsLoading, refetch: refetchProducts } = useQuery({
+  const { data: unifiedProducts = [], isLoading: productsLoading, refetch: refetchProducts, isSuccess: productsLoaded } = useQuery({
     queryKey: ["/api/inventory/unified/products"],
     retry: false,
   });
