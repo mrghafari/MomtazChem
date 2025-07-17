@@ -88,41 +88,50 @@ export default function AdminPage() {
 
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to Admin Dashboard</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to Comprehensive Site Management System</h2>
           <p className="text-gray-600 mb-4">
-            Access all administrative tools through the centralized Site Management interface which includes comprehensive management for all system components.
+            Access the complete enterprise-grade administrative platform featuring 26 integrated modules for full business operations management. This centralized system provides comprehensive control over all aspects of your chemical solutions business - from production to customer delivery.
           </p>
           
           <div className="mb-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">All 24 Site Management Features:</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Complete 26-Module Administrative Suite:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 text-xs text-gray-600">
-              <div>• Syncing Shop - Product synchronization</div>
-              <div>• Inquiries - Customer inquiry management</div>
-              <div>• Barcode - EAN-13 barcode generation</div>
-              <div>• Email Settings - Multi-SMTP configuration</div>
-              <div>• Database Backup - System backup tools</div>
-              <div>• CRM - Customer relationship management</div>
-              <div>• SEO - Multilingual SEO optimization</div>
-              <div>• Categories - Product categorization</div>
-              <div>• SMS - Customer notification system</div>
-              <div>• Factory - Production management</div>
-              <div>• User Management - Admin user control</div>
-              <div>• Shop - E-commerce administration</div>
-              <div>• Procedures - Document management</div>
-              <div>• SMTP Test - Email connectivity testing</div>
-              <div>• Order Management - Order tracking system</div>
-              <div>• Products - Catalog management</div>
-              <div>• Payment Settings - Banking integration</div>
-              <div>• Wallet Management - Digital wallet system</div>
-              <div>• Geography Analytics - Regional analysis</div>
-              <div>• AI Settings - Smart automation tools</div>
-              <div>• Refresh Control - System timing settings</div>
-              <div>• Department Users - Role-based access</div>
-              <div>• Inventory Management - Stock control</div>
-              <div>• Content Management - Dynamic content</div>
-              <div>• Warehouse Management - Order workflow</div>
-              <div>• Logistics Management - Delivery coordination</div>
+              <div>• <strong>Syncing Shop</strong> - کاردکس/فروشگاه synchronization</div>
+              <div>• <strong>Inquiries</strong> - Customer inquiry & response management</div>
+              <div>• <strong>Barcode</strong> - GS1-compliant EAN-13 generation</div>
+              <div>• <strong>Email Settings</strong> - Multi-SMTP with 8 department routing</div>
+              <div>• <strong>Database Backup</strong> - PostgreSQL maintenance & migration</div>
+              <div>• <strong>CRM</strong> - Customer relationship & analytics</div>
+              <div>• <strong>SEO</strong> - 4-language optimization & sitemaps</div>
+              <div>• <strong>Categories</strong> - Hierarchical product classification</div>
+              <div>• <strong>SMS</strong> - Multilingual customer notifications</div>
+              <div>• <strong>Factory</strong> - Production line management</div>
+              <div>• <strong>User Management</strong> - Role-based access control</div>
+              <div>• <strong>Shop</strong> - E-commerce & inventory administration</div>
+              <div>• <strong>Procedures</strong> - Document & method management</div>
+              <div>• <strong>Order Management</strong> - 3-department workflow system</div>
+              <div>• <strong>Products</strong> - Showcase & shop catalog management</div>
+              <div>• <strong>Payment Settings</strong> - Iraqi banking integration</div>
+              <div>• <strong>Finance</strong> - Financial order management & approvals</div>
+              <div>• <strong>Wallet Management</strong> - Digital wallet & recharge system</div>
+              <div>• <strong>Geography Analytics</strong> - Regional performance & GPS tracking</div>
+              <div>• <strong>AI Settings</strong> - Smart SKU generation & recommendations</div>
+              <div>• <strong>Refresh Control</strong> - Centralized timing management</div>
+              <div>• <strong>Content Management</strong> - 430+ multilingual content items</div>
+              <div>• <strong>Warehouse Management</strong> - Unified inventory & goods tracking</div>
+              <div>• <strong>Logistics Management</strong> - Delivery coordination & verification</div>
+              <div>• <strong>Ticketing System</strong> - Support ticket management</div>
+              <div>• <strong>Remote Desktop</strong> - RustDesk international support</div>
+              <div>• <strong>Server Config</strong> - Production migration & hosting</div>
             </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800">
+              <strong>🚀 Enterprise Features:</strong> Multi-language support (English, Arabic, Kurdish, Turkish), 
+              AI-powered automation, comprehensive email routing, GPS delivery tracking, 
+              and complete business workflow management - all unified in one powerful platform.
+            </p>
           </div>
         </div>
 

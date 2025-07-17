@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { MapPin, Package, TrendingUp, Users, DollarSign, ShoppingCart, Calendar, Download, Filter, ArrowUpDown, ArrowUp, ArrowDown, Navigation, Target, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { MapPin, Package, TrendingUp, Users, DollarSign, ShoppingCart, Calendar, Download, Filter, ArrowUpDown, ArrowUp, ArrowDown, Navigation, Target, Clock, CheckCircle, AlertTriangle, Maximize2, Minimize2 } from "lucide-react";
 
 interface GeographicData {
   region: string;
@@ -85,6 +86,7 @@ export default function GeographicAnalytics() {
   const [showAllGpsDeliveries, setShowAllGpsDeliveries] = useState(false);
   const [gpsSortField, setGpsSortField] = useState<string>('');
   const [gpsSortDirection, setGpsSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [isMapMaximized, setIsMapMaximized] = useState(false);
 
   // Sorting function
   const handleSort = (field: string) => {
@@ -1391,10 +1393,283 @@ export default function GeographicAnalytics() {
                       
                       {/* Delivery Distribution Map */}
                       <div className="bg-white border rounded-lg p-4">
-                        <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
-                          <MapPin className="h-5 w-5 mr-2 text-blue-600" />
-                          نقشه پراکندگی توزیع تحویل‌ها (Delivery Distribution Map)
-                        </h4>
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="font-semibold text-gray-800 flex items-center">
+                            <MapPin className="h-5 w-5 mr-2 text-blue-600" />
+                            نقشه پراکندگی توزیع تحویل‌ها (Delivery Distribution Map)
+                          </h4>
+                          <Dialog open={isMapMaximized} onOpenChange={setIsMapMaximized}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                                <Maximize2 className="h-4 w-4" />
+                                بزرگنمایی
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-7xl max-h-[95vh] w-full h-full">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <MapPin className="h-5 w-5 text-blue-600" />
+                                  نقشه پراکندگی توزیع تحویل‌ها - نمای تمام‌صفحه
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="flex-1 overflow-hidden">
+                                {/* Maximized Map Content */}
+                                <div className="h-full">
+                                  {/* Summary Statistics */}
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                                    <div className="bg-blue-50 p-3 rounded-lg text-center">
+                                      <div className="text-xl font-bold text-blue-600">{gpsHeatmap.data.length}</div>
+                                      <div className="text-xs text-blue-700">کل نقاط تحویل</div>
+                                    </div>
+                                    <div className="bg-green-50 p-3 rounded-lg text-center">
+                                      <div className="text-xl font-bold text-green-600">
+                                        {gpsHeatmap.data.filter((p: any) => p.weight >= 1).length}
+                                      </div>
+                                      <div className="text-xs text-green-700">تحویل موفق</div>
+                                    </div>
+                                    <div className="bg-yellow-50 p-3 rounded-lg text-center">
+                                      <div className="text-xl font-bold text-yellow-600">
+                                        {gpsHeatmap.data.filter((p: any) => p.weight < 1).length}
+                                      </div>
+                                      <div className="text-xs text-yellow-700">نیاز به بررسی</div>
+                                    </div>
+                                    <div className="bg-purple-50 p-3 rounded-lg text-center">
+                                      <div className="text-xl font-bold text-purple-600">
+                                        {new Set(gpsHeatmap.data.map((point: any) => `${Math.floor(point.lat)},${Math.floor(point.lng)}`)).size}
+                                      </div>
+                                      <div className="text-xs text-purple-700">مناطق مختلف</div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Maximized Interactive Geographic Heat Map */}
+                                  <div className="bg-white rounded-lg border overflow-hidden h-[calc(100vh-300px)]">
+                                    <div className="relative w-full h-full">
+                                      {/* Zoom Controls */}
+                                      <div className="absolute top-3 left-3 z-10 flex flex-col space-y-2">
+                                        <button
+                                          onClick={() => {
+                                            const svg = document.getElementById('heat-map-svg-maximized');
+                                            if (svg) {
+                                              const currentViewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
+                                              const newWidth = Math.max(50, parseFloat(currentViewBox[2]) * 0.75);
+                                              const newHeight = Math.max(35, parseFloat(currentViewBox[3]) * 0.75);
+                                              const newX = parseFloat(currentViewBox[0]) + (parseFloat(currentViewBox[2]) - newWidth) / 2;
+                                              const newY = parseFloat(currentViewBox[1]) + (parseFloat(currentViewBox[3]) - newHeight) / 2;
+                                              svg.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
+                                            }
+                                          }}
+                                          className="w-8 h-8 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center text-gray-700 shadow-sm"
+                                          title="زوم ورود"
+                                        >
+                                          <span className="text-lg font-bold">+</span>
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            const svg = document.getElementById('heat-map-svg-maximized');
+                                            if (svg) {
+                                              const currentViewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
+                                              const newWidth = Math.min(10000, parseFloat(currentViewBox[2]) * 1.33);
+                                              const newHeight = Math.min(7000, parseFloat(currentViewBox[3]) * 1.33);
+                                              const newX = parseFloat(currentViewBox[0]) - (newWidth - parseFloat(currentViewBox[2])) / 2;
+                                              const newY = parseFloat(currentViewBox[1]) - (newHeight - parseFloat(currentViewBox[3])) / 2;
+                                              svg.setAttribute('viewBox', `${Math.max(-500, newX)} ${Math.max(-350, newY)} ${newWidth} ${newHeight}`);
+                                            }
+                                          }}
+                                          className="w-8 h-8 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center text-gray-700 shadow-sm"
+                                          title="زوم خروج"
+                                        >
+                                          <span className="text-lg font-bold">-</span>
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            const svg = document.getElementById('heat-map-svg-maximized');
+                                            if (svg) {
+                                              svg.setAttribute('viewBox', '0 0 1000 700');
+                                            }
+                                          }}
+                                          className="w-8 h-8 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center text-gray-700 shadow-sm"
+                                          title="بازگشت به نمای اصلی"
+                                        >
+                                          <span className="text-xs">🏠</span>
+                                        </button>
+                                      </div>
+                                      
+                                      {/* Google Maps background with GPS points overlay */}
+                                      <div className="relative w-full h-full rounded-lg overflow-hidden">
+                                        <iframe
+                                          src="https://www.google.com/maps/embed/v1/view?key=AIzaSyDummyKeyPlaceholder&center=33.3128,44.3661&zoom=6&maptype=roadmap"
+                                          width="100%"
+                                          height="100%"
+                                          style={{ border: 0 }}
+                                          allowFullScreen
+                                          loading="lazy"
+                                          referrerPolicy="no-referrer-when-downgrade"
+                                          className="w-full h-full"
+                                        ></iframe>
+                                      </div>
+                                      
+                                      <svg 
+                                        id="heat-map-svg-maximized"
+                                        viewBox="0 0 1000 700" 
+                                        className="w-full h-full bg-transparent absolute inset-0 cursor-grab active:cursor-grabbing pointer-events-none"
+                                        onMouseDown={(e) => {
+                                          const svg = e.currentTarget;
+                                          const startPoint = { x: e.clientX, y: e.clientY };
+                                          const viewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
+                                          const startViewBox = {
+                                            x: parseFloat(viewBox[0]),
+                                            y: parseFloat(viewBox[1]),
+                                            width: parseFloat(viewBox[2]),
+                                            height: parseFloat(viewBox[3])
+                                          };
+                                          
+                                          const handleMouseMove = (e: MouseEvent) => {
+                                            const dx = (startPoint.x - e.clientX) * (startViewBox.width / svg.clientWidth);
+                                            const dy = (startPoint.y - e.clientY) * (startViewBox.height / svg.clientHeight);
+                                            svg.setAttribute('viewBox', `${startViewBox.x + dx} ${startViewBox.y + dy} ${startViewBox.width} ${startViewBox.height}`);
+                                          };
+                                          
+                                          const handleMouseUp = () => {
+                                            document.removeEventListener('mousemove', handleMouseMove);
+                                            document.removeEventListener('mouseup', handleMouseUp);
+                                          };
+                                          
+                                          document.addEventListener('mousemove', handleMouseMove);
+                                          document.addEventListener('mouseup', handleMouseUp);
+                                        }}
+                                        onWheel={(e) => {
+                                          e.preventDefault();
+                                          const svg = e.currentTarget;
+                                          const viewBox = svg.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '700'];
+                                          const currentWidth = parseFloat(viewBox[2]);
+                                          const currentHeight = parseFloat(viewBox[3]);
+                                          const currentX = parseFloat(viewBox[0]);
+                                          const currentY = parseFloat(viewBox[1]);
+                                          
+                                          const zoomFactor = e.deltaY > 0 ? 1.15 : 0.85;
+                                          const newWidth = Math.max(50, Math.min(10000, currentWidth * zoomFactor));
+                                          const newHeight = Math.max(35, Math.min(7000, currentHeight * zoomFactor));
+                                          
+                                          // Center zoom around mouse position
+                                          const rect = svg.getBoundingClientRect();
+                                          const mouseX = ((e.clientX - rect.left) / rect.width) * currentWidth + currentX;
+                                          const mouseY = ((e.clientY - rect.top) / rect.height) * currentHeight + currentY;
+                                          
+                                          const newX = mouseX - (mouseX - currentX) * (newWidth / currentWidth);
+                                          const newY = mouseY - (mouseY - currentY) * (newHeight / currentHeight);
+                                          
+                                          svg.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
+                                        }}
+                                      >
+                                        {/* Background Map */}
+                                        <defs>
+                                          <pattern id="gridPatternMaximized" width="50" height="50" patternUnits="userSpaceOnUse">
+                                            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.5"/>
+                                          </pattern>
+                                          
+                                          {/* Gradient for heat intensity */}
+                                          <radialGradient id="heatGradientHighMaximized" cx="50%" cy="50%" r="50%">
+                                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.8"/>
+                                            <stop offset="50%" stopColor="#10b981" stopOpacity="0.4"/>
+                                            <stop offset="100%" stopColor="#10b981" stopOpacity="0.1"/>
+                                          </radialGradient>
+                                          
+                                          <radialGradient id="heatGradientMediumMaximized" cx="50%" cy="50%" r="50%">
+                                            <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.7"/>
+                                            <stop offset="50%" stopColor="#f59e0b" stopOpacity="0.3"/>
+                                            <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.1"/>
+                                          </radialGradient>
+                                        </defs>
+                                        
+                                        {/* Plot GPS Heat Points */}
+                                        {(() => {
+                                          // Group points by proximity to create heat intensity
+                                          const clusters = new Map();
+                                          
+                                          gpsHeatmap.data.forEach((point: any, index: number) => {
+                                            // Map GPS coordinates to SVG coordinates
+                                            const minLat = 25, maxLat = 42;
+                                            const minLng = 26, maxLng = 64;
+                                            
+                                            const x = ((point.lng - minLng) / (maxLng - minLng)) * 700 + 150;
+                                            const y = ((maxLat - point.lat) / (maxLat - minLat)) * 500 + 100;
+                                            
+                                            const mapX = Math.max(150, Math.min(850, x));
+                                            const mapY = Math.max(100, Math.min(600, y));
+                                            
+                                            // Group nearby points (within 30px radius)
+                                            const clusterKey = `${Math.floor(mapX / 30)}-${Math.floor(mapY / 30)}`;
+                                            if (!clusters.has(clusterKey)) {
+                                              clusters.set(clusterKey, { x: mapX, y: mapY, points: [], avgWeight: 0 });
+                                            }
+                                            clusters.get(clusterKey).points.push(point);
+                                          });
+                                          
+                                          // Calculate average weight for each cluster
+                                          clusters.forEach((cluster) => {
+                                            cluster.avgWeight = cluster.points.reduce((sum: number, p: any) => sum + p.weight, 0) / cluster.points.length;
+                                            cluster.intensity = cluster.points.length;
+                                          });
+                                          
+                                          return Array.from(clusters.values()).map((cluster, index) => (
+                                            <g key={`cluster-maximized-${index}`}>
+                                              {/* Heat bubble based on cluster intensity */}
+                                              <circle 
+                                                cx={cluster.x} 
+                                                cy={cluster.y} 
+                                                r={Math.min(50, 10 + cluster.intensity * 3)}
+                                                fill={cluster.avgWeight >= 1 ? "url(#heatGradientHighMaximized)" : "url(#heatGradientMediumMaximized)"}
+                                                opacity="0.6"
+                                              />
+                                              
+                                              {/* Center point marker */}
+                                              <circle 
+                                                cx={cluster.x} 
+                                                cy={cluster.y} 
+                                                r={Math.min(8, 3 + cluster.intensity)}
+                                                fill={cluster.avgWeight >= 1 ? "#10b981" : "#f59e0b"}
+                                                stroke="white"
+                                                strokeWidth="2"
+                                                className="hover:opacity-100 cursor-pointer pointer-events-auto"
+                                                onClick={() => {
+                                                  const avgLat = cluster.points.reduce((sum: number, p: any) => sum + p.lat, 0) / cluster.points.length;
+                                                  const avgLng = cluster.points.reduce((sum: number, p: any) => sum + p.lng, 0) / cluster.points.length;
+                                                  const googleMapsUrl = `https://www.google.com/maps?q=${avgLat},${avgLng}&z=15`;
+                                                  window.open(googleMapsUrl, '_blank');
+                                                }}
+                                              >
+                                                <title>
+                                                  🎯 منطقه تحویل (کلیک برای نمایش در Google Maps)
+                                                  📊 تعداد نقاط: {cluster.intensity}
+                                                  ⭐ میانگین دقت: {cluster.avgWeight.toFixed(1)}
+                                                  📍 کلیک کنید تا در Google Maps ببینید
+                                                </title>
+                                              </circle>
+                                              
+                                              {/* Pulse animation for high-intensity clusters */}
+                                              {cluster.intensity > 3 && (
+                                                <circle 
+                                                  cx={cluster.x} 
+                                                  cy={cluster.y} 
+                                                  r={10 + cluster.intensity * 2}
+                                                  fill="none"
+                                                  stroke={cluster.avgWeight >= 1 ? "#10b981" : "#f59e0b"}
+                                                  strokeWidth="1"
+                                                  opacity="0.7"
+                                                  className="animate-ping"
+                                                />
+                                              )}
+                                            </g>
+                                          ));
+                                        })()}
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                         
                         {/* Summary Statistics */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
