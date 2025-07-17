@@ -130,6 +130,10 @@ export interface IOrderManagementStorage {
     orderTotal: number;
     weight: number;
   }): Promise<number>;
+  
+  // Simple order numbering
+  generateSimpleOrderNumber(): Promise<string>;
+  resetOrderCounter(): Promise<void>;
 }
 
 export class OrderManagementStorage implements IOrderManagementStorage {
@@ -1160,6 +1164,42 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     } catch (error) {
       console.error(`Error calculating weight for order ${customerOrderId}:`, error);
       return 0;
+    }
+  }
+
+  // Simple order numbering functions
+  async generateSimpleOrderNumber(): Promise<string> {
+    try {
+      // Use raw SQL to handle atomic increment safely
+      const result = await db.execute(sql`
+        UPDATE simple_order_counter 
+        SET counter = counter + 1 
+        WHERE id = 1 
+        RETURNING counter, prefix
+      `);
+      
+      const row = result.rows[0] as { counter: number; prefix: string };
+      if (row) {
+        return `${row.prefix}-${row.counter}`;
+      }
+      
+      // Fallback if no counter exists
+      return `ORD-1001`;
+    } catch (error) {
+      console.error('Error generating simple order number:', error);
+      return `ORD-${Date.now()}`;
+    }
+  }
+
+  async resetOrderCounter(): Promise<void> {
+    try {
+      await db.execute(sql`
+        UPDATE simple_order_counter 
+        SET counter = 1001, last_reset = CURRENT_DATE 
+        WHERE id = 1
+      `);
+    } catch (error) {
+      console.error('Error resetting order counter:', error);
     }
   }
 }

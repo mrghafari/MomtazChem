@@ -5633,6 +5633,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // SIMPLE ORDER NUMBERING ENDPOINTS
+  // =============================================================================
+
+  // Generate simple order number
+  app.get("/api/orders/generate-simple-number", async (req, res) => {
+    try {
+      const simpleNumber = await orderManagementStorage.generateSimpleOrderNumber();
+      
+      res.json({ 
+        success: true, 
+        orderNumber: simpleNumber,
+        message: "شماره سفارش ساده تولید شد"
+      });
+    } catch (error) {
+      console.error("Error generating simple order number:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در تولید شماره سفارش" 
+      });
+    }
+  });
+
+  // Reset order counter (admin only)
+  app.post("/api/orders/reset-counter", async (req, res) => {
+    try {
+      await orderManagementStorage.resetOrderCounter();
+      
+      res.json({ 
+        success: true, 
+        message: "شمارنده سفارشات به حالت اولیه بازگشت (1001)"
+      });
+    } catch (error) {
+      console.error("Error resetting order counter:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در بازنشانی شمارنده" 
+      });
+    }
+  });
+
+  // =============================================================================
   // PROCEDURES MANAGEMENT ENDPOINTS
   // =============================================================================
 
