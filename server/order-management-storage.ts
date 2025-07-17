@@ -414,14 +414,15 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     .leftJoin(paymentReceipts, eq(paymentReceipts.customerOrderId, customerOrders.id));
     
     if (department === 'financial') {
-      // بخش مالی سفارشات در انتظار، با رسید پرداخت و در مراحل بررسی را می‌بیند
+      // بخش مالی فقط سفارشات در انتظار بررسی و رد شده را می‌بیند
+      // سفارشات تایید شده (financial_approved) به انبار منتقل می‌شوند
       const financialStatuses = statuses || [
         'pending', // سفارشات در انتظار که نیاز به بررسی فیش بانکی دارند
         orderStatuses.PENDING_PAYMENT,
         orderStatuses.PAYMENT_UPLOADED,
         orderStatuses.FINANCIAL_REVIEWING,
-        orderStatuses.FINANCIAL_APPROVED,
-        orderStatuses.FINANCIAL_REJECTED
+        // orderStatuses.FINANCIAL_APPROVED, // حذف شد - این سفارشات به انبار می‌روند
+        orderStatuses.FINANCIAL_REJECTED // فقط سفارشات رد شده در مالی باقی می‌مانند
       ];
       
       console.log('🔍 [FINANCIAL] Searching for orders with statuses:', financialStatuses);

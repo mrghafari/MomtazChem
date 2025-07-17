@@ -13472,9 +13472,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       console.log(`✅ [FINANCE] Approving order ${orderId} - moving to warehouse`);
 
       // When financial approves, move to warehouse_pending for warehouse approval
+      const { orderStatuses } = await import('../shared/order-management-schema');
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderId, 
-        'warehouse_pending', // Move to warehouse department
+        orderStatuses.WAREHOUSE_PENDING, // Use constant from schema
         adminId, 
         'financial', 
         notes || 'Payment approved by financial department - moving to warehouse'
