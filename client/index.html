@@ -39,12 +39,16 @@
     
     // تنظیم زبان فارسی و پیام خوش‌آمدگویی
     Tawk_API.onLoad = function(){
-      console.log('Tawk.to Live Chat loaded successfully');
-      // تنظیم متن پیش‌فرض
-      Tawk_API.setAttributes({
-        'name': 'مشتری ممتاز شیمی',
-        'email': 'guest@momtazchem.com'
-      });
+      try {
+        console.log('Tawk.to Live Chat loaded successfully');
+        // تنظیم متن پیش‌فرض
+        Tawk_API.setAttributes({
+          'name': 'مشتری ممتاز شیمی',
+          'email': 'guest@momtazchem.com'
+        });
+      } catch (error) {
+        console.warn('Tawk.to setup error (non-critical):', error);
+      }
     };
     
     // وقتی چت باز می‌شود
@@ -67,8 +71,16 @@
         console.log('Tawk.to script loaded successfully');
       };
       s1.onerror = function(e) {
-        console.error('Failed to load Tawk.to script:', e);
+        console.warn('Tawk.to loading error (non-critical):', e);
       };
+      
+      // تنظیم global error handler برای Tawk.to
+      window.addEventListener('error', function(e) {
+        if (e.message && e.message.includes('reportIncident')) {
+          e.preventDefault(); // جلوگیری از نمایش خطا در کنسول
+          return false;
+        }
+      });
       s0.parentNode.insertBefore(s1,s0);
     })();
     </script>
