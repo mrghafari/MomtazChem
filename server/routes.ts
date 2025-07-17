@@ -13830,33 +13830,24 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     try {
       const { id } = req.params;
       const { status, notes } = req.body;
-      const adminId = req.session?.adminId || 1;
+      // Support both admin and custom users
+      const userId = req.session?.adminId || req.session?.customUserId || 1;
       
-      console.log('📦 [WAREHOUSE] Processing order:', { id, status, notes, adminId });
+      console.log('📦 [WAREHOUSE] Processing order:', { id, status, notes, userId, sessionType: req.session?.adminId ? 'admin' : 'custom' });
       
-      // Update order status using direct database query for better control
-      const { pool } = await import('./db');
+      // Use order management storage to update order status
+      const updatedOrder = await orderManagementStorage.updateOrderStatus(
+        parseInt(id),
+        status,
+        userId,
+        'warehouse',
+        notes
+      );
       
-      const updateQuery = `
-        UPDATE orders 
-        SET 
-          status = $1, 
-          warehouse_notes = $2,
-          updated_at = NOW(),
-          ${status === 'warehouse_processing' ? 'warehouse_started_at = NOW(),' : ''}
-          ${status === 'warehouse_fulfilled' ? 'warehouse_fulfilled_at = NOW(),' : ''}
-          fulfilled_by = $3
-        WHERE id = $4
-        RETURNING *
-      `;
-      
-      const result = await pool.query(updateQuery, [status, notes, adminId, parseInt(id)]);
-      
-      if (result.rows.length === 0) {
+      if (!updatedOrder) {
         return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
       }
       
-      const updatedOrder = result.rows[0];
       console.log('📦 [WAREHOUSE] Order updated successfully:', updatedOrder);
       
       res.json({ success: true, data: updatedOrder });
