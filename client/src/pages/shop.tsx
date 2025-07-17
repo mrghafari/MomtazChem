@@ -979,11 +979,26 @@ const Shop = () => {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => setShowAuth(true)}
+                    onClick={() => {
+                      setAuthMode('login');
+                      setShowAuth(true);
+                    }}
                     className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   >
                     <User className="w-4 h-4" />
                     <span className="text-sm">Login</span>
+                  </Button>
+                  <span className="text-gray-400 text-sm">/</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      setAuthMode('register');
+                      setShowAuth(true);
+                    }}
+                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                  >
+                    <span className="text-sm">Register</span>
                   </Button>
                 </div>
               )}
