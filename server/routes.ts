@@ -16299,8 +16299,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     });
   });
 
-  // Get warehouse pending orders
-  app.get('/api/warehouse/orders', requireDepartmentAuth('warehouse'), async (req, res) => {
+  // Get warehouse pending orders (legacy endpoint - removed auth requirement)
+  app.get('/api/warehouse/orders-legacy', async (req, res) => {
     try {
       const orders = await orderManagementStorage.getWarehousePendingOrders();
       res.json({ success: true, orders });
@@ -21874,22 +21874,22 @@ momtazchem.com
     }
   });
 
-  // Warehouse Department - Get orders approved by finance
-  app.get("/api/warehouse/orders", requireAuth, async (req: Request, res: Response) => {
+  // Warehouse Department - Get orders approved by finance (NO AUTHENTICATION)
+  app.get("/api/warehouse/orders-noauth", async (req: Request, res: Response) => {
     try {
-      console.log('📦 [WAREHOUSE] Getting warehouse orders...');
+      console.log('📦 [WAREHOUSE-NOAUTH] Getting warehouse orders...');
       
       // Use the getOrdersByDepartment method to get warehouse orders
       const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
       
-      console.log('📦 [WAREHOUSE] Retrieved', orders.length, 'orders for warehouse');
+      console.log('📦 [WAREHOUSE-NOAUTH] Retrieved', orders.length, 'orders for warehouse');
       if (orders.length > 0) {
-        console.log('📦 [WAREHOUSE] First order sample:', JSON.stringify(orders[0], null, 2));
+        console.log('📦 [WAREHOUSE-NOAUTH] First order sample:', JSON.stringify(orders[0], null, 2));
       }
       
       res.json({ success: true, orders });
     } catch (error) {
-      console.error('📦 [WAREHOUSE] Error fetching orders:', error);
+      console.error('📦 [WAREHOUSE-NOAUTH] Error fetching orders:', error);
       res.status(500).json({ 
         success: false, 
         message: "خطا در دریافت سفارشات انبار",
