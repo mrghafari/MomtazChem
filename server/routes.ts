@@ -2508,7 +2508,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stockQuantity: newStockQuantity,
         batchNumber: batchNumber, // Update to latest batch
         lastRestockDate: new Date(),
-        unitPrice: unitPrice || product.unitPrice,
+        // قیمت محصول تغییر نمی‌کند - فقط برای بچ جدید ثبت می‌شود
+        // unitPrice remains unchanged - only recorded for the new batch
         supplier: supplier || product.supplier,
         warehouseLocation: warehouseLocation || product.warehouseLocation,
       };

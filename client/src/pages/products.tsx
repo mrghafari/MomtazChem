@@ -2616,7 +2616,7 @@ export default function ProductsPage() {
                   name="unitPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-right">قیمت واحد (IQD)</FormLabel>
+                      <FormLabel className="text-right">قیمت واحد محصول (فقط نمایش)</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
@@ -2624,36 +2624,27 @@ export default function ProductsPage() {
                           step="0.01"
                           min="0"
                           placeholder="5000"
-                          className="text-right"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          className="text-right bg-gray-50 cursor-not-allowed"
+                          readOnly
+                          disabled
+                          title="قیمت محصول ثابت است و تغییر نمی‌کند"
                         />
                       </FormControl>
                       <FormMessage />
+                      <p className="text-xs text-gray-500 text-right mt-1">
+                        💡 قیمت محصول ثابت باقی می‌ماند و تغییر نمی‌کند
+                      </p>
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={addQuantityForm.control}
-                  name="totalValue"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">ارزش کل (IQD)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="number" 
-                          step="0.01"
-                          min="0"
-                          placeholder="52500"
-                          className="text-right"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="flex items-center justify-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-center text-blue-700">
+                    <Package className="w-8 h-8 mx-auto mb-2" />
+                    <p className="text-sm font-medium">افزودن موجودی جدید</p>
+                    <p className="text-xs">قیمت محصول ثابت باقی می‌ماند</p>
+                  </div>
+                </div>
 
                 {/* Production Date and Expiry Date */}
                 <FormField
