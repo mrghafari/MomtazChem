@@ -2456,6 +2456,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // KARDEX BATCH MANAGEMENT ENDPOINTS - مدیریت بچ‌های کاردکس
+  // =============================================================================
+  
+  // Add quantity with new batch number to existing product
+  app.post("/api/kardex/add-quantity", async (req, res) => {
+    try {
+      const { productId, batchNumber, quantity, unitPrice, productionDate, expiryDate, supplier, warehouseLocation, notes } = req.body;
+      
+      if (!productId || !batchNumber || !quantity || quantity <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه محصول، شماره بچ و مقدار الزامی است"
+        });
+      }
+
+      // Get the product to update
+      const products = await storage.getProducts();
+      const product = products.find(p => p.id === productId);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: "محصول یافت نشد"
+        });
+      }
+
+      // Calculate total value
+      const totalValue = unitPrice ? (quantity * parseFloat(unitPrice)) : 0;
+
+      // Add batch entry to kardex_batches table
+      const batchEntry = {
+        productId,
+        batchNumber,
+        quantity,
+        unitPrice: unitPrice || product.unitPrice || "0.00",
+        totalValue: totalValue.toString(),
+        productionDate: productionDate ? new Date(productionDate) : null,
+        expiryDate: expiryDate ? new Date(expiryDate) : null,
+        supplier: supplier || product.supplier,
+        warehouseLocation: warehouseLocation || product.warehouseLocation,
+        notes: notes || `افزودن ${quantity} واحد با بچ ${batchNumber}`,
+        createdBy: req.session?.adminId ? `admin_${req.session.adminId}` : 'system'
+      };
+
+      // In a real implementation, this would be inserted into kardex_batches table
+      // For now, we'll update the main product's stock quantity and batch number
+      
+      // Update product stock quantity (add new quantity to existing)
+      const newStockQuantity = (product.stockQuantity || 0) + quantity;
+      const updatedProduct = {
+        stockQuantity: newStockQuantity,
+        batchNumber: batchNumber, // Update to latest batch
+        lastRestockDate: new Date(),
+        unitPrice: unitPrice || product.unitPrice,
+        supplier: supplier || product.supplier,
+        warehouseLocation: warehouseLocation || product.warehouseLocation,
+      };
+
+      await storage.updateProduct(productId, updatedProduct);
+
+      // Sync to shop if syncWithShop is enabled
+      if (product.syncWithShop) {
+        try {
+          const { KardexSyncMaster } = await import('./kardex-sync-master');
+          await KardexSyncMaster.smartSyncShopFromKardex();
+          console.log(`✅ [KARDEX-BATCH] Auto-synced to shop after adding quantity to product ${productId}`);
+        } catch (syncError) {
+          console.error("Auto-sync failed after adding quantity:", syncError);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `${quantity} واحد با شماره بچ ${batchNumber} به محصول اضافه شد`,
+        data: {
+          productId,
+          batchNumber,
+          quantity,
+          newStockQuantity,
+          totalValue: totalValue.toFixed(2)
+        }
+      });
+
+    } catch (error) {
+      console.error("Error adding quantity to product:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در افزودن مقدار به محصول"
+      });
+    }
+  });
+
+  // Get batch history for a product
+  app.get("/api/kardex/batches/:productId", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      
+      // In a real implementation, this would query kardex_batches table
+      // For now, return mock data based on current product
+      const products = await storage.getProducts();
+      const product = products.find(p => p.id === productId);
+      
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: "محصول یافت نشد"
+        });
+      }
+
+      // Mock batch data - in real implementation this would come from kardex_batches table
+      const batches = [
+        {
+          id: 1,
+          batchNumber: product.batchNumber || "BATCH-001",
+          quantity: product.stockQuantity || 0,
+          unitPrice: product.unitPrice || "0.00",
+          totalValue: ((product.stockQuantity || 0) * parseFloat(product.unitPrice || "0")).toFixed(2),
+          productionDate: product.lastRestockDate || new Date(),
+          createdAt: product.lastRestockDate || new Date(),
+          notes: "بچ فعلی",
+          isActive: true
+        }
+      ];
+
+      res.json({
+        success: true,
+        data: batches
+      });
+
+    } catch (error) {
+      console.error("Error fetching batch history:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت تاریخچه بچ‌ها"
+      });
+    }
+  });
+
+  // =============================================================================
   // KARDEX SYNC MASTER ENDPOINTS - سیستم همگام‌سازی ایمن
   // =============================================================================
   

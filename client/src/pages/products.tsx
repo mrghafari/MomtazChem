@@ -62,6 +62,18 @@ const formSchema = insertShowcaseProductSchema.extend({
   // Non-chemical product flag
   isNonChemical: z.boolean().default(false),
 });
+
+// Add quantity form schema
+const addQuantityFormSchema = z.object({
+  batchNumber: z.string().min(1, "شماره بچ الزامی است"),
+  quantity: z.coerce.number().min(1, "مقدار باید بیشتر از صفر باشد"),
+  unitPrice: z.coerce.number().min(0, "قیمت واحد نمی‌تواند منفی باشد").optional(),
+  productionDate: z.string().optional(),
+  expiryDate: z.string().optional(),
+  supplier: z.string().optional(),
+  warehouseLocation: z.string().optional(),
+  notes: z.string().optional(),
+});
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
 import { generateEAN13Barcode, validateEAN13 } from "@shared/barcode-utils";
@@ -153,6 +165,7 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
+  const [addingQuantityProduct, setAddingQuantityProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [, setLocation] = useLocation();
@@ -325,6 +338,49 @@ export default function ProductsPage() {
     }
   };
 
+  // Add quantity mutation
+  const { mutate: addQuantity } = useMutation({
+    mutationFn: (data: { productId: number } & z.infer<typeof addQuantityFormSchema>) => {
+      return apiRequest("/api/kardex/add-quantity", { method: "POST", body: data });
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setAddingQuantityProduct(null);
+      addQuantityForm.reset();
+      toast({
+        title: "✅ موفقیت",
+        description: result.message || "مقدار جدید با موفقیت اضافه شد",
+      });
+      // Immediate refresh to show changes
+      window.location.reload();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ خطا",
+        description: error.message || "افزودن مقدار ناموفق بود",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle add quantity to product
+  const handleAddQuantity = (product: ShowcaseProduct) => {
+    setAddingQuantityProduct(product);
+    addQuantityForm.setValue("unitPrice", parseFloat(product.unitPrice || "0"));
+    addQuantityForm.setValue("supplier", product.supplier || "");
+    addQuantityForm.setValue("warehouseLocation", product.warehouseLocation || "");
+  };
+
+  // Confirm add quantity
+  const confirmAddQuantity = (data: z.infer<typeof addQuantityFormSchema>) => {
+    if (addingQuantityProduct) {
+      addQuantity({
+        productId: addingQuantityProduct.id,
+        ...data
+      });
+    }
+  };
+
   // Quick sync toggle mutation
   const { mutate: toggleSync } = useMutation({
     mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) => {
@@ -442,6 +498,21 @@ export default function ProductsPage() {
       grossWeight: 0,
       // Batch tracking
       batchNumber: "",
+    },
+  });
+
+  // Add quantity form
+  const addQuantityForm = useForm<z.infer<typeof addQuantityFormSchema>>({
+    resolver: zodResolver(addQuantityFormSchema),
+    defaultValues: {
+      batchNumber: "",
+      quantity: 1,
+      unitPrice: 0,
+      productionDate: "",
+      expiryDate: "",
+      supplier: "",
+      warehouseLocation: "",
+      notes: "",
     },
   });
 
@@ -1160,6 +1231,15 @@ export default function ProductsPage() {
                           title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
                         >
                           {product.syncWithShop ? 'مخفی کردن' : 'نمایش'}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAddQuantity(product)}
+                          className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
+                          title="افزودن مقدار جدید با شماره بچ"
+                        >
+                          <Plus className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -2472,6 +2552,261 @@ export default function ProductsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add Quantity Dialog */}
+      <Dialog open={!!addingQuantityProduct} onOpenChange={() => setAddingQuantityProduct(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-right">
+              🔢 افزودن مقدار جدید - {addingQuantityProduct?.name}
+            </DialogTitle>
+            <DialogDescription className="text-right text-gray-600">
+              مقدار جدید با شماره بچ جدید برای این محصول اضافه کنید. این مقدار به موجودی کل محصول در انبار اضافه خواهد شد.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...addQuantityForm}>
+            <form onSubmit={addQuantityForm.handleSubmit(confirmAddQuantity)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* Quantity and Batch */}
+                <FormField
+                  control={addQuantityForm.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">مقدار (کیلوگرم)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="number" 
+                          step="0.01"
+                          min="0.01"
+                          placeholder="10.5"
+                          className="text-right"
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={addQuantityForm.control}
+                  name="batchNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">شماره بچ</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="BATCH-2025-001"
+                          className="text-right"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Unit Price and Total Value */}
+                <FormField
+                  control={addQuantityForm.control}
+                  name="unitPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">قیمت واحد (IQD)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          placeholder="5000"
+                          className="text-right"
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={addQuantityForm.control}
+                  name="totalValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">ارزش کل (IQD)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          placeholder="52500"
+                          className="text-right"
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Production Date and Expiry Date */}
+                <FormField
+                  control={addQuantityForm.control}
+                  name="productionDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">تاریخ تولید</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="date"
+                          className="text-right"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={addQuantityForm.control}
+                  name="expiryDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">تاریخ انقضا</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="date"
+                          className="text-right"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Supplier and Warehouse Location */}
+                <FormField
+                  control={addQuantityForm.control}
+                  name="supplier"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">تامین کننده</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="شرکت ممتاز شیمی"
+                          className="text-right"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={addQuantityForm.control}
+                  name="warehouseLocation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">محل انبار</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="A1-B2-C3"
+                          className="text-right"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Quality Grade and Notes */}
+                <FormField
+                  control={addQuantityForm.control}
+                  name="qualityGrade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">درجه کیفیت</FormLabel>
+                      <FormControl>
+                        <Select 
+                          value={field.value} 
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="text-right">
+                            <SelectValue placeholder="انتخاب کنید" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="A">A - عالی</SelectItem>
+                            <SelectItem value="B">B - خوب</SelectItem>
+                            <SelectItem value="C">C - متوسط</SelectItem>
+                            <SelectItem value="D">D - قابل قبول</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={addQuantityForm.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-right">یادداشت</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="یادداشت اختیاری"
+                          className="text-right"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setAddingQuantityProduct(null)}
+                >
+                  انصراف
+                </Button>
+                <Button 
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={addQuantity.isPending}
+                >
+                  {addQuantity.isPending ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      در حال افزودن...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 mr-2" />
+                      افزودن مقدار
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
