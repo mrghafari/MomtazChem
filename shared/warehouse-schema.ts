@@ -23,20 +23,16 @@ export const warehouseLocations = pgTable("warehouse_locations", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Enhanced warehouse items with all Excel fields
-export const warehouseItems = pgTable("warehouse_items", {
+// Master product definitions (کالاها اصلی)
+export const warehouseProducts = pgTable("warehouse_products", {
   id: serial("id").primaryKey(),
-  productCode: text("product_code").notNull().unique(), // کد کالا - P-001, R-001
-  productName: text("product_name").notNull(), // نام کالا
+  productCode: text("product_code").notNull().unique(), // کد کالا - PT-300 (Paint Thinner PT-300)
+  productName: text("product_name").notNull(), // نام کالا - Paint Thinner PT-300
   productType: text("product_type").notNull(), // نوع: محصول نهایی، ماده اولیه، بسته‌بندی
   unit: text("unit").notNull().default("عدد"), // واحد: عدد، لیتر، کیلوگرم
-  initialStock: integer("initial_stock").default(0), // موجودی اولیه
-  currentStock: integer("current_stock").default(0), // موجودی فعلی
   minStockLevel: integer("min_stock_level").default(0), // حداقل موجودی
   maxStockLevel: integer("max_stock_level"), // حداکثر موجودی
-  warehouseLocationId: integer("warehouse_location_id").references(() => warehouseLocations.id), // محل انبار
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).default("0.00"), // قیمت واحد
-  totalValue: decimal("total_value", { precision: 12, scale: 2 }).default("0.00"), // ارزش کل
+  standardUnitPrice: decimal("standard_unit_price", { precision: 10, scale: 2 }).default("0.00"), // قیمت استاندارد
   category: text("category"), // دسته‌بندی
   subcategory: text("subcategory"), // زیردسته
   specifications: json("specifications"), // مشخصات فنی
@@ -45,22 +41,45 @@ export const warehouseItems = pgTable("warehouse_items", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Warehouse receipt entries (ورود به انبار)
+// Batch-based inventory items (هر بچ = یک ردیف جداگانه)
+export const warehouseItems = pgTable("warehouse_items", {
+  id: serial("id").primaryKey(),
+  warehouseProductId: integer("warehouse_product_id").notNull().references(() => warehouseProducts.id), // مرجع به محصول اصلی
+  batchNumber: text("batch_number").notNull(), // شماره بچ - 1, 2, 100, 102
+  batchCode: text("batch_code").notNull().unique(), // کد یکتا = productCode + "-" + batchNumber (PT-300-1, PT-300-2)
+  warehouseLocationId: integer("warehouse_location_id").references(() => warehouseLocations.id), // محل انبار
+  currentStock: integer("current_stock").default(0), // موجودی فعلی این بچ
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).default("0.00"), // قیمت این بچ
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).default("0.00"), // ارزش کل این بچ
+  productionDate: timestamp("production_date"), // تاریخ تولید
+  expiryDate: timestamp("expiry_date"), // تاریخ انقضا
+  supplierName: text("supplier_name"), // تأمین‌کننده این بچ
+  supplierCode: text("supplier_code"), // کد تامین‌کننده
+  qualityGrade: text("quality_grade"), // درجه کیفیت: A, B, C
+  notes: text("notes"), // یادداشت خاص این بچ
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Warehouse receipt entries (ورود به انبار) - هر ورود برای یک بچ خاص
 export const warehouseReceipts = pgTable("warehouse_receipts", {
   id: serial("id").primaryKey(),
   receiptNumber: text("receipt_number").notNull().unique(), // شماره رسید - WR-20250701-001
   receiptDate: timestamp("receipt_date").notNull(), // تاریخ ورود
-  warehouseItemId: integer("warehouse_item_id").notNull().references(() => warehouseItems.id),
+  warehouseProductId: integer("warehouse_product_id").notNull().references(() => warehouseProducts.id), // محصول اصلی
+  warehouseItemId: integer("warehouse_item_id").references(() => warehouseItems.id), // بچ خاص (اختیاری، چون ممکن است بچ جدید ایجاد شود)
+  batchNumber: text("batch_number").notNull(), // شماره بچ - این ورود برای کدام بچ است
   quantity: integer("quantity").notNull(), // مقدار
   unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).default("0.00"), // قیمت واحد
   totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).default("0.00"), // مبلغ کل
   source: text("source").notNull(), // مرجع: تولید، خرید، انتقال
   supplierName: text("supplier_name"), // تأمین‌کننده/تولید
   supplierCode: text("supplier_code"), // کد تامین‌کننده
-  batchNumber: text("batch_number"), // شماره بچ
   productionDate: timestamp("production_date"), // تاریخ تولید
   expiryDate: timestamp("expiry_date"), // تاریخ انقضا
   qualityControl: boolean("quality_control").default(false), // کنترل کیفیت
+  qualityGrade: text("quality_grade"), // درجه کیفیت: A, B, C
   qualityNotes: text("quality_notes"), // یادداشت کیفیت
   registeredBy: text("registered_by").notNull(), // مسئول ثبت
   approvedBy: text("approved_by"), // تأیید شده توسط
@@ -71,12 +90,12 @@ export const warehouseReceipts = pgTable("warehouse_receipts", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Warehouse issue entries (خروج از انبار)
+// Warehouse issue entries (خروج از انبار) - هر خروج از یک بچ خاص
 export const warehouseIssues = pgTable("warehouse_issues", {
   id: serial("id").primaryKey(),
   issueNumber: text("issue_number").notNull().unique(), // شماره حواله - IS-20250701-001
   issueDate: timestamp("issue_date").notNull(), // تاریخ خروج
-  warehouseItemId: integer("warehouse_item_id").notNull().references(() => warehouseItems.id),
+  warehouseItemId: integer("warehouse_item_id").notNull().references(() => warehouseItems.id), // بچ خاص
   quantity: integer("quantity").notNull(), // مقدار
   unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).default("0.00"), // قیمت واحد
   totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).default("0.00"), // مبلغ کل
@@ -146,6 +165,15 @@ export const insertWarehouseLocationSchema = createInsertSchema(warehouseLocatio
 });
 export type InsertWarehouseLocation = z.infer<typeof insertWarehouseLocationSchema>;
 export type WarehouseLocation = typeof warehouseLocations.$inferSelect;
+
+// Warehouse products (master definitions)
+export const insertWarehouseProductSchema = createInsertSchema(warehouseProducts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertWarehouseProduct = z.infer<typeof insertWarehouseProductSchema>;
+export type WarehouseProduct = typeof warehouseProducts.$inferSelect;
 
 // Warehouse items
 export const insertWarehouseItemSchema = createInsertSchema(warehouseItems).omit({

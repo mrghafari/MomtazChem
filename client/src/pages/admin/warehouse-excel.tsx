@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
-// Types based on Excel structure
+// Types based on batch-based Excel structure
 interface WarehouseLocation {
   id: number;
   name: string;
@@ -24,22 +24,37 @@ interface WarehouseLocation {
   isActive: boolean;
 }
 
-interface WarehouseItem {
+interface WarehouseProduct {
   id: number;
-  productCode: string;
-  productName: string;
+  productCode: string; // PT-300
+  productName: string; // Paint Thinner PT-300
   productType: string; // محصول نهایی، ماده اولیه، بسته‌بندی
   unit: string;
-  initialStock: number;
-  currentStock: number;
   minStockLevel: number;
   maxStockLevel?: number;
-  warehouseLocationId?: number;
-  unitPrice: number;
-  totalValue: number;
+  standardUnitPrice: number;
   category?: string;
   subcategory?: string;
   isActive: boolean;
+}
+
+interface WarehouseItem {
+  id: number;
+  warehouseProductId: number;
+  batchNumber: string; // 1, 2, 100, 102
+  batchCode: string; // PT-300-1, PT-300-2, PT-300-100
+  currentStock: number;
+  unitPrice: number;
+  totalValue: number;
+  productionDate?: string;
+  expiryDate?: string;
+  supplierName?: string;
+  supplierCode?: string;
+  qualityGrade?: string;
+  notes?: string;
+  warehouseLocationId?: number;
+  isActive: boolean;
+  warehouseProduct?: WarehouseProduct;
   warehouseLocation?: WarehouseLocation;
 }
 
@@ -110,7 +125,13 @@ const WarehouseExcelManagement: React.FC = () => {
     queryFn: () => apiRequest('/api/warehouse/locations')
   });
 
-  // Fetch warehouse items (کالاها)
+  // Fetch warehouse products (کالاها اصلی - از کاردکس)
+  const { data: products = [] } = useQuery<WarehouseProduct[]>({
+    queryKey: ['/api/warehouse/products'],
+    queryFn: () => apiRequest('/api/warehouse/products')
+  });
+
+  // Fetch warehouse items (بچ‌های موجود برای هر محصول)
   const { data: items = [], isLoading: itemsLoading } = useQuery<WarehouseItem[]>({
     queryKey: ['/api/warehouse/items'],
     queryFn: () => apiRequest('/api/warehouse/items')

@@ -91,9 +91,11 @@ import {
 } from "@shared/logistics-schema";
 import { 
   warehouseLocations, 
+  warehouseProducts,
   warehouseItems, 
   warehouseReceipts, 
   warehouseIssues,
+  insertWarehouseProductSchema,
   insertWarehouseItemSchema,
   insertWarehouseReceiptSchema,
   insertWarehouseIssueSchema
@@ -367,6 +369,253 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create requireAdmin alias for better semantics
   const requireAdmin = requireAuth;
   
+  // =============================================================================
+  // WAREHOUSE MANAGEMENT API ROUTES - Based on Excel Structure
+  // =============================================================================
+
+  // Get warehouse locations
+  app.get("/api/warehouse/locations", async (req: Request, res: Response) => {
+    try {
+      const locations = await db.select().from(warehouseLocations).where(eq(warehouseLocations.isActive, true));
+      res.json(locations);
+    } catch (error) {
+      console.error("Error fetching warehouse locations:", error);
+      res.status(500).json({ success: false, message: "خطا در بارگیری انبارها" });
+    }
+  });
+
+  // Sync products from Kardex to warehouse products
+  app.post("/api/warehouse/sync-from-kardex", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const showcaseProducts = await db.select().from(products).where(eq(products.isActive, true));
+      let syncedCount = 0;
+      
+      for (const showcaseProduct of showcaseProducts) {
+        // Check if already exists
+        const existing = await db.select().from(warehouseProducts)
+          .where(eq(warehouseProducts.productCode, showcaseProduct.sku || showcaseProduct.name))
+          .limit(1);
+        
+        if (existing.length === 0) {
+          await db.insert(warehouseProducts).values({
+            productCode: showcaseProduct.sku || showcaseProduct.name.substring(0, 10),
+            productName: showcaseProduct.name,
+            productType: "محصول نهایی", 
+            unit: "عدد",
+            minStockLevel: showcaseProduct.minStockLevel || 0,
+            maxStockLevel: showcaseProduct.maxStockLevel || 100,
+            standardUnitPrice: showcaseProduct.unitPrice || showcaseProduct.price || 0,
+            category: showcaseProduct.category,
+            subcategory: showcaseProduct.subcategory,
+            specifications: showcaseProduct.specifications
+          });
+          syncedCount++;
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `${syncedCount} محصول از کاردکس همگام‌سازی شد`,
+        syncedCount 
+      });
+    } catch (error) {
+      console.error("Error syncing from Kardex:", error);
+      res.status(500).json({ success: false, message: "خطا در همگام‌سازی از کاردکس" });
+    }
+  });
+
+  // Get warehouse products (کالاها اصلی)
+  app.get("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const { category, type } = req.query;
+      
+      let query = db.select().from(warehouseProducts).where(eq(warehouseProducts.isActive, true));
+      const warehouseProductsList = await query;
+      
+      // Apply filters
+      let filteredProducts = warehouseProductsList;
+      if (category) {
+        filteredProducts = filteredProducts.filter(product => product.category === category);
+      }
+      if (type) {
+        filteredProducts = filteredProducts.filter(product => product.productType === type);
+      }
+      
+      res.json(filteredProducts);
+    } catch (error) {
+      console.error("Error fetching warehouse products:", error);
+      res.status(500).json({ success: false, message: "خطا در بارگیری محصولات" });
+    }
+  });
+
+  // Get warehouse items (بچ‌های موجود برای هر محصول)
+  app.get("/api/warehouse/items", async (req: Request, res: Response) => {
+    try {
+      const { productId, category, type, lowStock } = req.query;
+      
+      let query = db.select({
+        id: warehouseItems.id,
+        warehouseProductId: warehouseItems.warehouseProductId,
+        batchNumber: warehouseItems.batchNumber,
+        batchCode: warehouseItems.batchCode,
+        currentStock: warehouseItems.currentStock,
+        unitPrice: warehouseItems.unitPrice,
+        totalValue: warehouseItems.totalValue,
+        productionDate: warehouseItems.productionDate,
+        expiryDate: warehouseItems.expiryDate,
+        supplierName: warehouseItems.supplierName,
+        supplierCode: warehouseItems.supplierCode,
+        qualityGrade: warehouseItems.qualityGrade,
+        notes: warehouseItems.notes,
+        isActive: warehouseItems.isActive,
+        warehouseLocationId: warehouseItems.warehouseLocationId,
+        createdAt: warehouseItems.createdAt,
+        updatedAt: warehouseItems.updatedAt,
+        warehouseProduct: {
+          id: warehouseProducts.id,
+          productCode: warehouseProducts.productCode,
+          productName: warehouseProducts.productName,
+          productType: warehouseProducts.productType,
+          unit: warehouseProducts.unit,
+          minStockLevel: warehouseProducts.minStockLevel,
+          maxStockLevel: warehouseProducts.maxStockLevel,
+          standardUnitPrice: warehouseProducts.standardUnitPrice,
+          category: warehouseProducts.category,
+          subcategory: warehouseProducts.subcategory
+        },
+        warehouseLocation: {
+          id: warehouseLocations.id,
+          name: warehouseLocations.name,
+          code: warehouseLocations.code
+        }
+      }).from(warehouseItems)
+        .leftJoin(warehouseProducts, eq(warehouseItems.warehouseProductId, warehouseProducts.id))
+        .leftJoin(warehouseLocations, eq(warehouseItems.warehouseLocationId, warehouseLocations.id))
+        .where(eq(warehouseItems.isActive, true));
+
+      if (productId) {
+        query = query.where(eq(warehouseItems.warehouseProductId, Number(productId)));
+      }
+
+      const items = await query;
+      
+      // Apply filters
+      let filteredItems = items;
+      if (category) {
+        filteredItems = filteredItems.filter(item => item.warehouseProduct?.category === category);
+      }
+      if (type) {
+        filteredItems = filteredItems.filter(item => item.warehouseProduct?.productType === type);
+      }
+      if (lowStock === 'true') {
+        filteredItems = filteredItems.filter(item => 
+          item.currentStock <= (item.warehouseProduct?.minStockLevel || 0)
+        );
+      }
+      
+      res.json(filteredItems);
+    } catch (error) {
+      console.error("Error fetching warehouse items:", error);
+      res.status(500).json({ success: false, message: "خطا در بارگیری بچ‌های کالا" });
+    }
+  });
+
+  // Get warehouse receipts (ورود به انبار)
+  app.get("/api/warehouse/receipts", async (req: Request, res: Response) => {
+    try {
+      const receipts = await db.select({
+        id: warehouseReceipts.id,
+        receiptNumber: warehouseReceipts.receiptNumber,
+        receiptDate: warehouseReceipts.receiptDate,
+        warehouseProductId: warehouseReceipts.warehouseProductId,
+        warehouseItemId: warehouseReceipts.warehouseItemId,
+        batchNumber: warehouseReceipts.batchNumber,
+        quantity: warehouseReceipts.quantity,
+        unitPrice: warehouseReceipts.unitPrice,
+        totalAmount: warehouseReceipts.totalAmount,
+        source: warehouseReceipts.source,
+        supplierName: warehouseReceipts.supplierName,
+        supplierCode: warehouseReceipts.supplierCode,
+        productionDate: warehouseReceipts.productionDate,
+        expiryDate: warehouseReceipts.expiryDate,
+        qualityControl: warehouseReceipts.qualityControl,
+        qualityNotes: warehouseReceipts.qualityNotes,
+        registeredBy: warehouseReceipts.registeredBy,
+        approvedBy: warehouseReceipts.approvedBy,
+        notes: warehouseReceipts.notes,
+        status: warehouseReceipts.status,
+        createdAt: warehouseReceipts.createdAt,
+        updatedAt: warehouseReceipts.updatedAt
+      }).from(warehouseReceipts)
+        .orderBy(warehouseReceipts.receiptDate);
+
+      res.json(receipts);
+    } catch (error) {
+      console.error("Error fetching warehouse receipts:", error);
+      res.status(500).json({ success: false, message: "خطا در بارگیری ورودی‌های انبار" });
+    }
+  });
+
+  // Get warehouse issues (خروج از انبار)
+  app.get("/api/warehouse/issues", async (req: Request, res: Response) => {
+    try {
+      const issues = await db.select({
+        id: warehouseIssues.id,
+        issueNumber: warehouseIssues.issueNumber,
+        issueDate: warehouseIssues.issueDate,
+        warehouseItemId: warehouseIssues.warehouseItemId,
+        quantity: warehouseIssues.quantity,
+        unitPrice: warehouseIssues.unitPrice,
+        totalAmount: warehouseIssues.totalAmount,
+        destination: warehouseIssues.destination,
+        reference: warehouseIssues.reference,
+        customerName: warehouseIssues.customerName,
+        customerCode: warehouseIssues.customerCode,
+        orderNumber: warehouseIssues.orderNumber,
+        invoiceNumber: warehouseIssues.invoiceNumber,
+        vehicleInfo: warehouseIssues.vehicleInfo,
+        driverName: warehouseIssues.driverName,
+        registeredBy: warehouseIssues.registeredBy,
+        approvedBy: warehouseIssues.approvedBy,
+        notes: warehouseIssues.notes,
+        status: warehouseIssues.status,
+        createdAt: warehouseIssues.createdAt,
+        updatedAt: warehouseIssues.updatedAt
+      }).from(warehouseIssues)
+        .orderBy(warehouseIssues.issueDate);
+
+      res.json(issues);
+    } catch (error) {
+      console.error("Error fetching warehouse issues:", error);
+      res.status(500).json({ success: false, message: "خطا در بارگیری خروجی‌های انبار" });
+    }
+  });
+
+  // Get warehouse stats
+  app.get("/api/warehouse/stats", async (req: Request, res: Response) => {
+    try {
+      const totalProducts = await db.select({ count: sql`count(*)` }).from(warehouseProducts).where(eq(warehouseProducts.isActive, true));
+      const totalItems = await db.select({ count: sql`count(*)` }).from(warehouseItems).where(eq(warehouseItems.isActive, true));
+      const totalReceipts = await db.select({ count: sql`count(*)` }).from(warehouseReceipts);
+      const totalIssues = await db.select({ count: sql`count(*)` }).from(warehouseIssues);
+
+      res.json({
+        totalProducts: totalProducts[0]?.count || 0,
+        totalItems: totalItems[0]?.count || 0,
+        lowStockItems: 0, // Will be calculated based on minStockLevel
+        outOfStockItems: 0, // Items with currentStock = 0
+        totalValue: 0, // Sum of all item values
+        pendingReceipts: totalReceipts[0]?.count || 0,
+        pendingIssues: totalIssues[0]?.count || 0,
+        monthlyReceipts: 0,
+        monthlyIssues: 0
+      });
+    } catch (error) {
+      console.error("Error fetching warehouse stats:", error);
+      res.status(500).json({ success: false, message: "خطا در بارگیری آمار انبار" });
+    }
+  });
+
   // Add department middleware to all authenticated routes (excluding ticket creation for guest access)
   app.use('/api', (req, res, next) => {
     // Skip auth middleware for ticket creation to allow guest access
@@ -26374,324 +26623,6 @@ momtazchem.com
         message: "Failed to generate sequential code",
         error: error.message
       });
-    }
-  });
-
-  // =============================================================================
-  // WAREHOUSE MANAGEMENT API ROUTES - Based on Excel Structure
-  // =============================================================================
-
-  // Get warehouse locations
-  app.get("/api/warehouse/locations", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const locations = await db.select().from(warehouseLocations).where(eq(warehouseLocations.isActive, true));
-      res.json(locations);
-    } catch (error) {
-      console.error("Error fetching warehouse locations:", error);
-      res.status(500).json({ success: false, message: "خطا در بارگیری انبارها" });
-    }
-  });
-
-  // Get warehouse items (کالاها)
-  app.get("/api/warehouse/items", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const { category, type, lowStock } = req.query;
-      
-      let query = db.select({
-        id: warehouseItems.id,
-        productCode: warehouseItems.productCode,
-        productName: warehouseItems.productName,
-        productType: warehouseItems.productType,
-        unit: warehouseItems.unit,
-        initialStock: warehouseItems.initialStock,
-        currentStock: warehouseItems.currentStock,
-        minStockLevel: warehouseItems.minStockLevel,
-        maxStockLevel: warehouseItems.maxStockLevel,
-        warehouseLocationId: warehouseItems.warehouseLocationId,
-        unitPrice: warehouseItems.unitPrice,
-        totalValue: warehouseItems.totalValue,
-        category: warehouseItems.category,
-        subcategory: warehouseItems.subcategory,
-        isActive: warehouseItems.isActive,
-        warehouseLocation: {
-          id: warehouseLocations.id,
-          name: warehouseLocations.name,
-          code: warehouseLocations.code
-        }
-      }).from(warehouseItems)
-        .leftJoin(warehouseLocations, eq(warehouseItems.warehouseLocationId, warehouseLocations.id))
-        .where(eq(warehouseItems.isActive, true));
-
-      const items = await query;
-      
-      // Apply filters
-      let filteredItems = items;
-      if (category) {
-        filteredItems = filteredItems.filter(item => item.category === category);
-      }
-      if (type) {
-        filteredItems = filteredItems.filter(item => item.productType === type);
-      }
-      if (lowStock === 'true') {
-        filteredItems = filteredItems.filter(item => item.currentStock <= item.minStockLevel);
-      }
-      
-      res.json(filteredItems);
-    } catch (error) {
-      console.error("Error fetching warehouse items:", error);
-      res.status(500).json({ success: false, message: "خطا در بارگیری کالاها" });
-    }
-  });
-
-  // Get warehouse receipts (ورود به انبار)
-  app.get("/api/warehouse/receipts", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const receipts = await db.select({
-        id: warehouseReceipts.id,
-        receiptNumber: warehouseReceipts.receiptNumber,
-        receiptDate: warehouseReceipts.receiptDate,
-        warehouseItemId: warehouseReceipts.warehouseItemId,
-        quantity: warehouseReceipts.quantity,
-        unitPrice: warehouseReceipts.unitPrice,
-        totalAmount: warehouseReceipts.totalAmount,
-        source: warehouseReceipts.source,
-        supplierName: warehouseReceipts.supplierName,
-        supplierCode: warehouseReceipts.supplierCode,
-        batchNumber: warehouseReceipts.batchNumber,
-        productionDate: warehouseReceipts.productionDate,
-        expiryDate: warehouseReceipts.expiryDate,
-        registeredBy: warehouseReceipts.registeredBy,
-        approvedBy: warehouseReceipts.approvedBy,
-        notes: warehouseReceipts.notes,
-        status: warehouseReceipts.status,
-        warehouseItem: {
-          id: warehouseItems.id,
-          productCode: warehouseItems.productCode,
-          productName: warehouseItems.productName,
-          unit: warehouseItems.unit
-        }
-      }).from(warehouseReceipts)
-        .leftJoin(warehouseItems, eq(warehouseReceipts.warehouseItemId, warehouseItems.id))
-        .orderBy(desc(warehouseReceipts.receiptDate));
-      
-      res.json(receipts);
-    } catch (error) {
-      console.error("Error fetching warehouse receipts:", error);
-      res.status(500).json({ success: false, message: "خطا در بارگیری ورودی‌های انبار" });
-    }
-  });
-
-  // Get warehouse issues (خروج از انبار)
-  app.get("/api/warehouse/issues", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const issues = await db.select({
-        id: warehouseIssues.id,
-        issueNumber: warehouseIssues.issueNumber,
-        issueDate: warehouseIssues.issueDate,
-        warehouseItemId: warehouseIssues.warehouseItemId,
-        quantity: warehouseIssues.quantity,
-        unitPrice: warehouseIssues.unitPrice,
-        totalAmount: warehouseIssues.totalAmount,
-        destination: warehouseIssues.destination,
-        reference: warehouseIssues.reference,
-        customerName: warehouseIssues.customerName,
-        customerCode: warehouseIssues.customerCode,
-        orderNumber: warehouseIssues.orderNumber,
-        invoiceNumber: warehouseIssues.invoiceNumber,
-        registeredBy: warehouseIssues.registeredBy,
-        approvedBy: warehouseIssues.approvedBy,
-        notes: warehouseIssues.notes,
-        status: warehouseIssues.status,
-        warehouseItem: {
-          id: warehouseItems.id,
-          productCode: warehouseItems.productCode,
-          productName: warehouseItems.productName,
-          unit: warehouseItems.unit
-        }
-      }).from(warehouseIssues)
-        .leftJoin(warehouseItems, eq(warehouseIssues.warehouseItemId, warehouseItems.id))
-        .orderBy(desc(warehouseIssues.issueDate));
-      
-      res.json(issues);
-    } catch (error) {
-      console.error("Error fetching warehouse issues:", error);
-      res.status(500).json({ success: false, message: "خطا در بارگیری خروجی‌های انبار" });
-    }
-  });
-
-  // Get warehouse statistics
-  app.get("/api/warehouse/stats", requireAuth, async (req: Request, res: Response) => {
-    try {
-      // Get total items
-      const totalItemsResult = await db.select({ count: sql`count(*)` })
-        .from(warehouseItems)
-        .where(eq(warehouseItems.isActive, true));
-      const totalItems = Number(totalItemsResult[0]?.count || 0);
-
-      // Get low stock items
-      const lowStockResult = await db.select({ count: sql`count(*)` })
-        .from(warehouseItems)
-        .where(and(
-          eq(warehouseItems.isActive, true),
-          sql`current_stock <= min_stock_level`
-        ));
-      const lowStockItems = Number(lowStockResult[0]?.count || 0);
-
-      // Get out of stock items
-      const outOfStockResult = await db.select({ count: sql`count(*)` })
-        .from(warehouseItems)
-        .where(and(
-          eq(warehouseItems.isActive, true),
-          sql`current_stock <= 0`
-        ));
-      const outOfStockItems = Number(outOfStockResult[0]?.count || 0);
-
-      // Get total value
-      const totalValueResult = await db.select({ 
-        totalValue: sql`sum(total_value)` 
-      }).from(warehouseItems).where(eq(warehouseItems.isActive, true));
-      const totalValue = Number(totalValueResult[0]?.totalValue || 0);
-
-      // Get pending receipts and issues
-      const pendingReceiptsResult = await db.select({ count: sql`count(*)` })
-        .from(warehouseReceipts)
-        .where(eq(warehouseReceipts.status, 'pending'));
-      const pendingReceipts = Number(pendingReceiptsResult[0]?.count || 0);
-
-      const pendingIssuesResult = await db.select({ count: sql`count(*)` })
-        .from(warehouseIssues)
-        .where(eq(warehouseIssues.status, 'pending'));
-      const pendingIssues = Number(pendingIssuesResult[0]?.count || 0);
-
-      // Get monthly receipts and issues (current month)
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-      const monthlyReceiptsResult = await db.select({ count: sql`count(*)` })
-        .from(warehouseReceipts)
-        .where(and(
-          sql`receipt_date >= ${startOfMonth.toISOString()}`,
-          sql`receipt_date <= ${endOfMonth.toISOString()}`
-        ));
-      const monthlyReceipts = Number(monthlyReceiptsResult[0]?.count || 0);
-
-      const monthlyIssuesResult = await db.select({ count: sql`count(*)` })
-        .from(warehouseIssues)
-        .where(and(
-          sql`issue_date >= ${startOfMonth.toISOString()}`,
-          sql`issue_date <= ${endOfMonth.toISOString()}`
-        ));
-      const monthlyIssues = Number(monthlyIssuesResult[0]?.count || 0);
-
-      const stats = {
-        totalItems,
-        lowStockItems,
-        outOfStockItems,
-        totalValue,
-        pendingReceipts,
-        pendingIssues,
-        monthlyReceipts,
-        monthlyIssues
-      };
-
-      res.json(stats);
-    } catch (error) {
-      console.error("Error fetching warehouse statistics:", error);
-      res.status(500).json({ success: false, message: "خطا در بارگیری آمار انبار" });
-    }
-  });
-
-  // Create warehouse item
-  app.post("/api/warehouse/items", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const itemData = insertWarehouseItemSchema.parse(req.body);
-      
-      const [newItem] = await db.insert(warehouseItems)
-        .values({
-          ...itemData,
-          totalValue: sql`${itemData.unitPrice} * ${itemData.currentStock}`
-        })
-        .returning();
-
-      res.json({ success: true, data: newItem });
-    } catch (error) {
-      console.error("Error creating warehouse item:", error);
-      res.status(500).json({ success: false, message: "خطا در ایجاد کالای جدید" });
-    }
-  });
-
-  // Create warehouse receipt
-  app.post("/api/warehouse/receipts", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const receiptData = insertWarehouseReceiptSchema.parse(req.body);
-      
-      // Generate receipt number if not provided
-      if (!receiptData.receiptNumber) {
-        const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
-        const dailyCount = await db.select({ count: sql`count(*)` })
-          .from(warehouseReceipts)
-          .where(sql`DATE(receipt_date) = CURRENT_DATE`);
-        const sequence = String(Number(dailyCount[0]?.count || 0) + 1).padStart(3, '0');
-        receiptData.receiptNumber = `WR-${today}-${sequence}`;
-      }
-
-      const [newReceipt] = await db.insert(warehouseReceipts)
-        .values(receiptData)
-        .returning();
-
-      // Update warehouse item stock if receipt is approved
-      if (receiptData.status === 'approved') {
-        await db.update(warehouseItems)
-          .set({
-            currentStock: sql`current_stock + ${receiptData.quantity}`,
-            totalValue: sql`unit_price * (current_stock + ${receiptData.quantity})`,
-            updatedAt: new Date()
-          })
-          .where(eq(warehouseItems.id, receiptData.warehouseItemId));
-      }
-
-      res.json({ success: true, data: newReceipt });
-    } catch (error) {
-      console.error("Error creating warehouse receipt:", error);
-      res.status(500).json({ success: false, message: "خطا در ثبت ورود انبار" });
-    }
-  });
-
-  // Create warehouse issue
-  app.post("/api/warehouse/issues", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const issueData = insertWarehouseIssueSchema.parse(req.body);
-      
-      // Generate issue number if not provided
-      if (!issueData.issueNumber) {
-        const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
-        const dailyCount = await db.select({ count: sql`count(*)` })
-          .from(warehouseIssues)
-          .where(sql`DATE(issue_date) = CURRENT_DATE`);
-        const sequence = String(Number(dailyCount[0]?.count || 0) + 1).padStart(3, '0');
-        issueData.issueNumber = `IS-${today}-${sequence}`;
-      }
-
-      const [newIssue] = await db.insert(warehouseIssues)
-        .values(issueData)
-        .returning();
-
-      // Update warehouse item stock if issue is approved
-      if (issueData.status === 'approved' || issueData.status === 'completed') {
-        await db.update(warehouseItems)
-          .set({
-            currentStock: sql`current_stock - ${issueData.quantity}`,
-            totalValue: sql`unit_price * (current_stock - ${issueData.quantity})`,
-            updatedAt: new Date()
-          })
-          .where(eq(warehouseItems.id, issueData.warehouseItemId));
-      }
-
-      res.json({ success: true, data: newIssue });
-    } catch (error) {
-      console.error("Error creating warehouse issue:", error);
-      res.status(500).json({ success: false, message: "خطا در ثبت خروج انبار" });
     }
   });
 
