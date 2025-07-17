@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Brain, Monitor as RemoteMonitor, FileText, Edit, Server } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -339,6 +339,38 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("remote-desktop", () => setLocation("/admin/remote-desktop")),
       className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50",
       moduleId: "remote_desktop"
+    },
+    {
+      id: "server-config",
+      label: "Server Config",
+      icon: Server,
+      onClick: () => trackButtonClick("server-config", () => setLocation("/admin/server-config")),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "server_config"
+    },
+    {
+      id: "inventory-management",
+      label: "Inventory Management",
+      icon: Package,
+      onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+      moduleId: "inventory_management"
+    },
+    {
+      id: "department-users",
+      label: "Department Users",
+      icon: UserCog,
+      onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
+      className: "border-slate-300 text-slate-600 hover:bg-slate-50",
+      moduleId: "department_users"
+    },
+    {
+      id: "smtp-test",
+      label: "SMTP Test",
+      icon: Mail,
+      onClick: () => trackButtonClick("smtp-test", () => setLocation("/admin/smtp-test")),
+      className: "border-red-300 text-red-600 hover:bg-red-50",
+      moduleId: "smtp_test"
     }
   ];
 

@@ -15911,7 +15911,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت فروشگاه': 'shop_management',
             'مدیریت محصولات': 'product_management',
             'مدیریت سفارشات': 'order_management',
-            'مدیریت انبار': 'warehouse-management',
+            'مدیریت انبار': 'warehouse_management',
             'مدیریت لجستیک': 'logistics_management',
             'مدیریت استعلامات': 'inquiries',
             'مدیریت CRM': 'crm',
@@ -15921,7 +15921,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت پرداخت': 'payment_management',
             'مدیریت کیف پول': 'wallet_management',
             'تحلیل جغرافیایی': 'geography_analytics',
-            'مدیریت دسته‌بندی‌ها': 'categories'
+            'مدیریت دسته‌بندی‌ها': 'categories',
+            'دستیار SEO هوشمند': 'seo_management',
+            'مدیریت موجودی': 'inventory_management',
+            'کاربران بخش': 'department_users',
+            'تنظیمات سرور': 'server_config'
           };
 
           // Convert Persian names to technical IDs
@@ -16002,7 +16006,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت فروشگاه': 'shop_management',
             'مدیریت محصولات': 'product_management',
             'مدیریت سفارشات': 'order_management',
-            'مدیریت انبار': 'warehouse-management',
+            'مدیریت انبار': 'warehouse_management',
             'مدیریت لجستیک': 'logistics_management',
             'مدیریت استعلامات': 'inquiries',
             'مدیریت CRM': 'crm',
@@ -16012,7 +16016,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت پرداخت': 'payment_management',
             'مدیریت کیف پول': 'wallet_management',
             'تحلیل جغرافیایی': 'geography_analytics',
-            'مدیریت دسته‌بندی‌ها': 'categories'
+            'مدیریت دسته‌بندی‌ها': 'categories',
+            'دستیار SEO هوشمند': 'seo_management',
+            'مدیریت موجودی': 'inventory_management',
+            'کاربران بخش': 'department_users',
+            'تنظیمات سرور': 'server_config'
           };
 
           // Convert Persian names to technical IDs
@@ -16053,7 +16061,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",
           "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
-          "server_config"
+          "server_config", "seo_management"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
