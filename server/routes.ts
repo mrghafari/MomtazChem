@@ -521,6 +521,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get real warehouse stock for a specific product by SKU/barcode
+  app.get("/api/warehouse/stock/:sku", async (req: Request, res: Response) => {
+    try {
+      const { sku } = req.params;
+      
+      // Find warehouse product by SKU/product code
+      const warehouseProduct = await db
+        .select()
+        .from(warehouseProducts)
+        .where(eq(warehouseProducts.productCode, sku))
+        .limit(1);
+      
+      if (warehouseProduct.length === 0) {
+        return res.json({ 
+          success: true, 
+          sku: sku,
+          warehouseStock: 0, 
+          hasWarehouseRecord: false,
+          message: "محصول در انبار یافت نشد" 
+        });
+      }
+      
+      // Calculate total stock from all batches
+      const stockResult = await db
+        .select({
+          totalStock: sql<number>`COALESCE(SUM(${warehouseItems.currentStock}), 0)`,
+          batchCount: sql<number>`COUNT(${warehouseItems.id})`,
+        })
+        .from(warehouseItems)
+        .where(eq(warehouseItems.warehouseProductId, warehouseProduct[0].id));
+      
+      const warehouseStock = stockResult[0]?.totalStock || 0;
+      const batchCount = stockResult[0]?.batchCount || 0;
+      
+      res.json({ 
+        success: true, 
+        sku: sku,
+        warehouseStock: warehouseStock, 
+        batchCount: batchCount,
+        hasWarehouseRecord: true,
+        productName: warehouseProduct[0].productName,
+        message: `موجودی انبار: ${warehouseStock} واحد در ${batchCount} بچ` 
+      });
+    } catch (error) {
+      console.error("Error fetching warehouse stock:", error);
+      res.status(500).json({ success: false, message: "خطا در بارگیری موجودی انبار" });
+    }
+  });
+
+  // Add new batch to warehouse for existing product
+  app.post("/api/warehouse/add-batch", async (req: Request, res: Response) => {
+    try {
+      const { sku, batchNumber, quantity, unitPrice, notes } = req.body;
+      
+      // Validation
+      if (!sku || !batchNumber || !quantity || quantity <= 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "SKU، شماره بچ و مقدار اجباری است" 
+        });
+      }
+      
+      // Find warehouse product by SKU
+      const warehouseProduct = await db
+        .select()
+        .from(warehouseProducts)
+        .where(eq(warehouseProducts.productCode, sku))
+        .limit(1);
+      
+      if (warehouseProduct.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "محصول در انبار یافت نشد. ابتدا محصول را از کاردکس همگام‌سازی کنید" 
+        });
+      }
+      
+      // Check if batch number already exists for this product
+      const existingBatch = await db
+        .select()
+        .from(warehouseItems)
+        .where(and(
+          eq(warehouseItems.warehouseProductId, warehouseProduct[0].id),
+          eq(warehouseItems.batchNumber, batchNumber)
+        ))
+        .limit(1);
+      
+      if (existingBatch.length > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `بچ شماره ${batchNumber} برای این محصول قبلاً وجود دارد` 
+        });
+      }
+      
+      // Generate batch code
+      const batchCode = `${sku}-${batchNumber}-${Date.now()}`;
+      
+      // Add new batch
+      const newBatch = await db.insert(warehouseItems).values({
+        warehouseProductId: warehouseProduct[0].id,
+        batchNumber: batchNumber,
+        batchCode: batchCode,
+        currentStock: quantity,
+        initialStock: quantity,
+        unitPrice: unitPrice || warehouseProduct[0].standardUnitPrice || 0,
+        totalValue: quantity * (unitPrice || warehouseProduct[0].standardUnitPrice || 0),
+        supplierName: 'ممتاز شیمی',
+        qualityGrade: 'A',
+        notes: notes || `بچ جدید اضافه شده - ${new Date().toLocaleDateString('en-US')}`,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
+      
+      // Update product stock in showcase if it exists
+      try {
+        const showcaseProduct = await db
+          .select()
+          .from(showcaseProducts)
+          .where(eq(showcaseProducts.sku, sku))
+          .limit(1);
+        
+        if (showcaseProduct.length > 0) {
+          // Calculate new total stock from all warehouse batches
+          const totalStockResult = await db
+            .select({
+              totalStock: sql<number>`COALESCE(SUM(${warehouseItems.currentStock}), 0)`,
+            })
+            .from(warehouseItems)
+            .where(eq(warehouseItems.warehouseProductId, warehouseProduct[0].id));
+          
+          const newTotalStock = totalStockResult[0]?.totalStock || 0;
+          
+          // Update showcase product stock
+          await db
+            .update(showcaseProducts)
+            .set({ 
+              stockQuantity: newTotalStock,
+              updatedAt: new Date()
+            })
+            .where(eq(showcaseProducts.sku, sku));
+        }
+      } catch (syncError) {
+        console.error("Error syncing stock to showcase:", syncError);
+        // Continue even if sync fails
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `بچ جدید ${batchNumber} با موفقیت اضافه شد`,
+        batch: newBatch[0],
+        productName: warehouseProduct[0].productName
+      });
+    } catch (error) {
+      console.error("Error adding warehouse batch:", error);
+      res.status(500).json({ success: false, message: "خطا در افزودن بچ جدید" });
+    }
+  });
+
   // Get warehouse items (بچ‌های موجود برای هر محصول)
   app.get("/api/warehouse/items", async (req: Request, res: Response) => {
     try {

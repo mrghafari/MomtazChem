@@ -63,15 +63,11 @@ const formSchema = insertShowcaseProductSchema.extend({
   isNonChemical: z.boolean().default(false),
 });
 
-// Add quantity form schema
+// Add quantity form schema for warehouse batch
 const addQuantityFormSchema = z.object({
   batchNumber: z.string().min(1, "شماره بچ الزامی است"),
   quantity: z.coerce.number().min(1, "مقدار باید بیشتر از صفر باشد"),
   unitPrice: z.coerce.number().min(0, "قیمت واحد نمی‌تواند منفی باشد").optional(),
-  productionDate: z.string().optional(),
-  expiryDate: z.string().optional(),
-  supplier: z.string().optional(),
-  warehouseLocation: z.string().optional(),
   notes: z.string().optional(),
 });
 import { useToast } from "@/hooks/use-toast";
@@ -377,7 +373,15 @@ export default function ProductsPage() {
   // Add quantity mutation
   const { mutate: addQuantity } = useMutation({
     mutationFn: (data: { productId: number } & z.infer<typeof addQuantityFormSchema>) => {
-      return apiRequest("/api/kardex/add-quantity", { method: "POST", body: data });
+      const product = products?.find(p => p.id === data.productId);
+      const requestData = {
+        sku: product?.sku || '',
+        batchNumber: data.batchNumber,
+        quantity: data.quantity,
+        unitPrice: data.unitPrice,
+        notes: data.notes
+      };
+      return apiRequest("/api/warehouse/add-batch", { method: "POST", body: requestData });
     },
     onSuccess: async (result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -411,8 +415,12 @@ export default function ProductsPage() {
   const handleAddQuantity = (product: ShowcaseProduct) => {
     setAddingQuantityProduct(product);
     addQuantityForm.setValue("unitPrice", parseFloat(product.unitPrice || "0"));
-    addQuantityForm.setValue("supplier", product.supplier || "");
-    addQuantityForm.setValue("warehouseLocation", product.warehouseLocation || "");
+    addQuantityForm.reset({
+      batchNumber: "",
+      quantity: 0,
+      unitPrice: parseFloat(product.unitPrice || "0"),
+      notes: ""
+    });
   };
 
   // Confirm add quantity
@@ -2082,27 +2090,31 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.stockQuantity ? 'text-red-600' : ''}`}>
-{t.stockQuantity}
+                            موجودی انبار (محاسبه خودکار)
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>تعداد موجودی فعلی محصول در انبار</p>
+                                <p>موجودی واقعی از مجموع همه بچ‌های انبار محاسبه می‌شود</p>
                               </TooltipContent>
                             </Tooltip>
+                            <Lock className="h-3 w-3 text-gray-400" />
                           </FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
-                              placeholder="0" 
-                              className={`h-9 ${validationErrors.stockQuantity ? "border-red-500 focus:border-red-500" : ""}`}
+                              placeholder="محاسبه از انبار" 
+                              className="h-9 bg-gray-100 cursor-not-allowed"
                               {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                              value={field.value || 0}
+                              readOnly
+                              disabled
                             />
                           </FormControl>
-                          <FormMessage />
+                          <p className="text-xs text-blue-600 mt-1">
+                            💡 موجودی از مجموع بچ‌های انبار محاسبه می‌شود
+                          </p>
                           {validationErrors.stockQuantity && (
                             <p className="text-sm text-red-600 mt-1">{validationErrors.stockQuantity}</p>
                           )}
@@ -2842,113 +2854,12 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* Production Date and Expiry Date */}
-                <FormField
-                  control={addQuantityForm.control}
-                  name="productionDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">تاریخ تولید</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="date"
-                          className="text-right"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={addQuantityForm.control}
-                  name="expiryDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">تاریخ انقضا</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="date"
-                          className="text-right"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Supplier and Warehouse Location */}
-                <FormField
-                  control={addQuantityForm.control}
-                  name="supplier"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">تامین کننده</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="شرکت ممتاز شیمی"
-                          className="text-right"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={addQuantityForm.control}
-                  name="warehouseLocation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">محل انبار</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="A1-B2-C3"
-                          className="text-right"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Quality Grade and Notes */}
-                <FormField
-                  control={addQuantityForm.control}
-                  name="qualityGrade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">درجه کیفیت</FormLabel>
-                      <FormControl>
-                        <Select 
-                          value={field.value} 
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger className="text-right">
-                            <SelectValue placeholder="انتخاب کنید" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="A">A - عالی</SelectItem>
-                            <SelectItem value="B">B - خوب</SelectItem>
-                            <SelectItem value="C">C - متوسط</SelectItem>
-                            <SelectItem value="D">D - قابل قبول</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+                {/* Notes Field */}
                 <FormField
                   control={addQuantityForm.control}
                   name="notes"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2">
                       <FormLabel className="text-right">یادداشت</FormLabel>
                       <FormControl>
                         <Input 
@@ -2961,6 +2872,8 @@ export default function ProductsPage() {
                     </FormItem>
                   )}
                 />
+
+
               </div>
 
               {/* Action Buttons */}
