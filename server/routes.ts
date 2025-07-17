@@ -16056,7 +16056,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",
           "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
-          "server_config", "seo_management"
+          "server_config"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
