@@ -31,6 +31,7 @@ const registerSchema = z.object({
   country: z.string().min(2, "Country is required"),
   city: z.string().min(2, "City is required"),
   address: z.string().min(5, "Address is required"),
+  secondaryAddress: z.string().optional(),
   postalCode: z.string().optional(),
   alternatePhone: z.string().optional(),
   industry: z.string().optional(),
@@ -518,7 +519,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
-                          Phone *
+                          Mobile Number *
                         </FormLabel>
                         <FormControl>
                           <Input placeholder="Phone number" {...field} />
@@ -585,6 +586,34 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                       </FormLabel>
                       <FormControl>
                         <Input placeholder="Full address" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={registerForm.control}
+                  name="secondaryAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>آدرس دوم (اختیاری)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="آدرس دوم (اختیاری)" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={registerForm.control}
+                  name="postalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>کد پستی (اختیاری)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="کد پستی" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
