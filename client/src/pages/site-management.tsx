@@ -334,6 +334,46 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
       className: "border-green-300 text-green-600 hover:bg-green-50",
       moduleId: "content_management"
+    },
+    {
+      id: "logistics-management",
+      label: "Logistics Management",
+      icon: Truck,
+      onClick: () => trackButtonClick("logistics-management", () => setLocation("/admin/logistics-management")),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "logistics_management"
+    },
+    {
+      id: "ticketing-system",
+      label: "Ticketing System",
+      icon: Ticket,
+      onClick: () => trackButtonClick("ticketing-system", () => setLocation("/admin/ticketing-system")),
+      className: "border-rose-300 text-rose-600 hover:bg-rose-50",
+      moduleId: "ticketing_system"
+    },
+    {
+      id: "remote-desktop",
+      label: "Remote Desktop",
+      icon: Monitor,
+      onClick: () => trackButtonClick("remote-desktop", () => setLocation("/admin/remote-desktop")),
+      className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50",
+      moduleId: "remote_desktop"
+    },
+    {
+      id: "inventory-management",
+      label: "Inventory Management",
+      icon: Box,
+      onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
+      moduleId: "inventory_management"
+    },
+    {
+      id: "department-users",
+      label: "Department Users",
+      icon: UserCog,
+      onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
+      moduleId: "department_users"
     }
 
   ];
