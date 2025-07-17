@@ -526,18 +526,42 @@ const LogisticsManagement = () => {
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
                   {/* Customer Info Block */}
                   <div className="bg-white rounded-lg p-3 border border-green-200">
                     <h5 className="font-medium text-green-800 mb-2 flex items-center">
                       <User className="w-4 h-4 mr-2" />
                       اطلاعات گیرنده
                     </h5>
-                    <p className="text-sm text-gray-700">{order.customerName}</p>
-                    <p className="text-sm text-gray-600 flex items-center mt-1">
-                      <Phone className="w-3 h-3 mr-1" />
-                      {order.customerPhone}
-                    </p>
+                    <div className="space-y-2">
+                      <div className="bg-gray-50 rounded p-2">
+                        <p className="text-xs text-gray-500 mb-1">نام مشتری</p>
+                        <p className="text-sm font-medium text-gray-800">
+                          {order.customerFirstName} {order.customerLastName}
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 rounded p-2 flex items-center">
+                        <Phone className="w-3 h-3 mr-2 text-gray-500" />
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">شماره موبایل</p>
+                          <p className="text-sm font-medium text-gray-800">{order.customerPhone}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Delivery Address Block */}
+                  <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                    <h5 className="font-medium text-yellow-800 mb-2 flex items-center">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      آدرس دریافت کالا
+                    </h5>
+                    <div className="bg-gray-50 rounded p-2">
+                      <p className="text-xs text-gray-500 mb-1">آدرس تحویل</p>
+                      <p className="text-sm font-medium text-gray-800">
+                        {order.customerAddress || 'آدرس تحویل مشخص نشده'}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Shipment Details Block */}
