@@ -1001,65 +1001,132 @@ const WarehouseManagement: React.FC = () => {
                           </td>
                         </tr>
                       ) : warehouseBatches?.data && warehouseBatches.data.length > 0 ? (
-                        warehouseBatches.data
-                          .filter((batch: WarehouseBatch) => 
-                            (batch.productname?.toLowerCase() || batch.product_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                            (batch.batchnumber?.toLowerCase() || batch.batch_number?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                            (batch.productsku?.toLowerCase() || batch.product_sku?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-                          )
-                          .map((batch: WarehouseBatch) => (
-                            <tr key={`${batch.productId}-${batch.batchNumber}-${batch.id}`} className="border-b hover:bg-gray-50">
-                              <td className="p-4">
-                                <div>
-                                  <p className="font-medium">{batch.productname || batch.product_name || 'نام محصول نامشخص'}</p>
-                                  <p className="text-sm text-gray-500">{batch.productsku || batch.product_sku || 'SKU نامشخص'}</p>
-                                </div>
-                              </td>
-                              <td className="p-4 text-center">
-                                <div className="text-sm">
-                                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-mono text-xs">
-                                    {batch.batchnumber || batch.batch_number || 'N/A'}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="font-medium">{batch.quantity}</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="font-medium text-blue-600">0</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="font-medium text-red-600">0</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="font-bold text-green-600">{batch.quantity}</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <Badge variant={batch.quantity > 15 ? "default" : batch.quantity > 5 ? "secondary" : "destructive"}>
-                                  {batch.quantity > 15 ? "در انبار" : batch.quantity > 5 ? "کم" : "بحرانی"}
-                                </Badge>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="text-sm">15</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="text-sm">5</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <div className="flex gap-1 justify-center">
-                                  <Button variant="outline" size="sm">
-                                    <Plus className="w-4 h-4" />
-                                  </Button>
-                                  <Button variant="outline" size="sm">
-                                    <Minus className="w-4 h-4" />
-                                  </Button>
-                                  <Button variant="outline" size="sm">
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))
+                        (() => {
+                          // Group batches by product
+                          const groupedBatches = warehouseBatches.data.reduce((acc: any, batch: WarehouseBatch) => {
+                            const productKey = batch.product_id || batch.productId;
+                            const productName = batch.productname || batch.product_name || 'نام محصول نامشخص';
+                            const productSku = batch.productsku || batch.product_sku || 'SKU نامشخص';
+                            
+                            if (!acc[productKey]) {
+                              acc[productKey] = {
+                                productName,
+                                productSku,
+                                batches: []
+                              };
+                            }
+                            acc[productKey].batches.push(batch);
+                            return acc;
+                          }, {});
+
+                          // Filter groups based on search term
+                          const filteredGroups = Object.entries(groupedBatches).filter(([_, group]: [string, any]) =>
+                            group.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            group.productSku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            group.batches.some((batch: WarehouseBatch) => 
+                              (batch.batchnumber?.toLowerCase() || batch.batch_number?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+                            )
+                          );
+
+                          return filteredGroups.map(([productKey, group]: [string, any]) => {
+                            const totalQuantity = group.batches.reduce((sum: number, batch: WarehouseBatch) => sum + (batch.quantity || 0), 0);
+                            
+                            return (
+                              <React.Fragment key={productKey}>
+                                {/* Main product row */}
+                                <tr className="border-b bg-gray-50 font-medium">
+                                  <td className="p-4">
+                                    <div>
+                                      <p className="font-bold text-gray-800">{group.productName}</p>
+                                      <p className="text-sm text-gray-600">{group.productSku}</p>
+                                    </div>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm text-gray-600">{group.batches.length} بچ</span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="font-bold text-blue-600">{totalQuantity}</span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="font-medium text-blue-600">0</span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="font-medium text-red-600">0</span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="font-bold text-green-600">{totalQuantity}</span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <Badge variant={totalQuantity > 15 ? "default" : totalQuantity > 5 ? "secondary" : "destructive"}>
+                                      {totalQuantity > 15 ? "در انبار" : totalQuantity > 5 ? "کم" : "بحرانی"}
+                                    </Badge>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm">15</span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm">5</span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <div className="flex gap-1 justify-center">
+                                      <Button variant="outline" size="sm">
+                                        <Plus className="w-4 h-4" />
+                                      </Button>
+                                      <Button variant="outline" size="sm">
+                                        <Edit className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                                
+                                {/* Batch sub-rows */}
+                                {group.batches.map((batch: WarehouseBatch, index: number) => (
+                                  <tr key={`${productKey}-batch-${index}`} className="border-b border-gray-200 bg-blue-50/30 text-sm">
+                                    <td className="p-3 pl-8">
+                                      <div className="flex items-center">
+                                        <span className="text-gray-400 mr-2">├─</span>
+                                        <span className="text-gray-600">بچ #{index + 1}</span>
+                                      </div>
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-mono text-xs">
+                                        {batch.batchnumber || batch.batch_number || 'N/A'}
+                                      </span>
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <span className="font-medium">{batch.quantity}</span>
+                                    </td>
+                                    <td className="p-3 text-center text-gray-400">-</td>
+                                    <td className="p-3 text-center text-gray-400">-</td>
+                                    <td className="p-3 text-center">
+                                      <span className="font-medium text-green-600">{batch.quantity}</span>
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <Badge variant={batch.quantity > 15 ? "default" : batch.quantity > 5 ? "secondary" : "destructive"} className="text-xs">
+                                        {batch.quantity > 15 ? "موجود" : batch.quantity > 5 ? "کم" : "ناکافی"}
+                                      </Badge>
+                                    </td>
+                                    <td className="p-3 text-center text-gray-400">-</td>
+                                    <td className="p-3 text-center text-gray-400">-</td>
+                                    <td className="p-3 text-center">
+                                      <div className="flex gap-1 justify-center">
+                                        <Button variant="outline" size="sm" className="h-6 w-6 p-0">
+                                          <Plus className="w-3 h-3" />
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="h-6 w-6 p-0">
+                                          <Minus className="w-3 h-3" />
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="h-6 w-6 p-0">
+                                          <Edit className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </React.Fragment>
+                            );
+                          });
+                        })()
                       ) : (
                         <tr>
                           <td colSpan={10} className="p-8 text-center text-gray-500">
