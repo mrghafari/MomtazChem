@@ -94,6 +94,7 @@ import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
 
 import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
 import WarehouseManagement from "@/pages/admin/warehouse-management";
+import WarehouseManagementFixed from "@/pages/admin/warehouse-management-fixed";
 import ContentManagement from "@/pages/content-management";
 import EmailTemplates from "@/pages/email-templates";
 import SecurityManagement from "@/pages/security-management-new";
@@ -185,7 +186,7 @@ function Router() {
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
 
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
-          <Route path="/admin/warehouse-management" component={WarehouseManagement} />
+          <Route path="/admin/warehouse-management" component={WarehouseManagementFixed} />
 
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/email-templates" component={EmailTemplates} />
@@ -199,7 +200,7 @@ function Router() {
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
           <Route path="/financial/login" component={FinancialLogin} />
-          <Route path="/warehouse" component={WarehouseManagement} />
+          <Route path="/warehouse" component={WarehouseManagementFixed} />
           <Route path="/warehouse/login" component={WarehouseLogin} />
           <Route path="/logistics-department" component={LogisticsDepartment} />
           <Route path="/logistics-full" component={LogisticsDepartment} />
