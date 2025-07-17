@@ -2681,14 +2681,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🔄 [SYNC] Updated کاردکس product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
 
-      // Also sync to shop if product exists there
-      await db.execute(sql`
-        UPDATE shop_products 
-        SET stock_quantity = ${totalWarehouseStock} 
-        WHERE product_id = ${productId}
-      `);
+      // Shop sync temporarily disabled due to schema issues
+      // await db.execute(sql`
+      //   UPDATE shop_products 
+      //   SET stock_quantity = ${totalWarehouseStock} 
+      //   WHERE parent_product_id = ${productId}
+      // `);
       
-      console.log(`🔄 [SYNC] Updated shop product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
+      console.log(`🔄 [SYNC] کاردکس updated successfully (shop sync disabled)`);
 
       return { success: true, totalStock: totalWarehouseStock };
     } catch (error) {
