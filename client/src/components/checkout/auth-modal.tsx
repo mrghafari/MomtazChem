@@ -45,7 +45,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
     country: 'Iran',
     city: '',
     address: '',
-    secondaryAddress: ''
+    secondaryAddress: '',
+    postalCode: ''
   });
 
   const resetModal = () => {
@@ -62,7 +63,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
       country: 'Iran',
       city: '',
       address: '',
-      secondaryAddress: ''
+      secondaryAddress: '',
+      postalCode: ''
     });
     setShowPassword(false);
     setIsLoading(false);
@@ -171,7 +173,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
           company: registerData.company,
           country: registerData.country,
           city: registerData.city,
-          address: registerData.address
+          address: registerData.address,
+          secondaryAddress: registerData.secondaryAddress,
+          postalCode: registerData.postalCode,
+          customerType: 'retail',
+          customerSource: 'website',
+          preferredLanguage: 'fa',
+          marketingConsent: false
         })
       });
 
@@ -360,7 +368,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                 </div>
 
                 <div>
-                  <Label htmlFor="register-phone">Phone Number *</Label>
+                  <Label htmlFor="register-phone">Mobile Number *</Label>
                   <Input
                     id="register-phone"
                     value={registerData.phone}
@@ -421,6 +429,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                     value={registerData.secondaryAddress}
                     onChange={(e) => setRegisterData({ ...registerData, secondaryAddress: e.target.value })}
                     placeholder="آدرس دوم (اختیاری)"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="register-postalCode">کد پستی (اختیاری)</Label>
+                  <Input
+                    id="register-postalCode"
+                    value={registerData.postalCode}
+                    onChange={(e) => setRegisterData({ ...registerData, postalCode: e.target.value })}
+                    placeholder="کد پستی"
                   />
                 </div>
 
