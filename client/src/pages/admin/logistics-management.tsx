@@ -30,7 +30,6 @@ import {
   Package,
   MapPin,
   Calendar,
-  Weight,
   RefreshCw,
   Send,
   Shield,
@@ -186,6 +185,7 @@ interface LogisticsOrder {
 
 const LogisticsManagement = () => {
   const [activeTab, setActiveTab] = useState('orders');
+  const [sentCodes, setSentCodes] = useState<Set<number>>(new Set()); // Track which orders have codes sent
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -252,9 +252,13 @@ const LogisticsManagement = () => {
       if (!response.ok) throw new Error('Failed to generate verification code');
       return response.json();
     },
-    onSuccess: () => {
-      toast({ title: "کد تایید تولید شد", description: "کد 4 رقمی برای مشتری ارسال شد" });
+    onSuccess: (result) => {
+      toast({ 
+        title: "کد تایید ارسال شد", 
+        description: `کد ${result.code} برای سفارش #${result.customerOrderId} به شماره ${result.customerPhone} ارسال شد` 
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/verification-codes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
     },
     onError: () => {
       toast({ title: "خطا", description: "تولید کد تایید ناموفق بود", variant: "destructive" });
@@ -293,12 +297,12 @@ const LogisticsManagement = () => {
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "موفق", description: "ارسال توسط حمل‌کننده ثبت شد" });
+      toast({ title: "موفق", description: "اطلاعات حمل‌کننده ذخیره شد" });
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
     },
     onError: () => {
-      toast({ title: "خطا", description: "خطا در ثبت ارسال", variant: "destructive" });
-    },
+      toast({ title: "خطا", description: "ذخیره اطلاعات حمل‌کننده ناموفق بود", variant: "destructive" });
+    }
   });
 
   // Verification mutation
@@ -400,7 +404,7 @@ const LogisticsManagement = () => {
                       وزن محموله
                     </h5>
                     <p className="text-lg font-bold text-blue-700 flex items-center">
-                      <Weight className="w-4 h-4 mr-1" />
+                      <Package className="w-4 h-4 mr-1" />
                       {order.totalWeight ? `${order.totalWeight} ${order.weightUnit || 'kg'}` : 'محاسبه نشده'}
                     </p>
                     <p className="text-xs text-blue-600 mt-1">برای انتخاب وسیله حمل</p>
@@ -445,16 +449,30 @@ const LogisticsManagement = () => {
                 <div className="flex gap-2 flex-wrap">
                   <Button 
                     size="sm" 
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className={sentCodes.has(order.customerOrderId) 
+                      ? "bg-red-600 hover:bg-red-700 text-white" 
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }
                     onClick={() => {
-                      toast({
-                        title: "کد ارسال شد",
-                        description: `کد تحویل برای سفارش #${order.customerOrderId} به ${order.customerPhone} ارسال شد`,
+                      // Generate 4-digit code between 1111-9999
+                      generateCodeMutation.mutate({
+                        customerOrderId: order.customerOrderId,
+                        customerPhone: order.customerPhone,
+                        customerName: `${order.customerFirstName} ${order.customerLastName}`
                       });
+                      
+                      // Mark this order as having code sent (change button color)
+                      setSentCodes(prev => new Set(prev).add(order.customerOrderId));
                     }}
+                    disabled={generateCodeMutation.isPending}
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    ارسال کد به مشتری
+                    {generateCodeMutation.isPending 
+                      ? "در حال ارسال..." 
+                      : sentCodes.has(order.customerOrderId) 
+                        ? "کد ارسال شده" 
+                        : "ارسال کد به مشتری"
+                    }
                   </Button>
                   <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
                     <Users className="w-4 h-4 mr-2" />
@@ -581,7 +599,7 @@ const LogisticsManagement = () => {
                       وزن محموله
                     </h5>
                     <p className="text-lg font-bold text-blue-700 flex items-center">
-                      <Weight className="w-4 h-4 mr-1" />
+                      <Package className="w-4 h-4 mr-1" />
                       {order.totalWeight ? `${order.totalWeight} ${order.weightUnit || 'kg'}` : 'محاسبه نشده'}
                     </p>
                     <p className="text-xs text-blue-600 mt-1">برای انتخاب وسیله حمل</p>
@@ -727,6 +745,73 @@ const LogisticsManagement = () => {
                     <MapPin className="w-4 h-4 mr-2" />
                     پیگیری
                   </Button>
+
+                  {/* Carrier Delivery Button */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant={order.deliveryPersonName ? "default" : "outline"}
+                        className={order.deliveryPersonName ? "bg-green-600 hover:bg-green-700" : ""}
+                      >
+                        <Truck className="w-4 h-4 mr-2" />
+                        {order.deliveryPersonName ? "مشاهده حمل‌کننده" : "تعیین حمل‌کننده"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>تعیین حمل‌کننده سفارش</DialogTitle>
+                        <DialogDescription>
+                          اطلاعات حمل‌کننده برای سفارش #{order.customerOrderId}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <CarrierDeliveryForm 
+                        orderId={order.customerOrderId}
+                        existingData={{
+                          deliveryPersonName: order.deliveryPersonName,
+                          deliveryPersonPhone: order.deliveryPersonPhone,
+                          vehicleType: order.vehicleType,
+                          vehiclePlate: order.vehiclePlate,
+                          vehicleModel: order.vehicleModel,
+                          vehicleColor: order.vehicleColor,
+                          driverName: order.driverName,
+                          driverPhone: order.driverPhone,
+                          deliveryCompanyName: order.deliveryCompanyName,
+                          deliveryCompanyPhone: order.deliveryCompanyPhone
+                        }}
+                        onSubmit={(data) => carrierDeliveryMutation.mutate({ orderId: order.customerOrderId, data })}
+                      />
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Verification Button */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant={order.isVerified ? "default" : "outline"}
+                        className={order.isVerified ? "bg-green-600 hover:bg-green-700" : ""}
+                        disabled={!order.deliveryCode}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {order.isVerified ? "تحویل تایید شده" : "تایید تحویل"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>تایید تحویل سفارش</DialogTitle>
+                        <DialogDescription>
+                          کد تحویل را وارد کرده و موقعیت مکانی حمل‌کننده را ثبت کنید
+                        </DialogDescription>
+                      </DialogHeader>
+                      <VerificationCodeForm 
+                        orderId={order.customerOrderId}
+                        expectedCode={order.deliveryCode}
+                        isVerified={order.isVerified}
+                        onSubmit={(data) => verificationMutation.mutate({ orderId: order.customerOrderId, data })}
+                      />
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
@@ -1641,6 +1726,99 @@ const LogisticsManagement = () => {
       </Card>
     </div>
   );
+
+  // CarrierDeliveryForm component
+  const CarrierDeliveryForm = ({ orderId, deliveryCode, onSubmit }: { 
+    orderId: number; 
+    deliveryCode?: string; 
+    onSubmit: (data: any) => void 
+  }) => {
+    const [formData, setFormData] = useState({
+      vehicleType: '',
+      vehiclePlate: '',
+      driverName: '',
+      driverPhone: '',
+      estimatedDeliveryDate: '',
+      notes: ''
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      onSubmit(formData);
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="vehicleType">نوع وسیله نقلیه</Label>
+            <Input
+              id="vehicleType"
+              value={formData.vehicleType}
+              onChange={(e) => setFormData(prev => ({ ...prev, vehicleType: e.target.value }))}
+              placeholder="مثال: ون، کامیون، موتور"
+            />
+          </div>
+          <div>
+            <Label htmlFor="vehiclePlate">پلاک وسیله</Label>
+            <Input
+              id="vehiclePlate"
+              value={formData.vehiclePlate}
+              onChange={(e) => setFormData(prev => ({ ...prev, vehiclePlate: e.target.value }))}
+              placeholder="مثال: 12ج345-67"
+            />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="driverName">نام راننده</Label>
+            <Input
+              id="driverName"
+              value={formData.driverName}
+              onChange={(e) => setFormData(prev => ({ ...prev, driverName: e.target.value }))}
+              placeholder="نام کامل راننده"
+            />
+          </div>
+          <div>
+            <Label htmlFor="driverPhone">شماره تماس راننده</Label>
+            <Input
+              id="driverPhone"
+              value={formData.driverPhone}
+              onChange={(e) => setFormData(prev => ({ ...prev, driverPhone: e.target.value }))}
+              placeholder="09123456789"
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="estimatedDeliveryDate">تاریخ تحویل تخمینی</Label>
+          <Input
+            id="estimatedDeliveryDate"
+            type="datetime-local"
+            value={formData.estimatedDeliveryDate}
+            onChange={(e) => setFormData(prev => ({ ...prev, estimatedDeliveryDate: e.target.value }))}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="notes">یادداشت‌ها</Label>
+          <Textarea
+            id="notes"
+            value={formData.notes}
+            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            placeholder="توضیحات اضافی درباره ارسال..."
+            rows={3}
+          />
+        </div>
+
+        <Button type="submit" className="w-full">
+          <Save className="w-4 h-4 mr-2" />
+          ثبت اطلاعات ارسال
+        </Button>
+      </form>
+    );
+  };
 
   return (
     <div className="container mx-auto p-6" dir="rtl">
