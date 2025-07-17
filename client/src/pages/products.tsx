@@ -499,6 +499,8 @@ export default function ProductsPage() {
     generateSKUMutation.mutate(productData);
   };
 
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
