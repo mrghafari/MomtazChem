@@ -912,15 +912,15 @@ const WarehouseManagement: React.FC = () => {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-right p-4">محصول</th>
-                        <th className="text-right p-4">موجودی</th>
-                        <th className="text-right p-4">کالای در راه</th>
-                        <th className="text-right p-4">ضایعات</th>
-                        <th className="text-right p-4">موجودی کل</th>
-                        <th className="text-right p-4">وضعیت</th>
-                        <th className="text-right p-4">آستانه کم</th>
-                        <th className="text-right p-4">آستانه بحرانی</th>
-                        <th className="text-right p-4">عملیات</th>
+                        <th className="text-right p-4 min-w-[200px]">محصول</th>
+                        <th className="text-center p-4 min-w-[120px]">موجودی</th>
+                        <th className="text-center p-4 min-w-[100px]">کالای در راه</th>
+                        <th className="text-center p-4 min-w-[100px]">ضایعات</th>
+                        <th className="text-center p-4 min-w-[100px]">موجودی کل</th>
+                        <th className="text-center p-4 min-w-[100px]">وضعیت</th>
+                        <th className="text-center p-4 min-w-[100px]">آستانه کم</th>
+                        <th className="text-center p-4 min-w-[100px]">آستانه بحرانی</th>
+                        <th className="text-center p-4 min-w-[120px]">عملیات</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -932,9 +932,9 @@ const WarehouseManagement: React.FC = () => {
                               <p className="text-sm text-gray-500">{product.shopSku}</p>
                             </div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 text-center">
                             {editingProduct === product.id.toString() ? (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center gap-2">
                                 <Input
                                   type="number"
                                   min="0"
@@ -958,7 +958,7 @@ const WarehouseManagement: React.FC = () => {
                                 </Button>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center gap-2">
                                 <span className="font-medium">{product.stockQuantity}</span>
                                 <Button
                                   variant="outline"
@@ -970,7 +970,7 @@ const WarehouseManagement: React.FC = () => {
                               </div>
                             )}
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 text-center">
                             <span className="font-medium text-blue-600">
                               {/* Calculate goods in transit: orders that are processed but not yet sent to logistics */}
                               {(() => {
@@ -983,10 +983,10 @@ const WarehouseManagement: React.FC = () => {
                               })()}
                             </span>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 text-center">
                             {/* Waste column with editing functionality */}
                             {editingWaste === product.id.toString() ? (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center gap-2">
                                 <Input
                                   type="number"
                                   min="0"
@@ -1009,7 +1009,7 @@ const WarehouseManagement: React.FC = () => {
                                 </Button>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center gap-2">
                                 <span className="font-medium text-red-600">
                                   {wasteAmounts[product.id] || 0}
                                 </span>
@@ -1023,7 +1023,7 @@ const WarehouseManagement: React.FC = () => {
                               </div>
                             )}
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 text-center">
                             <span className="font-bold text-green-600">
                               {/* Total inventory = current stock + goods in transit - waste */}
                               {(() => {
@@ -1036,11 +1036,15 @@ const WarehouseManagement: React.FC = () => {
                               })()}
                             </span>
                           </td>
-                          <td className="p-4">{getStockBadge(product)}</td>
-                          <td className="p-4">{product.lowStockThreshold}</td>
-                          <td className="p-4">{product.minStockLevel}</td>
-                          <td className="p-4">
-                            <div className="flex gap-2">
+                          <td className="p-4 text-center">{getStockBadge(product)}</td>
+                          <td className="p-4 text-center">
+                            <span className="font-medium">{product.lowStockThreshold}</span>
+                          </td>
+                          <td className="p-4 text-center">
+                            <span className="font-medium">{product.minStockLevel}</span>
+                          </td>
+                          <td className="p-4 text-center">
+                            <div className="flex justify-center gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
