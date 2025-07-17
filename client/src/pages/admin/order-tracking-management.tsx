@@ -542,10 +542,12 @@ export default function OrderTrackingManagement() {
                                             <CreditCard className="w-4 h-4 text-gray-500" />
                                             <span className="font-medium">مبلغ کل:</span>
                                             <span className="font-bold text-green-600">
-                                              {typeof selectedOrder.totalAmount === 'string' 
-                                                ? parseFloat(selectedOrder.totalAmount).toLocaleString('fa-IR')
-                                                : selectedOrder.totalAmount.toLocaleString('fa-IR')
-                                              } {selectedOrder.currency}
+                                              {selectedOrder.totalAmount 
+                                                ? (typeof selectedOrder.totalAmount === 'string' 
+                                                    ? parseFloat(selectedOrder.totalAmount).toLocaleString('en-US')
+                                                    : selectedOrder.totalAmount.toLocaleString('en-US'))
+                                                : '0'
+                                              } {selectedOrder.currency || 'IQD'}
                                             </span>
                                           </div>
                                           <div className="flex items-center gap-2">
