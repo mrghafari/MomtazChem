@@ -2626,8 +2626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update کاردکس stock quantity (sync from warehouse to کاردکس)
-      // Temporarily disabled sync to test stock increase
-      // await syncWarehouseToKardex(productId);
+      await syncWarehouseToKardex(productId);
 
       res.json({
         success: true,
@@ -2661,42 +2660,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sync warehouse inventory to کاردکس function (warehouse is master)
+  // Simple sync warehouse inventory to کاردکس function (warehouse is master)
   async function syncWarehouseToKardex(productId: number) {
     try {
-      // Get total warehouse inventory for this product
-      const warehouseInventoryData = await db.select()
-        .from(warehouseInventory)
-        .where(eq(warehouseInventory.productId, productId));
-
-      const totalWarehouseStock = warehouseInventoryData.reduce((sum, item) => sum + item.quantity, 0);
+      // Get total warehouse inventory for this product using simple query
+      const result = await db.execute(sql`
+        SELECT COALESCE(SUM(quantity), 0) as total_stock 
+        FROM warehouse_inventory 
+        WHERE product_id = ${productId}
+      `);
+      
+      const totalWarehouseStock = result.rows[0]?.total_stock || 0;
 
       // Update کاردکس (showcase_products) with warehouse stock
-      await db.update(showcaseProducts)
-        .set({
-          stock_quantity: totalWarehouseStock,
-          updated_at: new Date()
-        })
-        .where(eq(showcaseProducts.id, productId));
+      await db.execute(sql`
+        UPDATE showcase_products 
+        SET stock_quantity = ${totalWarehouseStock} 
+        WHERE id = ${productId}
+      `);
 
       console.log(`🔄 [SYNC] Updated کاردکس product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
 
       // Also sync to shop if product exists there
-      const shopProduct = await db.select()
-        .from(shopProducts)
-        .where(eq(shopProducts.productId, productId))
-        .limit(1);
-
-      if (shopProduct.length > 0) {
-        await db.update(shopProducts)
-          .set({
-            stock_quantity: totalWarehouseStock,
-            updated_at: new Date()
-          })
-          .where(eq(shopProducts.productId, productId));
-
-        console.log(`🔄 [SYNC] Updated shop product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
-      }
+      await db.execute(sql`
+        UPDATE shop_products 
+        SET stock_quantity = ${totalWarehouseStock} 
+        WHERE product_id = ${productId}
+      `);
+      
+      console.log(`🔄 [SYNC] Updated shop product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
 
       return { success: true, totalStock: totalWarehouseStock };
     } catch (error) {
