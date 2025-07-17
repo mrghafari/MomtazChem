@@ -980,7 +980,7 @@ const WarehouseManagement: React.FC = () => {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-right p-4 min-w-[200px]">محصول</th>
+                        <th className="text-center p-4 min-w-[200px]">محصول</th>
                         <th className="text-center p-4 min-w-[120px]">موجودی</th>
                         <th className="text-center p-4 min-w-[100px]">کالای در راه</th>
                         <th className="text-center p-4 min-w-[100px]">ضایعات</th>
@@ -988,13 +988,12 @@ const WarehouseManagement: React.FC = () => {
                         <th className="text-center p-4 min-w-[100px]">وضعیت</th>
                         <th className="text-center p-4 min-w-[100px]">آستانه کم</th>
                         <th className="text-center p-4 min-w-[100px]">آستانه بحرانی</th>
-                        <th className="text-center p-4 min-w-[120px]">عملیات</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredProducts.map((product: UnifiedProduct) => (
                         <tr key={product.id} className="border-b hover:bg-gray-50">
-                          <td className="p-4">
+                          <td className="p-4 text-center">
                             <div>
                               <p className="font-medium">{product.name}</p>
                               <p className="text-sm text-gray-500">{product.shopSku}</p>
@@ -1088,9 +1087,6 @@ const WarehouseManagement: React.FC = () => {
                           </td>
                           <td className="p-4 text-center">
                             <span className="font-medium">{product.minStockLevel}</span>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className="text-sm text-gray-500">-</span>
                           </td>
                         </tr>
                       ))}
