@@ -198,7 +198,7 @@ const WarehouseManagement: React.FC = () => {
       // Set column widths for better display
       const colWidths = [
         { wch: 8 },   // ردیف
-        { wch: 25 },  // نام محصول
+        { wch: 30 },  // نام محصول (increased width)
         { wch: 15 },  // دسته‌بندی
         { wch: 15 },  // کد محصول
         { wch: 12 },  // موجودی فعلی
