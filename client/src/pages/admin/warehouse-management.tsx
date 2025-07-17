@@ -450,7 +450,7 @@ const WarehouseManagement: React.FC = () => {
       refetchOrders();
       toast({
         title: "وضعیت سفارش به‌روزرسانی شد",
-        description: `سفارش با موفقیت ${data.data?.status === 'warehouse_processing' ? 'در حال پردازش' : data.data?.status === 'warehouse_fulfilled' ? 'آماده ارسال به لجستیک' : 'به‌روزرسانی شده'} تنظیم شد.`,
+        description: `سفارش با موفقیت ${data.data?.status === 'warehouse_processing' ? 'در حال پردازش' : data.data?.status === 'warehouse_approved' ? 'تایید شده - ارسال به لجستیک' : 'به‌روزرسانی شده'} تنظیم شد.`,
       });
       setShowOrderDetails(false);
     },
@@ -703,7 +703,7 @@ const WarehouseManagement: React.FC = () => {
   const handleApproveToLogistics = (order: Order) => {
     updateOrderMutation.mutate({
       orderId: order.id,
-      status: 'warehouse_fulfilled',
+      status: 'warehouse_approved',
       notes: warehouseNotes || 'تایید انبار - ارسال به لجستیک'
     });
   };
@@ -713,7 +713,7 @@ const WarehouseManagement: React.FC = () => {
     
     updateOrderMutation.mutate({
       orderId: selectedOrder.id,
-      status: 'warehouse_fulfilled',
+      status: 'warehouse_approved',
       notes: warehouseNotes
     });
   };
