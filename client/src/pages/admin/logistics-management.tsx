@@ -185,8 +185,11 @@ interface LogisticsOrder {
 
 const LogisticsManagement = () => {
   const [activeTab, setActiveTab] = useState('orders');
-  const [sentCodes, setSentCodes] = useState<Set<number>>(new Set()); // Track which orders have codes sent
-  const [existingCodes, setExistingCodes] = useState<{[orderId: number]: string}>({}); // Track existing codes per order
+  const [orderButtonStates, setOrderButtonStates] = useState<{[orderId: number]: { 
+    isCodeSent: boolean; 
+    existingCode: string | null; 
+    isGenerating: boolean;
+  }}>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -215,39 +218,52 @@ const LogisticsManagement = () => {
 
   // Load existing codes when orders are fetched
   useEffect(() => {
-    if (pendingOrders && pendingOrders.length > 0) {
+    const allOrders = [...(logisticsOrders || []), ...(pendingOrders || [])];
+    
+    if (allOrders && allOrders.length > 0) {
       const loadExistingCodes = async () => {
-        const codePromises = pendingOrders.map(async (order: LogisticsOrder) => {
+        const codePromises = allOrders.map(async (order: LogisticsOrder) => {
           try {
             const response = await fetch(`/api/logistics/verification-codes/order/${order.customerOrderId}`);
             if (response.ok) {
               const result = await response.json();
-              return { orderId: order.customerOrderId, code: result.data.verificationCode };
+              return { 
+                orderId: order.customerOrderId, 
+                code: result.data.verificationCode,
+                hasCode: true
+              };
             }
           } catch (error) {
             console.log(`No existing code for order ${order.customerOrderId}`);
           }
-          return null;
+          return { 
+            orderId: order.customerOrderId, 
+            code: null,
+            hasCode: false
+          };
         });
 
         const codes = await Promise.all(codePromises);
-        const newExistingCodes: {[orderId: number]: string} = {};
-        const newSentCodes = new Set<number>();
+        const newButtonStates: {[orderId: number]: { 
+          isCodeSent: boolean; 
+          existingCode: string | null; 
+          isGenerating: boolean;
+        }} = {};
 
         codes.forEach(result => {
-          if (result) {
-            newExistingCodes[result.orderId] = result.code;
-            newSentCodes.add(result.orderId);
-          }
+          newButtonStates[result.orderId] = {
+            isCodeSent: result.hasCode,
+            existingCode: result.code,
+            isGenerating: false
+          };
         });
 
-        setExistingCodes(newExistingCodes);
-        setSentCodes(newSentCodes);
+        setOrderButtonStates(newButtonStates);
       };
 
       loadExistingCodes();
     }
-  }, [pendingOrders]);
+  }, [logisticsOrders, pendingOrders]);
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
     queryKey: ['/api/logistics/companies'],
@@ -290,9 +306,18 @@ const LogisticsManagement = () => {
     }
   });
 
-  // Generate verification code mutation
+  // Generate verification code mutation with per-order state management
   const generateCodeMutation = useMutation({
     mutationFn: async (data: { customerOrderId: number; customerPhone: string; customerName: string }) => {
+      // Set generating state for this specific order
+      setOrderButtonStates(prev => ({
+        ...prev,
+        [data.customerOrderId]: {
+          ...prev[data.customerOrderId],
+          isGenerating: true
+        }
+      }));
+
       // First get SMS template
       const templateResponse = await fetch('/api/sms/template/logistics-delivery');
       let smsTemplate = '{{customerName}} عزیز، سفارش شما در راه است.\nکد تحویل: {{verificationCode}}\nاین کد را هنگام تحویل به پیک اعلام کنید.\nممتازکم';
@@ -352,13 +377,14 @@ const LogisticsManagement = () => {
         ? `کد موجود ${result.code} مجدداً برای سفارش #${result.customerOrderId} به شماره ${result.customerPhone} ارسال شد`
         : `کد جدید ${result.code} برای سفارش #${result.customerOrderId} به شماره ${result.customerPhone} ارسال شد`;
       
-      // Mark this order as having a sent code
-      setSentCodes(prev => new Set(prev.add(result.customerOrderId)));
-      
-      // Track the existing code for this order
-      setExistingCodes(prev => ({
+      // Update state only for this specific order
+      setOrderButtonStates(prev => ({
         ...prev,
-        [result.customerOrderId]: result.code
+        [result.customerOrderId]: {
+          isCodeSent: true,
+          existingCode: result.code,
+          isGenerating: false
+        }
       }));
       
       toast({ 
@@ -368,7 +394,16 @@ const LogisticsManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/verification-codes'] });
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
     },
-    onError: () => {
+    onError: (error, variables) => {
+      // Reset generating state for this specific order
+      setOrderButtonStates(prev => ({
+        ...prev,
+        [variables.customerOrderId]: {
+          ...prev[variables.customerOrderId],
+          isGenerating: false
+        }
+      }));
+      
       toast({ title: "خطا", description: "تولید یا ارسال مجدد کد تایید ناموفق بود", variant: "destructive" });
     }
   });
@@ -554,12 +589,12 @@ const LogisticsManagement = () => {
 
                   {/* Verification Code Block for Logistics Orders */}
                   <div className={`rounded-lg p-3 border ${
-                    order.deliveryCode || existingCodes[order.customerOrderId]
+                    order.deliveryCode || orderButtonStates[order.customerOrderId]?.existingCode
                       ? 'bg-purple-50 border-purple-200' 
                       : 'bg-gray-50 border-gray-200'
                   }`}>
                     <h5 className={`font-medium mb-2 flex items-center ${
-                      order.deliveryCode || existingCodes[order.customerOrderId]
+                      order.deliveryCode || orderButtonStates[order.customerOrderId]?.existingCode
                         ? 'text-purple-800' 
                         : 'text-gray-600'
                     }`}>
@@ -567,18 +602,18 @@ const LogisticsManagement = () => {
                       کد تحویل
                     </h5>
                     <p className={`text-lg font-bold ${
-                      order.deliveryCode || existingCodes[order.customerOrderId]
+                      order.deliveryCode || orderButtonStates[order.customerOrderId]?.existingCode
                         ? 'text-purple-700' 
                         : 'text-gray-500'
                     }`}>
-                      {order.deliveryCode || existingCodes[order.customerOrderId] || 'تخصیص نیافته'}
+                      {order.deliveryCode || orderButtonStates[order.customerOrderId]?.existingCode || 'تخصیص نیافته'}
                     </p>
                     <p className={`text-xs mt-1 ${
-                      order.deliveryCode || existingCodes[order.customerOrderId]
+                      order.deliveryCode || orderButtonStates[order.customerOrderId]?.existingCode
                         ? 'text-purple-600' 
                         : 'text-gray-500'
                     }`}>
-                      {order.deliveryCode || existingCodes[order.customerOrderId] 
+                      {order.deliveryCode || orderButtonStates[order.customerOrderId]?.existingCode
                         ? 'کد ارسال شده به مشتری' 
                         : 'کد تحویل هنوز ارسال نشده'
                       }
@@ -590,7 +625,7 @@ const LogisticsManagement = () => {
                 <div className="flex gap-2 flex-wrap">
                   <Button 
                     size="sm" 
-                    className={existingCodes[order.customerOrderId] || sentCodes.has(order.customerOrderId)
+                    className={orderButtonStates[order.customerOrderId]?.isCodeSent
                       ? "bg-red-600 hover:bg-red-700 text-white" 
                       : "bg-blue-600 hover:bg-blue-700 text-white"
                     }
@@ -602,13 +637,13 @@ const LogisticsManagement = () => {
                         customerName: `${order.customerFirstName} ${order.customerLastName}`
                       });
                     }}
-                    disabled={generateCodeMutation.isPending}
+                    disabled={orderButtonStates[order.customerOrderId]?.isGenerating || false}
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    {generateCodeMutation.isPending 
+                    {orderButtonStates[order.customerOrderId]?.isGenerating
                       ? "در حال ارسال..." 
-                      : existingCodes[order.customerOrderId] || sentCodes.has(order.customerOrderId)
-                        ? `ارسال مجدد کد ${existingCodes[order.customerOrderId] || ''}`
+                      : orderButtonStates[order.customerOrderId]?.isCodeSent
+                        ? `ارسال مجدد کد ${orderButtonStates[order.customerOrderId]?.existingCode || ''}`
                         : "ارسال کد به مشتری"
                     }
                   </Button>
