@@ -162,7 +162,6 @@ const WarehouseManagement: React.FC = () => {
   // State for batch management
   const [productBatches, setProductBatches] = useState<{[productId: number]: ProductBatch[]}>({});
   const [expandedProducts, setExpandedProducts] = useState<Set<number>>(new Set());
-  const [newBatchData, setNewBatchData] = useState<{[productId: number]: Partial<ProductBatch>}>({});
 
   // Helper function to get goods in transit for a product
   const getGoodsInTransitForProduct = (productId: number): number => {
@@ -183,52 +182,7 @@ const WarehouseManagement: React.FC = () => {
     setExpandedProducts(newExpanded);
   };
 
-  // Add new batch to product
-  const addNewBatch = (productId: number) => {
-    const batchData = newBatchData[productId];
-    if (!batchData?.batchNumber) {
-      toast({
-        title: "خطا",
-        description: "لطفاً شماره بچ را وارد کنید",
-        variant: "destructive"
-      });
-      return;
-    }
 
-    const newBatch: ProductBatch = {
-      id: `${productId}-batch-${Date.now()}`,
-      batchNumber: batchData.batchNumber,
-      stockQuantity: 0, // Will be filled from Kardex
-      notes: 'از کاردکس تکمیل خواهد شد'
-    };
-
-    setProductBatches(prev => ({
-      ...prev,
-      [productId]: [...(prev[productId] || []), newBatch]
-    }));
-
-    // Clear form data
-    setNewBatchData(prev => ({
-      ...prev,
-      [productId]: {}
-    }));
-
-    toast({
-      title: "موفق",
-      description: "بچ جدید اضافه شد - اطلاعات از کاردکس تکمیل خواهد شد",
-    });
-  };
-
-  // Update batch data
-  const updateBatchData = (productId: number, field: string, value: any) => {
-    setNewBatchData(prev => ({
-      ...prev,
-      [productId]: {
-        ...prev[productId],
-        [field]: value
-      }
-    }));
-  };
 
   // Excel export function for inventory
   const exportInventoryToExcel = () => {
@@ -1325,51 +1279,7 @@ const WarehouseManagement: React.FC = () => {
                               </tr>
                             ))}
 
-                            {/* Add New Batch Row */}
-                            <tr className="border-b bg-yellow-50">
-                              <td className="p-4 pl-12">
-                                <div className="text-sm text-gray-600">
-                                  <p>+ بچ جدید</p>
-                                </div>
-                              </td>
-                              <td className="p-4 text-center">
-                                <Input
-                                  placeholder="شماره بچ جدید"
-                                  value={newBatchData[product.id]?.batchNumber || ''}
-                                  onChange={(e) => updateBatchData(product.id, 'batchNumber', e.target.value)}
-                                  className="text-sm w-32"
-                                />
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <Button
-                                  size="sm"
-                                  onClick={() => addNewBatch(product.id)}
-                                  className="text-xs"
-                                  disabled={!newBatchData[product.id]?.batchNumber}
-                                >
-                                  <Plus className="w-3 h-3 mr-1" />
-                                  افزودن
-                                </Button>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
-                              </td>
-                            </tr>
+
                           </>
                         )}
                         </React.Fragment>
