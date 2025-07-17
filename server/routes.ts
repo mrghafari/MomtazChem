@@ -16058,6 +16058,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
         console.log('🔍 [DEBUG] ticketing_system included?', allModules.includes('ticketing_system'));
+        console.log('🔍 [DEBUG] server_config included?', allModules.includes('server_config'));
 
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, allModules);
 
