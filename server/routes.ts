@@ -42,7 +42,7 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
-import { warehouseInventory, insertWarehouseInventorySchema } from "@shared/customer-schema";
+import { warehouseInventory, insertWarehouseInventorySchema } from "@shared/schema";
 import { smsService } from "./sms-service";
 import { ticketingStorage } from "./ticketing-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
@@ -2538,16 +2538,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const inventory = await db.select()
         .from(warehouseInventory)
-        .where(
-          and(
-            eq(warehouseInventory.productId, productId),
-            eq(warehouseInventory.isActive, true),
-            eq(warehouseInventory.isSoldOut, false)
-          )
-        )
+        .where(eq(warehouseInventory.productId, productId))
         .orderBy(warehouseInventory.createdAt);
 
-      const totalStock = inventory.reduce((sum, item) => sum + item.stockQuantity, 0);
+      const totalStock = inventory.reduce((sum, item) => sum + item.quantity, 0);
 
       res.json({
         success: true,
@@ -2594,9 +2588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(
             and(
               eq(warehouseInventory.productId, productId),
-              eq(warehouseInventory.batchNumber, batchNumber),
-              eq(warehouseInventory.isActive, true),
-              eq(warehouseInventory.isSoldOut, false)
+              eq(warehouseInventory.batchNumber, batchNumber)
             )
           )
           .limit(1);
@@ -2605,10 +2597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Update existing batch
           await db.update(warehouseInventory)
             .set({
-              stockQuantity: existingBatch[0].stockQuantity + increaseQuantity,
-              lastMovementType: 'increase',
-              lastMovementDate: new Date(),
-              lastMovementReason: reason || `افزایش موجودی ${increaseQuantity} واحد`,
+              quantity: existingBatch[0].quantity + increaseQuantity,
               updatedAt: new Date()
             })
             .where(eq(warehouseInventory.id, existingBatch[0].id));
@@ -2627,12 +2616,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           productName,
           productSku,
           batchNumber,
-          stockQuantity: increaseQuantity,
-          productionDate: new Date(),
+          quantity: increaseQuantity,
+          receivedDate: new Date(),
           qualityStatus: 'approved',
-          lastMovementType: 'increase',
-          lastMovementDate: new Date(),
-          lastMovementReason: reason || `ایجاد بچ جدید با ${increaseQuantity} واحد`,
+          notes: reason || `ایجاد بچ جدید با ${increaseQuantity} واحد`,
         });
 
         console.log(`✅ [WAREHOUSE] Created new batch ${batchNumber} with ${increaseQuantity} units`);
@@ -2679,15 +2666,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get total warehouse inventory for this product
       const warehouseInventoryData = await db.select()
         .from(warehouseInventory)
-        .where(
-          and(
-            eq(warehouseInventory.productId, productId),
-            eq(warehouseInventory.isActive, true),
-            eq(warehouseInventory.isSoldOut, false)
-          )
-        );
+        .where(eq(warehouseInventory.productId, productId));
 
-      const totalWarehouseStock = warehouseInventoryData.reduce((sum, item) => sum + item.stockQuantity, 0);
+      const totalWarehouseStock = warehouseInventoryData.reduce((sum, item) => sum + item.quantity, 0);
 
       // Update کاردکس (showcase_products) with warehouse stock
       await db.update(showcaseProducts)
@@ -2728,30 +2709,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const soldOutBatches = await db.select()
         .from(warehouseInventory)
-        .where(
-          and(
-            eq(warehouseInventory.stockQuantity, 0),
-            eq(warehouseInventory.isActive, true),
-            eq(warehouseInventory.isSoldOut, false)
-          )
-        );
+        .where(eq(warehouseInventory.quantity, 0));
 
       if (soldOutBatches.length > 0) {
-        await db.update(warehouseInventory)
-          .set({
-            isSoldOut: true,
-            lastMovementType: 'sold_out',
-            lastMovementDate: new Date(),
-            lastMovementReason: 'حذف خودکار بچ تمام شده',
-            updatedAt: new Date()
-          })
-          .where(
-            and(
-              eq(warehouseInventory.stockQuantity, 0),
-              eq(warehouseInventory.isActive, true),
-              eq(warehouseInventory.isSoldOut, false)
-            )
-          );
+        await db.delete(warehouseInventory)
+          .where(eq(warehouseInventory.quantity, 0));
 
         console.log(`🗑️ [WAREHOUSE] Marked ${soldOutBatches.length} sold-out batches for removal`);
       }
