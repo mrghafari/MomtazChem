@@ -22027,6 +22027,78 @@ momtazchem.com
     }
   });
 
+  // Warehouse Department - Get product waste amounts
+  app.get("/api/warehouse/waste", async (req: Request, res: Response) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get the latest waste amount for each product
+      const result = await pool.query(`
+        SELECT 
+          product_id,
+          waste_amount,
+          reason,
+          reported_at
+        FROM product_waste pw1
+        WHERE pw1.reported_at = (
+          SELECT MAX(pw2.reported_at) 
+          FROM product_waste pw2 
+          WHERE pw2.product_id = pw1.product_id
+        )
+        ORDER BY pw1.product_id
+      `);
+      
+      // Convert to key-value format for frontend
+      const wasteAmounts: { [key: string]: number } = {};
+      result.rows.forEach(row => {
+        wasteAmounts[row.product_id.toString()] = parseFloat(row.waste_amount) || 0;
+      });
+      
+      res.json({ success: true, wasteAmounts });
+    } catch (error) {
+      console.error('Error fetching waste amounts:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت ضایعات",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Warehouse Department - Update product waste amount
+  app.post("/api/warehouse/waste/:productId", async (req: Request, res: Response) => {
+    try {
+      const { pool } = await import('./db');
+      const productId = parseInt(req.params.productId);
+      const { wasteAmount, reason } = req.body;
+      
+      if (isNaN(productId) || wasteAmount < 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه محصول یا مقدار ضایعات نامعتبر است"
+        });
+      }
+      
+      // Insert new waste record
+      await pool.query(`
+        INSERT INTO product_waste (product_id, waste_amount, reason, reported_by)
+        VALUES ($1, $2, $3, $4)
+      `, [productId, wasteAmount, reason || 'تنظیم دستی', req.session?.adminId || null]);
+      
+      res.json({ 
+        success: true, 
+        message: "ضایعات محصول با موفقیت به‌روزرسانی شد"
+      });
+    } catch (error) {
+      console.error('Error updating waste amount:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در به‌روزرسانی ضایعات",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Warehouse Department - Approve order (items ready)
   app.post("/api/warehouse/orders/:orderId/approve", requireAuth, attachUserDepartments, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {

@@ -38,6 +38,18 @@ export const goodsInTransit = pgTable("goods_in_transit", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Product Waste Tracking - تتبع ضایعات محصولات
+export const productWaste = pgTable("product_waste", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  wasteAmount: decimal("waste_amount", { precision: 10, scale: 2 }).notNull().default("0"),
+  reason: text("reason"), // دلیل ضایعات
+  reportedBy: integer("reported_by"), // Admin ID
+  reportedAt: timestamp("reported_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Shop products with actual pricing and inventory
 export const shopProducts = pgTable("shop_products", {
   id: serial("id").primaryKey(),

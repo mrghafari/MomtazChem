@@ -40,7 +40,8 @@ import {
   Plus,
   Minus,
   Save,
-  Printer
+  Printer,
+  Play
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
@@ -139,6 +140,56 @@ const WarehouseManagement: React.FC = () => {
   const [editingWaste, setEditingWaste] = useState<string | null>(null);
   const [wasteQuantity, setWasteQuantity] = useState<number>(0);
   const [wasteAmounts, setWasteAmounts] = useState<{[key: string]: number}>({});
+  
+  // Query for waste amounts from database
+  const { data: wasteData, refetch: refetchWaste } = useQuery({
+    queryKey: ['/api/warehouse/waste'],
+    enabled: true,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  });
+
+  // Update local state when waste data is fetched
+  useEffect(() => {
+    if (wasteData?.wasteAmounts) {
+      setWasteAmounts(wasteData.wasteAmounts);
+    }
+  }, [wasteData]);
+
+  // Mutation for updating waste amounts
+  const updateWasteMutation = useMutation({
+    mutationFn: async ({ productId, wasteAmount, reason }: { productId: number; wasteAmount: number; reason?: string }) => {
+      const response = await fetch(`/api/warehouse/waste/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ wasteAmount, reason }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update waste amount');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchWaste();
+      toast({
+        title: "موفق",
+        description: "ضایعات محصول با موفقیت به‌روزرسانی شد",
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating waste:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در به‌روزرسانی ضایعات",
+        variant: "destructive",
+      });
+    },
+  });
   
   // Order items modal state
   const [showOrderItems, setShowOrderItems] = useState(false);
@@ -618,17 +669,16 @@ const WarehouseManagement: React.FC = () => {
       return;
     }
 
-    setWasteAmounts(prev => ({
-      ...prev,
-      [productId]: newWasteAmount
-    }));
+    // Use the mutation to update waste amount in database
+    updateWasteMutation.mutate({
+      productId,
+      wasteAmount: newWasteAmount,
+      reason: `تنظیم دستی ضایعات به ${newWasteAmount} واحد`
+    });
+    
+    // Reset editing state
     setEditingWaste(null);
     setWasteQuantity(0);
-    
-    toast({
-      title: "ضایعات به‌روزرسانی شد",
-      description: `ضایعات محصول به ${newWasteAmount} واحد تنظیم شد.`,
-    });
   };
 
   const handleSaveThresholdSettings = () => {
@@ -861,6 +911,7 @@ const WarehouseManagement: React.FC = () => {
                         <th className="text-right p-4">مبلغ</th>
                         <th className="text-right p-4">وضعیت</th>
                         <th className="text-right p-4">تاریخ</th>
+                        <th className="text-center p-4">عملیات</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -884,6 +935,45 @@ const WarehouseManagement: React.FC = () => {
                           <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
                           <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
                           <td className="p-4">{formatDate(order.createdAt)}</td>
+                          <td className="p-4">
+                            <div className="flex justify-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewOrderItems(order)}
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                جزئیات
+                              </Button>
+                              {(order.currentStatus === 'financial_approved' || order.currentStatus === 'warehouse_pending') && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleStartProcessing(order)}
+                                  className="text-green-600 hover:text-green-800"
+                                >
+                                  <Play className="w-4 h-4 mr-1" />
+                                  شروع پردازش
+                                </Button>
+                              )}
+                              {order.currentStatus === 'warehouse_processing' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedOrder(order);
+                                    setWarehouseNotes(order.warehouseNotes || '');
+                                    setShowOrderDetails(true);
+                                  }}
+                                  className="text-orange-600 hover:text-orange-800"
+                                >
+                                  <Package className="w-4 h-4 mr-1" />
+                                  تکمیل
+                                </Button>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
