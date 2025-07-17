@@ -42,6 +42,7 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
+import { warehouseInventory, insertWarehouseInventorySchema } from "@shared/customer-schema";
 import { smsService } from "./sms-service";
 import { ticketingStorage } from "./ticketing-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
@@ -2516,6 +2517,255 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در همگام‌سازی هوشمند"
+      });
+    }
+  });
+
+  // =============================================================================
+  // WAREHOUSE INVENTORY WITH BATCH TRACKING ENDPOINTS
+  // =============================================================================
+  
+  // Get warehouse inventory for a specific product
+  app.get("/api/warehouse/inventory/:productId", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      if (isNaN(productId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه محصول نامعتبر است" 
+        });
+      }
+
+      const inventory = await db.select()
+        .from(warehouseInventory)
+        .where(
+          and(
+            eq(warehouseInventory.productId, productId),
+            eq(warehouseInventory.isActive, true),
+            eq(warehouseInventory.isSoldOut, false)
+          )
+        )
+        .orderBy(warehouseInventory.createdAt);
+
+      const totalStock = inventory.reduce((sum, item) => sum + item.stockQuantity, 0);
+
+      res.json({
+        success: true,
+        data: {
+          inventory,
+          totalStock,
+          batchCount: inventory.length
+        },
+        message: "موجودی انبار دریافت شد"
+      });
+    } catch (error) {
+      console.error("Error getting warehouse inventory:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت موجودی انبار"
+      });
+    }
+  });
+
+  // Increase warehouse stock with batch number
+  app.post("/api/warehouse/increase-stock", async (req, res) => {
+    try {
+      const { productId, quantity, batchNumber, batchType, productName, productSku, reason } = req.body;
+
+      if (!productId || !quantity || !batchNumber || !productName || !productSku) {
+        return res.status(400).json({
+          success: false,
+          message: "اطلاعات ضروری ناقص است"
+        });
+      }
+
+      const increaseQuantity = parseInt(quantity);
+      if (isNaN(increaseQuantity) || increaseQuantity <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "مقدار افزایش باید عدد مثبت باشد"
+        });
+      }
+
+      // Check if batch already exists for existing batch type
+      if (batchType === 'existing') {
+        const existingBatch = await db.select()
+          .from(warehouseInventory)
+          .where(
+            and(
+              eq(warehouseInventory.productId, productId),
+              eq(warehouseInventory.batchNumber, batchNumber),
+              eq(warehouseInventory.isActive, true),
+              eq(warehouseInventory.isSoldOut, false)
+            )
+          )
+          .limit(1);
+
+        if (existingBatch.length > 0) {
+          // Update existing batch
+          await db.update(warehouseInventory)
+            .set({
+              stockQuantity: existingBatch[0].stockQuantity + increaseQuantity,
+              lastMovementType: 'increase',
+              lastMovementDate: new Date(),
+              lastMovementReason: reason || `افزایش موجودی ${increaseQuantity} واحد`,
+              updatedAt: new Date()
+            })
+            .where(eq(warehouseInventory.id, existingBatch[0].id));
+
+          console.log(`✅ [WAREHOUSE] Increased existing batch ${batchNumber} by ${increaseQuantity} units`);
+        } else {
+          return res.status(404).json({
+            success: false,
+            message: "بچ موجود یافت نشد"
+          });
+        }
+      } else {
+        // Create new batch
+        await db.insert(warehouseInventory).values({
+          productId,
+          productName,
+          productSku,
+          batchNumber,
+          stockQuantity: increaseQuantity,
+          productionDate: new Date(),
+          qualityStatus: 'approved',
+          lastMovementType: 'increase',
+          lastMovementDate: new Date(),
+          lastMovementReason: reason || `ایجاد بچ جدید با ${increaseQuantity} واحد`,
+        });
+
+        console.log(`✅ [WAREHOUSE] Created new batch ${batchNumber} with ${increaseQuantity} units`);
+      }
+
+      // Update کاردکس stock quantity (sync from warehouse to کاردکس)
+      await syncWarehouseToKardex(productId);
+
+      res.json({
+        success: true,
+        message: `موجودی با موفقیت ${increaseQuantity} واحد افزایش یافت`
+      });
+    } catch (error) {
+      console.error("Error increasing warehouse stock:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در افزایش موجودی انبار"
+      });
+    }
+  });
+
+  // Sync warehouse inventory to کاردکس (warehouse is master)
+  app.post("/api/warehouse/sync-to-kardex/:productId", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      await syncWarehouseToKardex(productId);
+
+      res.json({
+        success: true,
+        message: "همگام‌سازی انبار به کاردکس انجام شد"
+      });
+    } catch (error) {
+      console.error("Error syncing warehouse to kardex:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در همگام‌سازی"
+      });
+    }
+  });
+
+  // Sync warehouse inventory to کاردکس function (warehouse is master)
+  async function syncWarehouseToKardex(productId: number) {
+    try {
+      // Get total warehouse inventory for this product
+      const warehouseInventoryData = await db.select()
+        .from(warehouseInventory)
+        .where(
+          and(
+            eq(warehouseInventory.productId, productId),
+            eq(warehouseInventory.isActive, true),
+            eq(warehouseInventory.isSoldOut, false)
+          )
+        );
+
+      const totalWarehouseStock = warehouseInventoryData.reduce((sum, item) => sum + item.stockQuantity, 0);
+
+      // Update کاردکس (showcase_products) with warehouse stock
+      await db.update(showcaseProducts)
+        .set({
+          stockQuantity: totalWarehouseStock,
+          updatedAt: new Date()
+        })
+        .where(eq(showcaseProducts.id, productId));
+
+      console.log(`🔄 [SYNC] Updated کاردکس product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
+
+      // Also sync to shop if product exists there
+      const shopProduct = await db.select()
+        .from(shopProducts)
+        .where(eq(shopProducts.productId, productId))
+        .limit(1);
+
+      if (shopProduct.length > 0) {
+        await db.update(shopProducts)
+          .set({
+            stockQuantity: totalWarehouseStock,
+            updatedAt: new Date()
+          })
+          .where(eq(shopProducts.productId, productId));
+
+        console.log(`🔄 [SYNC] Updated shop product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
+      }
+
+      return { success: true, totalStock: totalWarehouseStock };
+    } catch (error) {
+      console.error("Error syncing warehouse to kardex:", error);
+      throw error;
+    }
+  }
+
+  // Remove sold-out batches automatically
+  app.post("/api/warehouse/remove-sold-out-batches", async (req, res) => {
+    try {
+      const soldOutBatches = await db.select()
+        .from(warehouseInventory)
+        .where(
+          and(
+            eq(warehouseInventory.stockQuantity, 0),
+            eq(warehouseInventory.isActive, true),
+            eq(warehouseInventory.isSoldOut, false)
+          )
+        );
+
+      if (soldOutBatches.length > 0) {
+        await db.update(warehouseInventory)
+          .set({
+            isSoldOut: true,
+            lastMovementType: 'sold_out',
+            lastMovementDate: new Date(),
+            lastMovementReason: 'حذف خودکار بچ تمام شده',
+            updatedAt: new Date()
+          })
+          .where(
+            and(
+              eq(warehouseInventory.stockQuantity, 0),
+              eq(warehouseInventory.isActive, true),
+              eq(warehouseInventory.isSoldOut, false)
+            )
+          );
+
+        console.log(`🗑️ [WAREHOUSE] Marked ${soldOutBatches.length} sold-out batches for removal`);
+      }
+
+      res.json({
+        success: true,
+        data: { removedBatches: soldOutBatches.length },
+        message: `${soldOutBatches.length} بچ تمام شده حذف شد`
+      });
+    } catch (error) {
+      console.error("Error removing sold-out batches:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف بچ‌های تمام شده"
       });
     }
   });
