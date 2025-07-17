@@ -16620,6 +16620,39 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Customer password reset token verification
+  app.get('/api/customers/password-reset-verify', async (req, res) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token) {
+        return res.status(400).json({ success: false, message: "توکن الزامی است" });
+      }
+
+      // Find customer by reset token
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT * FROM crm_customers 
+        WHERE reset_password_token = $1 
+        AND reset_password_expires > $2
+        AND is_active = true
+      `, [token, new Date()]);
+
+      if (result.rows.length === 0) {
+        return res.status(400).json({ success: false, message: "توکن نامعتبر یا منقضی شده است" });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "توکن معتبر است",
+        valid: true
+      });
+    } catch (error) {
+      console.error('Error verifying reset token:', error);
+      res.status(500).json({ success: false, message: "خطا در بررسی توکن" });
+    }
+  });
+
   // Customer password reset with token
   app.post('/api/customers/password-reset', async (req, res) => {
     try {

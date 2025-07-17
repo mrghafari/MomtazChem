@@ -53,8 +53,27 @@ export default function CustomerResetPassword() {
         .trim();
       
       setToken(tokenParam);
-      setIsValidToken(true);
-      console.log('Reset token extracted:', tokenParam);
+      
+      // Validate token with backend
+      const validateToken = async () => {
+        try {
+          const response = await fetch(`/api/customers/password-reset-verify?token=${encodeURIComponent(tokenParam)}`);
+          const result = await response.json();
+          
+          if (result.success) {
+            setIsValidToken(true);
+            console.log('✓ Token validated successfully');
+          } else {
+            setIsValidToken(false);
+            console.log('✗ Token validation failed:', result.message);
+          }
+        } catch (error) {
+          console.error('Error validating token:', error);
+          setIsValidToken(false);
+        }
+      };
+      
+      validateToken();
     } else {
       setIsValidToken(false);
       console.log('No token found in URL');
@@ -73,7 +92,7 @@ export default function CustomerResetPassword() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/customers/reset-password', {
+      const response = await fetch('/api/customers/password-reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
