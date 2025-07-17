@@ -374,6 +374,17 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       financialReviewedAt: orderManagement.financialReviewedAt,
       financialNotes: orderManagement.financialNotes,
       paymentReceiptUrl: orderManagement.paymentReceiptUrl,
+      
+      // Warehouse department fields
+      warehouseAssigneeId: orderManagement.warehouseAssigneeId,
+      warehouseProcessedAt: orderManagement.warehouseProcessedAt,
+      warehouseNotes: orderManagement.warehouseNotes,
+      
+      // Logistics department fields  
+      logisticsAssigneeId: orderManagement.logisticsAssigneeId,
+      logisticsProcessedAt: orderManagement.logisticsProcessedAt,
+      logisticsNotes: orderManagement.logisticsNotes,
+      
       createdAt: orderManagement.createdAt,
       updatedAt: orderManagement.updatedAt,
       

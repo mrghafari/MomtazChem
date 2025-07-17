@@ -34,6 +34,9 @@ interface LogisticsOrder {
   totalWeight?: string;
   weightUnit?: string;
   
+  // Warehouse processing date for logistics planning
+  warehouseProcessedAt?: string;
+  
   trackingNumber?: string;
   estimatedDeliveryDate?: string;
   actualDeliveryDate?: string;
@@ -438,6 +441,25 @@ export default function LogisticsDepartment() {
                                 </div>
                                 <p className="text-xs text-blue-600 mt-1">
                                   برای انتخاب وسیله حمل مناسب از این وزن استفاده کنید
+                                </p>
+                              </div>
+                              
+                              {/* Warehouse Processing Date Display */}
+                              <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-green-600" />
+                                  <span className="text-sm font-medium text-green-800">
+                                    تاریخ پردازش انبار: {order.warehouseProcessedAt ? 
+                                      new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                      }) : 'در انتظار پردازش'
+                                    }
+                                  </span>
+                                </div>
+                                <p className="text-xs text-green-600 mt-1">
+                                  زمان تایید و آماده‌سازی سفارش در انبار
                                 </p>
                               </div>
                               

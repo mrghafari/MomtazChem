@@ -913,7 +913,8 @@ const WarehouseManagement: React.FC = () => {
                         <th className="text-right p-4">وزن محموله</th>
                         <th className="text-right p-4">مبلغ</th>
                         <th className="text-right p-4">وضعیت</th>
-                        <th className="text-right p-4">تاریخ</th>
+                        <th className="text-right p-4">تاریخ پردازش در انبار</th>
+                        <th className="text-right p-4">تاریخ ایجاد</th>
                         <th className="text-center p-4">عملیات</th>
                       </tr>
                     </thead>
@@ -947,6 +948,17 @@ const WarehouseManagement: React.FC = () => {
                           </td>
                           <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
                           <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
+                          <td className="p-4">
+                            <div className="text-sm">
+                              {order.warehouseProcessedAt ? (
+                                <span className="text-green-600 font-medium">
+                                  {formatDate(order.warehouseProcessedAt)}
+                                </span>
+                              ) : (
+                                <span className="text-gray-400">در انتظار پردازش</span>
+                              )}
+                            </div>
+                          </td>
                           <td className="p-4">{formatDate(order.createdAt)}</td>
                           <td className="p-4">
                             <div className="flex justify-center gap-2">
