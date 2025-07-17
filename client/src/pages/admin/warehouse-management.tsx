@@ -1170,39 +1170,51 @@ const WarehouseManagement: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium">مشتری:</Label>
-                  <p className="mt-1">{selectedOrder.customerName}</p>
+                  <p className="mt-1">{
+                    selectedOrder.customer?.firstName && selectedOrder.customer?.lastName 
+                      ? `${selectedOrder.customer.firstName} ${selectedOrder.customer.lastName}` 
+                      : selectedOrder.customerFirstName && selectedOrder.customerLastName 
+                        ? `${selectedOrder.customerFirstName} ${selectedOrder.customerLastName}`
+                        : selectedOrder.customerName || 'نامشخص'
+                  }</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium">ایمیل:</Label>
-                  <p className="mt-1">{selectedOrder.customerEmail}</p>
+                  <p className="mt-1">{
+                    selectedOrder.customer?.email || selectedOrder.customerEmail || 'ایمیل نامشخص'
+                  }</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium">مبلغ کل:</Label>
-                  <p className="mt-1">{formatCurrency(selectedOrder.totalAmount)}</p>
+                  <p className="mt-1">{formatCurrency(parseFloat(selectedOrder.totalAmount) || 0)}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium">وضعیت:</Label>
-                  <p className="mt-1">{getStatusBadge(selectedOrder.status)}</p>
+                  <p className="mt-1">{getStatusBadge(selectedOrder.currentStatus || selectedOrder.status)}</p>
                 </div>
               </div>
-              <div>
-                <Label className="text-sm font-medium">آدرس ارسال:</Label>
-                <p className="mt-1">{selectedOrder.shippingAddress}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium">اقلام سفارش:</Label>
-                <div className="mt-2 space-y-2">
-                  {selectedOrder.items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-gray-500">تعداد: {item.quantity}</p>
+              {selectedOrder.shippingAddress && (
+                <div>
+                  <Label className="text-sm font-medium">آدرس ارسال:</Label>
+                  <p className="mt-1">{selectedOrder.shippingAddress}</p>
+                </div>
+              )}
+              {selectedOrder.items && selectedOrder.items.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">اقلام سفارش:</Label>
+                  <div className="mt-2 space-y-2">
+                    {selectedOrder.items.map((item, index) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div>
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-sm text-gray-500">تعداد: {item.quantity}</p>
+                        </div>
+                        <p className="font-medium">{formatCurrency(item.price * item.quantity)}</p>
                       </div>
-                      <p className="font-medium">{formatCurrency(item.price * item.quantity)}</p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               <div>
                 <Label className="text-sm font-medium">یادداشت انبار:</Label>
                 <Textarea
@@ -1216,7 +1228,7 @@ const WarehouseManagement: React.FC = () => {
                 <Button variant="outline" onClick={() => setShowOrderDetails(false)}>
                   انصراف
                 </Button>
-                {selectedOrder.status === 'warehouse_processing' && (
+                {(selectedOrder.currentStatus === 'warehouse_processing' || selectedOrder.status === 'warehouse_processing') && (
                   <Button onClick={handleFulfillOrder} disabled={updateOrderMutation.isPending}>
                     {updateOrderMutation.isPending ? 'در حال پردازش...' : 'تکمیل سفارش'}
                   </Button>
