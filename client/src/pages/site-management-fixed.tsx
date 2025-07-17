@@ -324,14 +324,7 @@ export default function SiteManagement() {
       className: "border-rose-300 text-rose-600 hover:bg-rose-50",
       moduleId: "ticketing_system"
     },
-    {
-      id: "ai-seo-assistant",
-      label: "AI SEO Assistant",
-      icon: Brain,
-      onClick: () => trackButtonClick("ai-seo-assistant", () => setLocation("/admin/ai-seo-assistant")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
-      moduleId: "seo_management"
-    },
+
     {
       id: "remote-desktop",
       label: "Remote Desktop",
@@ -348,14 +341,7 @@ export default function SiteManagement() {
       className: "border-blue-300 text-blue-600 hover:bg-blue-50",
       moduleId: "server_config"
     },
-    {
-      id: "warehouse-management",
-      label: "Warehouse Management",
-      icon: Warehouse,
-      onClick: () => trackButtonClick("warehouse-management", () => setLocation("/admin/warehouse-management")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
-      moduleId: "warehouse_management"
-    },
+
 
 
   ];
