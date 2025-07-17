@@ -161,6 +161,8 @@ export default function ProductsPage() {
   const [stockIncreaseBatchType, setStockIncreaseBatchType] = useState<string>("");
   const [stockIncreaseBatchNumber, setStockIncreaseBatchNumber] = useState<string>("");
   const [isIncreasingStock, setIsIncreasingStock] = useState(false);
+  const [previousBatches, setPreviousBatches] = useState<any[]>([]);
+  const [showPreviousBatches, setShowPreviousBatches] = useState(false);
   
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
@@ -372,6 +374,35 @@ export default function ProductsPage() {
       });
     },
   });
+
+  // Fetch previous batches for a product
+  const fetchPreviousBatches = async (productId: number) => {
+    try {
+      const response = await apiRequest(`/api/warehouse/previous-batches/${productId}`);
+      if (response.success) {
+        setPreviousBatches(response.data);
+        setShowPreviousBatches(true);
+      }
+    } catch (error) {
+      console.error("Error fetching previous batches:", error);
+      toast({
+        title: "خطا",
+        description: "خطا در دریافت بچ‌های قبلی",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle previous batch selection
+  const handlePreviousBatchSelect = (batch: any) => {
+    setStockIncreaseBatchNumber(batch.batch_number);
+    setStockIncreaseBatchType(batch.batch_type || "existing");
+    setShowPreviousBatches(false);
+    toast({
+      title: "بچ انتخاب شد",
+      description: `بچ ${batch.batch_number} انتخاب شد`,
+    });
+  };
 
   // Handle stock increase
   const handleStockIncrease = (product: ShowcaseProduct) => {
@@ -2180,13 +2211,32 @@ export default function ProductsPage() {
                           <span className="text-xs ml-1">(غیر فعال)</span>
                         )}
                       </label>
-                      <Input 
-                        placeholder={form.watch('isNonChemical') ? "غیر کاربردی" : "مثال: B2025-001"} 
-                        className={`h-9 ${form.watch('isNonChemical') ? 'bg-gray-100 border-gray-300 text-gray-400' : 'border-emerald-300 focus:border-emerald-500'}`}
-                        disabled={form.watch('isNonChemical')}
-                        value={stockIncreaseBatchNumber}
-                        onChange={(e) => setStockIncreaseBatchNumber(e.target.value)}
-                      />
+                      <div className="flex gap-2">
+                        <Input 
+                          placeholder={form.watch('isNonChemical') ? "غیر کاربردی" : "مثال: B2025-001"} 
+                          className={`h-9 flex-1 ${form.watch('isNonChemical') ? 'bg-gray-100 border-gray-300 text-gray-400' : 'border-emerald-300 focus:border-emerald-500'}`}
+                          disabled={form.watch('isNonChemical')}
+                          value={stockIncreaseBatchNumber}
+                          onChange={(e) => setStockIncreaseBatchNumber(e.target.value)}
+                        />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className={`h-9 px-3 ${form.watch('isNonChemical') ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed' : 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200'}`}
+                              disabled={form.watch('isNonChemical')}
+                              onClick={() => editingProduct && fetchPreviousBatches(editingProduct.id)}
+                            >
+                              <Database className="h-3 w-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>بچ‌های قبلی</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                     </div>
                   </div>
                   
@@ -2666,6 +2716,56 @@ export default function ProductsPage() {
               </form>
             </Form>
           </TooltipProvider>
+        </DialogContent>
+      </Dialog>
+
+      {/* Previous Batches Dialog */}
+      <Dialog open={showPreviousBatches} onOpenChange={setShowPreviousBatches}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-amber-600" />
+              بچ‌های قبلی
+            </DialogTitle>
+            <DialogDescription>
+              انتخاب بچ از فهرست بچ‌های قبلی
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {previousBatches.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">هیچ بچ قبلی یافت نشد</p>
+            ) : (
+              previousBatches.map((batch, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="w-full justify-start text-right p-3 h-auto hover:bg-amber-50"
+                  onClick={() => handlePreviousBatchSelect(batch)}
+                >
+                  <div className="text-right">
+                    <div className="font-medium text-amber-700">
+                      {batch.batch_number}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {batch.batch_type === 'new' ? 'بچ جدید' : 'بچ موجود'}
+                    </div>
+                    {batch.last_used && (
+                      <div className="text-xs text-gray-400">
+                        آخرین استفاده: {new Date(batch.last_used).toLocaleDateString('fa-IR')}
+                      </div>
+                    )}
+                  </div>
+                </Button>
+              ))
+            )}
+          </div>
+          
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setShowPreviousBatches(false)}>
+              بستن
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

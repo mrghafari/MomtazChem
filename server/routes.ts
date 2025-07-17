@@ -2641,6 +2641,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get previous batches for a product
+  app.get("/api/warehouse/previous-batches/:productId", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      
+      const batches = await db.execute(sql`
+        SELECT DISTINCT batch_number, batch_type, 
+               MAX(created_at) as last_used
+        FROM warehouse_inventory 
+        WHERE product_id = ${productId}
+        GROUP BY batch_number, batch_type
+        ORDER BY last_used DESC
+        LIMIT 10
+      `);
+
+      res.json({
+        success: true,
+        data: batches.rows
+      });
+    } catch (error) {
+      console.error("Error fetching previous batches:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت بچ‌های قبلی"
+      });
+    }
+  });
+
   // Sync warehouse inventory to کاردکس (warehouse is master)
   app.post("/api/warehouse/sync-to-kardex/:productId", async (req, res) => {
     try {
