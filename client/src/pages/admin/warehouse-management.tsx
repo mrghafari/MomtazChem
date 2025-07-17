@@ -125,7 +125,7 @@ interface InventoryMovement {
 
 const WarehouseManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('financial_approved');
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [warehouseNotes, setWarehouseNotes] = useState('');
@@ -362,11 +362,23 @@ const WarehouseManagement: React.FC = () => {
 
   // Filter orders based on search and status
   const filteredOrders = orders?.filter(order => {
-    const matchesSearch = (order.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (order.customerEmail || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.id.toString().includes(searchTerm);
+    // Build customer name from API response structure
+    const customerName = order.customer?.firstName && order.customer?.lastName 
+      ? `${order.customer.firstName} ${order.customer.lastName}` 
+      : order.customerFirstName && order.customerLastName 
+        ? `${order.customerFirstName} ${order.customerLastName}`
+        : order.customerName || '';
     
-    const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
+    const customerEmail = order.customer?.email || order.customerEmail || '';
+    
+    const matchesSearch = customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.id.toString().includes(searchTerm) ||
+                         order.customerOrderId?.toString().includes(searchTerm);
+    
+    // Use currentStatus from API instead of status
+    const orderStatus = order.currentStatus || order.status || '';
+    const matchesStatus = selectedStatus === 'all' || orderStatus === selectedStatus;
     
     return matchesSearch && matchesStatus;
   }) || [];
@@ -484,6 +496,7 @@ const WarehouseManagement: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
+      'warehouse_pending': { color: 'bg-orange-100 text-orange-800', label: 'در انتظار انبار' },
       'financial_approved': { color: 'bg-yellow-100 text-yellow-800', label: 'تایید مالی - آماده انبار' },
       'warehouse_processing': { color: 'bg-blue-100 text-blue-800', label: 'در حال پردازش انبار' },
       'warehouse_fulfilled': { color: 'bg-green-100 text-green-800', label: 'آماده ارسال به لجستیک' },
@@ -604,6 +617,7 @@ const WarehouseManagement: React.FC = () => {
                 onChange={(e) => setSelectedStatus(e.target.value)}
               >
                 <option value="all">همه وضعیت‌ها</option>
+                <option value="warehouse_pending">در انتظار انبار</option>
                 <option value="financial_approved">تایید مالی - آماده انبار</option>
                 <option value="warehouse_processing">در حال پردازش انبار</option>
                 <option value="warehouse_fulfilled">آماده ارسال به لجستیک</option>
@@ -649,12 +663,20 @@ const WarehouseManagement: React.FC = () => {
                           <td className="p-4 font-medium">#{order.id}</td>
                           <td className="p-4">
                             <div>
-                              <p className="font-medium">{order.customerName || 'نامشخص'}</p>
-                              <p className="text-sm text-gray-500">{order.customerEmail || 'ایمیل نامشخص'}</p>
+                              <p className="font-medium">{
+                                order.customer?.firstName && order.customer?.lastName 
+                                  ? `${order.customer.firstName} ${order.customer.lastName}` 
+                                  : order.customerFirstName && order.customerLastName 
+                                    ? `${order.customerFirstName} ${order.customerLastName}`
+                                    : order.customerName || 'نامشخص'
+                              }</p>
+                              <p className="text-sm text-gray-500">{
+                                order.customer?.email || order.customerEmail || 'ایمیل نامشخص'
+                              }</p>
                             </div>
                           </td>
-                          <td className="p-4">{formatCurrency(order.totalAmount)}</td>
-                          <td className="p-4">{getStatusBadge(order.status)}</td>
+                          <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
+                          <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
                           <td className="p-4">{formatDate(order.createdAt)}</td>
                           <td className="p-4">
                             <div className="flex gap-2">
@@ -665,7 +687,7 @@ const WarehouseManagement: React.FC = () => {
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              {order.status === 'financial_approved' && (
+                              {(order.currentStatus === 'warehouse_pending' || order.currentStatus === 'financial_approved') && (
                                 <Button
                                   size="sm"
                                   onClick={() => handleStartProcessing(order)}
@@ -676,7 +698,7 @@ const WarehouseManagement: React.FC = () => {
                                   شروع پردازش
                                 </Button>
                               )}
-                              {order.status === 'warehouse_processing' && (
+                              {order.currentStatus === 'warehouse_processing' && (
                                 <Button
                                   size="sm"
                                   onClick={() => handleApproveToLogistics(order)}
