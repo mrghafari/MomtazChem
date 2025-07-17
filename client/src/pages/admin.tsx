@@ -133,6 +133,12 @@ export default function AdminPage() {
               and complete business workflow management - all unified in one powerful platform.
             </p>
           </div>
+          
+          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-sm text-green-800">
+              <strong>🔐 نحوه تخصیص دسترسی‌ها:</strong> برای تخصیص این ماژول‌ها به کاربران، به بخش "نقش‌ها" بروید و نقش‌هایی با دسترسی‌های خاص ایجاد یا ویرایش کنید. سپس هر کاربر را می‌توانید به نقشی تخصیص دهید که دسترسی او به این 26 ماژول را تعیین می‌کند.
+            </p>
+          </div>
         </div>
 
 
