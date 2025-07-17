@@ -933,42 +933,7 @@ const WarehouseManagement: React.FC = () => {
                             </div>
                           </td>
                           <td className="p-4 text-center">
-                            {editingProduct === product.id.toString() ? (
-                              <div className="flex items-center justify-center gap-2">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  value={editingQuantity}
-                                  onChange={(e) => setEditingQuantity(parseInt(e.target.value) || 0)}
-                                  className="w-20"
-                                />
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleProductStockUpdate(product.id, editingQuantity)}
-                                  disabled={updateInventoryMutation.isPending}
-                                >
-                                  <Save className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setEditingProduct(null)}
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-center gap-2">
-                                <span className="font-medium">{product.stockQuantity}</span>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleProductStockEdit(product.id.toString(), product.stockQuantity)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            )}
+                            <span className="font-medium">{product.stockQuantity}</span>
                           </td>
                           <td className="p-4 text-center">
                             <span className="font-medium text-blue-600">
@@ -991,7 +956,20 @@ const WarehouseManagement: React.FC = () => {
                                   type="number"
                                   min="0"
                                   value={wasteQuantity}
-                                  onChange={(e) => setWasteQuantity(parseInt(e.target.value) || 0)}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value);
+                                    if (isNaN(value) || value < 0) {
+                                      setWasteQuantity(0);
+                                    } else {
+                                      setWasteQuantity(value);
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    // Prevent entering negative numbers
+                                    if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                                      e.preventDefault();
+                                    }
+                                  }}
                                   className="w-20"
                                 />
                                 <Button
@@ -1044,22 +1022,7 @@ const WarehouseManagement: React.FC = () => {
                             <span className="font-medium">{product.minStockLevel}</span>
                           </td>
                           <td className="p-4 text-center">
-                            <div className="flex justify-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleProductStockEdit(product.id.toString(), product.stockQuantity + 1)}
-                              >
-                                <Plus className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleProductStockEdit(product.id.toString(), Math.max(0, product.stockQuantity - 1))}
-                              >
-                                <Minus className="w-4 h-4" />
-                              </Button>
-                            </div>
+                            <span className="text-sm text-gray-500">-</span>
                           </td>
                         </tr>
                       ))}
