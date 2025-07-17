@@ -65,7 +65,7 @@ interface OrderManagement {
   deliveryCode?: string;
 }
 
-export default function FinanceOrders() {
+function FinanceOrders() {
   const { toast } = useToast();
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -88,7 +88,14 @@ export default function FinanceOrders() {
     queryFn: () => fetch('/api/order-management/financial', { credentials: 'include' }).then(res => res.json())
   });
 
+  // Fetch approved orders that have been transferred to warehouse
+  const { data: approvedOrdersResponse, isLoading: isLoadingApproved, refetch: refetchApproved } = useQuery({
+    queryKey: ['/api/financial/approved-orders'],
+    queryFn: () => fetch('/api/financial/approved-orders', { credentials: 'include' }).then(res => res.json())
+  });
+
   const allOrders: OrderManagement[] = ordersResponse?.orders || [];
+  const transferredOrders: OrderManagement[] = approvedOrdersResponse?.orders || [];
   
   // Filter and search functionality
   const filteredOrders = allOrders.filter(order => {
@@ -103,13 +110,20 @@ export default function FinanceOrders() {
     return searchMatch && statusMatch;
   });
 
+  // Filter transferred orders
+  const filteredTransferredOrders = transferredOrders.filter(order => {
+    const searchMatch = !searchTerm || 
+      order.customerFirstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerLastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerOrderId?.toString().includes(searchTerm);
+    
+    return searchMatch;
+  });
+
   // Separate orders by status for tabs
   const pendingOrders = filteredOrders.filter(order => 
     ['pending', 'pending_payment', 'payment_uploaded', 'financial_reviewing'].includes(order.currentStatus)
-  );
-  
-  const approvedOrders = filteredOrders.filter(order => 
-    order.currentStatus === 'financial_approved'
   );
   
   const rejectedOrders = filteredOrders.filter(order => 
@@ -121,7 +135,7 @@ export default function FinanceOrders() {
     sum + parseFloat(order.totalAmount || '0'), 0
   );
   
-  const totalApproved = approvedOrders.reduce((sum, order) => 
+  const totalTransferred = filteredTransferredOrders.reduce((sum, order) => 
     sum + parseFloat(order.totalAmount || '0'), 0
   );
 
@@ -428,11 +442,11 @@ export default function FinanceOrders() {
           <TabsList className="grid w-full grid-cols-3 bg-white shadow-sm border rounded-lg p-1">
             <TabsTrigger value="pending" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-orange-500 data-[state=active]:text-white">
               <Clock className="h-4 w-4" />
-              <span>در انتظار ({pendingOrders.length})</span>
+              <span>در انتظار بررسی ({pendingOrders.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="approved" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-green-500 data-[state=active]:text-white">
-              <CheckCircle className="h-4 w-4" />
-              <span>تایید شده ({approvedOrders.length})</span>
+            <TabsTrigger value="transferred" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+              <ChevronRight className="h-4 w-4" />
+              <span>ارجاع شده به انبار ({filteredTransferredOrders.length})</span>
             </TabsTrigger>
             <TabsTrigger value="rejected" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-red-500 data-[state=active]:text-white">
               <XCircle className="h-4 w-4" />
@@ -461,18 +475,19 @@ export default function FinanceOrders() {
             )}
           </TabsContent>
 
-          <TabsContent value="approved" className="space-y-4">
-            {approvedOrders.length === 0 ? (
+          <TabsContent value="transferred" className="space-y-4">
+            {filteredTransferredOrders.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
-                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">هیچ سفارش تایید شده‌ای وجود ندارد</h3>
+                  <ChevronRight className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">سفارشی به انبار ارجاع نشده</h3>
+                  <p className="text-gray-500">در حال حاضر سفارش تایید شده‌ای که به انبار ارجاع شده باشد وجود ندارد</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-4">
-                {approvedOrders.map((order) => (
-                  <OrderCard key={order.id} order={order} readOnly />
+                {filteredTransferredOrders.map((order) => (
+                  <TransferredOrderCard key={order.id} order={order} />
                 ))}
               </div>
             )}
@@ -743,3 +758,117 @@ function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
     </Card>
   );
 }
+
+// TransferredOrderCard Component for approved orders sent to warehouse
+interface TransferredOrderCardProps {
+  order: OrderManagement;
+}
+
+function TransferredOrderCard({ order }: TransferredOrderCardProps) {
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'warehouse_pending':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'warehouse_notified':
+        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'warehouse_processing':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'warehouse_approved':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusDisplayName = (status: string) => {
+    switch (status) {
+      case 'warehouse_pending':
+        return 'در انتظار بررسی انبار';
+      case 'warehouse_notified':
+        return 'اطلاع رسانی انبار';
+      case 'warehouse_processing':
+        return 'در حال پردازش انبار';
+      case 'warehouse_approved':
+        return 'تایید نهایی انبار';
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4 space-x-reverse">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <ChevronRight className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">سفارش #{order.customerOrderId}</h3>
+              <p className="text-sm text-gray-600">{order.customerFirstName} {order.customerLastName}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <Badge className={`border ${getStatusBadgeColor(order.currentStatus)}`}>
+              {getStatusDisplayName(order.currentStatus)}
+            </Badge>
+            <div className="text-left">
+              <p className="font-bold text-lg text-green-600">
+                {parseFloat(order.totalAmount).toLocaleString()} {order.currency}
+              </p>
+              <p className="text-xs text-gray-500">
+                تایید مالی: {order.financialReviewedAt && new Date(order.financialReviewedAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Mail className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">{order.customerEmail}</span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Phone className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">{order.customerPhone}</span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Calendar className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">
+              بروزرسانی: {new Date(order.updatedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-900">تایید شده توسط بخش مالی</span>
+            <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+              ارجاع شده به انبار
+            </Badge>
+          </div>
+        </div>
+
+        {order.financialNotes && (
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <p className="text-sm font-medium text-gray-700 mb-1">یادداشت مالی:</p>
+            <p className="text-sm text-gray-600">{order.financialNotes}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default FinanceOrders;

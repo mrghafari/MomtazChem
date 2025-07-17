@@ -13492,16 +13492,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Get financial department orders (public access for financial department)
-  app.get('/api/financial/orders', async (req: Request, res: Response) => {
-    try {
-      const orders = await orderManagementStorage.getOrdersByDepartment('financial');
-      res.json({ success: true, orders });
-    } catch (error) {
-      console.error('Error fetching financial orders:', error);
-      res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات مالی' });
-    }
-  });
+
 
   // Approve financial order (public access for financial department)
   app.post('/api/finance/orders/:id/approve', async (req: Request, res: Response) => {
@@ -15544,14 +15535,25 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     });
   });
 
-  // Get financial pending orders
-  app.get('/api/financial/orders', requireDepartmentAuth('financial'), async (req, res) => {
+  // Get financial pending orders  
+  app.get('/api/financial/orders', async (req, res) => {
     try {
       const orders = await orderManagementStorage.getFinancialPendingOrders();
       res.json({ success: true, orders });
     } catch (error) {
       console.error('Error fetching financial orders:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
+    }
+  });
+
+  // Get approved orders that have been transferred to warehouse
+  app.get('/api/financial/approved-orders', async (req, res) => {
+    try {
+      const approvedOrders = await orderManagementStorage.getFinancialApprovedOrders();
+      res.json({ success: true, orders: approvedOrders });
+    } catch (error) {
+      console.error('Error fetching financial approved orders:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات تأیید شده" });
     }
   });
 
@@ -15593,12 +15595,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const { notes } = req.body;
       const adminId = req.session.adminId!;
       
+      // Use warehouse_pending status from schema to properly transfer to warehouse
+      const { orderStatuses } = await import('../shared/order-management-schema');
       await orderManagementStorage.updateOrderStatus(
         orderId,
-        'financial_approved',
+        orderStatuses.WAREHOUSE_PENDING, // Transfer directly to warehouse pending
         adminId,
         'financial',
-        notes || 'تایید شده توسط بخش مالی'
+        notes || 'تایید شده توسط بخش مالی - انتقال به انبار'
       );
 
       // Send website notification and email to customer (NO SMS)
@@ -15626,12 +15630,14 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(401).json({ success: false, message: "احراز هویت نشده" });
       }
       
+      // Use warehouse_pending status from schema to properly transfer to warehouse
+      const { orderStatuses } = await import('../shared/order-management-schema');
       await orderManagementStorage.updateOrderStatus(
         orderId,
-        'financial_approved',
+        orderStatuses.WAREHOUSE_PENDING, // Transfer directly to warehouse pending
         reviewerId,
         'financial',
-        'تایید شده توسط بخش مالی'
+        'تایید شده توسط بخش مالی - انتقال به انبار'
       );
 
       // Send website notification and email to customer (NO SMS)

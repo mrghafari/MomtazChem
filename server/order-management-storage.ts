@@ -26,7 +26,7 @@ import { crmCustomers } from "@shared/schema";
 import { showcaseProducts as products } from "@shared/showcase-schema";
 import { shopProducts } from "@shared/shop-schema";
 import { db } from "./db";
-import { eq, and, desc, asc, inArray, sql } from "drizzle-orm";
+import { eq, and, desc, asc, inArray, sql, isNotNull } from "drizzle-orm";
 
 export interface IOrderManagementStorage {
   // Order Management
@@ -44,6 +44,7 @@ export interface IOrderManagementStorage {
   getOrdersByDepartment(department: Department, status?: OrderStatus[]): Promise<OrderManagement[]>;
   getOrdersByStatus(status: OrderStatus | OrderStatus[]): Promise<OrderManagement[]>;
   getFinancialPendingOrders(): Promise<OrderManagement[]>;
+  getFinancialApprovedOrders(): Promise<any[]>;
   getWarehousePendingOrders(): Promise<OrderManagement[]>;
   getLogisticsPendingOrders(): Promise<OrderManagement[]>;
   
@@ -264,13 +265,13 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     switch (department) {
       case 'financial':
         // بخش مالی سفارشات در انتظار، با رسید پرداخت و در مراحل بررسی مالی را می‌بیند
+        // سفارشات تأیید شده (FINANCIAL_APPROVED) از بخش مالی حذف شده و به انبار منتقل می‌شوند
         return [
           'pending', // سفارشات در انتظار که نیاز به بررسی فیش بانکی دارند
           orderStatuses.PENDING_PAYMENT,
           orderStatuses.PAYMENT_UPLOADED,
           orderStatuses.FINANCIAL_REVIEWING,
-          orderStatuses.FINANCIAL_APPROVED,
-          orderStatuses.FINANCIAL_REJECTED
+          orderStatuses.FINANCIAL_REJECTED // فقط سفارشات رد شده در بخش مالی باقی می‌مانند
         ].includes(currentStatus as any);
         
       case 'warehouse':
@@ -517,6 +518,14 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   
   async getFinancialPendingOrders(): Promise<OrderManagement[]> {
     return this.getOrdersByDepartment('financial');
+  }
+
+  // Get orders that have been approved by financial and transferred to warehouse
+  async getFinancialApprovedOrders(): Promise<any[]> {
+    console.log('🔍 [FINANCIAL APPROVED] Getting orders transferred to warehouse...');
+    
+    // Use the same approach as getOrdersByDepartment but for warehouse statuses
+    return this.getOrdersByDepartment('warehouse');
   }
   
   async getWarehousePendingOrders(): Promise<OrderManagement[]> {
