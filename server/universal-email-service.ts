@@ -145,7 +145,10 @@ export class UniversalEmailService {
   /**
    * Send password reset email
    */
-  static async sendPasswordResetEmail(email: string, resetLink: string, userName: string) {
+  static async sendPasswordResetEmail(email: string, resetToken: string, userName: string, req?: any) {
+    const { CONFIG } = await import('./config');
+    const resetLink = CONFIG.getPasswordResetUrl(resetToken, req);
+    
     return await this.sendEmail({
       categoryKey: 'password-reset',
       to: [email],

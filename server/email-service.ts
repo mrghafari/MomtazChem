@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { CONFIG } from './config';
 import { db } from './db';
 import { smtpSettings, emailTemplates } from '../shared/email-schema';
 import { eq, and } from 'drizzle-orm';
@@ -122,10 +123,11 @@ class EmailService {
     return { transporter, config };
   }
 
-  async sendPasswordResetEmail(email: string, resetToken: string, customerName: string) {
+  async sendPasswordResetEmail(email: string, resetToken: string, customerName: string, baseUrl?: string) {
     try {
       const { transporter, config } = await this.createTransporter('admin');
-      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password/${resetToken}`;
+      const frontendUrl = baseUrl || process.env.FRONTEND_URL || 'https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev';
+      const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
       const template = await this.getEmailTemplate('Password Management Template');
       
@@ -228,7 +230,7 @@ class EmailService {
           password_label: newPassword ? 'رمز عبور جدید شما:' : '',
           password_value: newPassword || '',
           security_note: newPassword ? 'لطفاً پس از ورود به سیستم، رمز عبور خود را به دلایل امنیتی تغییر دهید.' : '',
-          action_url: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/login`,
+          action_url: CONFIG.getLoginUrl(),
           action_text: 'ورود به حساب کاربری'
         };
 
@@ -276,7 +278,7 @@ class EmailService {
           ` : ''}
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:5000'}/login" 
+            <a href="${CONFIG.getLoginUrl()}" 
                style="background-color: #2563eb; color: white; padding: 12px 30px; 
                       text-decoration: none; border-radius: 5px; display: inline-block;">
               ورود به حساب کاربری

@@ -540,7 +540,7 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
   }
 }
 
-export async function sendPasswordResetEmail(resetData: PasswordResetData): Promise<void> {
+export async function sendPasswordResetEmail(resetData: PasswordResetData, req?: any): Promise<void> {
   try {
     const transporter = await createTransporter('admin');
     const categorySettings = await emailStorage.getCategoryWithSettings('admin');
@@ -550,8 +550,8 @@ export async function sendPasswordResetEmail(resetData: PasswordResetData): Prom
     }
 
     const smtp = categorySettings.smtp;
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
-    const resetUrl = `${baseUrl}/customer-reset-password?token=${resetData.token}`;
+    const { CONFIG } = await import('./config');
+    const resetUrl = CONFIG.getCustomerPasswordResetUrl(resetData.token, req);
     
     // Skip password reset email if sender and recipient are the same
     if (resetData.email.toLowerCase() === smtp.fromEmail.toLowerCase()) {

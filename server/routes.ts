@@ -1179,13 +1179,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send password reset email using Universal Email Service
-      const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+      const { CONFIG } = await import('./config');
       
       const { UniversalEmailService } = await import('./universal-email-service');
       await UniversalEmailService.sendPasswordResetEmail(
         user.email,
-        resetLink,
-        user.username
+        resetToken,
+        user.username,
+        req
       );
 
       res.json({ 
@@ -7577,7 +7578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: customer?.firstName,
         lastName: customer?.lastName,
         token
-      });
+      }, req);
 
       res.json({
         success: true,
@@ -16475,7 +16476,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           }
         });
 
-        const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password/${resetToken}`;
+        const { CONFIG } = await import('./config');
+        const resetUrl = CONFIG.getPasswordResetUrl(resetToken, req);
         
         const mailOptions = {
           from: process.env.SMTP_USER,
