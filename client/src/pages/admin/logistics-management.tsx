@@ -35,6 +35,7 @@ import {
   Shield,
   User
 } from 'lucide-react';
+import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 
 // Types
 interface TransportationCompany {
@@ -184,6 +185,12 @@ const LogisticsManagement = () => {
   const [activeTab, setActiveTab] = useState('orders');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Enable audio notifications for logistics orders
+  const { orderCount } = useOrderNotifications({
+    department: 'logistics',
+    enabled: true
+  });
 
   // Queries
   const { data: pendingOrdersResponse, isLoading: loadingOrders } = useQuery({

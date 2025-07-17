@@ -40,6 +40,7 @@ import {
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
 import { useToast } from "@/hooks/use-toast";
+import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import { formatCurrency } from "@/lib/utils";
 
 interface OrderManagement {
@@ -74,6 +75,12 @@ export default function FinanceOrders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("pending");
+
+  // Enable audio notifications for new orders
+  const { orderCount } = useOrderNotifications({
+    department: 'financial',
+    enabled: true
+  });
 
   // Get orders for financial review
   const { data: ordersResponse, isLoading, refetch } = useQuery({

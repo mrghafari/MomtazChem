@@ -41,6 +41,7 @@ import {
   Save
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import { apiRequest } from '@/lib/queryClient';
 
 interface Order {
@@ -149,6 +150,12 @@ const WarehouseManagement: React.FC = () => {
   });
   
   const queryClient = useQueryClient();
+
+  // Enable audio notifications for warehouse orders
+  const { orderCount } = useOrderNotifications({
+    department: 'warehouse',
+    enabled: true
+  });
 
   // Fetch warehouse statistics
   const { data: stats, isLoading: statsLoading } = useQuery<WarehouseStats>({
