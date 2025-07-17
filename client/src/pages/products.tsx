@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
@@ -168,6 +168,9 @@ export default function ProductsPage() {
   const [addingQuantityProduct, setAddingQuantityProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [expandedProducts, setExpandedProducts] = useState<Set<number>>(new Set());
+  const [batchHistory, setBatchHistory] = useState<Record<number, any[]>>({});
+  const [batchSummary, setBatchSummary] = useState<Record<number, any>>({});
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { t, language, direction } = useLanguage();
@@ -338,15 +341,54 @@ export default function ProductsPage() {
     }
   };
 
+  // Toggle product expansion for batch history
+  const toggleProductExpansion = (productId: number) => {
+    const newExpanded = new Set(expandedProducts);
+    if (newExpanded.has(productId)) {
+      newExpanded.delete(productId);
+    } else {
+      newExpanded.add(productId);
+      // Fetch batch data when expanding
+      fetchBatchData(productId);
+    }
+    setExpandedProducts(newExpanded);
+  };
+
+  // Fetch batch data for a product
+  const fetchBatchData = async (productId: number) => {
+    try {
+      const response = await fetch(`/api/kardex-batches/${productId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setBatchHistory(prev => ({
+          ...prev,
+          [productId]: data.batches || []
+        }));
+        setBatchSummary(prev => ({
+          ...prev,
+          [productId]: data.summary || {}
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch batch data:', error);
+    }
+  };
+
   // Add quantity mutation
   const { mutate: addQuantity } = useMutation({
     mutationFn: (data: { productId: number } & z.infer<typeof addQuantityFormSchema>) => {
       return apiRequest("/api/kardex/add-quantity", { method: "POST", body: data });
     },
-    onSuccess: (result) => {
+    onSuccess: async (result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setAddingQuantityProduct(null);
       addQuantityForm.reset();
+      
+      // Refresh batch history for this product if it's expanded
+      if (expandedProducts.has(variables.productId)) {
+        await fetchBatchData(variables.productId);
+      }
+      
       toast({
         title: "✅ موفقیت",
         description: result.message || "مقدار جدید با موفقیت اضافه شد",
@@ -362,6 +404,8 @@ export default function ProductsPage() {
       });
     },
   });
+
+
 
   // Handle add quantity to product
   const handleAddQuantity = (product: ShowcaseProduct) => {
@@ -1226,6 +1270,18 @@ export default function ProductsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => toggleProductExpansion(product.id)}
+                          className="h-8 w-8 p-0 hover:bg-purple-50 hover:text-purple-600"
+                          title="نمایش/مخفی کردن بچ‌ها"
+                        >
+                          {expandedProducts.has(product.id) ? 
+                            <ChevronUp className="w-4 h-4" /> : 
+                            <ChevronDown className="w-4 h-4" />
+                          }
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
                           className={`h-8 w-16 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
                           title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
@@ -1437,6 +1493,62 @@ export default function ProductsPage() {
                           )}
                         </div>
                       </div>
+
+                      {/* Batch History Section - Show when expanded */}
+                      {expandedProducts.has(product.id) && (
+                        <div className="mt-4 border-t pt-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                              📦 تاریخچه بچ‌ها
+                            </h4>
+                            {batchSummary[product.id] && (
+                              <div className="text-xs text-gray-600 space-x-2">
+                                <span>ضایعات: {batchSummary[product.id].totalWaste || 0}</span>
+                                <span>در ترانزیت: {batchSummary[product.id].totalInTransit || 0}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {batchHistory[product.id] && batchHistory[product.id].length > 0 ? (
+                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                              {batchHistory[product.id].map((batch, index) => (
+                                <div 
+                                  key={index} 
+                                  className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700"
+                                >
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                    <div>
+                                      <span className="font-medium text-gray-600">بچ:</span>
+                                      <span className="ml-1 font-mono bg-blue-100 px-1 rounded">{batch.batchNumber}</span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-600">مقدار:</span>
+                                      <span className="ml-1 text-green-600 font-medium">{batch.quantity}</span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-600">ضایعات:</span>
+                                      <span className="ml-1 text-red-600">{batch.wasteQuantity || 0}</span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-600">ترانزیت:</span>
+                                      <span className="ml-1 text-yellow-600">{batch.inTransitQuantity || 0}</span>
+                                    </div>
+                                  </div>
+                                  {batch.productionDate && (
+                                    <div className="mt-2 text-xs text-gray-500">
+                                      تاریخ تولید: {new Date(batch.productionDate).toLocaleDateString('fa-IR')}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4 text-gray-500 text-sm">
+                              هیچ بچی برای این محصول ثبت نشده است
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

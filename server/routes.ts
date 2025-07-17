@@ -36,6 +36,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
+import { kardexBatches } from "@shared/kardex-batch-schema";
 import { orderManagement, shippingRates, vatSettings, deliveryMethods } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
@@ -2100,6 +2101,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get batch data for a product
+  app.get("/api/kardex-batches/:productId", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      if (isNaN(productId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid product ID" 
+        });
+      }
+
+      // Get batch history from kardex_batches table
+      const batchHistory = await db
+        .select()
+        .from(kardexBatches)
+        .where(eq(kardexBatches.productId, productId))
+        .orderBy(desc(kardexBatches.createdAt));
+
+      // Calculate summary statistics
+      const totalWaste = batchHistory.reduce((sum, batch) => sum + (batch.wasteQuantity || 0), 0);
+      const totalInTransit = batchHistory.reduce((sum, batch) => sum + (batch.inTransitQuantity || 0), 0);
+      const totalQuantity = batchHistory.reduce((sum, batch) => sum + batch.quantity, 0);
+
+      const summary = {
+        totalBatches: batchHistory.length,
+        totalQuantity,
+        totalWaste,
+        totalInTransit,
+        averageBatchSize: batchHistory.length > 0 ? totalQuantity / batchHistory.length : 0
+      };
+
+      res.json({
+        success: true,
+        batches: batchHistory,
+        summary
+      });
+    } catch (error) {
+      console.error("Error fetching batch data:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت اطلاعات بچ‌ها",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Update product (PATCH method)
   app.patch("/api/products/:id", requireAuth, async (req, res) => {
     try {
@@ -2482,34 +2529,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Calculate total value
-      const totalValue = unitPrice ? (quantity * parseFloat(unitPrice)) : 0;
+      const totalValue = unitPrice ? (quantity * parseFloat(unitPrice)) : (quantity * parseFloat(product.unitPrice || "0"));
 
-      // Add batch entry to kardex_batches table
-      const batchEntry = {
+      // Insert new batch entry into kardex_batches table
+      const { pool } = await import('./db');
+      const batchInsertResult = await pool.query(`
+        INSERT INTO kardex_batches (
+          product_id, batch_number, quantity, unit_price, total_value, 
+          production_date, expiry_date, supplier, warehouse_location, 
+          notes, created_by
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING id
+      `, [
         productId,
         batchNumber,
         quantity,
-        unitPrice: unitPrice || product.unitPrice || "0.00",
-        totalValue: totalValue.toString(),
-        productionDate: productionDate ? new Date(productionDate) : null,
-        expiryDate: expiryDate ? new Date(expiryDate) : null,
-        supplier: supplier || product.supplier,
-        warehouseLocation: warehouseLocation || product.warehouseLocation,
-        notes: notes || `افزودن ${quantity} واحد با بچ ${batchNumber}`,
-        createdBy: req.session?.adminId ? `admin_${req.session.adminId}` : 'system'
-      };
-
-      // In a real implementation, this would be inserted into kardex_batches table
-      // For now, we'll update the main product's stock quantity and batch number
+        product.unitPrice || "0.00", // Always use product's original price
+        totalValue.toString(),
+        productionDate ? new Date(productionDate) : null,
+        expiryDate ? new Date(expiryDate) : null,
+        supplier || product.supplier,
+        warehouseLocation || product.warehouseLocation,
+        notes || `افزودن ${quantity} واحد با بچ ${batchNumber}`,
+        req.session?.adminId ? `admin_${req.session.adminId}` : 'system'
+      ]);
+      
+      console.log(`✅ [KARDEX-BATCH] New batch entry created with ID: ${batchInsertResult.rows[0].id}`);
       
       // Update product stock quantity (add new quantity to existing)
-      const newStockQuantity = (product.stockQuantity || 0) + quantity;
+      // مقدار کل محصول = مجموع تمام بچ‌ها
+      const { rows: batchRows } = await pool.query(`
+        SELECT SUM(quantity) as total_quantity 
+        FROM kardex_batches 
+        WHERE product_id = $1 AND is_active = true
+      `, [productId]);
+      
+      const newStockQuantity = parseInt(batchRows[0].total_quantity) || 0;
       const updatedProduct = {
         stockQuantity: newStockQuantity,
         batchNumber: batchNumber, // Update to latest batch
         lastRestockDate: new Date(),
-        // قیمت محصول تغییر نمی‌کند - فقط برای بچ جدید ثبت می‌شود
-        // unitPrice remains unchanged - only recorded for the new batch
         supplier: supplier || product.supplier,
         warehouseLocation: warehouseLocation || product.warehouseLocation,
       };
@@ -2535,7 +2594,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           batchNumber,
           quantity,
           newStockQuantity,
-          totalValue: totalValue.toFixed(2)
+          totalValue: totalValue.toFixed(2),
+          batchId: batchInsertResult.rows[0].id
         }
       });
 
@@ -2553,36 +2613,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const productId = parseInt(req.params.productId);
       
-      // In a real implementation, this would query kardex_batches table
-      // For now, return mock data based on current product
-      const products = await storage.getProducts();
-      const product = products.find(p => p.id === productId);
-      
-      if (!product) {
-        return res.status(404).json({
-          success: false,
-          message: "محصول یافت نشد"
-        });
-      }
+      // Fetch all batches from kardex_batches table
+      const { pool } = await import('./db');
+      const batchResult = await pool.query(`
+        SELECT 
+          id, product_id, batch_number, quantity, unit_price, total_value,
+          production_date, expiry_date, supplier, warehouse_location, 
+          notes, is_active, created_at, updated_at, created_by
+        FROM kardex_batches 
+        WHERE product_id = $1 AND is_active = true
+        ORDER BY created_at DESC
+      `, [productId]);
 
-      // Mock batch data - in real implementation this would come from kardex_batches table
-      const batches = [
-        {
-          id: 1,
-          batchNumber: product.batchNumber || "BATCH-001",
-          quantity: product.stockQuantity || 0,
-          unitPrice: product.unitPrice || "0.00",
-          totalValue: ((product.stockQuantity || 0) * parseFloat(product.unitPrice || "0")).toFixed(2),
-          productionDate: product.lastRestockDate || new Date(),
-          createdAt: product.lastRestockDate || new Date(),
-          notes: "بچ فعلی",
-          isActive: true
-        }
-      ];
+      const batches = batchResult.rows.map(row => ({
+        id: row.id,
+        productId: row.product_id,
+        batchNumber: row.batch_number,
+        quantity: row.quantity,
+        unitPrice: row.unit_price,
+        totalValue: row.total_value,
+        productionDate: row.production_date,
+        expiryDate: row.expiry_date,
+        supplier: row.supplier,
+        warehouseLocation: row.warehouse_location,
+        notes: row.notes,
+        isActive: row.is_active,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        createdBy: row.created_by
+      }));
+
+      // Calculate summary statistics
+      const totalQuantity = batches.reduce((sum, batch) => sum + batch.quantity, 0);
+      const totalValue = batches.reduce((sum, batch) => sum + parseFloat(batch.totalValue || "0"), 0);
+      const availableQuantity = batches.reduce((sum, batch) => sum + batch.quantity, 0); // قابل استفاده
+      const reservedQuantity = 0; // رزرو شده - در صورت نیاز از جدول دیگری محاسبه شود
+      const damagedQuantity = 0; // ضایعات - در صورت نیاز از جدول دیگری محاسبه شود
+      const inTransitQuantity = 0; // در راه - در صورت نیاز از جدول دیگری محاسبه شود
 
       res.json({
         success: true,
-        data: batches
+        data: batches,
+        summary: {
+          totalBatches: batches.length,
+          totalQuantity: totalQuantity,
+          totalValue: totalValue.toFixed(2),
+          availableQuantity: availableQuantity,
+          reservedQuantity: reservedQuantity,
+          damagedQuantity: damagedQuantity,
+          inTransitQuantity: inTransitQuantity,
+          currency: "IQD"
+        }
       });
 
     } catch (error) {
