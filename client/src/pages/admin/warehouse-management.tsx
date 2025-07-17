@@ -1003,22 +1003,22 @@ const WarehouseManagement: React.FC = () => {
                       ) : warehouseBatches?.data && warehouseBatches.data.length > 0 ? (
                         warehouseBatches.data
                           .filter((batch: WarehouseBatch) => 
-                            (batch.productName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                            (batch.batchNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                            (batch.productSku?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+                            (batch.productname?.toLowerCase() || batch.product_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                            (batch.batchnumber?.toLowerCase() || batch.batch_number?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                            (batch.productsku?.toLowerCase() || batch.product_sku?.toLowerCase() || '').includes(searchTerm.toLowerCase())
                           )
                           .map((batch: WarehouseBatch) => (
                             <tr key={`${batch.productId}-${batch.batchNumber}-${batch.id}`} className="border-b hover:bg-gray-50">
                               <td className="p-4">
                                 <div>
-                                  <p className="font-medium">{batch.productName || 'نام محصول نامشخص'}</p>
-                                  <p className="text-sm text-gray-500">{batch.productSku || 'SKU نامشخص'}</p>
+                                  <p className="font-medium">{batch.productname || batch.product_name || 'نام محصول نامشخص'}</p>
+                                  <p className="text-sm text-gray-500">{batch.productsku || batch.product_sku || 'SKU نامشخص'}</p>
                                 </div>
                               </td>
                               <td className="p-4 text-center">
                                 <div className="text-sm">
                                   <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-mono text-xs">
-                                    {batch.batchNumber || 'N/A'}
+                                    {batch.batchnumber || batch.batch_number || 'N/A'}
                                   </span>
                                 </div>
                               </td>

@@ -2529,9 +2529,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/warehouse/batches", async (req, res) => {
     try {
       const batches = await db.execute(sql`
-        SELECT * FROM warehouse_inventory 
-        WHERE quantity > 0 
-        ORDER BY product_name, batch_number, created_at DESC
+        SELECT 
+          wi.*,
+          sp.name as productName,
+          sp.sku as productSku,
+          sp.unit_price,
+          sp.category
+        FROM warehouse_inventory wi
+        LEFT JOIN showcase_products sp ON wi.product_id = sp.id
+        WHERE wi.quantity > 0 
+        ORDER BY sp.name, wi.batch_number, wi.created_at DESC
       `);
 
       res.json({
