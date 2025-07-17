@@ -399,7 +399,11 @@ export default function SiteManagement() {
       !button.moduleId || allowedModules.includes(button.moduleId)
     );
     
-    console.log('🔍 [DEBUG] filtered buttons:', filteredButtons.length, filteredButtons.map(b => b.id));
+    console.log('🔍 [DEBUG] filtered buttons count:', filteredButtons.length);
+    console.log('🔍 [DEBUG] filtered button IDs:', filteredButtons.map(b => b.id));
+    console.log('🔍 [DEBUG] missing buttons:', allButtons.filter(btn => 
+      btn.moduleId && !allowedModules.includes(btn.moduleId)
+    ).map(b => ({ id: b.id, moduleId: b.moduleId })));
     return filteredButtons;
   };
 
