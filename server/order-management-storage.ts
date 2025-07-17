@@ -1268,16 +1268,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       
       // Get order items
       const orderItemsResult = await db
-        .select({
-          id: orderItems.id,
-          productId: orderItems.productId,
-          productName: orderItems.productName,
-          productSku: orderItems.productSku,
-          quantity: orderItems.quantity,
-          unitPrice: orderItems.unitPrice,
-          totalPrice: orderItems.totalPrice,
-          productSnapshot: orderItems.productSnapshot
-        })
+        .select()
         .from(orderItems)
         .where(eq(orderItems.orderId, orderId));
       
