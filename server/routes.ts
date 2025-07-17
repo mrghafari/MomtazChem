@@ -5105,7 +5105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'shop_management': { name: 'مدیریت فروشگاه', description: 'مدیریت محصولات، سفارشات و فروش', category: 'commerce' },
         'product_management': { name: 'مدیریت محصولات', description: 'مدیریت کاردکس و محصولات', category: 'commerce' },
         'order_management': { name: 'مدیریت سفارشات', description: 'پردازش و تایید سفارشات', category: 'commerce' },
-        'warehouse-management': { name: 'مدیریت انبار', description: 'کنترل موجودی و انبارداری', category: 'warehouse' },
+        'warehouse_management': { name: 'مدیریت انبار', description: 'کنترل موجودی و انبارداری', category: 'warehouse' },
         'logistics_management': { name: 'مدیریت لجستیک', description: 'مدیریت حمل و نقل و تحویل', category: 'logistics' },
         'inquiries': { name: 'مدیریت استعلامات', description: 'پاسخ به استعلامات مشتریان', category: 'customer' },
         'crm': { name: 'مدیریت CRM', description: 'مدیریت مشتریان و روابط', category: 'customer' },
@@ -16062,11 +16062,16 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         console.log('🔍 [DEBUG] ticketing_system included?', allModules.includes('ticketing_system'));
         console.log('🔍 [DEBUG] server_config included?', allModules.includes('server_config'));
 
-        console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, allModules);
+        // Convert any dash-separated module names to underscore format for consistency
+        const normalizedModules = allModules.map(module => 
+          module.replace(/-/g, '_')
+        );
+        
+        console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, normalizedModules);
 
         return res.json({
           success: true,
-          permissions: allModules.map(moduleId => ({
+          permissions: normalizedModules.map(moduleId => ({
             moduleId,
             canView: true,
             canCreate: true,
@@ -16074,7 +16079,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             canDelete: true,
             canApprove: true
           })),
-          modules: allModules,
+          modules: normalizedModules,
           roles: ["super_admin"],
           roleInfo: {
             name: "super_admin",
