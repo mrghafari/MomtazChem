@@ -2673,8 +2673,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update کاردکس (showcase_products) with warehouse stock
       await db.update(showcaseProducts)
         .set({
-          stockQuantity: totalWarehouseStock,
-          updatedAt: new Date()
+          stock_quantity: totalWarehouseStock,
+          updated_at: new Date()
         })
         .where(eq(showcaseProducts.id, productId));
 
@@ -2689,8 +2689,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (shopProduct.length > 0) {
         await db.update(shopProducts)
           .set({
-            stockQuantity: totalWarehouseStock,
-            updatedAt: new Date()
+            stock_quantity: totalWarehouseStock,
+            updated_at: new Date()
           })
           .where(eq(shopProducts.productId, productId));
 
