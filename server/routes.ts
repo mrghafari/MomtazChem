@@ -2628,21 +2628,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lowStockItems: parseInt(lowStockResult[0]?.low_stock_count || '0')
       };
 
-      // Map order counts
-      orderCounts.forEach((row: any) => {
-        switch (row.current_status) {
-          case 'warehouse_pending':
-          case 'financial_approved':
-            stats.pendingOrders += parseInt(row.count);
-            break;
-          case 'warehouse_processing':
-            stats.processingOrders += parseInt(row.count);
-            break;
-          case 'warehouse_approved':
-            stats.fulfilledOrders += parseInt(row.count);
-            break;
-        }
-      });
+      // Map order counts safely
+      try {
+        const orderCountArray = Array.isArray(orderCounts) ? orderCounts : [];
+        orderCountArray.forEach((row: any) => {
+          if (row && row.current_status && row.count) {
+            const count = parseInt(row.count) || 0;
+            switch (row.current_status) {
+              case 'warehouse_pending':
+              case 'financial_approved':
+                stats.pendingOrders += count;
+                break;
+              case 'warehouse_processing':
+                stats.processingOrders += count;
+                break;
+              case 'warehouse_approved':
+                stats.fulfilledOrders += count;
+                break;
+            }
+          }
+        });
+      } catch (error) {
+        console.error("❌ [WAREHOUSE-STATS] Error processing order counts:", error);
+      }
 
       console.log("📊 [WAREHOUSE-STATS] Statistics calculated:", stats);
       res.json({ success: true, data: stats });

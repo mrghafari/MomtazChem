@@ -123,10 +123,13 @@ export default function WarehouseManagementFixed() {
   });
 
   // Queries
-  const { data: orders = [], isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
+  const { data: ordersData, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
     queryKey: ['/api/order-management/warehouse'],
     staleTime: 30000
   });
+
+  const orders = Array.isArray(ordersData?.orders) ? ordersData.orders : 
+                Array.isArray(ordersData) ? ordersData : [];
 
   const { data: warehouseInventoryData, isLoading: inventoryLoading, refetch: refetchInventory } = useQuery({
     queryKey: ['/api/warehouse/inventory'],
@@ -305,7 +308,7 @@ export default function WarehouseManagementFixed() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-        <Card>
+        <Card key="pending-orders">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Clock className="h-4 w-4 text-orange-500" />
@@ -317,7 +320,7 @@ export default function WarehouseManagementFixed() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card key="processing-orders">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Package className="h-4 w-4 text-blue-500" />
@@ -329,7 +332,7 @@ export default function WarehouseManagementFixed() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card key="fulfilled-orders">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <CheckCircle className="h-4 w-4 text-green-500" />
@@ -341,7 +344,7 @@ export default function WarehouseManagementFixed() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card key="total-revenue">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <DollarSign className="h-4 w-4 text-green-600" />
@@ -353,7 +356,7 @@ export default function WarehouseManagementFixed() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card key="low-stock">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <AlertCircle className="h-4 w-4 text-red-500" />
@@ -365,7 +368,7 @@ export default function WarehouseManagementFixed() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card key="total-products">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Warehouse className="h-4 w-4 text-purple-500" />
@@ -390,7 +393,7 @@ export default function WarehouseManagementFixed() {
 
         {/* Orders Tab */}
         <TabsContent value="orders" className="space-y-4">
-          <Card>
+          <Card key="orders-tab">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>سفارشات انبار</CardTitle>
@@ -470,7 +473,7 @@ export default function WarehouseManagementFixed() {
 
         {/* Inventory Tab */}
         <TabsContent value="inventory" className="space-y-4">
-          <Card>
+          <Card key="inventory-tab">
             <CardHeader>
               <CardTitle>موجودی انبار (فرمت Excel مطابق درخواست)</CardTitle>
             </CardHeader>
@@ -624,7 +627,7 @@ export default function WarehouseManagementFixed() {
 
         {/* Other tabs with placeholder content */}
         <TabsContent value="transit">
-          <Card>
+          <Card key="transit-tab">
             <CardHeader>
               <CardTitle>کالای در حال حمل</CardTitle>
             </CardHeader>
@@ -635,7 +638,7 @@ export default function WarehouseManagementFixed() {
         </TabsContent>
 
         <TabsContent value="reports">
-          <Card>
+          <Card key="reports-tab">
             <CardHeader>
               <CardTitle>گزارشات</CardTitle>
             </CardHeader>
@@ -646,7 +649,7 @@ export default function WarehouseManagementFixed() {
         </TabsContent>
 
         <TabsContent value="statistics">
-          <Card>
+          <Card key="statistics-tab">
             <CardHeader>
               <CardTitle>آمار</CardTitle>
             </CardHeader>
