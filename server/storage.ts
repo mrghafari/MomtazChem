@@ -1,5 +1,6 @@
 import { users, leads, leadActivities, passwordResets, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
+import { warehouseLocations, warehouseItems, warehouseReceipts, warehouseIssues, inventoryMovements, inventoryAdjustments, type WarehouseLocation, type InsertWarehouseLocation, type WarehouseItem, type InsertWarehouseItem, type WarehouseReceipt, type InsertWarehouseReceipt, type WarehouseIssue, type InsertWarehouseIssue, type InventoryMovement, type InsertInventoryMovement, type InventoryAdjustment, type InsertInventoryAdjustment } from "@shared/warehouse-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
 import { shopStorage } from "./shop-storage";
@@ -62,6 +63,81 @@ export interface IStorage {
     averageDealSize: number;
   }>;
   
+  // =============================================================================
+  // WAREHOUSE MANAGEMENT METHODS
+  // =============================================================================
+  
+  // Warehouse locations
+  createWarehouseLocation(location: InsertWarehouseLocation): Promise<WarehouseLocation>;
+  getWarehouseLocations(): Promise<WarehouseLocation[]>;
+  getWarehouseLocationById(id: number): Promise<WarehouseLocation | undefined>;
+  updateWarehouseLocation(id: number, location: Partial<InsertWarehouseLocation>): Promise<WarehouseLocation>;
+  deleteWarehouseLocation(id: number): Promise<void>;
+  
+  // Warehouse items (کالاها)
+  createWarehouseItem(item: InsertWarehouseItem): Promise<WarehouseItem>;
+  getWarehouseItems(filters?: { category?: string; type?: string; lowStock?: boolean }): Promise<WarehouseItem[]>;
+  getWarehouseItemById(id: number): Promise<WarehouseItem | undefined>;
+  getWarehouseItemByCode(code: string): Promise<WarehouseItem | undefined>;
+  updateWarehouseItem(id: number, item: Partial<InsertWarehouseItem>): Promise<WarehouseItem>;
+  deleteWarehouseItem(id: number): Promise<void>;
+  updateWarehouseItemStock(id: number, newStock: number, reason: string): Promise<void>;
+  
+  // Warehouse receipts (ورود به انبار)
+  createWarehouseReceipt(receipt: InsertWarehouseReceipt): Promise<WarehouseReceipt>;
+  getWarehouseReceipts(filters?: { startDate?: Date; endDate?: Date; status?: string; warehouseItemId?: number }): Promise<WarehouseReceipt[]>;
+  getWarehouseReceiptById(id: number): Promise<WarehouseReceipt | undefined>;
+  getWarehouseReceiptByNumber(receiptNumber: string): Promise<WarehouseReceipt | undefined>;
+  updateWarehouseReceipt(id: number, receipt: Partial<InsertWarehouseReceipt>): Promise<WarehouseReceipt>;
+  approveWarehouseReceipt(id: number, approvedBy: string): Promise<void>;
+  deleteWarehouseReceipt(id: number): Promise<void>;
+  
+  // Warehouse issues (خروج از انبار)
+  createWarehouseIssue(issue: InsertWarehouseIssue): Promise<WarehouseIssue>;
+  getWarehouseIssues(filters?: { startDate?: Date; endDate?: Date; status?: string; warehouseItemId?: number }): Promise<WarehouseIssue[]>;
+  getWarehouseIssueById(id: number): Promise<WarehouseIssue | undefined>;
+  getWarehouseIssueByNumber(issueNumber: string): Promise<WarehouseIssue | undefined>;
+  updateWarehouseIssue(id: number, issue: Partial<InsertWarehouseIssue>): Promise<WarehouseIssue>;
+  approveWarehouseIssue(id: number, approvedBy: string): Promise<void>;
+  deleteWarehouseIssue(id: number): Promise<void>;
+  
+  // Inventory movements
+  createInventoryMovement(movement: InsertInventoryMovement): Promise<InventoryMovement>;
+  getInventoryMovements(warehouseItemId?: number, limit?: number): Promise<InventoryMovement[]>;
+  getInventoryMovementsByDateRange(startDate: Date, endDate: Date): Promise<InventoryMovement[]>;
+  
+  // Inventory adjustments
+  createInventoryAdjustment(adjustment: InsertInventoryAdjustment): Promise<InventoryAdjustment>;
+  getInventoryAdjustments(filters?: { startDate?: Date; endDate?: Date; status?: string }): Promise<InventoryAdjustment[]>;
+  getInventoryAdjustmentById(id: number): Promise<InventoryAdjustment | undefined>;
+  approveInventoryAdjustment(id: number, approvedBy: string): Promise<void>;
+  
+  // Warehouse analytics and reports
+  getWarehouseStatistics(): Promise<{
+    totalItems: number;
+    lowStockItems: number;
+    outOfStockItems: number;
+    totalValue: number;
+    pendingReceipts: number;
+    pendingIssues: number;
+    monthlyReceipts: number;
+    monthlyIssues: number;
+  }>;
+  
+  getStockMovementReport(warehouseItemId: number, startDate?: Date, endDate?: Date): Promise<{
+    item: WarehouseItem;
+    movements: InventoryMovement[];
+    openingStock: number;
+    totalReceipts: number;
+    totalIssues: number;
+    totalAdjustments: number;
+    closingStock: number;
+  }>;
+  
+  getLowStockAlert(): Promise<WarehouseItem[]>;
+  generateReceiptNumber(): Promise<string>;
+  generateIssueNumber(): Promise<string>;
+  generateAdjustmentNumber(): Promise<string>;
 
 }
 
