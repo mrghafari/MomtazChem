@@ -25953,23 +25953,38 @@ momtazchem.com
         });
       }
 
-      const code = await logisticsStorage.generateVerificationCode(
-        customerOrderId, 
-        customerPhone, 
-        customerName
-      );
+      // Check if verification code already exists for this order
+      const existingCode = await logisticsStorage.getDeliveryCodeByOrderId(customerOrderId);
+      
+      let codeData;
+      let isNewCode = false;
+      
+      if (existingCode) {
+        // Use existing code, just resend SMS
+        codeData = existingCode;
+        console.log(`Reusing existing code ${existingCode.verificationCode} for order ${customerOrderId}`);
+      } else {
+        // Generate new code
+        codeData = await logisticsStorage.generateVerificationCode(
+          customerOrderId, 
+          customerPhone, 
+          customerName
+        );
+        isNewCode = true;
+        console.log(`Generated new code ${codeData.verificationCode} for order ${customerOrderId}`);
+      }
 
-      // Send SMS notification
+      // Send SMS notification (for both new and existing codes)
       try {
         const smsResult = await smsService.sendDeliveryVerificationSms(
           customerPhone,
-          code.verificationCode,
+          codeData.verificationCode,
           customerName,
-          code.id
+          codeData.id
         );
 
         if (smsResult.success) {
-          await logisticsStorage.updateSmsStatus(code.id, 'sent', { 
+          await logisticsStorage.updateSmsStatus(codeData.id, 'sent', { 
             messageId: smsResult.messageId,
             provider: 'kavenegar'
           });
@@ -25979,7 +25994,12 @@ momtazchem.com
         // Continue even if SMS fails
       }
 
-      res.status(201).json({ success: true, data: code });
+      res.status(isNewCode ? 201 : 200).json({ 
+        success: true, 
+        data: codeData,
+        isExisting: !isNewCode,
+        message: isNewCode ? 'کد جدید تولید شد' : 'کد موجود مجدداً ارسال شد'
+      });
     } catch (error) {
       console.error('Error generating verification code:', error);
       res.status(500).json({ success: false, message: 'خطا در تولید کد تایید' });

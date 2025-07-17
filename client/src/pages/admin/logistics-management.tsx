@@ -186,8 +186,45 @@ interface LogisticsOrder {
 const LogisticsManagement = () => {
   const [activeTab, setActiveTab] = useState('orders');
   const [sentCodes, setSentCodes] = useState<Set<number>>(new Set()); // Track which orders have codes sent
+  const [existingCodes, setExistingCodes] = useState<Map<number, string>>(new Map()); // Track existing codes per order
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Load existing codes when orders are fetched
+  React.useEffect(() => {
+    if (pendingOrders && pendingOrders.length > 0) {
+      const loadExistingCodes = async () => {
+        const codePromises = pendingOrders.map(async (order: LogisticsOrder) => {
+          try {
+            const response = await fetch(`/api/logistics/verification-codes/order/${order.customerOrderId}`);
+            if (response.ok) {
+              const result = await response.json();
+              return { orderId: order.customerOrderId, code: result.data.verificationCode };
+            }
+          } catch (error) {
+            console.log(`No existing code for order ${order.customerOrderId}`);
+          }
+          return null;
+        });
+
+        const codes = await Promise.all(codePromises);
+        const newExistingCodes = new Map<number, string>();
+        const newSentCodes = new Set<number>();
+
+        codes.forEach(result => {
+          if (result) {
+            newExistingCodes.set(result.orderId, result.code);
+            newSentCodes.add(result.orderId);
+          }
+        });
+
+        setExistingCodes(newExistingCodes);
+        setSentCodes(newSentCodes);
+      };
+
+      loadExistingCodes();
+    }
+  }, [pendingOrders]);
 
   // Enable audio notifications for logistics orders
   const { orderCount } = useOrderNotifications({
@@ -241,27 +278,70 @@ const LogisticsManagement = () => {
   const routes = routesResponse?.data || [];
   const verificationCodes = verificationCodesResponse?.data || [];
 
+  // Get existing verification code for order
+  const getExistingCodeMutation = useMutation({
+    mutationFn: async (customerOrderId: number) => {
+      const response = await fetch(`/api/logistics/verification-codes/order/${customerOrderId}`);
+      if (response.status === 404) return null; // No existing code
+      if (!response.ok) throw new Error('Failed to check existing code');
+      return response.json();
+    }
+  });
+
   // Generate verification code mutation
   const generateCodeMutation = useMutation({
     mutationFn: async (data: { customerOrderId: number; customerPhone: string; customerName: string }) => {
-      const response = await fetch('/api/logistics/verification-codes/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to generate verification code');
-      return response.json();
+      // First check if code already exists
+      const existingResponse = await fetch(`/api/logistics/verification-codes/order/${data.customerOrderId}`);
+      
+      if (existingResponse.ok) {
+        // Code exists, just resend SMS
+        const existingCode = await existingResponse.json();
+        return { 
+          data: existingCode.data, 
+          isExisting: true,
+          code: existingCode.data.verificationCode,
+          customerOrderId: data.customerOrderId,
+          customerPhone: data.customerPhone 
+        };
+      } else {
+        // No existing code, generate new one
+        const response = await fetch('/api/logistics/verification-codes/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Failed to generate verification code');
+        const result = await response.json();
+        return { 
+          data: result.data, 
+          isExisting: false,
+          code: result.data.verificationCode,
+          customerOrderId: data.customerOrderId,
+          customerPhone: data.customerPhone 
+        };
+      }
     },
     onSuccess: (result) => {
+      const message = result.isExisting 
+        ? `کد موجود ${result.code} مجدداً برای سفارش #${result.customerOrderId} به شماره ${result.customerPhone} ارسال شد`
+        : `کد جدید ${result.code} برای سفارش #${result.customerOrderId} به شماره ${result.customerPhone} ارسال شد`;
+      
+      // Mark this order as having a sent code
+      setSentCodes(prev => new Set(prev.add(result.customerOrderId)));
+      
+      // Track the existing code for this order
+      setExistingCodes(prev => new Map(prev.set(result.customerOrderId, result.code)));
+      
       toast({ 
-        title: "کد تایید ارسال شد", 
-        description: `کد ${result.code} برای سفارش #${result.customerOrderId} به شماره ${result.customerPhone} ارسال شد` 
+        title: result.isExisting ? "کد مجدداً ارسال شد" : "کد جدید تولید و ارسال شد", 
+        description: message
       });
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/verification-codes'] });
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
     },
     onError: () => {
-      toast({ title: "خطا", description: "تولید کد تایید ناموفق بود", variant: "destructive" });
+      toast({ title: "خطا", description: "تولید یا ارسال مجدد کد تایید ناموفق بود", variant: "destructive" });
     }
   });
 
@@ -449,28 +529,25 @@ const LogisticsManagement = () => {
                 <div className="flex gap-2 flex-wrap">
                   <Button 
                     size="sm" 
-                    className={sentCodes.has(order.customerOrderId) 
+                    className={existingCodes.has(order.customerOrderId) || sentCodes.has(order.customerOrderId)
                       ? "bg-red-600 hover:bg-red-700 text-white" 
                       : "bg-blue-600 hover:bg-blue-700 text-white"
                     }
                     onClick={() => {
-                      // Generate 4-digit code between 1111-9999
+                      // Generate 4-digit code between 1111-9999 (or resend existing)
                       generateCodeMutation.mutate({
                         customerOrderId: order.customerOrderId,
                         customerPhone: order.customerPhone,
                         customerName: `${order.customerFirstName} ${order.customerLastName}`
                       });
-                      
-                      // Mark this order as having code sent (change button color)
-                      setSentCodes(prev => new Set(prev).add(order.customerOrderId));
                     }}
                     disabled={generateCodeMutation.isPending}
                   >
                     <Send className="w-4 h-4 mr-2" />
                     {generateCodeMutation.isPending 
                       ? "در حال ارسال..." 
-                      : sentCodes.has(order.customerOrderId) 
-                        ? "کد ارسال شده" 
+                      : existingCodes.has(order.customerOrderId) || sentCodes.has(order.customerOrderId)
+                        ? `ارسال مجدد کد ${existingCodes.get(order.customerOrderId) || ''}`
                         : "ارسال کد به مشتری"
                     }
                   </Button>
