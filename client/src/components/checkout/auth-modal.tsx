@@ -44,7 +44,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
     company: '',
     country: 'Iran',
     city: '',
-    address: ''
+    address: '',
+    secondaryAddress: ''
   });
 
   const resetModal = () => {
@@ -60,7 +61,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
       company: '',
       country: 'Iran',
       city: '',
-      address: ''
+      address: '',
+      secondaryAddress: ''
     });
     setShowPassword(false);
     setIsLoading(false);
@@ -402,13 +404,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                 </div>
 
                 <div>
-                  <Label htmlFor="register-address">Address *</Label>
+                  <Label htmlFor="register-address">آدرس اصلی *</Label>
                   <Input
                     id="register-address"
                     value={registerData.address}
                     onChange={(e) => setRegisterData({ ...registerData, address: e.target.value })}
                     required
-                    placeholder="Complete address"
+                    placeholder="آدرس کامل اصلی"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="register-secondaryAddress">آدرس دوم (اختیاری)</Label>
+                  <Input
+                    id="register-secondaryAddress"
+                    value={registerData.secondaryAddress}
+                    onChange={(e) => setRegisterData({ ...registerData, secondaryAddress: e.target.value })}
+                    placeholder="آدرس دوم (اختیاری)"
                   />
                 </div>
 
