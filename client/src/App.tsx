@@ -101,7 +101,6 @@ import OrderTrackingManagement from "@/pages/admin/order-tracking-management";
 import AiSeoAssistant from "@/pages/admin/ai-seo-assistant";
 import RemoteDesktop from "@/pages/admin/remote-desktop";
 import EmailServiceGuide from "@/pages/admin/email-service-guide";
-import WarehouseExcelManagement from "@/pages/admin/warehouse-excel";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
@@ -187,7 +186,6 @@ function Router() {
 
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           <Route path="/admin/warehouse-management" component={WarehouseManagement} />
-          <Route path="/admin/warehouse-excel" component={WarehouseExcelManagement} />
 
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/email-templates" component={EmailTemplates} />
