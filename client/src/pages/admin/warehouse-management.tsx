@@ -172,29 +172,6 @@ const WarehouseManagement: React.FC = () => {
       .reduce((total: number, item: any) => total + (item.quantity || 0), 0);
   };
 
-  // Initialize product batches (simulate existing batches)
-  React.useEffect(() => {
-    if (productsLoaded && unifiedProducts && Array.isArray(unifiedProducts) && unifiedProducts.length > 0) {
-      const initialBatches: {[productId: number]: ProductBatch[]} = {};
-      unifiedProducts.forEach((product: UnifiedProduct) => {
-        if (product && product.id) {
-          if (product.batchNumber) {
-            initialBatches[product.id] = [{
-              id: `${product.id}-batch-1`,
-              batchNumber: product.batchNumber,
-              stockQuantity: product.stockQuantity,
-              productionDate: '2025-01-01',
-              notes: 'بچ اصلی'
-            }];
-          } else {
-            initialBatches[product.id] = [];
-          }
-        }
-      });
-      setProductBatches(initialBatches);
-    }
-  }, [productsLoaded, unifiedProducts]);
-
   // Toggle product expansion for batch view
   const toggleProductExpansion = (productId: number) => {
     const newExpanded = new Set(expandedProducts);
@@ -517,6 +494,29 @@ const WarehouseManagement: React.FC = () => {
       });
     }
   }, [settingsData]);
+
+  // Initialize product batches (simulate existing batches)
+  React.useEffect(() => {
+    if (productsLoaded && unifiedProducts && Array.isArray(unifiedProducts) && unifiedProducts.length > 0) {
+      const initialBatches: {[productId: number]: ProductBatch[]} = {};
+      unifiedProducts.forEach((product: UnifiedProduct) => {
+        if (product && product.id) {
+          if (product.batchNumber) {
+            initialBatches[product.id] = [{
+              id: `${product.id}-batch-1`,
+              batchNumber: product.batchNumber,
+              stockQuantity: product.stockQuantity,
+              productionDate: '2025-01-01',
+              notes: 'بچ اصلی'
+            }];
+          } else {
+            initialBatches[product.id] = [];
+          }
+        }
+      });
+      setProductBatches(initialBatches);
+    }
+  }, [productsLoaded, unifiedProducts]);
 
   // Mutation for updating order status
   const updateOrderMutation = useMutation({
