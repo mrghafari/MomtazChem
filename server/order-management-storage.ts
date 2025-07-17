@@ -593,8 +593,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     
     const results = await query;
     
-    // Transform results
-    return results.map(row => ({
+    // Transform results and calculate weight for orders without weight
+    const transformedResults = results.map(row => ({
       id: row.id,
       customerOrderId: row.customerOrderId,
       currentStatus: row.currentStatus,
@@ -637,6 +637,23 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         mimeType: row.receiptMimeType,
       } : null
     }));
+
+    // Calculate weight for orders that don't have it calculated yet (especially for warehouse and logistics)
+    if (departmentFilter === 'warehouse' || departmentFilter === 'logistics') {
+      for (const order of transformedResults) {
+        if (!order.totalWeight || order.totalWeight === '0.000') {
+          await this.calculateAndUpdateOrderWeight(order.customerOrderId);
+          // Update the order object with calculated weight
+          const calculatedWeight = await this.calculateOrderWeight(order.customerOrderId);
+          if (calculatedWeight > 0) {
+            order.totalWeight = calculatedWeight.toFixed(3);
+            order.weightUnit = 'kg';
+          }
+        }
+      }
+    }
+
+    return transformedResults;
   }
 
   async getLogisticsPendingOrders(): Promise<OrderManagement[]> {

@@ -910,6 +910,7 @@ const WarehouseManagement: React.FC = () => {
                         <th className="text-right p-4">نام مشتری</th>
                         <th className="text-right p-4">شماره موبایل</th>
                         <th className="text-right p-4">ایمیل</th>
+                        <th className="text-right p-4">وزن محموله</th>
                         <th className="text-right p-4">مبلغ</th>
                         <th className="text-right p-4">وضعیت</th>
                         <th className="text-right p-4">تاریخ</th>
@@ -938,6 +939,11 @@ const WarehouseManagement: React.FC = () => {
                             <div className="text-sm text-gray-600">{
                               order.customer?.email || order.customerEmail || 'ایمیل نامشخص'
                             }</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-medium text-blue-600">
+                              {order.totalWeight ? `${parseFloat(order.totalWeight).toFixed(1)} ${order.weightUnit || 'kg'}` : 'در حال محاسبه...'}
+                            </div>
                           </td>
                           <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
                           <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
