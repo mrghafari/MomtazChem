@@ -361,14 +361,17 @@ export default function SiteManagement() {
     const allButtons = getInitialButtons();
     
     console.log('🔍 [DEBUG] allowedModules:', allowedModules);
-    console.log('🔍 [DEBUG] ticketing_system in allowedModules?', allowedModules.includes('ticketing_system'));
+    console.log('🔍 [DEBUG] finance in allowedModules?', allowedModules.includes('finance'));
+    console.log('🔍 [DEBUG] geography_analytics in allowedModules?', allowedModules.includes('geography_analytics'));
     
     const filtered = allButtons.filter(button => 
       !button.moduleId || allowedModules.includes(button.moduleId)
     );
     
-    console.log('🔍 [DEBUG] ticketing button found in allButtons?', allButtons.find(b => b.moduleId === 'ticketing_system'));
-    console.log('🔍 [DEBUG] ticketing button in filtered?', filtered.find(b => b.moduleId === 'ticketing_system'));
+    console.log('🔍 [DEBUG] finance button found in allButtons?', allButtons.find(b => b.moduleId === 'finance'));
+    console.log('🔍 [DEBUG] geography_analytics button found in allButtons?', allButtons.find(b => b.moduleId === 'geography_analytics'));
+    console.log('🔍 [DEBUG] finance button in filtered?', filtered.find(b => b.moduleId === 'finance'));
+    console.log('🔍 [DEBUG] geography_analytics button in filtered?', filtered.find(b => b.moduleId === 'geography_analytics'));
     
     return filtered;
   };

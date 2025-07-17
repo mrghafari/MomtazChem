@@ -15912,7 +15912,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(401).json({ success: false, message: "احراز هویت نشده" });
       }
 
-      // Handle custom users directly
+      // Handle custom users directly (First mapping section)
       if (customUserId) {
         const { pool } = await import('./db');
         const result = await pool.query(`
@@ -15956,7 +15956,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت پرداخت': 'payment_management',
             'مدیریت مالی': 'finance',
             'مدیریت کیف پول': 'wallet_management',
-            'تحلیل جغرافیایی': 'geography_analytics',
+            'آمار جغرافیایی': 'geography_analytics',
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config'
@@ -16049,7 +16049,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت پرداخت': 'payment_management',
             'مدیریت مالی': 'finance',
             'مدیریت کیف پول': 'wallet_management',
-            'تحلیل جغرافیایی': 'geography_analytics',
+            'آمار جغرافیایی': 'geography_analytics',
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config'
@@ -16085,7 +16085,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
       // If no custom user found, check for super admin or legacy permissions
       // admin@momtazchem.com (id=15) is the super admin
+      console.log(`🔍 [DEBUG] Checking super admin path: ${legacyUser[0].id === 15} || ${legacyUser[0].email === 'admin@momtazchem.com'}`);
       if (legacyUser[0].id === 15 || legacyUser[0].email === 'admin@momtazchem.com') {
+        console.log(`🔍 [DEBUG] SUPER ADMIN PATH ACTIVATED for ${legacyUser[0].email}`);
         const allModules = [
           "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
           "crm", "seo", "categories", "sms", "factory", "user_management",
@@ -16113,6 +16115,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         );
 
         console.log(`✓ [PERMISSIONS] Super admin Persian modules:`, persianModules);
+        console.log(`🔍 [DEBUG] finance mapping: ${normalizedModules.includes('finance')} → ${persianModules.includes('مدیریت مالی')}`);
+        console.log(`🔍 [DEBUG] geography_analytics mapping: ${normalizedModules.includes('geography_analytics')} → ${persianModules.includes('آمار جغرافیایی')}`);
 
         return res.json({
           success: true,
