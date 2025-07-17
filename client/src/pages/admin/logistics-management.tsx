@@ -190,6 +190,29 @@ const LogisticsManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+
+
+  // Enable audio notifications for logistics orders
+  const { orderCount } = useOrderNotifications({
+    department: 'logistics',
+    enabled: true
+  });
+
+  // Queries
+  const { data: pendingOrdersResponse, isLoading: loadingOrders } = useQuery({
+    queryKey: ['/api/logistics/orders/pending'],
+    enabled: activeTab === 'orders'
+  });
+
+  // Get orders that have reached logistics stage (warehouse approved)
+  const { data: logisticsOrdersResponse, isLoading: loadingLogisticsOrders } = useQuery({
+    queryKey: ['/api/logistics/orders'],
+    enabled: activeTab === 'orders'
+  });
+  
+  const pendingOrders = pendingOrdersResponse?.data || [];
+  const logisticsOrders = logisticsOrdersResponse?.orders || [];
+
   // Load existing codes when orders are fetched
   useEffect(() => {
     if (pendingOrders && pendingOrders.length > 0) {
@@ -225,27 +248,6 @@ const LogisticsManagement = () => {
       loadExistingCodes();
     }
   }, [pendingOrders]);
-
-  // Enable audio notifications for logistics orders
-  const { orderCount } = useOrderNotifications({
-    department: 'logistics',
-    enabled: true
-  });
-
-  // Queries
-  const { data: pendingOrdersResponse, isLoading: loadingOrders } = useQuery({
-    queryKey: ['/api/logistics/orders/pending'],
-    enabled: activeTab === 'orders'
-  });
-
-  // Get orders that have reached logistics stage (warehouse approved)
-  const { data: logisticsOrdersResponse, isLoading: loadingLogisticsOrders } = useQuery({
-    queryKey: ['/api/logistics/orders'],
-    enabled: activeTab === 'orders'
-  });
-  
-  const pendingOrders = pendingOrdersResponse?.data || [];
-  const logisticsOrders = logisticsOrdersResponse?.orders || [];
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
     queryKey: ['/api/logistics/companies'],
