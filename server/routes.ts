@@ -384,39 +384,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sync products from Kardex to warehouse products
-  app.post("/api/warehouse/sync-from-kardex", requireAuth, async (req: Request, res: Response) => {
+  // Sync products from Kardex to warehouse products and items (batch-based)
+  app.post("/api/warehouse/sync-from-kardex", async (req: Request, res: Response) => {
     try {
       const showcaseProducts = await db.select().from(products).where(eq(products.isActive, true));
-      let syncedCount = 0;
+      let syncedProductsCount = 0;
+      let syncedBatchesCount = 0;
       
       for (const showcaseProduct of showcaseProducts) {
-        // Check if already exists
-        const existing = await db.select().from(warehouseProducts)
+        // Check if warehouse product already exists
+        const existingProduct = await db.select().from(warehouseProducts)
           .where(eq(warehouseProducts.productCode, showcaseProduct.sku || showcaseProduct.name))
           .limit(1);
         
-        if (existing.length === 0) {
-          await db.insert(warehouseProducts).values({
+        let warehouseProductId;
+        
+        if (existingProduct.length === 0) {
+          // Create warehouse product
+          const newWarehouseProduct = await db.insert(warehouseProducts).values({
             productCode: showcaseProduct.sku || showcaseProduct.name.substring(0, 10),
             productName: showcaseProduct.name,
             productType: "محصول نهایی", 
-            unit: "عدد",
+            unit: showcaseProduct.stockUnit || "عدد",
             minStockLevel: showcaseProduct.minStockLevel || 0,
             maxStockLevel: showcaseProduct.maxStockLevel || 100,
             standardUnitPrice: showcaseProduct.unitPrice || showcaseProduct.price || 0,
             category: showcaseProduct.category,
             subcategory: showcaseProduct.subcategory,
             specifications: showcaseProduct.specifications
-          });
-          syncedCount++;
+          }).returning({ id: warehouseProducts.id });
+          
+          warehouseProductId = newWarehouseProduct[0].id;
+          syncedProductsCount++;
+        } else {
+          warehouseProductId = existingProduct[0].id;
+          
+          // Update existing product
+          await db.update(warehouseProducts)
+            .set({
+              productName: showcaseProduct.name,
+              unit: showcaseProduct.stockUnit || "عدد",
+              minStockLevel: showcaseProduct.minStockLevel || 0,
+              maxStockLevel: showcaseProduct.maxStockLevel || 100,
+              standardUnitPrice: showcaseProduct.unitPrice || showcaseProduct.price || 0,
+              category: showcaseProduct.category,
+              subcategory: showcaseProduct.subcategory,
+              specifications: showcaseProduct.specifications,
+              updatedAt: new Date()
+            })
+            .where(eq(warehouseProducts.id, warehouseProductId));
+        }
+        
+        // Handle batch/item sync
+        if (showcaseProduct.batchNumber && showcaseProduct.stockQuantity > 0) {
+          const batchCode = `${showcaseProduct.sku || showcaseProduct.name.substring(0, 10)}-${showcaseProduct.batchNumber}`;
+          
+          // Check if batch already exists
+          const existingBatch = await db.select().from(warehouseItems)
+            .where(eq(warehouseItems.batchCode, batchCode))
+            .limit(1);
+          
+          if (existingBatch.length === 0) {
+            // Create new batch item
+            await db.insert(warehouseItems).values({
+              warehouseProductId: warehouseProductId,
+              batchNumber: showcaseProduct.batchNumber,
+              batchCode: batchCode,
+              currentStock: showcaseProduct.stockQuantity,
+              unitPrice: showcaseProduct.unitPrice || showcaseProduct.price || 0,
+              totalValue: (showcaseProduct.stockQuantity * (showcaseProduct.unitPrice || showcaseProduct.price || 0)),
+              productionDate: showcaseProduct.lastRestockDate ? new Date(showcaseProduct.lastRestockDate) : null,
+              expiryDate: showcaseProduct.expiryDate ? new Date(showcaseProduct.expiryDate) : null,
+              notes: `همگام‌سازی شده از کاردکس - ${new Date().toLocaleDateString('fa-IR')}`
+            });
+            syncedBatchesCount++;
+          } else {
+            // Update existing batch item
+            await db.update(warehouseItems)
+              .set({
+                currentStock: showcaseProduct.stockQuantity,
+                unitPrice: showcaseProduct.unitPrice || showcaseProduct.price || 0,
+                totalValue: (showcaseProduct.stockQuantity * (showcaseProduct.unitPrice || showcaseProduct.price || 0)),
+                productionDate: showcaseProduct.lastRestockDate ? new Date(showcaseProduct.lastRestockDate) : null,
+                expiryDate: showcaseProduct.expiryDate ? new Date(showcaseProduct.expiryDate) : null,
+                updatedAt: new Date()
+              })
+              .where(eq(warehouseItems.id, existingBatch[0].id));
+          }
         }
       }
       
       res.json({ 
         success: true, 
-        message: `${syncedCount} محصول از کاردکس همگام‌سازی شد`,
-        syncedCount 
+        message: `${syncedProductsCount} محصول و ${syncedBatchesCount} بچ جدید از کاردکس همگام‌سازی شد`,
+        syncedProductsCount,
+        syncedBatchesCount
       });
     } catch (error) {
       console.error("Error syncing from Kardex:", error);
@@ -624,6 +686,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     // Skip middleware for test endpoints
     if (req.path.startsWith('/test/') || req.path.startsWith('/analytics/')) {
+      return next();
+    }
+    // Skip middleware for warehouse endpoints
+    if (req.path.startsWith('/warehouse/')) {
       return next();
     }
     attachUserDepartments(req, res, next);

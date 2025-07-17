@@ -119,6 +119,29 @@ const WarehouseExcelManagement: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Mutation for syncing from Kardex
+  const syncFromKardexMutation = useMutation({
+    mutationFn: () => apiRequest('/api/warehouse/sync-from-kardex', { method: 'POST' }),
+    onSuccess: (data) => {
+      toast({
+        title: "همگام‌سازی موفق",
+        description: data.message || "محصولات از کاردکس همگام‌سازی شدند",
+      });
+      // Refresh all warehouse data
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse/items'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse/stats'] });
+    },
+    onError: (error: any) => {
+      console.error('Sync error:', error);
+      toast({
+        title: "خطا در همگام‌سازی",
+        description: error.message || "خطایی در همگام‌سازی از کاردکس رخ داد",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Fetch warehouse locations
   const { data: locations = [] } = useQuery<WarehouseLocation[]>({
     queryKey: ['/api/warehouse/locations'],
@@ -217,6 +240,15 @@ const WarehouseExcelManagement: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => syncFromKardexMutation.mutate()}
+            disabled={syncFromKardexMutation.isPending}
+          >
+            <Package className="w-4 h-4 ml-2" />
+            {syncFromKardexMutation.isPending ? 'در حال همگام‌سازی...' : 'همگام‌سازی از کاردکس'}
+          </Button>
           <Button variant="outline" size="sm">
             <Download className="w-4 h-4 ml-2" />
             گزارش Excel
