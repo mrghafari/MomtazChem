@@ -134,6 +134,9 @@ const WarehouseManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState("orders");
   const [editingProduct, setEditingProduct] = useState<string | null>(null);
   const [editingQuantity, setEditingQuantity] = useState<number>(0);
+  const [editingWaste, setEditingWaste] = useState<string | null>(null);
+  const [wasteQuantity, setWasteQuantity] = useState<number>(0);
+  const [wasteAmounts, setWasteAmounts] = useState<{[key: string]: number}>({});
   
   // Order items modal state
   const [showOrderItems, setShowOrderItems] = useState(false);
@@ -499,6 +502,34 @@ const WarehouseManagement: React.FC = () => {
       productId,
       quantity: newQuantity,
       reason: `تنظیم دستی موجودی به ${newQuantity} واحد`
+    });
+  };
+
+  const handleWasteEdit = (productId: string, currentWaste: number) => {
+    setEditingWaste(productId);
+    setWasteQuantity(currentWaste);
+  };
+
+  const handleWasteUpdate = (productId: number, newWasteAmount: number) => {
+    if (newWasteAmount < 0) {
+      toast({
+        title: "خطا",
+        description: "مقدار ضایعات نمی‌تواند منفی باشد.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setWasteAmounts(prev => ({
+      ...prev,
+      [productId]: newWasteAmount
+    }));
+    setEditingWaste(null);
+    setWasteQuantity(0);
+    
+    toast({
+      title: "ضایعات به‌روزرسانی شد",
+      description: `ضایعات محصول به ${newWasteAmount} واحد تنظیم شد.`,
     });
   };
 
@@ -882,9 +913,9 @@ const WarehouseManagement: React.FC = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="text-right p-4">محصول</th>
-                        <th className="text-right p-4">دسته‌بندی</th>
                         <th className="text-right p-4">موجودی</th>
                         <th className="text-right p-4">کالای در راه</th>
+                        <th className="text-right p-4">ضایعات</th>
                         <th className="text-right p-4">موجودی کل</th>
                         <th className="text-right p-4">وضعیت</th>
                         <th className="text-right p-4">آستانه کم</th>
@@ -901,7 +932,6 @@ const WarehouseManagement: React.FC = () => {
                               <p className="text-sm text-gray-500">{product.shopSku}</p>
                             </div>
                           </td>
-                          <td className="p-4">{product.category}</td>
                           <td className="p-4">
                             {editingProduct === product.id.toString() ? (
                               <div className="flex items-center gap-2">
@@ -954,14 +984,55 @@ const WarehouseManagement: React.FC = () => {
                             </span>
                           </td>
                           <td className="p-4">
+                            {/* Waste column with editing functionality */}
+                            {editingWaste === product.id.toString() ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={wasteQuantity}
+                                  onChange={(e) => setWasteQuantity(parseInt(e.target.value) || 0)}
+                                  className="w-20"
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleWasteUpdate(product.id, wasteQuantity)}
+                                >
+                                  <Save className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEditingWaste(null)}
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-red-600">
+                                  {wasteAmounts[product.id] || 0}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleWasteEdit(product.id.toString(), wasteAmounts[product.id] || 0)}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-4">
                             <span className="font-bold text-green-600">
-                              {/* Total inventory = current stock + goods in transit */}
+                              {/* Total inventory = current stock + goods in transit - waste */}
                               {(() => {
                                 const transitOrders = orders.filter(order => 
                                   ['warehouse_processing', 'warehouse_approved'].includes(order.currentStatus || order.status)
                                 );
                                 const transitQuantity = transitOrders.length > 0 ? Math.min(transitOrders.length * 2, 8) : 0;
-                                return product.stockQuantity + transitQuantity;
+                                const wasteAmount = wasteAmounts[product.id] || 0;
+                                return Math.max(0, product.stockQuantity + transitQuantity - wasteAmount);
                               })()}
                             </span>
                           </td>
