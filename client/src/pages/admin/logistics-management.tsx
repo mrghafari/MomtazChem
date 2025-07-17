@@ -26,6 +26,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  AlertTriangle,
   Package,
   MapPin,
   Calendar,
@@ -434,6 +435,22 @@ const LogisticsManagement = () => {
         )}
       </div>
 
+      {/* Mandatory Fields Warning */}
+      {pendingOrders.some(order => !order.customerName || !order.customerPhone || !order.customerAddress) && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+            <h4 className="font-semibold text-red-800">هشدار: اطلاعات الزامی ناقص</h4>
+          </div>
+          <p className="text-sm text-red-700">
+            برخی سفارشات فاقد اطلاعات الزامی هستند: <strong>اطلاعات گیرنده، شماره موبایل، و آدرس دریافت کالا</strong>
+          </p>
+          <p className="text-xs text-red-600 mt-1">
+            لطفاً قبل از پردازش لجستیک، تمامی اطلاعات الزامی را تکمیل کنید
+          </p>
+        </div>
+      )}
+
       {/* سفارشات در انتظار */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
@@ -460,17 +477,60 @@ const LogisticsManagement = () => {
                   {getStatusBadge(order.currentStatus)}
                 </div>
                 
+                {/* Delivery Address Section - Full Width */}
+                <div className="mb-4">
+                  <div className={`rounded-lg p-3 border ${
+                    (!order.customerAddress) 
+                      ? 'bg-red-50 border-red-200' 
+                      : 'bg-purple-50 border-purple-200'
+                  }`}>
+                    <h5 className={`font-medium mb-2 flex items-center ${
+                      (!order.customerAddress) 
+                        ? 'text-red-800' 
+                        : 'text-purple-800'
+                    }`}>
+                      <MapPin className="w-4 h-4 mr-2" />
+                      آدرس دریافت کالا
+                      {!order.customerAddress && (
+                        <span className="text-red-500 text-xs mr-2">*الزامی</span>
+                      )}
+                    </h5>
+                    <p className={`text-sm ${
+                      !order.customerAddress ? 'text-red-700 font-semibold' : 'text-gray-700'
+                    }`}>
+                      {order.customerAddress || 'آدرس دریافت کالا ضروری است برای تحویل محموله'}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                   {/* Customer Info Block */}
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
-                    <h5 className="font-medium text-blue-800 mb-2 flex items-center">
+                  <div className={`rounded-lg p-3 border ${
+                    (!order.customerName || !order.customerPhone) 
+                      ? 'bg-red-50 border-red-200' 
+                      : 'bg-white border-blue-200'
+                  }`}>
+                    <h5 className={`font-medium mb-2 flex items-center ${
+                      (!order.customerName || !order.customerPhone) 
+                        ? 'text-red-800' 
+                        : 'text-blue-800'
+                    }`}>
                       <User className="w-4 h-4 mr-2" />
                       اطلاعات گیرنده
+                      {(!order.customerName || !order.customerPhone) && (
+                        <span className="text-red-500 text-xs mr-2">*الزامی</span>
+                      )}
                     </h5>
-                    <p className="text-sm text-gray-700">{order.customerName || 'نامشخص'}</p>
-                    <p className="text-sm text-gray-600 flex items-center mt-1">
+                    <p className={`text-sm ${
+                      !order.customerName ? 'text-red-700 font-semibold' : 'text-gray-700'
+                    }`}>
+                      {order.customerName || 'نام گیرنده ضروری است'}
+                    </p>
+                    <p className={`text-sm flex items-center mt-1 ${
+                      !order.customerPhone ? 'text-red-700 font-semibold' : 'text-gray-600'
+                    }`}>
                       <Phone className="w-3 h-3 mr-1" />
-                      {order.customerPhone || 'نامشخص'}
+                      {order.customerPhone || 'شماره موبایل ضروری است'}
                     </p>
                   </div>
 
