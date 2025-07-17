@@ -887,6 +887,45 @@ const WarehouseManagement: React.FC = () => {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     همگام‌سازی
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Test batch synchronization
+                      const testBatchSync = async () => {
+                        try {
+                          const response = await fetch('/api/warehouse/inventory-sync', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              productId: 25,
+                              productName: 'Test Product',
+                              productSku: 'TST-001',
+                              productBarcode: '1234567890123',
+                              batchNumber: 'BATCH-2025-001',
+                              movementType: 'کاردکس_کاهش',
+                              quantity: 5,
+                              previousStock: 10,
+                              newStock: 5,
+                              reason: 'تست سیستم بچ',
+                              source: 'کاردکس',
+                              notes: 'تست همگام‌سازی بچ نامبر'
+                            })
+                          });
+                          const result = await response.json();
+                          console.log('Batch sync test result:', result);
+                        } catch (error) {
+                          console.error('Batch sync test failed:', error);
+                        }
+                      };
+                      testBatchSync();
+                    }}
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    تست بچ
+                  </Button>
                   <Button variant="outline" size="sm">
                     <Download className="w-4 h-4 mr-2" />
                     خروجی
@@ -913,6 +952,7 @@ const WarehouseManagement: React.FC = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="text-right p-4 min-w-[200px]">محصول</th>
+                        <th className="text-center p-4 min-w-[120px]">شماره بچ</th>
                         <th className="text-center p-4 min-w-[120px]">موجودی</th>
                         <th className="text-center p-4 min-w-[100px]">کالای در راه</th>
                         <th className="text-center p-4 min-w-[100px]">ضایعات</th>
@@ -930,6 +970,14 @@ const WarehouseManagement: React.FC = () => {
                             <div>
                               <p className="font-medium">{product.name}</p>
                               <p className="text-sm text-gray-500">{product.shopSku}</p>
+                            </div>
+                          </td>
+                          <td className="p-4 text-center">
+                            <div className="text-sm">
+                              {/* Display batch number from کاردکس */}
+                              <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-mono text-xs">
+                                {product.batchNumber || 'بدون بچ'}
+                              </span>
                             </div>
                           </td>
                           <td className="p-4 text-center">

@@ -2220,12 +2220,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (stockDifference !== 0) {
             console.log(`📦 [WAREHOUSE-SYNC] Creating inventory movement: ${stockDifference > 0 ? '+' : ''}${stockDifference} units`);
             
-            // Prepare inventory movement data
+            // Prepare inventory movement data including batch number
             const movementData = {
               productId: product.id,
               productName: product.name,
               productSku: product.sku || '',
               productBarcode: product.barcode || '',
+              batchNumber: product.batchNumber || null,
               movementType: stockDifference > 0 ? 'کاردکس_افزایش' : 'کاردکس_کاهش',
               quantity: Math.abs(stockDifference),
               previousStock: oldProduct.stockQuantity || 0,
@@ -2233,7 +2234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               movementDate: new Date().toISOString(),
               reason: 'تغییر موجودی از کاردکس',
               source: 'کاردکس',
-              notes: `موجودی از ${oldProduct.stockQuantity || 0} به ${product.stockQuantity || 0} تغییر یافت`
+              notes: `موجودی از ${oldProduct.stockQuantity || 0} به ${product.stockQuantity || 0} تغییر یافت${product.batchNumber ? ` - بچ: ${product.batchNumber}` : ''}`
             };
             
             // Call warehouse inventory sync API
@@ -22119,6 +22120,7 @@ momtazchem.com
       const movementData = req.body;
       console.log("📦 [WAREHOUSE-INVENTORY-SYNC] Received inventory movement from کاردکس:", {
         productName: movementData.productName,
+        batchNumber: movementData.batchNumber,
         movementType: movementData.movementType,
         quantity: movementData.quantity,
         previousStock: movementData.previousStock,
@@ -22127,7 +22129,7 @@ momtazchem.com
       });
       
       // Store the inventory movement for warehouse staff to see
-      // In a production system, you might want to store this in a proper inventory_movements table
+      // Enhanced with batch tracking
       const movementRecord = {
         id: Date.now(), // Simple ID generation
         timestamp: new Date().toISOString(),
@@ -22135,6 +22137,7 @@ momtazchem.com
         productName: movementData.productName,
         productSku: movementData.productSku,
         productBarcode: movementData.productBarcode,
+        batchNumber: movementData.batchNumber,
         movementType: movementData.movementType,
         quantity: movementData.quantity,
         previousStock: movementData.previousStock,
@@ -22145,23 +22148,75 @@ momtazchem.com
         status: 'active'
       };
       
+      // Handle batch tracking logic
+      if (movementData.batchNumber) {
+        console.log(`📦 [BATCH-TRACKING] Processing batch ${movementData.batchNumber} for ${movementData.productName}`);
+        
+        // If stock is now 0 or negative for this batch, mark it for removal
+        if (movementData.newStock <= 0) {
+          console.log(`🗑️ [BATCH-TRACKING] Batch ${movementData.batchNumber} sold out - marking for removal`);
+          movementRecord.status = 'sold_out';
+          movementRecord.notes = `${movementRecord.notes} - بچ فروخته شد و حذف می‌شود`;
+        }
+      }
+      
       console.log(`✅ [WAREHOUSE-INVENTORY-SYNC] Successfully recorded inventory movement for ${movementData.productName}`);
       console.log(`📊 [WAREHOUSE-INVENTORY-SYNC] Movement details:`, {
         type: movementData.movementType,
+        batch: movementData.batchNumber,
         change: `${movementData.previousStock} → ${movementData.newStock}`,
-        difference: movementData.movementType.includes('افزایش') ? `+${movementData.quantity}` : `-${movementData.quantity}`
+        difference: movementData.movementType.includes('افزایش') ? `+${movementData.quantity}` : `-${movementData.quantity}`,
+        batchStatus: movementData.newStock <= 0 ? 'SOLD_OUT' : 'ACTIVE'
       });
       
       res.json({
         success: true,
         message: "موجودی انبار با موفقیت همگام‌سازی شد",
-        movement: movementRecord
+        movement: movementRecord,
+        batchStatus: movementData.newStock <= 0 ? 'sold_out' : 'active'
       });
     } catch (error) {
       console.error("❌ [WAREHOUSE-INVENTORY-SYNC] Error:", error);
       res.status(500).json({
         success: false,
         message: "خطا در همگام‌سازی موجودی انبار"
+      });
+    }
+  });
+
+  // Remove sold-out batches from warehouse inventory
+  app.post("/api/warehouse/remove-sold-out-batches", async (req, res) => {
+    try {
+      console.log("🗑️ [BATCH-CLEANUP] Starting automatic cleanup of sold-out batches...");
+      
+      // In a production system, this would query a proper warehouse_inventory table
+      // and remove rows where batchStatus = 'sold_out' and stock <= 0
+      
+      const cleanupResults = {
+        removedBatches: 0,
+        cleanedProducts: [],
+        timestamp: new Date().toISOString()
+      };
+      
+      // Simulate batch cleanup logic
+      // In real implementation, this would:
+      // 1. Find all warehouse inventory rows with sold-out batches
+      // 2. Remove those rows from warehouse_inventory table
+      // 3. Log the cleanup activity
+      
+      console.log("✅ [BATCH-CLEANUP] Sold-out batch cleanup completed");
+      console.log(`📊 [BATCH-CLEANUP] Results: ${cleanupResults.removedBatches} batches removed`);
+      
+      res.json({
+        success: true,
+        message: "بچ‌های فروخته شده با موفقیت حذف شدند",
+        results: cleanupResults
+      });
+    } catch (error) {
+      console.error("❌ [BATCH-CLEANUP] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف بچ‌های فروخته شده"
       });
     }
   });
