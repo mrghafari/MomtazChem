@@ -45,6 +45,8 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import { apiRequest } from '@/lib/queryClient';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 interface Order {
   id: number;
@@ -142,6 +144,102 @@ const WarehouseManagement: React.FC = () => {
   const [showOrderItems, setShowOrderItems] = useState(false);
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
+
+  // Helper function to get goods in transit for a product
+  const getGoodsInTransitForProduct = (productId: number): number => {
+    if (!goodsInTransit) return 0;
+    return goodsInTransit
+      .filter((item: any) => item.productId === productId)
+      .reduce((total: number, item: any) => total + (item.quantity || 0), 0);
+  };
+
+  // Excel export function for inventory
+  const exportInventoryToExcel = () => {
+    try {
+      if (!unifiedProducts || unifiedProducts.length === 0) {
+        toast({
+          title: "خطا",
+          description: "داده‌های موجودی برای خروجی موجود نیست",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Prepare data for Excel export
+      const excelData = unifiedProducts.map((product, index) => {
+        const goodsInTransit = getGoodsInTransitForProduct(product.id);
+        const wasteAmount = wasteAmounts[product.id] || 0;
+        const finalInventory = Math.max(0, (product.stockQuantity || 0) + goodsInTransit - wasteAmount);
+        
+        return {
+          'ردیف': index + 1,
+          'نام محصول': product.name || '',
+          'دسته‌بندی': product.category || '',
+          'کد محصول (SKU)': product.shopSku || '',
+          'موجودی فعلی': product.stockQuantity || 0,
+          'کالای در راه': goodsInTransit,
+          'ضایعات': wasteAmount,
+          'موجودی نهایی': finalInventory,
+          'حداقل موجودی': product.minStockLevel || 0,
+          'آستانه کم': product.lowStockThreshold || 0,
+          'وضعیت': finalInventory <= 0 ? 'تمام شده' : 
+                   finalInventory <= (product.lowStockThreshold || 0) ? 'بحرانی' :
+                   finalInventory <= (product.minStockLevel || 0) ? 'موجودی کم' : 'موجود',
+          'قیمت واحد': product.shopPrice ? `${product.shopPrice} دینار` : 'نامشخص',
+          'ارزش کل': product.shopPrice ? 
+            `${(parseFloat(product.shopPrice) * finalInventory).toLocaleString()} دینار` : 'نامشخص'
+        };
+      });
+
+      // Create workbook and worksheet
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      
+      // Set column widths for better display
+      const colWidths = [
+        { wch: 8 },   // ردیف
+        { wch: 25 },  // نام محصول
+        { wch: 15 },  // دسته‌بندی
+        { wch: 15 },  // کد محصول
+        { wch: 12 },  // موجودی فعلی
+        { wch: 12 },  // کالای در راه
+        { wch: 10 },  // ضایعات
+        { wch: 12 },  // موجودی نهایی
+        { wch: 12 },  // حداقل موجودی
+        { wch: 10 },  // آستانه کم
+        { wch: 12 },  // وضعیت
+        { wch: 15 },  // قیمت واحد
+        { wch: 20 }   // ارزش کل
+      ];
+      ws['!cols'] = colWidths;
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, "گزارش موجودی");
+      
+      // Generate filename with current date
+      const currentDate = new Date().toLocaleDateString('fa-IR').replace(/\//g, '-');
+      const filename = `گزارش-موجودی-انبار-${currentDate}.xlsx`;
+      
+      // Export file
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, filename);
+      
+      toast({
+        title: "موفق",
+        description: `گزارش موجودی با نام ${filename} دانلود شد`,
+        variant: "default"
+      });
+      
+    } catch (error) {
+      console.error('Excel export error:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در تولید فایل اکسل",
+        variant: "destructive"
+      });
+    }
+  };
   
   // Authentication check
   const { user, isLoading: authLoading } = useAuth();
@@ -887,9 +985,14 @@ const WarehouseManagement: React.FC = () => {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     همگام‌سازی
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={exportInventoryToExcel}
+                    className="bg-green-50 hover:bg-green-100 border-green-200"
+                  >
                     <Download className="w-4 h-4 mr-2" />
-                    خروجی
+                    خروجی اکسل
                   </Button>
                 </div>
               </div>
