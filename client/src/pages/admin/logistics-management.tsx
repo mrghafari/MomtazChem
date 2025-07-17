@@ -491,7 +491,7 @@ const LogisticsManagement = () => {
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                   {/* Customer Info Block */}
                   <div className="bg-white rounded-lg p-3 border border-green-200">
                     <h5 className="font-medium text-green-800 mb-2 flex items-center">
@@ -550,6 +550,39 @@ const LogisticsManagement = () => {
                       }
                     </p>
                     <p className="text-xs text-orange-600 mt-1">زمان تحویل به مشتری</p>
+                  </div>
+
+                  {/* Verification Code Block for Logistics Orders */}
+                  <div className={`rounded-lg p-3 border ${
+                    order.deliveryCode || existingCodes[order.customerOrderId]
+                      ? 'bg-purple-50 border-purple-200' 
+                      : 'bg-gray-50 border-gray-200'
+                  }`}>
+                    <h5 className={`font-medium mb-2 flex items-center ${
+                      order.deliveryCode || existingCodes[order.customerOrderId]
+                        ? 'text-purple-800' 
+                        : 'text-gray-600'
+                    }`}>
+                      <Shield className="w-4 h-4 mr-2" />
+                      کد تحویل
+                    </h5>
+                    <p className={`text-lg font-bold ${
+                      order.deliveryCode || existingCodes[order.customerOrderId]
+                        ? 'text-purple-700' 
+                        : 'text-gray-500'
+                    }`}>
+                      {order.deliveryCode || existingCodes[order.customerOrderId] || 'تخصیص نیافته'}
+                    </p>
+                    <p className={`text-xs mt-1 ${
+                      order.deliveryCode || existingCodes[order.customerOrderId]
+                        ? 'text-purple-600' 
+                        : 'text-gray-500'
+                    }`}>
+                      {order.deliveryCode || existingCodes[order.customerOrderId] 
+                        ? 'کد ارسال شده به مشتری' 
+                        : 'کد تحویل هنوز ارسال نشده'
+                      }
+                    </p>
                   </div>
                 </div>
 
@@ -666,7 +699,7 @@ const LogisticsManagement = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                   {/* Customer Info Block */}
                   <div className={`rounded-lg p-3 border ${
                     (!order.customerName || !order.customerPhone) 
@@ -742,6 +775,39 @@ const LogisticsManagement = () => {
                       }
                     </p>
                     <p className="text-xs text-orange-600 mt-1">زمان تحویل به مشتری</p>
+                  </div>
+
+                  {/* Verification Code Block for Pending Orders */}
+                  <div className={`rounded-lg p-3 border ${
+                    order.deliveryCode || existingCodes[order.customerOrderId]
+                      ? 'bg-purple-50 border-purple-200' 
+                      : 'bg-gray-50 border-gray-200'
+                  }`}>
+                    <h5 className={`font-medium mb-2 flex items-center ${
+                      order.deliveryCode || existingCodes[order.customerOrderId]
+                        ? 'text-purple-800' 
+                        : 'text-gray-600'
+                    }`}>
+                      <Shield className="w-4 h-4 mr-2" />
+                      کد تحویل
+                    </h5>
+                    <p className={`text-lg font-bold ${
+                      order.deliveryCode || existingCodes[order.customerOrderId]
+                        ? 'text-purple-700' 
+                        : 'text-gray-500'
+                    }`}>
+                      {order.deliveryCode || existingCodes[order.customerOrderId] || 'تخصیص نیافته'}
+                    </p>
+                    <p className={`text-xs mt-1 ${
+                      order.deliveryCode || existingCodes[order.customerOrderId]
+                        ? 'text-purple-600' 
+                        : 'text-gray-500'
+                    }`}>
+                      {order.deliveryCode || existingCodes[order.customerOrderId] 
+                        ? 'کد ارسال شده به مشتری' 
+                        : 'کد تحویل هنوز ارسال نشده'
+                      }
+                    </p>
                   </div>
                 </div>
 
@@ -820,6 +886,32 @@ const LogisticsManagement = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 flex-wrap mt-4">
+                  {/* Send Code Button */}
+                  <Button 
+                    size="sm" 
+                    className={existingCodes[order.customerOrderId] || sentCodes.has(order.customerOrderId)
+                      ? "bg-red-600 hover:bg-red-700 text-white" 
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }
+                    onClick={() => {
+                      // Generate 4-digit code between 1111-9999 (or resend existing)
+                      generateCodeMutation.mutate({
+                        customerOrderId: order.customerOrderId,
+                        customerPhone: order.customerPhone,
+                        customerName: `${order.customerFirstName} ${order.customerLastName}`
+                      });
+                    }}
+                    disabled={generateCodeMutation.isPending}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {generateCodeMutation.isPending 
+                      ? "در حال ارسال..." 
+                      : existingCodes[order.customerOrderId] || sentCodes.has(order.customerOrderId)
+                        ? `ارسال مجدد کد ${existingCodes[order.customerOrderId] || ''}`
+                        : "ارسال کد به مشتری"
+                    }
+                  </Button>
+
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button size="sm" variant="outline">
