@@ -191,7 +191,7 @@ const LogisticsManagement = () => {
   const queryClient = useQueryClient();
 
   // Load existing codes when orders are fetched
-  React.useEffect(() => {
+  useEffect(() => {
     if (pendingOrders && pendingOrders.length > 0) {
       const loadExistingCodes = async () => {
         const codePromises = pendingOrders.map(async (order: LogisticsOrder) => {
