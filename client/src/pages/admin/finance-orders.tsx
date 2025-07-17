@@ -382,7 +382,7 @@ function FinanceOrders() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-100 text-sm font-medium">تایید شده</p>
-                  <p className="text-3xl font-bold text-white">{approvedOrders.length}</p>
+                  <p className="text-3xl font-bold text-white">{transferredOrders.length}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-green-200" />
               </div>
