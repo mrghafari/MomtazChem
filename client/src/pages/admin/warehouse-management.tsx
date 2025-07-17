@@ -141,6 +141,14 @@ const WarehouseManagement: React.FC = () => {
   const [wasteQuantity, setWasteQuantity] = useState<number>(0);
   const [wasteAmounts, setWasteAmounts] = useState<{[key: string]: number}>({});
   
+  // Header filter states
+  const [orderIdFilter, setOrderIdFilter] = useState('');
+  const [customerNameFilter, setCustomerNameFilter] = useState('');
+  const [phoneFilter, setPhoneFilter] = useState('');
+  const [emailFilter, setEmailFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [amountFilter, setAmountFilter] = useState('');
+  
   // Query for waste amounts from database
   const { data: wasteData, refetch: refetchWaste } = useQuery({
     queryKey: ['/api/warehouse/waste'],
@@ -573,6 +581,7 @@ const WarehouseManagement: React.FC = () => {
         : order.customerName || '';
     
     const customerEmail = order.customer?.email || order.customerEmail || '';
+    const customerPhone = order.customer?.phone || order.customerPhone || '';
     
     const matchesSearch = customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -583,7 +592,15 @@ const WarehouseManagement: React.FC = () => {
     const orderStatus = order.currentStatus || order.status || '';
     const matchesStatus = selectedStatus === 'all' || orderStatus === selectedStatus;
     
-    return matchesSearch && matchesStatus;
+    // Header filters
+    const matchesOrderId = orderIdFilter === '' || order.id.toString().includes(orderIdFilter);
+    const matchesCustomerName = customerNameFilter === '' || customerName.toLowerCase().includes(customerNameFilter.toLowerCase());
+    const matchesPhone = phoneFilter === '' || customerPhone.includes(phoneFilter);
+    const matchesEmail = emailFilter === '' || customerEmail.toLowerCase().includes(emailFilter.toLowerCase());
+    const matchesStatusFilter = statusFilter === '' || orderStatus.includes(statusFilter);
+    const matchesAmount = amountFilter === '' || parseFloat(order.totalAmount || '0').toString().includes(amountFilter);
+    
+    return matchesSearch && matchesStatus && matchesOrderId && matchesCustomerName && matchesPhone && matchesEmail && matchesStatusFilter && matchesAmount;
   }) || [];
 
   // Filter products based on search term
@@ -916,6 +933,88 @@ const WarehouseManagement: React.FC = () => {
                         <th className="text-right p-4">تاریخ پردازش در انبار</th>
                         <th className="text-right p-4">تاریخ ایجاد</th>
                         <th className="text-center p-4">عملیات</th>
+                      </tr>
+                      <tr className="border-b bg-gray-50">
+                        <th className="text-right p-2">
+                          <Input
+                            placeholder="شماره"
+                            value={orderIdFilter}
+                            onChange={(e) => setOrderIdFilter(e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                        </th>
+                        <th className="text-right p-2">
+                          <Input
+                            placeholder="نام مشتری"
+                            value={customerNameFilter}
+                            onChange={(e) => setCustomerNameFilter(e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                        </th>
+                        <th className="text-right p-2">
+                          <Input
+                            placeholder="شماره موبایل"
+                            value={phoneFilter}
+                            onChange={(e) => setPhoneFilter(e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                        </th>
+                        <th className="text-right p-2">
+                          <Input
+                            placeholder="ایمیل"
+                            value={emailFilter}
+                            onChange={(e) => setEmailFilter(e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                        </th>
+                        <th className="text-right p-2">
+                          <div className="h-8 flex items-center text-gray-400 text-xs">
+                            محاسبه شده
+                          </div>
+                        </th>
+                        <th className="text-right p-2">
+                          <Input
+                            placeholder="مبلغ"
+                            value={amountFilter}
+                            onChange={(e) => setAmountFilter(e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                        </th>
+                        <th className="text-right p-2">
+                          <Input
+                            placeholder="وضعیت"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                        </th>
+                        <th className="text-right p-2">
+                          <div className="h-8 flex items-center text-gray-400 text-xs">
+                            تاریخ
+                          </div>
+                        </th>
+                        <th className="text-right p-2">
+                          <div className="h-8 flex items-center text-gray-400 text-xs">
+                            تاریخ
+                          </div>
+                        </th>
+                        <th className="text-center p-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setOrderIdFilter('');
+                              setCustomerNameFilter('');
+                              setPhoneFilter('');
+                              setEmailFilter('');
+                              setAmountFilter('');
+                              setStatusFilter('');
+                            }}
+                            className="h-8 text-xs"
+                          >
+                            پاک کردن
+                          </Button>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
