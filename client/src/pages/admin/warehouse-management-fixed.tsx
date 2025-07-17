@@ -67,6 +67,8 @@ const WarehouseManagementFixed: React.FC = () => {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [warehouseNotes, setWarehouseNotes] = useState('');
   const [activeTab, setActiveTab] = useState("orders");
+  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
   
   // Header filter states
   const [orderIdFilter, setOrderIdFilter] = useState('');
@@ -75,6 +77,9 @@ const WarehouseManagementFixed: React.FC = () => {
   const [emailFilter, setEmailFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [amountFilter, setAmountFilter] = useState('');
+  
+  // Loading state for individual orders
+  const [loadingOrderId, setLoadingOrderId] = useState<number | null>(null);
   
   // All hooks called consistently
   const queryClient = useQueryClient();
@@ -93,6 +98,7 @@ const WarehouseManagementFixed: React.FC = () => {
   // Mutations
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, status, notes }: { orderId: number; status: string; notes?: string }) => {
+      setLoadingOrderId(orderId); // Set loading state for specific order
       return await apiRequest(`/api/order-management/warehouse/${orderId}/process`, {
         method: 'PATCH',
         body: { status, notes }
@@ -106,6 +112,7 @@ const WarehouseManagementFixed: React.FC = () => {
         description: `سفارش با موفقیت ${data.data?.status === 'warehouse_processing' ? 'در حال پردازش' : data.data?.status === 'warehouse_approved' ? 'تایید شده - ارسال به لجستیک' : 'به‌روزرسانی شده'} تنظیم شد.`,
       });
       setShowOrderDetails(false);
+      setLoadingOrderId(null); // Clear loading state
     },
     onError: (error: any) => {
       toast({
@@ -113,6 +120,7 @@ const WarehouseManagementFixed: React.FC = () => {
         description: error.message || "خطایی در به‌روزرسانی وضعیت سفارش رخ داد.",
         variant: "destructive",
       });
+      setLoadingOrderId(null); // Clear loading state on error
     },
   });
 
@@ -200,6 +208,27 @@ const WarehouseManagementFixed: React.FC = () => {
     setEmailFilter('');
     setAmountFilter('');
     setStatusFilter('');
+  };
+
+  // Fetch complete order details with items
+  const fetchOrderDetails = async (customerOrderId: number) => {
+    setLoadingOrderDetails(true);
+    try {
+      const response = await apiRequest(`/api/order-management/warehouse/${customerOrderId}/details`, {
+        method: 'GET'
+      });
+      setOrderDetails(response.order);
+      console.log('Order details fetched:', response.order);
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      toast({
+        title: "خطا در بارگیری جزئیات سفارش",
+        description: "خطایی در بارگیری جزئیات سفارش رخ داد.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingOrderDetails(false);
+    }
   };
 
   return (
@@ -421,20 +450,22 @@ const WarehouseManagementFixed: React.FC = () => {
                                   onClick={() => {
                                     setSelectedOrder(order);
                                     setShowOrderDetails(true);
+                                    // Fetch complete order details
+                                    fetchOrderDetails(order.customerOrderId);
                                   }}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
-                                  جزئیات
+                                  جزئیات سفارش
                                 </Button>
                                 {order.currentStatus === 'warehouse_approved' && (
                                   <Button
                                     size="sm"
                                     variant="default"
                                     onClick={() => handleOrderAction(order.id, 'logistics_dispatched')}
-                                    disabled={updateOrderMutation.isPending}
+                                    disabled={loadingOrderId === order.id}
                                   >
                                     <Truck className="w-4 h-4 mr-1" />
-                                    ارسال به لجستیک
+                                    {loadingOrderId === order.id ? 'در حال ارسال...' : 'ارسال به لجستیک'}
                                   </Button>
                                 )}
                               </div>
@@ -452,37 +483,131 @@ const WarehouseManagementFixed: React.FC = () => {
 
         {/* Order Details Dialog */}
         <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>جزئیات سفارش #{selectedOrder?.id}</DialogTitle>
+              <DialogTitle>جزئیات سفارش #{selectedOrder?.customerOrderId}</DialogTitle>
             </DialogHeader>
-            {selectedOrder && (
+            {loadingOrderDetails ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-4 text-gray-600">در حال بارگیری جزئیات سفارش...</p>
+              </div>
+            ) : orderDetails ? (
               <div className="space-y-6">
                 {/* Customer Information */}
                 <div>
-                  <h3 className="font-semibold mb-3">اطلاعات مشتری</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="font-semibold mb-3 text-lg">اطلاعات مشتری</h3>
+                  <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
                     <div>
-                      <Label>نام مشتری</Label>
-                      <p className="text-sm mt-1">{
-                        selectedOrder.customer?.firstName && selectedOrder.customer?.lastName 
-                          ? `${selectedOrder.customer.firstName} ${selectedOrder.customer.lastName}` 
-                          : selectedOrder.customerFirstName && selectedOrder.customerLastName 
-                            ? `${selectedOrder.customerFirstName} ${selectedOrder.customerLastName}`
-                            : selectedOrder.customerName || 'نامشخص'
+                      <Label className="text-sm font-medium text-gray-700">نام مشتری</Label>
+                      <p className="text-sm mt-1 font-medium">{
+                        orderDetails.customer?.firstName && orderDetails.customer?.lastName 
+                          ? `${orderDetails.customer.firstName} ${orderDetails.customer.lastName}` 
+                          : 'نامشخص'
                       }</p>
                     </div>
                     <div>
-                      <Label>شماره موبایل</Label>
-                      <p className="text-sm mt-1">{selectedOrder.customer?.phone || selectedOrder.customerPhone || 'شماره نامشخص'}</p>
+                      <Label className="text-sm font-medium text-gray-700">شماره موبایل</Label>
+                      <p className="text-sm mt-1 font-medium">{orderDetails.customer?.phone || 'شماره نامشخص'}</p>
                     </div>
                     <div>
-                      <Label>ایمیل</Label>
-                      <p className="text-sm mt-1">{selectedOrder.customer?.email || selectedOrder.customerEmail || 'ایمیل نامشخص'}</p>
+                      <Label className="text-sm font-medium text-gray-700">ایمیل</Label>
+                      <p className="text-sm mt-1 font-medium">{orderDetails.customer?.email || 'ایمیل نامشخص'}</p>
                     </div>
                     <div>
-                      <Label>مبلغ کل</Label>
-                      <p className="text-sm mt-1">{formatCurrency(parseFloat(selectedOrder.totalAmount) || 0)}</p>
+                      <Label className="text-sm font-medium text-gray-700">مبلغ کل</Label>
+                      <p className="text-sm mt-1 font-medium text-green-600">{formatCurrency(parseFloat(orderDetails.totalAmount) || 0)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Summary */}
+                <div>
+                  <h3 className="font-semibold mb-3 text-lg">خلاصه سفارش</h3>
+                  <div className="grid grid-cols-3 gap-4 bg-blue-50 p-4 rounded-lg">
+                    <div className="text-center">
+                      <Label className="text-sm font-medium text-gray-700">تعداد آیتم‌ها</Label>
+                      <p className="text-2xl font-bold text-blue-600">{orderDetails.totalItems}</p>
+                    </div>
+                    <div className="text-center">
+                      <Label className="text-sm font-medium text-gray-700">مجموع تعداد</Label>
+                      <p className="text-2xl font-bold text-blue-600">{orderDetails.totalQuantity}</p>
+                    </div>
+                    <div className="text-center">
+                      <Label className="text-sm font-medium text-gray-700">تاریخ سفارش</Label>
+                      <p className="text-sm font-medium text-gray-900">{new Date(orderDetails.orderDate).toLocaleDateString('fa-IR')}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Items */}
+                <div>
+                  <h3 className="font-semibold mb-3 text-lg">آیتم‌های سفارش</h3>
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="text-right p-3 text-sm font-medium text-gray-700">نام محصول</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-700">کد محصول</th>
+                          <th className="text-center p-3 text-sm font-medium text-gray-700">تعداد</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-700">قیمت واحد</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-700">قیمت کل</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orderDetails.items?.map((item: any, index: number) => (
+                          <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            <td className="p-3 text-sm">{item.productName}</td>
+                            <td className="p-3 text-sm font-mono text-gray-600">{item.productSku}</td>
+                            <td className="p-3 text-sm text-center font-medium">{item.quantity}</td>
+                            <td className="p-3 text-sm">{formatCurrency(parseFloat(item.unitPrice) || 0)}</td>
+                            <td className="p-3 text-sm font-medium">{formatCurrency(parseFloat(item.totalPrice) || 0)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Order Status */}
+                <div>
+                  <h3 className="font-semibold mb-3 text-lg">وضعیت سفارش</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className={`p-3 rounded-lg border ${orderDetails.financialApproved ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                      <div className="flex items-center gap-2">
+                        {orderDetails.financialApproved ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <Clock className="w-5 h-5 text-gray-400" />
+                        )}
+                        <span className={`text-sm font-medium ${orderDetails.financialApproved ? 'text-green-800' : 'text-gray-600'}`}>
+                          تایید مالی
+                        </span>
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg border ${orderDetails.warehouseProcessed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                      <div className="flex items-center gap-2">
+                        {orderDetails.warehouseProcessed ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <Clock className="w-5 h-5 text-gray-400" />
+                        )}
+                        <span className={`text-sm font-medium ${orderDetails.warehouseProcessed ? 'text-green-800' : 'text-gray-600'}`}>
+                          پردازش انبار
+                        </span>
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg border ${orderDetails.logisticsProcessed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                      <div className="flex items-center gap-2">
+                        {orderDetails.logisticsProcessed ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <Clock className="w-5 h-5 text-gray-400" />
+                        )}
+                        <span className={`text-sm font-medium ${orderDetails.logisticsProcessed ? 'text-green-800' : 'text-gray-600'}`}>
+                          پردازش لجستیک
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -507,16 +632,20 @@ const WarehouseManagementFixed: React.FC = () => {
                   >
                     انصراف
                   </Button>
-                  {selectedOrder.currentStatus === 'warehouse_approved' && (
+                  {selectedOrder?.currentStatus === 'warehouse_approved' && (
                     <Button
                       onClick={() => handleOrderAction(selectedOrder.id, 'logistics_dispatched')}
-                      disabled={updateOrderMutation.isPending}
+                      disabled={loadingOrderId === selectedOrder.id}
                     >
                       <Truck className="w-4 h-4 mr-1" />
-                      ارسال به لجستیک
+                      {loadingOrderId === selectedOrder.id ? 'در حال ارسال...' : 'ارسال به لجستیک'}
                     </Button>
                   )}
                 </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-600">خطا در بارگیری جزئیات سفارش</p>
               </div>
             )}
           </DialogContent>

@@ -14068,6 +14068,36 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Get complete order details with customer info and items
+  app.get('/api/order-management/warehouse/:customerOrderId/details', async (req, res) => {
+    // Check authentication for both admin and custom users
+    if (!req.session?.adminId && !req.session?.customUserId) {
+      return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
+    }
+    
+    try {
+      const { customerOrderId } = req.params;
+      
+      console.log('📦 [ORDER-DETAILS] Getting complete order details for customer order:', customerOrderId);
+      
+      // Get order details using order management storage
+      const orderDetails = await orderManagementStorage.getOrderWithItems(parseInt(customerOrderId));
+      
+      console.log('✅ [ORDER-DETAILS] Successfully retrieved order details');
+      
+      res.json({ 
+        success: true, 
+        order: orderDetails 
+      });
+    } catch (error) {
+      console.error('❌ [ORDER-DETAILS] Error fetching order details:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error.message || 'خطا در بارگیری جزئیات سفارش' 
+      });
+    }
+  });
+
   // =============================================================================
   // LOGISTICS DEPARTMENT API ROUTES
   // =============================================================================

@@ -135,6 +135,9 @@ export interface IOrderManagementStorage {
   // Simple order numbering
   generateSimpleOrderNumber(): Promise<string>;
   resetOrderCounter(): Promise<void>;
+  
+  // Order details with items
+  getOrderWithItems(orderId: number): Promise<any>;
 }
 
 export class OrderManagementStorage implements IOrderManagementStorage {
@@ -1237,6 +1240,98 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       `);
     } catch (error) {
       console.error('Error resetting order counter:', error);
+    }
+  }
+  
+  // Get order with complete details including items
+  async getOrderWithItems(orderId: number): Promise<any> {
+    console.log('🔍 [ORDER ITEMS] Getting order with items for order ID:', orderId);
+    
+    try {
+      // Get order management details
+      const orderManagement = await this.getOrderManagementByCustomerOrderId(orderId);
+      if (!orderManagement) {
+        throw new Error('سفارش یافت نشد');
+      }
+      
+      // Get customer order details
+      const customerOrderResult = await db
+        .select()
+        .from(customerOrders)
+        .where(eq(customerOrders.id, orderId));
+      
+      if (customerOrderResult.length === 0) {
+        throw new Error('جزئیات سفارش مشتری یافت نشد');
+      }
+      
+      const customerOrder = customerOrderResult[0];
+      
+      // Get order items
+      const orderItemsResult = await db
+        .select({
+          id: orderItems.id,
+          productId: orderItems.productId,
+          productName: orderItems.productName,
+          productSku: orderItems.productSku,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: orderItems.totalPrice,
+          productSnapshot: orderItems.productSnapshot
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, orderId));
+      
+      // Get customer details
+      let customerDetails = null;
+      if (customerOrder.customerId) {
+        const customerResult = await db
+          .select()
+          .from(crmCustomers)
+          .where(eq(crmCustomers.id, customerOrder.customerId));
+        
+        if (customerResult.length > 0) {
+          customerDetails = customerResult[0];
+        }
+      }
+      
+      const result = {
+        // Order management info
+        orderManagement: orderManagement,
+        
+        // Customer order info
+        customerOrder: customerOrder,
+        
+        // Order items
+        items: orderItemsResult,
+        
+        // Customer details
+        customer: customerDetails,
+        
+        // Calculated fields
+        totalItems: orderItemsResult.length,
+        totalQuantity: orderItemsResult.reduce((sum, item) => sum + item.quantity, 0),
+        totalAmount: customerOrder.totalAmount,
+        orderDate: customerOrder.createdAt,
+        
+        // Status info
+        currentStatus: orderManagement.currentStatus,
+        financialApproved: orderManagement.financialReviewedAt ? true : false,
+        warehouseProcessed: orderManagement.warehouseProcessedAt ? true : false,
+        logisticsProcessed: orderManagement.logisticsProcessedAt ? true : false
+      };
+      
+      console.log('✅ [ORDER ITEMS] Successfully retrieved order with items:', {
+        orderId,
+        itemsCount: orderItemsResult.length,
+        totalAmount: customerOrder.totalAmount,
+        customerName: customerDetails?.firstName + ' ' + customerDetails?.lastName
+      });
+      
+      return result;
+      
+    } catch (error) {
+      console.error('❌ [ORDER ITEMS] Error getting order with items:', error);
+      throw error;
     }
   }
 }
