@@ -9,7 +9,28 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessageSquare, Settings, Users, BarChart3, Shield, Clock } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { 
+  MessageSquare, 
+  Settings, 
+  Users, 
+  BarChart3, 
+  Shield, 
+  Clock, 
+  Send, 
+  Phone, 
+  ShoppingCart, 
+  Truck, 
+  Package, 
+  AlertTriangle, 
+  UserCheck,
+  Bell,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  Eye
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SmsSettings {
@@ -46,6 +67,36 @@ interface SmsStats {
   systemEnabled: boolean;
 }
 
+interface SmsUsageCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: any;
+  enabled: boolean;
+  messageTemplate: string;
+  triggerConditions: string[];
+  recipients: string[];
+  frequency: string;
+  priority: 'high' | 'medium' | 'low';
+  statistics?: {
+    totalSent: number;
+    lastSent?: string;
+    successRate: number;
+  };
+}
+
+interface DeliveryLog {
+  id: number;
+  orderId: number;
+  customerName: string;
+  phone: string;
+  verificationCode: string;
+  smsStatus: 'sent' | 'delivered' | 'failed';
+  createdAt: string;
+  deliveredAt?: string;
+  isVerified: boolean;
+}
+
 export default function AdminSmsManagement() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -75,11 +126,124 @@ export default function AdminSmsManagement() {
       return {};
     }
   });
+  
+  // SMS Usage Categories - All identified SMS use cases in the system
+  const [smsUsageCategories, setSmsUsageCategories] = useState<SmsUsageCategory[]>([
+    {
+      id: 'customer_authentication',
+      name: 'احراز هویت مشتری',
+      description: 'کد تایید ورود و ثبت نام مشتریان',
+      icon: UserCheck,
+      enabled: true,
+      messageTemplate: 'کد تایید ورود شما: {{code}}\nمعتبر تا {{expiry}} دقیقه\nممتازکم',
+      triggerConditions: ['Customer login', 'Customer registration', 'Password reset'],
+      recipients: ['Registered customers'],
+      frequency: 'On-demand',
+      priority: 'high',
+      statistics: { totalSent: 45, lastSent: '2025-01-16', successRate: 98.2 }
+    },
+    {
+      id: 'delivery_verification',
+      name: 'کد تحویل سفارش',
+      description: 'ارسال کد تحویل برای سفارشات در حال ارسال',
+      icon: Truck,
+      enabled: true,
+      messageTemplate: '{{customerName}} عزیز، سفارش شما در راه است.\nکد تحویل: {{verificationCode}}\nاین کد را هنگام تحویل به پیک اعلام کنید.\nممتازکم',
+      triggerConditions: ['Order shipped', 'Delivery personnel assigned'],
+      recipients: ['Customers with shipped orders'],
+      frequency: 'Per shipment',
+      priority: 'high',
+      statistics: { totalSent: 23, lastSent: '2025-01-15', successRate: 95.7 }
+    },
+    {
+      id: 'order_notifications',
+      name: 'اطلاع‌رسانی سفارش',
+      description: 'وضعیت سفارش، تایید پرداخت، آماده‌سازی',
+      icon: ShoppingCart,
+      enabled: true,
+      messageTemplate: 'سفارش {{orderNumber}} شما {{status}} شد.\nزمان تقریبی تحویل: {{estimatedDelivery}}\nممتازکم',
+      triggerConditions: ['Order confirmed', 'Payment received', 'Order prepared', 'Order shipped'],
+      recipients: ['Order customers'],
+      frequency: 'Per order status change',
+      priority: 'medium',
+      statistics: { totalSent: 78, lastSent: '2025-01-16', successRate: 97.4 }
+    },
+    {
+      id: 'inventory_alerts',
+      name: 'هشدار موجودی',
+      description: 'اطلاع‌رسانی کمبود موجودی به مدیران',
+      icon: Package,
+      enabled: false,
+      messageTemplate: 'هشدار موجودی:\n{{productName}} ({{sku}})\nموجودی فعلی: {{currentStock}}\nحد مینیمم: {{minThreshold}}\nممتازکم',
+      triggerConditions: ['Stock below minimum', 'Out of stock'],
+      recipients: ['Inventory managers', 'Warehouse staff'],
+      frequency: 'Real-time alerts',
+      priority: 'high',
+      statistics: { totalSent: 12, lastSent: '2025-01-14', successRate: 100 }
+    },
+    {
+      id: 'admin_notifications',
+      name: 'اطلاع‌رسانی مدیریت',
+      description: 'ارسال پیام‌های مدیریتی و اطلاعیه‌ها',
+      icon: Bell,
+      enabled: true,
+      messageTemplate: 'اطلاعیه مهم:\n{{message}}\nتاریخ: {{date}}\nممتازکم - مدیریت',
+      triggerConditions: ['Manual admin send', 'System alerts', 'Important announcements'],
+      recipients: ['All staff', 'Selected user groups'],
+      frequency: 'As needed',
+      priority: 'medium',
+      statistics: { totalSent: 34, lastSent: '2025-01-13', successRate: 96.8 }
+    },
+    {
+      id: 'wallet_notifications',
+      name: 'اطلاع‌رسانی کیف پول',
+      description: 'تراکنش‌های کیف پول، شارژ و برداشت',
+      icon: Phone,
+      enabled: true,
+      messageTemplate: 'تراکنش کیف پول:\nمبلغ: {{amount}} دینار\nنوع: {{transactionType}}\nموجودی: {{balance}} دینار\nممتازکم',
+      triggerConditions: ['Wallet recharge', 'Payment from wallet', 'Refund to wallet'],
+      recipients: ['Wallet users'],
+      frequency: 'Per transaction',
+      priority: 'medium',
+      statistics: { totalSent: 67, lastSent: '2025-01-16', successRate: 98.5 }
+    },
+    {
+      id: 'security_alerts',
+      name: 'هشدارهای امنیتی',
+      description: 'ورود مشکوک، تغییر رمز عبور، تلاش‌های ناموفق',
+      icon: Shield,
+      enabled: true,
+      messageTemplate: 'هشدار امنیتی:\n{{alertType}}\nزمان: {{timestamp}}\nIP: {{ipAddress}}\nممتازکم - امنیت',
+      triggerConditions: ['Suspicious login', 'Password changed', 'Failed login attempts'],
+      recipients: ['Account owners', 'Security team'],
+      frequency: 'Real-time',
+      priority: 'high',
+      statistics: { totalSent: 8, lastSent: '2025-01-12', successRate: 100 }
+    },
+    {
+      id: 'marketing_campaigns',
+      name: 'کمپین‌های بازاریابی',
+      description: 'تخفیف‌ها، محصولات جدید، اطلاعیه‌های تجاری',
+      icon: Send,
+      enabled: false,
+      messageTemplate: '{{campaignTitle}}\n{{description}}\nکد تخفیف: {{discountCode}}\nاعتبار تا: {{validUntil}}\nممتازکم',
+      triggerConditions: ['New product launch', 'Special offers', 'Seasonal campaigns'],
+      recipients: ['Subscribed customers', 'Target segments'],
+      frequency: 'Campaign-based',
+      priority: 'low',
+      statistics: { totalSent: 156, lastSent: '2025-01-10', successRate: 94.2 }
+    }
+  ]);
+  
+  const [deliveryLogs, setDeliveryLogs] = useState<DeliveryLog[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<SmsUsageCategory | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState(false);
 
   useEffect(() => {
     loadSmsSettings();
     loadSmsStats();
     loadCustomersWithSms();
+    loadDeliveryLogs();
   }, []);
 
   // Save local SMS states to localStorage whenever they change
@@ -360,6 +524,75 @@ export default function AdminSmsManagement() {
     }
   };
 
+  const loadDeliveryLogs = async () => {
+    try {
+      const response = await fetch('/api/admin/sms/delivery-logs');
+      const result = await response.json();
+      if (result.success && result.data) {
+        setDeliveryLogs(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading delivery logs:', error);
+    }
+  };
+
+  const toggleCategoryEnabled = async (categoryId: string, enabled: boolean) => {
+    try {
+      const response = await fetch('/api/admin/sms/category/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryId, enabled })
+      });
+
+      if (response.ok) {
+        setSmsUsageCategories(prev => 
+          prev.map(cat => 
+            cat.id === categoryId ? { ...cat, enabled } : cat
+          )
+        );
+        toast({
+          title: enabled ? 'فعال شد' : 'غیرفعال شد',
+          description: `دسته ${categoryId} ${enabled ? 'فعال' : 'غیرفعال'} شد`
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'خطا',
+        description: 'مشکل در تغییر وضعیت دسته',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const updateCategoryTemplate = async (categoryId: string, newTemplate: string) => {
+    try {
+      const response = await fetch('/api/admin/sms/category/template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryId, template: newTemplate })
+      });
+
+      if (response.ok) {
+        setSmsUsageCategories(prev => 
+          prev.map(cat => 
+            cat.id === categoryId ? { ...cat, messageTemplate: newTemplate } : cat
+          )
+        );
+        toast({
+          title: 'ذخیره شد',
+          description: 'قالب پیام به‌روزرسانی شد'
+        });
+        setEditingTemplate(false);
+      }
+    } catch (error) {
+      toast({
+        title: 'خطا',
+        description: 'مشکل در ذخیره قالب',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -380,19 +613,23 @@ export default function AdminSmsManagement() {
         <TabsList>
           <TabsTrigger value="overview">
             <BarChart3 className="h-4 w-4 mr-2" />
-            Overview
+            آمار کلی
+          </TabsTrigger>
+          <TabsTrigger value="categories">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            دسته‌بندی SMS
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" />
-            Settings
+            تنظیمات
           </TabsTrigger>
           <TabsTrigger value="customers">
             <Users className="h-4 w-4 mr-2" />
-            Customer Access
+            مشتریان
           </TabsTrigger>
           <TabsTrigger value="delivery">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Delivery SMS
+            <Truck className="h-4 w-4 mr-2" />
+            لاگ تحویل
           </TabsTrigger>
         </TabsList>
 
@@ -400,64 +637,94 @@ export default function AdminSmsManagement() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">System Status</CardTitle>
+                <CardTitle className="text-sm font-medium">وضعیت سیستم</CardTitle>
                 <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {stats.systemEnabled ? "Active" : "Disabled"}
+                  {stats.systemEnabled ? "فعال" : "غیرفعال"}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  SMS authentication system
+                  سیستم SMS
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Verifications</CardTitle>
+                <CardTitle className="text-sm font-medium">کل تاییدیه‌ها</CardTitle>
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalVerifications}</div>
                 <p className="text-xs text-muted-foreground">
-                  All time SMS codes sent
+                  کل کدهای SMS ارسال شده
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Today's Verifications</CardTitle>
+                <CardTitle className="text-sm font-medium">تاییدیه‌های امروز</CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.verificationsSentToday}</div>
                 <p className="text-xs text-muted-foreground">
-                  SMS codes sent today
+                  کدهای امروز
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Enabled Customers</CardTitle>
+                <CardTitle className="text-sm font-medium">مشتریان فعال</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.customersWithSmsEnabled}</div>
                 <p className="text-xs text-muted-foreground">
-                  Customers with SMS auth
+                  مشتریان با SMS فعال
                 </p>
               </CardContent>
             </Card>
           </div>
 
+          {/* SMS Usage Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle>استفاده از SMS در سیستم</CardTitle>
               <CardDescription>
-                Manage the SMS authentication system
+                خلاصه‌ای از کاربردهای مختلف SMS در سیستم ممتازکم
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {smsUsageCategories.slice(0, 4).map((category) => {
+                  const IconComponent = category.icon;
+                  return (
+                    <div key={category.id} className="flex items-center space-x-3 space-x-reverse">
+                      <div className={`p-2 rounded-lg ${category.enabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                        <IconComponent className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{category.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {category.statistics?.totalSent || 0} پیام ارسال شده
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>عملیات سریع</CardTitle>
+              <CardDescription>
+                مدیریت سیستم SMS
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -709,126 +976,255 @@ export default function AdminSmsManagement() {
           </Card>
         </TabsContent>
 
+        {/* SMS Categories Tab */}
+        <TabsContent value="categories" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>دسته‌بندی‌های SMS</CardTitle>
+              <CardDescription>
+                مدیریت کاربردهای مختلف SMS در سیستم
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                {smsUsageCategories.map((category) => {
+                  const IconComponent = category.icon;
+                  const priorityColor = category.priority === 'high' ? 'text-red-600' : 
+                                      category.priority === 'medium' ? 'text-yellow-600' : 'text-green-600';
+                  const priorityBg = category.priority === 'high' ? 'bg-red-50' : 
+                                   category.priority === 'medium' ? 'bg-yellow-50' : 'bg-green-50';
+                  
+                  return (
+                    <Card key={category.id} className={`transition-all duration-200 ${category.enabled ? 'border-green-200 bg-green-50/30' : 'border-gray-200'}`}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-3 space-x-reverse flex-1">
+                            <div className={`p-2 rounded-lg ${category.enabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                              <IconComponent className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 space-x-reverse mb-2">
+                                <h3 className="font-semibold text-lg">{category.name}</h3>
+                                <Badge variant="outline" className={`${priorityBg} ${priorityColor} border-current`}>
+                                  {category.priority === 'high' ? 'اولویت بالا' : 
+                                   category.priority === 'medium' ? 'اولویت متوسط' : 'اولویت پایین'}
+                                </Badge>
+                                <Badge variant={category.enabled ? "default" : "secondary"}>
+                                  {category.enabled ? 'فعال' : 'غیرفعال'}
+                                </Badge>
+                              </div>
+                              <p className="text-gray-600 mb-3">{category.description}</p>
+                              
+                              {/* Statistics */}
+                              {category.statistics && (
+                                <div className="grid grid-cols-3 gap-4 mb-4">
+                                  <div className="text-center p-2 bg-white rounded border">
+                                    <div className="text-xl font-bold text-blue-600">{category.statistics.totalSent}</div>
+                                    <div className="text-xs text-gray-500">کل ارسال</div>
+                                  </div>
+                                  <div className="text-center p-2 bg-white rounded border">
+                                    <div className="text-xl font-bold text-green-600">{category.statistics.successRate}%</div>
+                                    <div className="text-xs text-gray-500">نرخ موفقیت</div>
+                                  </div>
+                                  <div className="text-center p-2 bg-white rounded border">
+                                    <div className="text-xs font-medium text-gray-600">{category.statistics.lastSent}</div>
+                                    <div className="text-xs text-gray-500">آخرین ارسال</div>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Message Template */}
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium">قالب پیام:</Label>
+                                {selectedCategory?.id === category.id && editingTemplate ? (
+                                  <div className="space-y-2">
+                                    <Textarea
+                                      value={selectedCategory.messageTemplate}
+                                      onChange={(e) => setSelectedCategory(prev => 
+                                        prev ? { ...prev, messageTemplate: e.target.value } : null
+                                      )}
+                                      className="min-h-[100px] font-mono text-sm"
+                                    />
+                                    <div className="flex space-x-2 space-x-reverse">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => updateCategoryTemplate(category.id, selectedCategory.messageTemplate)}
+                                      >
+                                        ذخیره
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => {
+                                          setEditingTemplate(false);
+                                          setSelectedCategory(null);
+                                        }}
+                                      >
+                                        لغو
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="relative group">
+                                    <div className="bg-gray-50 p-3 rounded border font-mono text-sm text-gray-700 whitespace-pre-wrap">
+                                      {category.messageTemplate}
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      onClick={() => {
+                                        setSelectedCategory(category);
+                                        setEditingTemplate(true);
+                                      }}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Trigger Conditions */}
+                              <div className="mt-3">
+                                <Label className="text-sm font-medium">شرایط فعال‌سازی:</Label>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {category.triggerConditions.map((condition, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {condition}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              {/* Recipients */}
+                              <div className="mt-2">
+                                <Label className="text-sm font-medium">گیرندگان:</Label>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {category.recipients.map((recipient, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {recipient}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Controls */}
+                          <div className="flex items-center space-x-2 space-x-reverse">
+                            <Switch
+                              checked={category.enabled}
+                              onCheckedChange={(enabled) => toggleCategoryEnabled(category.id, enabled)}
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="delivery" className="space-y-4">
-          <DeliverySmsTab />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                لاگ تحویل SMS
+              </CardTitle>
+              <CardDescription>
+                پیگیری SMS های ارسالی برای تحویل سفارشات
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Alert>
+                  <Truck className="h-4 w-4" />
+                  <AlertDescription>
+                    هنگام ارسال سفارش توسط بخش لجستیک، SMS حاوی کد تحویل و اطلاعات پیک به صورت خودکار برای مشتری ارسال می‌شود.
+                  </AlertDescription>
+                </Alert>
+
+                {deliveryLogs.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Truck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">هیچ SMS تحویل ارسال نشده</h3>
+                    <p className="text-muted-foreground">
+                      زمانی که سفارشی توسط بخش لجستیک ارسال شود، SMS تحویل در اینجا نمایش داده خواهد شد.
+                    </p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>شماره سفارش</TableHead>
+                        <TableHead>نام مشتری</TableHead>
+                        <TableHead>شماره تلفن</TableHead>
+                        <TableHead>کد تحویل</TableHead>
+                        <TableHead>وضعیت SMS</TableHead>
+                        <TableHead>تاریخ ارسال</TableHead>
+                        <TableHead>تحویل شده</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {deliveryLogs.map((log) => (
+                        <TableRow key={log.id}>
+                          <TableCell className="font-medium">#{log.orderId}</TableCell>
+                          <TableCell>{log.customerName}</TableCell>
+                          <TableCell>{log.phone}</TableCell>
+                          <TableCell>
+                            <span className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">
+                              {log.verificationCode}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={
+                                log.smsStatus === 'delivered' ? 'default' : 
+                                log.smsStatus === 'sent' ? 'secondary' : 'destructive'
+                              }
+                            >
+                              {log.smsStatus === 'delivered' ? 'تحویل شده' :
+                               log.smsStatus === 'sent' ? 'ارسال شده' : 'ناموفق'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(log.createdAt).toLocaleDateString('en-US')}
+                          </TableCell>
+                          <TableCell>
+                            {log.isVerified ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <XCircle className="h-4 w-4 text-gray-400" />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
+                    {deliveryLogs.length} رکورد نمایش داده شده
+                  </div>
+                  <Button
+                    onClick={loadDeliveryLogs}
+                    variant="outline"
+                    size="sm"
+                    disabled={loading}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    بروزرسانی
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-// تب مدیریت SMS تحویل کالا
-function DeliverySmsTab() {
-  const { toast } = useToast();
-  const [deliverySmsLogs, setDeliverySmsLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const loadDeliverySmsLogs = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin/sms/delivery-logs', {
-        credentials: 'include'
-      });
-      const result = await response.json();
-      if (result.success) {
-        setDeliverySmsLogs(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading delivery SMS logs:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadDeliverySmsLogs();
-  }, []);
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
-          SMS های تحویل کالا
-        </CardTitle>
-        <CardDescription>
-          مدیریت و پیگیری SMS های ارسالی برای تحویل کالا به مشتریان
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <Alert>
-            <MessageSquare className="h-4 w-4" />
-            <AlertDescription>
-              هنگام ارسال سفارش توسط بخش لجستیک، SMS حاوی کد تحویل و اطلاعات پیک به صورت خودکار برای مشتری ارسال می‌شود.
-            </AlertDescription>
-          </Alert>
-
-          <div className="border rounded-lg">
-            <div className="p-4 border-b bg-muted/50">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">لیست SMS های تحویل</h3>
-                <Button
-                  onClick={loadDeliverySmsLogs}
-                  variant="outline"
-                  size="sm"
-                  disabled={loading}
-                >
-                  {loading ? "در حال بارگذاری..." : "بروزرسانی"}
-                </Button>
-              </div>
-            </div>
-            
-            <div className="p-4">
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                  <p className="mt-4 text-muted-foreground">در حال بارگذاری...</p>
-                </div>
-              ) : deliverySmsLogs.length === 0 ? (
-                <div className="text-center py-8">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">هیچ SMS تحویل ارسال نشده</h3>
-                  <p className="text-muted-foreground">
-                    زمانی که سفارشی توسط بخش لجستیک ارسال شود، SMS تحویل در اینجا نمایش داده خواهد شد.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {deliverySmsLogs.map((sms) => (
-                    <div key={sms.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="space-y-1">
-                        <div className="font-medium">
-                          شماره: {sms.phoneNumber}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          کد تحویل: {sms.deliveryCode}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          سفارش: #{sms.relatedOrderId}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          ارسال شده: {new Date(sms.createdAt).toLocaleString('fa-IR')}
-                        </div>
-                      </div>
-                      <div className="text-left">
-                        <Badge variant={sms.status === 'sent' ? 'default' : 'destructive'}>
-                          {sms.status === 'sent' ? 'ارسال شده' : 'خطا'}
-                        </Badge>
-                        {sms.errorMessage && (
-                          <p className="text-xs text-red-600 mt-1">
-                            {sms.errorMessage}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

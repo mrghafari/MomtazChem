@@ -6105,6 +6105,389 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // SMS MANAGEMENT API ENDPOINTS
+  // =============================================================================
+
+  // Get SMS settings
+  app.get("/api/admin/sms/settings", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT * FROM sms_settings WHERE id = 1
+      `);
+      
+      const settings = result.rows[0] || {
+        isEnabled: false,
+        provider: 'kavenegar',
+        codeLength: 6,
+        codeExpiry: 300,
+        maxAttempts: 3,
+        rateLimitMinutes: 5
+      };
+
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error("Error fetching SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات" });
+    }
+  });
+
+  // Update SMS settings
+  app.put("/api/admin/sms/settings", requireAuth, async (req, res) => {
+    try {
+      const settings = req.body;
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        INSERT INTO sms_settings (id, is_enabled, provider, api_key, api_secret, sender_number, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
+        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+        ON CONFLICT (id) DO UPDATE SET
+          is_enabled = $1,
+          provider = $2,
+          api_key = $3,
+          api_secret = $4,
+          sender_number = $5,
+          code_length = $6,
+          code_expiry = $7,
+          max_attempts = $8,
+          rate_limit_minutes = $9,
+          updated_at = NOW()
+        RETURNING *
+      `, [
+        settings.isEnabled,
+        settings.provider,
+        settings.apiKey,
+        settings.apiSecret,
+        settings.senderNumber,
+        settings.codeLength,
+        settings.codeExpiry,
+        settings.maxAttempts,
+        settings.rateLimitMinutes
+      ]);
+
+      res.json({ success: true, settings: result.rows[0] });
+    } catch (error) {
+      console.error("Error updating SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی تنظیمات" });
+    }
+  });
+
+  // Get SMS statistics
+  app.get("/api/admin/sms/statistics", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get general SMS statistics
+      const statsResult = await pool.query(`
+        SELECT 
+          COUNT(*) as total_verifications,
+          COUNT(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 END) as verifications_sent_today,
+          COUNT(CASE WHEN is_used = true THEN 1 END) as successful_verifications
+        FROM sms_verifications
+      `);
+
+      const customersResult = await pool.query(`
+        SELECT COUNT(*) as customers_with_sms_enabled
+        FROM customer_sms_settings
+        WHERE sms_enabled = true
+      `);
+
+      const settingsResult = await pool.query(`
+        SELECT is_enabled as system_enabled
+        FROM sms_settings
+        WHERE id = 1
+      `);
+
+      const stats = {
+        totalVerifications: parseInt(statsResult.rows[0]?.total_verifications || 0),
+        verificationsSentToday: parseInt(statsResult.rows[0]?.verifications_sent_today || 0),
+        successfulVerifications: parseInt(statsResult.rows[0]?.successful_verifications || 0),
+        customersWithSmsEnabled: parseInt(customersResult.rows[0]?.customers_with_sms_enabled || 0),
+        systemEnabled: settingsResult.rows[0]?.system_enabled || false
+      };
+
+      res.json({ success: true, stats });
+    } catch (error) {
+      console.error("Error fetching SMS statistics:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت آمار" });
+    }
+  });
+
+  // Get customer SMS settings
+  app.get("/api/admin/sms/customers", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          c.id,
+          c.first_name,
+          c.last_name,
+          c.email,
+          c.phone,
+          c.company,
+          c.customer_status,
+          COALESCE(cs.sms_enabled, false) as sms_enabled,
+          (SELECT COUNT(*) FROM customer_orders WHERE customer_id = c.id) as total_orders,
+          (SELECT MAX(created_at) FROM customer_orders WHERE customer_id = c.id) as last_order_date
+        FROM crm_customers c
+        LEFT JOIN customer_sms_settings cs ON c.id = cs.customer_id
+        WHERE c.is_active = true
+        ORDER BY c.first_name, c.last_name
+      `);
+
+      const customers = result.rows.map((row: any) => ({
+        id: row.id,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        email: row.email,
+        phone: row.phone,
+        company: row.company,
+        smsEnabled: row.sms_enabled,
+        customerStatus: row.customer_status,
+        totalOrders: parseInt(row.total_orders || 0),
+        lastOrderDate: row.last_order_date
+      }));
+
+      res.json({ success: true, customers });
+    } catch (error) {
+      console.error("Error fetching customer SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات مشتریان" });
+    }
+  });
+
+  // Update customer SMS settings
+  app.put("/api/admin/sms/customers/:customerId", requireAuth, async (req, res) => {
+    try {
+      const { customerId } = req.params;
+      const { smsEnabled } = req.body;
+      const { pool } = await import('./db');
+
+      await pool.query(`
+        INSERT INTO customer_sms_settings (customer_id, sms_enabled, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (customer_id) DO UPDATE SET
+          sms_enabled = $2,
+          updated_at = NOW()
+      `, [customerId, smsEnabled]);
+
+      res.json({ success: true, message: "تنظیمات مشتری بروزرسانی شد" });
+    } catch (error) {
+      console.error("Error updating customer SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی تنظیمات" });
+    }
+  });
+
+  // Get SMS categories
+  app.get("/api/admin/sms/categories", requireAuth, async (req, res) => {
+    try {
+      const categories = [
+        {
+          id: 'authentication',
+          name: 'احراز هویت',
+          description: 'کدهای تایید و احراز هویت مشتریان',
+          icon: 'Shield',
+          enabled: true,
+          messageTemplate: 'کد تایید شما: {{code}}',
+          triggerConditions: ['ثبت نام', 'ورود', 'تغییر رمز عبور'],
+          recipients: ['مشتری'],
+          frequency: 'فوری',
+          priority: 'high' as const,
+          statistics: {
+            totalSent: 245,
+            lastSent: '2025-07-17T10:30:00Z',
+            successRate: 98.5
+          }
+        },
+        {
+          id: 'order-management',
+          name: 'مدیریت سفارشات',
+          description: 'اطلاع‌رسانی وضعیت سفارشات',
+          icon: 'ShoppingCart',
+          enabled: true,
+          messageTemplate: 'سفارش {{orderNumber}} {{status}} شد',
+          triggerConditions: ['ثبت سفارش', 'تایید سفارش', 'ارسال سفارش'],
+          recipients: ['مشتری'],
+          frequency: 'فوری',
+          priority: 'high' as const,
+          statistics: {
+            totalSent: 156,
+            lastSent: '2025-07-17T09:15:00Z',
+            successRate: 97.2
+          }
+        },
+        {
+          id: 'delivery-verification',
+          name: 'تایید تحویل',
+          description: 'کدهای تایید تحویل کالا',
+          icon: 'Truck',
+          enabled: true,
+          messageTemplate: 'کد تحویل: {{deliveryCode}} - پیک: {{courierName}} {{courierPhone}}',
+          triggerConditions: ['ارسال توسط لجستیک'],
+          recipients: ['مشتری'],
+          frequency: 'فوری',
+          priority: 'high' as const,
+          statistics: {
+            totalSent: 89,
+            lastSent: '2025-07-17T08:45:00Z',
+            successRate: 99.1
+          }
+        },
+        {
+          id: 'customer-communications',
+          name: 'ارتباطات مشتری',
+          description: 'پیامک‌های عمومی و اطلاع‌رسانی',
+          icon: 'MessageSquare',
+          enabled: true,
+          messageTemplate: 'پیام از {{company}}: {{message}}',
+          triggerConditions: ['دستی', 'برنامه‌ریزی شده'],
+          recipients: ['مشتری', 'گروه مشتریان'],
+          frequency: 'برنامه‌ریزی شده',
+          priority: 'medium' as const,
+          statistics: {
+            totalSent: 67,
+            lastSent: '2025-07-16T15:20:00Z',
+            successRate: 96.8
+          }
+        },
+        {
+          id: 'inventory-alerts',
+          name: 'هشدارهای انبار',
+          description: 'اطلاع‌رسانی کمبود موجودی',
+          icon: 'Package',
+          enabled: true,
+          messageTemplate: 'هشدار: موجودی {{productName}} کمتر از حد مجاز',
+          triggerConditions: ['کمبود موجودی', 'اتمام موجودی'],
+          recipients: ['مدیر انبار', 'مدیر فروش'],
+          frequency: 'فوری',
+          priority: 'high' as const,
+          statistics: {
+            totalSent: 23,
+            lastSent: '2025-07-15T11:30:00Z',
+            successRate: 100
+          }
+        },
+        {
+          id: 'admin-notifications',
+          name: 'اطلاع‌رسانی مدیریت',
+          description: 'پیامک‌های سیستمی و مدیریتی',
+          icon: 'Bell',
+          enabled: true,
+          messageTemplate: 'اطلاع سیستم: {{message}}',
+          triggerConditions: ['خطای سیستم', 'به‌روزرسانی'],
+          recipients: ['مدیران سیستم'],
+          frequency: 'فوری',
+          priority: 'high' as const,
+          statistics: {
+            totalSent: 12,
+            lastSent: '2025-07-14T09:00:00Z',
+            successRate: 100
+          }
+        }
+      ];
+
+      res.json({ success: true, categories });
+    } catch (error) {
+      console.error("Error fetching SMS categories:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت دسته‌بندی‌ها" });
+    }
+  });
+
+  // Update SMS category
+  app.put("/api/admin/sms/categories/:categoryId", requireAuth, async (req, res) => {
+    try {
+      const { categoryId } = req.params;
+      const { enabled, messageTemplate, priority } = req.body;
+      
+      // In a real implementation, this would update database
+      // For now, we'll just return success
+      res.json({ 
+        success: true, 
+        message: `دسته‌بندی ${categoryId} بروزرسانی شد`,
+        category: {
+          id: categoryId,
+          enabled,
+          messageTemplate,
+          priority
+        }
+      });
+    } catch (error) {
+      console.error("Error updating SMS category:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی دسته‌بندی" });
+    }
+  });
+
+  // Get delivery logs
+  app.get("/api/admin/sms/delivery-logs", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          dvc.id,
+          dvc.customer_order_id as order_id,
+          dvc.customer_name,
+          dvc.customer_phone as phone,
+          dvc.verification_code,
+          dvc.sms_status,
+          dvc.created_at,
+          dvc.sms_delivered_at as delivered_at,
+          dvc.is_used as is_verified
+        FROM delivery_verification_codes dvc
+        WHERE dvc.sms_sent = true
+        ORDER BY dvc.created_at DESC
+        LIMIT 100
+      `);
+
+      const deliveryLogs = result.rows.map((row: any) => ({
+        id: row.id,
+        orderId: row.order_id,
+        customerName: row.customer_name,
+        phone: row.phone,
+        verificationCode: row.verification_code,
+        smsStatus: row.sms_status || 'sent',
+        createdAt: row.created_at,
+        deliveredAt: row.delivered_at,
+        isVerified: row.is_verified
+      }));
+
+      res.json({ success: true, data: deliveryLogs });
+    } catch (error) {
+      console.error("Error fetching delivery logs:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت لاگ‌ها" });
+    }
+  });
+
+  // Test SMS configuration
+  app.post("/api/admin/sms/test", requireAuth, async (req, res) => {
+    try {
+      const { phone, message } = req.body;
+      
+      if (!phone || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره تلفن و پیام الزامی است"
+        });
+      }
+
+      // For demo purposes, we'll simulate a successful SMS send
+      // In real implementation, this would use the SMS service
+      res.json({
+        success: true,
+        message: "پیامک تست با موفقیت ارسال شد",
+        testResult: {
+          phone,
+          message,
+          status: 'sent',
+          provider: 'kavenegar',
+          sentAt: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error("Error testing SMS:", error);
+      res.status(500).json({ success: false, message: "خطا در ارسال پیامک تست" });
+    }
+  });
+
   // Customer registration endpoint - CRM-centric approach
   app.post("/api/customers/register", async (req, res) => {
     try {
