@@ -2672,7 +2672,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const totalWarehouseStock = result.rows[0]?.total_stock || 0;
 
-      // Update کاردکس (showcase_products) with warehouse stock
+      // Update ONLY کاردکس (showcase_products) with warehouse stock
+      // فروشگاه دست نخورده می‌ماند و فقط کاردکس به‌روزرسانی می‌شود
       await db.execute(sql`
         UPDATE showcase_products 
         SET stock_quantity = ${totalWarehouseStock} 
@@ -2680,15 +2681,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
 
       console.log(`🔄 [SYNC] Updated کاردکس product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
-
-      // Shop sync temporarily disabled due to schema issues
-      // await db.execute(sql`
-      //   UPDATE shop_products 
-      //   SET stock_quantity = ${totalWarehouseStock} 
-      //   WHERE parent_product_id = ${productId}
-      // `);
-      
-      console.log(`🔄 [SYNC] کاردکس updated successfully (shop sync disabled)`);
+      console.log(`📝 [INFO] فروشگاه دست نخورده باقی می‌ماند - فقط کاردکس به‌روزرسانی شد`);
 
       return { success: true, totalStock: totalWarehouseStock };
     } catch (error) {
