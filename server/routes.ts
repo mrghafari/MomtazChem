@@ -2660,7 +2660,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple sync warehouse inventory to کاردکس function (warehouse is master)
+  // Sync warehouse inventory to both کاردکس and shop (warehouse is master)
   async function syncWarehouseToKardex(productId: number) {
     try {
       // Get total warehouse inventory for this product using simple query
@@ -2672,8 +2672,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const totalWarehouseStock = result.rows[0]?.total_stock || 0;
 
-      // Update ONLY کاردکس (showcase_products) with warehouse stock
-      // فروشگاه دست نخورده می‌ماند و فقط کاردکس به‌روزرسانی می‌شود
+      // Update کاردکس (showcase_products) with warehouse stock
       await db.execute(sql`
         UPDATE showcase_products 
         SET stock_quantity = ${totalWarehouseStock} 
@@ -2681,11 +2680,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
 
       console.log(`🔄 [SYNC] Updated کاردکس product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
-      console.log(`📝 [INFO] فروشگاه دست نخورده باقی می‌ماند - فقط کاردکس به‌روزرسانی شد`);
+
+      // Update فروشگاه (shop_products) with total warehouse stock
+      await db.execute(sql`
+        UPDATE shop_products 
+        SET stock_quantity = ${totalWarehouseStock} 
+        WHERE parent_product_id = ${productId}
+      `);
+
+      console.log(`🔄 [SYNC] Updated فروشگاه product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
+      console.log(`📝 [INFO] هم کاردکس و هم فروشگاه با مجموع موجودی انبار همگام‌سازی شدند`);
 
       return { success: true, totalStock: totalWarehouseStock };
     } catch (error) {
-      console.error("Error syncing warehouse to kardex:", error);
+      console.error("Error syncing warehouse to kardex and shop:", error);
       throw error;
     }
   }
