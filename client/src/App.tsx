@@ -34,6 +34,7 @@ import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
 import EmailAddressManagerFixed from "@/pages/admin/email-address-manager-fixed";
 import EmailProgressPage from "@/pages/admin/email-progress";
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
+import ServerConfig from "@/components/admin/server-config";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import PasswordReset from "@/pages/password-reset";
@@ -192,6 +193,7 @@ function Router() {
           <Route path="/admin/ticketing-system" component={TicketingSystemFixed} />
           <Route path="/admin/ai-seo-assistant" component={AiSeoAssistant} />
           <Route path="/admin/remote-desktop" component={RemoteDesktop} />
+          <Route path="/admin/server-config" component={ServerConfig} />
 
           
           {/* Department-specific routes */}

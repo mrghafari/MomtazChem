@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Server } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -103,6 +103,7 @@ export default function SiteManagement() {
 
   // Module ID to button mapping for role-based filtering
   const moduleButtonMap: Record<string, string> = {
+    'server-config': 'server_config',
     'shop': 'shop',
     'products': 'products', 
     'order-management': 'order-management',
@@ -219,6 +220,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("database-backup", () => setLocation("/admin/database-management")),
       className: "border-slate-300 text-slate-600 hover:bg-slate-50",
       moduleId: "database_backup"
+    },
+    {
+      id: "server-config",
+      label: "Server Config",
+      icon: Server,
+      onClick: () => trackButtonClick("server-config", () => setLocation("/admin/server-config")),
+      className: "border-gray-300 text-gray-600 hover:bg-gray-50",
+      moduleId: "server_config"
     },
     {
       id: "seo",

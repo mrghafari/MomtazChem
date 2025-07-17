@@ -5005,6 +5005,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Server Configuration Routes
+  app.get("/api/server/config", requireAdmin, async (req, res) => {
+    try {
+      const { CONFIG } = await import('./config');
+      
+      const config = {
+        frontendUrl: process.env.FRONTEND_URL || CONFIG.getBaseUrl(req),
+        nodeEnv: process.env.NODE_ENV || 'development',
+        smtpHost: process.env.SMTP_HOST || 'smtp.zoho.com',
+        smtpPort: process.env.SMTP_PORT || '587',
+        smtpUser: process.env.SMTP_USER || '',
+        // Don't send sensitive data
+        databaseUrl: process.env.DATABASE_URL ? '***configured***' : '',
+        sessionSecret: process.env.SESSION_SECRET ? '***configured***' : '',
+        smtpPass: process.env.SMTP_PASS ? '***configured***' : ''
+      };
+
+      res.json({
+        success: true,
+        config
+      });
+    } catch (error) {
+      console.error("Error getting server config:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات سرور" });
+    }
+  });
+
+  app.post("/api/server/test-config", requireAdmin, async (req, res) => {
+    try {
+      const { frontendUrl, databaseUrl, smtpHost, smtpPort, smtpUser } = req.body;
+      
+      const testResults = {
+        domain: false,
+        database: false,
+        smtp: false
+      };
+
+      // Test domain URL format
+      if (frontendUrl) {
+        try {
+          new URL(frontendUrl);
+          testResults.domain = true;
+        } catch {
+          testResults.domain = false;
+        }
+      }
+
+      // Test database connection if provided
+      if (databaseUrl && databaseUrl !== '***configured***') {
+        try {
+          // Simple URL validation for PostgreSQL
+          if (databaseUrl.startsWith('postgresql://') || databaseUrl.startsWith('postgres://')) {
+            testResults.database = true;
+          }
+        } catch {
+          testResults.database = false;
+        }
+      } else if (process.env.DATABASE_URL) {
+        testResults.database = true;
+      }
+
+      // Test SMTP configuration
+      if (smtpHost && smtpPort && smtpUser) {
+        try {
+          const port = parseInt(smtpPort);
+          if (port > 0 && port < 65536 && smtpHost.includes('.')) {
+            testResults.smtp = true;
+          }
+        } catch {
+          testResults.smtp = false;
+        }
+      }
+
+      const allPassed = testResults.domain && testResults.database && testResults.smtp;
+
+      res.json({
+        success: allPassed,
+        testResults,
+        message: allPassed ? "همه تنظیمات صحیح است" : "برخی تنظیمات نیاز به بررسی دارند"
+      });
+    } catch (error) {
+      console.error("Error testing server config:", error);
+      res.status(500).json({ success: false, message: "خطا در تست تنظیمات" });
+    }
+  });
+
   // Get available modules/permissions - synchronized with Site Management modules
   app.get("/api/custom-modules", requireAdmin, async (req, res) => {
     try {
@@ -5013,6 +5099,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Map module IDs to their display information
       const moduleMapping = {
+        'server_config': { name: 'تنظیمات سرور', description: 'مدیریت کانفیگ سرور و مهاجرت', category: 'system' },
         'syncing_shop': { name: 'همگام‌سازی فروشگاه', description: 'همگام‌سازی محصولات کاردکس با فروشگاه', category: 'commerce' },
         'shop_management': { name: 'مدیریت فروشگاه', description: 'مدیریت محصولات، سفارشات و فروش', category: 'commerce' },
         'product_management': { name: 'مدیریت محصولات', description: 'مدیریت کاردکس و محصولات', category: 'commerce' },
@@ -15965,7 +16052,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "shop_management", "procedures", "smtp_test", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",
-          "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop"
+          "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
+          "server_config"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
