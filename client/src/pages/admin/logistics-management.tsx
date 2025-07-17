@@ -190,6 +190,8 @@ const LogisticsManagement = () => {
     existingCode: string | null; 
     isGenerating: boolean;
   }}>({});
+  const [selectedOrderForLabel, setSelectedOrderForLabel] = useState<any>(null);
+  const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -527,11 +529,18 @@ const LogisticsManagement = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
-                  {/* Customer Info Block */}
-                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                  {/* Customer Info Block - Clickable for Shipping Label */}
+                  <div 
+                    className="bg-white rounded-lg p-3 border border-green-200 cursor-pointer hover:bg-green-50 hover:border-green-300 transition-colors"
+                    onClick={() => {
+                      setSelectedOrderForLabel(order);
+                      setIsLabelDialogOpen(true);
+                    }}
+                  >
                     <h5 className="font-medium text-green-800 mb-2 flex items-center">
                       <User className="w-4 h-4 mr-2" />
                       اطلاعات گیرنده
+                      <Eye className="w-3 h-3 mr-1 text-green-600" />
                     </h5>
                     <div className="space-y-2">
                       <div className="bg-gray-50 rounded p-2">
@@ -548,6 +557,7 @@ const LogisticsManagement = () => {
                         </div>
                       </div>
                     </div>
+                    <p className="text-xs text-green-600 mt-2 text-center">کلیک برای برچسب ارسال</p>
                   </div>
 
                   {/* Delivery Address Block */}
@@ -2084,6 +2094,121 @@ const LogisticsManagement = () => {
           مدیریت حمل و نقل، تحویل کالاها و ردیابی سفارشات
         </p>
       </div>
+
+      {/* Shipping Label Dialog */}
+      <Dialog open={isLabelDialogOpen} onOpenChange={setIsLabelDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-right">برچسب ارسال مرسوله</DialogTitle>
+          </DialogHeader>
+          
+          {selectedOrderForLabel && (
+            <div className="bg-white p-6 border rounded-lg print:shadow-none">
+              {/* Header with Logo and Barcode */}
+              <div className="flex justify-between items-start mb-6 border-b pb-4">
+                <div className="text-right">
+                  <h2 className="text-2xl font-bold text-blue-800">ممتاز شیمی</h2>
+                  <p className="text-sm text-gray-600">شرکت پیشرو در تولید محصولات شیمیایی</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gray-800 text-white p-2 font-mono text-xs">
+                    ||||| ||| |||||  |||| |||||
+                  </div>
+                  <p className="text-xs mt-1">بارکد اسکن سریع</p>
+                </div>
+              </div>
+
+              {/* Tracking ID and Order Info */}
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-bold text-blue-800 mb-2">کد رهگیری مرسوله</h3>
+                  <p className="text-xl font-mono text-blue-700">TRK-{selectedOrderForLabel.customerOrderId}-{new Date().getFullYear()}</p>
+                  <p className="text-xs text-blue-600 mt-1">برای پیگیری توسط مشتری</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-bold text-green-800 mb-2">شماره سفارش</h3>
+                  <p className="text-xl font-bold text-green-700">#{selectedOrderForLabel.customerOrderId}</p>
+                  <p className="text-xs text-green-600 mt-1">Order ID سیستم داخلی</p>
+                </div>
+              </div>
+
+              {/* Sender and Receiver Information */}
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-bold text-gray-800 mb-3 flex items-center">
+                    <User className="w-4 h-4 mr-2" />
+                    فروشنده (From)
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>نام:</strong> شرکت ممتاز شیمی</p>
+                    <p><strong>آدرس:</strong> تهران، خیابان انقلاب، پلاک 123</p>
+                    <p><strong>تلفن:</strong> +98 21 1234 5678</p>
+                    <p><strong>کد پستی:</strong> 1234567890</p>
+                  </div>
+                </div>
+                <div className="border rounded-lg p-4 bg-yellow-50">
+                  <h3 className="font-bold text-yellow-800 mb-3 flex items-center">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    گیرنده (To)
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>نام:</strong> {selectedOrderForLabel.customerFirstName} {selectedOrderForLabel.customerLastName}</p>
+                    <p><strong>موبایل:</strong> {selectedOrderForLabel.customerPhone}</p>
+                    <p><strong>آدرس:</strong> {selectedOrderForLabel.customerAddress || 'آدرس مشخص نشده'}</p>
+                    <p><strong>کد پستی:</strong> {selectedOrderForLabel.postalCode || 'تعیین نشده'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Package Details */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-purple-50 p-4 rounded-lg text-center">
+                  <h3 className="font-bold text-purple-800 mb-2">تعداد اقلام</h3>
+                  <p className="text-2xl font-bold text-purple-700">1 از 1</p>
+                  <p className="text-xs text-purple-600">بسته کامل</p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg text-center">
+                  <h3 className="font-bold text-orange-800 mb-2">نوع ارسال</h3>
+                  <p className="text-lg font-bold text-orange-700">عادی</p>
+                  <p className="text-xs text-orange-600">Standard Shipping</p>
+                </div>
+                <div className="bg-indigo-50 p-4 rounded-lg text-center">
+                  <h3 className="font-bold text-indigo-800 mb-2">وزن مرسوله</h3>
+                  <p className="text-2xl font-bold text-indigo-700">
+                    {selectedOrderForLabel.totalWeight ? `${selectedOrderForLabel.totalWeight} kg` : 'نامشخص'}
+                  </p>
+                  <p className="text-xs text-indigo-600">برای محاسبات حمل</p>
+                </div>
+              </div>
+
+              {/* Delivery Code and Special Instructions */}
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <h3 className="font-bold text-red-800 mb-2">کد تحویل و دستورات ویژه</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm"><strong>کد تحویل:</strong> {selectedOrderForLabel.deliveryCode || orderButtonStates[selectedOrderForLabel.customerOrderId]?.existingCode || 'تولید نشده'}</p>
+                    <p className="text-xs text-red-600 mt-1">این کد باید هنگام تحویل بررسی شود</p>
+                  </div>
+                  <div>
+                    <p className="text-sm"><strong>تاریخ تحویل:</strong> {selectedOrderForLabel.estimatedDeliveryDate ? new Date(selectedOrderForLabel.estimatedDeliveryDate).toLocaleDateString('fa-IR') : 'تعیین نشده'}</p>
+                    <p className="text-xs text-red-600 mt-1">مهلت تحویل به مشتری</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Print Button */}
+              <div className="text-center">
+                <Button 
+                  onClick={() => window.print()} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
+                >
+                  چاپ برچسب ارسال
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
