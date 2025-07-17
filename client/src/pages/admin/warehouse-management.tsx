@@ -907,7 +907,9 @@ const WarehouseManagement: React.FC = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="text-right p-4">شماره سفارش</th>
-                        <th className="text-center p-4">مشتری</th>
+                        <th className="text-right p-4">نام مشتری</th>
+                        <th className="text-right p-4">شماره موبایل</th>
+                        <th className="text-right p-4">ایمیل</th>
                         <th className="text-right p-4">مبلغ</th>
                         <th className="text-right p-4">وضعیت</th>
                         <th className="text-right p-4">تاریخ</th>
@@ -918,19 +920,24 @@ const WarehouseManagement: React.FC = () => {
                       {filteredOrders.map((order) => (
                         <tr key={order.id} className="border-b hover:bg-gray-50">
                           <td className="p-4 font-medium">#{order.id}</td>
-                          <td className="p-4 text-center">
-                            <div>
-                              <p className="font-medium">{
-                                order.customer?.firstName && order.customer?.lastName 
-                                  ? `${order.customer.firstName} ${order.customer.lastName}` 
-                                  : order.customerFirstName && order.customerLastName 
-                                    ? `${order.customerFirstName} ${order.customerLastName}`
-                                    : order.customerName || 'نامشخص'
-                              }</p>
-                              <p className="text-sm text-gray-500">{
-                                order.customer?.email || order.customerEmail || 'ایمیل نامشخص'
-                              }</p>
-                            </div>
+                          <td className="p-4">
+                            <div className="font-medium">{
+                              order.customer?.firstName && order.customer?.lastName 
+                                ? `${order.customer.firstName} ${order.customer.lastName}` 
+                                : order.customerFirstName && order.customerLastName 
+                                  ? `${order.customerFirstName} ${order.customerLastName}`
+                                  : order.customerName || 'نامشخص'
+                            }</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm">{
+                              order.customer?.phone || order.customerPhone || 'شماره نامشخص'
+                            }</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm text-gray-600">{
+                              order.customer?.email || order.customerEmail || 'ایمیل نامشخص'
+                            }</div>
                           </td>
                           <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
                           <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
