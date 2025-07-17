@@ -2626,7 +2626,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update کاردکس stock quantity (sync from warehouse to کاردکس)
-      await syncWarehouseToKardex(productId);
+      // Temporarily disabled sync to test stock increase
+      // await syncWarehouseToKardex(productId);
 
       res.json({
         success: true,
