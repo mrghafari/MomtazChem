@@ -5576,40 +5576,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get financial orders (orders requiring financial review)
   app.get("/api/order-management/financial", requireAuth, async (req, res) => {
     try {
-      const orders = await orderManagementStorage.getAllOrdersWithDetails();
+      console.log('🔍 [ROUTES] Financial endpoint called - using getOrdersByDepartment');
+      const orders = await orderManagementStorage.getOrdersByDepartment('financial');
       
-      // Filter for financial-related orders - include pending orders that need financial review
-      const financialOrders = orders.filter(order => 
-        ['pending', 'pending_payment', 'payment_uploaded', 'financial_review'].includes(order.status)
-      );
-
-      const formattedOrders = financialOrders.map(order => ({
-        id: order.id,
-        customerOrderId: order.customerOrderId || order.id,
-        customerName: order.customerName,
-        customerEmail: order.customerEmail,
-        customerPhone: order.customerPhone,
-        totalAmount: order.totalAmount,
-        currency: order.currency || 'IQD',
-        status: order.status,
-        paymentMethod: order.paymentMethod,
-        paymentReceiptUrl: order.paymentReceiptUrl,
-        trackingNumber: order.trackingNumber,
-        deliveryCode: order.deliveryCode,
-        estimatedDeliveryDate: order.estimatedDeliveryDate,
-        actualDeliveryDate: order.actualDeliveryDate,
-        deliveryPersonName: order.deliveryPersonName,
-        deliveryPersonPhone: order.deliveryPersonPhone,
-        financialNotes: order.financialNotes,
-        warehouseNotes: order.warehouseNotes,
-        logisticsNotes: order.logisticsNotes,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt
-      }));
-
+      console.log('🔍 [ROUTES] Received', orders.length, 'orders from financial department');
+      
       res.json({ 
         success: true, 
-        orders: formattedOrders 
+        orders: orders 
       });
     } catch (error) {
       console.error("Error fetching financial orders:", error);
@@ -13701,57 +13675,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Get financial department orders (pending payment & uploaded receipts)
-  app.get('/api/order-management/financial', async (req, res) => {
-    try {
-      const { pool } = await import('./db');
-      
-      // Get orders that need financial review or are pending payment
-      const query = `
-        SELECT DISTINCT
-          o.id,
-          o.order_number as customerOrderId,
-          crm.first_name || ' ' || crm.last_name as customerName,
-          crm.email as customerEmail,
-          crm.phone as customerPhone,
-          o.total_amount as totalAmount,
-          o.currency,
-          o.status,
-          o.payment_method as paymentMethod,
-          o.payment_receipt_url as paymentReceiptUrl,
-          om.financial_notes as financialNotes,
-          o.created_at as createdAt,
-          o.updated_at as updatedAt,
-          CASE 
-            WHEN o.status = 'pending_payment' THEN 'orphaned'
-            WHEN o.status = 'payment_uploaded' THEN 'needs_review'
-            WHEN o.status = 'financial_reviewing' THEN 'under_review'
-            ELSE 'processed'
-          END as financial_status
-        FROM customer_orders o
-        LEFT JOIN crm_customers crm ON o.customer_id = crm.id
-        LEFT JOIN order_management om ON o.id = om.customer_order_id
-        WHERE o.status IN ('pending_payment', 'payment_uploaded', 'financial_reviewing', 'financial_rejected')
-        ORDER BY 
-          CASE 
-            WHEN o.status = 'pending_payment' THEN 1  -- Orphaned orders first
-            WHEN o.status = 'payment_uploaded' THEN 2 -- Needs review second
-            WHEN o.status = 'financial_reviewing' THEN 3 -- Under review third
-            ELSE 4
-          END,
-          o.created_at DESC
-        LIMIT 500
-      `;
-      
-      const result = await pool.query(query);
-      console.log('💰 [FINANCIAL] Retrieved', result.rows.length, 'financial orders');
-      
-      res.json({ success: true, orders: result.rows });
-    } catch (error) {
-      console.error('❌ [FINANCIAL] Error fetching financial orders:', error);
-      res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات مالی' });
-    }
-  });
+
 
   // Update order status (department-specific)
   app.put('/api/order-management/:id/status', async (req, res) => {

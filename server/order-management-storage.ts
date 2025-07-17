@@ -21,11 +21,12 @@ import {
   type Department,
   orderStatuses
 } from "@shared/order-management-schema";
-import { customerOrders, customers, orderItems } from "@shared/customer-schema";
+import { customerOrders, orderItems } from "@shared/customer-schema";
+import { crmCustomers } from "@shared/schema";
 import { showcaseProducts as products } from "@shared/showcase-schema";
 import { shopProducts } from "@shared/shop-schema";
 import { db } from "./db";
-import { eq, and, desc, asc, inArray } from "drizzle-orm";
+import { eq, and, desc, asc, inArray, sql } from "drizzle-orm";
 
 export interface IOrderManagementStorage {
   // Order Management
@@ -238,8 +239,10 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     
     switch (department) {
       case 'financial':
-        // بخش مالی فقط سفارشات با رسید پرداخت را می‌بیند
+        // بخش مالی سفارشات در انتظار، با رسید پرداخت و در مراحل بررسی مالی را می‌بیند
         return [
+          'pending', // سفارشات در انتظار که نیاز به بررسی فیش بانکی دارند
+          orderStatuses.PENDING_PAYMENT,
           orderStatuses.PAYMENT_UPLOADED,
           orderStatuses.FINANCIAL_REVIEWING,
           orderStatuses.FINANCIAL_APPROVED,
@@ -334,6 +337,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   }
   
   async getOrdersByDepartment(department: Department, statuses?: OrderStatus[]): Promise<any[]> {
+    console.log('🔍 [DEPARTMENT] getOrdersByDepartment called with department:', department);
+    
     let query = db.select({
       // Order Management fields
       id: orderManagement.id,
@@ -373,10 +378,10 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       currency: customerOrders.currency,
       
       // Customer info
-      customerFirstName: customers.firstName,
-      customerLastName: customers.lastName,
-      customerEmail: customers.email,
-      customerPhone: customers.phone,
+      customerFirstName: crmCustomers.firstName,
+      customerLastName: crmCustomers.lastName,
+      customerEmail: crmCustomers.email,
+      customerPhone: crmCustomers.phone,
       
       // Payment Receipt info
       receiptUrl: paymentReceipts.receiptUrl,
@@ -385,15 +390,21 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     })
     .from(orderManagement)
     .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-    .leftJoin(customers, eq(customerOrders.customerId, customers.id))
+    .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
     .leftJoin(paymentReceipts, eq(paymentReceipts.customerOrderId, customerOrders.id));
     
     if (department === 'financial') {
-      // بخش مالی فقط سفارشات با رسید پرداخت آپلود شده را می‌بیند
+      // بخش مالی سفارشات در انتظار، با رسید پرداخت و در مراحل بررسی را می‌بیند
       const financialStatuses = statuses || [
+        'pending', // سفارشات در انتظار که نیاز به بررسی فیش بانکی دارند
+        orderStatuses.PENDING_PAYMENT,
         orderStatuses.PAYMENT_UPLOADED,
-        orderStatuses.FINANCIAL_REVIEWING
+        orderStatuses.FINANCIAL_REVIEWING,
+        orderStatuses.FINANCIAL_APPROVED,
+        orderStatuses.FINANCIAL_REJECTED
       ];
+      
+      console.log('🔍 [FINANCIAL] Searching for orders with statuses:', financialStatuses);
       query = query.where(inArray(orderManagement.currentStatus, financialStatuses));
     } else if (department === 'warehouse') {
       // انبار فقط سفارشات تایید شده مالی را می‌بیند
@@ -415,6 +426,15 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
     
     const results = await query.orderBy(desc(orderManagement.createdAt));
+    
+    console.log('📊 [DEPARTMENT] Retrieved', results.length, 'orders for department:', department);
+    if (results.length > 0) {
+      console.log('📊 [DEPARTMENT] First order sample:', JSON.stringify(results[0], null, 2));
+    } else {
+      console.log('📊 [DEPARTMENT] No orders found - checking basic count...');
+      const basicCount = await db.select({ count: sql`count(*)` }).from(orderManagement);
+      console.log('📊 [DEPARTMENT] Total orders in order_management table:', basicCount[0]);
+    }
     
     // Transform results to include customer info and receipt info in nested structure
     return results.map(row => ({
@@ -516,10 +536,10 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       currency: customerOrders.currency,
       
       // Customer info
-      customerFirstName: customers.firstName,
-      customerLastName: customers.lastName,
-      customerEmail: customers.email,
-      customerPhone: customers.phone,
+      customerFirstName: crmCustomers.firstName,
+      customerLastName: crmCustomers.lastName,
+      customerEmail: crmCustomers.email,
+      customerPhone: crmCustomers.phone,
       
       // Payment Receipt info
       receiptUrl: paymentReceipts.receiptUrl,
@@ -528,7 +548,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     })
     .from(orderManagement)
     .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-    .leftJoin(customers, eq(customerOrders.customerId, customers.id))
+    .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
     .leftJoin(paymentReceipts, eq(paymentReceipts.customerOrderId, customerOrders.id))
     .where(inArray(orderManagement.currentStatus, statuses))
     .orderBy(desc(orderManagement.createdAt));
