@@ -13825,13 +13825,29 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Process warehouse order
-  app.patch('/api/order-management/warehouse/:id/process', requireAuth, async (req, res) => {
+  // Process warehouse order - support both admin and custom users
+  app.patch('/api/order-management/warehouse/:id/process', async (req, res) => {
+    // Debug session information
+    console.log('🔧 [DEBUG] Session info:', {
+      exists: !!req.session,
+      adminId: req.session?.adminId,
+      customUserId: req.session?.customUserId,
+      isAuthenticated: req.session?.isAuthenticated,
+      sessionID: req.session?.id
+    });
+    
+    // Check authentication for both admin and custom users
+    if (!req.session?.adminId && !req.session?.customUserId) {
+      console.log('❌ [DEBUG] Authentication failed - no valid user ID');
+      return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
+    }
+    
+    console.log('✅ [DEBUG] Authentication successful');
     try {
       const { id } = req.params;
       const { status, notes } = req.body;
-      // Support both admin and custom users
-      const userId = req.session?.adminId || req.session?.customUserId || 1;
+      // Support both admin and custom users - convert UUID to numeric for database compatibility
+      const userId = req.session?.adminId || (req.session?.customUserId ? 2 : 1); // Use 2 for custom users, 1 for fallback
       
       console.log('📦 [WAREHOUSE] Processing order:', { id, status, notes, userId, sessionType: req.session?.adminId ? 'admin' : 'custom' });
       
