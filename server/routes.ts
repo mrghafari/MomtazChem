@@ -6535,6 +6535,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         },
         {
+          id: 'logistics_delivery_codes',
+          name: 'کدهای تحویل لجستیک',
+          description: 'ارسال کدهای ۴ رقمی تولید شده توسط بخش لجستیک برای تحویل محموله',
+          icon: 'Shield',
+          enabled: true,
+          messageTemplate: 'مشتری محترم {{customerName}}\nکد تحویل سفارش {{customerOrderId}}: {{verificationCode}}\nهنگام تحویل محموله این کد را به حمل‌کننده اعلام نمایید.\nشرکت ممتاز شیمی',
+          triggerConditions: ['Logistics code generated', 'Delivery code resent'],
+          recipients: ['Customers with pending deliveries'],
+          frequency: 'On-demand by logistics department',
+          priority: 'high' as const,
+          statistics: {
+            totalSent: 0,
+            lastSent: undefined,
+            successRate: 100
+          }
+        },
+        {
           id: 'customer-communications',
           name: 'ارتباطات مشتری',
           description: 'پیامک‌های عمومی و اطلاع‌رسانی',
@@ -6655,6 +6672,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching delivery logs:", error);
       res.status(500).json({ success: false, message: "خطا در دریافت لاگ‌ها" });
+    }
+  });
+
+  // Get SMS template for logistics delivery codes
+  app.get("/api/sms/template/logistics-delivery", async (req, res) => {
+    try {
+      const template = '{{customerName}} عزیز، سفارش شما در راه است.\nکد تحویل: {{verificationCode}}\nاین کد را هنگام تحویل به پیک اعلام کنید.\nممتازکم';
+      
+      res.json({
+        success: true,
+        template: template
+      });
+    } catch (error) {
+      console.error("Error fetching SMS template:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت قالب پیامک"
+      });
     }
   });
 

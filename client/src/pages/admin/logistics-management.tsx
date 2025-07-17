@@ -291,34 +291,57 @@ const LogisticsManagement = () => {
   // Generate verification code mutation
   const generateCodeMutation = useMutation({
     mutationFn: async (data: { customerOrderId: number; customerPhone: string; customerName: string }) => {
-      // First check if code already exists
+      // First get SMS template
+      const templateResponse = await fetch('/api/sms/template/logistics-delivery');
+      let smsTemplate = '{{customerName}} عزیز، سفارش شما در راه است.\nکد تحویل: {{verificationCode}}\nاین کد را هنگام تحویل به پیک اعلام کنید.\nممتازکم';
+      
+      if (templateResponse.ok) {
+        const templateData = await templateResponse.json();
+        smsTemplate = templateData.template;
+      }
+
+      // Check if code already exists
       const existingResponse = await fetch(`/api/logistics/verification-codes/order/${data.customerOrderId}`);
       
       if (existingResponse.ok) {
-        // Code exists, just resend SMS
+        // Code exists, just resend SMS with template
         const existingCode = await existingResponse.json();
+        
+        // Apply template variables
+        const finalMessage = smsTemplate
+          .replace('{{customerName}}', data.customerName)
+          .replace('{{verificationCode}}', existingCode.data.verificationCode);
+
         return { 
           data: existingCode.data, 
           isExisting: true,
           code: existingCode.data.verificationCode,
           customerOrderId: data.customerOrderId,
-          customerPhone: data.customerPhone 
+          customerPhone: data.customerPhone,
+          smsMessage: finalMessage
         };
       } else {
         // No existing code, generate new one
         const response = await fetch('/api/logistics/verification-codes/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify({...data, smsTemplate}),
         });
         if (!response.ok) throw new Error('Failed to generate verification code');
         const result = await response.json();
+        
+        // Apply template variables
+        const finalMessage = smsTemplate
+          .replace('{{customerName}}', data.customerName)
+          .replace('{{verificationCode}}', result.data.verificationCode);
+
         return { 
           data: result.data, 
           isExisting: false,
           code: result.data.verificationCode,
           customerOrderId: data.customerOrderId,
-          customerPhone: data.customerPhone 
+          customerPhone: data.customerPhone,
+          smsMessage: finalMessage
         };
       }
     },

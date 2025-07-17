@@ -156,6 +156,19 @@ export default function AdminSmsManagement() {
       statistics: { totalSent: 23, lastSent: '2025-01-15', successRate: 95.7 }
     },
     {
+      id: 'logistics_delivery_codes',
+      name: 'کدهای تحویل لجستیک',
+      description: 'ارسال کدهای ۴ رقمی تولید شده توسط بخش لجستیک برای تحویل محموله',
+      icon: Shield,
+      enabled: true,
+      messageTemplate: '{{customerName}} عزیز، سفارش شما در راه است.\nکد تحویل: {{verificationCode}}\nاین کد را هنگام تحویل به پیک اعلام کنید.\nممتازکم',
+      triggerConditions: ['Logistics code generated', 'Delivery code resent'],
+      recipients: ['Customers with pending deliveries'],
+      frequency: 'On-demand by logistics department',
+      priority: 'high',
+      statistics: { totalSent: 0, lastSent: undefined, successRate: 100 }
+    },
+    {
       id: 'order_notifications',
       name: 'اطلاع‌رسانی سفارش',
       description: 'وضعیت سفارش، تایید پرداخت، آماده‌سازی',
