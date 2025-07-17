@@ -1,0 +1,364 @@
+admin:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=f359308c:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=f359308c:840
+run @ @tanstack_react-query.js?v=f359308c:494
+start @ @tanstack_react-query.js?v=f359308c:536
+fetch @ @tanstack_react-query.js?v=f359308c:926
+executeFetch_fn @ @tanstack_react-query.js?v=f359308c:2211
+onSubscribe @ @tanstack_react-query.js?v=f359308c:1898
+subscribe @ @tanstack_react-query.js?v=f359308c:24
+(anonymous) @ @tanstack_react-query.js?v=f359308c:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=f359308c:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=f359308c:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=f359308c:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=f359308c:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=f359308c:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=f359308c:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=f359308c:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=f359308c:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=f359308c:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=f359308c:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=f359308c:19432
+commitRoot @ chunk-RPCDYKBN.js?v=f359308c:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=f359308c:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=f359308c:18718
+workLoop @ chunk-RPCDYKBN.js?v=f359308c:197
+flushWork @ chunk-RPCDYKBN.js?v=f359308c:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=f359308c:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+admin.tsx:16  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/content-management/items?section=admin_dashboard 404 (Not Found)
+queryFn @ admin.tsx:16
+fetchFn @ @tanstack_react-query.js?v=f359308c:840
+run @ @tanstack_react-query.js?v=f359308c:494
+start @ @tanstack_react-query.js?v=f359308c:536
+fetch @ @tanstack_react-query.js?v=f359308c:926
+executeFetch_fn @ @tanstack_react-query.js?v=f359308c:2211
+setOptions @ @tanstack_react-query.js?v=f359308c:1955
+(anonymous) @ @tanstack_react-query.js?v=f359308c:3032
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=f359308c:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=f359308c:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=f359308c:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=f359308c:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=f359308c:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=f359308c:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=f359308c:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=f359308c:19416
+commitRoot @ chunk-RPCDYKBN.js?v=f359308c:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=f359308c:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=f359308c:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=f359308c:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=f359308c:555
+flush @ @tanstack_react-query.js?v=f359308c:569
+batch @ @tanstack_react-query.js?v=f359308c:587
+dispatch_fn @ @tanstack_react-query.js?v=f359308c:996
+setData @ @tanstack_react-query.js?v=f359308c:696
+onSuccess @ @tanstack_react-query.js?v=f359308c:897
+resolve @ @tanstack_react-query.js?v=f359308c:456
+Promise.then
+run @ @tanstack_react-query.js?v=f359308c:498
+start @ @tanstack_react-query.js?v=f359308c:536
+fetch @ @tanstack_react-query.js?v=f359308c:926
+executeFetch_fn @ @tanstack_react-query.js?v=f359308c:2211
+onSubscribe @ @tanstack_react-query.js?v=f359308c:1898
+subscribe @ @tanstack_react-query.js?v=f359308c:24
+(anonymous) @ @tanstack_react-query.js?v=f359308c:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=f359308c:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=f359308c:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=f359308c:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=f359308c:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=f359308c:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=f359308c:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=f359308c:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=f359308c:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=f359308c:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=f359308c:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=f359308c:19432
+commitRoot @ chunk-RPCDYKBN.js?v=f359308c:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=f359308c:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=f359308c:18718
+workLoop @ chunk-RPCDYKBN.js?v=f359308c:197
+flushWork @ chunk-RPCDYKBN.js?v=f359308c:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=f359308c:384
+admin:168 Tawk.to Live Chat loaded successfully
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+products.tsx:785 Barcode effect triggered:  Canvas ref: null
+products.tsx:785 Barcode effect triggered:  Canvas ref: null
+products.tsx:785 Barcode effect triggered:  Canvas ref: null
+queryClient.ts:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=f359308c:840
+run @ @tanstack_react-query.js?v=f359308c:494
+start @ @tanstack_react-query.js?v=f359308c:536
+fetch @ @tanstack_react-query.js?v=f359308c:926
+executeFetch_fn @ @tanstack_react-query.js?v=f359308c:2211
+fetch @ @tanstack_react-query.js?v=f359308c:2011
+refetch @ @tanstack_react-query.js?v=f359308c:2001
+onFocus @ @tanstack_react-query.js?v=f359308c:749
+(anonymous) @ @tanstack_react-query.js?v=f359308c:1112
+(anonymous) @ @tanstack_react-query.js?v=f359308c:1111
+batch @ @tanstack_react-query.js?v=f359308c:583
+onFocus @ @tanstack_react-query.js?v=f359308c:1110
+(anonymous) @ @tanstack_react-query.js?v=f359308c:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=f359308c:313
+onFocus @ @tanstack_react-query.js?v=f359308c:312
+(anonymous) @ @tanstack_react-query.js?v=f359308c:299
+listener @ @tanstack_react-query.js?v=f359308c:270
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+advanced-email-settings.tsx:329 Loading category data: undefined undefined
+advanced-email-settings.tsx:134 Categories API Response: {success: true, categories: Array(17)}
+advanced-email-settings.tsx:417 Email Status Light Debug: Account Verification {id: 10, categoryId: 9, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Account Verification {host: 'smtppro.zoho.eu', username: 'verify@momtazchem.com', password: 'SET', fromEmail: 'verify@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Account Verification : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Admin & General Contact {id: 1, categoryId: 1, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Admin & General Contact {host: 'smtppro.zoho.eu', username: 'info@momtazchem.com', password: 'SET', fromEmail: 'info@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Admin & General Contact : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Agricultural Fertilizers Department {id: 2, categoryId: 4, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Agricultural Fertilizers Department {host: 'smtppro.zoho.eu', username: 'fertilizer@momtazchem.com', password: 'SET', fromEmail: 'fertilizer@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Agricultural Fertilizers Department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Backup Reports {id: 15, categoryId: 14, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Backup Reports {host: 'smtppro.zoho.eu', username: 'backup@momtazchem.com', password: 'SET', fromEmail: 'backup@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Backup Reports : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: CRM Notifications {id: 18, categoryId: 17, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for CRM Notifications {host: 'smtppro.zoho.eu', username: 'crm@momtazchem.com', password: 'SET', fromEmail: 'crm@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for CRM Notifications : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Fuel Additives Department {id: 4, categoryId: 2, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Fuel Additives Department {host: 'smtppro.zoho.eu', username: 'fuel@momtazchem.com', password: 'SET', fromEmail: 'fuel@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Fuel Additives Department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Inventory Alerts {id: 13, categoryId: 12, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Inventory Alerts {host: 'smtppro.zoho.eu', username: 'inventory@momtazchem.com', password: 'SET', fromEmail: 'inventory@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Inventory Alerts : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Order Confirmations {id: 11, categoryId: 10, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Order Confirmations {host: 'smtppro.zoho.eu', username: 'orders@momtazchem.com', password: 'SET', fromEmail: 'orders@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Order Confirmations : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Paint & Thinner Department {id: 6, categoryId: 5, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Paint & Thinner Department {host: 'smtppro.zoho.eu', username: 'thinner@momtazchem.com', password: 'SET', fromEmail: 'thinner@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Paint & Thinner Department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Password Reset {id: 9, categoryId: 8, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Password Reset {host: 'smtppro.zoho.eu', username: 'noreply@momtazchem.com', password: 'SET', fromEmail: 'noreply@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Password Reset : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Payment Notifications {id: 12, categoryId: 11, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Payment Notifications {host: 'smtppro.zoho.eu', username: 'payments@momtazchem.com', password: 'SET', fromEmail: 'payments@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Payment Notifications : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Sales department {id: 5, categoryId: 6, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Sales department {host: 'smtppro.zoho.eu', username: 'sales@momtazchem.com', password: 'SET', fromEmail: 'sales@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Sales department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Security Alerts {id: 16, categoryId: 15, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Security Alerts {host: 'smtppro.zoho.eu', username: 'security@momtazchem.com', password: 'SET', fromEmail: 'security@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Security Alerts : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Support {id: 7, categoryId: 7, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Support {host: 'smtppro.zoho.eu', username: 'support@momtazchem.com', password: 'SET', fromEmail: 'support@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Support : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: System Notifications {id: 14, categoryId: 13, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for System Notifications {host: 'smtppro.zoho.eu', username: 'system@momtazchem.com', password: 'SET', fromEmail: 'system@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for System Notifications : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: User Management {id: 17, categoryId: 16, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for User Management {host: 'smtppro.zoho.eu', username: 'users@momtazchem.com', password: 'SET', fromEmail: 'users@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for User Management : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Water Treatment Department {id: 3, categoryId: 3, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Water Treatment Department {host: 'smtppro.zoho.eu', username: 'water@momtazchem.com', password: 'SET', fromEmail: 'water@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Water Treatment Department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Account Verification {id: 10, categoryId: 9, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Account Verification {host: 'smtppro.zoho.eu', username: 'verify@momtazchem.com', password: 'SET', fromEmail: 'verify@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Account Verification : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Admin & General Contact {id: 1, categoryId: 1, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Admin & General Contact {host: 'smtppro.zoho.eu', username: 'info@momtazchem.com', password: 'SET', fromEmail: 'info@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Admin & General Contact : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Agricultural Fertilizers Department {id: 2, categoryId: 4, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Agricultural Fertilizers Department {host: 'smtppro.zoho.eu', username: 'fertilizer@momtazchem.com', password: 'SET', fromEmail: 'fertilizer@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Agricultural Fertilizers Department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Backup Reports {id: 15, categoryId: 14, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Backup Reports {host: 'smtppro.zoho.eu', username: 'backup@momtazchem.com', password: 'SET', fromEmail: 'backup@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Backup Reports : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: CRM Notifications {id: 18, categoryId: 17, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for CRM Notifications {host: 'smtppro.zoho.eu', username: 'crm@momtazchem.com', password: 'SET', fromEmail: 'crm@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for CRM Notifications : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Fuel Additives Department {id: 4, categoryId: 2, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Fuel Additives Department {host: 'smtppro.zoho.eu', username: 'fuel@momtazchem.com', password: 'SET', fromEmail: 'fuel@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Fuel Additives Department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Inventory Alerts {id: 13, categoryId: 12, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Inventory Alerts {host: 'smtppro.zoho.eu', username: 'inventory@momtazchem.com', password: 'SET', fromEmail: 'inventory@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Inventory Alerts : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Order Confirmations {id: 11, categoryId: 10, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Order Confirmations {host: 'smtppro.zoho.eu', username: 'orders@momtazchem.com', password: 'SET', fromEmail: 'orders@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Order Confirmations : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Paint & Thinner Department {id: 6, categoryId: 5, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Paint & Thinner Department {host: 'smtppro.zoho.eu', username: 'thinner@momtazchem.com', password: 'SET', fromEmail: 'thinner@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Paint & Thinner Department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Password Reset {id: 9, categoryId: 8, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Password Reset {host: 'smtppro.zoho.eu', username: 'noreply@momtazchem.com', password: 'SET', fromEmail: 'noreply@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Password Reset : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Payment Notifications {id: 12, categoryId: 11, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Payment Notifications {host: 'smtppro.zoho.eu', username: 'payments@momtazchem.com', password: 'SET', fromEmail: 'payments@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Payment Notifications : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Sales department {id: 5, categoryId: 6, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Sales department {host: 'smtppro.zoho.eu', username: 'sales@momtazchem.com', password: 'SET', fromEmail: 'sales@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Sales department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: Security Alerts {id: 16, categoryId: 15, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Security Alerts {host: 'smtppro.zoho.eu', username: 'security@momtazchem.com', password: 'SET', fromEmail: 'security@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for Security Alerts : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Support {id: 7, categoryId: 7, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Support {host: 'smtppro.zoho.eu', username: 'support@momtazchem.com', password: 'SET', fromEmail: 'support@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Support : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+advanced-email-settings.tsx:417 Email Status Light Debug: System Notifications {id: 14, categoryId: 13, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for System Notifications {host: 'smtppro.zoho.eu', username: 'system@momtazchem.com', password: 'SET', fromEmail: 'system@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for System Notifications : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: User Management {id: 17, categoryId: 16, host: 'smtppro.zoho.eu', port: 587, secure: false, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for User Management {host: 'smtppro.zoho.eu', username: 'users@momtazchem.com', password: 'SET', fromEmail: 'users@momtazchem.com', testStatus: 'untested', …}
+advanced-email-settings.tsx:446 Final status for User Management : untested
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: untested
+advanced-email-settings.tsx:417 Email Status Light Debug: Water Treatment Department {id: 3, categoryId: 3, host: 'smtppro.zoho.eu', port: 587, secure: true, …}
+advanced-email-settings.tsx:431 SMTP Configuration Check for Water Treatment Department {host: 'smtppro.zoho.eu', username: 'water@momtazchem.com', password: 'SET', fromEmail: 'water@momtazchem.com', testStatus: 'success', …}
+advanced-email-settings.tsx:446 Final status for Water Treatment Department : success
+advanced-email-settings.tsx:402 getTestStatusIcon called with status: success
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(30), modules: Array(30), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:375 🔍 [DEBUG] allowedModules: (30) ['syncing_shop', 'inquiries', 'barcode', 'email_settings', 'database_backup', 'crm', 'seo', 'categories', 'sms', 'factory', 'user_management', 'shop_management', 'procedures', 'smtp_test', 'order_management', 'product_management', 'payment_management', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'department_users', 'inventory_management', 'content_management', 'warehouse-management', 'user-management', 'logistics_management', 'ticketing_system', 'remote_desktop', 'server_config']
+site-management-fixed.tsx:376 🔍 [DEBUG] ticketing_system in allowedModules? true
+site-management-fixed.tsx:382 🔍 [DEBUG] ticketing button found in allButtons? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:383 🔍 [DEBUG] ticketing button in filtered? {id: 'ticketing', label: 'Ticketing System', icon: {…}, className: 'border-rose-300 text-rose-600 hover:bg-rose-50', onClick: ƒ, …}
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 27
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
