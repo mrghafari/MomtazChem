@@ -3664,6 +3664,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Function to convert technical module IDs to Persian names
+  function convertTechnicalToPersianModule(moduleId: string): string {
+    const technicalToPersianMap: { [key: string]: string } = {
+      'syncing_shop': 'همگام‌سازی فروشگاه',
+      'inquiries': 'مدیریت استعلامات',
+      'barcode': 'مدیریت بارکد',
+      'email_settings': 'تنظیمات ایمیل',
+      'database_backup': 'پشتیبان‌گیری پایگاه داده',
+      'crm': 'مدیریت CRM',
+      'seo': 'مدیریت SEO',
+      'categories': 'مدیریت دسته‌بندی‌ها',
+      'sms': 'مدیریت پیامک',
+      'factory': 'مدیریت کارخانه',
+      'user_management': 'مدیریت کاربران',
+      'shop_management': 'مدیریت فروشگاه',
+      'procedures': 'مدیریت روش‌ها',
+      'order_management': 'مدیریت سفارشات',
+      'product_management': 'مدیریت محصولات',
+      'payment_management': 'مدیریت پرداخت',
+      'finance': 'مدیریت مالی',
+      'wallet_management': 'مدیریت کیف پول',
+      'geography_analytics': 'آمار جغرافیایی',
+      'ai_settings': 'تنظیمات هوش مصنوعی',
+      'refresh_control': 'کنترل تازه‌سازی',
+      'content_management': 'مدیریت محتوا',
+      'warehouse_management': 'مدیریت انبار',
+      'logistics_management': 'مدیریت لجستیک',
+      'ticketing_system': 'سیستم تیکتینگ',
+      'remote_desktop': 'دسکتاپ ریموت',
+      'server_config': 'تنظیمات سرور'
+    };
+
+    return technicalToPersianMap[moduleId] || moduleId;
+  }
+
   // Get all admin permissions
   app.get("/api/admin/permissions", requireSuperAdmin, async (req, res) => {
     try {
@@ -16055,7 +16090,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
           "crm", "seo", "categories", "sms", "factory", "user_management",
           "shop_management", "procedures", "order_management", "product_management",
-          "payment_management", "wallet_management", "geography_analytics", "ai_settings",
+          "payment_management", "finance", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "content_management",
           "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
           "server_config"
@@ -16072,6 +16107,13 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, normalizedModules);
 
+        // Convert technical module IDs to Persian names for super admin
+        const persianModules = normalizedModules.map(moduleId => 
+          convertTechnicalToPersianModule(moduleId)
+        );
+
+        console.log(`✓ [PERMISSIONS] Super admin Persian modules:`, persianModules);
+
         return res.json({
           success: true,
           permissions: normalizedModules.map(moduleId => ({
@@ -16083,6 +16125,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             canApprove: true
           })),
           modules: normalizedModules,
+          persianModules: persianModules, // Add Persian names for frontend
           roles: ["super_admin"],
           roleInfo: {
             name: "super_admin",
