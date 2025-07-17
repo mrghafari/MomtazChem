@@ -857,18 +857,17 @@ const WarehouseManagement: React.FC = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="text-right p-4">شماره سفارش</th>
-                        <th className="text-right p-4">مشتری</th>
+                        <th className="text-center p-4">مشتری</th>
                         <th className="text-right p-4">مبلغ</th>
                         <th className="text-right p-4">وضعیت</th>
                         <th className="text-right p-4">تاریخ</th>
-                        <th className="text-right p-4">عملیات</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredOrders.map((order) => (
                         <tr key={order.id} className="border-b hover:bg-gray-50">
                           <td className="p-4 font-medium">#{order.id}</td>
-                          <td className="p-4">
+                          <td className="p-4 text-center">
                             <div>
                               <p className="font-medium">{
                                 order.customer?.firstName && order.customer?.lastName 
@@ -885,40 +884,6 @@ const WarehouseManagement: React.FC = () => {
                           <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
                           <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
                           <td className="p-4">{formatDate(order.createdAt)}</td>
-                          <td className="p-4">
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewOrderItems(order)}
-                                className="bg-amber-50 hover:bg-amber-100 border-amber-200"
-                              >
-                                <Package className="w-4 h-4" />
-                              </Button>
-                              {(order.currentStatus === 'warehouse_pending' || order.currentStatus === 'financial_approved') && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleStartProcessing(order)}
-                                  disabled={updateOrderMutation.isPending}
-                                  className="bg-blue-600 hover:bg-blue-700"
-                                >
-                                  <ArrowRight className="w-4 h-4 ml-1" />
-                                  شروع پردازش
-                                </Button>
-                              )}
-                              {order.currentStatus === 'warehouse_processing' && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleApproveToLogistics(order)}
-                                  disabled={updateOrderMutation.isPending}
-                                  className="bg-green-600 hover:bg-green-700"
-                                >
-                                  <CheckCircle className="w-4 h-4 ml-1" />
-                                  ارسال به لجستیک
-                                </Button>
-                              )}
-                            </div>
-                          </td>
                         </tr>
                       ))}
                     </tbody>
