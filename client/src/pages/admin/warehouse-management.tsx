@@ -40,7 +40,8 @@ import {
   Plus,
   Minus,
   Save,
-  Printer
+  Printer,
+  ArrowDownUp
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
@@ -336,6 +337,33 @@ const WarehouseManagement: React.FC = () => {
       toast({
         title: "خطا در به‌روزرسانی",
         description: error.message || "خطایی در به‌روزرسانی وضعیت سفارش رخ داد.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Sync quantities mutation for updating Kardex and Shop with warehouse real values
+  const syncQuantitiesMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('/api/warehouse/sync-quantities', {
+        method: 'POST',
+        body: {}
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse/batches'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
+      refetchBatches();
+      toast({
+        title: "همگام‌سازی موجودی موفق",
+        description: data.message || "تعداد واقعی محصولات از انبار به کاردکس و فروشگاه همگام‌سازی شد",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در همگام‌سازی",
+        description: error.message || "خطایی در همگام‌سازی موجودی انبار رخ داد",
         variant: "destructive",
       });
     },
@@ -917,41 +945,11 @@ const WarehouseManagement: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      // Test batch synchronization
-                      const testBatchSync = async () => {
-                        try {
-                          const response = await fetch('/api/warehouse/inventory-sync', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                              productId: 25,
-                              productName: 'Test Product',
-                              productSku: 'TST-001',
-                              productBarcode: '1234567890123',
-                              batchNumber: 'BATCH-2025-001',
-                              movementType: 'کاردکس_کاهش',
-                              quantity: 5,
-                              previousStock: 10,
-                              newStock: 5,
-                              reason: 'تست سیستم بچ',
-                              source: 'کاردکس',
-                              notes: 'تست همگام‌سازی بچ نامبر'
-                            })
-                          });
-                          const result = await response.json();
-                          console.log('Batch sync test result:', result);
-                        } catch (error) {
-                          console.error('Batch sync test failed:', error);
-                        }
-                      };
-                      testBatchSync();
-                    }}
+                    onClick={() => syncQuantitiesMutation.mutate()}
+                    disabled={syncQuantitiesMutation.isPending}
                   >
-                    <Package className="w-4 h-4 mr-2" />
-                    تست بچ
+                    <ArrowDownUp className="w-4 h-4 mr-2" />
+                    {syncQuantitiesMutation.isPending ? 'در حال همگام‌سازی...' : 'همگام‌سازی موجودی'}
                   </Button>
                   <Button variant="outline" size="sm">
                     <Download className="w-4 h-4 mr-2" />
@@ -1029,7 +1027,13 @@ const WarehouseManagement: React.FC = () => {
                           );
 
                           return filteredGroups.map(([productKey, group]: [string, any]) => {
+                            // Calculate totals for all quantity-related fields
                             const totalQuantity = group.batches.reduce((sum: number, batch: WarehouseBatch) => sum + (batch.quantity || 0), 0);
+                            const totalInTransit = group.batches.reduce((sum: number, batch: WarehouseBatch) => sum + (batch.inTransitQuantity || 0), 0);
+                            const totalWaste = group.batches.reduce((sum: number, batch: WarehouseBatch) => sum + (batch.wasteQuantity || 0), 0);
+                            const totalAvailable = totalQuantity - totalInTransit - totalWaste;
+                            const maxStockThreshold = Math.max(...group.batches.map((batch: WarehouseBatch) => batch.maxStockLevel || 15));
+                            const minStockThreshold = Math.min(...group.batches.map((batch: WarehouseBatch) => batch.minStockLevel || 5));
                             
                             return (
                               <React.Fragment key={productKey}>
@@ -1045,27 +1049,27 @@ const WarehouseManagement: React.FC = () => {
                                     <span className="text-sm text-gray-600">{group.batches.length} بچ</span>
                                   </td>
                                   <td className="p-4 text-center">
-                                    <span className="font-bold text-blue-600">{totalQuantity}</span>
+                                    <span className="font-bold text-blue-600">{totalQuantity.toLocaleString()}</span>
                                   </td>
                                   <td className="p-4 text-center">
-                                    <span className="font-medium text-blue-600">0</span>
+                                    <span className="font-medium text-blue-600">{totalInTransit.toLocaleString()}</span>
                                   </td>
                                   <td className="p-4 text-center">
-                                    <span className="font-medium text-red-600">0</span>
+                                    <span className="font-medium text-red-600">{totalWaste.toLocaleString()}</span>
                                   </td>
                                   <td className="p-4 text-center">
-                                    <span className="font-bold text-green-600">{totalQuantity}</span>
+                                    <span className="font-bold text-green-600">{totalAvailable.toLocaleString()}</span>
                                   </td>
                                   <td className="p-4 text-center">
-                                    <Badge variant={totalQuantity > 15 ? "default" : totalQuantity > 5 ? "secondary" : "destructive"}>
-                                      {totalQuantity > 15 ? "در انبار" : totalQuantity > 5 ? "کم" : "بحرانی"}
+                                    <Badge variant={totalAvailable > maxStockThreshold ? "default" : totalAvailable > minStockThreshold ? "secondary" : "destructive"}>
+                                      {totalAvailable > maxStockThreshold ? "در انبار" : totalAvailable > minStockThreshold ? "کم" : "بحرانی"}
                                     </Badge>
                                   </td>
                                   <td className="p-4 text-center">
-                                    <span className="text-sm">15</span>
+                                    <span className="text-sm">{maxStockThreshold}</span>
                                   </td>
                                   <td className="p-4 text-center">
-                                    <span className="text-sm">5</span>
+                                    <span className="text-sm">{minStockThreshold}</span>
                                   </td>
                                   <td className="p-4 text-center">
                                     <div className="flex gap-1 justify-center">
@@ -1094,20 +1098,28 @@ const WarehouseManagement: React.FC = () => {
                                       </span>
                                     </td>
                                     <td className="p-3 text-center">
-                                      <span className="font-medium">{batch.quantity}</span>
-                                    </td>
-                                    <td className="p-3 text-center text-gray-400">-</td>
-                                    <td className="p-3 text-center text-gray-400">-</td>
-                                    <td className="p-3 text-center">
-                                      <span className="font-medium text-green-600">{batch.quantity}</span>
+                                      <span className="font-medium">{(batch.quantity || 0).toLocaleString()}</span>
                                     </td>
                                     <td className="p-3 text-center">
-                                      <Badge variant={batch.quantity > 15 ? "default" : batch.quantity > 5 ? "secondary" : "destructive"} className="text-xs">
-                                        {batch.quantity > 15 ? "موجود" : batch.quantity > 5 ? "کم" : "ناکافی"}
+                                      <span className="text-blue-600">{(batch.inTransitQuantity || 0).toLocaleString()}</span>
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <span className="text-red-600">{(batch.wasteQuantity || 0).toLocaleString()}</span>
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <span className="font-medium text-green-600">{((batch.quantity || 0) - (batch.inTransitQuantity || 0) - (batch.wasteQuantity || 0)).toLocaleString()}</span>
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <Badge variant={(batch.quantity || 0) > (batch.maxStockLevel || 15) ? "default" : (batch.quantity || 0) > (batch.minStockLevel || 5) ? "secondary" : "destructive"} className="text-xs">
+                                        {(batch.quantity || 0) > (batch.maxStockLevel || 15) ? "موجود" : (batch.quantity || 0) > (batch.minStockLevel || 5) ? "کم" : "ناکافی"}
                                       </Badge>
                                     </td>
-                                    <td className="p-3 text-center text-gray-400">-</td>
-                                    <td className="p-3 text-center text-gray-400">-</td>
+                                    <td className="p-3 text-center">
+                                      <span className="text-gray-600 text-xs">{batch.maxStockLevel || 15}</span>
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <span className="text-gray-600 text-xs">{batch.minStockLevel || 5}</span>
+                                    </td>
                                     <td className="p-3 text-center">
                                       <div className="flex gap-1 justify-center">
                                         <Button variant="outline" size="sm" className="h-6 w-6 p-0">

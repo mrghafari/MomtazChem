@@ -2531,8 +2531,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const batches = await db.execute(sql`
         SELECT 
           wi.*,
-          sp.name as productName,
-          sp.sku as productSku,
+          sp.name as product_name,
+          sp.sku as product_sku,
           sp.unit_price,
           sp.category
         FROM warehouse_inventory wi
@@ -2551,6 +2551,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در دریافت بچ‌های انبار"
+      });
+    }
+  });
+
+  // Sync warehouse calculated quantities to Kardex and Shop (Reference endpoint)
+  app.post("/api/warehouse/sync-quantities", async (req, res) => {
+    try {
+      console.log("🔄 [WAREHOUSE-SYNC] Starting warehouse quantity synchronization...");
+      
+      // Calculate real available quantities for each product from warehouse batches
+      // Note: Using existing field 'quantity' as the main inventory measure
+      const warehouseTotals = await db.execute(sql`
+        SELECT 
+          wi.product_id,
+          sp.name as product_name,
+          sp.sku as product_sku,
+          SUM(wi.quantity) as total_quantity,
+          0 as total_in_transit,
+          0 as total_waste,
+          SUM(wi.quantity) as real_available_quantity
+        FROM warehouse_inventory wi
+        LEFT JOIN showcase_products sp ON wi.product_id = sp.id
+        WHERE wi.product_id IS NOT NULL AND wi.quantity > 0
+        GROUP BY wi.product_id, sp.name, sp.sku
+      `);
+
+      console.log(`🔄 [WAREHOUSE-SYNC] Found ${warehouseTotals.rows.length} products to sync`);
+
+      let syncedKardex = 0;
+      let syncedShop = 0;
+
+      for (const product of warehouseTotals.rows) {
+        const { product_id, real_available_quantity, product_name, product_sku } = product;
+        
+        console.log(`🔄 [WAREHOUSE-SYNC] Syncing ${product_name} (ID: ${product_id}) - Real Available: ${real_available_quantity}`);
+
+        // Update Kardex (showcase_products) stock quantity
+        try {
+          await db.execute(sql`
+            UPDATE showcase_products 
+            SET stock_quantity = ${real_available_quantity},
+                updated_at = NOW()
+            WHERE id = ${product_id}
+          `);
+          syncedKardex++;
+          console.log(`✅ [KARDEX-SYNC] Updated ${product_name} stock to ${real_available_quantity}`);
+        } catch (kardexError) {
+          console.error(`❌ [KARDEX-SYNC] Failed to update ${product_name}:`, kardexError);
+        }
+
+        // Update Shop (shop_products) stock quantity  
+        try {
+          await db.execute(sql`
+            UPDATE shop_products 
+            SET stock_quantity = ${real_available_quantity},
+                updated_at = NOW()
+            WHERE sku = ${product_sku}
+          `);
+          syncedShop++;
+          console.log(`✅ [SHOP-SYNC] Updated ${product_name} stock to ${real_available_quantity}`);
+        } catch (shopError) {
+          console.error(`❌ [SHOP-SYNC] Failed to update ${product_name}:`, shopError);
+        }
+      }
+
+      console.log(`🎯 [WAREHOUSE-SYNC] Synchronization completed - Kardex: ${syncedKardex}, Shop: ${syncedShop}`);
+
+      res.json({
+        success: true,
+        message: `همگام‌سازی موجودی کامل شد - کاردکس: ${syncedKardex} محصول، فروشگاه: ${syncedShop} محصول`,
+        data: {
+          totalProducts: warehouseTotals.rows.length,
+          syncedKardex,
+          syncedShop,
+          products: warehouseTotals.rows.map(p => ({
+            productId: p.product_id,
+            productName: p.product_name,
+            realAvailableQuantity: p.real_available_quantity
+          }))
+        }
+      });
+      
+    } catch (error) {
+      console.error("🔄 [WAREHOUSE-SYNC] Error syncing warehouse quantities:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در همگام‌سازی موجودی انبار"
       });
     }
   });
