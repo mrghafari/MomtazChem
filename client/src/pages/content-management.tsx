@@ -54,18 +54,18 @@ export default function ContentManagement() {
 
   // Query for content items
   const { data: contentItems, isLoading: loadingContent } = useQuery({
-    queryKey: ['/api/admin/content', selectedLanguage, selectedSection],
+    queryKey: ['/api/content-management/items', selectedLanguage, selectedSection],
     queryFn: () => 
-      fetch(`/api/admin/content?language=${selectedLanguage}&section=${selectedSection}`)
+      fetch(`/api/content-management/items?language=${selectedLanguage}&section=${selectedSection}`)
         .then(res => res.json())
         .then(data => data.success ? data.data : [])
   });
 
   // Query for image assets
   const { data: imageAssets, isLoading: loadingImages } = useQuery({
-    queryKey: ['/api/admin/content/images', selectedSection],
+    queryKey: ['/api/content-management/images', selectedSection],
     queryFn: () => 
-      fetch(`/api/admin/content/images?section=${selectedSection}`)
+      fetch(`/api/content-management/images?section=${selectedSection}`)
         .then(res => res.json())
         .then(data => data.success ? data.data : [])
   });
@@ -73,7 +73,7 @@ export default function ContentManagement() {
   // Mutation for updating content
   const updateContentMutation = useMutation({
     mutationFn: async (data: { id: number; content: string; isActive: boolean }) => {
-      const response = await fetch(`/api/admin/content/${data.id}`, {
+      const response = await fetch(`/api/content-management/items/${data.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export default function ContentManagement() {
     },
     onSuccess: () => {
       toast({ title: "Content updated successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/content'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/content-management/items'] });
       setEditingContent(null);
     },
     onError: () => {
@@ -95,13 +95,13 @@ export default function ContentManagement() {
   // Mutation for uploading images
   const uploadImageMutation = useMutation({
     mutationFn: (formData: FormData) =>
-      fetch('/api/admin/content/images/upload', {
+      fetch('/api/content-management/images/upload', {
         method: 'POST',
         body: formData
       }).then(res => res.json()),
     onSuccess: () => {
       toast({ title: "Image uploaded successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/content/images'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/content-management/images'] });
     },
     onError: () => {
       toast({ title: "Failed to upload image", variant: "destructive" });
@@ -111,14 +111,14 @@ export default function ContentManagement() {
   // Mutation for deleting images
   const deleteImageMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/admin/content/images/${id}`, {
+      const response = await fetch(`/api/content-management/images/${id}`, {
         method: 'DELETE'
       });
       return response.json();
     },
     onSuccess: () => {
       toast({ title: "Image deleted successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/content/images'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/content-management/images'] });
     },
     onError: () => {
       toast({ title: "Failed to delete image", variant: "destructive" });

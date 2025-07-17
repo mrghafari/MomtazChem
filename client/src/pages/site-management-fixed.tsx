@@ -356,14 +356,7 @@ export default function SiteManagement() {
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
       moduleId: "inventory_management"
     },
-    {
-      id: "department-users",
-      label: "Department Users",
-      icon: UserCog,
-      onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
-      className: "border-slate-300 text-slate-600 hover:bg-slate-50",
-      moduleId: "department_users"
-    }
+
   ];
 
   const getFilteredButtons = () => {

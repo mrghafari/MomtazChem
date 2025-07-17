@@ -358,14 +358,6 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
       className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
       moduleId: "inventory_management"
-    },
-    {
-      id: "department-users",
-      label: "Department Users",
-      icon: UserCog,
-      onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
-      moduleId: "department_users"
     }
 
   ];

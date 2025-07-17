@@ -3717,7 +3717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'geography_analytics',
         'ai_settings',
         'refresh_control',
-        'department_users',
+
         'inventory_management', // Keep as-is: this is correct module name from Site Management
         'content_management',
         'warehouse_management', // Added: warehouse_management module
@@ -15920,7 +15920,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
             'مدیریت موجودی': 'inventory_management',
-            'کاربران بخش': 'department_users',
             'تنظیمات سرور': 'server_config'
           };
 
@@ -16014,7 +16013,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
             'مدیریت موجودی': 'inventory_management',
-            'کاربران بخش': 'department_users',
             'تنظیمات سرور': 'server_config'
           };
 
@@ -16054,7 +16052,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "crm", "seo", "categories", "sms", "factory", "user_management",
           "shop_management", "procedures", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
-          "refresh_control", "department_users", "inventory_management", "content_management",
+          "refresh_control", "inventory_management", "content_management",
           "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
           "server_config"
         ];
@@ -16118,7 +16116,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           'sms_management', 'factory_management', 'super_admin', 'user_management',
           'shop_management', 'procedures_management', 'order_management',
           'product_management', 'payment_management', 'wallet_management', 'geography_analytics',
-          'ai_management', 'refresh_control', 'department_users', 'inventory_management',
+          'ai_management', 'refresh_control', 'inventory_management',
           'content_management', 'ticketing_system'
         ];
 
@@ -16177,7 +16175,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         { id: 'geography-analytics', name: 'Geography Analytics', category: 'analytics', icon: 'MapPin' },
         { id: 'ai-settings', name: 'AI Settings', category: 'system', icon: 'Zap' },
         { id: 'refresh-control', name: 'Refresh Control', category: 'system', icon: 'RefreshCw' },
-        { id: 'department-users', name: 'Department Users', category: 'administration', icon: 'Users' },
+
         { id: 'inventory-management', name: 'Inventory Management', category: 'inventory', icon: 'Package' },
         { id: 'content-management', name: 'Content Management', category: 'marketing', icon: 'Edit3' },
         { id: 'ticketing-system', name: 'Ticketing System', category: 'support', icon: 'Ticket' },
@@ -17439,147 +17437,7 @@ momtazchem.com
     }
   });
 
-  // ============================================================================
-  // SUPER ADMIN ENDPOINTS FOR DEPARTMENT MANAGEMENT
-  // ============================================================================
 
-  // Get all department users
-  app.get('/api/super-admin/department-users', requireAuth, async (req, res) => {
-    try {
-      const users = await db
-        .select({
-          id: schema.users.id,
-          username: schema.users.username,
-          email: schema.users.email,
-          department: schema.users.department,
-          isActive: schema.users.isActive,
-          lastLoginAt: schema.users.lastLoginAt,
-          createdAt: schema.users.createdAt
-        })
-        .from(schema.users)
-        .where(sql`${schema.users.department} IN ('financial', 'warehouse', 'logistics')`);
-
-      res.json({ success: true, users });
-    } catch (error) {
-      console.error('Error fetching department users:', error);
-      res.status(500).json({ success: false, message: "خطا در دریافت کاربران" });
-    }
-  });
-
-  // Create new department user
-  app.post('/api/super-admin/department-users', requireAuth, async (req, res) => {
-    try {
-      const { username, email, password, department } = req.body;
-      
-      // Hash password
-      const passwordHash = await bcrypt.hash(password, 10);
-      
-      const [newUser] = await db
-        .insert(schema.users)
-        .values({
-          username,
-          email,
-          passwordHash,
-          department,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
-        .returning({
-          id: schema.users.id,
-          username: schema.users.username,
-          email: schema.users.email,
-          department: schema.users.department,
-          isActive: schema.users.isActive,
-          createdAt: schema.users.createdAt
-        });
-
-      res.json({ success: true, user: newUser, message: "کاربر جدید ایجاد شد" });
-    } catch (error) {
-      console.error('Error creating department user:', error);
-      res.status(500).json({ success: false, message: "خطا در ایجاد کاربر" });
-    }
-  });
-
-  // Update department user
-  app.put('/api/super-admin/department-users/:id', requireAuth, async (req, res) => {
-    try {
-      const userId = parseInt(req.params.id);
-      const { username, email, password, department } = req.body;
-      
-      const updateData: any = {
-        username,
-        email,
-        department,
-        updatedAt: new Date()
-      };
-      
-      if (password) {
-        updateData.passwordHash = await bcrypt.hash(password, 10);
-      }
-      
-      const [updatedUser] = await db
-        .update(schema.users)
-        .set(updateData)
-        .where(eq(schema.users.id, userId))
-        .returning({
-          id: schema.users.id,
-          username: schema.users.username,
-          email: schema.users.email,
-          department: schema.users.department,
-          isActive: schema.users.isActive,
-          updatedAt: schema.users.updatedAt
-        });
-
-      res.json({ success: true, user: updatedUser, message: "کاربر بروزرسانی شد" });
-    } catch (error) {
-      console.error('Error updating department user:', error);
-      res.status(500).json({ success: false, message: "خطا در بروزرسانی کاربر" });
-    }
-  });
-
-  // Delete department user
-  app.delete('/api/super-admin/department-users/:id', requireAuth, async (req, res) => {
-    try {
-      const userId = parseInt(req.params.id);
-      
-      await db
-        .delete(schema.users)
-        .where(eq(schema.users.id, userId));
-
-      res.json({ success: true, message: "کاربر حذف شد" });
-    } catch (error) {
-      console.error('Error deleting department user:', error);
-      res.status(500).json({ success: false, message: "خطا در حذف کاربر" });
-    }
-  });
-
-  // Toggle user status
-  app.post('/api/super-admin/department-users/:id/toggle-status', requireAuth, async (req, res) => {
-    try {
-      const userId = parseInt(req.params.id);
-      const { isActive } = req.body;
-      
-      const [updatedUser] = await db
-        .update(schema.users)
-        .set({ isActive, updatedAt: new Date() })
-        .where(eq(schema.users.id, userId))
-        .returning({
-          id: schema.users.id,
-          username: schema.users.username,
-          isActive: schema.users.isActive
-        });
-
-      res.json({ 
-        success: true, 
-        user: updatedUser, 
-        message: isActive ? "کاربر فعال شد" : "کاربر غیرفعال شد" 
-      });
-    } catch (error) {
-      console.error('Error toggling user status:', error);
-      res.status(500).json({ success: false, message: "خطا در تغییر وضعیت کاربر" });
-    }
-  });
 
   // Import Other Products to Shop Database
   app.post('/api/shop/import-other-products', requireAuth, async (req, res) => {
@@ -22776,6 +22634,193 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "Failed to fetch content items",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Content Management API endpoints
+  app.get("/api/content-management/items", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { language, section } = req.query;
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq, and } = await import("drizzle-orm");
+
+      let query = db.select().from(contentItems);
+      
+      if (language) {
+        query = query.where(eq(contentItems.language, language as string));
+      }
+      
+      if (section) {
+        if (language) {
+          query = query.where(and(
+            eq(contentItems.language, language as string),
+            eq(contentItems.section, section as string)
+          ));
+        } else {
+          query = query.where(eq(contentItems.section, section as string));
+        }
+      }
+
+      const items = await query.orderBy(contentItems.updatedAt);
+
+      res.json({
+        success: true,
+        data: items
+      });
+    } catch (error) {
+      console.error("Error fetching content items:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch content items",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Create new content item
+  app.post("/api/content-management/items", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { key, content, contentType, language, section, isActive } = req.body;
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+
+      const [newItem] = await db
+        .insert(contentItems)
+        .values({
+          key,
+          content,
+          contentType: contentType || 'text',
+          language: language || 'en',
+          section: section || 'default',
+          isActive: isActive !== undefined ? isActive : true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      res.json({
+        success: true,
+        data: newItem,
+        message: "Content item created successfully"
+      });
+    } catch (error) {
+      console.error("Error creating content item:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create content item",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Update content item
+  app.put("/api/content-management/items/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const contentId = parseInt(req.params.id);
+      const { key, content, contentType, language, section, isActive } = req.body;
+
+      if (isNaN(contentId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid content ID"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq } = await import("drizzle-orm");
+
+      const [updatedItem] = await db
+        .update(contentItems)
+        .set({
+          key,
+          content,
+          contentType,
+          language,
+          section,
+          isActive,
+          updatedAt: new Date()
+        })
+        .where(eq(contentItems.id, contentId))
+        .returning();
+
+      res.json({
+        success: true,
+        data: updatedItem,
+        message: "Content item updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating content item:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update content item",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Delete content item
+  app.delete("/api/content-management/items/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const contentId = parseInt(req.params.id);
+
+      if (isNaN(contentId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid content ID"
+        });
+      }
+
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq } = await import("drizzle-orm");
+
+      await db
+        .delete(contentItems)
+        .where(eq(contentItems.id, contentId));
+
+      res.json({
+        success: true,
+        message: "Content item deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting content item:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete content item",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get image assets
+  app.get("/api/content-management/images", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { section } = req.query;
+      const { db } = await import("./db");
+      const { imageAssets } = await import("../shared/content-schema");
+      const { eq } = await import("drizzle-orm");
+
+      let query = db.select().from(imageAssets);
+      
+      if (section) {
+        query = query.where(eq(imageAssets.section, section as string));
+      }
+
+      const images = await query.orderBy(imageAssets.createdAt);
+
+      res.json({
+        success: true,
+        data: images
+      });
+    } catch (error) {
+      console.error("Error fetching image assets:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch image assets",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
