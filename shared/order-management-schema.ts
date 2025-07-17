@@ -25,6 +25,7 @@ export const orderStatuses = {
   FINANCIAL_REJECTED: 'financial_rejected',
   
   // Warehouse department statuses
+  WAREHOUSE_PENDING: 'warehouse_pending',
   WAREHOUSE_NOTIFIED: 'warehouse_notified',
   WAREHOUSE_PROCESSING: 'warehouse_processing',
   WAREHOUSE_APPROVED: 'warehouse_approved',

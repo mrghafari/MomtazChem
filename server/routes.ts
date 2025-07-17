@@ -13469,15 +13469,19 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const { notes } = req.body;
       const adminId = 1; // Default financial admin ID
 
+      console.log(`✅ [FINANCE] Approving order ${orderId} - moving to warehouse`);
+
+      // When financial approves, move to warehouse_pending for warehouse approval
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderId, 
-        'financial_approved', 
+        'warehouse_pending', // Move to warehouse department
         adminId, 
         'financial', 
-        notes || 'Payment approved by financial department'
+        notes || 'Payment approved by financial department - moving to warehouse'
       );
 
-      res.json({ success: true, order: updatedOrder, message: 'پرداخت تایید شد' });
+      console.log(`✅ [FINANCE] Order ${orderId} approved and moved to warehouse department`);
+      res.json({ success: true, order: updatedOrder, message: 'پرداخت تایید شد و به انبار ارسال گردید' });
     } catch (error) {
       console.error('Error approving financial order:', error);
       res.status(500).json({ success: false, message: 'خطا در تایید پرداخت' });
@@ -13491,14 +13495,18 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const { notes } = req.body;
       const adminId = 1; // Default financial admin ID
 
+      console.log(`❌ [FINANCE] Rejecting order ${orderId}`);
+
+      // When financial rejects, set to financial_rejected (stays in financial for rejected list)
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderId, 
-        'cancelled', 
+        'financial_rejected', 
         adminId, 
         'financial', 
         notes || 'Payment rejected by financial department'
       );
 
+      console.log(`❌ [FINANCE] Order ${orderId} rejected by financial department`);
       res.json({ success: true, order: updatedOrder, message: 'پرداخت رد شد' });
     } catch (error) {
       console.error('Error rejecting financial order:', error);

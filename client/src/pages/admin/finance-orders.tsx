@@ -156,12 +156,14 @@ export default function FinanceOrders() {
   // Mutations for approve/reject
   const approveMutation = useMutation({
     mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
-      return apiRequest(`/api/order-management/${orderId}/approve`, {
-        method: 'PUT',
-        body: { notes, status: 'financial_approved' }
+      console.log(`🔄 [FINANCE] Sending approve request for order ${orderId}`);
+      return apiRequest(`/api/finance/orders/${orderId}/approve`, {
+        method: 'POST',
+        body: { notes }
       });
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log(`✅ [FINANCE] Order approved successfully:`, response);
       toast({
         title: "✅ سفارش تایید شد",
         description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
@@ -172,6 +174,7 @@ export default function FinanceOrders() {
       setReviewNotes("");
     },
     onError: (error: any) => {
+      console.error(`❌ [FINANCE] Approve error:`, error);
       toast({
         title: "خطا در تایید",
         description: error.message || "امکان تایید سفارش وجود ندارد",
@@ -182,15 +185,17 @@ export default function FinanceOrders() {
 
   const rejectMutation = useMutation({
     mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
-      return apiRequest(`/api/order-management/${orderId}/reject`, {
-        method: 'PUT',
-        body: { notes, status: 'financial_rejected' }
+      console.log(`🔄 [FINANCE] Sending reject request for order ${orderId}`);
+      return apiRequest(`/api/finance/orders/${orderId}/reject`, {
+        method: 'POST',
+        body: { notes }
       });
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log(`❌ [FINANCE] Order rejected successfully:`, response);
       toast({
         title: "❌ سفارش رد شد",
-        description: "پرداخت رد شد و اطلاع‌رسانی به مشتری ارسال شد"
+        description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
       });
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       setDialogOpen(false);
@@ -198,6 +203,7 @@ export default function FinanceOrders() {
       setReviewNotes("");
     },
     onError: (error: any) => {
+      console.error(`❌ [FINANCE] Reject error:`, error);
       toast({
         title: "خطا در رد سفارش",
         description: error.message || "امکان رد سفارش وجود ندارد",

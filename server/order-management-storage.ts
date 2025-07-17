@@ -429,10 +429,14 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     } else if (department === 'warehouse') {
       // انبار فقط سفارشات تایید شده مالی را می‌بیند
       const warehouseStatuses = statuses || [
+        orderStatuses.WAREHOUSE_PENDING, // جدید: سفارشات منتظر انبار
         orderStatuses.FINANCIAL_APPROVED, // تایید شده توسط مالی
         orderStatuses.WAREHOUSE_NOTIFIED,
-        orderStatuses.WAREHOUSE_PROCESSING
+        orderStatuses.WAREHOUSE_PROCESSING,
+        orderStatuses.WAREHOUSE_APPROVED,
+        orderStatuses.WAREHOUSE_REJECTED
       ];
+      console.log('🔍 [WAREHOUSE] Searching for orders with statuses:', warehouseStatuses);
       query = query.where(inArray(orderManagement.currentStatus, warehouseStatuses));
     } else if (department === 'logistics') {
       // لجستیک فقط سفارشات تایید شده انبار را می‌بیند
