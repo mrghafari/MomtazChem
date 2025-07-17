@@ -21736,11 +21736,11 @@ momtazchem.com
         .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
         .where(eq(orderManagement.customerOrderId, orderId));
 
-      // Update order status to financial_approved
+      // Update order status to warehouse_pending (approved by financial, ready for warehouse)
       await db
         .update(orderManagement)
         .set({
-          currentStatus: 'financial_approved',
+          currentStatus: 'warehouse_pending',
           financialReviewerId: adminId,
           financialReviewedAt: new Date(),
           financialNotes: notes
@@ -21751,7 +21751,7 @@ momtazchem.com
       await db.insert(orderStatusHistory).values({
         orderManagementId: orderId,
         fromStatus: 'payment_uploaded',
-        toStatus: 'financial_approved',
+        toStatus: 'warehouse_pending',
         changedBy: adminId,
         changedByDepartment: 'financial',
         notes: notes

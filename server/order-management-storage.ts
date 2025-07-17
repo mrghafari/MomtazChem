@@ -277,7 +277,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       case 'warehouse':
         // انبار فقط سفارشات تایید شده مالی را می‌بیند
         return [
-          orderStatuses.FINANCIAL_APPROVED,
+          orderStatuses.WAREHOUSE_PENDING,
           orderStatuses.WAREHOUSE_NOTIFIED,
           orderStatuses.WAREHOUSE_PROCESSING,
           orderStatuses.WAREHOUSE_APPROVED,
