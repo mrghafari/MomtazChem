@@ -25,7 +25,7 @@ import { orderManagementStorage } from "./order-management-storage";
 import { walletStorage } from "./wallet-storage";
 import { requireDepartment, attachUserDepartments } from "./department-auth";
 import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests, customerOrders, orderItems } from "@shared/customer-schema";
-import { customerDb } from "./customer-db";
+import { customerDb, customerPool } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients, categoryEmailAssignments, insertCategoryEmailAssignmentSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders, shopProducts } from "@shared/shop-schema";
 import { sendContactEmail } from "./email";
@@ -13877,6 +13877,60 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('❌ [WAREHOUSE] Error processing warehouse order:', error);
       res.status(500).json({ success: false, message: 'خطا در پردازش سفارش' });
+    }
+  });
+
+  // Get order items for warehouse processing - shows what products are in each order
+  app.get('/api/order-management/warehouse/:customerOrderId/items', async (req, res) => {
+    // Check authentication for both admin and custom users
+    if (!req.session?.adminId && !req.session?.customUserId) {
+      return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
+    }
+    
+    try {
+      const { customerOrderId } = req.params;
+      
+      console.log('📦 [WAREHOUSE-ITEMS] Getting order items for customer order:', customerOrderId);
+      
+      // Get order items using direct pool query to avoid Drizzle issues
+      const result = await customerPool.query(
+        `SELECT 
+          id, 
+          product_id, 
+          product_name, 
+          product_sku, 
+          quantity, 
+          unit, 
+          unit_price, 
+          total_price, 
+          specifications, 
+          notes,
+          created_at
+        FROM order_items 
+        WHERE order_id = $1 
+        ORDER BY id`,
+        [parseInt(customerOrderId)]
+      );
+      
+      const orderItemsData = result.rows;
+      
+      console.log(`📦 [WAREHOUSE-ITEMS] Found ${orderItemsData.length} items for order ${customerOrderId}`);
+      
+      if (orderItemsData.length > 0) {
+        console.log('📦 [WAREHOUSE-ITEMS] First item sample:', JSON.stringify(orderItemsData[0], null, 2));
+      }
+      
+      res.json({ 
+        success: true, 
+        orderItems: orderItemsData,
+        totalItems: orderItemsData.length 
+      });
+    } catch (error) {
+      console.error('❌ [WAREHOUSE-ITEMS] Error fetching order items:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در بارگیری اقلام سفارش' 
+      });
     }
   });
 
