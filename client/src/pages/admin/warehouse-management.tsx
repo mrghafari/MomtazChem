@@ -93,6 +93,27 @@ interface UnifiedProduct {
   shopId?: number;
 }
 
+// Warehouse batch interface for batch-based inventory
+interface WarehouseBatch {
+  id: number;
+  productId: number;
+  productName: string;
+  productSku: string;
+  batchNumber: string;
+  batchType: string;
+  quantity: number;
+  unitPrice?: number;
+  totalValue?: number;
+  location?: string;
+  expiryDate?: string;
+  receivedDate: string;
+  qualityStatus: string;
+  isNonChemical?: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Goods in transit interface
 interface GoodsInTransit {
   id: number;
@@ -258,6 +279,12 @@ const WarehouseManagement: React.FC = () => {
   // Query for inventory movements
   const { data: inventoryMovements, isLoading: movementsLoading } = useQuery({
     queryKey: ['/api/shop/inventory-movements'],
+    refetchInterval: getWarehouseRefreshInterval()
+  });
+
+  // Query for warehouse batches (batch-based inventory)
+  const { data: warehouseBatches, isLoading: batchesLoading, refetch: refetchBatches } = useQuery({
+    queryKey: ['/api/warehouse/batches'],
     refetchInterval: getWarehouseRefreshInterval()
   });
 
@@ -964,116 +991,82 @@ const WarehouseManagement: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProducts.map((product: UnifiedProduct) => (
-                        <tr key={product.id} className="border-b hover:bg-gray-50">
-                          <td className="p-4">
-                            <div>
-                              <p className="font-medium">{product.name}</p>
-                              <p className="text-sm text-gray-500">{product.shopSku}</p>
+                      {batchesLoading ? (
+                        <tr>
+                          <td colSpan={10} className="p-8 text-center">
+                            <div className="flex items-center justify-center">
+                              <RefreshCw className="h-5 w-5 animate-spin mr-2" />
+                              <span>بارگذاری بچ‌های انبار...</span>
                             </div>
-                          </td>
-                          <td className="p-4 text-center">
-                            <div className="text-sm">
-                              {/* Display batch number from کاردکس */}
-                              <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-mono text-xs">
-                                {product.batchNumber || 'بدون بچ'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className="font-medium">{product.stockQuantity}</span>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className="font-medium text-blue-600">
-                              {/* Calculate goods in transit: orders that are processed but not yet sent to logistics */}
-                              {(() => {
-                                const transitOrders = orders.filter(order => 
-                                  ['warehouse_processing', 'warehouse_approved'].includes(order.currentStatus || order.status)
-                                );
-                                // For now showing count of orders containing this product
-                                // In a real implementation, this would sum quantities from order items
-                                return transitOrders.length > 0 ? Math.min(transitOrders.length * 2, 8) : 0;
-                              })()}
-                            </span>
-                          </td>
-                          <td className="p-4 text-center">
-                            {/* Waste column with editing functionality */}
-                            {editingWaste === product.id.toString() ? (
-                              <div className="flex items-center justify-center gap-2">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  value={wasteQuantity}
-                                  onChange={(e) => {
-                                    const value = parseInt(e.target.value);
-                                    if (isNaN(value) || value < 0) {
-                                      setWasteQuantity(0);
-                                    } else {
-                                      setWasteQuantity(value);
-                                    }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    // Prevent entering negative numbers
-                                    if (e.key === '-' || e.key === 'e' || e.key === 'E') {
-                                      e.preventDefault();
-                                    }
-                                  }}
-                                  className="w-20"
-                                />
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleWasteUpdate(product.id, wasteQuantity)}
-                                >
-                                  <Save className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setEditingWaste(null)}
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-center gap-2">
-                                <span className="font-medium text-red-600">
-                                  {wasteAmounts[product.id] || 0}
-                                </span>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleWasteEdit(product.id.toString(), wasteAmounts[product.id] || 0)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className="font-bold text-green-600">
-                              {/* Total inventory = current stock + goods in transit - waste */}
-                              {(() => {
-                                const transitOrders = orders.filter(order => 
-                                  ['warehouse_processing', 'warehouse_approved'].includes(order.currentStatus || order.status)
-                                );
-                                const transitQuantity = transitOrders.length > 0 ? Math.min(transitOrders.length * 2, 8) : 0;
-                                const wasteAmount = wasteAmounts[product.id] || 0;
-                                return Math.max(0, product.stockQuantity + transitQuantity - wasteAmount);
-                              })()}
-                            </span>
-                          </td>
-                          <td className="p-4 text-center">{getStockBadge(product)}</td>
-                          <td className="p-4 text-center">
-                            <span className="font-medium">{product.lowStockThreshold}</span>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className="font-medium">{product.minStockLevel}</span>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className="text-sm text-gray-500">-</span>
                           </td>
                         </tr>
-                      ))}
+                      ) : warehouseBatches?.data && warehouseBatches.data.length > 0 ? (
+                        warehouseBatches.data
+                          .filter((batch: WarehouseBatch) => 
+                            batch.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            batch.batchNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            batch.productSku.toLowerCase().includes(searchTerm.toLowerCase())
+                          )
+                          .map((batch: WarehouseBatch) => (
+                            <tr key={`${batch.productId}-${batch.batchNumber}-${batch.id}`} className="border-b hover:bg-gray-50">
+                              <td className="p-4">
+                                <div>
+                                  <p className="font-medium">{batch.productName}</p>
+                                  <p className="text-sm text-gray-500">{batch.productSku}</p>
+                                </div>
+                              </td>
+                              <td className="p-4 text-center">
+                                <div className="text-sm">
+                                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-mono text-xs">
+                                    {batch.batchNumber}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="font-medium">{batch.quantity}</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="font-medium text-blue-600">0</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="font-medium text-red-600">0</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="font-bold text-green-600">{batch.quantity}</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <Badge variant={batch.quantity > 15 ? "default" : batch.quantity > 5 ? "secondary" : "destructive"}>
+                                  {batch.quantity > 15 ? "در انبار" : batch.quantity > 5 ? "کم" : "بحرانی"}
+                                </Badge>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="text-sm">15</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="text-sm">5</span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <div className="flex gap-1 justify-center">
+                                  <Button variant="outline" size="sm">
+                                    <Plus className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                    <Minus className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                      ) : (
+                        <tr>
+                          <td colSpan={10} className="p-8 text-center text-gray-500">
+                            هیچ بچی در انبار یافت نشد
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

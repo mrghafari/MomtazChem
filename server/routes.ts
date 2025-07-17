@@ -2525,6 +2525,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WAREHOUSE INVENTORY WITH BATCH TRACKING ENDPOINTS
   // =============================================================================
   
+  // Get all warehouse batches for warehouse management
+  app.get("/api/warehouse/batches", async (req, res) => {
+    try {
+      const batches = await db.execute(sql`
+        SELECT * FROM warehouse_inventory 
+        WHERE quantity > 0 
+        ORDER BY product_name, batch_number, created_at DESC
+      `);
+
+      res.json({
+        success: true,
+        data: batches.rows,
+        message: "بچ‌های انبار دریافت شد"
+      });
+    } catch (error) {
+      console.error("Error getting warehouse batches:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت بچ‌های انبار"
+      });
+    }
+  });
+
   // Get warehouse inventory for a specific product
   app.get("/api/warehouse/inventory/:productId", async (req, res) => {
     try {
@@ -2595,12 +2618,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (existingBatch.length > 0) {
           // Update existing batch
-          await db.update(warehouseInventory)
-            .set({
-              quantity: existingBatch[0].quantity + increaseQuantity,
-              updatedAt: new Date()
-            })
-            .where(eq(warehouseInventory.id, existingBatch[0].id));
+          await db.execute(sql`
+            UPDATE warehouse_inventory 
+            SET quantity = quantity + ${increaseQuantity},
+                updated_at = NOW()
+            WHERE id = ${existingBatch[0].id}
+          `);
 
           console.log(`✅ [WAREHOUSE] Increased existing batch ${batchNumber} by ${increaseQuantity} units`);
         } else {
@@ -2611,16 +2634,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } else {
         // Create new batch
-        await db.insert(warehouseInventory).values({
-          productId,
-          productName,
-          productSku,
-          batchNumber,
-          quantity: increaseQuantity,
-          receivedDate: new Date(),
-          qualityStatus: 'approved',
-          notes: reason || `ایجاد بچ جدید با ${increaseQuantity} واحد`,
-        });
+        await db.execute(sql`
+          INSERT INTO warehouse_inventory (
+            product_id, product_name, product_sku, batch_number, batch_type,
+            quantity, received_date, quality_status, notes, created_at, updated_at
+          ) VALUES (
+            ${productId}, ${productName}, ${productSku}, ${batchNumber}, ${batchType || 'new'},
+            ${increaseQuantity}, NOW(), 'approved', 
+            ${reason || `ایجاد بچ جدید با ${increaseQuantity} واحد`}, NOW(), NOW()
+          )
+        `);
 
         console.log(`✅ [WAREHOUSE] Created new batch ${batchNumber} with ${increaseQuantity} units`);
       }
