@@ -42,7 +42,6 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
-import { warehouseInventory, insertWarehouseInventorySchema } from "@shared/schema";
 import { smsService } from "./sms-service";
 import { ticketingStorage } from "./ticketing-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
@@ -2221,13 +2220,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (stockDifference !== 0) {
             console.log(`📦 [WAREHOUSE-SYNC] Creating inventory movement: ${stockDifference > 0 ? '+' : ''}${stockDifference} units`);
             
-            // Prepare inventory movement data including batch number
+            // Prepare inventory movement data
             const movementData = {
               productId: product.id,
               productName: product.name,
               productSku: product.sku || '',
               productBarcode: product.barcode || '',
-              batchNumber: product.batchNumber || null,
               movementType: stockDifference > 0 ? 'کاردکس_افزایش' : 'کاردکس_کاهش',
               quantity: Math.abs(stockDifference),
               previousStock: oldProduct.stockQuantity || 0,
@@ -2235,7 +2233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               movementDate: new Date().toISOString(),
               reason: 'تغییر موجودی از کاردکس',
               source: 'کاردکس',
-              notes: `موجودی از ${oldProduct.stockQuantity || 0} به ${product.stockQuantity || 0} تغییر یافت${product.batchNumber ? ` - بچ: ${product.batchNumber}` : ''}`
+              notes: `موجودی از ${oldProduct.stockQuantity || 0} به ${product.stockQuantity || 0} تغییر یافت`
             };
             
             // Call warehouse inventory sync API
@@ -2517,460 +2515,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در همگام‌سازی هوشمند"
-      });
-    }
-  });
-
-  // =============================================================================
-  // WAREHOUSE INVENTORY WITH BATCH TRACKING ENDPOINTS
-  // =============================================================================
-  
-  // Get all warehouse batches for warehouse management
-  app.get("/api/warehouse/batches", async (req, res) => {
-    try {
-      const batches = await db.execute(sql`
-        SELECT 
-          wi.*,
-          sp.name as product_name,
-          sp.sku as product_sku,
-          sp.unit_price,
-          sp.category
-        FROM warehouse_inventory wi
-        LEFT JOIN showcase_products sp ON wi.product_id = sp.id
-        WHERE wi.quantity > 0 
-        ORDER BY sp.name, wi.batch_number, wi.created_at DESC
-      `);
-
-      res.json({
-        success: true,
-        data: batches.rows,
-        message: "بچ‌های انبار دریافت شد"
-      });
-    } catch (error) {
-      console.error("Error getting warehouse batches:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت بچ‌های انبار"
-      });
-    }
-  });
-
-  // Sync warehouse calculated quantities to Kardex and Shop (Reference endpoint)
-  // Get warehouse inventory endpoint
-  app.get("/api/warehouse/inventory", async (req, res) => {
-    try {
-      console.log("📦 [WAREHOUSE-INVENTORY] Fetching warehouse inventory...");
-      
-      const inventory = await db.execute(sql`
-        SELECT 
-          wi.id,
-          wi.product_id as productId,
-          sp.name as productName,
-          sp.sku as productSku,
-          wi.batch_number as batchNumber,
-          'production' as batchType,
-          wi.quantity,
-          0 as unitPrice,
-          0 as totalValue,
-          '' as location,
-          NULL as expiryDate,
-          wi.created_at as receivedDate,
-          'approved' as qualityStatus,
-          false as isNonChemical,
-          '' as notes,
-          wi.created_at as createdAt,
-          wi.updated_at as updatedAt
-        FROM warehouse_inventory wi
-        LEFT JOIN showcase_products sp ON wi.product_id = sp.id
-        WHERE wi.quantity > 0
-        ORDER BY sp.name, wi.batch_number
-      `);
-
-      console.log(`📦 [WAREHOUSE-INVENTORY] Found ${inventory.length} inventory items`);
-      res.json({ success: true, data: inventory.rows || inventory });
-    } catch (error) {
-      console.error("❌ [WAREHOUSE-INVENTORY] Error fetching inventory:", error);
-      res.status(500).json({ success: false, message: "خطا در دریافت موجودی انبار" });
-    }
-  });
-
-  // Get warehouse stats endpoint
-  app.get("/api/warehouse/stats", async (req, res) => {
-    try {
-      console.log("📊 [WAREHOUSE-STATS] Calculating warehouse statistics...");
-      
-      // Get order counts by status
-      const orderCounts = await db.execute(sql`
-        SELECT 
-          current_status,
-          COUNT(*) as count
-        FROM order_management 
-        WHERE current_status IN ('warehouse_pending', 'financial_approved', 'warehouse_processing', 'warehouse_approved', 'warehouse_rejected')
-        GROUP BY current_status
-      `);
-
-      // Get total revenue from completed orders
-      const revenueResult = [{ total_revenue: 0 }]; // Simplified for now
-
-      // Get low stock items count
-      const lowStockResult = await db.execute(sql`
-        SELECT COUNT(*) as low_stock_count
-        FROM warehouse_inventory wi
-        WHERE wi.quantity < 10
-      `);
-
-      const stats = {
-        pendingOrders: 0,
-        processingOrders: 0,
-        fulfilledOrders: 0,
-        totalRevenue: parseFloat(revenueResult[0]?.total_revenue || '0'),
-        averageProcessingTime: 24, // hours
-        lowStockItems: parseInt(lowStockResult[0]?.low_stock_count || '0')
-      };
-
-      // Map order counts safely
-      try {
-        const orderCountArray = Array.isArray(orderCounts) ? orderCounts : [];
-        orderCountArray.forEach((row: any) => {
-          if (row && row.current_status && row.count) {
-            const count = parseInt(row.count) || 0;
-            switch (row.current_status) {
-              case 'warehouse_pending':
-              case 'financial_approved':
-                stats.pendingOrders += count;
-                break;
-              case 'warehouse_processing':
-                stats.processingOrders += count;
-                break;
-              case 'warehouse_approved':
-                stats.fulfilledOrders += count;
-                break;
-            }
-          }
-        });
-      } catch (error) {
-        console.error("❌ [WAREHOUSE-STATS] Error processing order counts:", error);
-      }
-
-      console.log("📊 [WAREHOUSE-STATS] Statistics calculated:", stats);
-      res.json({ success: true, data: stats });
-    } catch (error) {
-      console.error("❌ [WAREHOUSE-STATS] Error calculating stats:", error);
-      res.status(500).json({ success: false, message: "خطا در محاسبه آمار انبار" });
-    }
-  });
-
-  app.post("/api/warehouse/sync-quantities", async (req, res) => {
-    try {
-      console.log("🔄 [WAREHOUSE-SYNC] Starting warehouse quantity synchronization...");
-      
-      // Calculate real available quantities for each product from warehouse batches
-      // Note: Using existing field 'quantity' as the main inventory measure
-      const warehouseTotals = await db.execute(sql`
-        SELECT 
-          wi.product_id,
-          sp.name as product_name,
-          sp.sku as product_sku,
-          SUM(wi.quantity) as total_quantity,
-          0 as total_in_transit,
-          0 as total_waste,
-          SUM(wi.quantity) as real_available_quantity
-        FROM warehouse_inventory wi
-        LEFT JOIN showcase_products sp ON wi.product_id = sp.id
-        WHERE wi.product_id IS NOT NULL AND wi.quantity > 0
-        GROUP BY wi.product_id, sp.name, sp.sku
-      `);
-
-      console.log(`🔄 [WAREHOUSE-SYNC] Found ${warehouseTotals.rows.length} products to sync`);
-
-      let syncedKardex = 0;
-      let syncedShop = 0;
-
-      for (const product of warehouseTotals.rows) {
-        const { product_id, real_available_quantity, product_name, product_sku } = product;
-        
-        console.log(`🔄 [WAREHOUSE-SYNC] Syncing ${product_name} (ID: ${product_id}) - Real Available: ${real_available_quantity}`);
-
-        // Update Kardex (showcase_products) stock quantity
-        try {
-          await db.execute(sql`
-            UPDATE showcase_products 
-            SET stock_quantity = ${real_available_quantity},
-                updated_at = NOW()
-            WHERE id = ${product_id}
-          `);
-          syncedKardex++;
-          console.log(`✅ [KARDEX-SYNC] Updated ${product_name} stock to ${real_available_quantity}`);
-        } catch (kardexError) {
-          console.error(`❌ [KARDEX-SYNC] Failed to update ${product_name}:`, kardexError);
-        }
-
-        // Update Shop (shop_products) stock quantity  
-        try {
-          await db.execute(sql`
-            UPDATE shop_products 
-            SET stock_quantity = ${real_available_quantity},
-                updated_at = NOW()
-            WHERE sku = ${product_sku}
-          `);
-          syncedShop++;
-          console.log(`✅ [SHOP-SYNC] Updated ${product_name} stock to ${real_available_quantity}`);
-        } catch (shopError) {
-          console.error(`❌ [SHOP-SYNC] Failed to update ${product_name}:`, shopError);
-        }
-      }
-
-      console.log(`🎯 [WAREHOUSE-SYNC] Synchronization completed - Kardex: ${syncedKardex}, Shop: ${syncedShop}`);
-
-      res.json({
-        success: true,
-        message: `همگام‌سازی موجودی کامل شد - کاردکس: ${syncedKardex} محصول، فروشگاه: ${syncedShop} محصول`,
-        data: {
-          totalProducts: warehouseTotals.rows.length,
-          syncedKardex,
-          syncedShop,
-          products: warehouseTotals.rows.map(p => ({
-            productId: p.product_id,
-            productName: p.product_name,
-            realAvailableQuantity: p.real_available_quantity
-          }))
-        }
-      });
-      
-    } catch (error) {
-      console.error("🔄 [WAREHOUSE-SYNC] Error syncing warehouse quantities:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در همگام‌سازی موجودی انبار"
-      });
-    }
-  });
-
-  // Get warehouse inventory for a specific product
-  app.get("/api/warehouse/inventory/:productId", async (req, res) => {
-    try {
-      const productId = parseInt(req.params.productId);
-      if (isNaN(productId)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "شناسه محصول نامعتبر است" 
-        });
-      }
-
-      const inventory = await db.select()
-        .from(warehouseInventory)
-        .where(eq(warehouseInventory.productId, productId))
-        .orderBy(warehouseInventory.createdAt);
-
-      const totalStock = inventory.reduce((sum, item) => sum + item.quantity, 0);
-
-      res.json({
-        success: true,
-        data: {
-          inventory,
-          totalStock,
-          batchCount: inventory.length
-        },
-        message: "موجودی انبار دریافت شد"
-      });
-    } catch (error) {
-      console.error("Error getting warehouse inventory:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت موجودی انبار"
-      });
-    }
-  });
-
-  // Increase warehouse stock with batch number
-  app.post("/api/warehouse/increase-stock", async (req, res) => {
-    try {
-      const { productId, quantity, batchNumber, batchType, productName, productSku, reason } = req.body;
-
-      if (!productId || !quantity || !batchNumber || !productName || !productSku) {
-        return res.status(400).json({
-          success: false,
-          message: "اطلاعات ضروری ناقص است"
-        });
-      }
-
-      const increaseQuantity = parseInt(quantity);
-      if (isNaN(increaseQuantity) || increaseQuantity <= 0) {
-        return res.status(400).json({
-          success: false,
-          message: "مقدار افزایش باید عدد مثبت باشد"
-        });
-      }
-
-      // Check if batch already exists for existing batch type
-      if (batchType === 'existing') {
-        const existingBatch = await db.select()
-          .from(warehouseInventory)
-          .where(
-            and(
-              eq(warehouseInventory.productId, productId),
-              eq(warehouseInventory.batchNumber, batchNumber)
-            )
-          )
-          .limit(1);
-
-        if (existingBatch.length > 0) {
-          // Update existing batch
-          await db.execute(sql`
-            UPDATE warehouse_inventory 
-            SET quantity = quantity + ${increaseQuantity},
-                updated_at = NOW()
-            WHERE id = ${existingBatch[0].id}
-          `);
-
-          console.log(`✅ [WAREHOUSE] Increased existing batch ${batchNumber} by ${increaseQuantity} units`);
-        } else {
-          return res.status(404).json({
-            success: false,
-            message: "بچ موجود یافت نشد"
-          });
-        }
-      } else {
-        // Create new batch
-        await db.execute(sql`
-          INSERT INTO warehouse_inventory (
-            product_id, product_name, product_sku, batch_number, batch_type,
-            quantity, received_date, quality_status, notes, created_at, updated_at
-          ) VALUES (
-            ${productId}, ${productName}, ${productSku}, ${batchNumber}, ${batchType || 'new'},
-            ${increaseQuantity}, NOW(), 'approved', 
-            ${reason || `ایجاد بچ جدید با ${increaseQuantity} واحد`}, NOW(), NOW()
-          )
-        `);
-
-        console.log(`✅ [WAREHOUSE] Created new batch ${batchNumber} with ${increaseQuantity} units`);
-      }
-
-      // Update کاردکس stock quantity (sync from warehouse to کاردکس)
-      await syncWarehouseToKardex(productId);
-
-      res.json({
-        success: true,
-        message: `موجودی با موفقیت ${increaseQuantity} واحد افزایش یافت`
-      });
-    } catch (error) {
-      console.error("Error increasing warehouse stock:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در افزایش موجودی انبار"
-      });
-    }
-  });
-
-  // Get previous batches for a product
-  app.get("/api/warehouse/previous-batches/:productId", async (req, res) => {
-    try {
-      const productId = parseInt(req.params.productId);
-      
-      const batches = await db.execute(sql`
-        SELECT DISTINCT batch_number, batch_type, 
-               MAX(created_at) as last_used
-        FROM warehouse_inventory 
-        WHERE product_id = ${productId}
-        GROUP BY batch_number, batch_type
-        ORDER BY last_used DESC
-        LIMIT 10
-      `);
-
-      res.json({
-        success: true,
-        data: batches.rows
-      });
-    } catch (error) {
-      console.error("Error fetching previous batches:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت بچ‌های قبلی"
-      });
-    }
-  });
-
-  // Sync warehouse inventory to کاردکس (warehouse is master)
-  app.post("/api/warehouse/sync-to-kardex/:productId", async (req, res) => {
-    try {
-      const productId = parseInt(req.params.productId);
-      await syncWarehouseToKardex(productId);
-
-      res.json({
-        success: true,
-        message: "همگام‌سازی انبار به کاردکس انجام شد"
-      });
-    } catch (error) {
-      console.error("Error syncing warehouse to kardex:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در همگام‌سازی"
-      });
-    }
-  });
-
-  // Sync warehouse inventory to both کاردکس and shop (warehouse is master)
-  async function syncWarehouseToKardex(productId: number) {
-    try {
-      // Get total warehouse inventory for this product using simple query
-      const result = await db.execute(sql`
-        SELECT COALESCE(SUM(quantity), 0) as total_stock 
-        FROM warehouse_inventory 
-        WHERE product_id = ${productId}
-      `);
-      
-      const totalWarehouseStock = result.rows[0]?.total_stock || 0;
-
-      // Update کاردکس (showcase_products) with warehouse stock
-      await db.execute(sql`
-        UPDATE showcase_products 
-        SET stock_quantity = ${totalWarehouseStock} 
-        WHERE id = ${productId}
-      `);
-
-      console.log(`🔄 [SYNC] Updated کاردکس product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
-
-      // Update فروشگاه (shop_products) with total warehouse stock
-      await db.execute(sql`
-        UPDATE shop_products 
-        SET stock_quantity = ${totalWarehouseStock} 
-        WHERE parent_product_id = ${productId}
-      `);
-
-      console.log(`🔄 [SYNC] Updated فروشگاه product ${productId} stock to ${totalWarehouseStock} units from warehouse`);
-      console.log(`📝 [INFO] هم کاردکس و هم فروشگاه با مجموع موجودی انبار همگام‌سازی شدند`);
-
-      return { success: true, totalStock: totalWarehouseStock };
-    } catch (error) {
-      console.error("Error syncing warehouse to kardex and shop:", error);
-      throw error;
-    }
-  }
-
-  // Remove sold-out batches automatically
-  app.post("/api/warehouse/remove-sold-out-batches", async (req, res) => {
-    try {
-      const soldOutBatches = await db.select()
-        .from(warehouseInventory)
-        .where(eq(warehouseInventory.quantity, 0));
-
-      if (soldOutBatches.length > 0) {
-        await db.delete(warehouseInventory)
-          .where(eq(warehouseInventory.quantity, 0));
-
-        console.log(`🗑️ [WAREHOUSE] Marked ${soldOutBatches.length} sold-out batches for removal`);
-      }
-
-      res.json({
-        success: true,
-        data: { removedBatches: soldOutBatches.length },
-        message: `${soldOutBatches.length} بچ تمام شده حذف شد`
-      });
-    } catch (error) {
-      console.error("Error removing sold-out batches:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در حذف بچ‌های تمام شده"
       });
     }
   });
@@ -22575,7 +22119,6 @@ momtazchem.com
       const movementData = req.body;
       console.log("📦 [WAREHOUSE-INVENTORY-SYNC] Received inventory movement from کاردکس:", {
         productName: movementData.productName,
-        batchNumber: movementData.batchNumber,
         movementType: movementData.movementType,
         quantity: movementData.quantity,
         previousStock: movementData.previousStock,
@@ -22584,7 +22127,7 @@ momtazchem.com
       });
       
       // Store the inventory movement for warehouse staff to see
-      // Enhanced with batch tracking
+      // In a production system, you might want to store this in a proper inventory_movements table
       const movementRecord = {
         id: Date.now(), // Simple ID generation
         timestamp: new Date().toISOString(),
@@ -22592,7 +22135,6 @@ momtazchem.com
         productName: movementData.productName,
         productSku: movementData.productSku,
         productBarcode: movementData.productBarcode,
-        batchNumber: movementData.batchNumber,
         movementType: movementData.movementType,
         quantity: movementData.quantity,
         previousStock: movementData.previousStock,
@@ -22603,75 +22145,23 @@ momtazchem.com
         status: 'active'
       };
       
-      // Handle batch tracking logic
-      if (movementData.batchNumber) {
-        console.log(`📦 [BATCH-TRACKING] Processing batch ${movementData.batchNumber} for ${movementData.productName}`);
-        
-        // If stock is now 0 or negative for this batch, mark it for removal
-        if (movementData.newStock <= 0) {
-          console.log(`🗑️ [BATCH-TRACKING] Batch ${movementData.batchNumber} sold out - marking for removal`);
-          movementRecord.status = 'sold_out';
-          movementRecord.notes = `${movementRecord.notes} - بچ فروخته شد و حذف می‌شود`;
-        }
-      }
-      
       console.log(`✅ [WAREHOUSE-INVENTORY-SYNC] Successfully recorded inventory movement for ${movementData.productName}`);
       console.log(`📊 [WAREHOUSE-INVENTORY-SYNC] Movement details:`, {
         type: movementData.movementType,
-        batch: movementData.batchNumber,
         change: `${movementData.previousStock} → ${movementData.newStock}`,
-        difference: movementData.movementType.includes('افزایش') ? `+${movementData.quantity}` : `-${movementData.quantity}`,
-        batchStatus: movementData.newStock <= 0 ? 'SOLD_OUT' : 'ACTIVE'
+        difference: movementData.movementType.includes('افزایش') ? `+${movementData.quantity}` : `-${movementData.quantity}`
       });
       
       res.json({
         success: true,
         message: "موجودی انبار با موفقیت همگام‌سازی شد",
-        movement: movementRecord,
-        batchStatus: movementData.newStock <= 0 ? 'sold_out' : 'active'
+        movement: movementRecord
       });
     } catch (error) {
       console.error("❌ [WAREHOUSE-INVENTORY-SYNC] Error:", error);
       res.status(500).json({
         success: false,
         message: "خطا در همگام‌سازی موجودی انبار"
-      });
-    }
-  });
-
-  // Remove sold-out batches from warehouse inventory
-  app.post("/api/warehouse/remove-sold-out-batches", async (req, res) => {
-    try {
-      console.log("🗑️ [BATCH-CLEANUP] Starting automatic cleanup of sold-out batches...");
-      
-      // In a production system, this would query a proper warehouse_inventory table
-      // and remove rows where batchStatus = 'sold_out' and stock <= 0
-      
-      const cleanupResults = {
-        removedBatches: 0,
-        cleanedProducts: [],
-        timestamp: new Date().toISOString()
-      };
-      
-      // Simulate batch cleanup logic
-      // In real implementation, this would:
-      // 1. Find all warehouse inventory rows with sold-out batches
-      // 2. Remove those rows from warehouse_inventory table
-      // 3. Log the cleanup activity
-      
-      console.log("✅ [BATCH-CLEANUP] Sold-out batch cleanup completed");
-      console.log(`📊 [BATCH-CLEANUP] Results: ${cleanupResults.removedBatches} batches removed`);
-      
-      res.json({
-        success: true,
-        message: "بچ‌های فروخته شده با موفقیت حذف شدند",
-        results: cleanupResults
-      });
-    } catch (error) {
-      console.error("❌ [BATCH-CLEANUP] Error:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در حذف بچ‌های فروخته شده"
       });
     }
   });

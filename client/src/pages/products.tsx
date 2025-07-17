@@ -155,15 +155,6 @@ export default function ProductsPage() {
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
-  // Stock increase form state
-  const [stockIncreaseQuantity, setStockIncreaseQuantity] = useState<string>("");
-  const [stockIncreaseBatchType, setStockIncreaseBatchType] = useState<string>("");
-  const [stockIncreaseBatchNumber, setStockIncreaseBatchNumber] = useState<string>("");
-  const [isIncreasingStock, setIsIncreasingStock] = useState(false);
-  const [previousBatches, setPreviousBatches] = useState<any[]>([]);
-  const [showPreviousBatches, setShowPreviousBatches] = useState(false);
-  
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { t, language, direction } = useLanguage();
@@ -317,152 +308,6 @@ export default function ProductsPage() {
       });
     },
   });
-
-  // Stock increase mutation
-  const { mutate: increaseStock } = useMutation({
-    mutationFn: (data: {
-      productId: number;
-      quantity: number;
-      batchNumber: string;
-      batchType: string;
-      productName: string;
-      productSku: string;
-      reason?: string;
-    }) => {
-      setIsIncreasingStock(true);
-      return apiRequest("/api/warehouse/increase-stock", { method: "POST", body: data });
-    },
-    onSuccess: () => {
-      setIsIncreasingStock(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      // Clear form
-      setStockIncreaseQuantity("");
-      setStockIncreaseBatchType("");
-      setStockIncreaseBatchNumber("");
-      toast({
-        title: "موفقیت",
-        description: "موجودی انبار با موفقیت افزایش یافت",
-      });
-    },
-    onError: (error: any) => {
-      setIsIncreasingStock(false);
-      toast({
-        title: "خطا",
-        description: error?.message || "خطا در افزایش موجودی انبار",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Sync warehouse to kardex mutation
-  const { mutate: syncToKardex } = useMutation({
-    mutationFn: (productId: number) => {
-      return apiRequest(`/api/warehouse/sync-to-kardex/${productId}`, { method: "POST" });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      toast({
-        title: "موفقیت",
-        description: "همگام‌سازی انبار با کاردکس انجام شد",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا",
-        description: error?.message || "خطا در همگام‌سازی",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Fetch previous batches for a product
-  const fetchPreviousBatches = async (productId: number) => {
-    try {
-      const response = await apiRequest(`/api/warehouse/previous-batches/${productId}`);
-      if (response.success) {
-        setPreviousBatches(response.data);
-        setShowPreviousBatches(true);
-      }
-    } catch (error) {
-      console.error("Error fetching previous batches:", error);
-      toast({
-        title: "خطا",
-        description: "خطا در دریافت بچ‌های قبلی",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Handle previous batch selection
-  const handlePreviousBatchSelect = (batch: any) => {
-    setStockIncreaseBatchNumber(batch.batch_number);
-    setStockIncreaseBatchType(batch.batch_type || "existing");
-    setShowPreviousBatches(false);
-    toast({
-      title: "بچ انتخاب شد",
-      description: `بچ ${batch.batch_number} انتخاب شد`,
-    });
-  };
-
-  // Handle stock increase
-  const handleStockIncrease = (product: ShowcaseProduct) => {
-    const quantity = parseInt(stockIncreaseQuantity);
-    
-    if (!quantity || quantity <= 0) {
-      toast({
-        title: "خطا",
-        description: "لطفاً مقدار معتبری برای افزایش موجودی وارد کنید",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const isNonChemical = form.watch('isNonChemical');
-    let batchNumber = stockIncreaseBatchNumber;
-    let batchType = stockIncreaseBatchType;
-
-    // For non-chemical products, batch fields are not required
-    if (isNonChemical) {
-      batchNumber = "N/A";
-      batchType = "none";
-    } else {
-      // For chemical products, batch fields are required
-      if (!batchType) {
-        toast({
-          title: "خطا",
-          description: "لطفاً نوع بچ را انتخاب کنید",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (!batchNumber) {
-        toast({
-          title: "خطا",
-          description: "لطفاً شماره بچ را وارد کنید",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    const stockData = {
-      productId: product.id,
-      quantity,
-      batchNumber,
-      batchType,
-      productName: product.name,
-      productSku: product.sku || '',
-      reason: 'Manual stock increase from Kardex'
-    };
-
-    increaseStock(stockData);
-  };
-
-  // Handle sync to kardex
-  const handleSyncToKardex = (product: ShowcaseProduct) => {
-    syncToKardex(product.id);
-  };
 
   // Handle delete product with confirmation
   const handleDeleteProduct = (product: ShowcaseProduct) => {
@@ -1953,22 +1798,21 @@ export default function ProductsPage() {
 {t.weightsAndBatch}
                   </h3>
                   
-                  {/* ردیف موجودی - فقط نمایشی از انبار */}
+                  {/* ردیف موجودی */}
                   <div className="grid grid-cols-3 gap-3 mb-3">
                     <FormField
                       control={form.control}
                       name="stockQuantity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium flex items-center gap-2 text-blue-600">
-                            موجودی انبار (فقط نمایش)
-                            <Lock className="h-3 w-3 text-blue-400" />
+                          <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.stockQuantity ? 'text-red-600' : ''}`}>
+{t.stockQuantity}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>موجودی فعلی از سیستم انبار - فقط قابل مشاهده</p>
+                                <p>تعداد موجودی فعلی محصول در انبار</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -1976,13 +1820,16 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               placeholder="0" 
-                              className="h-9 bg-blue-50 text-blue-800 border-blue-200"
+                              className={`h-9 ${validationErrors.stockQuantity ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
-                              value={field.value || '0'}
-                              readOnly={true}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
-                          <p className="text-xs text-blue-600 mt-1">از سیستم انبار همگام‌سازی می‌شود</p>
+                          <FormMessage />
+                          {validationErrors.stockQuantity && (
+                            <p className="text-sm text-red-600 mt-1">{validationErrors.stockQuantity}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -2154,127 +2001,6 @@ export default function ProductsPage() {
                       )}
                     />
                   </div>
-                </div>
-
-                {/* بخش افزایش موجودی با شماره بچ */}
-                <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-4 rounded-lg border border-emerald-200">
-                  <h3 className="text-lg font-semibold text-emerald-800 mb-3 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    افزایش موجودی انبار
-                    {form.watch('isNonChemical') && (
-                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
-                        محصول غیر شیمیایی
-                      </span>
-                    )}
-                  </h3>
-                  
-                  <div className="grid grid-cols-3 gap-3 mb-3">
-                    <div>
-                      <label className="text-sm font-medium text-emerald-700 mb-2 block">
-                        مقدار افزایش
-                      </label>
-                      <Input 
-                        type="number" 
-                        placeholder="0" 
-                        className="h-9 border-emerald-300 focus:border-emerald-500"
-                        value={stockIncreaseQuantity}
-                        onChange={(e) => setStockIncreaseQuantity(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className={`text-sm font-medium mb-2 block ${form.watch('isNonChemical') ? 'text-gray-400' : 'text-emerald-700'}`}>
-                        نوع بچ
-                        {form.watch('isNonChemical') && (
-                          <span className="text-xs ml-1">(غیر فعال)</span>
-                        )}
-                      </label>
-                      <Select 
-                        disabled={form.watch('isNonChemical')}
-                        value={stockIncreaseBatchType}
-                        onValueChange={setStockIncreaseBatchType}
-                      >
-                        <SelectTrigger className={`h-9 ${form.watch('isNonChemical') ? 'bg-gray-100 border-gray-300 text-gray-400' : 'border-emerald-300'}`}>
-                          <SelectValue placeholder={form.watch('isNonChemical') ? "غیر کاربردی برای محصول غیر شیمیایی" : "انتخاب نوع"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="new">بچ جدید</SelectItem>
-                          <SelectItem value="existing">بچ موجود</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <label className={`text-sm font-medium mb-2 block ${form.watch('isNonChemical') ? 'text-gray-400' : 'text-emerald-700'}`}>
-                        شماره بچ
-                        {form.watch('isNonChemical') && (
-                          <span className="text-xs ml-1">(غیر فعال)</span>
-                        )}
-                      </label>
-                      <div className="flex gap-2">
-                        <Input 
-                          placeholder={form.watch('isNonChemical') ? "غیر کاربردی" : "مثال: B2025-001"} 
-                          className={`h-9 flex-1 ${form.watch('isNonChemical') ? 'bg-gray-100 border-gray-300 text-gray-400' : 'border-emerald-300 focus:border-emerald-500'}`}
-                          disabled={form.watch('isNonChemical')}
-                          value={stockIncreaseBatchNumber}
-                          onChange={(e) => setStockIncreaseBatchNumber(e.target.value)}
-                        />
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className={`h-9 px-3 ${form.watch('isNonChemical') ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed' : 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200'}`}
-                              disabled={form.watch('isNonChemical')}
-                              onClick={() => editingProduct && fetchPreviousBatches(editingProduct.id)}
-                            >
-                              <Database className="h-3 w-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>بچ‌های قبلی</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      className="bg-emerald-100 border-emerald-300 text-emerald-700 hover:bg-emerald-200"
-                      onClick={() => handleStockIncrease(editingProduct!)}
-                      disabled={isIncreasingStock || !stockIncreaseQuantity}
-                    >
-                      {isIncreasingStock ? (
-                        <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                      ) : (
-                        <Plus className="h-4 w-4 mr-1" />
-                      )}
-                      {isIncreasingStock ? "در حال افزایش..." : "افزایش موجودی"}
-                    </Button>
-                    
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      className="bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200"
-                      onClick={() => handleSyncToKardex(editingProduct!)}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-1" />
-                      تست همگام‌سازی
-                    </Button>
-                  </div>
-                  
-                  <p className="text-xs text-emerald-600 mt-2">
-                    {form.watch('isNonChemical') ? 
-                      "افزایش موجودی در انبار بدون نیاز به شماره بچ برای محصولات غیر شیمیایی" :
-                      "افزایش موجودی در انبار و همگام‌سازی خودکار با کاردکس"
-                    }
-                  </p>
                 </div>
 
                 {/* برچسب‌ها و تنظیمات اضافی */}
@@ -2716,56 +2442,6 @@ export default function ProductsPage() {
               </form>
             </Form>
           </TooltipProvider>
-        </DialogContent>
-      </Dialog>
-
-      {/* Previous Batches Dialog */}
-      <Dialog open={showPreviousBatches} onOpenChange={setShowPreviousBatches}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-amber-600" />
-              بچ‌های قبلی
-            </DialogTitle>
-            <DialogDescription>
-              انتخاب بچ از فهرست بچ‌های قبلی
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {previousBatches.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">هیچ بچ قبلی یافت نشد</p>
-            ) : (
-              previousBatches.map((batch, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  className="w-full justify-start text-right p-3 h-auto hover:bg-amber-50"
-                  onClick={() => handlePreviousBatchSelect(batch)}
-                >
-                  <div className="text-right">
-                    <div className="font-medium text-amber-700">
-                      {batch.batch_number}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {batch.batch_type === 'new' ? 'بچ جدید' : 'بچ موجود'}
-                    </div>
-                    {batch.last_used && (
-                      <div className="text-xs text-gray-400">
-                        آخرین استفاده: {new Date(batch.last_used).toLocaleDateString('fa-IR')}
-                      </div>
-                    )}
-                  </div>
-                </Button>
-              ))
-            )}
-          </div>
-          
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={() => setShowPreviousBatches(false)}>
-              بستن
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
 

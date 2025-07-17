@@ -120,51 +120,6 @@ export const insertCustomerAddressSchema = createInsertSchema(customerAddresses)
 export type InsertCustomerAddress = z.infer<typeof insertCustomerAddressSchema>;
 export type CustomerAddress = typeof customerAddresses.$inferSelect;
 
-// =============================================================================
-// WAREHOUSE INVENTORY WITH BATCH TRACKING
-// =============================================================================
-
-// Warehouse inventory table with comprehensive batch tracking
-export const warehouseInventory = pgTable("warehouse_inventory", {
-  id: serial("id").primaryKey(),
-  productId: integer("product_id").notNull(), // Reference to showcase_products
-  productName: text("product_name").notNull(),
-  productSku: text("product_sku").notNull(),
-  batchNumber: text("batch_number").notNull(), // Production batch number (e.g., B2025-001)
-  stockQuantity: integer("stock_quantity").notNull().default(0),
-  
-  // Batch information
-  productionDate: timestamp("production_date"),
-  expiryDate: timestamp("expiry_date"),
-  qualityStatus: text("quality_status").default("approved"), // approved, pending, rejected
-  
-  // Location tracking
-  warehouseLocation: text("warehouse_location"), // Shelf/bin location
-  section: text("section"), // Warehouse section (A, B, C)
-  aisle: text("aisle"), // Aisle number
-  shelf: text("shelf"), // Shelf number
-  
-  // Inventory movements
-  lastMovementType: text("last_movement_type"), // increase, decrease, transfer
-  lastMovementDate: timestamp("last_movement_date"),
-  lastMovementReason: text("last_movement_reason"),
-  
-  // Status tracking
-  isActive: boolean("is_active").default(true),
-  isSoldOut: boolean("is_sold_out").default(false), // For automatic batch removal
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const insertWarehouseInventorySchema = createInsertSchema(warehouseInventory).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertWarehouseInventory = z.infer<typeof insertWarehouseInventorySchema>;
-export type WarehouseInventory = typeof warehouseInventory.$inferSelect;
-
 // Customer orders table
 export const customerOrders = pgTable("customer_orders", {
   id: serial("id").primaryKey(),
