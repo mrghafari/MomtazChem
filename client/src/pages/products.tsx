@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
@@ -61,14 +61,6 @@ const formSchema = insertShowcaseProductSchema.extend({
   showWhenOutOfStock: z.boolean().default(false),
   // Non-chemical product flag
   isNonChemical: z.boolean().default(false),
-});
-
-// Add quantity form schema for warehouse batch
-const addQuantityFormSchema = z.object({
-  batchNumber: z.string().min(1, "شماره بچ الزامی است"),
-  quantity: z.coerce.number().min(1, "مقدار باید بیشتر از صفر باشد"),
-  unitPrice: z.coerce.number().min(0, "قیمت واحد نمی‌تواند منفی باشد").optional(),
-  notes: z.string().optional(),
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -161,12 +153,8 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
-  const [addingQuantityProduct, setAddingQuantityProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [expandedProducts, setExpandedProducts] = useState<Set<number>>(new Set());
-  const [batchHistory, setBatchHistory] = useState<Record<number, any[]>>({});
-  const [batchSummary, setBatchSummary] = useState<Record<number, any>>({});
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { t, language, direction } = useLanguage();
@@ -337,102 +325,6 @@ export default function ProductsPage() {
     }
   };
 
-  // Toggle product expansion for batch history
-  const toggleProductExpansion = (productId: number) => {
-    const newExpanded = new Set(expandedProducts);
-    if (newExpanded.has(productId)) {
-      newExpanded.delete(productId);
-    } else {
-      newExpanded.add(productId);
-      // Fetch batch data when expanding
-      fetchBatchData(productId);
-    }
-    setExpandedProducts(newExpanded);
-  };
-
-  // Fetch batch data for a product
-  const fetchBatchData = async (productId: number) => {
-    try {
-      const response = await fetch(`/api/kardex-batches/${productId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setBatchHistory(prev => ({
-          ...prev,
-          [productId]: data.batches || []
-        }));
-        setBatchSummary(prev => ({
-          ...prev,
-          [productId]: data.summary || {}
-        }));
-      }
-    } catch (error) {
-      console.error('Failed to fetch batch data:', error);
-    }
-  };
-
-  // Add quantity mutation
-  const { mutate: addQuantity } = useMutation({
-    mutationFn: (data: { productId: number } & z.infer<typeof addQuantityFormSchema>) => {
-      const product = products?.find(p => p.id === data.productId);
-      const requestData = {
-        sku: product?.sku || '',
-        batchNumber: data.batchNumber,
-        quantity: data.quantity,
-        unitPrice: data.unitPrice,
-        notes: data.notes
-      };
-      return apiRequest("/api/warehouse/add-batch", { method: "POST", body: requestData });
-    },
-    onSuccess: async (result, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setAddingQuantityProduct(null);
-      addQuantityForm.reset();
-      
-      // Refresh batch history for this product if it's expanded
-      if (expandedProducts.has(variables.productId)) {
-        await fetchBatchData(variables.productId);
-      }
-      
-      toast({
-        title: "✅ موفقیت",
-        description: result.message || "مقدار جدید با موفقیت اضافه شد",
-      });
-      // Immediate refresh to show changes
-      window.location.reload();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "❌ خطا",
-        description: error.message || "افزودن مقدار ناموفق بود",
-        variant: "destructive",
-      });
-    },
-  });
-
-
-
-  // Handle add quantity to product
-  const handleAddQuantity = (product: ShowcaseProduct) => {
-    setAddingQuantityProduct(product);
-    addQuantityForm.setValue("unitPrice", parseFloat(product.unitPrice || "0"));
-    addQuantityForm.reset({
-      batchNumber: "",
-      quantity: 0,
-      unitPrice: parseFloat(product.unitPrice || "0"),
-      notes: ""
-    });
-  };
-
-  // Confirm add quantity
-  const confirmAddQuantity = (data: z.infer<typeof addQuantityFormSchema>) => {
-    if (addingQuantityProduct) {
-      addQuantity({
-        productId: addingQuantityProduct.id,
-        ...data
-      });
-    }
-  };
-
   // Quick sync toggle mutation
   const { mutate: toggleSync } = useMutation({
     mutationFn: ({ id, syncWithShop }: { id: number; syncWithShop: boolean }) => {
@@ -507,8 +399,6 @@ export default function ProductsPage() {
     generateSKUMutation.mutate(productData);
   };
 
-
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -552,21 +442,6 @@ export default function ProductsPage() {
       grossWeight: 0,
       // Batch tracking
       batchNumber: "",
-    },
-  });
-
-  // Add quantity form
-  const addQuantityForm = useForm<z.infer<typeof addQuantityFormSchema>>({
-    resolver: zodResolver(addQuantityFormSchema),
-    defaultValues: {
-      batchNumber: "",
-      quantity: 1,
-      unitPrice: 0,
-      productionDate: "",
-      expiryDate: "",
-      supplier: "",
-      warehouseLocation: "",
-      notes: "",
     },
   });
 
@@ -1280,32 +1155,11 @@ export default function ProductsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => toggleProductExpansion(product.id)}
-                          className="h-8 w-8 p-0 hover:bg-purple-50 hover:text-purple-600"
-                          title="نمایش/مخفی کردن بچ‌ها"
-                        >
-                          {expandedProducts.has(product.id) ? 
-                            <ChevronUp className="w-4 h-4" /> : 
-                            <ChevronDown className="w-4 h-4" />
-                          }
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
                           onClick={() => toggleSync({ id: product.id, syncWithShop: !product.syncWithShop })}
                           className={`h-8 w-16 p-0 text-xs font-medium ${product.syncWithShop ? 'hover:bg-red-50 hover:text-red-600 bg-green-50 text-green-700' : 'hover:bg-green-50 hover:text-green-600 bg-gray-50 text-gray-700'}`}
                           title={product.syncWithShop ? 'مخفی کردن از فروشگاه' : 'نمایش در فروشگاه'}
                         >
                           {product.syncWithShop ? 'مخفی کردن' : 'نمایش'}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAddQuantity(product)}
-                          className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
-                          title="افزودن مقدار جدید با شماره بچ"
-                        >
-                          <Plus className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -1503,144 +1357,6 @@ export default function ProductsPage() {
                           )}
                         </div>
                       </div>
-
-                      {/* Batch History Section - Show when expanded */}
-                      {expandedProducts.has(product.id) && (
-                        <div className="mt-4 border-t pt-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                              📦 تاریخچه بچ‌ها
-                            </h4>
-                            {batchSummary[product.id] && (
-                              <div className="text-xs text-gray-600 space-x-2">
-                                <span>ضایعات: {batchSummary[product.id].totalWaste || 0}</span>
-                                <span>در ترانزیت: {batchSummary[product.id].totalInTransit || 0}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {batchHistory[product.id] && batchHistory[product.id].length > 0 ? (
-                            <div className="space-y-2 max-h-60 overflow-y-auto">
-                              {batchHistory[product.id].map((batch, index) => (
-                                <div 
-                                  key={index} 
-                                  className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700"
-                                >
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                                    <div>
-                                      <span className="font-medium text-gray-600">بچ:</span>
-                                      <span className="ml-1 font-mono bg-blue-100 px-1 rounded">{batch.batchNumber}</span>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium text-gray-600">مقدار:</span>
-                                      <span className="ml-1 text-green-600 font-medium">{batch.quantity}</span>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium text-gray-600">ضایعات:</span>
-                                      <span className="ml-1 text-red-600">{batch.wasteQuantity || 0}</span>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium text-gray-600">ترانزیت:</span>
-                                      <span className="ml-1 text-yellow-600">{batch.inTransitQuantity || 0}</span>
-                                    </div>
-                                  </div>
-                                  {batch.productionDate && (
-                                    <div className="mt-2 text-xs text-gray-500">
-                                      تاریخ تولید: {new Date(batch.productionDate).toLocaleDateString('fa-IR')}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                              
-                              {/* آخرین ردیف: موجودی کل انبار */}
-                              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700 mt-4">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <Package className="w-4 h-4 text-blue-600" />
-                                    <span className="font-bold text-blue-800 dark:text-blue-200">موجودی کل انبار:</span>
-                                  </div>
-                                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                    {product.stockQuantity || 0} {product.stockUnit || 'واحد'}
-                                  </span>
-                                </div>
-                                
-                                {/* اطلاعات بچ اولیه با موجودی */}
-                                {batchHistory[product.id] && batchHistory[product.id].length > 0 && (
-                                  <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-700">
-                                    <div className="text-xs text-blue-700 dark:text-blue-300 mb-2 font-medium">
-                                      🏷️ بچ اولیه با موجودی:
-                                    </div>
-                                    {(() => {
-                                      // پیدا کردن اولین بچی که موجودی دارد
-                                      const activeBatch = batchHistory[product.id].find(batch => 
-                                        (batch.quantity - (batch.wasteQuantity || 0) - (batch.inTransitQuantity || 0)) > 0
-                                      );
-                                      
-                                      if (activeBatch) {
-                                        const remainingQuantity = activeBatch.quantity - (activeBatch.wasteQuantity || 0) - (activeBatch.inTransitQuantity || 0);
-                                        return (
-                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs bg-white dark:bg-gray-800 p-2 rounded border">
-                                            <div>
-                                              <span className="font-medium text-gray-600">شماره بچ:</span>
-                                              <span className="ml-1 font-mono bg-green-100 px-1 rounded text-green-800">
-                                                {activeBatch.batchNumber}
-                                              </span>
-                                            </div>
-                                            <div>
-                                              <span className="font-medium text-gray-600">موجودی باقی‌مانده:</span>
-                                              <span className="ml-1 text-green-600 font-bold">{remainingQuantity}</span>
-                                            </div>
-                                            <div>
-                                              <span className="font-medium text-gray-600">مقدار اصلی:</span>
-                                              <span className="ml-1 text-blue-600">{activeBatch.quantity}</span>
-                                            </div>
-                                            {activeBatch.productionDate && (
-                                              <div>
-                                                <span className="font-medium text-gray-600">تاریخ تولید:</span>
-                                                <span className="ml-1 text-gray-700 text-xs">
-                                                  {new Date(activeBatch.productionDate).toLocaleDateString('fa-IR')}
-                                                </span>
-                                              </div>
-                                            )}
-                                          </div>
-                                        );
-                                      } else {
-                                        return (
-                                          <div className="text-center py-2 text-gray-500 text-xs bg-white dark:bg-gray-800 rounded border">
-                                            هیچ بچی با موجودی فعال یافت نشد
-                                          </div>
-                                        );
-                                      }
-                                    })()}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <div className="text-center py-4 text-gray-500 text-sm">
-                                هیچ بچی برای این محصول ثبت نشده است
-                              </div>
-                              
-                              {/* ردیف موجودی کل حتی بدون بچ */}
-                              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <Package className="w-4 h-4 text-blue-600" />
-                                    <span className="font-bold text-blue-800 dark:text-blue-200">موجودی کل انبار:</span>
-                                  </div>
-                                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                    {product.stockQuantity || 0} {product.stockUnit || 'واحد'}
-                                  </span>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-600">
-                                  💡 برای ایجاد بچ جدید از دکمه "+" استفاده کنید
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -2090,31 +1806,27 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.stockQuantity ? 'text-red-600' : ''}`}>
-                            موجودی انبار (محاسبه خودکار)
+{t.stockQuantity}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>موجودی واقعی از مجموع همه بچ‌های انبار محاسبه می‌شود</p>
+                                <p>تعداد موجودی فعلی محصول در انبار</p>
                               </TooltipContent>
                             </Tooltip>
-                            <Lock className="h-3 w-3 text-gray-400" />
                           </FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
-                              placeholder="محاسبه از انبار" 
-                              className="h-9 bg-gray-100 cursor-not-allowed"
+                              placeholder="0" 
+                              className={`h-9 ${validationErrors.stockQuantity ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
-                              value={field.value || 0}
-                              readOnly
-                              disabled
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                             />
                           </FormControl>
-                          <p className="text-xs text-blue-600 mt-1">
-                            💡 موجودی از مجموع بچ‌های انبار محاسبه می‌شود
-                          </p>
+                          <FormMessage />
                           {validationErrors.stockQuantity && (
                             <p className="text-sm text-red-600 mt-1">{validationErrors.stockQuantity}</p>
                           )}
@@ -2760,153 +2472,6 @@ export default function ProductsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Add Quantity Dialog */}
-      <Dialog open={!!addingQuantityProduct} onOpenChange={() => setAddingQuantityProduct(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-right">
-              🔢 افزودن مقدار جدید - {addingQuantityProduct?.name}
-            </DialogTitle>
-            <DialogDescription className="text-right text-gray-600">
-              مقدار جدید با شماره بچ جدید برای این محصول اضافه کنید. این مقدار به موجودی کل محصول در انبار اضافه خواهد شد.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Form {...addQuantityForm}>
-            <form onSubmit={addQuantityForm.handleSubmit(confirmAddQuantity)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                {/* Quantity and Batch */}
-                <FormField
-                  control={addQuantityForm.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">مقدار (کیلوگرم)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="number" 
-                          step="0.01"
-                          min="0.01"
-                          placeholder="10.5"
-                          className="text-right"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={addQuantityForm.control}
-                  name="batchNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">شماره بچ</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="BATCH-2025-001"
-                          className="text-right"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Unit Price and Total Value */}
-                <FormField
-                  control={addQuantityForm.control}
-                  name="unitPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right">قیمت واحد محصول (فقط نمایش)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="number" 
-                          step="0.01"
-                          min="0"
-                          placeholder="5000"
-                          className="text-right bg-gray-50 cursor-not-allowed"
-                          readOnly
-                          disabled
-                          title="قیمت محصول ثابت است و تغییر نمی‌کند"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                      <p className="text-xs text-gray-500 text-right mt-1">
-                        💡 قیمت محصول ثابت باقی می‌ماند و تغییر نمی‌کند
-                      </p>
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex items-center justify-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="text-center text-blue-700">
-                    <Package className="w-8 h-8 mx-auto mb-2" />
-                    <p className="text-sm font-medium">افزودن موجودی جدید</p>
-                    <p className="text-xs">قیمت محصول ثابت باقی می‌ماند</p>
-                  </div>
-                </div>
-
-                {/* Notes Field */}
-                <FormField
-                  control={addQuantityForm.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel className="text-right">یادداشت</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="یادداشت اختیاری"
-                          className="text-right"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setAddingQuantityProduct(null)}
-                >
-                  انصراف
-                </Button>
-                <Button 
-                  type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  disabled={addQuantity.isPending}
-                >
-                  {addQuantity.isPending ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      در حال افزودن...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4 mr-2" />
-                      افزودن مقدار
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

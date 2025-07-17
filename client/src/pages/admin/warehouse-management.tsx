@@ -40,9 +40,7 @@ import {
   Plus,
   Minus,
   Save,
-  Printer,
-  ChevronDown,
-  ChevronRight
+  Printer
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
@@ -95,18 +93,6 @@ interface UnifiedProduct {
   shopPrice?: number;
   shopSku?: string;
   shopId?: number;
-  batchNumber?: string;
-  batches?: ProductBatch[];
-}
-
-// Product batch interface for multiple batches per product
-interface ProductBatch {
-  id: string;
-  batchNumber: string;
-  stockQuantity: number;
-  expiryDate?: string;
-  productionDate?: string;
-  notes?: string;
 }
 
 // Goods in transit interface
@@ -159,10 +145,6 @@ const WarehouseManagement: React.FC = () => {
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<any>(null);
   const [orderItems, setOrderItems] = useState<any[]>([]);
 
-  // State for batch management
-  const [productBatches, setProductBatches] = useState<{[productId: number]: ProductBatch[]}>({});
-  const [expandedProducts, setExpandedProducts] = useState<Set<number>>(new Set());
-
   // Helper function to get goods in transit for a product
   const getGoodsInTransitForProduct = (productId: number): number => {
     if (!goodsInTransit) return 0;
@@ -170,19 +152,6 @@ const WarehouseManagement: React.FC = () => {
       .filter((item: any) => item.productId === productId)
       .reduce((total: number, item: any) => total + (item.quantity || 0), 0);
   };
-
-  // Toggle product expansion for batch view
-  const toggleProductExpansion = (productId: number) => {
-    const newExpanded = new Set(expandedProducts);
-    if (newExpanded.has(productId)) {
-      newExpanded.delete(productId);
-    } else {
-      newExpanded.add(productId);
-    }
-    setExpandedProducts(newExpanded);
-  };
-
-
 
   // Excel export function for inventory
   const exportInventoryToExcel = () => {
@@ -196,61 +165,30 @@ const WarehouseManagement: React.FC = () => {
         return;
       }
 
-      // Prepare data for Excel export - including batch information
-      const excelData: any[] = [];
-      
-      unifiedProducts.forEach((product, productIndex) => {
-        const productBatchList = productBatches[product.id] || [];
+      // Prepare data for Excel export
+      const excelData = unifiedProducts.map((product, index) => {
         const goodsInTransit = getGoodsInTransitForProduct(product.id);
         const wasteAmount = wasteAmounts[product.id] || 0;
+        const finalInventory = Math.max(0, (product.stockQuantity || 0) + goodsInTransit - wasteAmount);
         
-        if (productBatchList.length === 0) {
-          // Product without batches
-          const finalInventory = Math.max(0, (product.stockQuantity || 0) + goodsInTransit - wasteAmount);
-          excelData.push({
-            'ردیف': productIndex + 1,
-            'نام محصول': product.name || '',
-            'دسته‌بندی': product.category || '',
-            'کد محصول (SKU)': product.shopSku || '',
-            'شماره بچ': product.batchNumber || 'بدون بچ',
-            'موجودی فعلی': product.stockQuantity || 0,
-            'کالای در راه': goodsInTransit,
-            'ضایعات': wasteAmount,
-            'موجودی نهایی': finalInventory,
-            'حداقل موجودی': product.minStockLevel || 0,
-            'آستانه کم': product.lowStockThreshold || 0,
-            'وضعیت': finalInventory <= 0 ? 'تمام شده' : 
-                     finalInventory <= (product.lowStockThreshold || 0) ? 'بحرانی' :
-                     finalInventory <= (product.minStockLevel || 0) ? 'موجودی کم' : 'موجود',
-            'قیمت واحد (دینار)': product.shopPrice ? parseFloat(product.shopPrice) : 'نامشخص',
-            'ارزش کل (دینار)': product.shopPrice ? 
-              (parseFloat(product.shopPrice) * finalInventory) : 'نامشخص'
-          });
-        } else {
-          // Product with multiple batches
-          productBatchList.forEach((batch, batchIndex) => {
-            const batchFinalInventory = Math.max(0, batch.stockQuantity + goodsInTransit - wasteAmount);
-            excelData.push({
-              'ردیف': `${productIndex + 1}.${batchIndex + 1}`,
-              'نام محصول': batchIndex === 0 ? product.name || '' : '',
-              'دسته‌بندی': batchIndex === 0 ? product.category || '' : '',
-              'کد محصول (SKU)': batchIndex === 0 ? product.shopSku || '' : '',
-              'شماره بچ': batch.batchNumber,
-              'موجودی فعلی': batch.stockQuantity,
-              'کالای در راه': batchIndex === 0 ? goodsInTransit : 0,
-              'ضایعات': batchIndex === 0 ? wasteAmount : 0,
-              'موجودی نهایی': batchFinalInventory,
-              'حداقل موجودی': batchIndex === 0 ? product.minStockLevel || 0 : '',
-              'آستانه کم': batchIndex === 0 ? product.lowStockThreshold || 0 : '',
-              'وضعیت': batchFinalInventory <= 0 ? 'تمام شده' : 
-                       batchFinalInventory <= (product.lowStockThreshold || 0) ? 'بحرانی' :
-                       batchFinalInventory <= (product.minStockLevel || 0) ? 'موجودی کم' : 'موجود',
-              'قیمت واحد (دینار)': batchIndex === 0 && product.shopPrice ? parseFloat(product.shopPrice) : '',
-              'ارزش کل (دینار)': batchIndex === 0 && product.shopPrice ? 
-                (parseFloat(product.shopPrice) * batchFinalInventory) : ''
-            });
-          });
-        }
+        return {
+          'ردیف': index + 1,
+          'نام محصول': product.name || '',
+          'دسته‌بندی': product.category || '',
+          'کد محصول (SKU)': product.shopSku || '',
+          'موجودی فعلی': product.stockQuantity || 0,
+          'کالای در راه': goodsInTransit,
+          'ضایعات': wasteAmount,
+          'موجودی نهایی': finalInventory,
+          'حداقل موجودی': product.minStockLevel || 0,
+          'آستانه کم': product.lowStockThreshold || 0,
+          'وضعیت': finalInventory <= 0 ? 'تمام شده' : 
+                   finalInventory <= (product.lowStockThreshold || 0) ? 'بحرانی' :
+                   finalInventory <= (product.minStockLevel || 0) ? 'موجودی کم' : 'موجود',
+          'قیمت واحد': product.shopPrice ? `${product.shopPrice} دینار` : 'نامشخص',
+          'ارزش کل': product.shopPrice ? 
+            `${(parseFloat(product.shopPrice) * finalInventory).toLocaleString()} دینار` : 'نامشخص'
+        };
       });
 
       // Create workbook and worksheet
@@ -263,7 +201,6 @@ const WarehouseManagement: React.FC = () => {
         { wch: 25 },  // نام محصول
         { wch: 15 },  // دسته‌بندی
         { wch: 15 },  // کد محصول
-        { wch: 15 },  // شماره بچ
         { wch: 12 },  // موجودی فعلی
         { wch: 12 },  // کالای در راه
         { wch: 10 },  // ضایعات
@@ -388,7 +325,7 @@ const WarehouseManagement: React.FC = () => {
   const orders = ordersResponse?.orders || [];
 
   // Fetch unified products for inventory management
-  const { data: unifiedProducts = [], isLoading: productsLoading, refetch: refetchProducts, isSuccess: productsLoaded } = useQuery({
+  const { data: unifiedProducts = [], isLoading: productsLoading, refetch: refetchProducts } = useQuery({
     queryKey: ["/api/inventory/unified/products"],
     retry: false,
   });
@@ -448,29 +385,6 @@ const WarehouseManagement: React.FC = () => {
       });
     }
   }, [settingsData]);
-
-  // Initialize product batches (simulate existing batches)
-  React.useEffect(() => {
-    if (productsLoaded && unifiedProducts && Array.isArray(unifiedProducts) && unifiedProducts.length > 0) {
-      const initialBatches: {[productId: number]: ProductBatch[]} = {};
-      unifiedProducts.forEach((product: UnifiedProduct) => {
-        if (product && product.id) {
-          if (product.batchNumber) {
-            initialBatches[product.id] = [{
-              id: `${product.id}-batch-1`,
-              batchNumber: product.batchNumber,
-              stockQuantity: product.stockQuantity,
-              productionDate: '2025-01-01',
-              notes: 'بچ اصلی'
-            }];
-          } else {
-            initialBatches[product.id] = [];
-          }
-        }
-      });
-      setProductBatches(initialBatches);
-    }
-  }, [productsLoaded, unifiedProducts]);
 
   // Mutation for updating order status
   const updateOrderMutation = useMutation({
@@ -622,24 +536,22 @@ const WarehouseManagement: React.FC = () => {
   }) || [];
 
   // Filter products based on search term
-  const filteredProducts = (unifiedProducts && Array.isArray(unifiedProducts)) 
-    ? unifiedProducts.filter((product: UnifiedProduct) => {
-        if (!product) return false;
-        const searchLower = searchTerm.toLowerCase();
-        return (
-          product.name?.toLowerCase().includes(searchLower) ||
-          product.category?.toLowerCase().includes(searchLower) ||
-          product.shopSku?.toLowerCase().includes(searchLower)
-        );
-      }) 
-    : [];
+  const filteredProducts = unifiedProducts?.filter((product: UnifiedProduct) => {
+    if (!product) return false;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      product.name?.toLowerCase().includes(searchLower) ||
+      product.category?.toLowerCase().includes(searchLower) ||
+      product.shopSku?.toLowerCase().includes(searchLower)
+    );
+  }) || [];
 
   // Calculate inventory statistics
   const inventoryStats = {
-    totalProducts: (unifiedProducts && Array.isArray(unifiedProducts)) ? unifiedProducts.length : 0,
-    outOfStock: (unifiedProducts && Array.isArray(unifiedProducts)) ? unifiedProducts.filter((p: UnifiedProduct) => p && p.stockQuantity <= 0).length : 0,
-    lowStock: (unifiedProducts && Array.isArray(unifiedProducts)) ? unifiedProducts.filter((p: UnifiedProduct) => p && p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold || 10)).length : 0,
-    criticalStock: (unifiedProducts && Array.isArray(unifiedProducts)) ? unifiedProducts.filter((p: UnifiedProduct) => p && p.stockQuantity > 0 && p.stockQuantity <= (p.minStockLevel || 5)).length : 0,
+    totalProducts: unifiedProducts?.length || 0,
+    outOfStock: unifiedProducts?.filter((p: UnifiedProduct) => p.stockQuantity <= 0).length || 0,
+    lowStock: unifiedProducts?.filter((p: UnifiedProduct) => p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold || 10)).length || 0,
+    criticalStock: unifiedProducts?.filter((p: UnifiedProduct) => p.stockQuantity > 0 && p.stockQuantity <= (p.minStockLevel || 5)).length || 0,
   };
 
   // Helper functions for inventory management
@@ -1104,7 +1016,6 @@ const WarehouseManagement: React.FC = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="text-right p-4 min-w-[200px]">محصول</th>
-                        <th className="text-center p-4 min-w-[120px]">شماره بچ</th>
                         <th className="text-center p-4 min-w-[120px]">موجودی</th>
                         <th className="text-center p-4 min-w-[100px]">کالای در راه</th>
                         <th className="text-center p-4 min-w-[100px]">ضایعات</th>
@@ -1112,43 +1023,21 @@ const WarehouseManagement: React.FC = () => {
                         <th className="text-center p-4 min-w-[100px]">وضعیت</th>
                         <th className="text-center p-4 min-w-[100px]">آستانه کم</th>
                         <th className="text-center p-4 min-w-[100px]">آستانه بحرانی</th>
+                        <th className="text-center p-4 min-w-[120px]">عملیات</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredProducts.map((product: UnifiedProduct) => (
-                        <React.Fragment key={product.id}>
-                          {/* Main Product Row */}
-                          <tr className="border-b hover:bg-gray-50 bg-blue-50">
-                            <td className="p-4">
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => toggleProductExpansion(product.id)}
-                                  className="p-1"
-                                >
-                                  {expandedProducts.has(product.id) ? (
-                                    <ChevronDown className="w-4 h-4" />
-                                  ) : (
-                                    <ChevronRight className="w-4 h-4" />
-                                  )}
-                                </Button>
-                                <div>
-                                  <p className="font-medium">{product.name}</p>
-                                  <p className="text-sm text-gray-500">{product.shopSku}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="p-4 text-center">
-                              <span className="font-medium text-blue-600">
-                                {(productBatches[product.id] || []).length} بچ
-                              </span>
-                            </td>
-                            <td className="p-4 text-center">
-                              <span className="font-medium">
-                                {(productBatches[product.id] || []).reduce((total, batch) => total + batch.stockQuantity, 0)}
-                              </span>
-                            </td>
+                        <tr key={product.id} className="border-b hover:bg-gray-50">
+                          <td className="p-4">
+                            <div>
+                              <p className="font-medium">{product.name}</p>
+                              <p className="text-sm text-gray-500">{product.shopSku}</p>
+                            </div>
+                          </td>
+                          <td className="p-4 text-center">
+                            <span className="font-medium">{product.stockQuantity}</span>
+                          </td>
                           <td className="p-4 text-center">
                             <span className="font-medium text-blue-600">
                               {/* Calculate goods in transit: orders that are processed but not yet sent to logistics */}
@@ -1235,54 +1124,10 @@ const WarehouseManagement: React.FC = () => {
                           <td className="p-4 text-center">
                             <span className="font-medium">{product.minStockLevel}</span>
                           </td>
+                          <td className="p-4 text-center">
+                            <span className="text-sm text-gray-500">-</span>
+                          </td>
                         </tr>
-
-                        {/* Batch Sub-rows */}
-                        {expandedProducts.has(product.id) && (
-                          <>
-                            {/* Existing Batches */}
-                            {(productBatches[product.id] || []).map((batch, batchIndex) => (
-                              <tr key={batch.id} className="border-b bg-gray-50">
-                                <td className="p-4 pl-12">
-                                  <div className="text-sm text-gray-600">
-                                    <p>بچ #{batchIndex + 1}</p>
-                                  </div>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <span className="text-sm font-medium text-blue-600">
-                                    {batch.batchNumber}
-                                  </span>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <span className="text-sm">{batch.stockQuantity}</span>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <span className="text-sm text-gray-500">-</span>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <span className="text-sm text-gray-500">-</span>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <span className="text-sm">{batch.stockQuantity}</span>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <Badge variant="outline" className="text-xs">
-                                    {batch.stockQuantity > 0 ? 'موجود' : 'تمام شده'}
-                                  </Badge>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <span className="text-sm text-gray-500">-</span>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <span className="text-sm text-gray-500">-</span>
-                                </td>
-                              </tr>
-                            ))}
-
-
-                          </>
-                        )}
-                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>
