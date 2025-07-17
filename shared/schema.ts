@@ -508,7 +508,7 @@ export const crmCustomers = pgTable("crm_customers", {
   
   // Communication preferences
   communicationPreference: text("communication_preference").default("email"), // email, phone, sms, whatsapp
-  preferredLanguage: text("preferred_language").default("en"),
+  preferredLanguage: text("preferred_language").default("fa"), // fa (Persian), en (English), ar (Arabic), ku (Kurdish), tr (Turkish)
   marketingConsent: boolean("marketing_consent").default(false),
   smsEnabled: boolean("sms_enabled").default(true), // Individual SMS setting for this customer
   productInterests: json("product_interests"), // Array of product categories

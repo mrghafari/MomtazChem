@@ -1,4 +1,5 @@
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
+import { generateSMSMessage } from './multilingual-messages';
 
 export interface SmsConfig {
   provider: 'kavenegar' | 'sms_ir' | 'melipayamak';
@@ -22,12 +23,39 @@ export class SmsService {
     this.config = config;
   }
   
+  // Enhanced multilingual SMS sending method
+  async sendLocalizedSms(
+    phone: string,
+    messageType: string,
+    customerLanguage: string,
+    variables: Record<string, string>
+  ): Promise<SmsResult> {
+    try {
+      const message = generateSMSMessage(messageType as any, customerLanguage, variables);
+      return await this.sendSms(phone, message);
+    } catch (error) {
+      console.error('Error sending localized SMS:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   async sendDeliveryVerificationSms(
     phone: string, 
     verificationCode: string, 
     customerName: string = 'مشتری',
-    deliveryVerificationId?: number
+    deliveryVerificationId?: number,
+    customerLanguage: string = 'fa'
   ): Promise<SmsResult> {
+    // Use multilingual messaging if language preference is available
+    if (customerLanguage && customerLanguage !== 'fa') {
+      return await this.sendLocalizedSms(phone, 'smsOrderUpdate', customerLanguage, {
+        orderNumber: verificationCode,
+        status: 'در راه / On the way',
+        customerName
+      });
+    }
+    
+    // Default Persian message for backward compatibility
     const message = `${customerName} عزیز، سفارش شما در راه است.
 کد تحویل: ${verificationCode}
 این کد را هنگام تحویل به پیک اعلام کنید.

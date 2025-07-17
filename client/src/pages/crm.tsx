@@ -33,6 +33,24 @@ interface CrmCustomer {
   customerType: string;
   customerStatus: string;
   customerSource: string;
+  preferredLanguage: string;
+  communicationPreference: string;
+  totalOrdersCount: number;
+  totalSpent: string;
+  averageOrderValue: string;
+  lastOrderDate?: string;
+  createdAt: string;
+  phone?: string;
+  country?: string;
+  city?: string;
+  address?: string;
+  secondaryAddress?: string;
+  postalCode?: string;
+  customerType: string;
+  customerStatus: string;
+  customerSource: string;
+  preferredLanguage: string;
+  communicationPreference: string;
   totalOrdersCount: number;
   totalSpent: string;
   averageOrderValue: string;
@@ -94,6 +112,8 @@ export default function CRM() {
     customerType: "retail",
     customerSource: "website",
     customerStatus: "active",
+    preferredLanguage: "fa",
+    communicationPreference: "email",
     internalNotes: ""
   });
 
@@ -889,6 +909,39 @@ export default function CRM() {
                     <SelectItem value="marketing">Marketing</SelectItem>
                     <SelectItem value="cold_call">Cold Call</SelectItem>
                     <SelectItem value="trade_show">Trade Show</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="preferredLanguage">Preferred Language</Label>
+                <Select value={newCustomer.preferredLanguage} onValueChange={(value) => setNewCustomer({ ...newCustomer, preferredLanguage: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fa">فارسی (Persian)</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="ar">العربية (Arabic)</SelectItem>
+                    <SelectItem value="ku">کوردی (Kurdish)</SelectItem>
+                    <SelectItem value="tr">Türkçe (Turkish)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="communicationPreference">Communication Preference</Label>
+                <Select value={newCustomer.communicationPreference} onValueChange={(value) => setNewCustomer({ ...newCustomer, communicationPreference: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
+                    <SelectItem value="phone">Phone</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

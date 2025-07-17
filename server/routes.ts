@@ -44,6 +44,7 @@ import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
 import { smsService } from "./sms-service";
 import { ticketingStorage } from "./ticketing-storage";
+import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
 import { supportTickets } from "../shared/ticketing-schema";
 import { 
   insertSupportTicketSchema, 
@@ -10400,6 +10401,26 @@ ${procedure.content}
         });
       }
 
+      // Try to get customer language preference from CRM
+      let customerLanguage = 'en'; // Default to English
+      try {
+        const { pool } = await import('./db');
+        const customerResult = await pool.query(`
+          SELECT preferred_language 
+          FROM crm_customers 
+          WHERE email = $1 AND is_active = true
+        `, [inquiry.contactEmail]);
+        
+        if (customerResult.rows.length > 0 && customerResult.rows[0].preferred_language) {
+          customerLanguage = customerResult.rows[0].preferred_language;
+          console.log(`📞 Customer language preference found: ${customerLanguage} for ${inquiry.contactEmail}`);
+        } else {
+          console.log(`📞 No language preference found for ${inquiry.contactEmail}, using default: ${customerLanguage}`);
+        }
+      } catch (langError) {
+        console.log(`❌ Error fetching customer language preference: ${langError.message}, using default: ${customerLanguage}`);
+      }
+
       // Create the response
       const response = await simpleCustomerStorage.createInquiryResponse({
         inquiryId: id,
@@ -10603,14 +10624,56 @@ Leading Chemical Solutions Provider
             `;
           }
 
-          // Send follow-up email to customer
-          await transporter.sendMail({
-            from: `${smtp.fromName} <${smtp.fromEmail}>`,
-            to: inquiry.contactEmail,
-            subject: `Follow-up: ${inquiry.subject || 'Your Inquiry'} - ${inquiry.inquiryNumber}`,
-            html: htmlContent,
-            text: textContent
-          });
+          // Use multilingual email service if language preference is available
+          if (customerLanguage && customerLanguage !== 'en') {
+            try {
+              const { emailService } = await import('./email-service');
+              const { getLocalizedEmailSubject } = await import('./multilingual-messages');
+              
+              // Get localized subject line for inquiry response
+              const localizedSubject = getLocalizedEmailSubject('inquiryResponse', customerLanguage);
+              
+              const emailSent = await emailService.sendLocalizedEmail(
+                inquiry.contactEmail,
+                'inquiryResponse',
+                customerLanguage,
+                {
+                  customerName: inquiry.contactName || 'Valued Customer',
+                  inquiryNumber: inquiry.inquiryNumber,
+                  inquirySubject: inquiry.subject || 'Product Inquiry',
+                  inquiryCategory: inquiry.category || 'General',
+                  responseText
+                },
+                emailCategory,
+                localizedSubject + ` - ${inquiry.inquiryNumber}`
+              );
+              
+              if (emailSent) {
+                console.log(`📧 Multilingual follow-up email sent successfully to: ${inquiry.contactEmail} in ${customerLanguage}`);
+              } else {
+                throw new Error('Multilingual email sending failed');
+              }
+            } catch (multilingualError) {
+              console.log(`❌ Multilingual email failed, using standard template: ${multilingualError.message}`);
+              // Fallback to standard email
+              await transporter.sendMail({
+                from: `${smtp.fromName} <${smtp.fromEmail}>`,
+                to: inquiry.contactEmail,
+                subject: `Follow-up: ${inquiry.subject || 'Your Inquiry'} - ${inquiry.inquiryNumber}`,
+                html: htmlContent,
+                text: textContent
+              });
+            }
+          } else {
+            // Send standard email
+            await transporter.sendMail({
+              from: `${smtp.fromName} <${smtp.fromEmail}>`,
+              to: inquiry.contactEmail,
+              subject: `Follow-up: ${inquiry.subject || 'Your Inquiry'} - ${inquiry.inquiryNumber}`,
+              html: htmlContent,
+              text: textContent
+            });
+          }
 
           console.log(`Follow-up email sent successfully to: ${inquiry.contactEmail}`);
         }

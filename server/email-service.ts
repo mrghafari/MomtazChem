@@ -2,12 +2,16 @@ import nodemailer from 'nodemailer';
 import { db } from './db';
 import { smtpSettings, emailTemplates } from '../shared/email-schema';
 import { eq, and } from 'drizzle-orm';
+import { getLocalizedMessage, getLocalizedEmailSubject } from './multilingual-messages';
 
 interface EmailOptions {
   to: string;
   subject: string;
   text?: string;
   html?: string;
+  customerLanguage?: string;
+  messageType?: string;
+  variables?: Record<string, string>;
 }
 
 class EmailService {
@@ -310,6 +314,43 @@ class EmailService {
         responseCode: error.responseCode,
         response: error.response
       });
+      return false;
+    }
+  }
+
+  // Enhanced multilingual email sending method
+  async sendLocalizedEmail(
+    to: string,
+    messageType: string,
+    customerLanguage: string,
+    variables: Record<string, string>,
+    category: string = 'admin',
+    customSubject?: string
+  ): Promise<boolean> {
+    try {
+      const subject = customSubject || getLocalizedEmailSubject(messageType, customerLanguage);
+      const message = getLocalizedMessage(messageType as any, customerLanguage, variables);
+      
+      return await this.sendEmail({
+        to,
+        subject,
+        text: message,
+        html: `<div style="font-family: Arial, sans-serif; direction: ${customerLanguage === 'ar' || customerLanguage === 'fa' || customerLanguage === 'ku' ? 'rtl' : 'ltr'}; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #2563eb;">Momtaz Chemistry / شرکت ممتاز شیمی</h1>
+          </div>
+          <p style="line-height: 1.6; color: #333;">${message}</p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+            <p style="color: #666; font-size: 12px;">
+              Best regards / با احترام<br>
+              Momtaz Chemistry Support Team / تیم پشتیبانی ممتاز شیمی<br>
+              +964 770 999 6771 | support@momtazchem.com
+            </p>
+          </div>
+        </div>`
+      }, category);
+    } catch (error) {
+      console.error('Error sending localized email:', error);
       return false;
     }
   }
