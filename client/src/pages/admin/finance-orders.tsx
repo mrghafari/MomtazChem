@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   DollarSign, 
   CheckCircle, 
@@ -16,57 +19,108 @@ import {
   FileText,
   CreditCard,
   Barcode,
-  Plus
+  Plus,
+  Search,
+  Filter,
+  Download,
+  TrendingUp,
+  Users,
+  ShoppingCart,
+  AlertTriangle,
+  Calendar,
+  Phone,
+  Mail,
+  MapPin,
+  Receipt,
+  ChevronRight,
+  ExternalLink,
+  Wallet,
+  Building
 } from "lucide-react";
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 
-interface Order {
+interface OrderManagement {
   id: number;
   customerOrderId: number;
   currentStatus: string;
+  totalAmount: string;
+  currency: string;
   paymentReceiptUrl?: string;
   financialNotes?: string;
   financialReviewedAt?: string;
   createdAt: string;
   updatedAt: string;
-  deliveryCode?: string;
+  customerFirstName: string;
+  customerLastName: string;
+  customerEmail: string;
+  customerPhone: string;
+  receiptUrl?: string;
+  receiptFileName?: string;
+  receiptMimeType?: string;
   financialReviewerId?: number;
-  warehouseAssigneeId?: number;
-  warehouseProcessedAt?: string;
-  warehouseNotes?: string;
-  logisticsAssigneeId?: number;
-  logisticsProcessedAt?: string;
-  logisticsNotes?: string;
-  trackingNumber?: string;
-  estimatedDeliveryDate?: string;
-  actualDeliveryDate?: string;
-  deliveryPersonName?: string;
-  deliveryPersonPhone?: string;
+  deliveryCode?: string;
 }
 
 export default function FinanceOrders() {
   const { toast } = useToast();
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
-  const [trackingCodes, setTrackingCodes] = useState<any[]>([]);
-  const [showTrackingModal, setShowTrackingModal] = useState(false);
-  const [selectedOrderForTracking, setSelectedOrderForTracking] = useState<Order | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState("pending");
 
-  // Get pending orders for financial review
+  // Get orders for financial review
   const { data: ordersResponse, isLoading, refetch } = useQuery({
     queryKey: ['/api/order-management/financial'],
     queryFn: () => fetch('/api/order-management/financial', { credentials: 'include' }).then(res => res.json())
   });
 
-  const orders = ordersResponse?.orders || [];
+  const allOrders: OrderManagement[] = ordersResponse?.orders || [];
+  
+  // Filter and search functionality
+  const filteredOrders = allOrders.filter(order => {
+    const searchMatch = !searchTerm || 
+      order.customerFirstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerLastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerOrderId?.toString().includes(searchTerm);
+    
+    const statusMatch = statusFilter === "all" || order.currentStatus === statusFilter;
+    
+    return searchMatch && statusMatch;
+  });
+
+  // Separate orders by status for tabs
+  const pendingOrders = filteredOrders.filter(order => 
+    ['pending', 'pending_payment', 'payment_uploaded', 'financial_reviewing'].includes(order.currentStatus)
+  );
+  
+  const approvedOrders = filteredOrders.filter(order => 
+    order.currentStatus === 'financial_approved'
+  );
+  
+  const rejectedOrders = filteredOrders.filter(order => 
+    order.currentStatus === 'financial_rejected'
+  );
+
+  // Statistics
+  const totalAmount = allOrders.reduce((sum, order) => 
+    sum + parseFloat(order.totalAmount || '0'), 0
+  );
+  
+  const totalApproved = approvedOrders.reduce((sum, order) => 
+    sum + parseFloat(order.totalAmount || '0'), 0
+  );
 
   // Auto-refresh controlled by global settings
   useEffect(() => {
-    if (orders && orders.length >= 0) { // Start auto-refresh after successful data load
+    if (allOrders && allOrders.length >= 0) {
       const checkRefreshSettings = () => {
         const globalSettings = localStorage.getItem('global-refresh-settings');
         if (globalSettings) {
@@ -78,15 +132,14 @@ export default function FinanceOrders() {
               ? settings.globalInterval 
               : financeSettings.interval;
             
-            return refreshInterval * 1000; // Convert seconds to milliseconds
+            return refreshInterval * 1000;
           }
         }
-        return 600000; // Default 10 minutes if no settings found
+        return 600000;
       };
 
       const intervalMs = checkRefreshSettings();
       const interval = setInterval(() => {
-        // Check if refresh is still enabled before executing
         const currentSettings = localStorage.getItem('global-refresh-settings');
         if (currentSettings) {
           const settings = JSON.parse(currentSettings);
@@ -98,22 +151,23 @@ export default function FinanceOrders() {
 
       return () => clearInterval(interval);
     }
-  }, [orders, refetch]);
+  }, [allOrders, refetch]);
 
+  // Mutations for approve/reject
   const approveMutation = useMutation({
     mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
-      return apiRequest(`/api/finance/orders/${orderId}/approve`, {
-        method: 'POST',
-        body: { notes }
+      return apiRequest(`/api/order-management/${orderId}/approve`, {
+        method: 'PUT',
+        body: { notes, status: 'financial_approved' }
       });
     },
     onSuccess: () => {
       toast({
-        title: "✅ فیش بانکی تایید شد",
-        description: "پرداخت تایید شد، ایمیل و SMS به مشتری ارسال شد و سفارش به واحد انبار منتقل شد"
+        title: "✅ سفارش تایید شد",
+        description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/finance/orders'] });
-      setIsDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
+      setDialogOpen(false);
       setSelectedOrder(null);
       setReviewNotes("");
     },
@@ -128,19 +182,18 @@ export default function FinanceOrders() {
 
   const rejectMutation = useMutation({
     mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
-      return apiRequest(`/api/finance/orders/${orderId}/reject`, {
-        method: 'POST',
-        body: { notes }
+      return apiRequest(`/api/order-management/${orderId}/reject`, {
+        method: 'PUT',
+        body: { notes, status: 'financial_rejected' }
       });
     },
     onSuccess: () => {
       toast({
-        title: "❌ فیش بانکی رد شد",
-        description: "پرداخت رد شد، ایمیل و SMS اطلاع‌رسانی به مشتری ارسال شد",
-        variant: "destructive"
+        title: "❌ سفارش رد شد",
+        description: "پرداخت رد شد و اطلاع‌رسانی به مشتری ارسال شد"
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/finance/orders'] });
-      setIsDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
+      setDialogOpen(false);
       setSelectedOrder(null);
       setReviewNotes("");
     },
@@ -240,355 +293,440 @@ export default function FinanceOrders() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8" dir="rtl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">واحد مالی - بررسی پرداخت‌ها</h1>
-          <p className="text-gray-600 mt-2">بررسی و تایید پرداخت‌های دریافت شده</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" dir="rtl">
+      {/* Header Section */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 space-x-reverse">
+              <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                <DollarSign className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-indigo-800 bg-clip-text text-transparent">
+                  واحد مالی
+                </h1>
+                <p className="text-gray-600 mt-1">مدیریت و بررسی پرداخت‌های دریافتی</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4 space-x-reverse">
+              <Button 
+                onClick={() => refetch()}
+                variant="outline"
+                className="flex items-center space-x-2 space-x-reverse"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span>تازه‌سازی</span>
+              </Button>
+            </div>
+          </div>
         </div>
-        <Badge variant="secondary" className="text-lg px-4 py-2">
-          {orders.length} سفارش در انتظار
-        </Badge>
       </div>
 
-      {/* Refresh Control */}
-      <div className="mb-6">
-        <GlobalRefreshControl 
-          pageName="financial"
-          onRefresh={() => refetch()}
-          isLoading={isLoading}
-        />
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">سفارشات در انتظار</p>
-                <p className="text-2xl font-bold text-yellow-600">{orders.length}</p>
-              </div>
-              <Clock className="h-8 w-8 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">سفارشات تکمیل شده</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {orders.filter(order => order.currentStatus === 'financial_approved').length}
-                </p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">اولویت بالا</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {orders.filter(order => 
-                    new Date(order.createdAt) < new Date(Date.now() - 24 * 60 * 60 * 1000)
-                  ).length}
-                </p>
-              </div>
-              <CreditCard className="h-8 w-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Orders List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            سفارشات در انتظار بررسی مالی
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {orders.length === 0 ? (
-            <div className="text-center py-12">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">همه سفارشات بررسی شده</h3>
-              <p className="text-gray-500">در حال حاضر سفارش جدیدی برای بررسی وجود ندارد</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {orders.map((order: Order) => (
-                <div key={order.id} className="border rounded-lg p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <h3 className="font-medium text-lg">سفارش #{order.customerOrderId}</h3>
-                        <p className="text-sm text-gray-600">مشتری #{order.customerOrderId}</p>
-                      </div>
-                      {getStatusBadge(order.currentStatus)}
-                    </div>
-                    <div className="text-left">
-                      <p className="font-bold text-lg text-green-600">
-                        {/* Order total will be loaded from customer orders */}
-                        سفارش #{order.customerOrderId}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-gray-600">وضعیت سفارش</p>
-                      <p className="font-medium">{order.currentStatus}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">تاریخ ایجاد</p>
-                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">آخرین بروزرسانی</p>
-                      <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}</p>
-                    </div>
-                  </div>
-
-                  {/* Order Details Summary */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <h4 className="font-medium mb-2">جزئیات سفارش:</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">شماره سفارش:</span>
-                        <span className="font-medium ml-2">#{order.customerOrderId}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">تاریخ ایجاد:</span>
-                        <span className="font-medium ml-2">{new Date(order.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}</span>
-                      </div>
-                      {order.financialNotes && (
-                        <div className="col-span-2">
-                          <span className="text-gray-600">یادداشت مالی:</span>
-                          <span className="font-medium ml-2">{order.financialNotes}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bank Receipt Display Section */}
-                  {order.paymentReceiptUrl && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                        <h5 className="font-medium text-blue-900">فیش بانکی ارسال شده</h5>
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                          نیاز به تایید
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1">
-                          <p className="text-sm text-blue-700 mb-1">فیش واریزی توسط مشتری ارسال شده است</p>
-                          <p className="text-xs text-blue-600">
-                            بررسی فیش بانکی و تایید یا رد پرداخت ضروری است
-                          </p>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" asChild className="border-blue-300 hover:bg-blue-50">
-                            <a href={order.paymentReceiptUrl} target="_blank" rel="noopener noreferrer">
-                              <Eye className="h-4 w-4 mr-1" />
-                              مشاهده فیش
-                            </a>
-                          </Button>
-                          
-                          {order.paymentReceiptUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
-                            <div className="relative group">
-                              <img 
-                                src={order.paymentReceiptUrl} 
-                                alt="Bank Receipt Preview"
-                                className="w-16 h-16 object-cover rounded border border-blue-200 cursor-pointer hover:scale-105 transition-transform"
-                                onClick={() => window.open(order.paymentReceiptUrl, '_blank')}
-                              />
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded transition-colors"></div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleTrackingModal(order)}
-                      >
-                        <Barcode className="h-4 w-4 mr-1" />
-                        ردیابی کالا
-                      </Button>
-                    </div>
-                    <Button 
-                      onClick={() => handleOrderReview(order)}
-                      className={order.paymentReceiptUrl ? "bg-blue-600 hover:bg-blue-700" : ""}
-                    >
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      {order.paymentReceiptUrl ? "بررسی فیش بانکی" : "بررسی پرداخت"}
-                    </Button>
-                  </div>
+      {/* Statistics Dashboard */}
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">کل سفارشات</p>
+                  <p className="text-3xl font-bold text-white">{allOrders.length}</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Review Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>بررسی پرداخت سفارش #{selectedOrder?.customerOrderId}</DialogTitle>
-          </DialogHeader>
+                <ShoppingCart className="h-8 w-8 text-blue-200" />
+              </div>
+            </CardContent>
+          </Card>
           
-          {selectedOrder && (
-            <div className="space-y-6">
-              {/* Order Summary */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium mb-3">خلاصه سفارش</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">مشتری:</span>
-                    <span className="font-medium mr-2">{selectedOrder.customerName}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">مبلغ کل:</span>
-                    <span className="font-medium mr-2">{formatCurrency(selectedOrder.orderTotal, 'IQD')}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">روش پرداخت:</span>
-                    <span className="font-medium mr-2">{selectedOrder.paymentMethod}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">تاریخ سفارش:</span>
-                    <span className="font-medium mr-2">{new Date(selectedOrder.orderDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}</span>
-                  </div>
+          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100 text-sm font-medium">در انتظار بررسی</p>
+                  <p className="text-3xl font-bold text-white">{pendingOrders.length}</p>
                 </div>
+                <Clock className="h-8 w-8 text-orange-200" />
               </div>
-
-              {/* Payment Receipt */}
-              {selectedOrder.paymentReceiptUrl && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <FileText className="h-5 w-5 text-blue-600" />
-                    <h4 className="font-medium text-blue-900">فیش بانکی ارسال شده</h4>
-                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                      نیاز به تایید
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    {selectedOrder.paymentReceiptUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
-                      <div className="flex-shrink-0">
-                        <img 
-                          src={selectedOrder.paymentReceiptUrl} 
-                          alt="Bank Receipt"
-                          className="w-24 h-24 object-cover rounded border border-blue-200 cursor-pointer hover:scale-105 transition-transform"
-                          onClick={() => window.open(selectedOrder.paymentReceiptUrl, '_blank')}
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="flex-1">
-                      <p className="text-sm text-blue-700 mb-2">
-                        فیش واریزی توسط مشتری ارسال شده است. لطفاً مطابقت مبلغ و صحت اطلاعات را بررسی کنید.
-                      </p>
-                      <Button variant="outline" asChild className="border-blue-300 hover:bg-blue-50">
-                        <a href={selectedOrder.paymentReceiptUrl} target="_blank" rel="noopener noreferrer">
-                          <Eye className="h-4 w-4 mr-2" />
-                          مشاهده فیش در تب جدید
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">تایید شده</p>
+                  <p className="text-3xl font-bold text-white">{approvedOrders.length}</p>
                 </div>
-              )}
-
-              {/* Review Notes */}
-              <div>
-                <label className="block text-sm font-medium mb-2">یادداشت بررسی</label>
-                <Textarea
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                  placeholder="یادداشت خود را در مورد بررسی پرداخت وارد کنید..."
-                  rows={4}
-                />
+                <CheckCircle className="h-8 w-8 text-green-200" />
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-4">
-                <Button 
-                  onClick={handleApprove}
-                  disabled={approveMutation.isPending || rejectMutation.isPending}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                >
-                  {approveMutation.isPending ? (
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                  )}
-                  ✅ تایید فیش بانکی
-                </Button>
-                <Button 
-                  variant="destructive"
-                  onClick={handleReject}
-                  disabled={approveMutation.isPending || rejectMutation.isPending}
-                  className="flex-1 bg-red-600 hover:bg-red-700"
-                >
-                  {rejectMutation.isPending ? (
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <XCircle className="h-4 w-4 mr-2" />
-                  )}
-                  ❌ رد فیش بانکی
-                </Button>
-              </div>
-              
-              {selectedOrder.paymentReceiptUrl && (
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">
-                    💡 پس از تایید یا رد، ایمیل و SMS اطلاع‌رسانی به مشتری ارسال خواهد شد
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">مجموع مبالغ</p>
+                  <p className="text-2xl font-bold text-white">
+                    {totalAmount.toLocaleString()} IQD
                   </p>
                 </div>
-              )}
+                <TrendingUp className="h-8 w-8 text-purple-200" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Filter */}
+        <Card className="mb-6 shadow-lg border-0">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="جستجو بر اساس نام مشتری، ایمیل یا شماره سفارش..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pr-10"
+                  />
+                </div>
+              </div>
+              <div className="w-full md:w-48">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full h-10 px-3 border rounded-md bg-white"
+                >
+                  <option value="all">همه وضعیت‌ها</option>
+                  <option value="pending_payment">در انتظار پرداخت</option>
+                  <option value="payment_uploaded">فیش آپلود شده</option>
+                  <option value="financial_reviewing">در حال بررسی</option>
+                  <option value="financial_approved">تایید شده</option>
+                  <option value="financial_rejected">رد شده</option>
+                </select>
+              </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+
+        {/* Tabbed Interface */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 bg-white shadow-sm border rounded-lg p-1">
+            <TabsTrigger value="pending" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+              <Clock className="h-4 w-4" />
+              <span>در انتظار ({pendingOrders.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="approved" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-green-500 data-[state=active]:text-white">
+              <CheckCircle className="h-4 w-4" />
+              <span>تایید شده ({approvedOrders.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="rejected" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-red-500 data-[state=active]:text-white">
+              <XCircle className="h-4 w-4" />
+              <span>رد شده ({rejectedOrders.length})</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="pending" className="space-y-4">
+            {pendingOrders.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">همه سفارشات بررسی شده</h3>
+                  <p className="text-gray-500">در حال حاضر سفارش جدیدی برای بررسی وجود ندارد</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {pendingOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} onOrderSelect={() => {
+                    setSelectedOrder(order);
+                    setDialogOpen(true);
+                  }} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="approved" className="space-y-4">
+            {approvedOrders.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">هیچ سفارش تایید شده‌ای وجود ندارد</h3>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {approvedOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} readOnly />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="rejected" className="space-y-4">
+            {rejectedOrders.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">هیچ سفارش رد شده‌ای وجود ندارد</h3>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {rejectedOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} readOnly />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+        
+        {/* Review Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="max-w-2xl" dir="rtl">
+            <DialogHeader>
+              <DialogTitle>بررسی پرداخت سفارش #{selectedOrder?.customerOrderId}</DialogTitle>
+            </DialogHeader>
+            
+            {selectedOrder && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">نام مشتری</Label>
+                    <p className="font-medium">{selectedOrder.customerFirstName} {selectedOrder.customerLastName}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">ایمیل</Label>
+                    <p className="font-medium">{selectedOrder.customerEmail}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">تلفن</Label>
+                    <p className="font-medium">{selectedOrder.customerPhone}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">مبلغ کل</Label>
+                    <p className="font-medium text-green-600">{parseFloat(selectedOrder.totalAmount).toLocaleString()} {selectedOrder.currency}</p>
+                  </div>
+                </div>
+
+                {selectedOrder.receiptUrl && (
+                  <div className="border rounded-lg p-4">
+                    <Label className="text-sm font-medium text-gray-600 mb-2 block">فیش بانکی</Label>
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={selectedOrder.receiptUrl} 
+                        alt="Bank Receipt" 
+                        className="w-32 h-32 object-cover rounded border cursor-pointer hover:scale-105 transition-transform"
+                        onClick={() => openImageModal(selectedOrder.receiptUrl!)}
+                      />
+                      <div className="flex-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => openImageModal(selectedOrder.receiptUrl!)}
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="h-4 w-4" />
+                          مشاهده بزرگ
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="reviewNotes" className="text-sm font-medium">یادداشت بررسی</Label>
+                  <Textarea
+                    id="reviewNotes"
+                    value={reviewNotes}
+                    onChange={(e) => setReviewNotes(e.target.value)}
+                    placeholder="یادداشت خود را برای این بررسی وارد کنید..."
+                    className="mt-1"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex justify-between gap-4 pt-4">
+                  <Button
+                    variant="destructive"
+                    onClick={handleReject}
+                    disabled={rejectMutation.isPending}
+                    className="flex items-center gap-2"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    {rejectMutation.isPending ? 'در حال رد...' : 'رد پرداخت'}
+                  </Button>
+                  <Button
+                    onClick={handleApprove}
+                    disabled={approveMutation.isPending}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    {approveMutation.isPending ? 'در حال تایید...' : 'تایید پرداخت'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Image Modal */}
+        <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>مشاهده فیش بانکی</DialogTitle>
+            </DialogHeader>
+            {selectedImageUrl && (
+              <div className="flex justify-center">
+                <img 
+                  src={selectedImageUrl} 
+                  alt="Bank Receipt Full Size" 
+                  className="max-w-full h-auto rounded-lg shadow-lg"
+                />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
+  );
+}
+
+// OrderCard Component
+interface OrderCardProps {
+  order: OrderManagement;
+  onOrderSelect?: () => void;
+  readOnly?: boolean;
+}
+
+function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'pending_payment':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'payment_uploaded':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'financial_reviewing':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'financial_approved':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'financial_rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusDisplayName = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'در انتظار';
+      case 'pending_payment':
+        return 'در انتظار پرداخت';
+      case 'payment_uploaded':
+        return 'فیش پرداخت آپلود شده';
+      case 'financial_reviewing':
+        return 'در حال بررسی مالی';
+      case 'financial_approved':
+        return 'تایید شده';
+      case 'financial_rejected':
+        return 'رد شده';
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4 space-x-reverse">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Receipt className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">سفارش #{order.customerOrderId}</h3>
+              <p className="text-sm text-gray-600">{order.customerFirstName} {order.customerLastName}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <Badge className={`border ${getStatusBadgeColor(order.currentStatus)}`}>
+              {getStatusDisplayName(order.currentStatus)}
+            </Badge>
+            <div className="text-left">
+              <p className="font-bold text-lg text-green-600">
+                {parseFloat(order.totalAmount).toLocaleString()} {order.currency}
+              </p>
+              <p className="text-xs text-gray-500">
+                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Mail className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">{order.customerEmail}</span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Phone className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">{order.customerPhone}</span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Calendar className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">
+              {new Date(order.updatedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </span>
+          </div>
+        </div>
+
+        {order.receiptUrl && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <Receipt className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">فیش بانکی ارسال شده</span>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                نیاز به بررسی
+              </Badge>
+            </div>
+          </div>
+        )}
+
+        {order.financialNotes && (
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <p className="text-sm font-medium text-gray-700 mb-1">یادداشت مالی:</p>
+            <p className="text-sm text-gray-600">{order.financialNotes}</p>
+          </div>
+        )}
+
+        {!readOnly && (
+          <div className="flex justify-end">
+            <Button 
+              onClick={onOrderSelect}
+              size="sm"
+              className="flex items-center space-x-2 space-x-reverse"
+            >
+              <Eye className="h-4 w-4" />
+              <span>بررسی و تایید</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
