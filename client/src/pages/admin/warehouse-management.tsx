@@ -767,13 +767,6 @@ const WarehouseManagement: React.FC = () => {
                               >
                                 <Package className="w-4 h-4" />
                               </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewDetails(order)}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
                               {(order.currentStatus === 'warehouse_pending' || order.currentStatus === 'financial_approved') && (
                                 <Button
                                   size="sm"
