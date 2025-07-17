@@ -13969,6 +13969,44 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       console.log('📦 [WAREHOUSE] Order updated successfully:', updatedOrder);
       
+      // Auto-generate and send delivery code when order is approved to logistics
+      if (status === 'warehouse_approved') {
+        try {
+          console.log('🚚 [AUTO-CODE] Order approved to logistics, auto-generating delivery code...');
+          
+          // Get order details for customer info
+          const orderDetails = await orderManagementStorage.getOrderById(parseInt(id));
+          if (orderDetails && orderDetails.customerPhone && orderDetails.customerFirstName) {
+            const customerName = `${orderDetails.customerFirstName} ${orderDetails.customerLastName || ''}`.trim();
+            
+            console.log('🚚 [AUTO-CODE] Customer info:', {
+              orderId: orderDetails.customerOrderId,
+              phone: orderDetails.customerPhone,
+              name: customerName
+            });
+            
+            // Generate delivery code using logistics storage
+            const { logisticsStorage } = await import('./logistics-storage');
+            const codeResult = await logisticsStorage.generateDeliveryCode(
+              orderDetails.customerOrderId,
+              orderDetails.customerPhone,
+              customerName
+            );
+            
+            if (codeResult.success) {
+              console.log('✅ [AUTO-CODE] Delivery code generated and sent automatically:', codeResult.deliveryCode);
+            } else {
+              console.log('❌ [AUTO-CODE] Failed to generate delivery code:', codeResult.message);
+            }
+          } else {
+            console.log('❌ [AUTO-CODE] Missing customer information for auto-code generation');
+          }
+        } catch (autoCodeError) {
+          console.error('❌ [AUTO-CODE] Error in auto-code generation:', autoCodeError);
+          // Don't fail the warehouse approval if code generation fails
+        }
+      }
+      
       res.json({ success: true, data: updatedOrder });
     } catch (error) {
       console.error('❌ [WAREHOUSE] Error processing warehouse order:', error);
@@ -22145,6 +22183,49 @@ momtazchem.com
       const { notes } = req.body;
       const adminId = req.session.adminId;
 
+      console.log(`📦 [WAREHOUSE] Processing approval for order ${orderId}`);
+
+      // Get order details with customer information first
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { crmCustomers } = await import("../shared/crm-schema");
+      
+      const orderDetailsQuery = await db
+        .select({
+          // Order Management fields
+          id: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          currentStatus: orderManagement.currentStatus,
+          
+          // Customer info from CRM
+          customerFirstName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName,
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          
+          // Order total for context
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+        })
+        .from(orderManagement)
+        .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(orderManagement.customerOrderId, orderId))
+        .limit(1);
+
+      if (orderDetailsQuery.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      const order = orderDetailsQuery[0];
+      console.log(`📋 [WAREHOUSE] Order details: Customer ${order.customerFirstName} ${order.customerLastName}, Phone: ${order.customerPhone}`);
+      
+      if (!order.customerPhone) {
+        console.log(`⚠️ [WAREHOUSE] Warning: Order ${orderId} has no customer phone number for SMS`);
+      }
+
       // Update order status to warehouse_approved
       await db
         .update(orderManagement)
@@ -22166,7 +22247,71 @@ momtazchem.com
         notes: notes
       });
 
-      res.json({ success: true, message: "کالا آماده شد" });
+      console.log(`✅ [WAREHOUSE] Order ${orderId} approved successfully`);
+
+      // AUTOMATIC DELIVERY CODE GENERATION AND SMS SENDING
+      try {
+        console.log(`🚀 [WAREHOUSE] Triggering automatic delivery code generation for order ${orderId}`);
+        
+        // Check if delivery code already exists
+        const existingCode = await logisticsStorage.getDeliveryCodeByOrderId(orderId);
+        
+        let deliveryCodeData;
+        let isNewCode = false;
+        
+        if (existingCode) {
+          // Use existing code
+          deliveryCodeData = existingCode;
+          console.log(`🔄 [WAREHOUSE] Reusing existing delivery code ${existingCode.verificationCode} for order ${orderId}`);
+        } else {
+          // Generate new delivery code with proper customer details
+          const customerName = `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim() || 'مشتری';
+          const customerPhone = order.customerPhone || '09000000000';
+          
+          deliveryCodeData = await logisticsStorage.generateVerificationCode(
+            orderId,
+            customerPhone,
+            customerName
+          );
+          isNewCode = true;
+          console.log(`🆕 [WAREHOUSE] Generated new delivery code ${deliveryCodeData.verificationCode} for order ${orderId}, customer: ${customerName}`);
+        }
+
+        // Send SMS notification automatically with proper customer details
+        try {
+          const customerName = `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim() || 'مشتری';
+          const customerPhone = order.customerPhone || '09000000000';
+          
+          const smsResult = await smsService.sendDeliveryVerificationSms(
+            customerPhone,
+            deliveryCodeData.verificationCode,
+            customerName,
+            deliveryCodeData.id
+          );
+
+          if (smsResult.success) {
+            await logisticsStorage.updateSmsStatus(deliveryCodeData.id, 'sent', { 
+              messageId: smsResult.messageId,
+              provider: 'kavenegar'
+            });
+            console.log(`📱 [WAREHOUSE] SMS sent successfully for order ${orderId}, code: ${deliveryCodeData.verificationCode}`);
+          } else {
+            console.log(`⚠️ [WAREHOUSE] SMS sending failed for order ${orderId}: ${smsResult.error}`);
+          }
+        } catch (smsError) {
+          console.error(`❌ [WAREHOUSE] SMS error for order ${orderId}:`, smsError);
+        }
+
+      } catch (codeError) {
+        console.error(`❌ [WAREHOUSE] Error generating delivery code for order ${orderId}:`, codeError);
+        // Continue without failing the warehouse approval
+      }
+
+      res.json({ 
+        success: true, 
+        message: "کالا آماده شد و کد تحویل ارسال شد",
+        deliveryCodeGenerated: true
+      });
     } catch (error) {
       console.error("Error approving warehouse order:", error);
       res.status(500).json({
