@@ -351,14 +351,7 @@ export default function SiteManagement() {
       className: "border-cyan-300 text-cyan-600 hover:bg-cyan-50",
       moduleId: "remote_desktop"
     },
-    {
-      id: "inventory-management",
-      label: "Inventory Management",
-      icon: Box,
-      onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
-      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
-      moduleId: "inventory_management"
-    }
+
 
   ];
 

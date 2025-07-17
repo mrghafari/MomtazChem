@@ -3718,9 +3718,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'ai_settings',
         'refresh_control',
 
-        'inventory_management', // Keep as-is: this is correct module name from Site Management
+
         'content_management',
-        'warehouse_management', // Added: warehouse_management module
+        'warehouse_management',
         'logistics_management', // Added: logistics-management module
         'remote_desktop' // Added: remote desktop management module
       ];
@@ -15919,7 +15919,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'تحلیل جغرافیایی': 'geography_analytics',
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
-            'مدیریت موجودی': 'inventory_management',
             'تنظیمات سرور': 'server_config'
           };
 
@@ -16012,7 +16011,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'تحلیل جغرافیایی': 'geography_analytics',
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
-            'مدیریت موجودی': 'inventory_management',
             'تنظیمات سرور': 'server_config'
           };
 
@@ -16052,7 +16050,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "crm", "seo", "categories", "sms", "factory", "user_management",
           "shop_management", "procedures", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
-          "refresh_control", "inventory_management", "content_management",
+          "refresh_control", "content_management",
           "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
           "server_config"
         ];
@@ -16116,8 +16114,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           'sms_management', 'factory_management', 'super_admin', 'user_management',
           'shop_management', 'procedures_management', 'order_management',
           'product_management', 'payment_management', 'wallet_management', 'geography_analytics',
-          'ai_management', 'refresh_control', 'inventory_management',
-          'content_management', 'ticketing_system'
+          'ai_management', 'refresh_control',
+          'content_management', 'ticketing_system', 'warehouse_management'
         ];
 
         console.log(`✓ [PERMISSIONS] Legacy/Super admin ${legacyUser[0].email} has all modules`);
@@ -16176,7 +16174,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         { id: 'ai-settings', name: 'AI Settings', category: 'system', icon: 'Zap' },
         { id: 'refresh-control', name: 'Refresh Control', category: 'system', icon: 'RefreshCw' },
 
-        { id: 'inventory-management', name: 'Inventory Management', category: 'inventory', icon: 'Package' },
+
         { id: 'content-management', name: 'Content Management', category: 'marketing', icon: 'Edit3' },
         { id: 'ticketing-system', name: 'Ticketing System', category: 'support', icon: 'Ticket' },
         { id: 'finance-orders', name: 'Financial Orders', category: 'financial', icon: 'DollarSign' },

@@ -349,13 +349,14 @@ export default function SiteManagement() {
       moduleId: "server_config"
     },
     {
-      id: "inventory-management",
-      label: "Inventory Management",
-      icon: Package,
-      onClick: () => trackButtonClick("inventory-management", () => setLocation("/admin/inventory-management")),
-      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
-      moduleId: "inventory_management"
+      id: "warehouse-management",
+      label: "Warehouse Management",
+      icon: Warehouse,
+      onClick: () => trackButtonClick("warehouse-management", () => setLocation("/admin/warehouse-management")),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "warehouse_management"
     },
+
 
   ];
 
