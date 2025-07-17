@@ -28,7 +28,7 @@ import DatabaseManagement from "@/pages/admin/database-management";
 import UserManagementRedesign from "@/pages/admin/user-management-redesign";
 import FactoryManagement from "@/pages/admin/factory-management";
 import ProceduresManagement from "@/pages/admin/procedures-management";
-import SMTPTestPage from "@/pages/admin/smtp-test";
+
 import EmailSettingsPage from "@/pages/admin/email-settings";
 import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
 import EmailAddressManagerFixed from "@/pages/admin/email-address-manager-fixed";
@@ -136,7 +136,7 @@ function Router() {
           <Route path="/user-management" component={UserManagementRedesign} />
           <Route path="/admin/factory-management" component={FactoryManagement} />
           <Route path="/admin/procedures-management" component={ProceduresManagement} />
-          <Route path="/admin/smtp-test" component={SMTPTestPage} />
+
           <Route path="/admin/email-settings" component={EmailSettingsPage} />
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />
           <Route path="/admin/email-address-manager" component={EmailAddressManagerFixed} />

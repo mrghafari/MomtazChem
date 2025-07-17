@@ -121,7 +121,7 @@ export default function SiteManagement() {
     'categories': 'categories',
     'barcode': 'barcode',
     'database-backup': 'database-backup',
-    'smtp-test': 'smtp-test',
+
     'ai-settings': 'ai-settings',
     'user-management': 'user-management',
     'security-management': 'security-management',
@@ -277,14 +277,6 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("procedures", () => setLocation("/admin/procedures-management")),
       className: "border-amber-300 text-amber-600 hover:bg-amber-50",
       moduleId: "procedures"
-    },
-    {
-      id: "smtp-test",
-      label: "SMTP Test",
-      icon: TestTube,
-      onClick: () => trackButtonClick("smtp-test", () => setLocation("/admin/smtp-test")),
-      className: "border-sky-300 text-sky-600 hover:bg-sky-50",
-      moduleId: "smtp_test"
     },
     {
       id: "payment-settings",

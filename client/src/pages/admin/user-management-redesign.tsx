@@ -150,7 +150,7 @@ type Module = {
 
 // Function to extract modules dynamically from Site Management configuration
 const extractSiteManagementModules = (): Module[] => {
-  // Complete synchronized list with ALL 25 modules from Site Management - using original English names
+  // Complete synchronized list with ALL 24 modules from Site Management - using original English names
   const siteManagementModules = [
     { moduleId: 'syncing_shop', label: 'Syncing Shop', icon: Database, color: 'bg-blue-500' },
     { moduleId: 'shop_management', label: 'Shop Management', icon: ShoppingCart, color: 'bg-purple-500' },
@@ -169,7 +169,6 @@ const extractSiteManagementModules = (): Module[] => {
     { moduleId: 'categories', label: 'Categories', icon: Package, color: 'bg-violet-500' },
     { moduleId: 'barcode', label: 'Barcode Management', icon: QrCode, color: 'bg-rose-500' },
     { moduleId: 'database_backup', label: 'Database Backup', icon: Database, color: 'bg-stone-500' },
-    { moduleId: 'smtp_test', label: 'SMTP Test', icon: TestTube, color: 'bg-amber-500' },
     { moduleId: 'ai_settings', label: 'AI Settings', icon: Zap, color: 'bg-sky-500' },
     { moduleId: 'user_management', label: 'User Management', icon: UserCog, color: 'bg-slate-500' },
     { moduleId: 'sms', label: 'SMS Management', icon: Smartphone, color: 'bg-gray-500' },

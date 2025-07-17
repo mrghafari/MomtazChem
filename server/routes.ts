@@ -3710,7 +3710,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'user_management',
         'shop_management',
         'procedures',
-        'smtp_test',
         'order_management',
         'product_management',
         'payment_management',
@@ -3802,7 +3801,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'factory',
       'user_management',
       'procedures',
-      'smtp_test',
       'payment_management',
       'wallet_management',
       'geography_analytics',
@@ -3811,7 +3809,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'content_management',
       'ticketing_system',
       'remote_desktop'
-      // Total: 26 modules - automatically synced with Site Management
+      // Total: 24 modules - automatically synced with Site Management
     ];
   };
 
@@ -5117,7 +5115,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'factory': { name: 'مدیریت کارخانه', description: 'مدیریت خط تولید', category: 'production' },
         'user_management': { name: 'مدیریت کاربران', description: 'ایجاد و مدیریت کاربران سیستم', category: 'admin' },
         'procedures': { name: 'مدیریت روش‌ها', description: 'مدیریت اسناد و روش‌های کاری', category: 'content' },
-        'smtp_test': { name: 'تست SMTP', description: 'آزمایش اتصال ایمیل', category: 'communication' },
         'payment_management': { name: 'مدیریت پرداخت', description: 'تنظیمات درگاه پرداخت', category: 'finance' },
         'wallet_management': { name: 'مدیریت کیف پول', description: 'مدیریت کیف پول مشتریان', category: 'finance' },
         'geography_analytics': { name: 'آمار جغرافیایی', description: 'تحلیل آمار منطقه‌ای', category: 'analytics' },
@@ -15901,7 +15898,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'پشتیبان‌گیری پایگاه داده': 'database_backup',
             'مدیریت SEO': 'seo',
             'مدیریت پیامک': 'sms',
-            'تست SMTP': 'smtp_test',
             'تنظیمات هوش مصنوعی': 'ai_settings',
             'کنترل تازه‌سازی': 'refresh_control',
             'سیستم تیکتینگ': 'ticketing_system',
@@ -15996,7 +15992,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'پشتیبان‌گیری پایگاه داده': 'database_backup',
             'مدیریت SEO': 'seo',
             'مدیریت پیامک': 'sms',
-            'تست SMTP': 'smtp_test',
             'تنظیمات هوش مصنوعی': 'ai_settings',
             'کنترل تازه‌سازی': 'refresh_control',
             'سیستم تیکتینگ': 'ticketing_system',
@@ -16057,7 +16052,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         const allModules = [
           "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
           "crm", "seo", "categories", "sms", "factory", "user_management",
-          "shop_management", "procedures", "smtp_test", "order_management", "product_management",
+          "shop_management", "procedures", "order_management", "product_management",
           "payment_management", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "department_users", "inventory_management", "content_management",
           "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
@@ -16121,7 +16116,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           'syncing_shop', 'inquiry_management', 'barcode_management', 'email_management',
           'backup_management', 'crm_management', 'seo_management', 'category_management',
           'sms_management', 'factory_management', 'super_admin', 'user_management',
-          'shop_management', 'procedures_management', 'smtp_test', 'order_management',
+          'shop_management', 'procedures_management', 'order_management',
           'product_management', 'payment_management', 'wallet_management', 'geography_analytics',
           'ai_management', 'refresh_control', 'department_users', 'inventory_management',
           'content_management', 'ticketing_system'
@@ -16175,7 +16170,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         { id: 'user-management', name: 'User Management', category: 'administration', icon: 'Users2' },
         { id: 'shop', name: 'Shop', category: 'sales', icon: 'ShoppingCart' },
         { id: 'procedures', name: 'Procedures', category: 'operations', icon: 'BookOpen' },
-        { id: 'smtp-test', name: 'SMTP Test', category: 'communication', icon: 'TestTube' },
         { id: 'order-management', name: 'Order Management', category: 'sales', icon: 'Truck' },
         { id: 'products', name: 'Products', category: 'inventory', icon: 'Package' },
         { id: 'payment-settings', name: 'Payment Settings', category: 'financial', icon: 'CreditCard' },

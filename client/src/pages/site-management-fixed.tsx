@@ -363,14 +363,6 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("department-users", () => setLocation("/admin/department-users")),
       className: "border-slate-300 text-slate-600 hover:bg-slate-50",
       moduleId: "department_users"
-    },
-    {
-      id: "smtp-test",
-      label: "SMTP Test",
-      icon: Mail,
-      onClick: () => trackButtonClick("smtp-test", () => setLocation("/admin/smtp-test")),
-      className: "border-red-300 text-red-600 hover:bg-red-50",
-      moduleId: "smtp_test"
     }
   ];
 

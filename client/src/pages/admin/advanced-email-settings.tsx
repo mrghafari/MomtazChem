@@ -1455,7 +1455,7 @@ export default function AdvancedEmailSettingsPage() {
                         </Button>
                         
                         <Button 
-                          onClick={() => window.open('/admin/smtp-test', '_blank')}
+                          onClick={() => toast({ title: "SMTP Test", description: "SMTP testing functionality has been integrated into Email Settings." })}
                           variant="outline" 
                           className="h-16 flex-col space-y-1"
                         >
