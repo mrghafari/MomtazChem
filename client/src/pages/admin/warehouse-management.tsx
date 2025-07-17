@@ -163,6 +163,7 @@ const WarehouseManagement: React.FC = () => {
   const [productBatches, setProductBatches] = useState<{[productId: number]: ProductBatch[]}>({});
   const [expandedProducts, setExpandedProducts] = useState<Set<number>>(new Set());
   const [newBatchData, setNewBatchData] = useState<{[productId: number]: Partial<ProductBatch>}>({});
+  const [kardexBatchHistory, setKardexBatchHistory] = useState<{[productId: number]: any[]}>({});
 
   // Helper function to get goods in transit for a product
   const getGoodsInTransitForProduct = (productId: number): number => {
@@ -173,14 +174,34 @@ const WarehouseManagement: React.FC = () => {
   };
 
   // Toggle product expansion for batch view
-  const toggleProductExpansion = (productId: number) => {
+  const toggleProductExpansion = async (productId: number) => {
     const newExpanded = new Set(expandedProducts);
     if (newExpanded.has(productId)) {
       newExpanded.delete(productId);
     } else {
       newExpanded.add(productId);
+      // Fetch batch data from kardex when expanding
+      await fetchKardexBatchData(productId);
     }
     setExpandedProducts(newExpanded);
+  };
+
+  // Fetch batch data from kardex API
+  const fetchKardexBatchData = async (productId: number) => {
+    try {
+      const response = await fetch(`/api/kardex-batches/${productId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setKardexBatchHistory(prev => ({
+            ...prev,
+            [productId]: data.batches || []
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching kardex batch data:', error);
+    }
   };
 
   // Add new batch to product
@@ -1286,34 +1307,41 @@ const WarehouseManagement: React.FC = () => {
                         {/* Batch Sub-rows */}
                         {expandedProducts.has(product.id) && (
                           <>
-                            {/* Existing Batches */}
-                            {(productBatches[product.id] || []).map((batch, batchIndex) => (
-                              <tr key={batch.id} className="border-b bg-gray-50">
+                            {/* Existing Batches from Kardex */}
+                            {(kardexBatchHistory[product.id] || []).map((batch, batchIndex) => (
+                              <tr key={`kardex-${batch.batchNumber}-${batchIndex}`} className="border-b bg-blue-50">
                                 <td className="p-4 pl-12">
                                   <div className="text-sm text-gray-600">
-                                    <p>بچ #{batchIndex + 1}</p>
+                                    <p className="font-medium text-blue-700">🏷️ بچ اولیه #{batchIndex + 1}</p>
+                                    {batch.productionDate && (
+                                      <p className="text-xs text-gray-500">
+                                        تولید: {new Date(batch.productionDate).toLocaleDateString('fa-IR')}
+                                      </p>
+                                    )}
                                   </div>
                                 </td>
                                 <td className="p-4 text-center">
-                                  <span className="text-sm font-medium text-blue-600">
+                                  <span className="text-sm font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
                                     {batch.batchNumber}
                                   </span>
                                 </td>
                                 <td className="p-4 text-center">
-                                  <span className="text-sm">{batch.stockQuantity}</span>
+                                  <span className="text-sm font-bold text-green-600">{batch.quantity}</span>
                                 </td>
                                 <td className="p-4 text-center">
-                                  <span className="text-sm text-gray-500">-</span>
+                                  <span className="text-sm text-orange-600">{batch.inTransitQuantity || 0}</span>
                                 </td>
                                 <td className="p-4 text-center">
-                                  <span className="text-sm text-gray-500">-</span>
+                                  <span className="text-sm text-red-600">{batch.wasteQuantity || 0}</span>
                                 </td>
                                 <td className="p-4 text-center">
-                                  <span className="text-sm">{batch.stockQuantity}</span>
+                                  <span className="text-sm font-bold text-green-700">
+                                    {batch.quantity - (batch.wasteQuantity || 0) - (batch.inTransitQuantity || 0)}
+                                  </span>
                                 </td>
                                 <td className="p-4 text-center">
-                                  <Badge variant="outline" className="text-xs">
-                                    {batch.stockQuantity > 0 ? 'موجود' : 'تمام شده'}
+                                  <Badge variant="outline" className="text-xs bg-green-100 text-green-800">
+                                    {(batch.quantity - (batch.wasteQuantity || 0) - (batch.inTransitQuantity || 0)) > 0 ? 'موجود' : 'تمام شده'}
                                   </Badge>
                                 </td>
                                 <td className="p-4 text-center">
@@ -1325,11 +1353,67 @@ const WarehouseManagement: React.FC = () => {
                               </tr>
                             ))}
 
+                            {/* New Batches from warehouse */}
+                            {(productBatches[product.id] || []).filter(batch => !batch.id.startsWith('kardex-')).map((batch, batchIndex) => {
+                              // Get reference batch data from first available kardex batch
+                              const referenceBatch = (kardexBatchHistory[product.id] || [])[0];
+                              return (
+                                <tr key={batch.id} className="border-b bg-green-50">
+                                  <td className="p-4 pl-12">
+                                    <div className="text-sm text-gray-600">
+                                      <p className="font-medium text-green-700">📦 بچ جدید #{batchIndex + 1}</p>
+                                      <p className="text-xs text-gray-500">اطلاعات از بچ اولیه</p>
+                                    </div>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
+                                      {batch.batchNumber}
+                                    </span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm font-bold text-green-600">
+                                      {referenceBatch ? referenceBatch.quantity : batch.stockQuantity}
+                                    </span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm text-orange-600">
+                                      {referenceBatch ? (referenceBatch.inTransitQuantity || 0) : 0}
+                                    </span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm text-red-600">
+                                      {referenceBatch ? (referenceBatch.wasteQuantity || 0) : 0}
+                                    </span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm font-bold text-green-700">
+                                      {referenceBatch ? 
+                                        (referenceBatch.quantity - (referenceBatch.wasteQuantity || 0) - (referenceBatch.inTransitQuantity || 0)) :
+                                        batch.stockQuantity
+                                      }
+                                    </span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <Badge variant="outline" className="text-xs bg-green-100 text-green-800">
+                                      موجود
+                                    </Badge>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm text-gray-500">-</span>
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <span className="text-sm text-gray-500">-</span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+
                             {/* Add New Batch Row */}
                             <tr className="border-b bg-yellow-50">
                               <td className="p-4 pl-12">
                                 <div className="text-sm text-gray-600">
-                                  <p>+ بچ جدید</p>
+                                  <p className="font-medium text-yellow-700">➕ افزودن بچ جدید</p>
+                                  <p className="text-xs text-gray-500">موجودی کل انبار نمایش داده می‌شود</p>
                                 </div>
                               </td>
                               <td className="p-4 text-center">
@@ -1341,22 +1425,62 @@ const WarehouseManagement: React.FC = () => {
                                 />
                               </td>
                               <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                                <div className="text-sm">
+                                  <span className="font-bold text-blue-600">{product.stockQuantity}</span>
+                                  <div className="text-xs text-gray-500">موجودی کل انبار</div>
+                                </div>
                               </td>
                               <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                                <div className="text-sm">
+                                  {(() => {
+                                    const referenceBatch = (kardexBatchHistory[product.id] || [])[0];
+                                    return (
+                                      <>
+                                        <span className="font-medium text-orange-600">
+                                          {referenceBatch ? (referenceBatch.inTransitQuantity || 0) : 0}
+                                        </span>
+                                        <div className="text-xs text-gray-500">از بچ اولیه</div>
+                                      </>
+                                    );
+                                  })()}
+                                </div>
                               </td>
                               <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                                <div className="text-sm">
+                                  {(() => {
+                                    const referenceBatch = (kardexBatchHistory[product.id] || [])[0];
+                                    return (
+                                      <>
+                                        <span className="font-medium text-red-600">
+                                          {referenceBatch ? (referenceBatch.wasteQuantity || 0) : 0}
+                                        </span>
+                                        <div className="text-xs text-gray-500">از بچ اولیه</div>
+                                      </>
+                                    );
+                                  })()}
+                                </div>
                               </td>
                               <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                                <div className="text-sm">
+                                  {(() => {
+                                    const referenceBatch = (kardexBatchHistory[product.id] || [])[0];
+                                    const finalInventory = referenceBatch ? 
+                                      (referenceBatch.quantity - (referenceBatch.wasteQuantity || 0) - (referenceBatch.inTransitQuantity || 0)) :
+                                      product.stockQuantity;
+                                    return (
+                                      <>
+                                        <span className="font-bold text-green-600">{finalInventory}</span>
+                                        <div className="text-xs text-gray-500">نهایی</div>
+                                      </>
+                                    );
+                                  })()}
+                                </div>
                               </td>
                               <td className="p-4 text-center">
                                 <Button
                                   size="sm"
                                   onClick={() => addNewBatch(product.id)}
-                                  className="text-xs"
+                                  className="text-xs bg-green-600 hover:bg-green-700"
                                   disabled={!newBatchData[product.id]?.batchNumber}
                                 >
                                   <Plus className="w-3 h-3 mr-1" />
@@ -1364,10 +1488,10 @@ const WarehouseManagement: React.FC = () => {
                                 </Button>
                               </td>
                               <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                                <span className="text-sm text-gray-500">-</span>
                               </td>
                               <td className="p-4 text-center">
-                                <span className="text-sm text-blue-600 font-medium">از کاردکس</span>
+                                <span className="text-sm text-gray-500">-</span>
                               </td>
                             </tr>
                           </>
