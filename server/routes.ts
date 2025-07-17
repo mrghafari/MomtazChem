@@ -3721,8 +3721,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         'content_management',
         'warehouse_management',
-        'logistics_management', // Added: logistics-management module
-        'remote_desktop' // Added: remote desktop management module
+        'logistics_management',
+        'ticketing_system',
+        'remote_desktop',
+        'server_config'
       ];
 
       // Get super admin role (admin@momtazchem.com has user ID 7)
@@ -3788,7 +3790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'shop_management', 
       'product_management',
       'order_management',
-      'warehouse-management',
+      'warehouse_management',
       'logistics_management',
       'inquiries',
       'crm',
@@ -3808,8 +3810,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'refresh_control',
       'content_management',
       'ticketing_system',
-      'remote_desktop'
-      // Total: 24 modules - automatically synced with Site Management
+      'remote_desktop',
+      'server_config'
+      // Total: 26 modules - automatically synced with Site Management
     ];
   };
 
