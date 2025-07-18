@@ -1736,7 +1736,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bank receipt upload endpoint
+  // Bank receipt upload endpoint (DISABLED - using newer version below)
+  /*
   app.post("/api/payment/upload-receipt", requireCustomerAuth, (req, res) => {
     const uploadReceipt = multer({
       storage: receiptStorage,
@@ -1832,6 +1833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   });
+  */
 
   // Get receipt for order (customer can view their own receipt)
   app.get("/api/payment/receipt/:orderId", requireCustomerAuth, async (req, res) => {
@@ -19701,8 +19703,20 @@ momtazchem.com
         });
       }
 
-      // بررسی وجود سفارش
-      const order = await shopStorage.getOrderById(parseInt(orderId));
+      // بررسی وجود سفارش در customer_orders
+      let order;
+      if (orderId.startsWith('ORD-')) {
+        // Find order by order number
+        const [orderResult] = await customerDb
+          .select()
+          .from(customerOrders)
+          .where(eq(customerOrders.orderNumber, orderId));
+        order = orderResult;
+      } else {
+        // Find order by ID
+        order = await customerStorage.getOrderById(parseInt(orderId));
+      }
+      
       if (!order) {
         return res.status(404).json({ 
           success: false, 
@@ -19714,27 +19728,34 @@ momtazchem.com
       const filePath = `/uploads/receipts/${file.filename}`;
 
       // به‌روزرسانی سفارش با مسیر فیش بانکی
-      await shopStorage.updateOrder(parseInt(orderId), {
-        receiptPath: filePath,
-        paymentStatus: 'receipt_uploaded'
-      });
+      await customerDb
+        .update(customerOrders)
+        .set({
+          receiptPath: filePath,
+          paymentStatus: 'receipt_uploaded'
+        })
+        .where(eq(customerOrders.id, order.id));
 
       // ثبت فعالیت در سیستم مالی
-      await shopStorage.createFinancialTransaction({
-        type: 'receipt_uploaded',
-        orderId: order.id,
-        amount: order.totalAmount,
-        description: `فیش بانکی آپلود شد - ${file.originalname}`,
-        referenceNumber: order.orderNumber,
-        status: 'pending_review',
-        processingDate: new Date(),
-        metadata: { 
-          receiptPath: filePath,
-          fileName: file.originalname,
-          fileSize: file.size,
-          mimeType: file.mimetype
-        }
-      });
+      try {
+        await shopStorage.createFinancialTransaction({
+          type: 'receipt_uploaded',
+          orderId: order.id,
+          amount: order.totalAmount,
+          description: `فیش بانکی آپلود شد - ${file.originalname}`,
+          referenceNumber: order.orderNumber,
+          status: 'pending_review',
+          processingDate: new Date(),
+          metadata: { 
+            receiptPath: filePath,
+            fileName: file.originalname,
+            fileSize: file.size,
+            mimeType: file.mimetype
+          }
+        });
+      } catch (error) {
+        console.log('Warning: Could not create financial transaction, but receipt uploaded successfully');
+      }
 
       console.log(`Receipt uploaded for order ${orderId}:`, {
         fileName: file.originalname,

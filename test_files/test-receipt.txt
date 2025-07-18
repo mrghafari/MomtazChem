@@ -1,0 +1,4 @@
+Test bank receipt content
+Receipt ID: 12345
+Date: 2025-07-18
+Amount: 25.24 IQD
