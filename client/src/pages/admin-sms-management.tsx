@@ -19,7 +19,9 @@ import {
   Truck, 
   CheckCircle2,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  Info,
+  AlertTriangle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SmsTemplatesSimple from '@/components/sms-templates-simple';
