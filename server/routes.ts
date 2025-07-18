@@ -6468,11 +6468,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           c.phone,
           c.company,
           c.customer_status,
-          COALESCE(cs.sms_enabled, false) as sms_enabled,
+          COALESCE(c.sms_enabled, true) as sms_enabled,
           (SELECT COUNT(*) FROM customer_orders WHERE customer_id = c.id) as total_orders,
           (SELECT MAX(created_at) FROM customer_orders WHERE customer_id = c.id) as last_order_date
         FROM crm_customers c
-        LEFT JOIN customer_sms_settings cs ON c.id = cs.customer_id
         WHERE c.is_active = true
         ORDER BY c.first_name, c.last_name
       `);
@@ -6505,16 +6504,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { pool } = await import('./db');
 
       await pool.query(`
-        INSERT INTO customer_sms_settings (customer_id, sms_enabled, updated_at)
-        VALUES ($1, $2, NOW())
-        ON CONFLICT (customer_id) DO UPDATE SET
-          sms_enabled = $2,
-          updated_at = NOW()
+        UPDATE crm_customers 
+        SET sms_enabled = $2
+        WHERE id = $1
       `, [customerId, smsEnabled]);
 
       res.json({ success: true, message: "تنظیمات مشتری بروزرسانی شد" });
     } catch (error) {
       console.error("Error updating customer SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی تنظیمات" });
+    }
+  });
+
+  // Bulk toggle SMS for customers
+  app.post("/api/admin/sms/bulk-toggle", requireAuth, async (req, res) => {
+    try {
+      const { customerIds, smsEnabled } = req.body;
+      const { pool } = await import('./db');
+
+      if (!customerIds || !Array.isArray(customerIds)) {
+        return res.status(400).json({ success: false, message: "لیست مشتریان نامعتبر است" });
+      }
+
+      const placeholders = customerIds.map((_, index) => `$${index + 2}`).join(',');
+      const query = `
+        UPDATE crm_customers 
+        SET sms_enabled = $1
+        WHERE id IN (${placeholders})
+      `;
+
+      await pool.query(query, [smsEnabled, ...customerIds]);
+
+      res.json({ 
+        success: true, 
+        message: `تنظیمات SMS برای ${customerIds.length} مشتری بروزرسانی شد` 
+      });
+    } catch (error) {
+      console.error("Error bulk updating SMS settings:", error);
       res.status(500).json({ success: false, message: "خطا در بروزرسانی تنظیمات" });
     }
   });

@@ -255,11 +255,14 @@ export class SmsStorage implements ISmsStorage {
       .from(smsVerifications)
       .where(eq(smsVerifications.isUsed, true));
     
-    // Get customers with SMS enabled
-    const customersWithSmsEnabled = await smsDb
-      .select({ count: customerSmsSettings.id })
-      .from(customerSmsSettings)
-      .where(eq(customerSmsSettings.smsAuthEnabled, true));
+    // Get customers with SMS enabled from CRM
+    const { pool } = await import('./db');
+    const customersResult = await pool.query(`
+      SELECT COUNT(*) as count
+      FROM crm_customers
+      WHERE sms_enabled = true AND is_active = true
+    `);
+    const customersWithSmsEnabledCount = parseInt(customersResult.rows[0]?.count || 0);
     
     // Get system status
     const systemSettings = await this.getSmsSettings();
@@ -268,7 +271,7 @@ export class SmsStorage implements ISmsStorage {
       totalVerifications: totalVerifications.length,
       verificationsSentToday: verificationsSentToday.length,
       successfulVerifications: successfulVerifications.length,
-      customersWithSmsEnabled: customersWithSmsEnabled.length,
+      customersWithSmsEnabled: customersWithSmsEnabledCount,
       systemEnabled: systemSettings?.isEnabled || false
     };
   }
