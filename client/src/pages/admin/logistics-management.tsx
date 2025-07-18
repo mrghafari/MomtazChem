@@ -207,6 +207,8 @@ const LogisticsManagement = () => {
   }}>({});
   const [selectedOrderForLabel, setSelectedOrderForLabel] = useState<any>(null);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
+  const [existingCodes, setExistingCodes] = useState<{[orderId: number]: string}>({});
+  const [sentCodes, setSentCodes] = useState<Set<number>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -218,20 +220,41 @@ const LogisticsManagement = () => {
     enabled: true
   });
 
-  // Queries
+  // Queries - Use the correct endpoint for logistics department orders
   const { data: pendingOrdersResponse, isLoading: loadingOrders } = useQuery({
-    queryKey: ['/api/logistics/orders/pending'],
+    queryKey: ['/api/order-management/by-department/logistics'],
     enabled: activeTab === 'orders'
   });
 
-  // Get orders that have reached logistics stage (warehouse approved)
+  // Get orders that have reached logistics stage (warehouse approved) - same endpoint
   const { data: logisticsOrdersResponse, isLoading: loadingLogisticsOrders } = useQuery({
-    queryKey: ['/api/logistics/orders'],
+    queryKey: ['/api/order-management/by-department/logistics'],
     enabled: activeTab === 'orders'
   });
   
-  const pendingOrders = pendingOrdersResponse?.data || [];
+  const pendingOrders = pendingOrdersResponse?.orders || [];
   const logisticsOrders = logisticsOrdersResponse?.orders || [];
+  
+  // Map data to add customer object structure for compatibility
+  const mappedPendingOrders = pendingOrders.map((order: any) => ({
+    ...order,
+    customer: {
+      firstName: order.customerFirstName,
+      lastName: order.customerLastName,
+      email: order.customerEmail,
+      phone: order.customerPhone
+    }
+  }));
+  
+  const mappedLogisticsOrders = logisticsOrders.map((order: any) => ({
+    ...order,
+    customer: {
+      firstName: order.customerFirstName,
+      lastName: order.customerLastName,
+      email: order.customerEmail,
+      phone: order.customerPhone
+    }
+  }));
 
   // Load existing codes when orders are fetched
   useEffect(() => {
@@ -508,10 +531,10 @@ const LogisticsManagement = () => {
         <h3 className="text-lg font-semibold">مدیریت سفارشات لجستیک</h3>
         <div className="flex gap-2">
           <Badge variant="outline" className="bg-blue-50 text-blue-700">
-            {logisticsOrders.length} سفارش در لجستیک
+            {mappedLogisticsOrders.length} سفارش در لجستیک
           </Badge>
           <Badge variant="outline" className="bg-orange-50 text-orange-700">
-            {pendingOrders.length} سفارش در انتظار
+            {mappedPendingOrders.length} سفارش در انتظار
           </Badge>
         </div>
       </div>
@@ -525,7 +548,7 @@ const LogisticsManagement = () => {
         
         {loadingLogisticsOrders ? (
           <div className="text-center py-8">در حال بارگذاری سفارشات لجستیک...</div>
-        ) : logisticsOrders.length === 0 ? (
+        ) : mappedLogisticsOrders.length === 0 ? (
           <Card className="border-green-200">
             <CardContent className="text-center py-8">
               <Package className="w-12 h-12 mx-auto mb-4 text-green-400" />
@@ -533,7 +556,7 @@ const LogisticsManagement = () => {
             </CardContent>
           </Card>
         ) : (
-          logisticsOrders.map((order: any) => (
+          mappedLogisticsOrders.map((order: any) => (
             <Card key={order.id} className="border-r-4 border-r-green-500 bg-green-50">
               <CardContent className="p-4">
                 <div className="flex justify-between items-center mb-3">
@@ -978,7 +1001,7 @@ const LogisticsManagement = () => {
                   {/* Send Code Button */}
                   <Button 
                     size="sm" 
-                    className={existingCodes[order.customerOrderId] || sentCodes.has(order.customerOrderId)
+                    className={orderButtonStates[order.customerOrderId]?.isCodeSent
                       ? "bg-red-600 hover:bg-red-700 text-white" 
                       : "bg-blue-600 hover:bg-blue-700 text-white"
                     }
@@ -997,8 +1020,8 @@ const LogisticsManagement = () => {
                     <Send className="w-4 h-4 mr-2" />
                     {generateCodeMutation.isPending 
                       ? "در حال ارسال..." 
-                      : existingCodes[order.customerOrderId] || sentCodes.has(order.customerOrderId)
-                        ? `ارسال مجدد کد ${existingCodes[order.customerOrderId] || ''}`
+                      : orderButtonStates[order.customerOrderId]?.isCodeSent
+                        ? `ارسال مجدد کد ${orderButtonStates[order.customerOrderId]?.existingCode || ''}`
                         : "ارسال کد به مشتری"
                     }
                   </Button>
