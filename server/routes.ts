@@ -7083,8 +7083,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const verificationCode = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit code
         
-        // Get SMS template 8 for registration verification
-        const template = await simpleSmsStorage.getTemplateById(8);
+        // Get SMS template 4 for registration verification
+        const template = await simpleSmsStorage.getTemplateById(4);
         
         if (template && template.templateContent && phone) {
           // Replace variables in template
@@ -7102,7 +7102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             SET usage_count = usage_count + 1, 
                 last_used = NOW(), 
                 updated_at = NOW() 
-            WHERE id = ${8}
+            WHERE id = ${4}
           `);
           
           // Log SMS activity in CRM
