@@ -6774,6 +6774,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Toggle category status
+  app.patch("/api/admin/sms/template-categories/:id/toggle-status", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      
+      await smsStorage.updateTemplateCategory(parseInt(id), { isActive });
+      res.json({ success: true, message: "وضعیت دسته‌بندی تغییر کرد" });
+    } catch (error) {
+      console.error("Error toggling category status:", error);
+      res.status(500).json({ success: false, message: "خطا در تغییر وضعیت دسته‌بندی" });
+    }
+  });
+
   // SMS Templates Management
   app.get("/api/admin/sms/templates", requireAuth, async (req: Request, res: Response) => {
     try {
@@ -6847,6 +6861,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting template:", error);
       res.status(500).json({ success: false, message: "خطا در حذف قالب" });
+    }
+  });
+
+  // Toggle template status
+  app.patch("/api/admin/sms/templates/:id/toggle-status", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      
+      await smsStorage.updateTemplate(parseInt(id), { isActive });
+      res.json({ success: true, message: "وضعیت قالب تغییر کرد" });
+    } catch (error) {
+      console.error("Error toggling template status:", error);
+      res.status(500).json({ success: false, message: "خطا در تغییر وضعیت قالب" });
     }
   });
 
