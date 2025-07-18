@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -537,7 +537,7 @@ function FinanceOrders() {
             </TabsTrigger>
             <TabsTrigger value="orphan" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-amber-500 data-[state=active]:text-white">
               <AlertTriangle className="h-4 w-4" />
-              <span>سفارشات یتیم ({orphanStats?.stats?.active || 0})</span>
+              <span>سفارشات موقت ({orphanStats?.stats?.active || 0})</span>
             </TabsTrigger>
           </TabsList>
 
@@ -605,7 +605,7 @@ function FinanceOrders() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5" />
-                    مدیریت سفارشات یتیم (Grace Period Orders)
+                    مدیریت سفارشات موقت (Grace Period Orders)
                   </CardTitle>
                   <CardDescription>
                     سفارشات با مهلت 3 روزه پرداخت و سیستم اطلاع‌رسانی خودکار
