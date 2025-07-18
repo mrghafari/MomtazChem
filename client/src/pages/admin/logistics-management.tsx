@@ -105,12 +105,15 @@ const LogisticsManagement = () => {
   // Map data to add customer object structure for compatibility
   const mappedLogisticsOrders = logisticsOrders.map((order: any) => ({
     ...order,
-    customer: {
+    // Use existing customer object if available, otherwise create from individual fields
+    customer: order.customer || {
       firstName: order.customerFirstName,
       lastName: order.customerLastName,
       email: order.customerEmail,
       phone: order.customerPhone
-    }
+    },
+    // Ensure customerAddress is available for display
+    customerAddress: order.customerAddress || 'آدرس ثبت نشده'
   }));
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
@@ -175,7 +178,7 @@ const LogisticsManagement = () => {
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
                     {/* Customer Info Block */}
                     <div className="bg-white rounded-lg p-3 border border-green-200">
                       <h5 className="font-medium text-green-800 mb-2 flex items-center">
@@ -186,12 +189,12 @@ const LogisticsManagement = () => {
                         <div className="bg-gray-50 rounded p-2">
                           <p className="text-xs text-gray-500 mb-1">نام مشتری</p>
                           <p className="text-sm font-medium text-gray-800">
-                            {order.customerFirstName} {order.customerLastName}
+                            {order.customer?.firstName || order.customerFirstName} {order.customer?.lastName || order.customerLastName}
                           </p>
                         </div>
                         <div className="bg-gray-50 rounded p-2 flex items-center">
                           <Phone className="w-3 h-3 mr-2 text-gray-500" />
-                          <span className="text-sm text-gray-700">{order.customerPhone}</span>
+                          <span className="text-sm text-gray-700">{order.customer?.phone || order.customerPhone}</span>
                         </div>
                       </div>
                     </div>
@@ -228,7 +231,7 @@ const LogisticsManagement = () => {
                           ? 'text-purple-700' 
                           : 'text-gray-500'
                       }`}>
-                        {order.deliveryCode || 'تخصیص نیافته'}
+                        {order.deliveryCode || 'کد ندارد'}
                       </p>
                       <p className={`text-xs mt-1 ${
                         order.deliveryCode
@@ -237,6 +240,42 @@ const LogisticsManagement = () => {
                       }`}>
                         کد 4 رقمی تحویل
                       </p>
+                    </div>
+
+                    {/* Delivery Address Block */}
+                    <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                      <h5 className="font-medium text-orange-800 mb-2 flex items-center">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        آدرس تحویل
+                      </h5>
+                      <p className="text-sm text-orange-700">
+                        {order.customerAddress || order.shippingAddress || 'آدرس ثبت نشده'}
+                      </p>
+                      <p className="text-xs text-orange-600 mt-1">آدرس دریافت کالا</p>
+                    </div>
+
+                    {/* Order Date Block */}
+                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                      <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                        <Package className="w-4 h-4 mr-2" />
+                        تاریخ سفارش
+                      </h5>
+                      <p className="text-sm font-medium text-green-700">
+                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US') : 'نامشخص'}
+                      </p>
+                      <p className="text-xs text-green-600 mt-1">تاریخ ثبت سفارش</p>
+                    </div>
+
+                    {/* Delivery Date Block */}
+                    <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                      <h5 className="font-medium text-yellow-800 mb-2 flex items-center">
+                        <Truck className="w-4 h-4 mr-2" />
+                        تاریخ تحویل
+                      </h5>
+                      <p className="text-sm font-medium text-yellow-700">
+                        {order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString('en-US') : 'در انتظار تحویل'}
+                      </p>
+                      <p className="text-xs text-yellow-600 mt-1">تاریخ تحویل سفارش</p>
                     </div>
                   </div>
 
