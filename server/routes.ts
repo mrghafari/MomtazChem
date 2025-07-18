@@ -6338,7 +6338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const settings = result.rows[0] || {
         isEnabled: false,
-        provider: 'kavenegar',
+        provider: 'asiacell',
         apiKey: '',
         apiSecret: '',
         username: '',

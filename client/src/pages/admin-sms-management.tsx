@@ -467,11 +467,9 @@ export default function AdminSmsManagement() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="kavenegar">Kavenegar</SelectItem>
-                      <SelectItem value="melipayamak">Melipayamak</SelectItem>
-                      <SelectItem value="farapayamak">Farapayamak</SelectItem>
-                      <SelectItem value="sms_ir">SMS.ir</SelectItem>
-                      <SelectItem value="parsgreen">ParsGreen</SelectItem>
+                      <SelectItem value="asiacell">Asiacell</SelectItem>
+                      <SelectItem value="zain_iraq">Zain Iraq</SelectItem>
+                      <SelectItem value="korek_telecom">Korek Telecom</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -604,6 +602,38 @@ export default function AdminSmsManagement() {
               <Button onClick={handleSaveSettings} disabled={loading} className="w-full">
                 Save Settings
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Provider Information Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                راهنمای ارائه‌دهندگان SMS
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 text-sm">
+                <div className="space-y-3">
+                  <div className="border-l-4 border-green-500 pl-3">
+                    <h4 className="font-medium text-green-700">اپراتورهای عراق</h4>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li>• <strong>Asiacell</strong> - asiacell.com</li>
+                      <li>• <strong>Zain Iraq</strong> - iq.zain.com</li>
+                      <li>• <strong>Korek Telecom</strong> - korek.com</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                  <div className="text-sm text-amber-800">
+                    <strong>نکته مهم:</strong> برای استفاده از اپراتورهای عراق، با بخش فنی هر اپراتور تماس بگیرید تا API credentials و اطلاعات اتصال را دریافت کنید.
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
