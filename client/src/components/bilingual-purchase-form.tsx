@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -1063,19 +1063,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <Upload className="w-4 h-4 text-purple-600" />
                     ارسال فیش واریزی بانکی
                   </Label>
+                  
+                  {/* علامت مهلت 3 روزه کنار فیش بانکی */}
+                  <div className="flex items-center gap-1 mr-2">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    <RadioGroupItem 
+                      value="bank_transfer_grace" 
+                      id="bank_transfer_grace_inline"
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="bank_transfer_grace_inline" className="text-xs text-amber-600 cursor-pointer whitespace-nowrap">
+                      مهلت 3 روز
+                    </Label>
+                  </div>
                 </div>
-                
-                {/* پنجم: واریز بانکی با مهلت 3 روزه */}
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="bank_transfer_grace" id="bank_transfer_grace" />
-                  <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
-                    <CreditCard className="w-4 h-4 text-amber-600" />
-                    <div className="flex flex-col">
-                      <span className="font-semibold">واریز بانکی با مهلت 3 روزه</span>
-                      <span className="text-xs text-muted-foreground">سفارش قفل شده - مهلت آپلود فیش: 3 روز</span>
-                    </div>
-                  </Label>
-                </div>
+
                 
                 {/* Hidden file input for immediate file selection */}
                 <input
