@@ -338,34 +338,25 @@ const WarehouseManagementFixed: React.FC = () => {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full table-fixed">
-                      <colgroup>
-                        <col className="w-[120px]" />
-                        <col className="w-[250px]" />
-                        <col className="w-[140px]" />
-                        <col className="w-[120px]" />
-                        <col className="w-[120px]" />
-                        <col className="w-[140px]" />
-                        <col className="w-[200px]" />
-                      </colgroup>
+                    <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
                       <thead>
                         <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="text-right p-4 font-semibold text-gray-700">شماره سفارش</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">اطلاعات مشتری</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">وزن محموله</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">مبلغ کل</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">وضعیت</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">تاریخ پردازش</th>
-                          <th className="text-center p-4 font-semibold text-gray-700">عملیات</th>
+                          <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '120px' }}>شماره سفارش</th>
+                          <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '250px' }}>اطلاعات مشتری</th>
+                          <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '140px' }}>وزن محموله</th>
+                          <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '120px' }}>مبلغ کل</th>
+                          <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '120px' }}>وضعیت</th>
+                          <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '140px' }}>تاریخ پردازش</th>
+                          <th className="text-center p-4 font-semibold text-gray-700" style={{ width: '200px' }}>عملیات</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredOrders.map((order: Order) => (
                           <tr key={order.id} className="border-b hover:bg-blue-50 transition-colors">
-                            <td className="p-4">
+                            <td className="p-4" style={{ width: '120px' }}>
                               <div className="font-bold text-blue-600 truncate">#{order.id}</div>
                             </td>
-                            <td className="p-4">
+                            <td className="p-4" style={{ width: '250px' }}>
                               <div className="space-y-1">
                                 <div className="font-medium text-gray-900 truncate">{
                                   order.customer?.firstName && order.customer?.lastName 
@@ -382,24 +373,24 @@ const WarehouseManagementFixed: React.FC = () => {
                                 </div>
                               </div>
                             </td>
-                            <td className="p-4">
+                            <td className="p-4" style={{ width: '140px' }}>
                               <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1">
                                 <Weight className="w-3 h-3" />
                                 {order.totalWeight ? `${parseFloat(order.totalWeight).toFixed(1)} kg` : 'محاسبه...'}
                               </div>
                             </td>
-                            <td className="p-4">
+                            <td className="p-4" style={{ width: '120px' }}>
                               <div className="font-semibold text-green-600 text-sm truncate">
                                 {formatCurrency(parseFloat(order.totalAmount) || 0)}
                               </div>
                             </td>
-                            <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
-                            <td className="p-4">
+                            <td className="p-4" style={{ width: '120px' }}>{getStatusBadge(order.currentStatus || order.status)}</td>
+                            <td className="p-4" style={{ width: '140px' }}>
                               <div className="text-sm text-gray-600 truncate">
                                 {order.warehouseProcessedAt ? new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR') : 'پردازش نشده'}
                               </div>
                             </td>
-                            <td className="p-4 text-center">
+                            <td className="p-4 text-center" style={{ width: '200px' }}>
                               <div className="flex items-center justify-center gap-1">
                                 <Button
                                   size="sm"
@@ -527,31 +518,24 @@ const WarehouseManagementFixed: React.FC = () => {
                 <div>
                   <h3 className="font-semibold mb-3 text-lg">آیتم‌های سفارش</h3>
                   <div className="border rounded-lg overflow-hidden">
-                    <table className="w-full table-fixed">
-                      <colgroup>
-                        <col className="w-[35%]" />
-                        <col className="w-[20%]" />
-                        <col className="w-[15%]" />
-                        <col className="w-[15%]" />
-                        <col className="w-[15%]" />
-                      </colgroup>
+                    <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="text-right p-3 text-sm font-medium text-gray-700">نام محصول</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-700">کد محصول</th>
-                          <th className="text-center p-3 text-sm font-medium text-gray-700">تعداد</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-700">قیمت واحد</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-700">قیمت کل</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-700" style={{ width: '35%' }}>نام محصول</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-700" style={{ width: '20%' }}>کد محصول</th>
+                          <th className="text-center p-3 text-sm font-medium text-gray-700" style={{ width: '15%' }}>تعداد</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-700" style={{ width: '15%' }}>قیمت واحد</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-700" style={{ width: '15%' }}>قیمت کل</th>
                         </tr>
                       </thead>
                       <tbody>
                         {orderDetails.items?.map((item: any, index: number) => (
                           <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            <td className="p-3 text-sm truncate" title={item.productName}>{item.productName}</td>
-                            <td className="p-3 text-sm font-mono text-gray-600 truncate" title={item.productSku}>{item.productSku}</td>
-                            <td className="p-3 text-sm text-center font-medium">{item.quantity}</td>
-                            <td className="p-3 text-sm truncate">{formatCurrency(parseFloat(item.unitPrice) || 0)}</td>
-                            <td className="p-3 text-sm font-medium truncate">{formatCurrency(parseFloat(item.totalPrice) || 0)}</td>
+                            <td className="p-3 text-sm truncate" style={{ width: '35%' }} title={item.productName}>{item.productName}</td>
+                            <td className="p-3 text-sm font-mono text-gray-600 truncate" style={{ width: '20%' }} title={item.productSku}>{item.productSku}</td>
+                            <td className="p-3 text-sm text-center font-medium" style={{ width: '15%' }}>{item.quantity}</td>
+                            <td className="p-3 text-sm truncate" style={{ width: '15%' }}>{formatCurrency(parseFloat(item.unitPrice) || 0)}</td>
+                            <td className="p-3 text-sm font-medium truncate" style={{ width: '15%' }}>{formatCurrency(parseFloat(item.totalPrice) || 0)}</td>
                           </tr>
                         ))}
                       </tbody>
