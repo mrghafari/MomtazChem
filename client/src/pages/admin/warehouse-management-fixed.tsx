@@ -527,7 +527,14 @@ const WarehouseManagementFixed: React.FC = () => {
                 <div>
                   <h3 className="font-semibold mb-3 text-lg">آیتم‌های سفارش</h3>
                   <div className="border rounded-lg overflow-hidden">
-                    <table className="w-full">
+                    <table className="w-full table-fixed">
+                      <colgroup>
+                        <col className="w-[35%]" />
+                        <col className="w-[20%]" />
+                        <col className="w-[15%]" />
+                        <col className="w-[15%]" />
+                        <col className="w-[15%]" />
+                      </colgroup>
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="text-right p-3 text-sm font-medium text-gray-700">نام محصول</th>
@@ -540,11 +547,11 @@ const WarehouseManagementFixed: React.FC = () => {
                       <tbody>
                         {orderDetails.items?.map((item: any, index: number) => (
                           <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            <td className="p-3 text-sm">{item.productName}</td>
-                            <td className="p-3 text-sm font-mono text-gray-600">{item.productSku}</td>
+                            <td className="p-3 text-sm truncate" title={item.productName}>{item.productName}</td>
+                            <td className="p-3 text-sm font-mono text-gray-600 truncate" title={item.productSku}>{item.productSku}</td>
                             <td className="p-3 text-sm text-center font-medium">{item.quantity}</td>
-                            <td className="p-3 text-sm">{formatCurrency(parseFloat(item.unitPrice) || 0)}</td>
-                            <td className="p-3 text-sm font-medium">{formatCurrency(parseFloat(item.totalPrice) || 0)}</td>
+                            <td className="p-3 text-sm truncate">{formatCurrency(parseFloat(item.unitPrice) || 0)}</td>
+                            <td className="p-3 text-sm font-medium truncate">{formatCurrency(parseFloat(item.totalPrice) || 0)}</td>
                           </tr>
                         ))}
                       </tbody>
