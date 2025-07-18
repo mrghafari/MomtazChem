@@ -275,6 +275,155 @@ export class UnifiedInventoryManager {
     }
   }
   /**
+   * Get detailed inventory with batch information for all products
+   * Returns inventory breakdown by batch for each product
+   */
+  static async getDetailedInventoryWithBatches(): Promise<{
+    productName: string;
+    barcode: string;
+    totalStock: number;
+    batches: {
+      batchNumber: string;
+      stock: number;
+      createdAt: Date;
+      notes?: string;
+    }[];
+  }[]> {
+    try {
+      console.log(`📦 [INVENTORY] Getting detailed inventory with batch information...`);
+      
+      // Get all products with batch information from shop_products using existing database connection
+      const allShopProducts = await shopStorage.getShopProducts();
+      const productsWithBarcodes = allShopProducts.filter(p => p.barcode);
+      
+      console.log(`📦 [INVENTORY] Found ${productsWithBarcodes.length} products with barcodes`);
+      
+      // Group by barcode and get product names
+      const inventoryMap = new Map<string, {
+        productName: string;
+        barcode: string;
+        totalStock: number;
+        batches: {
+          batchNumber: string;
+          stock: number;
+          createdAt: Date;
+          notes?: string;
+        }[];
+      }>();
+      
+      // Process batch data
+      for (const product of productsWithBarcodes) {
+        const barcode = product.barcode!;
+        const batchNumber = product.batchNumber || 'بدون شماره بچ';
+        const stock = product.stockQuantity || 0;
+        const createdAt = new Date(product.createdAt || new Date());
+        const notes = undefined;
+        
+        console.log(`📦 [INVENTORY] Processing product: ${product.name}, barcode: ${barcode}, stock: ${stock}`);
+        
+        if (!inventoryMap.has(barcode)) {
+          const productName = product.name || `محصول ${barcode}`;
+          
+          inventoryMap.set(barcode, {
+            productName,
+            barcode,
+            totalStock: 0,
+            batches: []
+          });
+        }
+        
+        const inventoryItem = inventoryMap.get(barcode)!;
+        inventoryItem.totalStock += stock;
+        inventoryItem.batches.push({
+          batchNumber,
+          stock,
+          createdAt,
+          notes
+        });
+      }
+      
+      const resultArray = Array.from(inventoryMap.values());
+      console.log(`✅ [INVENTORY] Found ${resultArray.length} products with batch details`);
+      console.log(`✅ [INVENTORY] Sample result:`, JSON.stringify(resultArray[0], null, 2));
+      
+      return resultArray;
+      
+    } catch (error) {
+      console.error(`❌ [INVENTORY] Error getting detailed inventory with batches:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Get batch details for a specific product by barcode
+   * Returns all batches for that product with quantities
+   */
+  static async getProductBatchDetails(barcode: string): Promise<{
+    productName: string;
+    barcode: string;
+    totalStock: number;
+    batches: {
+      batchNumber: string;
+      stock: number;
+      createdAt: Date;
+      notes?: string;
+    }[];
+  } | null> {
+    try {
+      console.log(`📦 [INVENTORY] Getting batch details for barcode: ${barcode}`);
+      
+      const { db } = await import("./db");
+      const { batchSalesTracking, shopProducts } = await import("../shared/shop-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      // Get product name
+      const product = await db.select({ name: shopProducts.name })
+        .from(shopProducts)
+        .where(eq(shopProducts.barcode, barcode))
+        .limit(1);
+      
+      if (product.length === 0) {
+        console.log(`❌ [INVENTORY] Product with barcode ${barcode} not found`);
+        return null;
+      }
+      
+      const productName = product[0].name;
+      
+      // Get all batches for this product
+      const batches = await db.select({
+        batchNumber: batchSalesTracking.batchNumber,
+        stock: batchSalesTracking.stockQuantity,
+        createdAt: batchSalesTracking.createdAt,
+        notes: batchSalesTracking.notes
+      })
+      .from(batchSalesTracking)
+      .where(eq(batchSalesTracking.barcode, barcode))
+      .orderBy(batchSalesTracking.createdAt);
+      
+      const totalStock = batches.reduce((sum, batch) => sum + (batch.stock || 0), 0);
+      
+      const result = {
+        productName,
+        barcode,
+        totalStock,
+        batches: batches.map(batch => ({
+          batchNumber: batch.batchNumber,
+          stock: batch.stock || 0,
+          createdAt: batch.createdAt,
+          notes: batch.notes || undefined
+        }))
+      };
+      
+      console.log(`✅ [INVENTORY] Found ${batches.length} batches for ${productName} (Total: ${totalStock})`);
+      return result;
+      
+    } catch (error) {
+      console.error(`❌ [INVENTORY] Error getting batch details for ${barcode}:`, error);
+      return null;
+    }
+  }
+
+  /**
    * Process order with batch tracking
    * Uses LIFO inventory reduction and tracks batch usage
    */

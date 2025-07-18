@@ -7081,6 +7081,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
+  // Get batch details for a specific product by barcode
+  app.get("/api/inventory/product-batch-details/:barcode", requireAuth, async (req, res) => {
+    try {
+      const barcode = req.params.barcode;
+      
+      if (!barcode) {
+        return res.status(400).json({
+          success: false,
+          message: "بارکد محصول نامعتبر است"
+        });
+      }
+
+      const { UnifiedInventoryManager } = await import('./unified-inventory-manager');
+      const batchDetails = await UnifiedInventoryManager.getProductBatchDetails(barcode);
+      
+      if (!batchDetails) {
+        return res.status(404).json({
+          success: false,
+          message: "محصول با این بارکد یافت نشد"
+        });
+      }
+      
+      res.json({
+        success: true,
+        data: batchDetails,
+        message: `اطلاعات ${batchDetails.batches.length} بچ برای محصول ${batchDetails.productName} دریافت شد`
+      });
+    } catch (error) {
+      console.error("Error fetching product batch details:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات بچ محصول" });
+    }
+  });
+
   // Generate invoice PDF with batch information
   app.get("/api/orders/:orderId/invoice-with-batch", requireAuth, async (req, res) => {
     try {
@@ -9152,6 +9187,23 @@ ${procedure.content}
         success: false, 
         message: "Internal server error" 
       });
+    }
+  });
+
+  // Get detailed inventory with batch information for all products
+  app.get("/api/inventory/detailed-with-batches", requireAuth, async (req, res) => {
+    try {
+      const { UnifiedInventoryManager } = await import('./unified-inventory-manager');
+      const detailedInventory = await UnifiedInventoryManager.getDetailedInventoryWithBatches();
+      
+      res.json({
+        success: true,
+        data: detailedInventory,
+        message: `اطلاعات موجودی ${detailedInventory.length} محصول با جزئیات بچ دریافت شد`
+      });
+    } catch (error) {
+      console.error("Error fetching detailed inventory with batches:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات موجودی با بچ" });
     }
   });
 
