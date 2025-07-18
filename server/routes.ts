@@ -1977,6 +1977,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API endpoint for getting all batches of a product by barcode
+  app.get("/api/batches/:barcode", requireAuth, async (req, res) => {
+    try {
+      const { barcode } = req.params;
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          id, 
+          name, 
+          batch_number, 
+          stock_quantity, 
+          created_at,
+          unit_price,
+          net_weight,
+          gross_weight
+        FROM showcase_products 
+        WHERE barcode = $1
+        ORDER BY created_at DESC
+      `, [barcode]);
+      
+      res.json({
+        success: true,
+        barcode,
+        batches: result.rows,
+        totalBatches: result.rows.length,
+        totalStock: result.rows.reduce((sum, batch) => sum + (batch.stock_quantity || 0), 0)
+      });
+    } catch (error) {
+      console.error("Error getting batches:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات بچ‌ها" });
+    }
+  });
+
+  // API endpoint for getting current selling batch (LIFO)
+  app.get("/api/selling-batch/:barcode", requireAuth, async (req, res) => {
+    try {
+      const { barcode } = req.params;
+      const { ShopStorage } = await import('./shop-storage');
+      const shopStorage = new ShopStorage();
+      
+      const currentBatch = await shopStorage.getCurrentSellingBatch(barcode);
+      
+      if (!currentBatch) {
+        return res.status(404).json({
+          success: false,
+          message: `هیچ بچ موجود برای بارکد ${barcode} یافت نشد`
+        });
+      }
+      
+      res.json({
+        success: true,
+        barcode,
+        currentBatch: {
+          batchId: currentBatch.id,
+          batchNumber: currentBatch.batch_number,
+          productName: currentBatch.name,
+          stockQuantity: currentBatch.stock_quantity,
+          createdAt: currentBatch.created_at
+        }
+      });
+    } catch (error) {
+      console.error("Error getting current selling batch:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات بچ فعال" });
+    }
+  });
+
   // Protected admin routes for product management (کاردکس)
   app.post("/api/products", requireAuth, async (req, res) => {
     try {
@@ -2011,7 +2078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      console.log(`✅ New batch registration: Barcode ${barcode} + Batch ${productData.batchNumber || 'No Batch'}`);
+      console.log(`✅ New batch registration: Barcode ${barcode} + Batch ${productData.batchNumber || 'No Batch'} + Stock ${productData.stockQuantity || 0}`);
       
       
       // Create product in showcase_products table (کاردکس)

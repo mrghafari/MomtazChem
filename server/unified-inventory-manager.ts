@@ -128,12 +128,16 @@ export class UnifiedInventoryManager {
   }
   
   /**
-   * Reduce inventory when order is placed
+   * Reduce inventory when order is placed using LIFO batch management
    * This is the single point for inventory reduction
    */
   static async reduceInventoryForOrder(orderItems: any[]): Promise<boolean> {
     try {
-      console.log(`📦 [INVENTORY] Reducing inventory for order with ${orderItems.length} items`);
+      console.log(`📦 [INVENTORY] Reducing inventory for order with ${orderItems.length} items using LIFO batch management`);
+      
+      // Import shop storage for LIFO functionality
+      const { ShopStorage } = await import('./shop-storage');
+      const shopStorage = new ShopStorage();
       
       for (const item of orderItems) {
         // Get current inventory
@@ -144,23 +148,47 @@ export class UnifiedInventoryManager {
           continue;
         }
         
-        // Calculate new quantity
-        const newQuantity = Math.max(0, currentInventory.stockQuantity - item.quantity);
-        
-        console.log(`📦 [INVENTORY] ${item.productName}:`);
-        console.log(`   Current: ${currentInventory.stockQuantity}`);
-        console.log(`   Ordered: ${item.quantity}`);
-        console.log(`   New: ${newQuantity}`);
-        
-        // Update inventory
-        await this.updateProductInventory(
-          item.productName,
-          newQuantity,
-          `Order sale: ${item.quantity} units sold`
-        );
+        // Use LIFO batch management if product has barcode
+        if (currentInventory.barcode) {
+          console.log(`📦 [INVENTORY] Using LIFO batch system for ${item.productName} (${currentInventory.barcode})`);
+          
+          const lifoResult = await shopStorage.reduceInventoryLIFO(
+            currentInventory.barcode,
+            item.quantity,
+            `Order sale: ${item.quantity} units sold`
+          );
+          
+          if (lifoResult.success) {
+            console.log(`✅ [LIFO] Successfully reduced ${item.quantity} units from ${lifoResult.affectedBatches.length} batches`);
+            
+            // Show batch details
+            for (const batch of lifoResult.affectedBatches) {
+              console.log(`  📦 Batch ${batch.batchNumber}: ${batch.previousStock} → ${batch.newStock} (reduced ${batch.reducedQuantity})`);
+            }
+          } else {
+            console.log(`❌ [LIFO] Failed to reduce inventory for ${item.productName} - insufficient stock`);
+          }
+        } else {
+          // Fallback to traditional inventory reduction if no barcode
+          console.log(`📦 [INVENTORY] Using traditional inventory reduction for ${item.productName} (no barcode)`);
+          
+          const newQuantity = Math.max(0, currentInventory.stockQuantity - item.quantity);
+          
+          console.log(`📦 [INVENTORY] ${item.productName}:`);
+          console.log(`   Current: ${currentInventory.stockQuantity}`);
+          console.log(`   Ordered: ${item.quantity}`);
+          console.log(`   New: ${newQuantity}`);
+          
+          // Update inventory
+          await this.updateProductInventory(
+            item.productName,
+            newQuantity,
+            `Order sale: ${item.quantity} units sold`
+          );
+        }
       }
       
-      console.log(`✅ [INVENTORY] Successfully reduced inventory for all order items`);
+      console.log(`✅ [INVENTORY] Successfully reduced inventory for all order items using LIFO batch management`);
       return true;
       
     } catch (error) {

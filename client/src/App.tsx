@@ -50,6 +50,7 @@ import ProductVariants from "@/pages/admin/product-variants";
 import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
+import BatchManagement from "@/pages/batch-management";
 import ProductRecommendations from "@/pages/product-recommendations";
 import ProductReviews from "@/pages/product-reviews";
 import FuelAdditives from "@/pages/products/fuel-additives";
@@ -197,6 +198,7 @@ function Router() {
           <Route path="/admin/ai-seo-assistant" component={AiSeoAssistant} />
           <Route path="/admin/remote-desktop" component={RemoteDesktop} />
           <Route path="/admin/server-config" component={ServerConfig} />
+          <Route path="/admin/batch-management" component={BatchManagement} />
 
           
           {/* Department-specific routes */}

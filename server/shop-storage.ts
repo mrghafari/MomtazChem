@@ -911,6 +911,88 @@ export class ShopStorage implements IShopStorage {
     });
   }
 
+  // LIFO Batch Management: Reduce inventory from newest batches first
+  async reduceInventoryLIFO(barcode: string, quantityToReduce: number, reason: string): Promise<{ success: boolean, affectedBatches: any[] }> {
+    try {
+      const { pool } = await import('./db');
+      let remainingQuantity = quantityToReduce;
+      const affectedBatches = [];
+      
+      // Get all batches for this barcode, ordered by creation date (newest first - LIFO)
+      const batchesResult = await pool.query(`
+        SELECT id, name, batch_number, stock_quantity, created_at
+        FROM showcase_products 
+        WHERE barcode = $1 AND stock_quantity > 0
+        ORDER BY created_at DESC
+      `, [barcode]);
+      
+      console.log(`🔄 [LIFO] Reducing ${quantityToReduce} units from barcode ${barcode} across ${batchesResult.rows.length} batches`);
+      
+      // Process batches in LIFO order (newest first)
+      for (const batch of batchesResult.rows) {
+        if (remainingQuantity <= 0) break;
+        
+        const currentBatchStock = batch.stock_quantity;
+        const reduceFromThisBatch = Math.min(remainingQuantity, currentBatchStock);
+        const newBatchStock = currentBatchStock - reduceFromThisBatch;
+        
+        // Update batch stock
+        await pool.query(`
+          UPDATE showcase_products 
+          SET stock_quantity = $1 
+          WHERE id = $2
+        `, [newBatchStock, batch.id]);
+        
+        // Log batch reduction
+        affectedBatches.push({
+          batchId: batch.id,
+          batchNumber: batch.batch_number,
+          productName: batch.name,
+          previousStock: currentBatchStock,
+          reducedQuantity: reduceFromThisBatch,
+          newStock: newBatchStock,
+          createdAt: batch.created_at
+        });
+        
+        remainingQuantity -= reduceFromThisBatch;
+        
+        console.log(`  📦 Batch ${batch.batch_number}: ${currentBatchStock} → ${newBatchStock} (reduced ${reduceFromThisBatch})`);
+      }
+      
+      if (remainingQuantity > 0) {
+        console.log(`⚠️  [LIFO] Warning: Could not reduce ${remainingQuantity} units - insufficient stock`);
+        return { success: false, affectedBatches };
+      }
+      
+      console.log(`✅ [LIFO] Successfully reduced ${quantityToReduce} units from ${affectedBatches.length} batches`);
+      return { success: true, affectedBatches };
+      
+    } catch (error) {
+      console.error('Error in LIFO inventory reduction:', error);
+      return { success: false, affectedBatches: [] };
+    }
+  }
+
+  // Get current selling batch (newest batch with stock > 0)
+  async getCurrentSellingBatch(barcode: string): Promise<any> {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT id, name, batch_number, stock_quantity, created_at
+        FROM showcase_products 
+        WHERE barcode = $1 AND stock_quantity > 0
+        ORDER BY created_at DESC
+        LIMIT 1
+      `, [barcode]);
+      
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error('Error getting current selling batch:', error);
+      return null;
+    }
+  }
+
   // Analytics
   async getOrderStatistics(): Promise<{
     totalOrders: number;
