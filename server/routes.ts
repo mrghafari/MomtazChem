@@ -367,6 +367,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.path.startsWith('/test/') || req.path.startsWith('/analytics/')) {
       return next();
     }
+    // Skip middleware for warehouse order management endpoints
+    if (req.path.startsWith('/order-management/warehouse/')) {
+      return next();
+    }
     attachUserDepartments(req, res, next);
   });
   
@@ -13923,20 +13927,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Process warehouse order - support both admin and custom users
   app.patch('/api/order-management/warehouse/:id/process', async (req, res) => {
-    // Debug session information
-    console.log('🔧 [DEBUG] Session info:', {
-      exists: !!req.session,
-      adminId: req.session?.adminId,
-      customUserId: req.session?.customUserId,
-      isAuthenticated: req.session?.isAuthenticated,
-      sessionID: req.session?.id
-    });
-    
-    // Check authentication for both admin and custom users
-    if (!req.session?.adminId && !req.session?.customUserId) {
-      console.log('❌ [DEBUG] Authentication failed - no valid user ID');
-      return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
-    }
     
     console.log('✅ [DEBUG] Authentication successful');
     try {
@@ -14016,10 +14006,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Get order items for warehouse processing - shows what products are in each order
   app.get('/api/order-management/warehouse/:customerOrderId/items', async (req, res) => {
-    // Check authentication for both admin and custom users
-    if (!req.session?.adminId && !req.session?.customUserId) {
-      return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
-    }
     
     try {
       const { customerOrderId } = req.params;
@@ -14070,10 +14056,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   // Get complete order details with customer info and items
   app.get('/api/order-management/warehouse/:customerOrderId/details', async (req, res) => {
-    // Check authentication for both admin and custom users
-    if (!req.session?.adminId && !req.session?.customUserId) {
-      return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
-    }
     
     try {
       const { customerOrderId } = req.params;
