@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Edit, Trash2, Plus, Copy, MessageSquare, Tag, AlertCircle, Info } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { getTemplateUsageConditions } from "@/config/sms-template-conditions";
 
 // Types
 interface SmsTemplate {
@@ -155,22 +156,6 @@ export default function SmsTemplatesSimple() {
   const copyToClipboard = (content: string) => {
     navigator.clipboard.writeText(content);
     toast({ title: "کپی شد", description: "محتوای قالب کپی شد" });
-  };
-
-  // Get usage guidelines for each template
-  const getUsageGuidelines = (templateName: string): string => {
-    const guidelines: Record<string, string> = {
-      "Order Confirmation": "استفاده: هنگام تأیید سفارش جدید - متغیرها: customer_name، order_id، items - زمان ارسال: بلافاصله پس از ثبت سفارش",
-      "Delivery Notification": "استفاده: اطلاع‌رسانی تحویل سفارش - متغیرها: customer_name، order_id، delivery_code - زمان ارسال: هنگام تحویل کالا",
-      "Payment Reminder": "استفاده: یادآوری پرداخت معوقه - متغیرها: customer_name، amount، due_date - زمان ارسال: قبل از سررسید پرداخت",
-      "Order Cancellation": "استفاده: اطلاع‌رسانی لغو سفارش - متغیرها: customer_name، order_id، reason - زمان ارسال: هنگام لغو سفارش",
-      "Delivery Verification": "استفاده: تأیید دریافت کالا توسط مشتری - متغیرها: customer_name، verification_code - زمان ارسال: پس از تحویل فیزیکی",
-      "Welcome": "استفاده: خوشامدگویی به مشتریان جدید - متغیرها: customer_name - زمان ارسال: بلافاصله پس از ثبت نام",
-      "Promotional": "استفاده: ارسال تخفیفات و پیشنهادات ویژه - متغیرها: discount_percent، expiry_date - زمان ارسال: در کمپین‌های بازاریابی",
-      "Security Alert": "استفاده: هشدارهای امنیتی و ورود مشکوک - متغیرها: customer_name، timestamp - زمان ارسال: هنگام تشخیص فعالیت مشکوک"
-    };
-    
-    return guidelines[templateName] || "راهنمایی خاصی برای این قالب تعریف نشده است";
   };
 
   if (templatesLoading) {
@@ -357,15 +342,22 @@ export default function SmsTemplatesSimple() {
                   </div>
                 )}
                 
-                {/* Usage Guidelines Section */}
+                {/* Template Number and Usage Conditions */}
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border border-amber-200">
                   <div className="flex items-center gap-2 mb-2">
                     <Info className="h-4 w-4 text-amber-600" />
-                    <span className="text-sm font-medium text-amber-800">شرایط استفاده:</span>
+                    <span className="text-sm font-medium text-amber-800">
+                      شماره قالب: #{index + 1} - شرایط ارسال:
+                    </span>
                   </div>
                   <p className="text-sm text-amber-700 leading-relaxed">
-                    {getUsageGuidelines(template.templateName)}
+                    {getTemplateUsageConditions(template.templateName)}
                   </p>
+                  <div className="mt-2 pt-2 border-t border-amber-200">
+                    <p className="text-xs text-amber-600">
+                      💡 توجه: این شرایط قابل تغییر در کد سیستم می‌باشد
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 pt-2 border-t">
