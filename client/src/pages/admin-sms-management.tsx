@@ -58,12 +58,13 @@ interface CustomerSmsSettings {
   lastOrderDate?: string;
 }
 
-interface SmsStats {
-  totalVerifications: number;
-  verificationsSentToday: number;
-  successfulVerifications: number;
-  customersWithSmsEnabled: number;
-  systemEnabled: boolean;
+interface SmsLog {
+  id: number;
+  recipientName: string;
+  recipientPhone: string;
+  messageText: string;
+  sentAt: string;
+  status: 'sent' | 'delivered' | 'failed';
 }
 
 interface DeliveryLog {
@@ -92,13 +93,10 @@ export default function AdminSmsManagement() {
   const [customersWithSms, setCustomersWithSms] = useState<CustomerSmsSettings[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerSmsSettings[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [stats, setStats] = useState<SmsStats>({
-    totalVerifications: 0,
-    verificationsSentToday: 0,
-    successfulVerifications: 0,
-    customersWithSmsEnabled: 0,
-    systemEnabled: false
-  });
+  const [smsLogs, setSmsLogs] = useState<SmsLog[]>([]);
+  const [filteredLogs, setFilteredLogs] = useState<SmsLog[]>([]);
+  const [logSearchQuery, setLogSearchQuery] = useState('');
+  const [timeFilter, setTimeFilter] = useState('all');
   const [localSmsStates, setLocalSmsStates] = useState<Record<number, boolean>>(() => {
     try {
       const saved = localStorage.getItem('sms-local-states');
@@ -107,13 +105,11 @@ export default function AdminSmsManagement() {
       return {};
     }
   });
-  const [deliveryLogs, setDeliveryLogs] = useState<DeliveryLog[]>([]);
 
   useEffect(() => {
     loadSmsSettings();
-    loadSmsStats();
+    loadSmsLogs();
     loadCustomersWithSms();
-    loadDeliveryLogs();
   }, []);
 
   // Save local SMS states to localStorage whenever they change
@@ -137,6 +133,38 @@ export default function AdminSmsManagement() {
     }
   }, [customersWithSms, searchQuery]);
 
+  // Filter SMS logs based on search and time filters
+  useEffect(() => {
+    let filtered = [...smsLogs];
+
+    // Apply text search filter
+    if (logSearchQuery.trim()) {
+      filtered = filtered.filter(log => 
+        log.recipientName.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
+        log.recipientPhone.includes(logSearchQuery) ||
+        log.messageText.toLowerCase().includes(logSearchQuery.toLowerCase())
+      );
+    }
+
+    // Apply time filter
+    if (timeFilter !== 'all') {
+      const now = new Date();
+      const filterDate = new Date();
+      
+      if (timeFilter === 'today') {
+        filterDate.setHours(0, 0, 0, 0);
+      } else if (timeFilter === 'week') {
+        filterDate.setDate(now.getDate() - 7);
+      } else if (timeFilter === 'month') {
+        filterDate.setMonth(now.getMonth() - 1);
+      }
+      
+      filtered = filtered.filter(log => new Date(log.sentAt) >= filterDate);
+    }
+
+    setFilteredLogs(filtered);
+  }, [smsLogs, logSearchQuery, timeFilter]);
+
   const loadSmsSettings = async () => {
     try {
       const response = await fetch('/api/admin/sms/settings');
@@ -149,15 +177,16 @@ export default function AdminSmsManagement() {
     }
   };
 
-  const loadSmsStats = async () => {
+  const loadSmsLogs = async () => {
     try {
-      const response = await fetch('/api/admin/sms/stats');
+      const response = await fetch('/api/admin/sms/logs');
       const result = await response.json();
-      if (result.success && result.data) {
-        setStats(result.data);
+      if (result.success) {
+        setSmsLogs(result.data || []);
       }
     } catch (error) {
-      console.error('Error loading SMS stats:', error);
+      console.error('Error loading SMS logs:', error);
+      setSmsLogs([]);
     }
   };
 
@@ -173,17 +202,7 @@ export default function AdminSmsManagement() {
     }
   };
 
-  const loadDeliveryLogs = async () => {
-    try {
-      const response = await fetch('/api/admin/sms/delivery-logs');
-      const result = await response.json();
-      if (result.success && result.data) {
-        setDeliveryLogs(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading delivery logs:', error);
-    }
-  };
+
 
   const handleToggleSystem = async (enabled: boolean) => {
     setLoading(true);
@@ -196,7 +215,7 @@ export default function AdminSmsManagement() {
 
       if (response.ok) {
         setSettings(prev => ({ ...prev, isEnabled: enabled }));
-        setStats(prev => ({ ...prev, systemEnabled: enabled }));
+        setSettings(prev => ({ ...prev, isEnabled: enabled }));
         toast({
           title: enabled ? 'فعال شد' : 'غیرفعال شد',
           description: `سیستم SMS ${enabled ? 'فعال' : 'غیرفعال'} شد`
@@ -332,10 +351,6 @@ export default function AdminSmsManagement() {
             <BarChart3 className="h-4 w-4 mr-2" />
             آمار کلی
           </TabsTrigger>
-          <TabsTrigger value="templates">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            SMS Categories
-          </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" />
             تنظیمات
@@ -344,111 +359,112 @@ export default function AdminSmsManagement() {
             <Users className="h-4 w-4 mr-2" />
             مشتریان
           </TabsTrigger>
-          <TabsTrigger value="delivery">
-            <Truck className="h-4 w-4 mr-2" />
-            لاگ تحویل
+          <TabsTrigger value="templates">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            قالب‌های SMS
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">وضعیت سیستم</CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats.systemEnabled ? "فعال" : "غیرفعال"}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  سیستم SMS
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">کل تاییدیه‌ها</CardTitle>
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalVerifications}</div>
-                <p className="text-xs text-muted-foreground">
-                  کل کدهای SMS ارسال شده
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">تاییدیه‌های امروز</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.verificationsSentToday}</div>
-                <p className="text-xs text-muted-foreground">
-                  کدهای امروز
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">مشتریان فعال</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.customersWithSmsEnabled}</div>
-                <p className="text-xs text-muted-foreground">
-                  مشتریان با SMS فعال
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* SMS Usage Summary - Simplified */}
           <Card>
             <CardHeader>
-              <CardTitle>سیستم SMS ساده</CardTitle>
+              <CardTitle>آمار کلی ارسال SMS</CardTitle>
               <CardDescription>
-                مدیریت قالب‌های SMS بدون دسته‌بندی
+                تاریخچه کامل پیام‌های ارسالی با امکان فیلتر کردن
               </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-4">
-                <MessageSquare className="h-12 w-12 text-blue-600 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  قالب‌های SMS از طریق tab "SMS Categories" قابل مدیریت است
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              
+              {/* فیلترها */}
+              <div className="space-y-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="searchSms">جستجو در پیام‌ها</Label>
+                    <Input
+                      id="searchSms"
+                      placeholder="نام، شماره تلفن، یا متن پیام..."
+                      value={logSearchQuery}
+                      onChange={(e) => setLogSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="timeFilter">بازه زمانی</Label>
+                    <Select value={timeFilter} onValueChange={setTimeFilter}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">همه زمان‌ها</SelectItem>
+                        <SelectItem value="today">امروز</SelectItem>
+                        <SelectItem value="week">هفته گذشته</SelectItem>
+                        <SelectItem value="month">ماه گذشته</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>عملیات سریع</CardTitle>
-              <CardDescription>
-                مدیریت سیستم SMS
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">SMS Authentication System</Label>
-                  <div className="text-sm text-muted-foreground">
-                    {settings.isEnabled 
-                      ? "System is currently active and processing SMS verifications"
-                      : "System is disabled - no SMS codes will be sent"
-                    }
+                  <div className="flex items-end">
+                    <Button 
+                      onClick={loadSmsLogs} 
+                      variant="outline"
+                      disabled={loading}
+                      className="w-full"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      بروزرسانی
+                    </Button>
                   </div>
                 </div>
-                <Switch
-                  checked={settings.isEnabled}
-                  onCheckedChange={handleToggleSystem}
-                  disabled={loading}
-                />
+
+                <div className="text-sm text-muted-foreground">
+                  نمایش {filteredLogs.length} از {smsLogs.length} پیام
+                </div>
               </div>
+            </CardHeader>
+            
+            <CardContent>
+              {filteredLogs.length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">هیچ پیام SMS ارسالی وجود ندارد</h3>
+                  <p className="text-muted-foreground">
+                    پیام‌های ارسالی در اینجا نمایش داده خواهند شد
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>نام دریافت‌کننده</TableHead>
+                      <TableHead>شماره موبایل</TableHead>
+                      <TableHead>متن ارسالی</TableHead>
+                      <TableHead>زمان ارسال</TableHead>
+                      <TableHead>وضعیت</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLogs.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell className="font-medium">{log.recipientName}</TableCell>
+                        <TableCell>{log.recipientPhone}</TableCell>
+                        <TableCell className="max-w-xs truncate">{log.messageText}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(log.sentAt).toLocaleString('fa-IR')}
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={
+                              log.status === 'delivered' ? 'default' : 
+                              log.status === 'sent' ? 'secondary' : 'destructive'
+                            }
+                          >
+                            {log.status === 'delivered' ? 'تحویل شده' :
+                             log.status === 'sent' ? 'ارسال شده' : 'ناموفق'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -791,101 +807,6 @@ export default function AdminSmsManagement() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="delivery" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>لاگ تحویل SMS</CardTitle>
-              <CardDescription>
-                پیگیری SMS های ارسالی برای تحویل سفارشات
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Alert>
-                  <Truck className="h-4 w-4" />
-                  <AlertDescription>
-                    هنگام ارسال سفارش توسط بخش لجستیک، SMS حاوی کد تحویل و اطلاعات پیک به صورت خودکار برای مشتری ارسال می‌شود.
-                  </AlertDescription>
-                </Alert>
-
-                {deliveryLogs.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Truck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">هیچ SMS تحویل ارسال نشده</h3>
-                    <p className="text-muted-foreground">
-                      زمانی که سفارشی توسط بخش لجستیک ارسال شود، SMS تحویل در اینجا نمایش داده خواهد شد.
-                    </p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>شماره سفارش</TableHead>
-                        <TableHead>نام مشتری</TableHead>
-                        <TableHead>شماره تلفن</TableHead>
-                        <TableHead>کد تحویل</TableHead>
-                        <TableHead>وضعیت SMS</TableHead>
-                        <TableHead>تاریخ ارسال</TableHead>
-                        <TableHead>تحویل شده</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {deliveryLogs.map((log) => (
-                        <TableRow key={log.id}>
-                          <TableCell className="font-medium">#{log.orderId}</TableCell>
-                          <TableCell>{log.customerName}</TableCell>
-                          <TableCell>{log.phone}</TableCell>
-                          <TableCell>
-                            <span className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">
-                              {log.verificationCode}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={
-                                log.smsStatus === 'delivered' ? 'default' : 
-                                log.smsStatus === 'sent' ? 'secondary' : 'destructive'
-                              }
-                            >
-                              {log.smsStatus === 'delivered' ? 'تحویل شده' :
-                               log.smsStatus === 'sent' ? 'ارسال شده' : 'ناموفق'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {new Date(log.createdAt).toLocaleDateString('en-US')}
-                          </TableCell>
-                          <TableCell>
-                            {log.isVerified ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            ) : (
-                              <XCircle className="h-4 w-4 text-gray-400" />
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-muted-foreground">
-                    {deliveryLogs.length} رکورد نمایش داده شده
-                  </div>
-                  <Button
-                    onClick={loadDeliveryLogs}
-                    variant="outline"
-                    size="sm"
-                    disabled={loading}
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    بروزرسانی
-                  </Button>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

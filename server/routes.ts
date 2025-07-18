@@ -6414,44 +6414,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get SMS statistics
-  app.get("/api/admin/sms/statistics", requireAuth, async (req, res) => {
+  // Get SMS logs (simplified statistics)
+  app.get("/api/admin/sms/logs", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Get general SMS statistics
-      const statsResult = await pool.query(`
+      // Get SMS logs from customer verification codes
+      const logsResult = await pool.query(`
         SELECT 
-          COUNT(*) as total_verifications,
-          COUNT(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 END) as verifications_sent_today,
-          COUNT(CASE WHEN is_used = true THEN 1 END) as successful_verifications
-        FROM sms_verifications
+          cvc.id,
+          CONCAT(c.first_name, ' ', c.last_name) as recipient_name,
+          cvc.phone_number as recipient_phone,
+          'کد تایید شما: ' || cvc.verification_code as message_text,
+          cvc.created_at as sent_at,
+          CASE 
+            WHEN cvc.is_used = true THEN 'delivered'
+            ELSE 'sent'
+          END as status
+        FROM customer_verification_codes cvc
+        LEFT JOIN crm_customers c ON c.phone = cvc.phone_number
+        ORDER BY cvc.created_at DESC
+        LIMIT 100
       `);
 
-      const customersResult = await pool.query(`
-        SELECT COUNT(*) as customers_with_sms_enabled
-        FROM customer_sms_settings
-        WHERE sms_enabled = true
-      `);
+      const logs = logsResult.rows.map((row: any) => ({
+        id: row.id,
+        recipientName: row.recipient_name || 'نامشخص',
+        recipientPhone: row.recipient_phone,
+        messageText: row.message_text,
+        sentAt: row.sent_at,
+        status: row.status
+      }));
 
-      const settingsResult = await pool.query(`
-        SELECT is_enabled as system_enabled
-        FROM sms_settings
-        WHERE id = 1
-      `);
-
-      const stats = {
-        totalVerifications: parseInt(statsResult.rows[0]?.total_verifications || 0),
-        verificationsSentToday: parseInt(statsResult.rows[0]?.verifications_sent_today || 0),
-        successfulVerifications: parseInt(statsResult.rows[0]?.successful_verifications || 0),
-        customersWithSmsEnabled: parseInt(customersResult.rows[0]?.customers_with_sms_enabled || 0),
-        systemEnabled: settingsResult.rows[0]?.system_enabled || false
-      };
-
-      res.json({ success: true, stats });
+      res.json({ success: true, data: logs });
     } catch (error) {
-      console.error("Error fetching SMS statistics:", error);
-      res.status(500).json({ success: false, message: "خطا در دریافت آمار" });
+      console.error("Error fetching SMS logs:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت لاگ SMS" });
     }
   });
 
