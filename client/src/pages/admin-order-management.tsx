@@ -20,7 +20,14 @@ import {
   Calendar,
   MapPin,
   Phone,
-  User
+  User,
+  AlertTriangle,
+  Settings,
+  MessageSquare,
+  Mail,
+  Timer,
+  Bell,
+  Plus
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -110,12 +117,62 @@ const statusColors: Record<string, string> = {
 export default function AdminOrderManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedDepartment, setSelectedDepartment] = useState<'warehouse' | 'logistics' | 'delivered'>('warehouse');
+  const [selectedDepartment, setSelectedDepartment] = useState<'warehouse' | 'logistics' | 'delivered' | 'orphan'>('warehouse');
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
   const [newStatus, setNewStatus] = useState('');
   const [notes, setNotes] = useState('');
+
+  // Orphan orders queries
+  const { data: orphanStats } = useQuery({
+    queryKey: ['/api/orphan-orders/stats'],
+    enabled: selectedDepartment === 'orphan'
+  });
+
+  const { data: activeOrders } = useQuery({
+    queryKey: ['/api/orphan-orders/active'],
+    enabled: selectedDepartment === 'orphan'
+  });
+
+  const { data: notificationSettings } = useQuery({
+    queryKey: ['/api/orphan-orders/notification-settings'],
+    enabled: selectedDepartment === 'orphan'
+  });
+
+  const { data: messageTemplates } = useQuery({
+    queryKey: ['/api/orphan-orders/templates'],
+    enabled: selectedDepartment === 'orphan'
+  });
+
+  const { data: notificationSchedules } = useQuery({
+    queryKey: ['/api/orphan-orders/schedules'],
+    enabled: selectedDepartment === 'orphan'
+  });
+
+  // Send reminder mutation
+  const sendReminderMutation = useMutation({
+    mutationFn: async ({ orderId, type }: { orderId: number; type: string }) => {
+      return apiRequest(`/api/orphan-orders/${orderId}/send-reminder`, {
+        method: 'POST',
+        body: { type }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "موفق",
+        description: "یادآور با موفقیت ارسال شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/orphan-orders/active'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در ارسال یادآور",
+        variant: "destructive",
+      });
+    }
+  });
 
 
 
@@ -302,7 +359,7 @@ export default function AdminOrderManagement() {
       </div>
 
       <Tabs value={selectedDepartment} onValueChange={(value) => setSelectedDepartment(value as any)}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="warehouse" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             انبار
@@ -314,6 +371,10 @@ export default function AdminOrderManagement() {
           <TabsTrigger value="delivered" className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
             سفارشات تحویل شده
+          </TabsTrigger>
+          <TabsTrigger value="orphan" className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            سفارشات یتیم
           </TabsTrigger>
         </TabsList>
 
@@ -436,6 +497,365 @@ export default function AdminOrderManagement() {
             </Card>
           </TabsContent>
         ))}
+
+        {/* Orphan Orders Tab with Advanced Notification Management */}
+        <TabsContent value="orphan" className="mt-6">
+          <div className="space-y-6">
+            {/* Orphan Orders Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  مدیریت سفارشات یتیم (Grace Period Orders)
+                </CardTitle>
+                <CardDescription>
+                  سفارشات با مهلت 3 روزه پرداخت و سیستم اطلاع‌رسانی خودکار
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <Card className="border-amber-200 bg-amber-50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Timer className="h-5 w-5 text-amber-600" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">فعال</p>
+                          <p className="text-xl font-bold text-amber-600">{orphanStats?.stats?.active || 0}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-red-200 bg-red-50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">منقضی شده</p>
+                          <p className="text-xl font-bold text-red-600">{orphanStats?.stats?.expired || 0}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-blue-200 bg-blue-50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Bell className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">اطلاع‌رسانی امروز</p>
+                          <p className="text-xl font-bold text-blue-600">{orphanStats?.stats?.notificationsToday || 0}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-green-200 bg-green-50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">پرداخت شده</p>
+                          <p className="text-xl font-bold text-green-600">{orphanStats?.stats?.paid || 0}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Notification Management Tabs */}
+                <Tabs defaultValue="active-orders" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="active-orders">سفارشات فعال</TabsTrigger>
+                    <TabsTrigger value="notifications">تنظیمات اطلاع‌رسانی</TabsTrigger>
+                    <TabsTrigger value="templates">قالب‌های پیام</TabsTrigger>
+                    <TabsTrigger value="schedule">برنامه‌ریزی ارسال</TabsTrigger>
+                  </TabsList>
+
+                  {/* Active Grace Period Orders */}
+                  <TabsContent value="active-orders" className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          سفارشات در مهلت 3 روزه
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {activeOrders?.orders?.length > 0 ? (
+                            activeOrders.orders.map((order: any) => (
+                              <Card key={order.id} className="border-l-4 border-l-amber-500">
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <span className="font-medium">سفارش #{order.orderNumber}</span>
+                                      <Badge className="bg-amber-100 text-amber-800">مهلت فعال</Badge>
+                                      <span className="text-sm text-muted-foreground">
+                                        {order.totalAmount} {order.currency}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm text-red-600 font-medium">
+                                        باقی‌مانده: {Math.floor(order.hoursRemaining / 24)} روز {order.hoursRemaining % 24} ساعت
+                                      </span>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => sendReminderMutation.mutate({
+                                          orderId: order.id,
+                                          type: 'sms'
+                                        })}
+                                        disabled={sendReminderMutation.isPending}
+                                      >
+                                        <Bell className="h-4 w-4 mr-1" />
+                                        ارسال یادآور
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="mt-2 text-sm text-muted-foreground">
+                                    مشتری: {order.customer?.firstName} {order.customer?.lastName} • 
+                                    انقضا: {new Date(order.gracePeriodExpires).toLocaleDateString('fa-IR')}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))
+                          ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                              هیچ سفارش فعالی در مهلت 3 روزه یافت نشد
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Notification Settings */}
+                  <TabsContent value="notifications" className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="h-4 w-4" />
+                          تنظیمات کلی اطلاع‌رسانی
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>مهلت پیش‌فرض (روز)</Label>
+                            <Select defaultValue="3">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 روز</SelectItem>
+                                <SelectItem value="2">2 روز</SelectItem>
+                                <SelectItem value="3">3 روز</SelectItem>
+                                <SelectItem value="5">5 روز</SelectItem>
+                                <SelectItem value="7">7 روز</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>حداکثر تعداد اطلاع‌رسانی</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 بار</SelectItem>
+                                <SelectItem value="2">2 بار</SelectItem>
+                                <SelectItem value="3">3 بار</SelectItem>
+                                <SelectItem value="5">5 بار</SelectItem>
+                                <SelectItem value="10">10 بار</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>ساعت شروع کاری</Label>
+                            <Select defaultValue="08:00">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="06:00">06:00</SelectItem>
+                                <SelectItem value="07:00">07:00</SelectItem>
+                                <SelectItem value="08:00">08:00</SelectItem>
+                                <SelectItem value="09:00">09:00</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>ساعت پایان کاری</Label>
+                            <Select defaultValue="18:00">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="16:00">16:00</SelectItem>
+                                <SelectItem value="17:00">17:00</SelectItem>
+                                <SelectItem value="18:00">18:00</SelectItem>
+                                <SelectItem value="19:00">19:00</SelectItem>
+                                <SelectItem value="20:00">20:00</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Message Templates */}
+                  <TabsContent value="templates" className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* SMS Templates */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4" />
+                            قالب‌های SMS
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="p-3 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium">یادآور اول</span>
+                              <Badge variant="secondary">فعال</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              عزیز {{customer_name}}، مهلت پرداخت سفارش {{order_id}} تا {{days_remaining}} روز دیگر است.
+                            </p>
+                            <Button variant="outline" size="sm" className="mt-2">ویرایش</Button>
+                          </div>
+                          
+                          <div className="p-3 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium">هشدار نهایی</span>
+                              <Badge variant="secondary">فعال</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              هشدار نهایی: مهلت پرداخت سفارش {{order_id}} تا {{hours_remaining}} ساعت دیگر منقضی می‌شود.
+                            </p>
+                            <Button variant="outline" size="sm" className="mt-2">ویرایش</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Email Templates */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            قالب‌های ایمیل
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="p-3 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium">یادآور پرداخت</span>
+                              <Badge variant="secondary">فعال</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              موضوع: یادآوری پرداخت سفارش {{order_id}}
+                            </p>
+                            <Button variant="outline" size="sm" className="mt-2">ویرایش</Button>
+                          </div>
+                          
+                          <div className="p-3 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium">انقضای مهلت</span>
+                              <Badge variant="destructive">غیرفعال</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              موضوع: انقضای مهلت پرداخت - سفارش {{order_id}}
+                            </p>
+                            <Button variant="outline" size="sm" className="mt-2">ویرایش</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  {/* Schedule Management */}
+                  <TabsContent value="schedule" className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          برنامه‌ریزی ارسال خودکار
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {/* Schedule Rules */}
+                          <div className="grid gap-4">
+                            <div className="p-4 border rounded-lg">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">یادآور اول</span>
+                                  <Badge className="bg-green-100 text-green-800">فعال</Badge>
+                                </div>
+                                <Button variant="outline" size="sm">ویرایش</Button>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <span className="text-muted-foreground">زمان ارسال:</span>
+                                  <p className="font-medium">2 روز قبل از انقضا</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">نوع پیام:</span>
+                                  <p className="font-medium">SMS + ایمیل</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">حداکثر ارسال:</span>
+                                  <p className="font-medium">1 بار</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="p-4 border rounded-lg">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">هشدار نهایی</span>
+                                  <Badge className="bg-green-100 text-green-800">فعال</Badge>
+                                </div>
+                                <Button variant="outline" size="sm">ویرایش</Button>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <span className="text-muted-foreground">زمان ارسال:</span>
+                                  <p className="font-medium">1 ساعت قبل از انقضا</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">نوع پیام:</span>
+                                  <p className="font-medium">SMS فقط</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">حداکثر ارسال:</span>
+                                  <p className="font-medium">1 بار</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end">
+                            <Button>
+                              <Plus className="h-4 w-4 mr-1" />
+                              افزودن برنامه جدید
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Status Update Dialog */}

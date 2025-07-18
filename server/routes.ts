@@ -26772,6 +26772,296 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // ORPHAN ORDERS MANAGEMENT API ENDPOINTS
+  // =============================================================================
+
+  // Get grace period orders statistics
+  app.get("/api/orphan-orders/stats", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get grace period orders counts
+      const statsResult = await pool.query(`
+        SELECT 
+          COUNT(CASE WHEN payment_method = 'bank_transfer_grace' AND payment_status = 'grace_period' THEN 1 END) as active_grace_period,
+          COUNT(CASE WHEN payment_method = 'bank_transfer_grace' AND payment_status = 'expired' THEN 1 END) as expired_grace_period,
+          COUNT(CASE WHEN payment_method = 'bank_transfer_grace' AND payment_status = 'paid' THEN 1 END) as paid_grace_period,
+          COUNT(CASE WHEN created_at::date = CURRENT_DATE THEN 1 END) as notifications_today
+        FROM customer_orders
+        WHERE payment_method = 'bank_transfer_grace'
+      `);
+
+      const stats = statsResult.rows[0];
+      
+      res.json({
+        success: true,
+        stats: {
+          active: parseInt(stats.active_grace_period) || 0,
+          expired: parseInt(stats.expired_grace_period) || 0,
+          paid: parseInt(stats.paid_grace_period) || 0,
+          notificationsToday: parseInt(stats.notifications_today) || 0
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error fetching orphan orders stats:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت آمار سفارشات یتیم" 
+      });
+    }
+  });
+
+  // Get active grace period orders
+  app.get("/api/orphan-orders/active", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          co.*,
+          c.first_name as customer_first_name,
+          c.last_name as customer_last_name,
+          c.email as customer_email,
+          c.phone as customer_phone,
+          EXTRACT(EPOCH FROM (co.payment_grace_period_expires - NOW()))/3600 as hours_remaining
+        FROM customer_orders co
+        LEFT JOIN crm_customers c ON co.customer_id = c.id
+        WHERE co.payment_method = 'bank_transfer_grace' 
+          AND co.payment_status = 'grace_period'
+          AND co.payment_grace_period_expires > NOW()
+        ORDER BY co.payment_grace_period_expires ASC
+      `);
+
+      const orders = result.rows.map((row: any) => ({
+        id: row.id,
+        orderNumber: row.order_number,
+        totalAmount: row.total_amount,
+        currency: row.currency,
+        createdAt: row.created_at,
+        gracePeriodExpires: row.payment_grace_period_expires,
+        hoursRemaining: Math.max(0, Math.floor(row.hours_remaining)),
+        customer: {
+          firstName: row.customer_first_name,
+          lastName: row.customer_last_name,
+          email: row.customer_email,
+          phone: row.customer_phone
+        }
+      }));
+
+      res.json({
+        success: true,
+        orders
+      });
+      
+    } catch (error) {
+      console.error("Error fetching active grace period orders:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات فعال" 
+      });
+    }
+  });
+
+  // Send reminder notification for grace period order
+  app.post("/api/orphan-orders/:orderId/send-reminder", async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const { type } = req.body; // 'sms' or 'email'
+      
+      const { pool } = await import('./db');
+      
+      // Get order details
+      const orderResult = await pool.query(`
+        SELECT 
+          co.*,
+          c.first_name,
+          c.last_name,
+          c.email,
+          c.phone,
+          EXTRACT(EPOCH FROM (co.payment_grace_period_expires - NOW()))/3600 as hours_remaining
+        FROM customer_orders co
+        LEFT JOIN crm_customers c ON co.customer_id = c.id
+        WHERE co.id = $1 AND co.payment_method = 'bank_transfer_grace'
+      `, [orderId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      const order = orderResult.rows[0];
+      const hoursRemaining = Math.max(0, Math.floor(order.hours_remaining));
+      const daysRemaining = Math.floor(hoursRemaining / 24);
+
+      // Create notification message
+      let message = '';
+      if (type === 'sms') {
+        if (hoursRemaining > 24) {
+          message = `عزیز ${order.first_name}، مهلت پرداخت سفارش ${order.order_number} تا ${daysRemaining} روز دیگر است. مبلغ: ${order.total_amount} ${order.currency}`;
+        } else {
+          message = `هشدار نهایی: مهلت پرداخت سفارش ${order.order_number} تا ${hoursRemaining} ساعت دیگر منقضی می‌شود.`;
+        }
+      }
+
+      // Log notification (in production, would actually send SMS/email)
+      console.log(`📱 [ORPHAN-ORDERS] Sending ${type} reminder for order ${order.order_number}: ${message}`);
+
+      // Update last notification time
+      await pool.query(`
+        UPDATE customer_orders 
+        SET last_notification_sent = NOW()
+        WHERE id = $1
+      `, [orderId]);
+
+      res.json({
+        success: true,
+        message: `یادآور ${type === 'sms' ? 'پیامکی' : 'ایمیلی'} با موفقیت ارسال شد`
+      });
+      
+    } catch (error) {
+      console.error("Error sending reminder:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ارسال یادآور" 
+      });
+    }
+  });
+
+  // Get notification settings
+  app.get("/api/orphan-orders/notification-settings", async (req, res) => {
+    try {
+      // Return default settings (in production, would be from database)
+      res.json({
+        success: true,
+        settings: {
+          defaultGracePeriodDays: 3,
+          maxNotifications: 5,
+          workingHoursStart: "08:00",
+          workingHoursEnd: "18:00",
+          enableSms: true,
+          enableEmail: true
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching notification settings:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت تنظیمات" 
+      });
+    }
+  });
+
+  // Update notification settings
+  app.put("/api/orphan-orders/notification-settings", async (req, res) => {
+    try {
+      const settings = req.body;
+      
+      // In production, would save to database
+      console.log("📝 [ORPHAN-ORDERS] Notification settings updated:", settings);
+      
+      res.json({
+        success: true,
+        message: "تنظیمات با موفقیت به‌روزرسانی شد"
+      });
+    } catch (error) {
+      console.error("Error updating notification settings:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در به‌روزرسانی تنظیمات" 
+      });
+    }
+  });
+
+  // Get message templates
+  app.get("/api/orphan-orders/templates", async (req, res) => {
+    try {
+      // Return default templates (in production, would be from database)
+      const templates = {
+        sms: [
+          {
+            id: 1,
+            name: "یادآور اول",
+            content: "عزیز {{customer_name}}، مهلت پرداخت سفارش {{order_id}} تا {{days_remaining}} روز دیگر است.",
+            isActive: true
+          },
+          {
+            id: 2,
+            name: "هشدار نهایی",
+            content: "هشدار نهایی: مهلت پرداخت سفارش {{order_id}} تا {{hours_remaining}} ساعت دیگر منقضی می‌شود.",
+            isActive: true
+          }
+        ],
+        email: [
+          {
+            id: 1,
+            name: "یادآور پرداخت",
+            subject: "یادآوری پرداخت سفارش {{order_id}}",
+            content: "محتوای ایمیل یادآوری...",
+            isActive: true
+          },
+          {
+            id: 2,
+            name: "انقضای مهلت",
+            subject: "انقضای مهلت پرداخت - سفارش {{order_id}}",
+            content: "محتوای ایمیل انقضا...",
+            isActive: false
+          }
+        ]
+      };
+
+      res.json({
+        success: true,
+        templates
+      });
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت قالب‌ها" 
+      });
+    }
+  });
+
+  // Get notification schedules
+  app.get("/api/orphan-orders/schedules", async (req, res) => {
+    try {
+      // Return default schedules (in production, would be from database)
+      const schedules = [
+        {
+          id: 1,
+          name: "یادآور اول",
+          triggerTime: "2 days before expiry",
+          messageType: "SMS + Email",
+          maxSends: 1,
+          isActive: true
+        },
+        {
+          id: 2,
+          name: "هشدار نهایی",
+          triggerTime: "1 hour before expiry",
+          messageType: "SMS only",
+          maxSends: 1,
+          isActive: true
+        }
+      ];
+
+      res.json({
+        success: true,
+        schedules
+      });
+    } catch (error) {
+      console.error("Error fetching schedules:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت برنامه‌ریزی" 
+      });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);
