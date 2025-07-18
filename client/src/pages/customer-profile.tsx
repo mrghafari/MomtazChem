@@ -452,7 +452,17 @@ const CustomerProfile = () => {
                               {formatDate(order.createdAt)}
                             </p>
                             {order.orderType === 'grace_period' && (
-                              <div className="mt-2">
+                              <div className="mt-2 space-y-1">
+                                <div className="flex items-center gap-4 text-sm text-gray-600">
+                                  <span className="flex items-center gap-1">
+                                    <User className="w-4 h-4" />
+                                    {order.customerName}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Phone className="w-4 h-4" />
+                                    {order.customerPhone}
+                                  </span>
+                                </div>
                                 {order.gracePeriodStatus === 'active' ? (
                                   <p className="text-sm text-amber-600 flex items-center gap-1">
                                     <Clock className="w-4 h-4" />

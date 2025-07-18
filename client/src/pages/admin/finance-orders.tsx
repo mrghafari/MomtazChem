@@ -712,9 +712,23 @@ function FinanceOrders() {
                                         </Button>
                                       </div>
                                     </div>
-                                    <div className="mt-2 text-sm text-muted-foreground">
-                                      مشتری: {order.customer?.firstName} {order.customer?.lastName} • 
-                                      انقضا: {new Date(order.gracePeriodExpires).toLocaleDateString('fa-IR')}
+                                    <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                      <div className="flex items-center gap-2 text-gray-600">
+                                        <span className="font-medium">نام مشتری:</span>
+                                        <span>{order.customerName || order.customer?.firstName} {order.customer?.lastName}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-gray-600">
+                                        <Phone className="h-4 w-4" />
+                                        <span>{order.customerPhone || order.customer?.phone}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-gray-600">
+                                        <Mail className="h-4 w-4" />
+                                        <span>{order.customerEmail || order.customer?.email}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-red-600">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>انقضا: {new Date(order.gracePeriodExpires).toLocaleDateString('fa-IR')}</span>
+                                      </div>
                                     </div>
                                   </CardContent>
                                 </Card>

@@ -7803,7 +7803,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hoursRemaining: Math.max(0, Math.floor(row.hours_remaining)),
         isOrderLocked: row.is_order_locked,
         paymentGracePeriodStart: row.payment_grace_period_start,
-        paymentGracePeriodEnd: row.payment_grace_period_end
+        paymentGracePeriodEnd: row.payment_grace_period_end,
+        customerName: row.customer_first_name,
+        customerEmail: row.customer_email,
+        customerPhone: row.customer_phone
       }));
 
       // Combine both types of orders and sort by creation date
@@ -26890,39 +26893,65 @@ momtazchem.com
   // Get active grace period orders
   app.get("/api/orphan-orders/active", async (req, res) => {
     try {
-      const { pool } = await import('./db');
+      const { db } = await import('./db');
+      const { eq, and, gt } = await import('drizzle-orm');
+      const { orderManagement } = await import('../shared/order-management-schema');
+      const { customerOrders } = await import('../shared/customer-schema');
+      const { crmCustomers } = await import('../shared/schema');
+      const { paymentReceipts } = await import('../shared/customer-schema');
       
-      const result = await pool.query(`
-        SELECT 
-          om.*,
-          co.total_amount,
-          co.currency,
-          co.guest_name as customer_first_name,
-          co.guest_email as customer_email,
-          co.recipient_phone as customer_phone,
-          EXTRACT(EPOCH FROM (om.payment_grace_period_end - NOW()))/3600 as hours_remaining
-        FROM order_management om
-        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
-        WHERE om.current_status = 'payment_grace_period' 
-          AND om.payment_grace_period_end > NOW()
-        ORDER BY om.payment_grace_period_end ASC
-      `);
+      const result = await db.select({
+        // Order Management fields
+        id: orderManagement.id,
+        customerOrderId: orderManagement.customerOrderId,
+        currentStatus: orderManagement.currentStatus,
+        createdAt: orderManagement.createdAt,
+        gracePeriodExpires: orderManagement.paymentGracePeriodEnd,
+        
+        // Customer Order fields
+        totalAmount: customerOrders.totalAmount,
+        currency: customerOrders.currency,
+        
+        // Customer info from CRM
+        customerFirstName: crmCustomers.firstName,
+        customerLastName: crmCustomers.lastName,
+        customerEmail: crmCustomers.email,
+        customerPhone: crmCustomers.phone,
+      })
+      .from(orderManagement)
+      .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+      .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+      .where(
+        and(
+          eq(orderManagement.currentStatus, 'payment_grace_period'),
+          gt(orderManagement.paymentGracePeriodEnd, new Date())
+        )
+      )
+      .orderBy(orderManagement.paymentGracePeriodEnd);
 
-      const orders = result.rows.map((row: any) => ({
-        id: row.id,
-        orderNumber: row.customer_order_id,
-        totalAmount: row.total_amount,
-        currency: row.currency,
-        createdAt: row.created_at,
-        gracePeriodExpires: row.payment_grace_period_end,
-        hoursRemaining: Math.max(0, Math.floor(row.hours_remaining)),
-        customer: {
-          firstName: row.customer_first_name,
-          lastName: '',
-          email: row.customer_email,
-          phone: row.customer_phone
-        }
-      }));
+      const orders = result.map((row: any) => {
+        const hoursRemaining = row.gracePeriodExpires ? 
+          Math.max(0, Math.floor((new Date(row.gracePeriodExpires).getTime() - new Date().getTime()) / (1000 * 60 * 60))) : 0;
+        
+        return {
+          id: row.id,
+          orderNumber: row.customerOrderId,
+          totalAmount: row.totalAmount,
+          currency: row.currency,
+          createdAt: row.createdAt,
+          gracePeriodExpires: row.gracePeriodExpires,
+          hoursRemaining,
+          customerName: `${row.customerFirstName || ''} ${row.customerLastName || ''}`.trim(),
+          customerPhone: row.customerPhone || '',
+          customerEmail: row.customerEmail || '',
+          customer: {
+            firstName: row.customerFirstName || '',
+            lastName: row.customerLastName || '',
+            email: row.customerEmail || '',
+            phone: row.customerPhone || ''
+          }
+        };
+      });
 
       res.json({
         success: true,
@@ -26952,7 +26981,7 @@ momtazchem.com
           om.*,
           co.total_amount,
           co.currency,
-          co.guest_name,
+          co.recipient_name,
           co.guest_email,
           co.recipient_phone,
           EXTRACT(EPOCH FROM (om.payment_grace_period_end - NOW()))/3600 as hours_remaining
