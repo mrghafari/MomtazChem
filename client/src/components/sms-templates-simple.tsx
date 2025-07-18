@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Edit, Trash2, Plus, Copy, MessageSquare, Tag, AlertCircle, Info } from "lucide-react";
@@ -291,15 +292,43 @@ export default function SmsTemplatesSimple() {
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => deleteTemplateMutation.mutate(template.id)}
-                    disabled={deleteTemplateMutation.isPending}
-                    title="حذف"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        disabled={deleteTemplateMutation.isPending}
+                        title="حذف"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                          <Trash2 className="h-5 w-5 text-red-600" />
+                          تأیید حذف قالب
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-right">
+                          آیا از حذف قالب "{template.templateName}" اطمینان دارید؟
+                          <br />
+                          <span className="text-red-600 font-medium">
+                            این عمل غیرقابل بازگشت است و قالب به طور کامل حذف خواهد شد.
+                          </span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="flex gap-2">
+                        <AlertDialogCancel>انصراف</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteTemplateMutation.mutate(template.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                          disabled={deleteTemplateMutation.isPending}
+                        >
+                          {deleteTemplateMutation.isPending ? "در حال حذف..." : "حذف قطعی"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardHeader>
