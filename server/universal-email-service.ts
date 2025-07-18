@@ -33,7 +33,7 @@ export class UniversalEmailService {
       const smtp = categorySettings.smtp;
       
       // Create transporter
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         host: smtp.host,
         port: smtp.port,
         secure: smtp.port === 465,

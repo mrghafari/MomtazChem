@@ -17559,6 +17559,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(400).json({ success: false, message: "ایمیل الزامی است" });
       }
 
+      console.log('🔍 Finding customer by email:', email);
       const customer = await crmStorage.getCrmCustomerByEmail(email);
       if (!customer) {
         // Don't reveal if email exists or not for security
@@ -17568,73 +17569,68 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         });
       }
 
+      console.log('✅ Customer found:', customer.id, customer.email);
+
       // Generate reset token
-      const resetToken = require('crypto').randomBytes(32).toString('hex');
+      const crypto = await import('crypto');
+      const resetToken = crypto.randomBytes(32).toString('hex');
       const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
       
+      console.log('🔑 Generated reset token:', resetToken);
+      console.log('⏰ Token expires at:', resetExpires);
+
       // Save reset token to customer
-      await crmStorage.updateCrmCustomer(customer.id, {
-        resetPasswordToken: resetToken,
-        resetPasswordExpires: resetExpires
-      });
-
-      // Send reset email
       try {
-        const transporter = nodemailer.createTransporter({
-          host: process.env.SMTP_HOST || 'smtp.gmail.com',
-          port: 587,
-          secure: false,
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
-          }
+        await crmStorage.updateCrmCustomer(customer.id, {
+          resetPasswordToken: resetToken,
+          resetPasswordExpires: resetExpires
         });
+        console.log('💾 Token saved successfully');
+      } catch (updateError) {
+        console.error('❌ Error saving token:', updateError);
+        throw updateError;
+      }
 
+      // Send reset email using Universal Email Service
+      try {
         const { CONFIG } = await import('./config');
-        const resetUrl = CONFIG.getPasswordResetUrl(resetToken, req);
+        const resetUrl = CONFIG.getCustomerPasswordResetUrl(resetToken, req);
         
-        const mailOptions = {
-          from: process.env.SMTP_USER,
-          to: customer.email,
-          subject: 'بازیابی رمز عبور - ممتاز شیمی',
-          html: `
-            <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
-              <h2>بازیابی رمز عبور</h2>
-              <p>سلام ${customer.firstName} ${customer.lastName} عزیز،</p>
-              <p>درخواست بازیابی رمز عبور شما دریافت شد. برای تنظیم رمز عبور جدید، روی لینک زیر کلیک کنید:</p>
-              <div style="margin: 20px 0;">
-                <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-                  بازیابی رمز عبور
-                </a>
-              </div>
-              <p>این لینک تا 1 ساعت دیگر معتبر است.</p>
-              <p>اگر درخواست بازیابی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید.</p>
-              <p>با تشکر،<br>تیم ممتاز شیمی</p>
-            </div>
-          `
-        };
-
-        await transporter.sendMail(mailOptions);
+        const { UniversalEmailService } = await import('./universal-email-service');
+        await UniversalEmailService.sendPasswordResetEmail(
+          customer.email,
+          resetToken,
+          `${customer.firstName} ${customer.lastName}`,
+          req
+        );
+        
         console.log(`✓ Password reset email sent to ${customer.email}`);
       } catch (emailError) {
-        console.error('Error sending password reset email:', emailError);
+        console.error('⚠️ Error sending password reset email:', emailError);
+        // Continue even if email fails
       }
 
       // Log activity
-      await crmStorage.logCustomerActivity({
-        customerId: customer.id,
-        activityType: "password_reset_requested",
-        description: `درخواست بازیابی رمز عبور`,
-        performedBy: "customer",
-        activityData: { requestedAt: new Date() }
-      });
+      try {
+        await crmStorage.logCustomerActivity({
+          customerId: customer.id,
+          activityType: "password_reset_requested",
+          description: `درخواست بازیابی رمز عبور`,
+          performedBy: "customer",
+          activityData: { requestedAt: new Date() }
+        });
+        console.log('📝 Activity logged successfully');
+      } catch (logError) {
+        console.error('⚠️ Error logging activity:', logError);
+        // Continue even if logging fails
+      }
 
       res.json({ 
         success: true, 
         message: "اگر ایمیل شما در سیستم موجود باشد، لینک بازیابی رمز عبور ارسال خواهد شد" 
       });
     } catch (error) {
-      console.error('Error processing password reset request:', error);
+      console.error('❌ Error processing password reset request:', error);
       res.status(500).json({ success: false, message: "خطا در پردازش درخواست بازیابی رمز عبور" });
     }
   });
