@@ -631,7 +631,7 @@ export default function AdminSmsManagement() {
           </TabsTrigger>
           <TabsTrigger value="categories">
             <MessageSquare className="h-4 w-4 mr-2" />
-            دسته‌بندی SMS
+            SMS Categories
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" />
@@ -647,7 +647,7 @@ export default function AdminSmsManagement() {
           </TabsTrigger>
           <TabsTrigger value="templates">
             <MessageSquare className="h-4 w-4 mr-2" />
-            قالب‌های پیامک
+            SMS Categories
           </TabsTrigger>
         </TabsList>
 

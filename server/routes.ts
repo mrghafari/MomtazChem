@@ -27645,7 +27645,7 @@ momtazchem.com
   });
 
   // Get simple SMS template by ID
-  app.get("/api/admin/simple-sms-templates/:id", requireAuth, async (req, res) => {
+  app.get("/api/admin/simple-sms-templates/:id", async (req, res) => {
     try {
       const { simpleSmsStorage } = await import('./simple-sms-storage');
       const template = await simpleSmsStorage.getTemplateById(parseInt(req.params.id));
@@ -27671,7 +27671,7 @@ momtazchem.com
   });
 
   // Create new simple SMS template
-  app.post("/api/admin/simple-sms-templates", requireAuth, async (req, res) => {
+  app.post("/api/admin/simple-sms-templates", async (req, res) => {
     try {
       const { insertSimpleSmsTemplateSchema } = await import('../shared/schema');
       const templateData = insertSimpleSmsTemplateSchema.parse(req.body);
@@ -27694,7 +27694,7 @@ momtazchem.com
   });
 
   // Update simple SMS template
-  app.put("/api/admin/simple-sms-templates/:id", requireAuth, async (req, res) => {
+  app.put("/api/admin/simple-sms-templates/:id", async (req, res) => {
     try {
       const { insertSimpleSmsTemplateSchema } = await import('../shared/schema');
       const updates = insertSimpleSmsTemplateSchema.partial().parse(req.body);
@@ -27717,7 +27717,7 @@ momtazchem.com
   });
 
   // Delete simple SMS template
-  app.delete("/api/admin/simple-sms-templates/:id", requireAuth, async (req, res) => {
+  app.delete("/api/admin/simple-sms-templates/:id", async (req, res) => {
     try {
       const { simpleSmsStorage } = await import('./simple-sms-storage');
       await simpleSmsStorage.deleteTemplate(parseInt(req.params.id));
@@ -27736,7 +27736,7 @@ momtazchem.com
   });
 
   // Increment template usage count
-  app.post("/api/admin/simple-sms-templates/:id/increment-usage", requireAuth, async (req, res) => {
+  app.post("/api/admin/simple-sms-templates/:id/increment-usage", async (req, res) => {
     try {
       const { simpleSmsStorage } = await import('./simple-sms-storage');
       await simpleSmsStorage.incrementTemplateUsage(parseInt(req.params.id));
