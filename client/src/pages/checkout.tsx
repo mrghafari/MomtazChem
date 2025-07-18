@@ -77,7 +77,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [useWallet, setUseWallet] = useState(false);
   const [secondaryPaymentMethod, setSecondaryPaymentMethod] = useState('');
   const [customerInfo, setCustomerInfo] = useState<any>(null);
-  const [showRecipientFields, setShowRecipientFields] = useState(false);
+  const [showRecipientFields, setShowRecipientFields] = useState(true); // Default to open for testing
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -185,20 +185,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
 
 
 
-  // Auto-enable wallet usage when wallet payment methods are selected
-  useEffect(() => {
-    const paymentMethod = form.watch('paymentMethod');
-    if (paymentMethod === 'wallet_payment' || paymentMethod === 'wallet_combined') {
-      setUseWallet(true);
-      if (paymentMethod === 'wallet_payment') {
-        // For full wallet payment, use maximum possible amount
-        setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal));
-      } else {
-        // For combined payment, start with partial amount
-        setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal * 0.5));
-      }
-    }
-  }, [form.watch('paymentMethod'), walletBalance, beforeWalletTotal]);
+  // Move this useEffect after beforeWalletTotal calculation
 
   useEffect(() => {
     if (isUserLoggedIn) {
@@ -248,6 +235,21 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const taxRate = 0.09; // 9% tax
   const taxAmount = subtotal * taxRate;
   const beforeWalletTotal = subtotal + shippingCost + taxAmount;
+  
+  // Auto-enable wallet usage when wallet payment methods are selected
+  useEffect(() => {
+    const paymentMethod = form.watch('paymentMethod');
+    if (paymentMethod === 'wallet_payment' || paymentMethod === 'wallet_combined') {
+      setUseWallet(true);
+      if (paymentMethod === 'wallet_payment') {
+        // For full wallet payment, use maximum possible amount
+        setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal));
+      } else {
+        // For combined payment, start with partial amount
+        setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal * 0.5));
+      }
+    }
+  }, [form.watch('paymentMethod'), walletBalance, beforeWalletTotal]);
   
   // Calculate wallet usage
   const maxWalletUsage = Math.min(walletBalance, beforeWalletTotal);
