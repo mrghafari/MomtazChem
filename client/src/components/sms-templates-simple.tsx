@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Edit, Trash2, Plus, Copy, MessageSquare, Tag } from "lucide-react";
+import { Edit, Trash2, Plus, Copy, MessageSquare, Tag, AlertCircle, Info } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 // Types
@@ -154,6 +154,22 @@ export default function SmsTemplatesSimple() {
   const copyToClipboard = (content: string) => {
     navigator.clipboard.writeText(content);
     toast({ title: "کپی شد", description: "محتوای قالب کپی شد" });
+  };
+
+  // Get usage guidelines for each template
+  const getUsageGuidelines = (templateName: string): string => {
+    const guidelines: Record<string, string> = {
+      "Order Confirmation": "استفاده: هنگام تأیید سفارش جدید - متغیرها: customer_name، order_id، items - زمان ارسال: بلافاصله پس از ثبت سفارش",
+      "Delivery Notification": "استفاده: اطلاع‌رسانی تحویل سفارش - متغیرها: customer_name، order_id، delivery_code - زمان ارسال: هنگام تحویل کالا",
+      "Payment Reminder": "استفاده: یادآوری پرداخت معوقه - متغیرها: customer_name، amount، due_date - زمان ارسال: قبل از سررسید پرداخت",
+      "Order Cancellation": "استفاده: اطلاع‌رسانی لغو سفارش - متغیرها: customer_name، order_id، reason - زمان ارسال: هنگام لغو سفارش",
+      "Delivery Verification": "استفاده: تأیید دریافت کالا توسط مشتری - متغیرها: customer_name، verification_code - زمان ارسال: پس از تحویل فیزیکی",
+      "Welcome": "استفاده: خوشامدگویی به مشتریان جدید - متغیرها: customer_name - زمان ارسال: بلافاصله پس از ثبت نام",
+      "Promotional": "استفاده: ارسال تخفیفات و پیشنهادات ویژه - متغیرها: discount_percent، expiry_date - زمان ارسال: در کمپین‌های بازاریابی",
+      "Security Alert": "استفاده: هشدارهای امنیتی و ورود مشکوک - متغیرها: customer_name، timestamp - زمان ارسال: هنگام تشخیص فعالیت مشکوک"
+    };
+    
+    return guidelines[templateName] || "راهنمایی خاصی برای این قالب تعریف نشده است";
   };
 
   if (templatesLoading) {
@@ -311,6 +327,17 @@ export default function SmsTemplatesSimple() {
                     </div>
                   </div>
                 )}
+                
+                {/* Usage Guidelines Section */}
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border border-amber-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Info className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm font-medium text-amber-800">شرایط استفاده:</span>
+                  </div>
+                  <p className="text-sm text-amber-700 leading-relaxed">
+                    {getUsageGuidelines(template.templateName)}
+                  </p>
+                </div>
                 
                 <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 pt-2 border-t">
                   <div>
