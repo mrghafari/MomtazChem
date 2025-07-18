@@ -49,6 +49,12 @@ const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
   recipientPhone: z.string().optional(),
   recipientAddress: z.string().optional(),
   
+  // Second Address Fields
+  secondDeliveryAddress: z.string().optional(),
+  secondDeliveryCity: z.string().optional(),
+  secondDeliveryPostalCode: z.string().optional(),
+  recipientMobile: z.string().optional(),
+  
   // Order Details
   shippingMethod: z.string().min(1, "Please select a shipping method"),
   paymentMethod: z.string().min(1, "Please select a payment method"),
@@ -79,7 +85,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [customerInfo, setCustomerInfo] = useState<any>(null);
   const [showRecipientFields, setShowRecipientFields] = useState(true); // Default to open for testing
   const [showPurchaseOrder, setShowPurchaseOrder] = useState(true);
-  const [showCartManagement, setShowCartManagement] = useState(false);
+  const [showCartManagement, setShowCartManagement] = useState(true);
   const [showSecondAddress, setShowSecondAddress] = useState(false);
   const [showRecipientMobile, setShowRecipientMobile] = useState(false);
   const { toast } = useToast();
@@ -1037,7 +1043,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     {/* Second Address Option */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">آدرس دوم (اختیاری)</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Second Address (Optional)</span>
                         <Button
                           type="button"
                           size="sm"
@@ -1053,25 +1059,56 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg space-y-3">
                           <div>
                             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              آدرس تحویل
+                              Delivery Address
                             </label>
-                            <Textarea
-                              placeholder="آدرس دوم برای تحویل کالا..."
-                              className="min-h-[60px] text-sm"
+                            <FormField
+                              control={form.control}
+                              name="secondDeliveryAddress"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Textarea
+                                      {...field}
+                                      placeholder="آدرس دوم برای تحویل کالا..."
+                                      className="min-h-[60px] text-sm"
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                شهر
+                                City
                               </label>
-                              <Input placeholder="تهران" className="text-sm" />
+                              <FormField
+                                control={form.control}
+                                name="secondDeliveryCity"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input {...field} placeholder="تهران" className="text-sm" />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
                             </div>
                             <div>
                               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                کد پستی (اختیاری)
+                                Postal Code (Optional)
                               </label>
-                              <Input placeholder="1968913751" className="text-sm" />
+                              <FormField
+                                control={form.control}
+                                name="secondDeliveryPostalCode"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input {...field} placeholder="1968913751" className="text-sm" />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
                             </div>
                           </div>
                         </div>
@@ -1081,7 +1118,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     {/* Recipient Mobile */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">موبایل تحویل گیرنده کالا</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Recipient Mobile Number</span>
                         <Button
                           type="button"
                           size="sm"
@@ -1097,16 +1134,27 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                           <div>
                             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              شماره موبایل گیرنده
+                              Recipient Mobile Number
                             </label>
-                            <Input
-                              placeholder="09123456789"
-                              className="text-sm"
-                              type="tel"
+                            <FormField
+                              control={form.control}
+                              name="recipientMobile"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder="09123456789"
+                                      className="text-sm"
+                                      type="tel"
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
                             />
                           </div>
                           <div className="mt-2 text-xs text-gray-500">
-                            این شماره برای ارسال پیامک تایید تحویل استفاده خواهد شد
+                            This number will be used for SMS delivery confirmation
                           </div>
                         </div>
                       )}
