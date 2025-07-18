@@ -1994,6 +1994,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error("خطا در تولید بارکد برای محصول جدید");
         }
       }
+
+      // Check for duplicate barcode + batch combination
+      if (barcode && productData.batchNumber) {
+        const { pool } = await import('./db');
+        const duplicateCheck = await pool.query(`
+          SELECT COUNT(*) as count FROM showcase_products 
+          WHERE barcode = $1 AND batch_number = $2
+        `, [barcode, productData.batchNumber]);
+        
+        if (duplicateCheck.rows[0].count > 0) {
+          return res.status(400).json({
+            success: false,
+            message: `محصول با بارکد ${barcode} و شماره بچ ${productData.batchNumber} قبلاً ثبت شده است. لطفاً شماره بچ متفاوت انتخاب کنید.`
+          });
+        }
+      }
+
+      console.log(`✅ New batch registration: Barcode ${barcode} + Batch ${productData.batchNumber || 'No Batch'}`);
+      
       
       // Create product in showcase_products table (کاردکس)
       const showcaseProductData = {
