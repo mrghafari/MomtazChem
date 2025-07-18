@@ -75,16 +75,20 @@ export default function SmsTemplateManagement() {
   const queryClient = useQueryClient();
 
   // Fetch template categories
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+  const { data: categoriesData = { data: [] }, isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/admin/sms/template-categories"],
     queryFn: () => apiRequest("/api/admin/sms/template-categories")
   });
 
   // Fetch all templates
-  const { data: templates = [], isLoading: templatesLoading } = useQuery({
+  const { data: templatesData = { data: [] }, isLoading: templatesLoading } = useQuery({
     queryKey: ["/api/admin/sms/templates"],
     queryFn: () => apiRequest("/api/admin/sms/templates")
   });
+
+  // Extract arrays from API responses
+  const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.data || []);
+  const templates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
 
   // Category form
   const categoryForm = useForm<z.infer<typeof templateCategorySchema>>({
