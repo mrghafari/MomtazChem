@@ -181,6 +181,21 @@ interface LogisticsOrder {
   warehouseProcessedAt?: string;
   createdAt: string;
   updatedAt: string;
+  
+  // Customer information
+  customer?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+  };
+  
+  // Derived properties for backward compatibility
+  customerName?: string;
+  customerPhone?: string;
+  customerAddress?: string;
+  deliveryCode?: string;
+  isVerified?: boolean;
 }
 
 const LogisticsManagement = () => {
@@ -667,8 +682,10 @@ const LogisticsManagement = () => {
                       // Generate 4-digit code between 1111-9999 (or resend existing)
                       generateCodeMutation.mutate({
                         customerOrderId: order.customerOrderId,
-                        customerPhone: order.customerPhone,
-                        customerName: `${order.customerFirstName} ${order.customerLastName}`
+                        customerPhone: order.customer?.phone || '',
+                        customerName: order.customer?.firstName && order.customer?.lastName 
+                          ? `${order.customer.firstName} ${order.customer.lastName}` 
+                          : 'نام نامشخص'
                       });
                     }}
                     disabled={orderButtonStates[order.customerOrderId]?.isGenerating || false}
@@ -701,7 +718,7 @@ const LogisticsManagement = () => {
       </div>
 
       {/* Mandatory Fields Warning */}
-      {pendingOrders.some(order => !order.customerName || !order.customerPhone || !order.customerAddress) && (
+      {pendingOrders.some(order => !order.customer?.firstName || !order.customer?.phone || !order.customerAddress) && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -771,31 +788,34 @@ const LogisticsManagement = () => {
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                   {/* Customer Info Block */}
                   <div className={`rounded-lg p-3 border ${
-                    (!order.customerName || !order.customerPhone) 
+                    (!order.customer?.firstName || !order.customer?.phone) 
                       ? 'bg-red-50 border-red-200' 
                       : 'bg-white border-blue-200'
                   }`}>
                     <h5 className={`font-medium mb-2 flex items-center ${
-                      (!order.customerName || !order.customerPhone) 
+                      (!order.customer?.firstName || !order.customer?.phone) 
                         ? 'text-red-800' 
                         : 'text-blue-800'
                     }`}>
                       <User className="w-4 h-4 mr-2" />
                       اطلاعات گیرنده
-                      {(!order.customerName || !order.customerPhone) && (
+                      {(!order.customer?.firstName || !order.customer?.phone) && (
                         <span className="text-red-500 text-xs mr-2">*الزامی</span>
                       )}
                     </h5>
                     <p className={`text-sm ${
-                      !order.customerName ? 'text-red-700 font-semibold' : 'text-gray-700'
+                      !order.customer?.firstName ? 'text-red-700 font-semibold' : 'text-gray-700'
                     }`}>
-                      {order.customerName || 'نام گیرنده ضروری است'}
+                      {order.customer?.firstName && order.customer?.lastName 
+                        ? `${order.customer.firstName} ${order.customer.lastName}` 
+                        : 'نام گیرنده ضروری است'
+                      }
                     </p>
                     <p className={`text-sm flex items-center mt-1 ${
-                      !order.customerPhone ? 'text-red-700 font-semibold' : 'text-gray-600'
+                      !order.customer?.phone ? 'text-red-700 font-semibold' : 'text-gray-600'
                     }`}>
                       <Phone className="w-3 h-3 mr-1" />
-                      {order.customerPhone || 'شماره موبایل ضروری است'}
+                      {order.customer?.phone || 'شماره موبایل ضروری است'}
                     </p>
                   </div>
 
@@ -966,8 +986,10 @@ const LogisticsManagement = () => {
                       // Generate 4-digit code between 1111-9999 (or resend existing)
                       generateCodeMutation.mutate({
                         customerOrderId: order.customerOrderId,
-                        customerPhone: order.customerPhone,
-                        customerName: `${order.customerFirstName} ${order.customerLastName}`
+                        customerPhone: order.customer?.phone || '',
+                        customerName: order.customer?.firstName && order.customer?.lastName 
+                          ? `${order.customer.firstName} ${order.customer.lastName}` 
+                          : 'نام نامشخص'
                       });
                     }}
                     disabled={generateCodeMutation.isPending}
