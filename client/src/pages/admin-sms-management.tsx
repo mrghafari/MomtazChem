@@ -472,6 +472,10 @@ export default function AdminSmsManagement() {
                       <SelectItem value="asiacell">Asiacell</SelectItem>
                       <SelectItem value="zain_iraq">Zain Iraq</SelectItem>
                       <SelectItem value="korek_telecom">Korek Telecom</SelectItem>
+                      <SelectItem value="twilio">Twilio</SelectItem>
+                      <SelectItem value="plivo">Plivo</SelectItem>
+                      <SelectItem value="infobip">Infobip</SelectItem>
+                      <SelectItem value="custom">شرکت جدید - سفارشی</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -616,7 +620,7 @@ export default function AdminSmsManagement() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div className="space-y-3">
                   <div className="border-l-4 border-green-500 pl-3">
                     <h4 className="font-medium text-green-700">اپراتورهای عراق</h4>
@@ -627,12 +631,32 @@ export default function AdminSmsManagement() {
                     </ul>
                   </div>
                 </div>
+                <div className="space-y-3">
+                  <div className="border-l-4 border-blue-500 pl-3">
+                    <h4 className="font-medium text-blue-700">ارائه‌دهندگان بین‌المللی</h4>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li>• <strong>Twilio</strong> - twilio.com</li>
+                      <li>• <strong>Plivo</strong> - plivo.com</li>
+                      <li>• <strong>Infobip</strong> - infobip.com</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
-                  <div className="text-sm text-amber-800">
-                    <strong>نکته مهم:</strong> برای استفاده از اپراتورهای عراق، با بخش فنی هر اپراتور تماس بگیرید تا API credentials و اطلاعات اتصال را دریافت کنید.
+              <div className="mt-4 space-y-3">
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                    <div className="text-sm text-amber-800">
+                      <strong>نکته مهم:</strong> برای استفاده از اپراتورهای عراق، با بخش فنی هر اپراتور تماس بگیرید تا API credentials و اطلاعات اتصال را دریافت کنید.
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <div className="text-sm text-blue-800">
+                      <strong>شرکت سفارشی:</strong> اگر ارائه‌دهنده SMS شما در لیست نیست، گزینه "شرکت جدید - سفارشی" را انتخاب کرده و اطلاعات API خود را وارد کنید.
+                    </div>
                   </div>
                 </div>
               </div>
