@@ -22,6 +22,7 @@ interface SmsTemplate {
   templateName: string;
   templateContent: string;
   variables: string[];
+  usageConditions?: string;
   isDefault: boolean;
   isActive: boolean;
   usageCount: number;
@@ -36,6 +37,7 @@ const templateSchema = z.object({
   templateName: z.string().min(1, "نام قالب الزامی است"),
   templateContent: z.string().min(1, "محتوای قالب الزامی است"),
   variables: z.array(z.string()).optional(),
+  usageConditions: z.string().optional(),
   isDefault: z.boolean().default(false),
   createdBy: z.string().default("admin")
 });
@@ -66,6 +68,7 @@ export default function SmsTemplatesSimple() {
       templateName: "",
       templateContent: "",
       variables: [],
+      usageConditions: "",
       isDefault: false,
       createdBy: "admin"
     }
@@ -140,6 +143,7 @@ export default function SmsTemplatesSimple() {
       templateName: template.templateName,
       templateContent: template.templateContent,
       variables: template.variables || [],
+      usageConditions: template.usageConditions || "",
       isDefault: template.isDefault,
       createdBy: template.createdBy || "admin"
     });
@@ -221,6 +225,27 @@ export default function SmsTemplatesSimple() {
                       <FormMessage />
                       <p className="text-xs text-gray-500">
                         متغیرهای شناسایی شده: {extractVariables(field.value || "").join(", ") || "هیچ"}
+                      </p>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={templateForm.control}
+                  name="usageConditions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>شرایط ارسال (قابل تغییر)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="شرایط ارسال خودکار این قالب را تعریف کنید (مثال: وضعیت سفارش = تایید شده و مبلغ پرداخت > 0)"
+                          className="min-h-20"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <p className="text-xs text-amber-600">
+                        💡 این شرایط در کارت قالب نمایش داده می‌شود و از طریق همین فرم قابل تغییر است
                       </p>
                     </FormItem>
                   )}
@@ -351,11 +376,11 @@ export default function SmsTemplatesSimple() {
                     </span>
                   </div>
                   <p className="text-sm text-amber-700 leading-relaxed">
-                    {getTemplateUsageConditions(template.templateName)}
+                    {template.usageConditions || "شرایط ارسال تعریف نشده - نیاز به تنظیم توسط مدیر سیستم"}
                   </p>
                   <div className="mt-2 pt-2 border-t border-amber-200">
                     <p className="text-xs text-amber-600">
-                      💡 توجه: این شرایط قابل تغییر در کد سیستم می‌باشد
+                      💡 این شرایط از طریق فرم ویرایش قابل تغییر است (بدون نیاز به تغییر کد)
                     </p>
                   </div>
                 </div>

@@ -977,6 +977,7 @@ export const simpleSmsTemplates = pgTable("simple_sms_templates", {
   templateName: varchar("template_name", { length: 255 }).notNull(),
   templateContent: text("template_content").notNull(),
   variables: text("variables").array(),
+  usageConditions: text("usage_conditions"), // شرایط استفاده قابل تغییر توسط مدیر
   isDefault: boolean("is_default").default(false),
   isActive: boolean("is_active").default(true),
   usageCount: integer("usage_count").default(0),
