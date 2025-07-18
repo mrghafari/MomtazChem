@@ -6711,6 +6711,180 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SMS Template Categories Management
+  app.get("/api/admin/sms/template-categories", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const categories = await smsStorage.getAllTemplateCategories();
+      res.json({ success: true, data: categories });
+    } catch (error) {
+      console.error("Error fetching template categories:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت دسته‌بندی‌های قالب" });
+    }
+  });
+
+  app.post("/api/admin/sms/template-categories", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { categoryName, categoryDescription, systemUsage, displayOrder } = req.body;
+      
+      if (!categoryName || !systemUsage) {
+        return res.status(400).json({
+          success: false,
+          message: "نام دسته‌بندی و کاربری سیستم الزامی است"
+        });
+      }
+
+      const categoryNumber = await smsStorage.getNextCategoryNumber();
+      
+      const category = await smsStorage.createTemplateCategory({
+        categoryNumber,
+        categoryName,
+        categoryDescription,
+        systemUsage,
+        displayOrder: displayOrder || 0
+      });
+
+      res.json({ success: true, data: category, message: "دسته‌بندی قالب ایجاد شد" });
+    } catch (error) {
+      console.error("Error creating template category:", error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد دسته‌بندی قالب" });
+    }
+  });
+
+  app.put("/api/admin/sms/template-categories/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const category = await smsStorage.updateTemplateCategory(parseInt(id), updates);
+      res.json({ success: true, data: category, message: "دسته‌بندی قالب بروزرسانی شد" });
+    } catch (error) {
+      console.error("Error updating template category:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی دسته‌بندی قالب" });
+    }
+  });
+
+  app.delete("/api/admin/sms/template-categories/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      await smsStorage.deleteTemplateCategory(parseInt(id));
+      res.json({ success: true, message: "دسته‌بندی قالب حذف شد" });
+    } catch (error) {
+      console.error("Error deleting template category:", error);
+      res.status(500).json({ success: false, message: "خطا در حذف دسته‌بندی قالب" });
+    }
+  });
+
+  // SMS Templates Management
+  app.get("/api/admin/sms/templates", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const templates = await smsStorage.getAllTemplates();
+      res.json({ success: true, data: templates });
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت قالب‌ها" });
+    }
+  });
+
+  app.get("/api/admin/sms/templates/category/:categoryId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { categoryId } = req.params;
+      const templates = await smsStorage.getTemplatesByCategory(parseInt(categoryId));
+      res.json({ success: true, data: templates });
+    } catch (error) {
+      console.error("Error fetching templates by category:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت قالب‌های دسته‌بندی" });
+    }
+  });
+
+  app.post("/api/admin/sms/templates", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { categoryId, templateName, templateContent, variables, isDefault, createdBy } = req.body;
+      
+      if (!categoryId || !templateName || !templateContent) {
+        return res.status(400).json({
+          success: false,
+          message: "دسته‌بندی، نام قالب و محتوای قالب الزامی است"
+        });
+      }
+
+      const templateNumber = await smsStorage.getNextTemplateNumber(parseInt(categoryId));
+      
+      const template = await smsStorage.createTemplate({
+        categoryId: parseInt(categoryId),
+        templateNumber,
+        templateName,
+        templateContent,
+        variables: variables || [],
+        isDefault: isDefault || false,
+        createdBy: createdBy || 'admin'
+      });
+
+      res.json({ success: true, data: template, message: "قالب ایجاد شد" });
+    } catch (error) {
+      console.error("Error creating template:", error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد قالب" });
+    }
+  });
+
+  app.put("/api/admin/sms/templates/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const template = await smsStorage.updateTemplate(parseInt(id), updates);
+      res.json({ success: true, data: template, message: "قالب بروزرسانی شد" });
+    } catch (error) {
+      console.error("Error updating template:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی قالب" });
+    }
+  });
+
+  app.delete("/api/admin/sms/templates/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      await smsStorage.deleteTemplate(parseInt(id));
+      res.json({ success: true, message: "قالب حذف شد" });
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      res.status(500).json({ success: false, message: "خطا در حذف قالب" });
+    }
+  });
+
+  app.get("/api/admin/sms/templates/usage/:systemUsage", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { systemUsage } = req.params;
+      const { isDefault } = req.query;
+      
+      const template = await smsStorage.getTemplateBySystemUsage(
+        systemUsage, 
+        isDefault === 'true' ? true : undefined
+      );
+      
+      if (!template) {
+        return res.status(404).json({
+          success: false,
+          message: "قالبی برای این کاربری سیستم یافت نشد"
+        });
+      }
+
+      res.json({ success: true, data: template });
+    } catch (error) {
+      console.error("Error fetching template by system usage:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت قالب" });
+    }
+  });
+
+  app.post("/api/admin/sms/templates/:id/usage", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      await smsStorage.incrementTemplateUsage(parseInt(id));
+      res.json({ success: true, message: "استفاده از قالب ثبت شد" });
+    } catch (error) {
+      console.error("Error incrementing template usage:", error);
+      res.status(500).json({ success: false, message: "خطا در ثبت استفاده از قالب" });
+    }
+  });
+
   // Test SMS configuration
   app.post("/api/admin/sms/test", requireAuth, async (req, res) => {
     try {

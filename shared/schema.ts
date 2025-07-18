@@ -350,6 +350,36 @@ export const smsSettings = pgTable("sms_settings", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// SMS Template Categories
+export const smsTemplateCategories = pgTable("sms_template_categories", {
+  id: serial("id").primaryKey(),
+  categoryNumber: integer("category_number").notNull().unique(), // Sequential numbering: 1, 2, 3...
+  categoryName: text("category_name").notNull(),
+  categoryDescription: text("category_description"),
+  systemUsage: text("system_usage").notNull(), // 'temporary_orders', 'delivery_verification', 'customer_notification', etc.
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// SMS Templates with category assignment
+export const smsTemplates = pgTable("sms_templates", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => smsTemplateCategories.id),
+  templateNumber: integer("template_number").notNull(), // Sequential numbering within category: 1, 2, 3...
+  templateName: text("template_name").notNull(),
+  templateContent: text("template_content").notNull(),
+  variables: json("variables"), // Available variables like {{customer_name}}, {{order_number}}
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  usageCount: integer("usage_count").default(0),
+  lastUsed: timestamp("last_used"),
+  createdBy: text("created_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Customer SMS preferences
 export const customerSmsSettings = pgTable("customer_sms_settings", {
   id: serial("id").primaryKey(),
@@ -381,6 +411,20 @@ export const insertCustomerSmsSettingsSchema = createInsertSchema(customerSmsSet
   updatedAt: true,
 });
 
+export const insertSmsTemplateCategorySchema = createInsertSchema(smsTemplateCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSmsTemplateSchema = createInsertSchema(smsTemplates).omit({
+  id: true,
+  usageCount: true,
+  lastUsed: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Export types
 export type InsertSmsVerification = z.infer<typeof insertSmsVerificationSchema>;
 export type SmsVerification = typeof smsVerifications.$inferSelect;
@@ -388,6 +432,10 @@ export type InsertSmsSettings = z.infer<typeof insertSmsSettingsSchema>;
 export type SmsSettings = typeof smsSettings.$inferSelect;
 export type InsertCustomerSmsSettings = z.infer<typeof insertCustomerSmsSettingsSchema>;
 export type CustomerSmsSettings = typeof customerSmsSettings.$inferSelect;
+export type InsertSmsTemplateCategory = z.infer<typeof insertSmsTemplateCategorySchema>;
+export type SmsTemplateCategory = typeof smsTemplateCategories.$inferSelect;
+export type InsertSmsTemplate = z.infer<typeof insertSmsTemplateSchema>;
+export type SmsTemplate = typeof smsTemplates.$inferSelect;
 
 // =============================================================================
 // CUSTOM USER MANAGEMENT SYSTEM
