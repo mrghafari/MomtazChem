@@ -1285,6 +1285,9 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         }
       }
       
+      // Calculate total weight from order items
+      const totalWeight = await this.calculateOrderWeight(orderId);
+      
       const result = {
         // Order management info
         orderManagement: orderManagement,
@@ -1302,6 +1305,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         totalItems: orderItemsResult.length,
         totalQuantity: orderItemsResult.reduce((sum, item) => sum + item.quantity, 0),
         totalAmount: customerOrder.totalAmount,
+        totalWeight: totalWeight,
+        weightUnit: 'kg',
         orderDate: customerOrder.createdAt,
         
         // Status info
@@ -1315,6 +1320,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         orderId,
         itemsCount: orderItemsResult.length,
         totalAmount: customerOrder.totalAmount,
+        totalWeight: totalWeight,
         customerName: customerDetails?.firstName + ' ' + customerDetails?.lastName
       });
       
