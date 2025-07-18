@@ -19736,6 +19736,22 @@ momtazchem.com
         })
         .where(eq(customerOrders.id, order.id));
 
+      // به‌روزرسانی سیستم مدیریت سفارشات برای نمایش در بخش مالی
+      try {
+        await db
+          .update(orderManagement)
+          .set({
+            currentStatus: 'payment_uploaded',
+            paymentReceiptUrl: filePath,
+            updatedAt: new Date()
+          })
+          .where(eq(orderManagement.customerOrderId, order.id));
+        
+        console.log(`✅ [FINANCE] Order ${orderId} updated with receipt and moved to financial review`);
+      } catch (error) {
+        console.error('Warning: Could not update order management, but receipt uploaded successfully:', error);
+      }
+
       // ثبت فعالیت در سیستم مالی
       try {
         await shopStorage.createFinancialTransaction({
