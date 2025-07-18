@@ -7737,7 +7737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get customer order history
+  // Get customer order history (including grace period orders)
   app.get("/api/customers/orders", async (req, res) => {
     try {
       const customerId = (req.session as any)?.customerId;
@@ -7748,6 +7748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get regular orders
       const orders = await customerStorage.getOrdersByCustomer(customerId);
       
       // Get detailed order information with items
@@ -7757,19 +7758,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return {
             ...order,
             items,
+            orderType: 'regular'
           };
         })
       );
 
+      // Get grace period orders for this customer
+      const { pool } = await import('./db');
+      const gracePeriodResult = await pool.query(`
+        SELECT 
+          om.*,
+          co.total_amount,
+          co.currency,
+          co.guest_name as customer_first_name,
+          co.guest_email as customer_email,
+          co.recipient_phone as customer_phone,
+          co.items as order_items,
+          EXTRACT(EPOCH FROM (om.payment_grace_period_end - NOW()))/3600 as hours_remaining,
+          CASE 
+            WHEN om.payment_grace_period_end > NOW() THEN 'active'
+            ELSE 'expired'
+          END as grace_period_status
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE om.payment_grace_period_start IS NOT NULL
+          AND (co.guest_email = (
+            SELECT email FROM crm_customers WHERE id = $1
+          ) OR co.customer_id = $1)
+        ORDER BY om.created_at DESC
+      `, [customerId]);
+
+      // Format grace period orders to match regular order structure
+      const gracePeriodOrders = gracePeriodResult.rows.map((row: any) => ({
+        id: row.customer_order_id,
+        orderNumber: row.customer_order_id,
+        status: row.current_status,
+        totalAmount: row.total_amount,
+        currency: row.currency,
+        createdAt: row.created_at,
+        items: row.order_items || [],
+        orderType: 'grace_period',
+        gracePeriodExpires: row.payment_grace_period_end,
+        gracePeriodStatus: row.grace_period_status,
+        hoursRemaining: Math.max(0, Math.floor(row.hours_remaining)),
+        isOrderLocked: row.is_order_locked,
+        paymentGracePeriodStart: row.payment_grace_period_start,
+        paymentGracePeriodEnd: row.payment_grace_period_end
+      }));
+
+      // Combine both types of orders and sort by creation date
+      const allOrders = [...detailedOrders, ...gracePeriodOrders].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
       res.json({
         success: true,
-        orders: detailedOrders,
+        orders: allOrders,
       });
     } catch (error) {
       console.error("Error getting customer orders:", error);
       res.status(500).json({
         success: false,
         message: "خطا در دریافت سفارشات"
+      });
+    }
+  });
+
+  // Activate grace period order (continue with order after uploading receipt)
+  app.post("/api/customers/orders/:orderId/activate-grace-period", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت نشده" 
+        });
+      }
+
+      const { orderId } = req.params;
+      const { pool } = await import('./db');
+
+      // Check if this is a valid grace period order for this customer
+      const checkResult = await pool.query(`
+        SELECT om.*, co.guest_email, co.customer_id
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE om.customer_order_id = $1 
+          AND om.current_status = 'payment_grace_period'
+          AND om.payment_grace_period_end > NOW()
+          AND (co.guest_email = (
+            SELECT email FROM crm_customers WHERE id = $2
+          ) OR co.customer_id = $2)
+      `, [orderId, customerId]);
+
+      if (checkResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش موقت یافت نشد یا منقضی شده است"
+        });
+      }
+
+      // Update order status to continue processing
+      const updateResult = await pool.query(`
+        UPDATE order_management 
+        SET 
+          current_status = 'financial_pending',
+          is_order_locked = false,
+          updated_at = NOW()
+        WHERE customer_order_id = $1
+        RETURNING *
+      `, [orderId]);
+
+      if (updateResult.rows.length === 0) {
+        return res.status(500).json({
+          success: false,
+          message: "خطا در فعال‌سازی سفارش"
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "سفارش با موفقیت فعال شد و وارد فرآیند بررسی مالی شد",
+        order: updateResult.rows[0]
+      });
+
+    } catch (error) {
+      console.error("Error activating grace period order:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در فعال‌سازی سفارش موقت"
       });
     }
   });

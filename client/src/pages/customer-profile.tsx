@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download } from "lucide-react";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -95,6 +95,40 @@ const CustomerProfile = () => {
         variant: "destructive",
         title: "خطا در صدور فاکتور",
         description: "امکان صدور فاکتور رسمی وجود ندارد. لطفاً دوباره تلاش کنید.",
+      });
+    }
+  };
+
+  const handleActivateGracePeriodOrder = async (orderId: number) => {
+    try {
+      const response = await fetch(`/api/customers/orders/${orderId}/activate-grace-period`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to activate order');
+      }
+
+      toast({
+        title: "فعال‌سازی سفارش",
+        description: result.message,
+      });
+
+      // Refresh orders to show updated status
+      window.location.reload();
+
+    } catch (error) {
+      console.error('Error activating grace period order:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در فعال‌سازی",
+        description: error.message || "امکان فعال‌سازی سفارش وجود ندارد. لطفاً دوباره تلاش کنید.",
       });
     }
   };
@@ -207,6 +241,8 @@ const CustomerProfile = () => {
       case 'shipped': return 'bg-purple-100 text-purple-800';
       case 'delivered': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'payment_grace_period': return 'bg-amber-100 text-amber-800';
+      case 'financial_pending': return 'bg-blue-100 text-blue-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -219,8 +255,19 @@ const CustomerProfile = () => {
       case 'shipped': return t.shipped;
       case 'delivered': return t.delivered;
       case 'cancelled': return t.cancelled;
+      case 'payment_grace_period': return 'مهلت پرداخت';
+      case 'financial_pending': return 'در انتظار بررسی مالی';
       default: return status;
     }
+  };
+
+  const formatTimeRemaining = (hours: number) => {
+    if (hours <= 0) return 'منقضی شده';
+    if (hours < 1) return 'کمتر از ۱ ساعت';
+    if (hours < 24) return `${Math.floor(hours)} ساعت`;
+    const days = Math.floor(hours / 24);
+    const remainingHours = Math.floor(hours % 24);
+    return `${days} روز و ${remainingHours} ساعت`;
   };
 
   const totalSpent = orders.reduce((sum: number, order: any) => 
@@ -386,19 +433,42 @@ const CustomerProfile = () => {
                 ) : (
                   <div className="space-y-4">
                     {orders.map((order: any) => (
-                      <div key={order.id} className="border rounded-lg p-4">
+                      <div key={order.id} className={`border rounded-lg p-4 ${order.orderType === 'grace_period' ? 'border-amber-200 bg-amber-50' : ''}`}>
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h4 className="font-semibold text-gray-900">
-                              Order #{order.orderNumber || order.id}
-                            </h4>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold text-gray-900">
+                                Order #{order.orderNumber || order.id}
+                              </h4>
+                              {order.orderType === 'grace_period' && (
+                                <Badge className="bg-orange-100 text-orange-800">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  سفارش موقت
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-sm text-gray-500 flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
                               {formatDate(order.createdAt)}
                             </p>
+                            {order.orderType === 'grace_period' && (
+                              <div className="mt-2">
+                                {order.gracePeriodStatus === 'active' ? (
+                                  <p className="text-sm text-amber-600 flex items-center gap-1">
+                                    <Clock className="w-4 h-4" />
+                                    مهلت باقی‌مانده: {formatTimeRemaining(order.hoursRemaining)}
+                                  </p>
+                                ) : (
+                                  <p className="text-sm text-red-600 flex items-center gap-1">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    مهلت پرداخت منقضی شده
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-lg">${parseFloat(order.totalAmount).toFixed(2)}</p>
+                            <p className="font-semibold text-lg">{parseFloat(order.totalAmount).toFixed(2)} {order.currency || 'IQD'}</p>
                             <Badge className={getStatusColor(order.status)}>
                               {getStatusLabel(order.status)}
                             </Badge>
@@ -428,25 +498,53 @@ const CustomerProfile = () => {
                           </div>
                         )}
 
-                        {/* Invoice Actions */}
-                        <div className="mt-4 pt-3 border-t flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDownloadInvoice(order.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <Download className="w-4 h-4" />
-                            دانلود فاکتور
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleGenerateOfficialInvoice(order.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <FileText className="w-4 h-4" />
-                            درخواست فاکتور رسمی
-                          </Button>
+                        {/* Actions */}
+                        <div className="mt-4 pt-3 border-t flex gap-2 flex-wrap">
+                          {order.orderType === 'grace_period' && order.gracePeriodStatus === 'active' ? (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleActivateGracePeriodOrder(order.orderNumber)}
+                                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                              >
+                                <PlayCircle className="w-4 h-4" />
+                                فعال‌سازی سفارش
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setLocation(`/customer/bank-receipt-upload?orderId=${order.orderNumber}`)}
+                                className="flex items-center gap-2"
+                              >
+                                <FileText className="w-4 h-4" />
+                                آپلود رسید بانکی
+                              </Button>
+                            </>
+                          ) : order.orderType === 'grace_period' && order.gracePeriodStatus === 'expired' ? (
+                            <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+                              این سفارش منقضی شده است و قابل فعال‌سازی نیست
+                            </div>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownloadInvoice(order.id)}
+                                className="flex items-center gap-2"
+                              >
+                                <Download className="w-4 h-4" />
+                                دانلود فاکتور
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => handleGenerateOfficialInvoice(order.id)}
+                                className="flex items-center gap-2"
+                              >
+                                <FileText className="w-4 h-4" />
+                                درخواست فاکتور رسمی
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
                     ))}
