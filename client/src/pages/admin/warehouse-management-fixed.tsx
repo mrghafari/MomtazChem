@@ -341,22 +341,22 @@ const WarehouseManagementFixed: React.FC = () => {
                     <table className="w-full">
                       <thead>
                         <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="text-right p-4 font-semibold text-gray-700">شماره سفارش</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">اطلاعات مشتری</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">وزن محموله</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">مبلغ کل</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">وضعیت</th>
-                          <th className="text-right p-4 font-semibold text-gray-700">تاریخ پردازش</th>
-                          <th className="text-center p-4 font-semibold text-gray-700">عملیات</th>
+                          <th className="text-right p-4 font-semibold text-gray-700 w-[120px]">شماره سفارش</th>
+                          <th className="text-right p-4 font-semibold text-gray-700 w-[250px]">اطلاعات مشتری</th>
+                          <th className="text-right p-4 font-semibold text-gray-700 w-[140px]">وزن محموله</th>
+                          <th className="text-right p-4 font-semibold text-gray-700 w-[120px]">مبلغ کل</th>
+                          <th className="text-right p-4 font-semibold text-gray-700 w-[120px]">وضعیت</th>
+                          <th className="text-right p-4 font-semibold text-gray-700 w-[140px]">تاریخ پردازش</th>
+                          <th className="text-center p-4 font-semibold text-gray-700 w-[200px]">عملیات</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredOrders.map((order: Order) => (
                           <tr key={order.id} className="border-b hover:bg-blue-50 transition-colors">
-                            <td className="p-4">
+                            <td className="p-4 w-[120px]">
                               <div className="font-bold text-blue-600">#{order.id}</div>
                             </td>
-                            <td className="p-4">
+                            <td className="p-4 w-[250px]">
                               <div className="space-y-1">
                                 <div className="font-medium text-gray-900">{
                                   order.customer?.firstName && order.customer?.lastName 
@@ -373,24 +373,24 @@ const WarehouseManagementFixed: React.FC = () => {
                                 </div>
                               </div>
                             </td>
-                            <td className="p-4">
+                            <td className="p-4 w-[140px]">
                               <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center gap-1">
                                 <Weight className="w-4 h-4" />
                                 {order.totalWeight ? `${parseFloat(order.totalWeight).toFixed(1)} ${order.weightUnit || 'kg'}` : 'در حال محاسبه...'}
                               </div>
                             </td>
-                            <td className="p-4">
+                            <td className="p-4 w-[120px]">
                               <div className="font-semibold text-green-600">
                                 {formatCurrency(parseFloat(order.totalAmount) || 0)}
                               </div>
                             </td>
-                            <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
-                            <td className="p-4">
+                            <td className="p-4 w-[120px]">{getStatusBadge(order.currentStatus || order.status)}</td>
+                            <td className="p-4 w-[140px]">
                               <div className="text-sm text-gray-600">
                                 {order.warehouseProcessedAt ? new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR') : 'پردازش نشده'}
                               </div>
                             </td>
-                            <td className="p-4 text-center">
+                            <td className="p-4 text-center w-[200px]">
                               <div className="flex items-center justify-center gap-2">
                                 <Button
                                   size="sm"
