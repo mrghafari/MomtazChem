@@ -292,154 +292,102 @@ const WarehouseManagementFixed: React.FC = () => {
             </div>
 
             {/* Orders Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  سفارشات تایید شده توسط واحد مالی
-                </CardTitle>
-                <p className="text-sm text-gray-600">
-                  سفارشات آماده برای پردازش انبار و ارسال به بخش لجستیک
-                </p>
+            <Card className="shadow-lg border-0">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-3 text-xl">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Package className="w-6 h-6 text-blue-600" />
+                      </div>
+                      سفارشات تایید شده توسط واحد مالی
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 mt-2 mr-11">
+                      سفارشات آماده برای پردازش انبار و ارسال به بخش لجستیک
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-sm">
+                      {filteredOrders.length} سفارش
+                    </Badge>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => refetchOrders()}
+                      className="flex items-center gap-1"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      به‌روزرسانی
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 {ordersLoading ? (
-                  <div className="text-center py-8">در حال بارگیری...</div>
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-500">در حال بارگیری سفارشات...</p>
+                  </div>
                 ) : filteredOrders.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p>هیچ سفارش تایید شده‌ای در انتظار پردازش انبار نیست</p>
+                  <div className="text-center py-12 text-gray-500">
+                    <div className="p-4 bg-gray-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                      <Package className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">هیچ سفارشی یافت نشد</h3>
+                    <p>در حال حاضر هیچ سفارش تایید شده‌ای در انتظار پردازش انبار نیست</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+                    <table className="w-full">
                       <thead>
-                        <tr className="border-b">
-                          <th className="text-right p-4">شماره سفارش</th>
-                          <th className="text-right p-4">نام مشتری</th>
-                          <th className="text-right p-4">شماره موبایل</th>
-                          <th className="text-right p-4">ایمیل</th>
-                          <th className="text-right p-4">وزن محموله</th>
-                          <th className="text-right p-4">مبلغ</th>
-                          <th className="text-right p-4">وضعیت</th>
-                          <th className="text-right p-4">تاریخ پردازش در انبار</th>
-                          <th className="text-right p-4">تاریخ ایجاد</th>
-                          <th className="text-center p-4">عملیات</th>
-                        </tr>
-                        <tr className="border-b bg-gray-50">
-                          <th className="text-right p-2">
-                            <Input
-                              placeholder="شماره"
-                              value={orderIdFilter}
-                              onChange={(e) => setOrderIdFilter(e.target.value)}
-                              className="h-8 text-sm"
-                            />
-                          </th>
-                          <th className="text-right p-2">
-                            <Input
-                              placeholder="نام مشتری"
-                              value={customerNameFilter}
-                              onChange={(e) => setCustomerNameFilter(e.target.value)}
-                              className="h-8 text-sm"
-                            />
-                          </th>
-                          <th className="text-right p-2">
-                            <Input
-                              placeholder="شماره موبایل"
-                              value={phoneFilter}
-                              onChange={(e) => setPhoneFilter(e.target.value)}
-                              className="h-8 text-sm"
-                            />
-                          </th>
-                          <th className="text-right p-2">
-                            <Input
-                              placeholder="ایمیل"
-                              value={emailFilter}
-                              onChange={(e) => setEmailFilter(e.target.value)}
-                              className="h-8 text-sm"
-                            />
-                          </th>
-                          <th className="text-right p-2">
-                            <div className="h-8 flex items-center text-gray-400 text-xs">
-                              محاسبه شده
-                            </div>
-                          </th>
-                          <th className="text-right p-2">
-                            <Input
-                              placeholder="مبلغ"
-                              value={amountFilter}
-                              onChange={(e) => setAmountFilter(e.target.value)}
-                              className="h-8 text-sm"
-                            />
-                          </th>
-                          <th className="text-right p-2">
-                            <Input
-                              placeholder="وضعیت"
-                              value={statusFilter}
-                              onChange={(e) => setStatusFilter(e.target.value)}
-                              className="h-8 text-sm"
-                            />
-                          </th>
-                          <th className="text-right p-2">
-                            <div className="h-8 flex items-center text-gray-400 text-xs">
-                              تاریخ
-                            </div>
-                          </th>
-                          <th className="text-right p-2">
-                            <div className="h-8 flex items-center text-gray-400 text-xs">
-                              تاریخ
-                            </div>
-                          </th>
-                          <th className="text-center p-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={clearAllFilters}
-                              className="h-8 text-xs"
-                            >
-                              پاک کردن
-                            </Button>
-                          </th>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                          <th className="text-right p-4 font-semibold text-gray-700">شماره سفارش</th>
+                          <th className="text-right p-4 font-semibold text-gray-700">اطلاعات مشتری</th>
+                          <th className="text-right p-4 font-semibold text-gray-700">وزن محموله</th>
+                          <th className="text-right p-4 font-semibold text-gray-700">مبلغ کل</th>
+                          <th className="text-right p-4 font-semibold text-gray-700">وضعیت</th>
+                          <th className="text-right p-4 font-semibold text-gray-700">تاریخ پردازش</th>
+                          <th className="text-center p-4 font-semibold text-gray-700">عملیات</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredOrders.map((order: Order) => (
-                          <tr key={order.id} className="border-b hover:bg-gray-50">
-                            <td className="p-4 font-medium">#{order.id}</td>
+                          <tr key={order.id} className="border-b hover:bg-blue-50 transition-colors">
                             <td className="p-4">
-                              <div className="font-medium">{
-                                order.customer?.firstName && order.customer?.lastName 
-                                  ? `${order.customer.firstName} ${order.customer.lastName}` 
-                                  : order.customerFirstName && order.customerLastName 
-                                    ? `${order.customerFirstName} ${order.customerLastName}`
-                                    : order.customerName || 'نامشخص'
-                              }</div>
+                              <div className="font-bold text-blue-600">#{order.id}</div>
                             </td>
                             <td className="p-4">
-                              <div className="text-sm">{
-                                order.customer?.phone || order.customerPhone || 'شماره نامشخص'
-                              }</div>
+                              <div className="space-y-1">
+                                <div className="font-medium text-gray-900">{
+                                  order.customer?.firstName && order.customer?.lastName 
+                                    ? `${order.customer.firstName} ${order.customer.lastName}` 
+                                    : order.customerFirstName && order.customerLastName 
+                                      ? `${order.customerFirstName} ${order.customerLastName}`
+                                      : order.customerName || 'نامشخص'
+                                }</div>
+                                <div className="text-sm text-gray-600 flex items-center gap-2">
+                                  <span>📱 {order.customer?.phone || order.customerPhone || 'شماره نامشخص'}</span>
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  📧 {order.customer?.email || order.customerEmail || 'ایمیل نامشخص'}
+                                </div>
+                              </div>
                             </td>
                             <td className="p-4">
-                              <div className="text-sm text-gray-600">{
-                                order.customer?.email || order.customerEmail || 'ایمیل نامشخص'
-                              }</div>
-                            </td>
-                            <td className="p-4">
-                              <div className="font-medium text-blue-600">
+                              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center gap-1">
+                                <Weight className="w-4 h-4" />
                                 {order.totalWeight ? `${parseFloat(order.totalWeight).toFixed(1)} ${order.weightUnit || 'kg'}` : 'در حال محاسبه...'}
                               </div>
                             </td>
-                            <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
+                            <td className="p-4">
+                              <div className="font-semibold text-green-600">
+                                {formatCurrency(parseFloat(order.totalAmount) || 0)}
+                              </div>
+                            </td>
                             <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
                             <td className="p-4">
                               <div className="text-sm text-gray-600">
                                 {order.warehouseProcessedAt ? new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR') : 'پردازش نشده'}
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <div className="text-sm text-gray-600">
-                                {new Date(order.createdAt).toLocaleDateString('fa-IR')}
                               </div>
                             </td>
                             <td className="p-4 text-center">
@@ -453,16 +401,42 @@ const WarehouseManagementFixed: React.FC = () => {
                                     // Fetch complete order details
                                     fetchOrderDetails(order.customerOrderId);
                                   }}
+                                  className="text-xs"
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
-                                  جزئیات سفارش
+                                  جزئیات
                                 </Button>
+                                {(order.currentStatus === 'financial_approved' || order.currentStatus === 'warehouse_pending') && (
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => handleOrderAction(order.id, 'warehouse_processing')}
+                                    disabled={loadingOrderId === order.id}
+                                    className="bg-orange-500 hover:bg-orange-600 text-xs"
+                                  >
+                                    <Package className="w-4 h-4 mr-1" />
+                                    {loadingOrderId === order.id ? 'در حال پردازش...' : 'شروع پردازش'}
+                                  </Button>
+                                )}
+                                {order.currentStatus === 'warehouse_processing' && (
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => handleOrderAction(order.id, 'warehouse_approved')}
+                                    disabled={loadingOrderId === order.id}
+                                    className="bg-green-500 hover:bg-green-600 text-xs"
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    {loadingOrderId === order.id ? 'در حال تایید...' : 'تایید نهایی'}
+                                  </Button>
+                                )}
                                 {order.currentStatus === 'warehouse_approved' && (
                                   <Button
                                     size="sm"
                                     variant="default"
                                     onClick={() => handleOrderAction(order.id, 'logistics_dispatched')}
                                     disabled={loadingOrderId === order.id}
+                                    className="bg-blue-500 hover:bg-blue-600 text-xs"
                                   >
                                     <Truck className="w-4 h-4 mr-1" />
                                     {loadingOrderId === order.id ? 'در حال ارسال...' : 'ارسال به لجستیک'}
@@ -530,8 +504,8 @@ const WarehouseManagementFixed: React.FC = () => {
                       <p className="text-2xl font-bold text-blue-600">{orderDetails.totalItems}</p>
                     </div>
                     <div className="text-center">
-                      <Label className="text-sm font-medium text-gray-700">مجموع تعداد</Label>
-                      <p className="text-2xl font-bold text-blue-600">{orderDetails.totalQuantity}</p>
+                      <Label className="text-sm font-medium text-gray-700">مجموع وزن ناخالص</Label>
+                      <p className="text-2xl font-bold text-blue-600">{orderDetails.totalWeight ? `${parseFloat(orderDetails.totalWeight).toFixed(1)} kg` : 'محاسبه نشده'}</p>
                     </div>
                     <div className="text-center">
                       <Label className="text-sm font-medium text-gray-700">تاریخ سفارش</Label>
