@@ -30,6 +30,7 @@ interface SmsSettings {
   id?: number;
   isEnabled: boolean;
   provider: string;
+  customProviderName?: string;
   apiKey?: string;
   apiSecret?: string;
   username?: string;
@@ -479,6 +480,18 @@ export default function AdminSmsManagement() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {settings.provider === 'custom' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="customProviderName">نام شرکت سفارشی</Label>
+                    <Input
+                      id="customProviderName"
+                      placeholder="نام شرکت ارائه‌دهنده SMS"
+                      value={settings.customProviderName || ''}
+                      onChange={(e) => setSettings(prev => ({ ...prev, customProviderName: e.target.value }))}
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="apiKey">API Key / Token</Label>

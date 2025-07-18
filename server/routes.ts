@@ -6339,6 +6339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const settings = result.rows[0] || {
         isEnabled: false,
         provider: 'asiacell',
+        customProviderName: '',
         apiKey: '',
         apiSecret: '',
         username: '',
@@ -6367,28 +6368,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { pool } = await import('./db');
       
       const result = await pool.query(`
-        INSERT INTO sms_settings (id, is_enabled, provider, api_key, api_secret, username, password, sender_number, api_endpoint, service_type, pattern_id, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
-        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
+        INSERT INTO sms_settings (id, is_enabled, provider, custom_provider_name, api_key, api_secret, username, password, sender_number, api_endpoint, service_type, pattern_id, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
+        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW())
         ON CONFLICT (id) DO UPDATE SET
           is_enabled = $1,
           provider = $2,
-          api_key = $3,
-          api_secret = $4,
-          username = $5,
-          password = $6,
-          sender_number = $7,
-          api_endpoint = $8,
-          service_type = $9,
-          pattern_id = $10,
-          code_length = $11,
-          code_expiry = $12,
-          max_attempts = $13,
-          rate_limit_minutes = $14,
+          custom_provider_name = $3,
+          api_key = $4,
+          api_secret = $5,
+          username = $6,
+          password = $7,
+          sender_number = $8,
+          api_endpoint = $9,
+          service_type = $10,
+          pattern_id = $11,
+          code_length = $12,
+          code_expiry = $13,
+          max_attempts = $14,
+          rate_limit_minutes = $15,
           updated_at = NOW()
         RETURNING *
       `, [
         settings.isEnabled,
         settings.provider,
+        settings.customProviderName,
         settings.apiKey,
         settings.apiSecret,
         settings.username,
