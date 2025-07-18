@@ -46,7 +46,7 @@ import {
 } from "lucide-react";
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
-import SmsTemplateManagement from "@/components/sms-template-management";
+
 import { useToast } from "@/hooks/use-toast";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import { formatCurrency } from "@/lib/utils";
@@ -545,10 +545,7 @@ function FinanceOrders() {
               <AlertTriangle className="h-4 w-4" />
               <span>سفارشات موقت ({orphanStats?.stats?.active || 0})</span>
             </TabsTrigger>
-            <TabsTrigger value="sms-templates" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-purple-500 data-[state=active]:text-white">
-              <MessageSquare className="h-4 w-4" />
-              <span>قالب‌های پیامک</span>
-            </TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="pending" className="space-y-4">
@@ -788,9 +785,7 @@ function FinanceOrders() {
             </div>
           </TabsContent>
 
-          <TabsContent value="sms-templates" className="space-y-4">
-            <SmsTemplateManagement />
-          </TabsContent>
+
         </Tabs>
         
         {/* Review Dialog */}

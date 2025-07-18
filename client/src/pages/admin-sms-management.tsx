@@ -32,6 +32,7 @@ import {
   Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SmsTemplateManagement from '@/components/sms-template-management';
 
 interface SmsSettings {
   id?: number;
@@ -644,6 +645,10 @@ export default function AdminSmsManagement() {
             <Truck className="h-4 w-4 mr-2" />
             لاگ تحویل
           </TabsTrigger>
+          <TabsTrigger value="templates">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            قالب‌های پیامک
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -1236,6 +1241,10 @@ export default function AdminSmsManagement() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="templates" className="space-y-4">
+          <SmsTemplateManagement />
         </TabsContent>
       </Tabs>
     </div>
