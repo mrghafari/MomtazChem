@@ -476,6 +476,7 @@ export default function AdminSmsManagement() {
                       <SelectItem value="twilio">Twilio</SelectItem>
                       <SelectItem value="plivo">Plivo</SelectItem>
                       <SelectItem value="infobip">Infobip</SelectItem>
+                      <SelectItem value="msg91">MSG91</SelectItem>
                       <SelectItem value="custom">شرکت جدید - سفارشی</SelectItem>
                     </SelectContent>
                   </Select>
@@ -651,6 +652,7 @@ export default function AdminSmsManagement() {
                       <li>• <strong>Twilio</strong> - twilio.com</li>
                       <li>• <strong>Plivo</strong> - plivo.com</li>
                       <li>• <strong>Infobip</strong> - infobip.com</li>
+                      <li>• <strong>MSG91</strong> - msg91.com</li>
                     </ul>
                   </div>
                 </div>

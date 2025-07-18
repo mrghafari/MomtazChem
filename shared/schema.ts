@@ -338,7 +338,7 @@ export const smsVerifications = pgTable("sms_verifications", {
 export const smsSettings = pgTable("sms_settings", {
   id: serial("id").primaryKey(),
   isEnabled: boolean("is_enabled").default(false), // Global SMS system toggle
-  provider: text("provider").default("asiacell"), // 'asiacell', 'zain_iraq', 'korek_telecom', 'twilio', 'plivo', 'infobip', 'custom'
+  provider: text("provider").default("asiacell"), // 'asiacell', 'zain_iraq', 'korek_telecom', 'twilio', 'plivo', 'infobip', 'msg91', 'custom'
   customProviderName: text("custom_provider_name"), // Name for custom SMS provider
   apiKey: text("api_key"),
   apiSecret: text("api_secret"),
