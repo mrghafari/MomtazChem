@@ -2302,11 +2302,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Update product data with new stock quantity
         productData.stockQuantity = newStock;
         
-        // If new batch number is provided, create a new batch entry
+        // If new batch number is provided, create a new batch entry in کاردکس only
         if (productData.newBatchNumber && productData.newBatchNumber.trim()) {
-          console.log(`📦 [BATCH-CREATION] Creating new batch: ${productData.newBatchNumber}`);
+          console.log(`📦 [BATCH-CREATION] Creating new batch in کاردکس: ${productData.newBatchNumber}`);
           
-          // Add batch to database using shopStorage batch management
+          // Add batch to کاردکس (showcase_products) only - فروشگاه doesn't need batch details
           try {
             const batchData = {
               barcode: oldProduct?.barcode || '',
@@ -2317,7 +2317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
             
             await shopStorage.addBatch(batchData);
-            console.log(`✅ [BATCH-CREATION] Successfully created batch: ${productData.newBatchNumber}`);
+            console.log(`✅ [BATCH-CREATION] Successfully created batch in کاردکس: ${productData.newBatchNumber}`);
           } catch (batchError) {
             console.error(`❌ [BATCH-CREATION] Failed to create batch:`, batchError);
             // Don't fail the main operation if batch creation fails
@@ -2409,6 +2409,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const existingShopProduct = existingShopProducts.find(sp => sp.name === product.name);
           
           if (!existingShopProduct) {
+            // Calculate total stock from all batches in کاردکس for this barcode
+            let totalStock = product.stockQuantity || 0;
+            if (product.barcode) {
+              try {
+                const { pool } = await import('./db');
+                const totalStockResult = await pool.query(`
+                  SELECT SUM(stock_quantity) as total_stock
+                  FROM showcase_products 
+                  WHERE barcode = $1
+                `, [product.barcode]);
+                
+                totalStock = totalStockResult.rows[0]?.total_stock || 0;
+                console.log(`📦 [SHOP-SYNC] Calculated total stock from all batches for new product: ${totalStock}`);
+              } catch (error) {
+                console.error('Error calculating total stock:', error);
+              }
+            }
+            
             const shopProductData = {
               name: product.name,
               category: product.category,
@@ -2416,8 +2434,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               shortDescription: product.shortDescription || product.description,
               price: product.unitPrice || product.price || 0,
               priceUnit: product.currency || product.priceUnit || 'IQD',
-              inStock: (product.stockQuantity || 0) > 0 || (productData.showWhenOutOfStock || false),
-              stockQuantity: product.stockQuantity || 0,
+              inStock: totalStock > 0 || (productData.showWhenOutOfStock || false),
+              stockQuantity: totalStock, // Use total stock from all batches
               lowStockThreshold: 10,
               minStockLevel: product.minStockLevel || 5,
               maxStockLevel: product.maxStockLevel || 100,
@@ -2440,9 +2458,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ محصول به فروشگاه اضافه شد: ${product.name}`);
           } else {
             // Shop product already exists, update it
+            // Calculate total stock from all batches in کاردکس for this barcode
+            let totalStock = product.stockQuantity || 0;
+            if (product.barcode) {
+              try {
+                const { pool } = await import('./db');
+                const totalStockResult = await pool.query(`
+                  SELECT SUM(stock_quantity) as total_stock
+                  FROM showcase_products 
+                  WHERE barcode = $1
+                `, [product.barcode]);
+                
+                totalStock = totalStockResult.rows[0]?.total_stock || 0;
+                console.log(`📦 [SHOP-SYNC] Calculated total stock from all batches: ${totalStock}`);
+              } catch (error) {
+                console.error('Error calculating total stock:', error);
+              }
+            }
+            
             const updateData = {
-              stockQuantity: product.stockQuantity || 0,
-              inStock: (product.stockQuantity || 0) > 0 || (productData.showWhenOutOfStock || false),
+              stockQuantity: totalStock, // Use total stock from all batches
+              inStock: totalStock > 0 || (productData.showWhenOutOfStock || false),
               price: product.unitPrice || product.price || 0,
               priceUnit: product.currency || product.priceUnit || 'IQD',
               description: product.description,

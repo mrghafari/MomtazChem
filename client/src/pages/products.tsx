@@ -1901,7 +1901,7 @@ export default function ProductsPage() {
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>شماره دسته جدید برای موجودی اضافه شده</p>
+                                <p>شماره دسته جدید فقط برای کاردکس - فروشگاه فقط موجودی نهایی را دریافت می‌کند</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
