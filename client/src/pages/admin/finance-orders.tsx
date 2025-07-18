@@ -189,9 +189,9 @@ function FinanceOrders() {
   // Filter and search functionality
   const filteredOrders = allOrders.filter(order => {
     const searchMatch = !searchTerm || 
-      order.customerFirstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerLastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.customerOrderId?.toString().includes(searchTerm);
     
     const statusMatch = statusFilter === "all" || order.currentStatus === statusFilter;
@@ -202,9 +202,9 @@ function FinanceOrders() {
   // Filter transferred orders
   const filteredTransferredOrders = transferredOrders.filter(order => {
     const searchMatch = !searchTerm || 
-      order.customerFirstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerLastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.customerOrderId?.toString().includes(searchTerm);
     
     return searchMatch;
@@ -956,7 +956,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
             </div>
             <div>
               <h3 className="font-bold text-lg text-gray-900">سفارش #{order.customerOrderId}</h3>
-              <p className="text-sm text-gray-600">{order.customerFirstName} {order.customerLastName}</p>
+              <p className="text-sm text-gray-600">{order.customer?.firstName} {order.customer?.lastName}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3 space-x-reverse">
@@ -981,11 +981,11 @@ function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="flex items-center space-x-2 space-x-reverse">
             <Mail className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">{order.customerEmail}</span>
+            <span className="text-sm text-gray-600">{order.customer?.email}</span>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
             <Phone className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">{order.customerPhone}</span>
+            <span className="text-sm text-gray-600">{order.customer?.phone}</span>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
             <Calendar className="h-4 w-4 text-gray-400" />
@@ -1083,7 +1083,7 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
             </div>
             <div>
               <h3 className="font-bold text-lg text-gray-900">سفارش #{order.customerOrderId}</h3>
-              <p className="text-sm text-gray-600">{order.customerFirstName} {order.customerLastName}</p>
+              <p className="text-sm text-gray-600">{order.customer?.firstName} {order.customer?.lastName}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3 space-x-reverse">
@@ -1109,11 +1109,11 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="flex items-center space-x-2 space-x-reverse">
             <Mail className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">{order.customerEmail}</span>
+            <span className="text-sm text-gray-600">{order.customer?.email}</span>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
             <Phone className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">{order.customerPhone}</span>
+            <span className="text-sm text-gray-600">{order.customer?.phone}</span>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
             <Calendar className="h-4 w-4 text-gray-400" />

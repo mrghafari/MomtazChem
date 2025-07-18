@@ -5649,18 +5649,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🔍 [ROUTES] Received', orders.length, 'orders from financial department');
       
+      // Log first order structure for debugging
+      if (orders.length > 0) {
+        console.log('🔍 [ROUTES] First order structure:', JSON.stringify(orders[0], null, 2));
+      }
+      
       // Transform orders to ensure compatibility with frontend interface
       const transformedOrders = orders.map(order => ({
         ...order,
-        // Ensure flat customer fields for compatibility
-        customerFirstName: order.customerFirstName || '',
-        customerLastName: order.customerLastName || '',
-        customerEmail: order.customerEmail || '',
-        customerPhone: order.customerPhone || '',
+        // Extract customer fields from nested customer object
+        customerFirstName: order.customer?.firstName || '',
+        customerLastName: order.customer?.lastName || '',
+        customerEmail: order.customer?.email || '',
+        customerPhone: order.customer?.phone || '',
         // Also provide receipt info in legacy format
-        receiptUrl: order.receiptUrl || order.paymentReceiptUrl,
-        receiptFileName: order.receiptFileName || '',
-        receiptMimeType: order.receiptMimeType || ''
+        receiptUrl: order.receipt?.url || order.paymentReceiptUrl,
+        receiptFileName: order.receipt?.fileName || '',
+        receiptMimeType: order.receipt?.mimeType || ''
       }));
       
       res.json({ 
