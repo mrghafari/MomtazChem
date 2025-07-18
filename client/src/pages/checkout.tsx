@@ -78,6 +78,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [secondaryPaymentMethod, setSecondaryPaymentMethod] = useState('');
   const [customerInfo, setCustomerInfo] = useState<any>(null);
   const [showRecipientFields, setShowRecipientFields] = useState(true); // Default to open for testing
+  const [showPurchaseOrder, setShowPurchaseOrder] = useState(true);
+  const [showCartManagement, setShowCartManagement] = useState(false);
+  const [showSecondAddress, setShowSecondAddress] = useState(false);
+  const [showRecipientMobile, setShowRecipientMobile] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -987,26 +991,251 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           </div>
 
           {/* Order Summary */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
+            {/* Purchase Order Card */}
             <Card className="sticky top-8">
-              <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm">{item.name}</h4>
-                      <p className="text-xs text-gray-500">
-                        {item.quantity} × ${item.price}
-                      </p>
-                    </div>
-                    <span className="font-medium">${item.totalPrice.toFixed(2)}</span>
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                onClick={() => setShowPurchaseOrder(!showPurchaseOrder)}
+              >
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="w-5 h-5" />
+                    Purchase Order
                   </div>
-                ))}
-                
-                <Separator />
-                
+                  <span className="text-sm text-gray-500">
+                    {showPurchaseOrder ? '−' : '+'}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              {showPurchaseOrder && (
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="text-sm text-gray-600">
+                      سفارش خرید شما شامل {cartItems.length} قلم محصول است
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="text-xs font-medium text-blue-800 dark:text-blue-300 mb-2">
+                        خلاصه سفارش
+                      </div>
+                      <div className="space-y-1 text-xs text-blue-700 dark:text-blue-400">
+                        <div className="flex justify-between">
+                          <span>تعداد اقلام:</span>
+                          <span>{cartItems.reduce((sum, item) => sum + item.quantity, 0)} عدد</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>وزن تقریبی:</span>
+                          <span>{cartItems.reduce((sum, item) => sum + (parseFloat(item.weight || '1') * item.quantity), 0).toFixed(2)} کیلوگرم</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>تاریخ سفارش:</span>
+                          <span>{new Date().toLocaleDateString('fa-IR')}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Second Address Option */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">آدرس دوم (اختیاری)</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setShowSecondAddress(!showSecondAddress)}
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 h-6 w-6 p-0"
+                        >
+                          {showSecondAddress ? '−' : '+'}
+                        </Button>
+                      </div>
+                      
+                      {showSecondAddress && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg space-y-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              آدرس تحویل
+                            </label>
+                            <Textarea
+                              placeholder="آدرس دوم برای تحویل کالا..."
+                              className="min-h-[60px] text-sm"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                شهر
+                              </label>
+                              <Input placeholder="تهران" className="text-sm" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                کد پستی (اختیاری)
+                              </label>
+                              <Input placeholder="1968913751" className="text-sm" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Recipient Mobile */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">موبایل تحویل گیرنده کالا</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setShowRecipientMobile(!showRecipientMobile)}
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 h-6 w-6 p-0"
+                        >
+                          {showRecipientMobile ? '−' : '+'}
+                        </Button>
+                      </div>
+                      
+                      {showRecipientMobile && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              شماره موبایل گیرنده
+                            </label>
+                            <Input
+                              placeholder="09123456789"
+                              className="text-sm"
+                              type="tel"
+                            />
+                          </div>
+                          <div className="mt-2 text-xs text-gray-500">
+                            این شماره برای ارسال پیامک تایید تحویل استفاده خواهد شد
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-xs text-gray-500">
+                      کد سفارش پس از تکمیل خرید ارائه خواهد شد
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Cart Management Card */}
+            <Card>
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                onClick={() => setShowCartManagement(!showCartManagement)}
+              >
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="w-5 h-5" />
+                    Cart Management
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {showCartManagement ? '−' : '+'}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              {showCartManagement && (
+                <CardContent className="space-y-4">
+                  {/* Cart Items */}
+                  <div className="space-y-3">
+                    {cartItems.map((item) => (
+                      <div key={item.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-sm">{item.name}</h4>
+                            <p className="text-xs text-gray-500 mt-1">
+                              کد محصول: {item.sku || 'N/A'}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                            onClick={() => {
+                              // Remove item from cart logic would go here
+                              toast({
+                                title: "حذف از سبد خرید",
+                                description: `${item.name} از سبد خرید حذف شد`,
+                              });
+                            }}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => {
+                                // Decrease quantity logic
+                              }}
+                            >
+                              −
+                            </Button>
+                            <span className="min-w-[20px] text-center">{item.quantity}</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => {
+                                // Increase quantity logic
+                              }}
+                            >
+                              +
+                            </Button>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-gray-500">
+                              {item.quantity} × {parseFloat(item.price).toLocaleString()} IQD
+                            </div>
+                            <div className="font-medium">
+                              {item.totalPrice.toLocaleString()} IQD
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Cart Actions */}
+                  <div className="space-y-2 pt-3 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs"
+                      onClick={() => setLocation("/shop")}
+                    >
+                      ادامه خرید
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs text-red-600 hover:text-red-700"
+                      onClick={() => {
+                        // Clear cart logic
+                        toast({
+                          title: "سبد خرید پاک شد",
+                          description: "تمام محصولات از سبد خرید حذف شدند",
+                        });
+                      }}
+                    >
+                      پاک کردن سبد خرید
+                    </Button>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Payment Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle>خلاصه پرداخت</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>جمع کالاها:</span>
@@ -1034,16 +1263,16 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                 </div>
 
                 {shippingCost === 0 && (
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <p className="text-sm text-green-800">
+                  <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                    <p className="text-sm text-green-800 dark:text-green-300">
                       🎉 شما واجد شرایط ارسال رایگان هستید!
                     </p>
                   </div>
                 )}
                 
                 {actualWalletUsage >= beforeWalletTotal && (
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <p className="text-sm text-blue-800">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-blue-800 dark:text-blue-300">
                       💳 این سفارش کاملاً با کیف پول شما پرداخت خواهد شد
                     </p>
                   </div>
