@@ -54,6 +54,9 @@ export default function SmsTemplatesSimple() {
   // Extract arrays from API responses
   const templates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
 
+  // Debug logging
+  console.log("Templates Debug:", { templatesData, templates, templatesLoading });
+
   // Template form
   const templateForm = useForm<z.infer<typeof templateSchema>>({
     resolver: zodResolver(templateSchema),

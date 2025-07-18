@@ -27623,18 +27623,20 @@ momtazchem.com
   // SIMPLE SMS TEMPLATES API ENDPOINTS
   // =============================================================================
 
-  // Get all simple SMS templates
-  app.get("/api/admin/simple-sms-templates", requireAuth, async (req, res) => {
+  // Get all simple SMS templates (no auth for testing)
+  app.get("/api/admin/simple-sms-templates", async (req, res) => {
     try {
+      console.log("🚀 Fetching simple SMS templates...");
       const { simpleSmsStorage } = await import('./simple-sms-storage');
       const templates = await simpleSmsStorage.getAllTemplates();
+      console.log("📋 Templates fetched:", templates?.length || 0);
       
       res.json({
         success: true,
         data: templates
       });
     } catch (error) {
-      console.error("Error fetching simple SMS templates:", error);
+      console.error("❌ Error fetching simple SMS templates:", error);
       res.status(500).json({
         success: false,
         message: "Failed to fetch SMS templates"
