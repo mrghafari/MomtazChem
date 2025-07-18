@@ -7055,6 +7055,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get batch information for a specific order
+  app.get("/api/orders/:orderId/batch-info", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      if (!orderId) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره سفارش نامعتبر است"
+        });
+      }
+
+      const { unifiedInventoryManager } = await import('./unified-inventory-manager');
+      const batchInfo = await unifiedInventoryManager.getBatchInfoForOrder(orderId);
+      
+      res.json({
+        success: true,
+        data: batchInfo,
+        message: `اطلاعات ${batchInfo.length} بچ برای سفارش ${orderId} دریافت شد`
+      });
+    } catch (error) {
+      console.error("Error fetching batch info for order:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات بچ" });
+    }
+  });
+
+  // Generate invoice PDF with batch information
+  app.get("/api/orders/:orderId/invoice-with-batch", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      if (!orderId) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره سفارش نامعتبر است"
+        });
+      }
+
+      // Get order details
+      const order = await orderManagementStorage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      // Get customer details
+      const customer = await crmStorage.getCrmCustomerById(order.customerId);
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          message: "مشتری یافت نشد"
+        });
+      }
+
+      // Get batch information
+      const { unifiedInventoryManager } = await import('./unified-inventory-manager');
+      const batchInfo = await unifiedInventoryManager.getBatchInfoForOrder(orderId);
+
+      // Generate PDF with batch information
+      const { generateInvoicePDFWithBatch } = await import('./simple-pdf-generator');
+      const pdfBuffer = await generateInvoicePDFWithBatch(
+        customer,
+        order,
+        batchInfo,
+        `Invoice with Batch Info - Order ${orderId}`
+      );
+
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${orderId}-with-batch.pdf"`);
+      res.setHeader('Content-Length', pdfBuffer.length.toString());
+
+      // Send PDF
+      res.send(pdfBuffer);
+
+    } catch (error) {
+      console.error("Error generating invoice with batch info:", error);
+      res.status(500).json({ success: false, message: "خطا در تولید فاکتور با اطلاعات بچ" });
+    }
+  });
+
   // Customer registration endpoint - CRM-centric approach
   app.post("/api/customers/register", async (req, res) => {
     try {
@@ -8131,22 +8214,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
               });
 
-              // Update product stock
+              // Update product stock with batch tracking
               if (product.stockQuantity !== null && product.stockQuantity !== undefined) {
                 const currentStock = product.stockQuantity;
-                const newQuantity = Math.max(0, currentStock - (quantity as number));
-                console.log(`🛒 STOCK UPDATE - Product ${product.name} (ID: ${productId})`);
+                const quantityToSell = quantity as number;
+                
+                console.log(`🛒 STOCK UPDATE WITH BATCH TRACKING - Product ${product.name} (ID: ${productId})`);
                 console.log(`   Current Stock: ${currentStock}`);
-                console.log(`   Quantity Sold: ${quantity}`);
-                console.log(`   New Stock: ${newQuantity}`);
+                console.log(`   Quantity Sold: ${quantityToSell}`);
                 
-                await shopStorage.updateProductStock(
-                  parseInt(productId as string),
-                  newQuantity,
-                  `Order ${orderNumber} - Sold ${quantity} units`
-                );
-                
-                console.log(`✅ Stock updated successfully for product ${productId}`);
+                try {
+                  // Use unified inventory manager for batch tracking
+                  const { unifiedInventoryManager } = await import('./unified-inventory-manager');
+                  
+                  // Process inventory reduction with batch tracking
+                  const result = await unifiedInventoryManager.processOrderWithBatchTracking(
+                    parseInt(productId as string),
+                    quantityToSell,
+                    order.id,
+                    `Order ${orderNumber} - Customer purchase`
+                  );
+                  
+                  console.log(`✅ Stock updated with batch tracking for product ${productId}:`, result);
+                  
+                  // Track batch usage for this sale
+                  await unifiedInventoryManager.trackBatchUsageInSale(
+                    order.id,
+                    product.name,
+                    result.batchesUsed
+                  );
+                  
+                  console.log(`✅ Batch usage tracked for order ${order.id}`);
+                  
+                } catch (batchError) {
+                  console.error(`❌ Batch tracking failed for product ${productId}:`, batchError);
+                  
+                  // Fallback to simple stock update if batch tracking fails
+                  const newQuantity = Math.max(0, currentStock - quantityToSell);
+                  await shopStorage.updateProductStock(
+                    parseInt(productId as string),
+                    newQuantity,
+                    `Order ${orderNumber} - Sold ${quantityToSell} units (fallback)`
+                  );
+                  
+                  console.log(`⚠️ Fallback stock update completed for product ${productId}`);
+                }
               } else {
                 console.log(`⚠️ No stock quantity available for product ${productId}`);
               }

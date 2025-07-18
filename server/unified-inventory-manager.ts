@@ -2,10 +2,14 @@
  * Unified Inventory Management System
  * Makes showcase_products the single source of truth for inventory
  * Shop products will get inventory from showcase_products
+ * Now includes LIFO batch tracking with waste management
  */
 
 import { storage } from "./storage";
 import { shopStorage } from "./shop-storage";
+import { db } from "./db";
+import { batchSalesTracking } from "../shared/shop-schema";
+import { eq } from "drizzle-orm";
 
 export class UnifiedInventoryManager {
   
@@ -127,6 +131,25 @@ export class UnifiedInventoryManager {
     }
   }
   
+  /**
+   * Get batch info for a specific order
+   * Returns detailed batch information including waste calculations
+   */
+  static async getBatchInfoForOrder(orderId: number): Promise<any[]> {
+    try {
+      console.log(`📊 [BATCH INFO] Getting batch information for order ${orderId}`);
+      
+      const batchSales = await db.select().from(batchSalesTracking).where(eq(batchSalesTracking.orderId, orderId));
+      
+      console.log(`✅ [BATCH INFO] Found ${batchSales.length} batch records for order ${orderId}`);
+      return batchSales;
+      
+    } catch (error) {
+      console.error(`❌ [BATCH INFO] Error getting batch info for order ${orderId}:`, error);
+      return [];
+    }
+  }
+
   /**
    * Reduce inventory when order is placed using LIFO batch management
    * This is the single point for inventory reduction
@@ -251,9 +274,77 @@ export class UnifiedInventoryManager {
       return false;
     }
   }
+  /**
+   * Process order with batch tracking
+   * Uses LIFO inventory reduction and tracks batch usage
+   */
+  static async processOrderWithBatchTracking(
+    productId: number,
+    quantityToSell: number,
+    orderId: number,
+    notes?: string
+  ): Promise<{ success: boolean; batchesUsed: any[]; totalReduced: number }> {
+    try {
+      console.log(`🛒 [ORDER PROCESSING] Processing order ${orderId} for product ${productId}, quantity: ${quantityToSell}`);
+      
+      const { db } = await import("./db");
+      const { shopProducts } = await import("../shared/shop-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      // Get product details
+      const product = await db.select()
+        .from(shopProducts)
+        .where(eq(shopProducts.id, productId))
+        .limit(1);
+      
+      if (product.length === 0) {
+        throw new Error(`Product with ID ${productId} not found`);
+      }
+      
+      const productData = product[0];
+      
+      // Check if product has barcode for batch tracking
+      if (!productData.barcode) {
+        console.log(`Product ${productId} has no barcode, using simple stock reduction`);
+        
+        // Update stock directly
+        await db.update(shopProducts)
+          .set({ stockQuantity: Math.max(0, (productData.stockQuantity || 0) - quantityToSell) })
+          .where(eq(shopProducts.id, productId));
+        
+        return {
+          success: true,
+          batchesUsed: [],
+          totalReduced: quantityToSell
+        };
+      }
+      
+      // Use LIFO inventory reduction with batch tracking
+      const result = await this.reduceInventoryLIFO(
+        productData.barcode,
+        quantityToSell,
+        notes || `Order ${orderId} processing`
+      );
+      
+      console.log(`✅ [ORDER PROCESSING] LIFO inventory reduction completed for order ${orderId}`);
+      
+      return {
+        success: true,
+        batchesUsed: result.batchesUsed || [],
+        totalReduced: result.totalReduced || quantityToSell
+      };
+      
+    } catch (error) {
+      console.error(`❌ [ORDER PROCESSING] Error processing order ${orderId}:`, error);
+      throw error;
+    }
+  }
 }
 
 // Export functions for compatibility
 export async function syncFromShopToShowcase(): Promise<boolean> {
   return UnifiedInventoryManager.syncFromShopToShowcase();
 }
+
+// Export unified inventory manager instance
+export const unifiedInventoryManager = new UnifiedInventoryManager();

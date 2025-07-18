@@ -194,6 +194,52 @@ export default function CheckoutSuccess() {
     }
   };
 
+  // Download invoice with batch information
+  const handleDownloadInvoiceWithBatch = async () => {
+    if (!orderId) return;
+
+    try {
+      // Show loading toast
+      toast({
+        title: "درحال تولید فاکتور با اطلاعات بچ",
+        description: "لطفاً صبر کنید...",
+      });
+
+      const response = await fetch(`/api/orders/${orderId}/invoice-with-batch`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to download invoice with batch info');
+      }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${orderId}-with-batch.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "دانلود موفق",
+        description: "فاکتور با اطلاعات بچ با موفقیت دانلود شد",
+      });
+    } catch (error) {
+      console.error('Error downloading invoice with batch:', error);
+      toast({
+        title: "خطا در دانلود",
+        description: "امکان دانلود فاکتور با اطلاعات بچ وجود ندارد",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (!orderId) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -321,6 +367,14 @@ export default function CheckoutSuccess() {
                 >
                   <Download className="w-4 h-4 mr-2" />
                   دانلود فاکتور
+                </Button>
+                <Button 
+                  onClick={handleDownloadInvoiceWithBatch}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  دانلود فاکتور + بچ
                 </Button>
               </div>
 

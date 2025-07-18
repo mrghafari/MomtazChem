@@ -50,6 +50,26 @@ export const productWaste = pgTable("product_waste", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Batch Sales Tracking - ردیابی فروش بچ‌ها
+export const batchSalesTracking = pgTable("batch_sales_tracking", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull(),
+  customerId: integer("customer_id").notNull(),
+  productId: integer("product_id").notNull(),
+  barcode: text("barcode").notNull(),
+  batchNumber: text("batch_number").notNull(),
+  quantitySold: integer("quantity_sold").notNull(),
+  wasteAmount: decimal("waste_amount", { precision: 10, scale: 2 }).default("0"), // ضایعات احتساب شده
+  effectiveQuantity: integer("effective_quantity").notNull(), // مقدار مؤثر (quantity_sold + waste_amount)
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+  batchExpiryDate: timestamp("batch_expiry_date"),
+  manufacturingDate: timestamp("manufacturing_date"),
+  saleDate: timestamp("sale_date").notNull().defaultNow(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Shop products with actual pricing and inventory
 export const shopProducts = pgTable("shop_products", {
   id: serial("id").primaryKey(),

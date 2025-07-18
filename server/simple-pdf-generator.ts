@@ -1,6 +1,89 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Generate invoice PDF with batch information
+export async function generateInvoicePDFWithBatch(
+  customerData: any,
+  orderData: any,
+  batchData: any[],
+  title: string
+): Promise<Buffer> {
+  // Create invoice content with batch information
+  let invoiceContent = `
+INVOICE - ${title}
+=================
+Generated: ${new Date().toLocaleDateString()}
+
+COMPANY INFORMATION:
+Company: شركة مُمتاز للمواد الكيميائية
+Location: Iraq - Baghdad
+Phone: +964 770 999 6771
+Email: info@momtazchem.com
+
+CUSTOMER INFORMATION:
+Name: ${customerData.name || 'Unknown'}
+Email: ${customerData.email || 'Unknown'}
+Phone: ${customerData.phone || 'Unknown'}
+Address: ${customerData.address || 'Unknown'}
+
+INVOICE DETAILS:
+Invoice Number: ${orderData.invoiceNumber || orderData.id}
+Order Number: ${orderData.orderNumber || orderData.id}
+Issue Date: ${new Date(orderData.createdAt).toLocaleDateString()}
+Status: ${orderData.status || 'Unknown'}
+
+BATCH INFORMATION:
+================
+`;
+
+  // Add batch information if available
+  if (batchData && batchData.length > 0) {
+    invoiceContent += `
+BATCH DETAILS:
+The following batches were used for this order:
+
+`;
+    
+    for (const batch of batchData) {
+      invoiceContent += `
+Batch Number: ${batch.batchNumber}
+Barcode: ${batch.barcode}
+Quantity Sold: ${batch.quantitySold}
+Waste Amount: ${batch.wasteAmount} (${((parseFloat(batch.wasteAmount) / batch.quantitySold) * 100).toFixed(2)}%)
+Effective Quantity: ${batch.effectiveQuantity}
+Unit Price: ${batch.unitPrice} IQD
+Total Price: ${batch.totalPrice} IQD
+Manufacturing Date: ${batch.manufacturingDate ? new Date(batch.manufacturingDate).toLocaleDateString() : 'Unknown'}
+Expiry Date: ${batch.batchExpiryDate ? new Date(batch.batchExpiryDate).toLocaleDateString() : 'Unknown'}
+Notes: ${batch.notes || 'None'}
+---
+`;
+    }
+  } else {
+    invoiceContent += `
+No batch information available for this order.
+`;
+  }
+
+  invoiceContent += `
+
+PAYMENT INFORMATION:
+==================
+Payment Method: ${orderData.paymentMethod || 'Unknown'}
+Payment Status: ${orderData.paymentStatus || 'Unknown'}
+Total Amount: ${orderData.totalAmount || 'Unknown'} IQD
+
+NOTES:
+======
+${orderData.notes || 'No special notes'}
+
+Thank you for your business!
+Contact us for any questions about your order.
+`;
+
+  return generateSimplePDF(invoiceContent, title);
+}
+
 // Simple and reliable PDF generator
 export async function generateSimplePDF(content: string, title: string): Promise<Buffer> {
   // Clean content and prepare for PDF with proper encoding support
