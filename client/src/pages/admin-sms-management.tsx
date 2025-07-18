@@ -32,7 +32,7 @@ import {
   Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import SmsTemplateManagement from '@/components/sms-template-management';
+import SmsTemplatesSimple from '@/components/sms-templates-simple';
 
 interface SmsSettings {
   id?: number;
@@ -1244,7 +1244,7 @@ export default function AdminSmsManagement() {
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-4">
-          <SmsTemplateManagement />
+          <SmsTemplatesSimple />
         </TabsContent>
       </Tabs>
     </div>

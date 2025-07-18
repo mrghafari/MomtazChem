@@ -90,6 +90,11 @@ export default function SmsTemplateManagement() {
   const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.data || []);
   const templates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
 
+  // Filter templates based on selected category
+  const filteredTemplates = selectedCategory 
+    ? templates.filter((t: SmsTemplate) => t.categoryId === selectedCategory)
+    : templates;
+
   // Category form
   const categoryForm = useForm<z.infer<typeof templateCategorySchema>>({
     resolver: zodResolver(templateCategorySchema),
@@ -272,10 +277,7 @@ export default function SmsTemplateManagement() {
     return preview;
   };
 
-  // Filter templates by selected category
-  const filteredTemplates = selectedCategory 
-    ? templates.filter((t: SmsTemplate) => t.categoryId === selectedCategory)
-    : templates;
+
 
   if (categoriesLoading || templatesLoading) {
     return (

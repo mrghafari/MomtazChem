@@ -27619,6 +27619,139 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // SIMPLE SMS TEMPLATES API ENDPOINTS
+  // =============================================================================
+
+  // Get all simple SMS templates
+  app.get("/api/admin/simple-sms-templates", requireAuth, async (req, res) => {
+    try {
+      const { simpleSmsStorage } = await import('./simple-sms-storage');
+      const templates = await simpleSmsStorage.getAllTemplates();
+      
+      res.json({
+        success: true,
+        data: templates
+      });
+    } catch (error) {
+      console.error("Error fetching simple SMS templates:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch SMS templates"
+      });
+    }
+  });
+
+  // Get simple SMS template by ID
+  app.get("/api/admin/simple-sms-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const { simpleSmsStorage } = await import('./simple-sms-storage');
+      const template = await simpleSmsStorage.getTemplateById(parseInt(req.params.id));
+      
+      if (!template) {
+        return res.status(404).json({
+          success: false,
+          message: "Template not found"
+        });
+      }
+      
+      res.json({
+        success: true,
+        data: template
+      });
+    } catch (error) {
+      console.error("Error fetching simple SMS template:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch SMS template"
+      });
+    }
+  });
+
+  // Create new simple SMS template
+  app.post("/api/admin/simple-sms-templates", requireAuth, async (req, res) => {
+    try {
+      const { insertSimpleSmsTemplateSchema } = await import('../shared/schema');
+      const templateData = insertSimpleSmsTemplateSchema.parse(req.body);
+      const { simpleSmsStorage } = await import('./simple-sms-storage');
+      
+      const template = await simpleSmsStorage.createTemplate(templateData);
+      
+      res.status(201).json({
+        success: true,
+        data: template,
+        message: "SMS template created successfully"
+      });
+    } catch (error) {
+      console.error("Error creating simple SMS template:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create SMS template"
+      });
+    }
+  });
+
+  // Update simple SMS template
+  app.put("/api/admin/simple-sms-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const { insertSimpleSmsTemplateSchema } = await import('../shared/schema');
+      const updates = insertSimpleSmsTemplateSchema.partial().parse(req.body);
+      const { simpleSmsStorage } = await import('./simple-sms-storage');
+      
+      const template = await simpleSmsStorage.updateTemplate(parseInt(req.params.id), updates);
+      
+      res.json({
+        success: true,
+        data: template,
+        message: "SMS template updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating simple SMS template:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update SMS template"
+      });
+    }
+  });
+
+  // Delete simple SMS template
+  app.delete("/api/admin/simple-sms-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const { simpleSmsStorage } = await import('./simple-sms-storage');
+      await simpleSmsStorage.deleteTemplate(parseInt(req.params.id));
+      
+      res.json({
+        success: true,
+        message: "SMS template deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting simple SMS template:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete SMS template"
+      });
+    }
+  });
+
+  // Increment template usage count
+  app.post("/api/admin/simple-sms-templates/:id/increment-usage", requireAuth, async (req, res) => {
+    try {
+      const { simpleSmsStorage } = await import('./simple-sms-storage');
+      await simpleSmsStorage.incrementTemplateUsage(parseInt(req.params.id));
+      
+      res.json({
+        success: true,
+        message: "Template usage incremented"
+      });
+    } catch (error) {
+      console.error("Error incrementing template usage:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to increment template usage"
+      });
+    }
+  });
+
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     res.status(404).json({
@@ -27661,8 +27794,6 @@ momtazchem.com
       });
     }
   });
-
-
 
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {

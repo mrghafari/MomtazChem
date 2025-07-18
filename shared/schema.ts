@@ -966,3 +966,33 @@ export type ModulePermission = typeof modulePermissions.$inferSelect;
 
 export type InsertUserRoleAssignment = z.infer<typeof insertUserRoleAssignmentSchema>;
 export type UserRoleAssignment = typeof userRoleAssignments.$inferSelect;
+
+// =============================================================================
+// SIMPLE SMS TEMPLATES SCHEMA
+// =============================================================================
+
+// Simple SMS templates table without categories
+export const simpleSmsTemplates = pgTable("simple_sms_templates", {
+  id: serial("id").primaryKey(),
+  templateName: varchar("template_name", { length: 255 }).notNull(),
+  templateContent: text("template_content").notNull(),
+  variables: text("variables").array(),
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  usageCount: integer("usage_count").default(0),
+  lastUsed: timestamp("last_used"),
+  createdBy: varchar("created_by", { length: 100 }).default("admin"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSimpleSmsTemplateSchema = createInsertSchema(simpleSmsTemplates).omit({
+  id: true,
+  usageCount: true,
+  lastUsed: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSimpleSmsTemplate = z.infer<typeof insertSimpleSmsTemplateSchema>;
+export type SimpleSmsTemplate = typeof simpleSmsTemplates.$inferSelect;
