@@ -8226,6 +8226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { pool } = await import('./db');
       
       // Get all orders for this customer from customer_orders table
+      // Include both temporary orders (before financial approval) and regular orders (after conversion)
       const allOrdersResult = await pool.query(`
         SELECT 
           co.id,
@@ -8246,11 +8247,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           om.payment_grace_period_start,
           om.payment_grace_period_end,
           om.is_order_locked,
+          om.current_status,
+          om.financial_reviewed_at,
           EXTRACT(EPOCH FROM (om.payment_grace_period_end - NOW()))/3600 as hours_remaining,
           CASE 
             WHEN om.payment_grace_period_end > NOW() THEN 'active'
             ELSE 'expired'
-          END as grace_period_status
+          END as grace_period_status,
+          CASE 
+            WHEN om.payment_grace_period_start IS NOT NULL AND om.financial_reviewed_at IS NULL THEN 'temporary'
+            WHEN om.financial_reviewed_at IS NOT NULL THEN 'regular'
+            ELSE 'regular'
+          END as order_category
         FROM customer_orders co
         LEFT JOIN order_management om ON om.customer_order_id = co.id
         WHERE co.customer_id = $1
@@ -8294,7 +8302,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         items: row.items || [],
-        orderType: row.payment_grace_period_start ? 'grace_period' : 'regular',
+        orderType: row.order_category, // 'temporary' or 'regular'
+        orderCategory: row.order_category, // New field for order classification
+        currentStatus: row.current_status, // Current order status in workflow
+        financiallyApproved: row.financial_reviewed_at !== null,
         gracePeriodExpires: row.payment_grace_period_end,
         gracePeriodStatus: row.grace_period_status,
         hoursRemaining: Math.max(0, Math.floor(row.hours_remaining || 0)),
@@ -14263,7 +14274,24 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const { notes } = req.body;
       const adminId = 1; // Default financial admin ID
 
-      console.log(`✅ [FINANCE] Approving order ${orderId} - moving to warehouse`);
+      console.log(`✅ [FINANCE] Approving order ${orderId} - converting to regular order and moving to warehouse`);
+
+      const { pool } = await import('./db');
+      
+      // Get the order management record to check if it's a temporary order
+      const orderManagementResult = await pool.query(`
+        SELECT om.*, co.payment_method, co.status
+        FROM order_management om
+        JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE om.id = $1
+      `, [orderId]);
+
+      if (orderManagementResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
+      }
+
+      const orderData = orderManagementResult.rows[0];
+      const isTemporaryOrder = orderData.payment_grace_period_start !== null;
 
       // When financial approves, move to warehouse_pending for warehouse approval
       const { orderStatuses } = await import('../shared/order-management-schema');
@@ -14275,8 +14303,33 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         notes || 'Payment approved by financial department - moving to warehouse'
       );
 
-      console.log(`✅ [FINANCE] Order ${orderId} approved and moved to warehouse department`);
-      res.json({ success: true, order: updatedOrder, message: 'پرداخت تایید شد و به انبار ارسال گردید' });
+      // If this was a temporary order (grace period), convert it to regular order
+      if (isTemporaryOrder) {
+        console.log(`🔄 [FINANCE] Converting temporary order ${orderId} to regular order`);
+        
+        // Clear grace period fields and unlock the order
+        await pool.query(`
+          UPDATE order_management 
+          SET payment_grace_period_start = NULL,
+              payment_grace_period_end = NULL,
+              is_order_locked = false
+          WHERE id = $1
+        `, [orderId]);
+
+        // Update customer order status to 'confirmed' (regular order status)
+        await pool.query(`
+          UPDATE customer_orders 
+          SET status = 'confirmed',
+              payment_status = 'paid'
+          WHERE id = $1
+        `, [orderData.customer_order_id]);
+
+        console.log(`✅ [FINANCE] Order ${orderId} converted from temporary to regular order and moved to warehouse`);
+        res.json({ success: true, order: updatedOrder, message: 'سفارش موقت تایید شد و به سفارش معمولی تبدیل شد' });
+      } else {
+        console.log(`✅ [FINANCE] Regular order ${orderId} approved and moved to warehouse department`);
+        res.json({ success: true, order: updatedOrder, message: 'پرداخت تایید شد و به انبار ارسال گردید' });
+      }
     } catch (error) {
       console.error('Error approving financial order:', error);
       res.status(500).json({ success: false, message: 'خطا در تایید پرداخت' });
