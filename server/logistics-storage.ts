@@ -97,6 +97,7 @@ export interface ILogisticsStorage {
   getDeliveryCodeByOrderId(customerOrderId: number): Promise<DeliveryVerificationCode | null>;
   createDeliveryVerificationCode(data: InsertDeliveryVerificationCode): Promise<DeliveryVerificationCode>;
   generateVerificationCode(customerOrderId: number, customerPhone: string, customerName: string): Promise<DeliveryVerificationCode>;
+  generateSequentialDeliveryCode(orderManagementId: number, customerPhone: string): Promise<string>;
   verifyDeliveryCode(customerOrderId: number, code: string, verificationData: {
     verifiedBy: string;
     verificationLocation?: string;
@@ -577,6 +578,28 @@ export class LogisticsStorage implements ILogisticsStorage {
   }
 
   // Get next sequential delivery code (1111-9999)
+  async generateSequentialDeliveryCode(orderManagementId: number, customerPhone: string): Promise<string> {
+    // Get next sequential code
+    const sequentialCode = await this.getNextSequentialCode();
+    
+    // Store in delivery verification codes table for SMS tracking
+    await db
+      .insert(deliveryVerificationCodes)
+      .values({
+        orderManagementId,
+        customerOrderId: 0, // Will be updated if needed
+        verificationCode: sequentialCode,
+        customerPhone,
+        customerName: '', // Will be populated if needed
+        smsMessage: `کد تحویل سفارش شما: ${sequentialCode}`,
+        smsStatus: 'pending',
+        isActive: true,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+      });
+    
+    return sequentialCode;
+  }
+
   private async getNextSequentialCode(): Promise<string> {
     // Get current code from counter table
     const counterResult = await db

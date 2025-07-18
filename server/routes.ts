@@ -14719,6 +14719,59 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Resend delivery code (logistics department)
+  app.post('/api/order-management/:orderManagementId/resend-delivery-code', requireAuth, async (req, res) => {
+    try {
+      const orderManagementId = parseInt(req.params.orderManagementId);
+      
+      // Get order and customer information
+      const orderWithCustomer = await db
+        .select({
+          customerPhone: crmCustomers.phone,
+          customerOrderId: orderManagement.customerOrderId,
+          deliveryCode: orderManagement.deliveryCode,
+          customerFirstName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName
+        })
+        .from(orderManagement)
+        .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(orderManagement.id, orderManagementId))
+        .limit(1);
+
+      if (!orderWithCustomer[0]) {
+        return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
+      }
+
+      const { customerPhone, customerOrderId, deliveryCode } = orderWithCustomer[0];
+
+      if (!customerPhone) {
+        return res.status(400).json({ success: false, message: 'شماره تلفن مشتری یافت نشد' });
+      }
+
+      if (!deliveryCode) {
+        return res.status(400).json({ success: false, message: 'کد تحویل یافت نشد' });
+      }
+
+      // Resend SMS with existing delivery code
+      const smsSent = await orderManagementStorage.sendDeliveryCodeSms(customerPhone, deliveryCode, customerOrderId);
+      
+      if (smsSent) {
+        console.log(`✅ [RESEND SMS] Delivery code ${deliveryCode} resent to ${customerPhone} for order ${orderManagementId}`);
+        res.json({ 
+          success: true, 
+          message: 'کد تحویل مجدداً ارسال شد',
+          deliveryCode: deliveryCode
+        });
+      } else {
+        res.status(500).json({ success: false, message: 'خطا در ارسال مجدد کد تحویل' });
+      }
+    } catch (error) {
+      console.error('Error resending delivery code:', error);
+      res.status(500).json({ success: false, message: 'خطا در ارسال مجدد کد تحویل' });
+    }
+  });
+
   // Assign user to department
   app.post('/api/order-management/assign-department', requireAuth, async (req, res) => {
     try {

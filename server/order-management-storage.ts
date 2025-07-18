@@ -234,9 +234,25 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       
       // Generate delivery code when order is dispatched and send SMS
       if (newStatus === orderStatuses.LOGISTICS_DISPATCHED) {
-        const deliveryCode = await this.generateDeliveryCode(id);
-        // TODO: Send SMS to customer with delivery code
-        console.log(`SMS delivery code ${deliveryCode.code} should be sent for order ${id}`);
+        // Get customer phone number
+        const orderWithCustomer = await db
+          .select({
+            customerPhone: crmCustomers.phone,
+            customerOrderId: orderManagement.customerOrderId
+          })
+          .from(orderManagement)
+          .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+          .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+          .where(eq(orderManagement.id, currentOrder.id))
+          .limit(1);
+
+        if (orderWithCustomer[0]?.customerPhone) {
+          const deliveryCode = await this.generateDeliveryCode(currentOrder.id, orderWithCustomer[0].customerPhone);
+          await this.sendDeliveryCodeSms(orderWithCustomer[0].customerPhone, deliveryCode, orderWithCustomer[0].customerOrderId);
+          console.log(`✅ [AUTO SMS] Delivery code ${deliveryCode} sent to ${orderWithCustomer[0].customerPhone} for order ${currentOrder.id}`);
+        } else {
+          console.log(`❌ [AUTO SMS] No customer phone found for order ${currentOrder.id}`);
+        }
       }
     }
     
@@ -815,24 +831,71 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       ));
   }
   
-  async generateDeliveryCode(orderManagementId: number): Promise<DeliveryCode> {
-    // Generate 6-digit random code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Set expiration to 7 days from now
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-    
-    const [deliveryCode] = await db
-      .insert(deliveryCodes)
-      .values({
-        orderManagementId,
-        code,
-        expiresAt,
-      })
-      .returning();
-    
-    return deliveryCode;
+  async generateDeliveryCode(orderManagementId: number, customerPhone: string): Promise<string> {
+    try {
+      // Import logistics storage for sequential code generation
+      const { LogisticsStorage } = await import('./logistics-storage');
+      const logisticsStorage = new LogisticsStorage();
+      
+      // Generate sequential 4-digit code
+      const sequentialCode = await logisticsStorage.generateSequentialDeliveryCode(orderManagementId, customerPhone);
+      
+      console.log(`✅ [DELIVERY CODE] Generated sequential code ${sequentialCode} for order ${orderManagementId}`);
+      
+      // Update order with delivery code
+      await db
+        .update(orderManagement)
+        .set({ deliveryCode: sequentialCode })
+        .where(eq(orderManagement.id, orderManagementId));
+      
+      return sequentialCode;
+    } catch (error) {
+      console.error('❌ [DELIVERY CODE] Error generating delivery code:', error);
+      throw error;
+    }
+  }
+
+  async sendDeliveryCodeSms(customerPhone: string, deliveryCode: string, customerOrderId: number): Promise<boolean> {
+    try {
+      const { SmsService } = await import('./sms-service');
+      const smsService = new SmsService();
+      
+      // Try to get SMS template from database for delivery verification
+      let message = `کد تحویل سفارش شما: ${deliveryCode}\nشماره سفارش: ${customerOrderId}\nشرکت ممتاز شیمی`;
+      
+      try {
+        const { pool } = await import('./db');
+        const templateResult = await pool.query(`
+          SELECT message_template FROM sms_templates 
+          WHERE template_type = 'delivery_verification' 
+          AND is_active = true 
+          LIMIT 1
+        `);
+        
+        if (templateResult.rows.length > 0) {
+          const template = templateResult.rows[0].message_template;
+          // Replace template variables
+          message = template
+            .replace(/\{delivery_code\}/g, deliveryCode)
+            .replace(/\{order_id\}/g, customerOrderId.toString())
+            .replace(/\{customer_phone\}/g, customerPhone);
+          
+          console.log(`📝 [SMS TEMPLATE] Using database template for delivery code`);
+        } else {
+          console.log(`📝 [SMS TEMPLATE] No template found, using default message`);
+        }
+      } catch (templateError) {
+        console.log(`⚠️ [SMS TEMPLATE] Error fetching template, using default:`, templateError.message);
+      }
+      
+      const result = await smsService.sendSms(customerPhone, message);
+      console.log(`📱 [SMS] Delivery code ${deliveryCode} sent to ${customerPhone}:`, result);
+      
+      return result.success;
+    } catch (error) {
+      console.error('❌ [SMS] Error sending delivery code:', error);
+      return false;
+    }
   }
   
   async verifyDeliveryCode(code: string, verifiedBy: string): Promise<boolean> {
