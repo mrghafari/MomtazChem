@@ -32,6 +32,16 @@ export default function BatchManagement() {
   const [selectedBarcode, setSelectedBarcode] = useState<string | null>(null);
   const { user } = useAuth();
 
+  // Check for barcode in URL query parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const barcodeParam = urlParams.get('barcode');
+    if (barcodeParam) {
+      setSearchBarcode(barcodeParam);
+      setSelectedBarcode(barcodeParam);
+    }
+  }, []);
+
   // Fetch batches for selected barcode
   const { data: batchData, isLoading } = useQuery<BatchResponse>({
     queryKey: ['batches', selectedBarcode],

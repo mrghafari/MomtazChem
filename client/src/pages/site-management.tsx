@@ -206,6 +206,14 @@ export default function SiteManagement() {
       moduleId: "barcode"
     },
     {
+      id: "batch-management",
+      label: "Batch Management",
+      icon: Package,
+      onClick: () => trackButtonClick("batch-management", () => setLocation("/admin/batch-management")),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "warehouse_management"
+    },
+    {
       id: "email-settings",
       label: "Email Settings",
       icon: Mail,

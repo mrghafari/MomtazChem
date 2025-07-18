@@ -1169,6 +1169,20 @@ export default function ProductsPage() {
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
+                        {/* Batch Management Button - Only show if product has barcode */}
+                        {product.barcode && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setLocation(`/admin/batch-management?barcode=${product.barcode}`);
+                            }}
+                            className="h-8 w-8 p-0 hover:bg-purple-50 hover:text-purple-600"
+                            title="مدیریت بچ‌ها"
+                          >
+                            <Package className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
