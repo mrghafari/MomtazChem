@@ -2288,6 +2288,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if stock quantity is being updated for warehouse sync
       const oldProduct = await storage.getProductById(id);
+      
+      // Handle inventory addition functionality
+      if (productData.inventoryAddition && productData.inventoryAddition > 0) {
+        console.log(`📦 [INVENTORY-ADDITION] Adding ${productData.inventoryAddition} units to product ${id}`);
+        
+        // Calculate new stock quantity by adding to existing stock
+        const currentStock = oldProduct ? oldProduct.stockQuantity || 0 : 0;
+        const newStock = currentStock + productData.inventoryAddition;
+        
+        console.log(`📦 [INVENTORY-ADDITION] Stock calculation: ${currentStock} + ${productData.inventoryAddition} = ${newStock}`);
+        
+        // Update product data with new stock quantity
+        productData.stockQuantity = newStock;
+        
+        // If new batch number is provided, create a new batch entry
+        if (productData.newBatchNumber && productData.newBatchNumber.trim()) {
+          console.log(`📦 [BATCH-CREATION] Creating new batch: ${productData.newBatchNumber}`);
+          
+          // Add batch to database using shopStorage batch management
+          try {
+            const batchData = {
+              barcode: oldProduct?.barcode || '',
+              batchNumber: productData.newBatchNumber.trim(),
+              stockQuantity: productData.inventoryAddition,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            
+            await shopStorage.addBatch(batchData);
+            console.log(`✅ [BATCH-CREATION] Successfully created batch: ${productData.newBatchNumber}`);
+          } catch (batchError) {
+            console.error(`❌ [BATCH-CREATION] Failed to create batch:`, batchError);
+            // Don't fail the main operation if batch creation fails
+          }
+        }
+        
+        // Clean up the addition fields from productData so they don't get saved
+        delete productData.inventoryAddition;
+        delete productData.newBatchNumber;
+        
+        console.log(`✅ [INVENTORY-ADDITION] Final stock quantity: ${newStock}`);
+      }
+      
       const isStockUpdate = productData.stockQuantity !== undefined && 
                            oldProduct && 
                            oldProduct.stockQuantity !== productData.stockQuantity;

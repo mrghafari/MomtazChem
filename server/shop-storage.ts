@@ -993,6 +993,93 @@ export class ShopStorage implements IShopStorage {
     }
   }
 
+  // Add new batch to the system
+  async addBatch(batchData: { barcode: string, batchNumber: string, stockQuantity: number, createdAt: string, updatedAt: string }): Promise<any> {
+    try {
+      const { pool } = await import('./db');
+      
+      console.log(`📦 [ADD-BATCH] Adding new batch: ${batchData.batchNumber} for barcode: ${batchData.barcode}`);
+      
+      // First, get the original product data to clone it for the new batch
+      const originalResult = await pool.query(`
+        SELECT * FROM showcase_products 
+        WHERE barcode = $1 
+        ORDER BY created_at DESC
+        LIMIT 1
+      `, [batchData.barcode]);
+      
+      if (originalResult.rows.length === 0) {
+        throw new Error(`No product found with barcode ${batchData.barcode}`);
+      }
+      
+      const originalProduct = originalResult.rows[0];
+      
+      // Create new batch entry by cloning the original product with new batch number and stock
+      const insertResult = await pool.query(`
+        INSERT INTO showcase_products (
+          name, category, description, short_description, price_range, image_url, 
+          specifications, features, applications, barcode, sku, stock_quantity, 
+          min_stock_level, max_stock_level, unit_price, currency, is_active, 
+          is_variant, parent_product_id, variant_type, variant_value, 
+          msds_url, msds_file_name, show_msds_to_customers, pdf_catalog_url, 
+          catalog_file_name, show_catalog_to_customers, sync_with_shop, 
+          show_when_out_of_stock, is_non_chemical, net_weight, gross_weight, 
+          weight_unit, weight, batch_number, supplier, created_at, updated_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 
+          $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, 
+          $33, $34, $35, $36, $37, $38
+        ) RETURNING *
+      `, [
+        originalProduct.name,
+        originalProduct.category,
+        originalProduct.description,
+        originalProduct.short_description,
+        originalProduct.price_range,
+        originalProduct.image_url,
+        originalProduct.specifications,
+        originalProduct.features,
+        originalProduct.applications,
+        batchData.barcode, // same barcode
+        originalProduct.sku + '-' + batchData.batchNumber, // unique SKU for new batch
+        batchData.stockQuantity, // new stock quantity
+        originalProduct.min_stock_level,
+        originalProduct.max_stock_level,
+        originalProduct.unit_price,
+        originalProduct.currency,
+        originalProduct.is_active,
+        originalProduct.is_variant,
+        originalProduct.parent_product_id,
+        originalProduct.variant_type,
+        originalProduct.variant_value,
+        originalProduct.msds_url,
+        originalProduct.msds_file_name,
+        originalProduct.show_msds_to_customers,
+        originalProduct.pdf_catalog_url,
+        originalProduct.catalog_file_name,
+        originalProduct.show_catalog_to_customers,
+        originalProduct.sync_with_shop,
+        originalProduct.show_when_out_of_stock,
+        originalProduct.is_non_chemical,
+        originalProduct.net_weight,
+        originalProduct.gross_weight,
+        originalProduct.weight_unit,
+        originalProduct.weight,
+        batchData.batchNumber, // new batch number
+        originalProduct.supplier,
+        batchData.createdAt,
+        batchData.updatedAt
+      ]);
+      
+      console.log(`✅ [ADD-BATCH] Successfully added batch ${batchData.batchNumber} with ${batchData.stockQuantity} units`);
+      
+      return insertResult.rows[0];
+    } catch (error) {
+      console.error('Error adding batch:', error);
+      throw error;
+    }
+  }
+
   // Analytics
   async getOrderStatistics(): Promise<{
     totalOrders: number;

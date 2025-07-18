@@ -38,6 +38,9 @@ const formSchema = insertShowcaseProductSchema.extend({
   weight: z.string().optional(),
   // Batch tracking
   batchNumber: z.string().optional(),
+  // New inventory addition fields
+  inventoryAddition: z.number().optional(),
+  newBatchNumber: z.string().optional(),
   // Text fields for array handling
   features: z.string().optional(),
   applications: z.string().optional(),
@@ -442,6 +445,9 @@ export default function ProductsPage() {
       grossWeight: 0,
       // Batch tracking
       batchNumber: "",
+      // New inventory addition fields
+      inventoryAddition: 0,
+      newBatchNumber: "",
     },
   });
 
@@ -508,6 +514,9 @@ export default function ProductsPage() {
       netWeight: data.netWeight ? data.netWeight.toString() : null,
       grossWeight: data.grossWeight ? data.grossWeight.toString() : null,
       batchNumber: data.batchNumber?.trim() || null,
+      // New inventory addition fields
+      inventoryAddition: Number(data.inventoryAddition) || 0,
+      newBatchNumber: data.newBatchNumber?.trim() || null,
       // Convert string fields to arrays for backend compatibility
       features: typeof data.features === 'string' && data.features.trim() 
         ? data.features.split('\n').map(f => f.trim()).filter(f => f.length > 0)
@@ -1820,13 +1829,14 @@ export default function ProductsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className={`text-sm font-medium flex items-center gap-2 ${validationErrors.stockQuantity ? 'text-red-600' : ''}`}>
-{t.stockQuantity}
+                            موجودی فعلی
+                            <Lock className="h-3 w-3 text-gray-400" />
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>تعداد موجودی فعلی محصول در انبار</p>
+                                <p>موجودی فعلی محصول در انبار (غیر قابل تغییر مستقیم)</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -1834,16 +1844,76 @@ export default function ProductsPage() {
                             <Input 
                               type="number" 
                               placeholder="0" 
-                              className={`h-9 ${validationErrors.stockQuantity ? "border-red-500 focus:border-red-500" : ""}`}
+                              className={`h-9 bg-gray-50 text-gray-600 ${validationErrors.stockQuantity ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
+                              readOnly
                             />
                           </FormControl>
                           <FormMessage />
                           {validationErrors.stockQuantity && (
                             <p className="text-sm text-red-600 mt-1">{validationErrors.stockQuantity}</p>
                           )}
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="inventoryAddition"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            افزودن موجودی
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>مقدار موجودی که می‌خواهید به انبار اضافه کنید</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              className="h-9"
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="newBatchNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+                            شماره دسته جدید
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>شماره دسته جدید برای موجودی اضافه شده</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="BATCH-2025-NEW" 
+                              className="h-9"
+                              {...field}
+                              value={field.value || ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
