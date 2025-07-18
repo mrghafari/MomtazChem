@@ -286,7 +286,7 @@ const LogisticsManagement = () => {
 
       loadExistingCodes();
     }
-  }, [logisticsOrders, pendingOrders]);
+  }, [logisticsOrders]);
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
     queryKey: ['/api/logistics/companies'],
