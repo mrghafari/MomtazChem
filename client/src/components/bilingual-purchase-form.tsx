@@ -82,6 +82,8 @@ const translations = {
     remainingAmount: "Remaining amount",
     insufficientWallet: "Insufficient wallet balance",
     discountApplied: "Discount Applied",
+    bankTransferGrace: "Bank Transfer with 3-Day Grace Period",
+    bankTransferGraceDesc: "Order locked - Receipt upload deadline: 3 days",
     
     // Shipping options
     deliveryMethod: "Delivery Method",
@@ -693,6 +695,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         }
         onOrderComplete();
       }
+      // Handle bank transfer with grace period
+      else if (paymentMethod === 'bank_transfer_grace') {
+        toast({
+          title: "✅ سفارش با مهلت 3 روزه ثبت شد",
+          description: "سفارش شما قفل شد. تا 3 روز آینده فیش واریزی خود را آپلود کنید"
+        });
+        onOrderComplete();
+      }
       else {
         toast({
           title: t.orderSubmitted,
@@ -750,6 +760,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     } else if (paymentMethod === 'bank_receipt') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
+    } else if (paymentMethod === 'bank_transfer_grace') {
+      orderData.walletAmountUsed = 0;
+      orderData.remainingAmount = totalAmount;
+      orderData.paymentGracePeriod = true; // Flag for 3-day grace period
     }
 
     console.log('🚀 [ORDER SUBMIT] Submitting order with complete data:', {
@@ -1048,6 +1062,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
                     <Upload className="w-4 h-4 text-purple-600" />
                     ارسال فیش واریزی بانکی
+                  </Label>
+                </div>
+                
+                {/* پنجم: واریز بانکی با مهلت 3 روزه */}
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value="bank_transfer_grace" id="bank_transfer_grace" />
+                  <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
+                    <CreditCard className="w-4 h-4 text-amber-600" />
+                    <div className="flex flex-col">
+                      <span className="font-semibold">واریز بانکی با مهلت 3 روزه</span>
+                      <span className="text-xs text-muted-foreground">سفارش قفل شده - مهلت آپلود فیش: 3 روز</span>
+                    </div>
                   </Label>
                 </div>
                 

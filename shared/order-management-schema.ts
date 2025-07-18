@@ -17,6 +17,7 @@ import { z } from "zod";
 export const orderStatuses = {
   // Initial statuses
   PENDING_PAYMENT: 'pending_payment',
+  PAYMENT_GRACE_PERIOD: 'payment_grace_period', // 3-day grace period for bank transfer
   PAYMENT_UPLOADED: 'payment_uploaded',
   
   // Financial department statuses
@@ -56,6 +57,11 @@ export const orderManagement = pgTable("order_management", {
   financialReviewedAt: timestamp("financial_reviewed_at"),
   financialNotes: text("financial_notes"),
   paymentReceiptUrl: text("payment_receipt_url"), // Uploaded payment receipt
+  
+  // Grace period for bank transfer payments
+  paymentGracePeriodStart: timestamp("payment_grace_period_start"),
+  paymentGracePeriodEnd: timestamp("payment_grace_period_end"),
+  isOrderLocked: boolean("is_order_locked").default(false), // Lock order details during grace period
   
   // Warehouse department
   warehouseAssigneeId: integer("warehouse_assignee_id"),

@@ -7540,6 +7540,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalPaymentMethod = "bank_receipt";
         console.log("✅ Bank receipt method selected - customer will upload receipt");
       }
+      
+      // Handle bank transfer with grace period method
+      else if (orderData.paymentMethod === 'bank_transfer_grace') {
+        finalPaymentStatus = "grace_period";
+        finalPaymentMethod = "bank_transfer_grace";
+        console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
+      }
 
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
@@ -7669,15 +7676,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create order_management record for financial department workflow
       try {
-        await orderManagementStorage.createOrderManagement({
+        let orderMgmtData = {
           customerOrderId: order.id,
           customerId: finalCustomerId,
-          currentStatus: 'pending',
+          currentStatus: finalPaymentStatus === 'grace_period' ? 'payment_grace_period' : 'pending',
           currentDepartment: 'customer',
           totalAmount: totalAmount.toString(),
           currency: orderData.currency || "IQD",
           notes: orderData.notes || "",
-        });
+        };
+
+        // Add grace period fields for bank_transfer_grace payment method
+        if (orderData.paymentMethod === 'bank_transfer_grace') {
+          const gracePeriodStart = new Date();
+          const gracePeriodEnd = new Date();
+          gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 3); // 3 days grace period
+
+          orderMgmtData = {
+            ...orderMgmtData,
+            paymentGracePeriodStart: gracePeriodStart,
+            paymentGracePeriodEnd: gracePeriodEnd,
+            isOrderLocked: true, // Lock order details during grace period
+          };
+
+          console.log(`🕒 Grace period activated for order ${orderNumber} - expires: ${gracePeriodEnd.toISOString()}`);
+        }
+
+        await orderManagementStorage.createOrderManagement(orderMgmtData);
         console.log(`✅ Order management record created for order ${orderNumber}`);
       } catch (orderMgmtError) {
         console.error("❌ Error creating order management record:", orderMgmtError);
