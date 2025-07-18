@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,16 +12,35 @@ import { Upload, FileText, CheckCircle, AlertCircle, ArrowLeft, CreditCard, Buil
 import { apiRequest } from "@/lib/queryClient";
 
 export default function BankReceiptUpload() {
-  const { orderId } = useParams();
+  const { orderId: paramOrderId } = useParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [notes, setNotes] = useState("");
+  const [orderId, setOrderId] = useState<string | null>(null);
+
+  // Get orderId from URL parameters or query string
+  useEffect(() => {
+    if (paramOrderId) {
+      setOrderId(paramOrderId);
+    } else {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryOrderId = urlParams.get('orderId');
+      if (queryOrderId) {
+        setOrderId(queryOrderId);
+      }
+    }
+  }, [paramOrderId]);
 
   // Fetch order details
   const { data: order, isLoading: isLoadingOrder } = useQuery({
-    queryKey: [`/api/customers/orders/${orderId}`],
+    queryKey: [`/api/customers/orders`, orderId],
+    queryFn: async () => {
+      const response = await apiRequest('/api/customers/orders');
+      const orders = response.orders || [];
+      return orders.find((o: any) => o.orderNumber === orderId || o.id.toString() === orderId);
+    },
     enabled: !!orderId,
   });
 
