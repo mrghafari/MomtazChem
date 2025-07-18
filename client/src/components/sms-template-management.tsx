@@ -207,12 +207,23 @@ export default function SmsTemplateManagement() {
     }
   };
 
+  // Get next template number for category
+  const getNextTemplateNumber = (categoryId: number): number => {
+    const categoryTemplates = templates.filter((t: SmsTemplate) => t.categoryId === categoryId);
+    const maxNumber = categoryTemplates.length > 0 
+      ? Math.max(...categoryTemplates.map(t => t.templateNumber))
+      : 0;
+    return maxNumber + 1;
+  };
+
   // Handle template form submission
   const onTemplateSubmit = (data: z.infer<typeof templateSchema>) => {
     if (editingTemplate) {
       updateTemplateMutation.mutate({ id: editingTemplate.id, data });
     } else {
-      createTemplateMutation.mutate(data);
+      // Automatically assign next template number for new templates
+      const templateNumber = getNextTemplateNumber(data.categoryId);
+      createTemplateMutation.mutate({ ...data, templateNumber });
     }
   };
 
@@ -411,6 +422,16 @@ export default function SmsTemplateManagement() {
                           </SelectContent>
                         </Select>
                         <FormMessage />
+                        {!editingTemplate && field.value && (
+                          <div className="flex items-center gap-2 mt-2 p-2 bg-blue-50 rounded-lg">
+                            <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                              {getNextTemplateNumber(field.value)}
+                            </div>
+                            <span className="text-sm text-blue-700">
+                              شماره قالب جدید: {getNextTemplateNumber(field.value)}
+                            </span>
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -498,9 +519,14 @@ export default function SmsTemplateManagement() {
                 <Card key={category.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">#{category.categoryNumber}</Badge>
-                        <CardTitle className="text-lg">{category.categoryName}</CardTitle>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shrink-0">
+                          {category.categoryNumber}
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{category.categoryName}</CardTitle>
+                          <p className="text-sm text-green-600 font-medium">دسته‌بندی {category.categoryNumber}</p>
+                        </div>
                       </div>
                       <div className="flex gap-1">
                         <Button 
@@ -573,11 +599,14 @@ export default function SmsTemplateManagement() {
               <Card key={template.id} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <Badge variant={template.isDefault ? "default" : "secondary"}>
-                        #{template.templateNumber}
-                      </Badge>
-                      <CardTitle className="text-lg">{template.templateName}</CardTitle>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl shrink-0">
+                        {template.templateNumber}
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{template.templateName}</CardTitle>
+                        <p className="text-sm text-blue-600 font-medium">قالب شماره {template.templateNumber}</p>
+                      </div>
                       {template.isDefault && (
                         <Badge variant="default" className="text-xs">پیش‌فرض</Badge>
                       )}
