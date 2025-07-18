@@ -83,7 +83,7 @@ const CustomerRegister = () => {
         title: "Registration Successful",
         description: "Your account has been created. You can now log in.",
       });
-      setLocation("/customer-login");
+      setLocation("/customer/profile");
       setIsSubmitting(false);
     },
     onError: (error: any) => {
