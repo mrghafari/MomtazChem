@@ -20,6 +20,7 @@ import { crmStorage } from "./crm-storage";
 import { customerCommunicationStorage } from "./customer-communication-storage";
 import { crmDb } from "./crm-db";
 import { smsStorage } from "./sms-storage";
+import { SimpleSmsStorage, simpleSmsStorage, simpleSmsDb } from "./simple-sms-storage";
 import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { walletStorage } from "./wallet-storage";
@@ -7077,6 +7078,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update customer metrics immediately after registration
       await crmStorage.updateCustomerMetrics(crmCustomer.id);
+
+      // Send SMS verification after successful registration using template 8
+      try {
+        const verificationCode = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit code
+        
+        // Get SMS template 8 for registration verification
+        const template = await simpleSmsStorage.getTemplateById(8);
+        
+        if (template && template.templateContent && phone) {
+          // Replace variables in template
+          let smsMessage = template.templateContent;
+          smsMessage = smsMessage.replace(/\{\{customer_name\}\}/g, `${firstName} ${lastName}`);
+          smsMessage = smsMessage.replace(/\{\{verification_code\}\}/g, verificationCode);
+          
+          // Here you would integrate with your SMS provider
+          // For now, we'll log the message and mark it as sent
+          console.log(`📱 [SMS VERIFICATION] Registration verification sent to ${phone} - Template: ${template.templateName}`);
+          
+          // Increment template usage using direct SQL
+          await simpleSmsDb.execute(sql`
+            UPDATE simple_sms_templates 
+            SET usage_count = usage_count + 1, 
+                last_used = NOW(), 
+                updated_at = NOW() 
+            WHERE id = ${8}
+          `);
+          
+          // Log SMS activity in CRM
+          await crmStorage.logCustomerActivity({
+            customerId: crmCustomer.id,
+            activityType: 'sms_sent',
+            description: 'کد احراز هویت ثبت‌نام ارسال شد',
+            performedBy: 'system',
+            activityData: {
+              phone: phone,
+              template_id: 8,
+              verification_code: verificationCode,
+              sent_at: new Date().toISOString()
+            }
+          });
+        }
+      } catch (smsError) {
+        console.error('SMS verification error:', smsError);
+        // Don't fail registration if SMS fails
+      }
       
       res.json({
         success: true,

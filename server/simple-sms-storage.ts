@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";
 const { Pool } = pkg;
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { simpleSmsTemplates, type InsertSimpleSmsTemplate, type SimpleSmsTemplate } from "../shared/schema";
 
 export const simpleSmsPool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -79,7 +79,7 @@ export class SimpleSmsStorage implements ISimpleSmsStorage {
     await simpleSmsDb
       .update(simpleSmsTemplates)
       .set({ 
-        usageCount: simpleSmsTemplates.usageCount + 1,
+        usageCount: sql`${simpleSmsTemplates.usageCount} + 1`,
         lastUsed: new Date(),
         updatedAt: new Date()
       })
