@@ -8553,8 +8553,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update password
       await customerStorage.updateCustomerPassword(customer.id, newPassword);
       
-      // Mark token as used
-      await pool.query('UPDATE password_resets SET used = true WHERE token = $1', [token]);
+      // Mark token as used AND delete all tokens for this email to prevent reuse
+      await pool.query('DELETE FROM password_resets WHERE email = $1', [email]);
+      
+      console.log(`✅ Password reset completed for customer: ${email}`);
 
       res.json({
         success: true,
