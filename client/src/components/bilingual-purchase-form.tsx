@@ -429,6 +429,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const t = translations[language] || translations['en']; // fallback to English
   const isRTL = direction === 'rtl';
 
+  // State for additional recipient fields
+  const [showSecondAddress, setShowSecondAddress] = useState(false);
+  const [showRecipientMobile, setShowRecipientMobile] = useState(false);
+  const [secondAddress, setSecondAddress] = useState('');
+  const [recipientMobile, setRecipientMobile] = useState('');
+
 
 
   // Calculate discounted price based on quantity
@@ -726,6 +732,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       paymentMethod,
       walletAmountUsed: 0,
       remainingAmount: totalAmount,
+      // Add new recipient fields
+      secondAddress: showSecondAddress ? secondAddress : null,
+      recipientMobile: showRecipientMobile ? recipientMobile : null,
     };
 
     // Handle wallet payment calculations
@@ -764,11 +773,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className={`w-full max-w-6xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Order Form */}
-          <div className="order-2 lg:order-1">
-            <Card>
+      <Card className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />
@@ -1235,6 +1240,70 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   )}
                 />
 
+                {/* Second Address Option */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Second Delivery Address</label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowSecondAddress(!showSecondAddress)}
+                      className="text-blue-600 border-blue-200"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      {showSecondAddress ? 'Remove' : 'Add'}
+                    </Button>
+                  </div>
+                  {showSecondAddress && (
+                    <div className="pl-4 border-l-2 border-blue-200">
+                      <FormItem>
+                        <FormControl>
+                          <Textarea 
+                            value={secondAddress}
+                            onChange={(e) => setSecondAddress(e.target.value)}
+                            rows={2}
+                            placeholder="Enter alternative delivery address"
+                            className="text-left"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </div>
+                  )}
+                </div>
+
+                {/* Recipient Mobile Number */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Recipient Mobile Number</label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowRecipientMobile(!showRecipientMobile)}
+                      className="text-purple-600 border-purple-200"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      {showRecipientMobile ? 'Remove' : 'Add'}
+                    </Button>
+                  </div>
+                  {showRecipientMobile && (
+                    <div className="pl-4 border-l-2 border-purple-200">
+                      <FormItem>
+                        <FormControl>
+                          <Input 
+                            value={recipientMobile}
+                            onChange={(e) => setRecipientMobile(e.target.value)}
+                            type="tel"
+                            placeholder="Enter recipient mobile number for delivery verification"
+                            className="text-left"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </div>
+                  )}
+                </div>
+
                 {/* City and Postal Code */}
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -1346,150 +1415,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           </div>
         </CardContent>
       </Card>
-          </div>
-
-          {/* Right Column - Enhanced Features */}
-          <div className="order-1 lg:order-2 space-y-4">
-            {/* Enhanced Features Notice */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3 text-center">
-              <div className="text-sm font-medium text-blue-800 mb-1">🎉 Enhanced Checkout Features</div>
-              <div className="text-xs text-blue-600">
-                Purchase Order Management & Advanced Cart Controls
-              </div>
-            </div>
-
-            {/* Purchase Order Card */}
-            <Card>
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors pb-3"
-              >
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5 text-blue-600" />
-                    <span className="text-blue-600">Purchase Order</span>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">NEW</span>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Order Summary */}
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span>Items:</span>
-                    <span>{Object.values(cart).reduce((sum, qty) => sum + qty, 0)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Subtotal:</span>
-                    <span>{formatCurrency(subtotalAmount)}</span>
-                  </div>
-                  {vatAmount > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span>VAT:</span>
-                      <span>{formatCurrency(vatAmount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm">
-                    <span>Shipping:</span>
-                    <span>{shippingCost > 0 ? formatCurrency(shippingCost) : 'Free'}</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex justify-between font-medium">
-                      <span>Total:</span>
-                      <span>{formatCurrency(totalAmount)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Second Address Option */}
-                <div className="border-t pt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Alternative Delivery Address</label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="text-blue-600 border-blue-200"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Add a different delivery address for this order
-                  </div>
-                </div>
-
-                {/* Recipient Mobile Number */}
-                <div className="border-t pt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Recipient Mobile Number</label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="text-purple-600 border-purple-200"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Different mobile number for delivery verification
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Cart Management Card */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5 text-purple-600" />
-                    <span className="text-purple-600">Cart Management</span>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">NEW</span>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Quick Cart Actions */}
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Minus className="w-4 h-4 mr-1" />
-                    Reduce All
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add All
-                  </Button>
-                </div>
-
-                {/* Cart Summary Stats */}
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Total Items:</span>
-                    <span>{Object.values(cart).reduce((sum, qty) => sum + qty, 0)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Product Types:</span>
-                    <span>{Object.keys(cart).length}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Cart Value:</span>
-                    <span>{formatCurrency(subtotalAmount)}</span>
-                  </div>
-                </div>
-
-                {/* Clear Cart */}
-                <Button variant="destructive" size="sm" className="w-full">
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Clear Cart
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
