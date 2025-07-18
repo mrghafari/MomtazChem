@@ -14,6 +14,7 @@ export const transportationCompanies = pgTable("transportation_companies", {
   phone: varchar("phone", { length: 20 }),
   email: text("email"),
   address: text("address"),
+  website: text("website"),
   
   // Service capabilities
   serviceTypes: text("service_types").array(), // ['motorcycle', 'car', 'truck', 'van']
