@@ -998,6 +998,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
 
           {/* Order Summary */}
           <div className="lg:col-span-1 space-y-4">
+            {/* Enhanced Checkout Features Notice */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3 text-center">
+              <div className="text-sm font-medium text-blue-800 mb-1">🎉 Enhanced Checkout Features</div>
+              <div className="text-xs text-blue-600">
+                New: Purchase Order card with second address option and recipient mobile number fields below
+              </div>
+            </div>
+            
             {/* Purchase Order Card */}
             <Card className="sticky top-8">
               <CardHeader 
@@ -1006,8 +1014,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
               >
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5" />
-                    Purchase Order
+                    <ShoppingCart className="w-5 h-5 text-blue-600" />
+                    <span className="text-blue-600">Purchase Order</span>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">NEW</span>
                   </div>
                   <span className="text-sm text-gray-500">
                     {showPurchaseOrder ? '−' : '+'}
@@ -1176,8 +1185,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
               >
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5" />
-                    Cart Management
+                    <ShoppingCart className="w-5 h-5 text-purple-600" />
+                    <span className="text-purple-600">Cart Management</span>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">NEW</span>
                   </div>
                   <span className="text-sm text-gray-500">
                     {showCartManagement ? '−' : '+'}
