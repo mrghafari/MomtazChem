@@ -220,32 +220,15 @@ const LogisticsManagement = () => {
     enabled: true
   });
 
-  // Queries - Use the correct endpoint for logistics department orders
-  const { data: pendingOrdersResponse, isLoading: loadingOrders } = useQuery({
-    queryKey: ['/api/order-management/by-department/logistics'],
-    enabled: activeTab === 'orders'
-  });
-
-  // Get orders that have reached logistics stage (warehouse approved) - same endpoint
+  // Get orders that have reached logistics stage (warehouse approved)
   const { data: logisticsOrdersResponse, isLoading: loadingLogisticsOrders } = useQuery({
-    queryKey: ['/api/order-management/by-department/logistics'],
+    queryKey: ['/api/order-management/logistics'],
     enabled: activeTab === 'orders'
   });
   
-  const pendingOrders = pendingOrdersResponse?.orders || [];
   const logisticsOrders = logisticsOrdersResponse?.orders || [];
   
   // Map data to add customer object structure for compatibility
-  const mappedPendingOrders = pendingOrders.map((order: any) => ({
-    ...order,
-    customer: {
-      firstName: order.customerFirstName,
-      lastName: order.customerLastName,
-      email: order.customerEmail,
-      phone: order.customerPhone
-    }
-  }));
-  
   const mappedLogisticsOrders = logisticsOrders.map((order: any) => ({
     ...order,
     customer: {
@@ -258,7 +241,7 @@ const LogisticsManagement = () => {
 
   // Load existing codes when orders are fetched
   useEffect(() => {
-    const allOrders = [...(logisticsOrders || []), ...(pendingOrders || [])];
+    const allOrders = logisticsOrders || [];
     
     if (allOrders && allOrders.length > 0) {
       const loadExistingCodes = async () => {
@@ -532,9 +515,6 @@ const LogisticsManagement = () => {
         <div className="flex gap-2">
           <Badge variant="outline" className="bg-blue-50 text-blue-700">
             {mappedLogisticsOrders.length} سفارش در لجستیک
-          </Badge>
-          <Badge variant="outline" className="bg-orange-50 text-orange-700">
-            {mappedPendingOrders.length} سفارش در انتظار
           </Badge>
         </div>
       </div>
