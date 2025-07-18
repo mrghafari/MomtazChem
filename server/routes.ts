@@ -7079,9 +7079,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update customer metrics immediately after registration
       await crmStorage.updateCustomerMetrics(crmCustomer.id);
 
-      // Send SMS verification after successful registration using template 8
+      // Send SMS verification after successful registration using template 4
       try {
         const verificationCode = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit code
+        
+        // Store verification code in database
+        await db.execute(sql`
+          INSERT INTO customer_verification_codes (customer_id, verification_code, phone_number, expires_at)
+          VALUES (${crmCustomer.id}, ${verificationCode}, ${phone}, ${new Date(Date.now() + 10 * 60 * 1000)})
+        `);
         
         // Get SMS template 4 for registration verification
         const template = await simpleSmsStorage.getTemplateById(4);
@@ -7140,6 +7146,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Registration failed" 
+      });
+    }
+  });
+
+  // SMS Verification Endpoint
+  app.post('/api/customer/verify-sms', async (req, res) => {
+    try {
+      const { phone, verificationCode } = req.body;
+      
+      if (!phone || !verificationCode) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شماره تلفن و کد احراز هویت اجباری است" 
+        });
+      }
+
+      // Find valid verification code
+      const result = await db.execute(sql`
+        SELECT * FROM customer_verification_codes 
+        WHERE phone_number = ${phone} 
+        AND verification_code = ${verificationCode}
+        AND is_used = false 
+        AND expires_at > NOW()
+        ORDER BY created_at DESC
+        LIMIT 1
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "کد احراز هویت نامعتبر یا منقضی شده است" 
+        });
+      }
+
+      const verificationRecord = result.rows[0];
+      
+      // Mark verification code as used
+      await db.execute(sql`
+        UPDATE customer_verification_codes 
+        SET is_used = true 
+        WHERE id = ${verificationRecord.id}
+      `);
+
+      // Activate customer profile
+      await db.execute(sql`
+        UPDATE crm_customers 
+        SET customer_status = 'active', 
+            is_verified = true,
+            verified_at = NOW()
+        WHERE id = ${verificationRecord.customer_id}
+      `);
+
+      // Get customer data
+      const customer = await crmStorage.getCrmCustomerById(verificationRecord.customer_id);
+      
+      if (customer) {
+        // Log verification activity
+        await crmStorage.logCustomerActivity({
+          customerId: customer.id,
+          activityType: 'sms_verification_completed',
+          description: 'Customer verified phone number via SMS',
+          performedBy: 'system',
+          activityData: {
+            phone: phone,
+            verificationCode: verificationCode,
+            verifiedAt: new Date().toISOString()
+          }
+        });
+
+        // Set customer session
+        req.session.isAuthenticated = true;
+        req.session.customerId = customer.id;
+        req.session.customerType = 'crm';
+        
+        res.json({
+          success: true,
+          message: "احراز هویت با موفقیت انجام شد",
+          customer: {
+            id: customer.id,
+            firstName: customer.firstName,
+            lastName: customer.lastName,
+            email: customer.email,
+            phone: customer.phone,
+            isVerified: true
+          }
+        });
+      } else {
+        res.status(404).json({ 
+          success: false, 
+          message: "مشتری یافت نشد" 
+        });
+      }
+    } catch (error) {
+      console.error("SMS verification error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در احراز هویت" 
+      });
+    }
+  });
+
+  // Resend SMS Verification Code
+  app.post('/api/customer/resend-verification', async (req, res) => {
+    try {
+      const { phone } = req.body;
+      
+      if (!phone) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شماره تلفن اجباری است" 
+        });
+      }
+
+      // Find customer by phone
+      const customer = await crmStorage.getCrmCustomerByPhone(phone);
+      if (!customer) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "مشتری با این شماره یافت نشد" 
+        });
+      }
+
+      // Generate new verification code
+      const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      // Store new verification code
+      await db.execute(sql`
+        INSERT INTO customer_verification_codes (customer_id, verification_code, phone_number, expires_at)
+        VALUES (${customer.id}, ${verificationCode}, ${phone}, ${new Date(Date.now() + 10 * 60 * 1000)})
+      `);
+
+      // Get SMS template 4 for resend
+      const template = await simpleSmsStorage.getTemplateById(4);
+      
+      if (template && template.templateContent) {
+        let smsMessage = template.templateContent;
+        smsMessage = smsMessage.replace(/\{\{customer_name\}\}/g, `${customer.firstName} ${customer.lastName}`);
+        smsMessage = smsMessage.replace(/\{\{verification_code\}\}/g, verificationCode);
+        
+        console.log(`📱 [SMS RESEND] Verification code resent to ${phone}: ${smsMessage}`);
+        
+        // Increment template usage
+        await simpleSmsDb.execute(sql`
+          UPDATE simple_sms_templates 
+          SET usage_count = usage_count + 1, 
+              last_used = NOW(), 
+              updated_at = NOW() 
+          WHERE id = ${4}
+        `);
+        
+        // Log resend activity
+        await crmStorage.logCustomerActivity({
+          customerId: customer.id,
+          activityType: 'sms_resend',
+          description: 'Verification code resent to customer',
+          performedBy: 'system',
+          activityData: {
+            phone: phone,
+            templateUsed: template.templateName,
+            verificationCode: verificationCode
+          }
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "کد احراز هویت مجدداً ارسال شد"
+      });
+    } catch (error) {
+      console.error("SMS resend error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ارسال مجدد کد" 
       });
     }
   });

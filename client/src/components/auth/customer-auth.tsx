@@ -66,6 +66,10 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showVerificationForm, setShowVerificationForm] = useState(false);
+  const [registrationData, setRegistrationData] = useState<any>(null);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationError, setVerificationError] = useState("");
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -224,20 +228,14 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
       const result = await response.json();
 
       if (result.success) {
+        // Store registration data and show verification form
+        setRegistrationData(result.customer);
+        setShowVerificationForm(true);
+        
         toast({
           title: "Registration Successful",
-          description: "Your account has been created and you're now logged in",
+          description: "A verification code has been sent to your mobile number",
         });
-        // Use onRegisterSuccess if available, otherwise fallback to onLoginSuccess
-        if (onRegisterSuccess) {
-          onRegisterSuccess(result.customer);
-        } else {
-          onLoginSuccess(result.customer);
-        }
-        onOpenChange(false);
-        registerForm.reset();
-        setEmailExists(false);
-        setDuplicateEmail("");
       } else {
         // Check for duplicate email error
         if (result.message?.includes("already exists") || result.message?.includes("duplicate") || result.message?.includes("موجود")) {
@@ -279,13 +277,112 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
     setDuplicateEmail("");
   };
 
+  const onVerifyCode = async () => {
+    if (!verificationCode || verificationCode.length !== 4) {
+      setVerificationError("Please enter a 4-digit verification code");
+      return;
+    }
+
+    setIsLoading(true);
+    setVerificationError("");
+
+    try {
+      const response = await fetch('/api/customer/verify-sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          phone: registrationData.phone,
+          verificationCode: verificationCode
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Verification Successful",
+          description: "Your account has been verified and you're now logged in",
+        });
+        
+        // Complete registration process
+        if (onRegisterSuccess) {
+          onRegisterSuccess(result.customer);
+        } else {
+          onLoginSuccess(result.customer);
+        }
+        
+        onOpenChange(false);
+        registerForm.reset();
+        setShowVerificationForm(false);
+        setVerificationCode("");
+        setRegistrationData(null);
+        
+        // Navigate to customer profile
+        window.location.href = '/customer/profile';
+      } else {
+        setVerificationError(result.message || "Invalid verification code");
+      }
+    } catch (error) {
+      setVerificationError("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onResendCode = async () => {
+    if (!registrationData?.phone) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/customer/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          phone: registrationData.phone
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Code Resent",
+          description: "A new verification code has been sent to your mobile number",
+        });
+        setVerificationCode("");
+        setVerificationError("");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Resend Error",
+          description: result.message || "Failed to resend code",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Connection problem. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Customer Login</DialogTitle>
+          <DialogTitle>
+            {showVerificationForm ? "Verify Your Mobile Number" : "Customer Login"}
+          </DialogTitle>
           <DialogDescription>
-            Sign in to your account or create a new one
+            {showVerificationForm 
+              ? "Enter the 4-digit verification code sent to your mobile number"
+              : "Sign in to your account or create a new one"
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -306,7 +403,72 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
           </Alert>
         )}
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')} className="w-full">
+        {showVerificationForm && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">SMS Verification</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                We've sent a 4-digit code to {registrationData?.phone}
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Enter Verification Code
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Enter 4-digit code"
+                  value={verificationCode}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setVerificationCode(value);
+                    if (verificationError) setVerificationError("");
+                  }}
+                  className="text-center text-lg tracking-widest"
+                  maxLength={4}
+                />
+                {verificationError && (
+                  <p className="text-sm text-red-600 mt-1">{verificationError}</p>
+                )}
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  onClick={onVerifyCode}
+                  disabled={isLoading || verificationCode.length !== 4}
+                  className="flex-1"
+                >
+                  {isLoading ? "Verifying..." : "Verify Code"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={onResendCode}
+                  disabled={isLoading}
+                >
+                  Resend
+                </Button>
+              </div>
+              
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowVerificationForm(false);
+                  setVerificationCode("");
+                  setVerificationError("");
+                  setRegistrationData(null);
+                }}
+                className="w-full"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!showVerificationForm && (
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="register">Register</TabsTrigger>
@@ -627,6 +789,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
             </Form>
           </TabsContent>
         </Tabs>
+        )}
       </DialogContent>
     </Dialog>
   );
