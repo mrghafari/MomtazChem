@@ -6,10 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   MessageSquare, 
@@ -18,18 +16,10 @@ import {
   BarChart3, 
   Shield, 
   Clock, 
-  Send, 
-  Phone, 
-  ShoppingCart, 
   Truck, 
-  Package, 
-  AlertTriangle, 
-  UserCheck,
-  Bell,
   CheckCircle2,
   XCircle,
-  RefreshCw,
-  Eye
+  RefreshCw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SmsTemplatesSimple from '@/components/sms-templates-simple';
@@ -66,24 +56,6 @@ interface SmsStats {
   successfulVerifications: number;
   customersWithSmsEnabled: number;
   systemEnabled: boolean;
-}
-
-interface SmsUsageCategory {
-  id: string;
-  name: string;
-  description: string;
-  icon: any;
-  enabled: boolean;
-  messageTemplate: string;
-  triggerConditions: string[];
-  recipients: string[];
-  frequency: string;
-  priority: 'high' | 'medium' | 'low';
-  statistics?: {
-    totalSent: number;
-    lastSent?: string;
-    successRate: number;
-  };
 }
 
 interface DeliveryLog {
@@ -127,131 +99,7 @@ export default function AdminSmsManagement() {
       return {};
     }
   });
-  
-  // SMS Usage Categories - All identified SMS use cases in the system
-  const [smsUsageCategories, setSmsUsageCategories] = useState<SmsUsageCategory[]>([
-    {
-      id: 'customer_authentication',
-      name: 'احراز هویت مشتری',
-      description: 'کد تایید ورود و ثبت نام مشتریان',
-      icon: UserCheck,
-      enabled: true,
-      messageTemplate: 'کد تایید ورود شما: {{code}}\nمعتبر تا {{expiry}} دقیقه\nممتازکم',
-      triggerConditions: ['Customer login', 'Customer registration', 'Password reset'],
-      recipients: ['Registered customers'],
-      frequency: 'On-demand',
-      priority: 'high',
-      statistics: { totalSent: 45, lastSent: '2025-01-16', successRate: 98.2 }
-    },
-    {
-      id: 'delivery_verification',
-      name: 'کد تحویل سفارش',
-      description: 'ارسال کد تحویل برای سفارشات در حال ارسال',
-      icon: Truck,
-      enabled: true,
-      messageTemplate: '{{customerName}} عزیز، سفارش شما در راه است.\nکد تحویل: {{verificationCode}}\nاین کد را هنگام تحویل به پیک اعلام کنید.\nممتازکم',
-      triggerConditions: ['Order shipped', 'Delivery personnel assigned'],
-      recipients: ['Customers with shipped orders'],
-      frequency: 'Per shipment',
-      priority: 'high',
-      statistics: { totalSent: 23, lastSent: '2025-01-15', successRate: 95.7 }
-    },
-    {
-      id: 'logistics_delivery_codes',
-      name: 'کدهای تحویل لجستیک',
-      description: 'ارسال کدهای ۴ رقمی تولید شده توسط بخش لجستیک برای تحویل محموله',
-      icon: Shield,
-      enabled: true,
-      messageTemplate: '{{customerName}} عزیز، سفارش شما در راه است.\nکد تحویل: {{verificationCode}}\nاین کد را هنگام تحویل به پیک اعلام کنید.\nممتازکم',
-      triggerConditions: ['Logistics code generated', 'Delivery code resent'],
-      recipients: ['Customers with pending deliveries'],
-      frequency: 'On-demand by logistics department',
-      priority: 'high',
-      statistics: { totalSent: 0, lastSent: undefined, successRate: 100 }
-    },
-    {
-      id: 'order_notifications',
-      name: 'اطلاع‌رسانی سفارش',
-      description: 'وضعیت سفارش، تایید پرداخت، آماده‌سازی',
-      icon: ShoppingCart,
-      enabled: true,
-      messageTemplate: 'سفارش {{orderNumber}} شما {{status}} شد.\nزمان تقریبی تحویل: {{estimatedDelivery}}\nممتازکم',
-      triggerConditions: ['Order confirmed', 'Payment received', 'Order prepared', 'Order shipped'],
-      recipients: ['Order customers'],
-      frequency: 'Per order status change',
-      priority: 'medium',
-      statistics: { totalSent: 78, lastSent: '2025-01-16', successRate: 97.4 }
-    },
-    {
-      id: 'inventory_alerts',
-      name: 'هشدار موجودی',
-      description: 'اطلاع‌رسانی کمبود موجودی به مدیران',
-      icon: Package,
-      enabled: false,
-      messageTemplate: 'هشدار موجودی:\n{{productName}} ({{sku}})\nموجودی فعلی: {{currentStock}}\nحد مینیمم: {{minThreshold}}\nممتازکم',
-      triggerConditions: ['Stock below minimum', 'Out of stock'],
-      recipients: ['Inventory managers', 'Warehouse staff'],
-      frequency: 'Real-time alerts',
-      priority: 'high',
-      statistics: { totalSent: 12, lastSent: '2025-01-14', successRate: 100 }
-    },
-    {
-      id: 'admin_notifications',
-      name: 'اطلاع‌رسانی مدیریت',
-      description: 'ارسال پیام‌های مدیریتی و اطلاعیه‌ها',
-      icon: Bell,
-      enabled: true,
-      messageTemplate: 'اطلاعیه مهم:\n{{message}}\nتاریخ: {{date}}\nممتازکم - مدیریت',
-      triggerConditions: ['Manual admin send', 'System alerts', 'Important announcements'],
-      recipients: ['All staff', 'Selected user groups'],
-      frequency: 'As needed',
-      priority: 'medium',
-      statistics: { totalSent: 34, lastSent: '2025-01-13', successRate: 96.8 }
-    },
-    {
-      id: 'wallet_notifications',
-      name: 'اطلاع‌رسانی کیف پول',
-      description: 'تراکنش‌های کیف پول، شارژ و برداشت',
-      icon: Phone,
-      enabled: true,
-      messageTemplate: 'تراکنش کیف پول:\nمبلغ: {{amount}} دینار\nنوع: {{transactionType}}\nموجودی: {{balance}} دینار\nممتازکم',
-      triggerConditions: ['Wallet recharge', 'Payment from wallet', 'Refund to wallet'],
-      recipients: ['Wallet users'],
-      frequency: 'Per transaction',
-      priority: 'medium',
-      statistics: { totalSent: 67, lastSent: '2025-01-16', successRate: 98.5 }
-    },
-    {
-      id: 'security_alerts',
-      name: 'هشدارهای امنیتی',
-      description: 'ورود مشکوک، تغییر رمز عبور، تلاش‌های ناموفق',
-      icon: Shield,
-      enabled: true,
-      messageTemplate: 'هشدار امنیتی:\n{{alertType}}\nزمان: {{timestamp}}\nIP: {{ipAddress}}\nممتازکم - امنیت',
-      triggerConditions: ['Suspicious login', 'Password changed', 'Failed login attempts'],
-      recipients: ['Account owners', 'Security team'],
-      frequency: 'Real-time',
-      priority: 'high',
-      statistics: { totalSent: 8, lastSent: '2025-01-12', successRate: 100 }
-    },
-    {
-      id: 'marketing_campaigns',
-      name: 'کمپین‌های بازاریابی',
-      description: 'تخفیف‌ها، محصولات جدید، اطلاعیه‌های تجاری',
-      icon: Send,
-      enabled: false,
-      messageTemplate: '{{campaignTitle}}\n{{description}}\nکد تخفیف: {{discountCode}}\nاعتبار تا: {{validUntil}}\nممتازکم',
-      triggerConditions: ['New product launch', 'Special offers', 'Seasonal campaigns'],
-      recipients: ['Subscribed customers', 'Target segments'],
-      frequency: 'Campaign-based',
-      priority: 'low',
-      statistics: { totalSent: 156, lastSent: '2025-01-10', successRate: 94.2 }
-    }
-  ]);
-  
   const [deliveryLogs, setDeliveryLogs] = useState<DeliveryLog[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<SmsUsageCategory | null>(null);
-  const [editingTemplate, setEditingTemplate] = useState(false);
 
   useEffect(() => {
     loadSmsSettings();
@@ -310,231 +158,10 @@ export default function AdminSmsManagement() {
       const response = await fetch('/api/admin/sms/customers');
       const result = await response.json();
       if (result.success && result.data) {
-        // Apply server data but maintain local state overrides
-        setCustomersWithSms(result.data.map((serverCustomer: any) => {
-          // If we have a local state override for this customer, use it
-          if (localSmsStates[serverCustomer.id] !== undefined) {
-            return {
-              ...serverCustomer,
-              smsEnabled: localSmsStates[serverCustomer.id]
-            };
-          }
-          return serverCustomer;
-        }));
+        setCustomersWithSms(result.data);
       }
     } catch (error) {
       console.error('Error loading customers with SMS:', error);
-    }
-  };
-
-  const handleToggleSystem = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin/sms/toggle', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ enabled: !settings.isEnabled }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        setSettings(prev => ({ ...prev, isEnabled: !prev.isEnabled }));
-        toast({
-          title: "Success",
-          description: result.message,
-        });
-        loadSmsStats();
-      } else {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error", 
-        description: "خطا در تغییر وضعیت سیستم SMS",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin/sms/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        setSettings(result.data);
-        toast({
-          title: "Success",
-          description: result.message,
-        });
-        loadSmsStats();
-      } else {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "خطا در ذخیره تنظیمات SMS",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleToggleCustomerSms = async (customerId: number, enable: boolean) => {
-    // Immediately update local state and prevent any further data loading
-    const newStates = {
-      ...localSmsStates,
-      [customerId]: enable
-    };
-    setLocalSmsStates(newStates);
-    
-    // Also update the customers list directly to prevent conflicts
-    setCustomersWithSms(prev => 
-      prev.map(customer => 
-        customer.id === customerId 
-          ? { ...customer, smsEnabled: enable }
-          : customer
-      )
-    );
-
-    try {
-      const response = await fetch(`/api/admin/sms/customers/${customerId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ smsEnabled: enable })
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        toast({
-          title: enable ? "SMS فعال شد" : "SMS غیرفعال شد",
-          description: result.message,
-        });
-        
-        // Only reload stats to update counters
-        await loadSmsStats();
-      } else {
-        // Revert both local state and customers list if API call failed
-        setLocalSmsStates(prev => ({
-          ...prev,
-          [customerId]: !enable
-        }));
-        
-        setCustomersWithSms(prev => 
-          prev.map(customer => 
-            customer.id === customerId 
-              ? { ...customer, smsEnabled: !enable }
-              : customer
-          )
-        );
-        
-        toast({
-          title: "خطا",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      // Revert both local state and customers list if API call failed
-      setLocalSmsStates(prev => ({
-        ...prev,
-        [customerId]: !enable
-      }));
-      
-      setCustomersWithSms(prev => 
-        prev.map(customer => 
-          customer.id === customerId 
-            ? { ...customer, smsEnabled: !enable }
-            : customer
-        )
-      );
-      
-      toast({
-        title: "خطا",
-        description: "خطا در تغییر تنظیمات SMS مشتری",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleBulkSmsToggle = async (action: 'enable' | 'disable') => {
-    setLoading(true);
-    const enableSms = action === 'enable';
-    
-    // Store previous local states for potential rollback
-    const previousLocalStates = { ...localSmsStates };
-    
-    // Immediately update all customers' SMS status in local state
-    const newLocalStates: Record<number, boolean> = {};
-    customersWithSms.forEach(customer => {
-      newLocalStates[customer.id] = enableSms;
-    });
-    setLocalSmsStates(prev => ({ ...prev, ...newLocalStates }));
-
-    try {
-      const response = await fetch('/api/admin/sms/customers/bulk', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ action })
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        toast({
-          title: action === 'enable' ? "SMS برای همه فعال شد" : "SMS برای همه غیرفعال شد",
-          description: result.message,
-        });
-        
-        // Only reload stats to update counters
-        await loadSmsStats();
-      } else {
-        // Revert to previous local states if API call failed
-        setLocalSmsStates(previousLocalStates);
-        
-        toast({
-          title: "خطا",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      // Revert to previous local states if API call failed
-      setLocalSmsStates(previousLocalStates);
-      
-      toast({
-        title: "خطا",
-        description: "خطا در تغییر انبوه تنظیمات SMS",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -550,60 +177,128 @@ export default function AdminSmsManagement() {
     }
   };
 
-  const toggleCategoryEnabled = async (categoryId: string, enabled: boolean) => {
+  const handleToggleSystem = async (enabled: boolean) => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/admin/sms/category/toggle', {
+      const response = await fetch('/api/admin/sms/toggle-system', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoryId, enabled })
+        body: JSON.stringify({ enabled })
       });
 
       if (response.ok) {
-        setSmsUsageCategories(prev => 
-          prev.map(cat => 
-            cat.id === categoryId ? { ...cat, enabled } : cat
-          )
-        );
+        setSettings(prev => ({ ...prev, isEnabled: enabled }));
+        setStats(prev => ({ ...prev, systemEnabled: enabled }));
         toast({
           title: enabled ? 'فعال شد' : 'غیرفعال شد',
-          description: `دسته ${categoryId} ${enabled ? 'فعال' : 'غیرفعال'} شد`
+          description: `سیستم SMS ${enabled ? 'فعال' : 'غیرفعال'} شد`
         });
       }
     } catch (error) {
       toast({
         title: 'خطا',
-        description: 'مشکل در تغییر وضعیت دسته',
+        description: 'مشکل در تغییر وضعیت سیستم',
         variant: 'destructive'
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const updateCategoryTemplate = async (categoryId: string, newTemplate: string) => {
+  const handleSaveSettings = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/admin/sms/category/template', {
+      const response = await fetch('/api/admin/sms/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoryId, template: newTemplate })
+        body: JSON.stringify(settings)
       });
 
       if (response.ok) {
-        setSmsUsageCategories(prev => 
-          prev.map(cat => 
-            cat.id === categoryId ? { ...cat, messageTemplate: newTemplate } : cat
-          )
-        );
         toast({
           title: 'ذخیره شد',
-          description: 'قالب پیام به‌روزرسانی شد'
+          description: 'تنظیمات SMS ذخیره شد'
         });
-        setEditingTemplate(false);
       }
     } catch (error) {
       toast({
         title: 'خطا',
-        description: 'مشکل در ذخیره قالب',
+        description: 'مشکل در ذخیره تنظیمات',
         variant: 'destructive'
       });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleCustomerSms = async (customerId: number, enabled: boolean) => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/sms/customer/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, enabled })
+      });
+
+      if (response.ok) {
+        setCustomersWithSms(prev => 
+          prev.map(customer => 
+            customer.id === customerId ? { ...customer, smsEnabled: enabled } : customer
+          )
+        );
+        
+        setLocalSmsStates(prev => ({ ...prev, [customerId]: enabled }));
+        
+        toast({
+          title: enabled ? 'فعال شد' : 'غیرفعال شد',
+          description: `SMS برای مشتری ${enabled ? 'فعال' : 'غیرفعال'} شد`
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'خطا',
+        description: 'مشکل در تغییر وضعیت SMS مشتری',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkSmsToggle = async (action: 'enable' | 'disable') => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/sms/bulk-toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+
+      if (response.ok) {
+        const enabled = action === 'enable';
+        setCustomersWithSms(prev => 
+          prev.map(customer => ({ ...customer, smsEnabled: enabled }))
+        );
+        
+        const newLocalStates: Record<number, boolean> = {};
+        customersWithSms.forEach(customer => {
+          newLocalStates[customer.id] = enabled;
+        });
+        setLocalSmsStates(newLocalStates);
+        
+        toast({
+          title: enabled ? 'همه فعال شدند' : 'همه غیرفعال شدند',
+          description: `SMS برای همه مشتریان ${enabled ? 'فعال' : 'غیرفعال'} شد`
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'خطا',
+        description: 'مشکل در تغییر وضعیت SMS',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -613,7 +308,7 @@ export default function AdminSmsManagement() {
         <div>
           <h1 className="text-3xl font-bold">SMS Authentication Management</h1>
           <p className="text-muted-foreground">
-            Manage SMS two-factor authentication settings and customer access
+            مدیریت سیستم SMS و قالب‌های ساده
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -629,7 +324,7 @@ export default function AdminSmsManagement() {
             <BarChart3 className="h-4 w-4 mr-2" />
             آمار کلی
           </TabsTrigger>
-          <TabsTrigger value="categories">
+          <TabsTrigger value="templates">
             <MessageSquare className="h-4 w-4 mr-2" />
             SMS Categories
           </TabsTrigger>
@@ -644,10 +339,6 @@ export default function AdminSmsManagement() {
           <TabsTrigger value="delivery">
             <Truck className="h-4 w-4 mr-2" />
             لاگ تحویل
-          </TabsTrigger>
-          <TabsTrigger value="templates">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            SMS Categories
           </TabsTrigger>
         </TabsList>
 
@@ -708,32 +399,20 @@ export default function AdminSmsManagement() {
             </Card>
           </div>
 
-          {/* SMS Usage Summary */}
+          {/* SMS Usage Summary - Simplified */}
           <Card>
             <CardHeader>
-              <CardTitle>استفاده از SMS در سیستم</CardTitle>
+              <CardTitle>سیستم SMS ساده</CardTitle>
               <CardDescription>
-                خلاصه‌ای از کاربردهای مختلف SMS در سیستم ممتازکم
+                مدیریت قالب‌های SMS بدون دسته‌بندی
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {smsUsageCategories.slice(0, 4).map((category) => {
-                  const IconComponent = category.icon;
-                  return (
-                    <div key={category.id} className="flex items-center space-x-3 space-x-reverse">
-                      <div className={`p-2 rounded-lg ${category.enabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-                        <IconComponent className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{category.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {category.statistics?.totalSent || 0} پیام ارسال شده
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="text-center py-4">
+                <MessageSquare className="h-12 w-12 text-blue-600 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  قالب‌های SMS از طریق tab "SMS Categories" قابل مدیریت است
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -769,13 +448,13 @@ export default function AdminSmsManagement() {
         <TabsContent value="settings" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>SMS Provider Configuration</CardTitle>
+              <CardTitle>تنظیمات پیشرفته SMS</CardTitle>
               <CardDescription>
-                Configure your SMS service provider settings
+                پیکربندی تنظیمات احراز هویت SMS
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="provider">SMS Provider</Label>
                   <Select value={settings.provider} onValueChange={(value) => setSettings(prev => ({ ...prev, provider: value }))}>
@@ -784,48 +463,12 @@ export default function AdminSmsManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="kavenegar">Kavenegar</SelectItem>
-                      <SelectItem value="twilio">Twilio</SelectItem>
-                      <SelectItem value="ippanel">IP Panel</SelectItem>
+                      <SelectItem value="melipayamak">Melipayamak</SelectItem>
+                      <SelectItem value="farapayamak">Farapayamak</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="senderNumber">Sender Number</Label>
-                  <Input
-                    id="senderNumber"
-                    value={settings.senderNumber || ''}
-                    onChange={(e) => setSettings(prev => ({ ...prev, senderNumber: e.target.value }))}
-                    placeholder="e.g., 10008566"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="apiKey">API Key</Label>
-                  <Input
-                    id="apiKey"
-                    type="password"
-                    value={settings.apiKey || ''}
-                    onChange={(e) => setSettings(prev => ({ ...prev, apiKey: e.target.value }))}
-                    placeholder="Your SMS provider API key"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="apiSecret">API Secret</Label>
-                  <Input
-                    id="apiSecret"
-                    type="password"
-                    value={settings.apiSecret || ''}
-                    onChange={(e) => setSettings(prev => ({ ...prev, apiSecret: e.target.value }))}
-                    placeholder="Your SMS provider API secret"
-                  />
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div className="space-y-2">
                   <Label htmlFor="codeLength">Code Length</Label>
                   <Input
@@ -844,7 +487,7 @@ export default function AdminSmsManagement() {
                     id="codeExpiry"
                     type="number"
                     min="60"
-                    max="600"
+                    max="3600"
                     value={settings.codeExpiry}
                     onChange={(e) => setSettings(prev => ({ ...prev, codeExpiry: parseInt(e.target.value) }))}
                   />
@@ -968,23 +611,27 @@ export default function AdminSmsManagement() {
                             شرکت: {customer.company}
                           </div>
                         )}
-                        <div className="text-xs text-muted-foreground">
-                          {customer.totalOrders} سفارش • آخرین سفارش: {customer.lastOrderDate || 'هیچ'}
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline">{customer.customerStatus}</Badge>
+                          <span className="text-muted-foreground">
+                            {customer.totalOrders} سفارش
+                          </span>
+                          {customer.lastOrderDate && (
+                            <span className="text-muted-foreground">
+                              • آخرین سفارش: {new Date(customer.lastOrderDate).toLocaleDateString('fa-IR')}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2 gap-2">
-                        <Badge variant={
-                          (localSmsStates[customer.id] !== undefined ? localSmsStates[customer.id] : customer.smsEnabled) 
-                            ? "default" : "secondary"
-                        }>
-                          {(localSmsStates[customer.id] !== undefined ? localSmsStates[customer.id] : customer.smsEnabled) 
-                            ? "فعال" : "غیرفعال"}
-                        </Badge>
+                      <div className="flex items-center space-x-2">
                         <Switch
-                          checked={localSmsStates[customer.id] !== undefined ? localSmsStates[customer.id] : customer.smsEnabled}
-                          onCheckedChange={(checked) => handleToggleCustomerSms(customer.id, checked)}
+                          checked={localSmsStates[customer.id] ?? customer.smsEnabled}
+                          onCheckedChange={(enabled) => handleToggleCustomerSms(customer.id, enabled)}
                           disabled={loading}
                         />
+                        <Badge variant={customer.smsEnabled ? "default" : "secondary"}>
+                          {customer.smsEnabled ? "فعال" : "غیرفعال"}
+                        </Badge>
                       </div>
                     </div>
                   ))}
@@ -994,164 +641,10 @@ export default function AdminSmsManagement() {
           </Card>
         </TabsContent>
 
-        {/* SMS Categories Tab */}
-        <TabsContent value="categories" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>دسته‌بندی‌های SMS</CardTitle>
-              <CardDescription>
-                مدیریت کاربردهای مختلف SMS در سیستم
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                {smsUsageCategories.map((category) => {
-                  const IconComponent = category.icon;
-                  const priorityColor = category.priority === 'high' ? 'text-red-600' : 
-                                      category.priority === 'medium' ? 'text-yellow-600' : 'text-green-600';
-                  const priorityBg = category.priority === 'high' ? 'bg-red-50' : 
-                                   category.priority === 'medium' ? 'bg-yellow-50' : 'bg-green-50';
-                  
-                  return (
-                    <Card key={category.id} className={`transition-all duration-200 ${category.enabled ? 'border-green-200 bg-green-50/30' : 'border-gray-200'}`}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3 space-x-reverse flex-1">
-                            <div className={`p-2 rounded-lg ${category.enabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-                              <IconComponent className="h-5 w-5" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 space-x-reverse mb-2">
-                                <h3 className="font-semibold text-lg">{category.name}</h3>
-                                <Badge variant="outline" className={`${priorityBg} ${priorityColor} border-current`}>
-                                  {category.priority === 'high' ? 'اولویت بالا' : 
-                                   category.priority === 'medium' ? 'اولویت متوسط' : 'اولویت پایین'}
-                                </Badge>
-                                <Badge variant={category.enabled ? "default" : "secondary"}>
-                                  {category.enabled ? 'فعال' : 'غیرفعال'}
-                                </Badge>
-                              </div>
-                              <p className="text-gray-600 mb-3">{category.description}</p>
-                              
-                              {/* Statistics */}
-                              {category.statistics && (
-                                <div className="grid grid-cols-3 gap-4 mb-4">
-                                  <div className="text-center p-2 bg-white rounded border">
-                                    <div className="text-xl font-bold text-blue-600">{category.statistics.totalSent}</div>
-                                    <div className="text-xs text-gray-500">کل ارسال</div>
-                                  </div>
-                                  <div className="text-center p-2 bg-white rounded border">
-                                    <div className="text-xl font-bold text-green-600">{category.statistics.successRate}%</div>
-                                    <div className="text-xs text-gray-500">نرخ موفقیت</div>
-                                  </div>
-                                  <div className="text-center p-2 bg-white rounded border">
-                                    <div className="text-xs font-medium text-gray-600">{category.statistics.lastSent}</div>
-                                    <div className="text-xs text-gray-500">آخرین ارسال</div>
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {/* Message Template */}
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium">قالب پیام:</Label>
-                                {selectedCategory?.id === category.id && editingTemplate ? (
-                                  <div className="space-y-2">
-                                    <Textarea
-                                      value={selectedCategory.messageTemplate}
-                                      onChange={(e) => setSelectedCategory(prev => 
-                                        prev ? { ...prev, messageTemplate: e.target.value } : null
-                                      )}
-                                      className="min-h-[100px] font-mono text-sm"
-                                    />
-                                    <div className="flex space-x-2 space-x-reverse">
-                                      <Button
-                                        size="sm"
-                                        onClick={() => updateCategoryTemplate(category.id, selectedCategory.messageTemplate)}
-                                      >
-                                        ذخیره
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => {
-                                          setEditingTemplate(false);
-                                          setSelectedCategory(null);
-                                        }}
-                                      >
-                                        لغو
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="relative group">
-                                    <div className="bg-gray-50 p-3 rounded border font-mono text-sm text-gray-700 whitespace-pre-wrap">
-                                      {category.messageTemplate}
-                                    </div>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                      onClick={() => {
-                                        setSelectedCategory(category);
-                                        setEditingTemplate(true);
-                                      }}
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              {/* Trigger Conditions */}
-                              <div className="mt-3">
-                                <Label className="text-sm font-medium">شرایط فعال‌سازی:</Label>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {category.triggerConditions.map((condition, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs">
-                                      {condition}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                              
-                              {/* Recipients */}
-                              <div className="mt-2">
-                                <Label className="text-sm font-medium">گیرندگان:</Label>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {category.recipients.map((recipient, index) => (
-                                    <Badge key={index} variant="secondary" className="text-xs">
-                                      {recipient}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Controls */}
-                          <div className="flex items-center space-x-2 space-x-reverse">
-                            <Switch
-                              checked={category.enabled}
-                              onCheckedChange={(enabled) => toggleCategoryEnabled(category.id, enabled)}
-                            />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="delivery" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Truck className="h-5 w-5" />
-                لاگ تحویل SMS
-              </CardTitle>
+              <CardTitle>لاگ تحویل SMS</CardTitle>
               <CardDescription>
                 پیگیری SMS های ارسالی برای تحویل سفارشات
               </CardDescription>
