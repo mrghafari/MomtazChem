@@ -492,8 +492,8 @@ const CustomerProfile = () => {
                               <h5 className="font-medium text-gray-700">Order Items:</h5>
                               {order.items.map((item: any) => (
                                 <div key={item.id} className="flex justify-between text-sm">
-                                  <span>{item.productName} × {parseFloat(item.quantity)} {item.unit}</span>
-                                  <span>${parseFloat(item.totalPrice).toFixed(2)}</span>
+                                  <span>{item.product_name} × {parseFloat(item.quantity)}</span>
+                                  <span>{parseFloat(item.total_price).toFixed(2)} IQD</span>
                                 </div>
                               ))}
                             </div>
