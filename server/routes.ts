@@ -14719,6 +14719,73 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Generate delivery code for order (logistics department)
+  app.post('/api/order-management/:orderManagementId/generate-delivery-code', requireAuth, async (req, res) => {
+    try {
+      const orderManagementId = parseInt(req.params.orderManagementId);
+      
+      // Get order and customer information
+      const orderWithCustomer = await db
+        .select({
+          customerPhone: crmCustomers.phone,
+          customerOrderId: orderManagement.customerOrderId,
+          deliveryCode: orderManagement.deliveryCode,
+          customerFirstName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName
+        })
+        .from(orderManagement)
+        .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(orderManagement.id, orderManagementId))
+        .limit(1);
+
+      if (!orderWithCustomer[0]) {
+        return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
+      }
+
+      const { customerPhone, customerOrderId } = orderWithCustomer[0];
+
+      if (!customerPhone) {
+        return res.status(400).json({ success: false, message: 'شماره تلفن مشتری یافت نشد' });
+      }
+
+      // Generate new delivery code using logistics storage
+      const deliveryCode = await logisticsStorage.getNextSequentialCode();
+      
+      // Update order with new delivery code
+      await db
+        .update(orderManagement)
+        .set({ 
+          deliveryCode: deliveryCode,
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.id, orderManagementId));
+
+      // Send SMS with new delivery code
+      const smsSent = await orderManagementStorage.sendDeliveryCodeSms(customerPhone, deliveryCode, customerOrderId);
+      
+      if (smsSent) {
+        console.log(`✅ [GENERATE SMS] Delivery code ${deliveryCode} generated and sent to ${customerPhone} for order ${orderManagementId}`);
+        res.json({ 
+          success: true, 
+          message: 'کد تحویل تولید و ارسال شد',
+          deliveryCode: deliveryCode
+        });
+      } else {
+        // Even if SMS failed, we generated the code
+        console.log(`⚠️ [GENERATE SMS] Delivery code ${deliveryCode} generated but SMS failed for order ${orderManagementId}`);
+        res.json({ 
+          success: true, 
+          message: 'کد تحویل تولید شد اما SMS ارسال نشد',
+          deliveryCode: deliveryCode
+        });
+      }
+    } catch (error) {
+      console.error('Error generating delivery code:', error);
+      res.status(500).json({ success: false, message: 'خطا در تولید کد تحویل' });
+    }
+  });
+
   // Resend delivery code (logistics department)
   app.post('/api/order-management/:orderManagementId/resend-delivery-code', requireAuth, async (req, res) => {
     try {

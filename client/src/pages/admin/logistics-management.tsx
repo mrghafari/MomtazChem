@@ -142,12 +142,17 @@ const LogisticsManagement = () => {
     return <Badge className={config.color}>{config.text}</Badge>;
   };
 
-  // Function to resend delivery code
-  const handleResendDeliveryCode = async (orderManagementId: number) => {
+  // Function to send or resend delivery code
+  const handleSendDeliveryCode = async (orderManagementId: number, hasExistingCode: boolean) => {
     try {
       setResendingCodes(prev => ({ ...prev, [orderManagementId]: true }));
       
-      const response = await fetch(`/api/order-management/${orderManagementId}/resend-delivery-code`, {
+      // Use appropriate endpoint based on whether code exists
+      const endpoint = hasExistingCode 
+        ? `/api/order-management/${orderManagementId}/resend-delivery-code`
+        : `/api/order-management/${orderManagementId}/generate-delivery-code`;
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -158,23 +163,29 @@ const LogisticsManagement = () => {
       
       if (result.success) {
         setResentCodes(prev => ({ ...prev, [orderManagementId]: true }));
+        
+        // Refresh the orders to show the new delivery code
+        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+        
         toast({
           title: "✅ موفقیت",
-          description: `کد تحویل ${result.deliveryCode} مجدداً ارسال شد`,
+          description: hasExistingCode 
+            ? `کد تحویل ${result.deliveryCode} مجدداً ارسال شد`
+            : `کد تحویل ${result.deliveryCode} تولید و ارسال شد`,
           variant: "default",
         });
       } else {
         toast({
           title: "❌ خطا",
-          description: result.message || "خطا در ارسال مجدد کد",
+          description: result.message || "خطا در ارسال کد",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error resending delivery code:', error);
+      console.error('Error sending delivery code:', error);
       toast({
         title: "❌ خطا",
-        description: "خطا در ارسال مجدد کد تحویل",
+        description: "خطا در ارسال کد تحویل",
         variant: "destructive",
       });
     } finally {
@@ -352,35 +363,38 @@ const LogisticsManagement = () => {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 flex-wrap">
-                    {order.deliveryCode && (
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleResendDeliveryCode(order.id)}
-                        disabled={resendingCodes[order.id]}
-                        className={`${
-                          resentCodes[order.id] 
-                            ? 'bg-red-600 hover:bg-red-700 text-white' 
-                            : 'bg-blue-600 hover:bg-blue-700 text-white'
-                        }`}
-                      >
-                        {resendingCodes[order.id] ? (
-                          <>
-                            <Send className="w-4 h-4 mr-2 animate-spin" />
-                            در حال ارسال...
-                          </>
-                        ) : resentCodes[order.id] ? (
-                          <>
-                            <Send className="w-4 h-4 mr-2" />
-                            کد ارسال شد ✓
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4 mr-2" />
-                            ارسال کد به مشتری
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
+                      disabled={resendingCodes[order.id]}
+                      className={`${
+                        resentCodes[order.id] 
+                          ? 'bg-red-600 hover:bg-red-700 text-white' 
+                          : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
+                    >
+                      {resendingCodes[order.id] ? (
+                        <>
+                          <Send className="w-4 h-4 mr-2 animate-spin" />
+                          در حال ارسال...
+                        </>
+                      ) : resentCodes[order.id] ? (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          کد ارسال شد ✓
+                        </>
+                      ) : order.deliveryCode ? (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          ارسال مجدد کد
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          ارسال کد به مشتری
+                        </>
+                      )}
+                    </Button>
                     <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
                       <Users className="w-4 h-4 mr-2" />
                       اختصاص راننده
