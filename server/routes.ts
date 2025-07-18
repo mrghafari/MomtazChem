@@ -8185,15 +8185,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/customers/orders", async (req, res) => {
     try {
       const customerId = (req.session as any)?.customerId;
-      if (!customerId) {
+      const crmCustomerId = (req.session as any)?.crmCustomerId;
+      
+      console.log('🔍 [CUSTOMER ORDERS] Session check:', { customerId, crmCustomerId });
+      
+      if (!customerId && !crmCustomerId) {
         return res.status(401).json({ 
           success: false, 
           message: "احراز هویت نشده" 
         });
       }
+      
+      // Use CRM customer ID if available, otherwise use legacy customer ID
+      const finalCustomerId = crmCustomerId || customerId;
+      console.log('🔍 [CUSTOMER ORDERS] Using customer ID:', finalCustomerId);
 
       // Get regular orders
-      const orders = await customerStorage.getOrdersByCustomer(customerId);
+      const orders = await customerStorage.getOrdersByCustomer(finalCustomerId);
       
       // Get detailed order information with items
       const detailedOrders = await Promise.all(
@@ -8207,54 +8215,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
 
-      // Get grace period orders for this customer
+      // Get grace period orders and all customer orders for this customer
       const { pool } = await import('./db');
-      const gracePeriodResult = await pool.query(`
+      
+      // Get all orders for this customer from customer_orders table
+      const allOrdersResult = await pool.query(`
         SELECT 
-          om.*,
+          co.id,
+          co.order_number,
+          co.customer_id,
           co.total_amount,
+          co.status,
           co.currency,
-          co.guest_name as customer_first_name,
-          co.guest_email as customer_email,
-          co.recipient_phone as customer_phone,
-          co.items as order_items,
+          co.payment_status,
+          co.payment_method,
+          co.guest_name,
+          co.guest_email,
+          co.recipient_phone,
+          co.recipient_name,
+          co.recipient_address,
+          co.created_at,
+          co.updated_at,
+          om.payment_grace_period_start,
+          om.payment_grace_period_end,
+          om.is_order_locked,
           EXTRACT(EPOCH FROM (om.payment_grace_period_end - NOW()))/3600 as hours_remaining,
           CASE 
             WHEN om.payment_grace_period_end > NOW() THEN 'active'
             ELSE 'expired'
           END as grace_period_status
-        FROM order_management om
-        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
-        WHERE om.payment_grace_period_start IS NOT NULL
-          AND (co.guest_email = (
-            SELECT email FROM crm_customers WHERE id = $1
-          ) OR co.customer_id = $1)
-        ORDER BY om.created_at DESC
-      `, [customerId]);
+        FROM customer_orders co
+        LEFT JOIN order_management om ON om.customer_order_id = co.id
+        WHERE co.customer_id = $1
+        ORDER BY co.created_at DESC
+      `, [finalCustomerId]);
+      
+      // Get order items for each order
+      const allOrdersWithItems = await Promise.all(
+        allOrdersResult.rows.map(async (order: any) => {
+          const itemsResult = await pool.query(`
+            SELECT 
+              oi.id,
+              oi.product_id,
+              oi.quantity,
+              oi.unit_price,
+              oi.total_price,
+              p.name as product_name,
+              p.sku,
+              p.category
+            FROM order_items oi
+            LEFT JOIN shop_products p ON oi.product_id = p.id
+            WHERE oi.order_id = $1
+          `, [order.id]);
+          
+          return {
+            ...order,
+            items: itemsResult.rows
+          };
+        })
+      );
 
-      // Format grace period orders to match regular order structure
-      const gracePeriodOrders = gracePeriodResult.rows.map((row: any) => ({
-        id: row.customer_order_id,
-        orderNumber: row.customer_order_id,
-        status: row.current_status,
+      // Format customer orders to match regular order structure
+      const customerOrders = allOrdersWithItems.map((row: any) => ({
+        id: row.id,
+        orderNumber: row.order_number,
+        status: row.status,
         totalAmount: row.total_amount,
         currency: row.currency,
+        paymentStatus: row.payment_status,
+        paymentMethod: row.payment_method,
         createdAt: row.created_at,
-        items: row.order_items || [],
-        orderType: 'grace_period',
+        updatedAt: row.updated_at,
+        items: row.items || [],
+        orderType: row.payment_grace_period_start ? 'grace_period' : 'regular',
         gracePeriodExpires: row.payment_grace_period_end,
         gracePeriodStatus: row.grace_period_status,
-        hoursRemaining: Math.max(0, Math.floor(row.hours_remaining)),
+        hoursRemaining: Math.max(0, Math.floor(row.hours_remaining || 0)),
         isOrderLocked: row.is_order_locked,
         paymentGracePeriodStart: row.payment_grace_period_start,
         paymentGracePeriodEnd: row.payment_grace_period_end,
-        customerName: row.customer_first_name,
-        customerEmail: row.customer_email,
-        customerPhone: row.customer_phone
+        customerName: row.guest_name,
+        customerEmail: row.guest_email,
+        customerPhone: row.recipient_phone,
+        recipientName: row.recipient_name,
+        recipientAddress: row.recipient_address
       }));
 
-      // Combine both types of orders and sort by creation date
-      const allOrders = [...detailedOrders, ...gracePeriodOrders].sort((a, b) => 
+      // Remove duplicate orders and combine all orders
+      const allOrders = [...customerOrders].sort((a, b) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
