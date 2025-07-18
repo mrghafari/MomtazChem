@@ -2,13 +2,12 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -200,38 +199,6 @@ export default function SmsTemplateManagement() {
     },
     onError: (error: any) => {
       toast({ title: "خطا", description: error.message || "خطا در حذف قالب", variant: "destructive" });
-    }
-  });
-
-  // Toggle category status mutation
-  const toggleCategoryStatusMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
-      apiRequest(`/api/admin/sms/template-categories/${id}/toggle-status`, { 
-        method: "PATCH", 
-        body: { isActive } 
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/sms/template-categories"] });
-      toast({ title: "موفقیت", description: "وضعیت دسته‌بندی تغییر کرد" });
-    },
-    onError: (error: any) => {
-      toast({ title: "خطا", description: error.message || "خطا در تغییر وضعیت دسته‌بندی", variant: "destructive" });
-    }
-  });
-
-  // Toggle template status mutation
-  const toggleTemplateStatusMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
-      apiRequest(`/api/admin/sms/templates/${id}/toggle-status`, { 
-        method: "PATCH", 
-        body: { isActive } 
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/sms/templates"] });
-      toast({ title: "موفقیت", description: "وضعیت قالب تغییر کرد" });
-    },
-    onError: (error: any) => {
-      toast({ title: "خطا", description: error.message || "خطا در تغییر وضعیت قالب", variant: "destructive" });
     }
   });
 
@@ -542,8 +509,76 @@ export default function SmsTemplateManagement() {
         </div>
       </div>
 
-      {/* Templates Section */}
-      <div className="space-y-4">
+      <Tabs defaultValue="categories" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="categories">دسته‌بندی‌ها ({categories.length})</TabsTrigger>
+          <TabsTrigger value="templates">قالب‌ها ({templates.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="categories" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {categories.map((category: TemplateCategory) => {
+              const categoryTemplates = templates.filter((t: SmsTemplate) => t.categoryId === category.id);
+              return (
+                <Card key={category.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shrink-0">
+                          {category.categoryNumber}
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{category.categoryName}</CardTitle>
+                          <p className="text-sm text-green-600 font-medium">دسته‌بندی {category.categoryNumber}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditCategory(category)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => deleteCategoryMutation.mutate(category.id)}
+                          disabled={deleteCategoryMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <CardDescription>{category.categoryDescription}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Tags className="h-4 w-4" />
+                        <span>{category.systemUsage}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>{categoryTemplates.length} قالب</span>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => setSelectedCategory(category.id)}
+                      >
+                        مشاهده قالب‌ها
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="templates" className="space-y-4">
           <div className="flex gap-4 items-center">
             <Select 
               value={selectedCategory?.toString() || "all"} 
@@ -631,23 +666,6 @@ export default function SmsTemplateManagement() {
                       </div>
                     )}
                     
-                    {/* Template Status Toggle */}
-                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={template.isActive ? "default" : "secondary"}>
-                          {template.isActive ? "فعال" : "غیرفعال"}
-                        </Badge>
-                        <span className="text-sm text-gray-600">وضعیت قالب</span>
-                      </div>
-                      <Switch
-                        checked={template.isActive}
-                        onCheckedChange={(checked) => 
-                          toggleTemplateStatusMutation.mutate({ id: template.id, isActive: checked })
-                        }
-                        disabled={toggleTemplateStatusMutation.isPending}
-                      />
-                    </div>
-                    
                     <div className="flex justify-between text-xs text-gray-500">
                       <div className="flex items-center gap-1">
                         <BarChart3 className="h-3 w-3" />
@@ -665,7 +683,8 @@ export default function SmsTemplateManagement() {
               </Card>
             ))}
           </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
