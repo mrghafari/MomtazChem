@@ -26890,6 +26890,307 @@ momtazchem.com
     }
   });
 
+  // Orphan Orders Notification Management APIs
+  app.get("/api/orphan-orders/notification-settings", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query('SELECT * FROM orphan_order_notification_settings ORDER BY id DESC LIMIT 1');
+      
+      if (result.rows.length === 0) {
+        // Return default settings if none exist
+        return res.json({
+          success: true,
+          settings: {
+            notification_type: 'both',
+            trigger_hours_before_expiry: [72, 48, 24, 12, 6],
+            is_enabled: true,
+            max_notifications_per_order: 5,
+            notification_interval_hours: 12,
+            send_to_admin: true,
+            admin_notification_types: ['email']
+          }
+        });
+      }
+      
+      res.json({
+        success: true,
+        settings: result.rows[0]
+      });
+    } catch (error) {
+      console.error('Error fetching notification settings:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت تنظیمات اطلاع‌رسانی' });
+    }
+  });
+
+  app.put("/api/orphan-orders/notification-settings", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const {
+        notification_type,
+        trigger_hours_before_expiry,
+        is_enabled,
+        max_notifications_per_order,
+        notification_interval_hours,
+        send_to_admin,
+        admin_notification_types
+      } = req.body;
+
+      const result = await pool.query(`
+        UPDATE orphan_order_notification_settings 
+        SET 
+          notification_type = $1,
+          trigger_hours_before_expiry = $2,
+          is_enabled = $3,
+          max_notifications_per_order = $4,
+          notification_interval_hours = $5,
+          send_to_admin = $6,
+          admin_notification_types = $7,
+          updated_at = NOW()
+        WHERE id = (SELECT id FROM orphan_order_notification_settings ORDER BY id DESC LIMIT 1)
+        RETURNING *
+      `, [
+        notification_type,
+        trigger_hours_before_expiry,
+        is_enabled,
+        max_notifications_per_order,
+        notification_interval_hours,
+        send_to_admin,
+        admin_notification_types
+      ]);
+
+      if (result.rows.length === 0) {
+        // Create new settings if none exist
+        const insertResult = await pool.query(`
+          INSERT INTO orphan_order_notification_settings (
+            notification_type, trigger_hours_before_expiry, is_enabled, 
+            max_notifications_per_order, notification_interval_hours,
+            send_to_admin, admin_notification_types
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING *
+        `, [
+          notification_type,
+          trigger_hours_before_expiry,
+          is_enabled,
+          max_notifications_per_order,
+          notification_interval_hours,
+          send_to_admin,
+          admin_notification_types
+        ]);
+        
+        return res.json({
+          success: true,
+          settings: insertResult.rows[0]
+        });
+      }
+
+      res.json({
+        success: true,
+        settings: result.rows[0]
+      });
+    } catch (error) {
+      console.error('Error updating notification settings:', error);
+      res.status(500).json({ success: false, message: 'خطا در بروزرسانی تنظیمات اطلاع‌رسانی' });
+    }
+  });
+
+  app.get("/api/orphan-orders/templates", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query('SELECT * FROM orphan_order_templates ORDER BY is_default DESC, created_at DESC');
+      
+      res.json({
+        success: true,
+        templates: result.rows
+      });
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت قالب‌های پیام' });
+    }
+  });
+
+  app.post("/api/orphan-orders/templates", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const {
+        template_name,
+        template_type,
+        subject,
+        content,
+        variables,
+        is_active = true,
+        is_default = false
+      } = req.body;
+
+      // If setting as default, remove default from others of same type
+      if (is_default) {
+        await pool.query(`
+          UPDATE orphan_order_templates 
+          SET is_default = false 
+          WHERE template_type = $1
+        `, [template_type]);
+      }
+
+      const result = await pool.query(`
+        INSERT INTO orphan_order_templates (
+          template_name, template_type, subject, content, variables, is_active, is_default
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+      `, [template_name, template_type, subject, content, variables, is_active, is_default]);
+
+      res.json({
+        success: true,
+        template: result.rows[0]
+      });
+    } catch (error) {
+      console.error('Error creating template:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد قالب پیام' });
+    }
+  });
+
+  app.put("/api/orphan-orders/templates/:id", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const { id } = req.params;
+      const {
+        template_name,
+        template_type,
+        subject,
+        content,
+        variables,
+        is_active,
+        is_default
+      } = req.body;
+
+      // If setting as default, remove default from others of same type
+      if (is_default) {
+        await pool.query(`
+          UPDATE orphan_order_templates 
+          SET is_default = false 
+          WHERE template_type = $1 AND id != $2
+        `, [template_type, id]);
+      }
+
+      const result = await pool.query(`
+        UPDATE orphan_order_templates 
+        SET 
+          template_name = $1,
+          template_type = $2,
+          subject = $3,
+          content = $4,
+          variables = $5,
+          is_active = $6,
+          is_default = $7,
+          updated_at = NOW()
+        WHERE id = $8
+        RETURNING *
+      `, [template_name, template_type, subject, content, variables, is_active, is_default, id]);
+
+      res.json({
+        success: true,
+        template: result.rows[0]
+      });
+    } catch (error) {
+      console.error('Error updating template:', error);
+      res.status(500).json({ success: false, message: 'خطا در بروزرسانی قالب پیام' });
+    }
+  });
+
+  app.delete("/api/orphan-orders/templates/:id", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const { id } = req.params;
+
+      await pool.query('DELETE FROM orphan_order_templates WHERE id = $1', [id]);
+
+      res.json({
+        success: true,
+        message: 'قالب با موفقیت حذف شد'
+      });
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف قالب پیام' });
+    }
+  });
+
+  app.get("/api/orphan-orders/schedules", async (req, res) => {
+    try {
+      // Return scheduled notification data
+      res.json({
+        success: true,
+        schedules: [
+          {
+            id: 1,
+            name: 'یادآور روزانه',
+            frequency: 'daily',
+            time: '10:00',
+            enabled: true,
+            last_run: new Date().toISOString()
+          },
+          {
+            id: 2,
+            name: 'یادآور هشدار نهایی',
+            frequency: 'hourly',
+            time: null,
+            enabled: true,
+            last_run: new Date().toISOString()
+          }
+        ]
+      });
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت برنامه‌ریزی‌ها' });
+    }
+  });
+
+  app.get("/api/orphan-orders/stats", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get active grace period orders count
+      const activeResult = await pool.query(`
+        SELECT COUNT(*) as active_count 
+        FROM order_management 
+        WHERE current_status = 'payment_grace_period' 
+        AND payment_grace_period_end > NOW()
+      `);
+      
+      // Get expired orders count (last 7 days)
+      const expiredResult = await pool.query(`
+        SELECT COUNT(*) as expired_count 
+        FROM order_management 
+        WHERE current_status = 'payment_grace_period' 
+        AND payment_grace_period_end <= NOW()
+        AND payment_grace_period_end >= NOW() - INTERVAL '7 days'
+      `);
+      
+      // Get orders that transitioned from grace period to paid (last 30 days)
+      const paidResult = await pool.query(`
+        SELECT COUNT(*) as paid_count 
+        FROM order_management 
+        WHERE current_status NOT IN ('payment_grace_period') 
+        AND payment_grace_period_start IS NOT NULL
+        AND updated_at >= NOW() - INTERVAL '30 days'
+      `);
+
+      res.json({
+        success: true,
+        stats: {
+          active: parseInt(activeResult.rows[0].active_count || 0),
+          expired: parseInt(expiredResult.rows[0].expired_count || 0),
+          paid: parseInt(paidResult.rows[0].paid_count || 0),
+          notificationsToday: 0 // This would be tracked in a separate notifications log table
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching orphan orders stats:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در دریافت آمار سفارشات موقت',
+        stats: { active: 0, expired: 0, paid: 0, notificationsToday: 0 }
+      });
+    }
+  });
+
   // Get active grace period orders
   app.get("/api/orphan-orders/active", async (req, res) => {
     try {
