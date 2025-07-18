@@ -6339,6 +6339,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const settings = result.rows[0] || {
         isEnabled: false,
         provider: 'kavenegar',
+        apiKey: '',
+        apiSecret: '',
+        username: '',
+        password: '',
+        senderNumber: '',
+        apiEndpoint: '',
+        serviceType: 'pattern',
+        patternId: '',
         codeLength: 6,
         codeExpiry: 300,
         maxAttempts: 3,
@@ -6359,18 +6367,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { pool } = await import('./db');
       
       const result = await pool.query(`
-        INSERT INTO sms_settings (id, is_enabled, provider, api_key, api_secret, sender_number, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
-        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+        INSERT INTO sms_settings (id, is_enabled, provider, api_key, api_secret, username, password, sender_number, api_endpoint, service_type, pattern_id, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
+        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
         ON CONFLICT (id) DO UPDATE SET
           is_enabled = $1,
           provider = $2,
           api_key = $3,
           api_secret = $4,
-          sender_number = $5,
-          code_length = $6,
-          code_expiry = $7,
-          max_attempts = $8,
-          rate_limit_minutes = $9,
+          username = $5,
+          password = $6,
+          sender_number = $7,
+          api_endpoint = $8,
+          service_type = $9,
+          pattern_id = $10,
+          code_length = $11,
+          code_expiry = $12,
+          max_attempts = $13,
+          rate_limit_minutes = $14,
           updated_at = NOW()
         RETURNING *
       `, [
@@ -6378,7 +6391,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         settings.provider,
         settings.apiKey,
         settings.apiSecret,
+        settings.username,
+        settings.password,
         settings.senderNumber,
+        settings.apiEndpoint,
+        settings.serviceType,
+        settings.patternId,
         settings.codeLength,
         settings.codeExpiry,
         settings.maxAttempts,

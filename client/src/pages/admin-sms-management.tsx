@@ -30,7 +30,12 @@ interface SmsSettings {
   provider: string;
   apiKey?: string;
   apiSecret?: string;
+  username?: string;
+  password?: string;
   senderNumber?: string;
+  apiEndpoint?: string;
+  serviceType?: string;
+  patternId?: string;
   codeLength: number;
   codeExpiry: number;
   maxAttempts: number;
@@ -465,8 +470,86 @@ export default function AdminSmsManagement() {
                       <SelectItem value="kavenegar">Kavenegar</SelectItem>
                       <SelectItem value="melipayamak">Melipayamak</SelectItem>
                       <SelectItem value="farapayamak">Farapayamak</SelectItem>
+                      <SelectItem value="sms_ir">SMS.ir</SelectItem>
+                      <SelectItem value="parsgreen">ParsGreen</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="apiKey">API Key / Token</Label>
+                  <Input
+                    id="apiKey"
+                    type="password"
+                    placeholder="کلید API یا Token"
+                    value={settings.apiKey || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, apiKey: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="username">نام کاربری</Label>
+                  <Input
+                    id="username"
+                    placeholder="نام کاربری حساب SMS"
+                    value={settings.username || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, username: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">رمز عبور</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="رمز عبور حساب SMS"
+                    value={settings.password || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, password: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="senderNumber">شماره ارسال</Label>
+                  <Input
+                    id="senderNumber"
+                    placeholder="شماره ارسال کننده (خط اختصاصی)"
+                    value={settings.senderNumber || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, senderNumber: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="apiEndpoint">آدرس API</Label>
+                  <Input
+                    id="apiEndpoint"
+                    placeholder="https://api.provider.com/send"
+                    value={settings.apiEndpoint || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, apiEndpoint: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="serviceType">نوع سرویس</Label>
+                  <Select value={settings.serviceType || 'pattern'} onValueChange={(value) => setSettings(prev => ({ ...prev, serviceType: value }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pattern">پیامک الگویی (Pattern)</SelectItem>
+                      <SelectItem value="simple">پیامک ساده (Simple)</SelectItem>
+                      <SelectItem value="otp">کد یکبار مصرف (OTP)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="patternId">شناسه الگو</Label>
+                  <Input
+                    id="patternId"
+                    placeholder="Pattern ID برای پیامک‌های الگویی"
+                    value={settings.patternId || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, patternId: e.target.value }))}
+                  />
                 </div>
 
                 <div className="space-y-2">

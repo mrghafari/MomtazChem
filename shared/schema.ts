@@ -338,10 +338,15 @@ export const smsVerifications = pgTable("sms_verifications", {
 export const smsSettings = pgTable("sms_settings", {
   id: serial("id").primaryKey(),
   isEnabled: boolean("is_enabled").default(false), // Global SMS system toggle
-  provider: text("provider").default("twilio"), // 'twilio', 'kavenegar', 'ippanel'
+  provider: text("provider").default("kavenegar"), // 'kavenegar', 'melipayamak', 'farapayamak', 'sms_ir', 'parsgreen'
   apiKey: text("api_key"),
   apiSecret: text("api_secret"),
+  username: text("username"), // Username for SMS provider
+  password: text("password"), // Password for SMS provider  
   senderNumber: text("sender_number"),
+  apiEndpoint: text("api_endpoint"), // Custom API endpoint URL
+  serviceType: text("service_type").default("pattern"), // 'pattern', 'simple', 'otp'
+  patternId: text("pattern_id"), // Pattern ID for template-based SMS
   codeLength: integer("code_length").default(6),
   codeExpiry: integer("code_expiry").default(300), // seconds (5 minutes)
   maxAttempts: integer("max_attempts").default(3),
