@@ -44,6 +44,11 @@ const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
   shippingPostalCode: z.string().optional(),
   shippingCountry: z.string().optional(),
   
+  // Recipient Information (can be different from customer)
+  recipientName: z.string().optional(),
+  recipientPhone: z.string().optional(),
+  recipientAddress: z.string().optional(),
+  
   // Order Details
   shippingMethod: z.string().min(1, "Please select a shipping method"),
   paymentMethod: z.string().min(1, "Please select a payment method"),
@@ -72,6 +77,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [useWallet, setUseWallet] = useState(false);
   const [secondaryPaymentMethod, setSecondaryPaymentMethod] = useState('');
   const [customerInfo, setCustomerInfo] = useState<any>(null);
+  const [showRecipientFields, setShowRecipientFields] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -330,6 +336,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
 
     const orderData = {
       customerInfo,
+      recipientInfo: {
+        recipientName: data.recipientName || '',
+        recipientPhone: data.recipientPhone || '',
+        recipientAddress: data.recipientAddress || '',
+      },
       items: cartItems.map(item => ({
         productId: item.id,
         productName: item.name,
@@ -600,6 +611,75 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             )}
                           </div>
                         )}
+                        
+                        {/* Recipient Information Section */}
+                        <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2 space-x-reverse">
+                              <User className="w-4 h-4 text-purple-600" />
+                              <span className="font-medium text-purple-800 dark:text-purple-300">اطلاعات گیرنده</span>
+                            </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setShowRecipientFields(!showRecipientFields)}
+                              className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200"
+                            >
+                              {showRecipientFields ? '−' : '+'}
+                            </Button>
+                          </div>
+                          
+                          {showRecipientFields && (
+                            <div className="mt-4 space-y-4">
+                              <div className="text-sm text-purple-600 dark:text-purple-400 mb-3">
+                                در صورتی که گیرنده شخص متفاوتی از مشتری است، این فیلدها را پر کنید
+                              </div>
+                              
+                              <FormField
+                                control={form.control}
+                                name="recipientName"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>نام گیرنده</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="نام کامل گیرنده" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={form.control}
+                                name="recipientPhone"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>شماره موبایل گیرنده</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="09123456789" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={form.control}
+                                name="recipientAddress"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>آدرس دریافت کالا</FormLabel>
+                                    <FormControl>
+                                      <Textarea {...field} placeholder="آدرس کامل محل تحویل" className="min-h-[80px]" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-4">

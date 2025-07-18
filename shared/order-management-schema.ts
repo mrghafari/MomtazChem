@@ -81,6 +81,11 @@ export const orderManagement = pgTable("order_management", {
   verifiedAt: timestamp("verified_at"),
   verificationLocation: text("verification_location"),
   
+  // Recipient information (can be different from customer)
+  recipientName: text("recipient_name"), // نام گیرنده
+  recipientPhone: text("recipient_phone"), // شماره موبایل گیرنده
+  recipientAddress: text("recipient_address"), // آدرس دریافت کالا
+  
   // Carrier location tracking for geography analytics
   carrierLatitude: decimal("carrier_latitude", { precision: 10, scale: 8 }), // GPS latitude coordinates
   carrierLongitude: decimal("carrier_longitude", { precision: 11, scale: 8 }), // GPS longitude coordinates

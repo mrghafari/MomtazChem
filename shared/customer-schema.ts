@@ -142,6 +142,11 @@ export const customerOrders = pgTable("customer_orders", {
   carrier: text("carrier"), // DHL, FedEx, UPS, etc.
   receiptPath: text("receipt_path"), // Path to uploaded bank receipt
   
+  // Recipient information (can be different from customer)
+  recipientName: text("recipient_name"), // نام گیرنده
+  recipientPhone: text("recipient_phone"), // شماره موبایل گیرنده
+  recipientAddress: text("recipient_address"), // آدرس دریافت کالا
+  
   // Delivery method selected by customer during checkout
   deliveryMethod: text("delivery_method").default("courier"), // post, courier, truck, personal_pickup
   deliveryNotes: text("delivery_notes"), // Special delivery instructions from customer

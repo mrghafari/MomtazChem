@@ -7183,7 +7183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
-      const { items, customerInfo, totalAmount, notes, shippingMethod, paymentMethod, walletAmountUsed, remainingAmount } = req.body;
+      const { items, customerInfo, recipientInfo, totalAmount, notes, shippingMethod, paymentMethod, walletAmountUsed, remainingAmount } = req.body;
       
       console.log('🛒 [ORDER DEBUG] Order data received:', {
         paymentMethod,
@@ -7314,6 +7314,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 shippingMethod === 'express' ? 'Express Shipping (2-3 days)' : 
                 shippingMethod === 'overnight' ? 'Overnight Shipping' : 
                 'Standard Shipping',
+        // Store recipient information (can be different from customer)
+        recipientName: recipientInfo?.recipientName || '',
+        recipientPhone: recipientInfo?.recipientPhone || '',
+        recipientAddress: recipientInfo?.recipientAddress || '',
       };
 
       const order = await customerStorage.createOrder(orderData);
