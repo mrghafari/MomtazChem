@@ -54,16 +54,45 @@ interface OrderManagement {
   financialReviewedAt?: string;
   createdAt: string;
   updatedAt: string;
-  customerFirstName: string;
-  customerLastName: string;
-  customerEmail: string;
-  customerPhone: string;
+  customerFirstName?: string;
+  customerLastName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  customer?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+  receipt?: {
+    url: string;
+    fileName: string;
+    mimeType: string;
+  };
   receiptUrl?: string;
   receiptFileName?: string;
   receiptMimeType?: string;
   financialReviewerId?: number;
   deliveryCode?: string;
 }
+
+// Helper function to get customer info with fallback
+const getCustomerInfo = (order: OrderManagement) => {
+  if (order.customer) {
+    return {
+      firstName: order.customer.firstName,
+      lastName: order.customer.lastName,
+      email: order.customer.email,
+      phone: order.customer.phone
+    };
+  }
+  return {
+    firstName: order.customerFirstName || '',
+    lastName: order.customerLastName || '',
+    email: order.customerEmail || '',
+    phone: order.customerPhone || ''
+  };
+};
 
 function FinanceOrders() {
   const { toast } = useToast();
@@ -523,15 +552,15 @@ function FinanceOrders() {
                 <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                   <div>
                     <Label className="text-sm font-medium text-gray-600">نام مشتری</Label>
-                    <p className="font-medium">{selectedOrder.customerFirstName} {selectedOrder.customerLastName}</p>
+                    <p className="font-medium">{getCustomerInfo(selectedOrder).firstName} {getCustomerInfo(selectedOrder).lastName}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-600">ایمیل</Label>
-                    <p className="font-medium">{selectedOrder.customerEmail}</p>
+                    <p className="font-medium">{getCustomerInfo(selectedOrder).email}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-600">تلفن</Label>
-                    <p className="font-medium">{selectedOrder.customerPhone}</p>
+                    <p className="font-medium">{getCustomerInfo(selectedOrder).phone}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-600">مبلغ کل</Label>
@@ -630,6 +659,7 @@ interface OrderCardProps {
 }
 
 function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
+  const customerInfo = getCustomerInfo(order);
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'pending':

@@ -5646,9 +5646,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🔍 [ROUTES] Received', orders.length, 'orders from financial department');
       
+      // Transform orders to ensure compatibility with frontend interface
+      const transformedOrders = orders.map(order => ({
+        ...order,
+        // Ensure flat customer fields for compatibility
+        customerFirstName: order.customerFirstName || '',
+        customerLastName: order.customerLastName || '',
+        customerEmail: order.customerEmail || '',
+        customerPhone: order.customerPhone || '',
+        // Also provide receipt info in legacy format
+        receiptUrl: order.receiptUrl || order.paymentReceiptUrl,
+        receiptFileName: order.receiptFileName || '',
+        receiptMimeType: order.receiptMimeType || ''
+      }));
+      
       res.json({ 
         success: true, 
-        orders: orders 
+        orders: transformedOrders 
       });
     } catch (error) {
       console.error("Error fetching financial orders:", error);
