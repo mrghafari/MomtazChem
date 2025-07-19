@@ -13836,8 +13836,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get customer activities
       const activities = await crmStorage.getCustomerActivities(customerId, 20);
 
-      // Generate PDF using enhanced pdfMake generator for better Persian support
-      const { generateCustomerPDFHTML } = await import('./pdfmake-generator-fixed');
+      // Generate PDF using enhanced Puppeteer generator for better Persian support
+      const { generateCustomerPDFHTML } = await import('./simple-pdf-generator');
       const pdfBuffer = await generateCustomerPDFHTML(customer, analytics.orders || [], activities, `مشتری ${customer.name}`);
 
       // Set response headers for PDF download
@@ -13872,8 +13872,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get dashboard statistics
       const dashboardStats = await crmStorage.getCrmDashboardStats();
       
-      // Generate PDF using enhanced pdfMake generator
-      const { generateAnalyticsPDFHTML } = await import('./pdfmake-generator-fixed');
+      // Generate PDF using enhanced Puppeteer generator
+      const { generateAnalyticsPDFHTML } = await import('./simple-pdf-generator');
       const pdfBuffer = await generateAnalyticsPDFHTML(dashboardStats, 'گزارش آمارها');
 
       // Set response headers for PDF download

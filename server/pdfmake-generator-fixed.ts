@@ -1,9 +1,9 @@
 // PDF Generator using pdfMake with Persian/Arabic Support
-const pdfMake = require('pdfmake/build/pdfmake');
-const pdfFonts = require('pdfmake/build/vfs_fonts');
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
 // Initialize pdfMake with built-in fonts
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+(pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
 
 // Configure fonts for Persian/Arabic support
 (pdfMake as any).fonts = {
