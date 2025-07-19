@@ -393,9 +393,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Fallback to simple PDF generator for User Documentation');
-      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
-      const pdfBuffer = await generateDocumentationFallback('User Guide', language);
+      console.log('Generating User Documentation with PDFMake');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const pdfBuffer = await generateDocumentationPDFWithPDFMake('User Guide', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-User-Guide-Persian.pdf' : 
@@ -418,9 +418,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Fallback to simple PDF generator for Admin Documentation');
-      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
-      const pdfBuffer = await generateDocumentationFallback('Admin Guide', language);
+      console.log('Generating Admin Documentation with PDFMake');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const pdfBuffer = await generateDocumentationPDFWithPDFMake('Admin Guide', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-Admin-Guide-Persian.pdf' : 
@@ -443,9 +443,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Fallback to simple PDF generator for Technical Documentation');
-      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
-      const pdfBuffer = await generateDocumentationFallback('Technical Documentation', language);
+      console.log('Generating Technical Documentation with PDFMake');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const pdfBuffer = await generateDocumentationPDFWithPDFMake('Technical Documentation', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-Technical-Guide-Persian.pdf' : 
@@ -468,9 +468,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Fallback to simple PDF generator for Complete Documentation');
-      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
-      const pdfBuffer = await generateDocumentationFallback('Complete Documentation', language);
+      console.log('Generating Complete Documentation with PDFMake');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const pdfBuffer = await generateDocumentationPDFWithPDFMake('Complete Documentation', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-Complete-Documentation-Persian.pdf' : 
@@ -493,9 +493,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Fallback to simple PDF generator for Project Proposal');
-      const { generateDocumentationFallback } = await import('./simple-pdf-generator');
-      const pdfBuffer = await generateDocumentationFallback('Project Proposal', language);
+      console.log('Generating Project Proposal with PDFMake');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const pdfBuffer = await generateDocumentationPDFWithPDFMake('Project Proposal', language);
       
       const filename = language === 'fa' ? 
         'Momtazchem-Project-Proposal-Persian.pdf' : 
@@ -7229,13 +7229,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { unifiedInventoryManager } = await import('./unified-inventory-manager');
       const batchInfo = await unifiedInventoryManager.getBatchInfoForOrder(orderId);
 
-      // Generate PDF with batch information
-      const { generateInvoicePDFWithBatch } = await import('./simple-pdf-generator');
-      const pdfBuffer = await generateInvoicePDFWithBatch(
+      // Generate PDF with batch information using PDFMake
+      const { generateInvoicePDFWithPDFMake } = await import('./pdfmake-generator');
+      const pdfBuffer = await generateInvoicePDFWithPDFMake(
         customer,
         order,
         batchInfo,
-        `Invoice with Batch Info - Order ${orderId}`
+        `فاکتور سفارش ${orderId}`
       );
 
       // Set response headers for PDF download
@@ -13836,23 +13836,23 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get customer activities
       const activities = await crmStorage.getCustomerActivities(customerId, 20);
 
-      // Generate printable HTML for reliable Persian support
-      const { generateCustomerPDFHTML } = await import('./simple-pdf-generator');
-      const htmlBuffer = await generateCustomerPDFHTML(customer, analytics.orders || [], activities, `مشتری ${customer.name}`);
+      // Generate PDF using PDFMake with Vazir font support
+      const { generateCustomerPDFWithPDFMake } = await import('./pdfmake-generator');
+      const pdfBuffer = await generateCustomerPDFWithPDFMake(customer, analytics.orders || [], activities, `مشتری ${customer.name}`);
 
-      // Validate HTML buffer before sending
-      if (!htmlBuffer || htmlBuffer.length === 0) {
-        throw new Error('Generated HTML is empty');
+      // Validate PDF buffer before sending
+      if (!pdfBuffer || pdfBuffer.length === 0) {
+        throw new Error('Generated PDF is empty');
       }
       
-      console.log('Customer report HTML generated successfully, size:', htmlBuffer.length, 'bytes');
+      console.log('Customer report PDF generated successfully, size:', pdfBuffer.length, 'bytes');
       
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Content-Disposition', `inline; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.html"`);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Cache-Control', 'no-cache');
       
-      // Send HTML buffer
-      res.end(htmlBuffer);
+      // Send PDF buffer
+      res.end(pdfBuffer);
       
     } catch (error) {
       console.error("Error generating customer PDF:", error);
@@ -13869,23 +13869,23 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get dashboard statistics
       const dashboardStats = await crmStorage.getCrmDashboardStats();
       
-      // Generate printable HTML for reliable Persian support
-      const { generateAnalyticsPDFHTML } = await import('./simple-pdf-generator');
-      const htmlBuffer = await generateAnalyticsPDFHTML(dashboardStats, 'گزارش آمارها');
+      // Generate PDF using PDFMake with Vazir font support
+      const { generateAnalyticsPDFWithPDFMake } = await import('./pdfmake-generator');
+      const pdfBuffer = await generateAnalyticsPDFWithPDFMake(dashboardStats, 'گزارش آمارها');
 
-      // Validate HTML buffer before sending
-      if (!htmlBuffer || htmlBuffer.length === 0) {
-        throw new Error('Generated HTML is empty');
+      // Validate PDF buffer before sending
+      if (!pdfBuffer || pdfBuffer.length === 0) {
+        throw new Error('Generated PDF is empty');
       }
       
-      console.log('Analytics report HTML generated successfully, size:', htmlBuffer.length, 'bytes');
+      console.log('Analytics report PDF generated successfully, size:', pdfBuffer.length, 'bytes');
       
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Content-Disposition', `inline; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.html"`);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Cache-Control', 'no-cache');
       
-      // Send HTML buffer
-      res.end(htmlBuffer);
+      // Send PDF buffer
+      res.end(pdfBuffer);
       
     } catch (error) {
       console.error("Error generating analytics PDF:", error);
