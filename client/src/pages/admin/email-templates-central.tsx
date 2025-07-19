@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
-import { Mail, Eye, RefreshCw, Star, Zap, Shield, CreditCard, Package, Bell, Settings } from 'lucide-react';
+import { Mail, Eye, RefreshCw, Star, Zap, Shield, CreditCard, Package, Bell, Settings, Hash } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 
 interface EmailTemplate {
   id: number;
@@ -189,6 +190,7 @@ const TEMPLATE_REGISTRY = {
 };
 
 const EmailTemplatesCentral: React.FC = () => {
+  const [, setLocation] = useLocation();
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
@@ -310,6 +312,14 @@ const EmailTemplatesCentral: React.FC = () => {
               <p className="text-gray-600">مرکز جامع مدیریت ۱۷ قالب ایمیل سیستم</p>
             </div>
             <div className="flex gap-3">
+              <Button 
+                onClick={() => setLocation('/admin/template-numbering-system')}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+                size="sm"
+              >
+                <Hash className="w-4 h-4 mr-2" />
+                🔢 شماره‌گذاری قالب‌ها
+              </Button>
               <Button onClick={handleRefresh} variant="outline" size="sm">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 بروزرسانی ({Array.isArray(templates) ? templates.length : 0})

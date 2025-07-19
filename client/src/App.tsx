@@ -108,7 +108,9 @@ import SecurityManagement from "@/pages/security-management-new";
 import OrderTrackingManagement from "@/pages/admin/order-tracking-management";
 import AiSeoAssistant from "@/pages/admin/ai-seo-assistant";
 import RemoteDesktop from "@/pages/admin/remote-desktop";
-import EmailServiceGuide from "@/pages/admin/email-service-guide";
+
+import TemplateDistribution from "@/pages/admin/template-distribution";
+import TemplateNumberingSystem from "@/pages/admin/template-numbering-system";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
@@ -151,7 +153,11 @@ function Router() {
           <Route path="/admin/email-progress" component={EmailProgressPage} />
           <Route path="/admin/email-templates" component={EmailTemplates} />
           <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
-          <Route path="/admin/email-service-guide" component={EmailServiceGuide} />
+
+          <Route path="/admin/email-templates-central" component={EmailTemplatesCentral} />
+          <Route path="/admin/email-templates-fixed" component={EmailTemplatesFixed} />
+          <Route path="/admin/template-distribution" component={TemplateDistribution} />
+          <Route path="/admin/template-numbering-system" component={TemplateNumberingSystem} />
           <Route path="/admin/invoice-management" component={InvoiceManagement} />
           <Route path="/admin/payment-settings" component={PaymentSettings} />
           <Route path="/admin/wallet-management" component={WalletManagement} />

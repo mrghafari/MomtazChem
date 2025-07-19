@@ -520,7 +520,7 @@ export default function AdvancedEmailSettingsPage() {
         <div className="flex items-center gap-4 mb-4">
           <h2 className="text-xl font-semibold text-gray-800">زیرماژول‌های تنظیمات ایمیل</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/admin/email-address-manager")}>
             <div className="p-4">
               <div className="flex items-center gap-3 mb-2">
@@ -536,20 +536,7 @@ export default function AdvancedEmailSettingsPage() {
             </div>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/admin/email-service-guide")}>
-            <div className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">راهنمای سرویس ایمیل</h3>
-                  <p className="text-sm text-gray-600">Email Service Guide</p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-500">راهنمای کامل استفاده از سرویس ایمیل یونیورسال و 15 دسته‌بندی آن</p>
-            </div>
-          </Card>
+
 
           <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/admin/email-progress")}>
             <div className="p-4">

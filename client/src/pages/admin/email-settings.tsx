@@ -221,13 +221,6 @@ export default function EmailSettingsPage() {
         </div>
         <div className="flex gap-3">
           <Button 
-            onClick={() => setLocation("/admin/email-service-guide")}
-            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
-          >
-            <BookOpen className="h-4 w-4 mr-2" />
-            راهنمای سرویس ایمیل
-          </Button>
-          <Button 
             onClick={() => setLocation("/admin/email-progress")}
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
