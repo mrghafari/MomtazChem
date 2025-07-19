@@ -51,6 +51,8 @@ export interface IEmailStorage {
   getTemplateById(id: number): Promise<EmailTemplate | undefined>;
   updateTemplate(id: number, template: Partial<InsertEmailTemplate>): Promise<EmailTemplate>;
   deleteTemplate(id: number): Promise<void>;
+  toggleTemplateStatus(id: number): Promise<EmailTemplate>;
+  getTemplateByNumber(templateNumber: string): Promise<EmailTemplate | undefined>;
   
   // Email Logs
   logEmail(log: InsertEmailLog): Promise<EmailLog>;
@@ -322,7 +324,6 @@ export class EmailStorage implements IEmailStorage {
           created_at, 
           updated_at
         FROM email_templates 
-        WHERE is_active = true
         ORDER BY is_default DESC, name ASC
       `);
       
@@ -474,6 +475,71 @@ export class EmailStorage implements IEmailStorage {
     await emailDb
       .delete(emailTemplates)
       .where(eq(emailTemplates.id, id));
+  }
+
+  async toggleTemplateStatus(id: number): Promise<EmailTemplate> {
+    // Get current status
+    const template = await this.getTemplateById(id);
+    if (!template) {
+      throw new Error(`Template with ID ${id} not found`);
+    }
+    
+    // Toggle the status
+    const newStatus = !template.isActive;
+    
+    const [updatedTemplate] = await emailDb
+      .update(emailTemplates)
+      .set({ 
+        isActive: newStatus,
+        updatedAt: new Date()
+      })
+      .where(eq(emailTemplates.id, id))
+      .returning();
+      
+    return updatedTemplate;
+  }
+
+  // Get template by numbered reference (e.g., "#05", "#13")
+  async getTemplateByNumber(templateNumber: string): Promise<EmailTemplate | undefined> {
+    try {
+      const { sql } = await import("drizzle-orm");
+      
+      const result = await emailDb.execute(sql`
+        SELECT 
+          id, 
+          name as templateName, 
+          category,
+          subject, 
+          html_content as htmlContent, 
+          text_content as textContent, 
+          variables, 
+          is_active as isActive, 
+          is_default as isDefault, 
+          language, 
+          created_by as createdBy, 
+          usage_count as usageCount, 
+          last_used as lastUsed, 
+          created_at as createdAt, 
+          updated_at as updatedAt
+        FROM email_templates 
+        WHERE name LIKE '%' || ${templateNumber} || '%' 
+        AND is_active = true
+        ORDER BY name ASC
+        LIMIT 1
+      `);
+      
+      if (result.rows.length === 0) {
+        console.warn(`❌ Template ${templateNumber} not found or inactive`);
+        return undefined;
+      }
+      
+      const template = result.rows[0] as any;
+      console.log(`✅ Found template ${templateNumber}: ${template.templateName}`);
+      return template;
+    } catch (error) {
+      console.error(`Error fetching template ${templateNumber}:`, error);
+      return undefined;
+    }
   }
 
   async setDefaultTemplate(id: number, category: string): Promise<void> {

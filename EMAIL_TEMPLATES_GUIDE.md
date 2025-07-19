@@ -2,6 +2,28 @@
 
 ## فهرست ۱۷ قالب ایمیل فعال با شماره‌گذاری دقیق
 
+## ⚠️ قانون بحرانی: هرگز شماره قالب‌ها را تغییر نداد
+**شماره‌های اختصاص یافته به templates را هرگز تغییر نداد تا ایمیل اشتباه ارسال نشود**
+
+شماره‌های قالب دائمی هستند و برای جلوگیری از ارسال ایمیل اشتباه به مشتریان، هرگز نباید تغییر کنند.
+
+## نحوه استفاده از شماره‌های قالب در کد
+
+```javascript
+// استفاده صحیح: استفاده از شماره قالب
+await emailStorage.getTemplateByNumber('#05'); // Template #05 - Follow-up Response
+
+// استفاده صحیح: در Universal Email Service
+await UniversalEmailService.sendEmail({
+  templateNumber: '#05',
+  categoryKey: 'notifications',
+  variables: { customer_name: 'نام مشتری' }
+});
+
+// استفاده صحیح: برای inventory alerts
+const templateNumber = criticalAlerts.length > 0 ? '#17' : '#13';
+```
+
 ### قالب‌های پشتیبانی فنی
 **#01 - Technical Support Response** 
 - **شماره مرجع**: `TPL-001`

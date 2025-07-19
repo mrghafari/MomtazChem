@@ -88,6 +88,59 @@ class EmailService {
     }
   }
 
+  // Get template by number (e.g., "#05", "#13") - NEW METHOD
+  private async getEmailTemplateByNumber(templateNumber: string) {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      return await emailStorage.getTemplateByNumber(templateNumber);
+    } catch (error) {
+      console.error(`Error fetching template ${templateNumber}:`, error);
+      return null;
+    }
+  }
+
+  // Send email using template number - NEW METHOD
+  async sendEmailWithTemplate(templateNumber: string, variables: Record<string, string>, to: string, category: string = 'admin') {
+    try {
+      const template = await this.getEmailTemplateByNumber(templateNumber);
+      
+      if (!template) {
+        console.error(`Template ${templateNumber} not found`);
+        return false;
+      }
+
+      console.log(`📧 Using Template ${templateNumber} - ${template.templateName}`);
+
+      // Process template content with variables
+      let processedHtml = template.htmlContent;
+      let processedSubject = template.subject;
+      let processedText = template.textContent || '';
+      
+      for (const [key, value] of Object.entries(variables)) {
+        const placeholder = `{{${key}}}`;
+        processedHtml = processedHtml.replace(new RegExp(placeholder, 'g'), value);
+        processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
+        processedText = processedText.replace(new RegExp(placeholder, 'g'), value);
+      }
+
+      const { transporter, config } = await this.createTransporter(category);
+
+      await transporter.sendMail({
+        from: `"شرکت ممتاز شیمی" <${config.username}>`,
+        to: to,
+        subject: processedSubject,
+        text: processedText || processedHtml.replace(/<[^>]*>/g, ''), // Strip HTML for text version
+        html: processedHtml,
+      });
+
+      console.log(`✅ Email sent using Template ${templateNumber} to ${to}`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Error sending email with Template ${templateNumber}:`, error);
+      return false;
+    }
+  }
+
   private processTemplate(content: string, variables: Record<string, string>): string {
     let processed = content;
     
@@ -129,7 +182,8 @@ class EmailService {
       const frontendUrl = baseUrl || process.env.FRONTEND_URL || 'https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev';
       const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
-      const template = await this.getEmailTemplate('Password Management Template');
+      // Use Template #06 - Password Management Template
+      const template = await this.getEmailTemplateByNumber('#06');
       
       if (template) {
         const variables = {

@@ -152,6 +152,34 @@ const EmailTemplates: React.FC = () => {
     fetchTemplates();
   };
 
+  // Toggle template status
+  const toggleTemplateStatus = async (templateId: number) => {
+    try {
+      const response = await fetch(`/api/admin/email/templates/${templateId}/toggle`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log("✅ Template status toggled:", result.message);
+      
+      // Refresh templates list
+      refetch();
+      
+      return result;
+    } catch (error) {
+      console.error("❌ Error toggling template status:", error);
+      throw error;
+    }
+  };
+
   // Debug and handle templates data
   console.log("🔧 Email Templates Debug:", { 
     hasData: !!templatesData, 
@@ -415,6 +443,19 @@ const EmailTemplates: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
+                        onClick={() => toggleTemplateStatus(template.id)}
+                        className={`h-8 w-8 p-0 ${template.isActive === false ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'bg-green-50 border-green-200 hover:bg-green-100'}`}
+                        title={template.isActive === false ? 'فعال کردن ارسال ایمیل' : 'غیرفعال کردن ارسال ایمیل'}
+                      >
+                        {template.isActive === false ? (
+                          <span className="text-red-600">✗</span>
+                        ) : (
+                          <span className="text-green-600">✓</span>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => handleCopy(template)}
                         className="h-8 w-8 p-0"
                       >
@@ -431,7 +472,18 @@ const EmailTemplates: React.FC = () => {
                     </div>
                   </div>
                   <CardTitle className="text-lg">{template.name}</CardTitle>
-                  <p className="text-sm text-gray-600">استفاده شده: {template.usage_count} بار</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-600">استفاده شده: {template.usage_count} بار</p>
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        template.isActive === false 
+                          ? 'bg-red-100 text-red-700 border border-red-200' 
+                          : 'bg-green-100 text-green-700 border border-green-200'
+                      }`}>
+                        {template.isActive === false ? 'غیرفعال' : 'فعال'}
+                      </span>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">

@@ -80,27 +80,72 @@ export class InventoryAlertService {
   }
 
   /**
-   * Send inventory alert email to management
+   * Send inventory alert email to management using Template #13 or #17
    */
   private static async sendEmailAlert(alerts: InventoryAlert[]): Promise<void> {
     try {
-      const htmlContent = this.generateAlertEmailHtml(alerts);
-      const textContent = this.generateAlertEmailText(alerts);
+      const { emailStorage } = await import('./email-storage');
+      
+      // Determine which template to use based on alert severity
+      const criticalAlerts = alerts.filter(a => a.alertLevel === 'out_of_stock');
+      const templateNumber = criticalAlerts.length > 0 ? '#17' : '#13'; // Use #17 for comprehensive alerts, #13 for low stock
+      
+      const alertTemplate = await emailStorage.getTemplateByNumber(templateNumber);
+      
+      if (alertTemplate) {
+        console.log(`📧 Using Template ${templateNumber} - ${alertTemplate.templateName} for inventory alerts`);
+        
+        const templateVariables = {
+          alert_count: alerts.length.toString(),
+          product_count: alerts.length.toString(),
+          critical_count: criticalAlerts.length.toString(),
+          low_stock_count: (alerts.length - criticalAlerts.length).toString(),
+          alert_level: criticalAlerts.length > 0 ? 'critical' : 'warning',
+          timestamp: new Date().toLocaleString('fa-IR'),
+          products_list: alerts.map(a => `${a.productName} (موجودی: ${a.currentStock})`).join(', ')
+        };
 
-      // Use Universal Email Service for inventory alerts
-      await UniversalEmailService.sendEmail({
-        categoryKey: this.notificationConfig.categoryKey,
-        to: ['inventory@momtazchem.com'],
-        subject: `🚨 Inventory Alert - ${alerts.length} Product${alerts.length > 1 ? 's' : ''} Need Attention`,
-        html: htmlContent,
-        text: textContent,
-        variables: {
-          alertCount: alerts.length.toString(),
-          productCount: alerts.length.toString()
+        // Process template content with variables
+        let processedHtml = alertTemplate.htmlContent;
+        let processedSubject = alertTemplate.subject;
+        
+        for (const [key, value] of Object.entries(templateVariables)) {
+          const placeholder = `{{${key}}}`;
+          processedHtml = processedHtml.replace(new RegExp(placeholder, 'g'), value);
+          processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
         }
-      });
 
-      console.log(`Inventory alert sent for ${alerts.length} products via Universal Email Service`);
+        await UniversalEmailService.sendEmail({
+          categoryKey: this.notificationConfig.categoryKey,
+          to: ['inventory@momtazchem.com'],
+          subject: processedSubject,
+          html: processedHtml,
+          templateNumber: templateNumber,
+          variables: templateVariables
+        });
+
+        console.log(`✅ Inventory alert sent using Template ${templateNumber} for ${alerts.length} products`);
+      } else {
+        console.warn(`⚠️ Template ${templateNumber} not found, using fallback method`);
+        
+        // Fallback to hardcoded template
+        const htmlContent = this.generateAlertEmailHtml(alerts);
+        const textContent = this.generateAlertEmailText(alerts);
+
+        await UniversalEmailService.sendEmail({
+          categoryKey: this.notificationConfig.categoryKey,
+          to: ['inventory@momtazchem.com'],
+          subject: `🚨 Inventory Alert - ${alerts.length} Product${alerts.length > 1 ? 's' : ''} Need Attention`,
+          html: htmlContent,
+          text: textContent,
+          variables: {
+            alertCount: alerts.length.toString(),
+            productCount: alerts.length.toString()
+          }
+        });
+
+        console.log(`Inventory alert sent for ${alerts.length} products via fallback template`);
+      }
     } catch (error) {
       console.error('Error sending inventory alert email:', error);
     }

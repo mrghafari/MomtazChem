@@ -9451,14 +9451,53 @@ ${procedure.content}
         
         console.log(`Admin inquiry notification sent via Universal Email Service for category: ${inquiryData.category} → ${emailCategory}`);
 
-        // Send confirmation email to customer with English template
+        // Send confirmation email to customer using Template #05 - Follow-up Response
         try {
-          await UniversalEmailService.sendEmail({
-            categoryKey: 'notifications',
-            to: [inquiryData.contactEmail],
-            cc: [],
-            subject: `Inquiry Confirmation - ${inquiry.inquiryNumber}`,
-            html: `
+          const { emailStorage } = await import('./email-storage');
+          const followUpTemplate = await emailStorage.getTemplateByNumber('#05');
+          
+          if (followUpTemplate) {
+            console.log(`📧 Using Template #05 - ${followUpTemplate.templateName}`);
+            
+            const templateVariables = {
+              customer_name: inquiryData.contactEmail,
+              inquiry_number: inquiry.inquiryNumber,
+              inquiry_subject: inquiryData.subject || 'General Inquiry',
+              inquiry_category: inquiryData.category || 'general',
+              response_text: 'استعلام شما با موفقیت دریافت شد و در کمتر از 24 ساعت پاسخ داده خواهد شد.',
+              contact_phone: '+964 770 999 6771',
+              contact_email: 'info@momtazchem.com'
+            };
+
+            // Process template content with variables
+            let processedHtml = followUpTemplate.htmlContent;
+            let processedSubject = followUpTemplate.subject;
+            
+            for (const [key, value] of Object.entries(templateVariables)) {
+              const placeholder = `{{${key}}}`;
+              processedHtml = processedHtml.replace(new RegExp(placeholder, 'g'), value);
+              processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
+            }
+
+            await UniversalEmailService.sendEmail({
+              categoryKey: 'notifications',
+              to: [inquiryData.contactEmail],
+              subject: processedSubject,
+              html: processedHtml,
+              templateNumber: '#05',
+              variables: templateVariables
+            });
+            
+            console.log(`✅ Follow-up email sent using Template #05 to: ${inquiryData.contactEmail}`);
+          } else {
+            console.warn(`⚠️ Template #05 not found, using fallback template`);
+            // Fallback to hardcoded template
+            await UniversalEmailService.sendEmail({
+              categoryKey: 'notifications',
+              to: [inquiryData.contactEmail],
+              cc: [],
+              subject: `Inquiry Confirmation - ${inquiry.inquiryNumber}`,
+              html: `
               <div style="font-family: 'Arial', 'Helvetica', sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-radius: 8px;">
                 
                 <div style="text-align: center; margin-bottom: 30px;">
@@ -9531,9 +9570,10 @@ ${procedure.content}
                 </div>
               </div>
             `
-          });
-          
-          console.log(`✅ Customer confirmation email sent to: ${inquiryData.contactEmail}`);
+            });
+            
+            console.log(`✅ Customer confirmation email sent to: ${inquiryData.contactEmail} (using fallback)`);
+          }
         } catch (customerEmailError) {
           console.error("❌ Failed to send customer confirmation email:", customerEmailError);
         }
@@ -11416,6 +11456,37 @@ ${procedure.content}
       res.status(500).json({ 
         success: false, 
         message: "Error updating email template: " + error.message 
+      });
+    }
+  });
+
+  // Toggle template status (active/inactive)
+  app.patch("/api/admin/email/templates/:id/toggle", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه قالب نامعتبر است" 
+        });
+      }
+      
+      const template = await emailStorage.toggleTemplateStatus(id);
+      
+      console.log(`📧 Template ${template.templateName} status toggled to: ${template.isActive ? 'فعال' : 'غیرفعال'}`);
+      
+      res.json({ 
+        success: true, 
+        message: `وضعیت قالب با موفقیت به حالت ${template.isActive ? 'فعال' : 'غیرفعال'} تغییر یافت`,
+        template
+      });
+    } catch (error) {
+      console.error("Error toggling template status:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در تغییر وضعیت قالب: " + error.message 
       });
     }
   });

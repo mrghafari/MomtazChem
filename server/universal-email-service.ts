@@ -3,7 +3,7 @@ import { emailStorage } from "./email-storage";
 
 export interface UniversalEmailOptions {
   categoryKey: string;
-  to: string[];
+  to?: string[];
   cc?: string[];
   bcc?: string[];
   subject: string;
@@ -11,6 +11,7 @@ export interface UniversalEmailOptions {
   text?: string;
   attachments?: any[];
   variables?: { [key: string]: string };
+  templateNumber?: string; // NEW: Template number reference (e.g., "#05", "#13")
 }
 
 export class UniversalEmailService {
@@ -20,7 +21,43 @@ export class UniversalEmailService {
    */
   static async sendEmail(options: UniversalEmailOptions): Promise<boolean> {
     try {
-      console.log(`📧 [Universal Email] Sending email for category: ${options.categoryKey}`);
+      console.log(`📧 [Universal Email] Sending email for category: ${options.categoryKey}${options.templateNumber ? ` using template ${options.templateNumber}` : ''}`);
+      
+      // If template number specified, load and use template
+      if (options.templateNumber) {
+        try {
+          const template = await emailStorage.getTemplateByNumber(options.templateNumber);
+          if (template) {
+            console.log(`📧 Template ${options.templateNumber} found: ${template.templateName}`);
+            
+            // Process template with variables if provided
+            if (options.variables) {
+              let processedHtml = template.htmlContent;
+              let processedSubject = template.subject;
+              
+              for (const [key, value] of Object.entries(options.variables)) {
+                const placeholder = `{{${key}}}`;
+                processedHtml = processedHtml.replace(new RegExp(placeholder, 'g'), value);
+                processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
+              }
+              
+              // Update options with template content
+              options.html = processedHtml;
+              options.subject = processedSubject;
+              options.text = template.textContent || processedHtml.replace(/<[^>]*>/g, ''); // Strip HTML for text version
+            } else {
+              // Use template as-is
+              options.html = template.htmlContent;
+              options.subject = template.subject;
+              options.text = template.textContent || template.htmlContent.replace(/<[^>]*>/g, '');
+            }
+          } else {
+            console.warn(`⚠️ Template ${options.templateNumber} not found, using provided content`);
+          }
+        } catch (templateError) {
+          console.error(`❌ Error loading template ${options.templateNumber}:`, templateError);
+        }
+      }
       
       // Get category with SMTP settings
       const categorySettings = await emailStorage.getCategoryWithSettings(options.categoryKey);
@@ -181,19 +218,24 @@ export class UniversalEmailService {
     const { CONFIG } = await import('./config');
     const resetLink = CONFIG.getPasswordResetUrl(resetToken, req);
     
+    const templateVariables = {
+      customer_name: userName,
+      email_type: 'درخواست تغییر رمز عبور',
+      email_content: 'درخواست تغییر رمز عبور برای حساب کاربری شما دریافت شد.',
+      password_label: '',
+      password_value: '',
+      security_note: 'در صورتی که این درخواست را شما نداده‌اید، این ایمیل را نادیده بگیرید. این لینک تا 24 ساعت معتبر است.',
+      action_url: resetLink,
+      action_text: 'تغییر رمز عبور'
+    };
+    
     return await this.sendEmail({
       categoryKey: 'password-reset',
       to: [email],
       subject: 'Password Reset Request - Momtaz Chemical',
-      html: `
-        <h2>Password Reset Request</h2>
-        <p>Hello ${userName},</p>
-        <p>You have requested to reset your password. Click the link below to reset your password:</p>
-        <a href="${resetLink}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
-        <p>If you didn't request this, please ignore this email.</p>
-        <p>Best regards,<br>Momtaz Chemical Team</p>
-      `,
-      text: `Password Reset Request\n\nHello ${userName},\n\nYou have requested to reset your password. Click the link below to reset your password:\n${resetLink}\n\nIf you didn't request this, please ignore this email.\n\nBest regards,\nMomtaz Chemical Team`
+      html: `<h2>Fallback Template</h2>`, // Will be replaced by template #06
+      templateNumber: '#06',
+      variables: templateVariables
     });
   }
 
