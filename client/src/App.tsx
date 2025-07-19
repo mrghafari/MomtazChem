@@ -35,6 +35,8 @@ import EmailAddressManagerFixed from "@/pages/admin/email-address-manager-fixed"
 import EmailProgressPage from "@/pages/admin/email-progress";
 import EmailTemplates from '@/pages/admin/email-templates';
 import EmailTemplatesFixed from '@/pages/admin/email-templates-fixed';
+import Template05View from '@/pages/admin/template05-view';
+import Template05StaticView from '@/pages/admin/template05-static-view';
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import ServerConfig from "@/components/admin/server-config";
 import ForgotPassword from "@/pages/forgot-password";
@@ -198,6 +200,8 @@ function Router() {
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/email-templates" component={EmailTemplates} />
           <Route path="/admin/email-templates-fixed" component={EmailTemplatesFixed} />
+          <Route path="/admin/template05-view" component={Template05View} />
+          <Route path="/admin/template05-static" component={Template05StaticView} />
           <Route path="/admin/security-management" component={SecurityManagement} />
           <Route path="/admin/ticketing-system" component={TicketingSystemFixed} />
           <Route path="/admin/ai-seo-assistant" component={AiSeoAssistant} />

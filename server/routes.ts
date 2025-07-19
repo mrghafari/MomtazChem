@@ -11315,7 +11315,8 @@ Momtaz Chemical Technical Team`,
       console.error("Error fetching admin email templates:", error);
       res.status(500).json({ 
         success: false, 
-        message: "خطا در دریافت قالب‌های ایمیل" 
+        message: "خطا در دریافت قالب‌های ایمیل",
+        error: error.message
       });
     }
   });
@@ -28688,6 +28689,55 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "Failed to increment template usage"
+      });
+    }
+  });
+
+  // Get Template #05 directly via emailStorage
+  app.get("/api/template05-direct", async (req, res) => {
+    try {
+      console.log('🔍 Fetching Template #05 directly via emailStorage');
+      
+      const { emailStorage } = await import("./email-storage");
+      const templates = await emailStorage.getAllTemplates();
+      
+      const template05 = templates.find(t => 
+        t.name === '#05 - Momtaz Chemical Follow-up Response' ||
+        t.templateName === '#05 - Momtaz Chemical Follow-up Response'
+      );
+      
+      if (!template05) {
+        return res.status(404).json({
+          success: false,
+          message: "Template #05 not found",
+          availableTemplates: templates.map(t => t.name || t.templateName)
+        });
+      }
+      
+      console.log('✅ Template #05 found:', {
+        id: template05.id,
+        name: template05.name || template05.templateName,
+        contentLength: (template05.htmlContent || template05.html_content || '').length
+      });
+      
+      res.json({
+        success: true,
+        data: {
+          id: template05.id,
+          name: template05.name || template05.templateName,
+          subject: template05.subject,
+          html_content: template05.htmlContent || template05.html_content,
+          category: template05.category || template05.categoryName,
+          language: template05.language || 'fa',
+          created_at: template05.createdAt || template05.created_at
+        }
+      });
+    } catch (error) {
+      console.error("❌ Error fetching Template #05:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch Template #05",
+        error: error.message
       });
     }
   });
