@@ -2,7 +2,7 @@
  * Unified Inventory Management System
  * Makes showcase_products the single source of truth for inventory
  * Shop products will get inventory from showcase_products
- * Now includes LIFO batch tracking with waste management
+ * Now includes FIFO batch tracking with waste management
  */
 
 import { storage } from "./storage";
@@ -151,14 +151,14 @@ export class UnifiedInventoryManager {
   }
 
   /**
-   * Reduce inventory when order is placed using LIFO batch management
+   * Reduce inventory when order is placed using FIFO batch management
    * This is the single point for inventory reduction
    */
   static async reduceInventoryForOrder(orderItems: any[]): Promise<boolean> {
     try {
-      console.log(`📦 [INVENTORY] Reducing inventory for order with ${orderItems.length} items using LIFO batch management`);
+      console.log(`📦 [INVENTORY] Reducing inventory for order with ${orderItems.length} items using FIFO batch management`);
       
-      // Import shop storage for LIFO functionality
+      // Import shop storage for FIFO functionality
       const { ShopStorage } = await import('./shop-storage');
       const shopStorage = new ShopStorage();
       
@@ -171,25 +171,25 @@ export class UnifiedInventoryManager {
           continue;
         }
         
-        // Use LIFO batch management if product has barcode
+        // Use FIFO batch management if product has barcode
         if (currentInventory.barcode) {
-          console.log(`📦 [INVENTORY] Using LIFO batch system for ${item.productName} (${currentInventory.barcode})`);
+          console.log(`📦 [INVENTORY] Using FIFO batch system for ${item.productName} (${currentInventory.barcode})`);
           
-          const lifoResult = await shopStorage.reduceInventoryLIFO(
+          const fifoResult = await shopStorage.reduceInventoryFIFO(
             currentInventory.barcode,
             item.quantity,
             `Order sale: ${item.quantity} units sold`
           );
           
-          if (lifoResult.success) {
-            console.log(`✅ [LIFO] Successfully reduced ${item.quantity} units from ${lifoResult.affectedBatches.length} batches`);
+          if (fifoResult.success) {
+            console.log(`✅ [FIFO] Successfully reduced ${item.quantity} units from ${fifoResult.affectedBatches.length} batches`);
             
             // Show batch details
-            for (const batch of lifoResult.affectedBatches) {
+            for (const batch of fifoResult.affectedBatches) {
               console.log(`  📦 Batch ${batch.batchNumber}: ${batch.previousStock} → ${batch.newStock} (reduced ${batch.reducedQuantity})`);
             }
           } else {
-            console.log(`❌ [LIFO] Failed to reduce inventory for ${item.productName} - insufficient stock`);
+            console.log(`❌ [FIFO] Failed to reduce inventory for ${item.productName} - insufficient stock`);
           }
         } else {
           // Fallback to traditional inventory reduction if no barcode
@@ -211,12 +211,39 @@ export class UnifiedInventoryManager {
         }
       }
       
-      console.log(`✅ [INVENTORY] Successfully reduced inventory for all order items using LIFO batch management`);
+      console.log(`✅ [INVENTORY] Successfully reduced inventory for all order items using FIFO batch management`);
       return true;
       
     } catch (error) {
       console.error(`❌ [INVENTORY] Error reducing inventory for order:`, error);
       return false;
+    }
+  }
+
+  /**
+   * FIFO inventory reduction helper method
+   */
+  static async reduceInventoryFIFO(barcode: string, quantity: number, reason: string): Promise<{ 
+    success: boolean; 
+    batchesUsed: any[]; 
+    totalReduced: number 
+  }> {
+    try {
+      // Use shop storage FIFO method
+      const { ShopStorage } = await import('./shop-storage');
+      const shopStorage = new ShopStorage();
+      
+      const result = await shopStorage.reduceInventoryFIFO(barcode, quantity, reason);
+      
+      return {
+        success: result.success,
+        batchesUsed: result.affectedBatches,
+        totalReduced: result.success ? quantity : 0
+      };
+      
+    } catch (error) {
+      console.error('Error in FIFO inventory reduction:', error);
+      return { success: false, batchesUsed: [], totalReduced: 0 };
     }
   }
 
@@ -466,7 +493,7 @@ export class UnifiedInventoryManager {
 
   /**
    * Process order with batch tracking
-   * Uses LIFO inventory reduction and tracks batch usage
+   * Uses FIFO inventory reduction and tracks batch usage
    */
   static async processOrderWithBatchTracking(
     productId: number,
@@ -509,14 +536,14 @@ export class UnifiedInventoryManager {
         };
       }
       
-      // Use LIFO inventory reduction with batch tracking
-      const result = await this.reduceInventoryLIFO(
+      // Use FIFO inventory reduction with batch tracking
+      const result = await this.reduceInventoryFIFO(
         productData.barcode,
         quantityToSell,
         notes || `Order ${orderId} processing`
       );
       
-      console.log(`✅ [ORDER PROCESSING] LIFO inventory reduction completed for order ${orderId}`);
+      console.log(`✅ [ORDER PROCESSING] FIFO inventory reduction completed for order ${orderId}`);
       
       return {
         success: true,

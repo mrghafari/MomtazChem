@@ -911,24 +911,24 @@ export class ShopStorage implements IShopStorage {
     });
   }
 
-  // LIFO Batch Management: Reduce inventory from newest batches first
-  async reduceInventoryLIFO(barcode: string, quantityToReduce: number, reason: string): Promise<{ success: boolean, affectedBatches: any[] }> {
+  // FIFO Batch Management: Reduce inventory from oldest batches first
+  async reduceInventoryFIFO(barcode: string, quantityToReduce: number, reason: string): Promise<{ success: boolean, affectedBatches: any[] }> {
     try {
       const { pool } = await import('./db');
       let remainingQuantity = quantityToReduce;
       const affectedBatches = [];
       
-      // Get all batches for this barcode, ordered by creation date (newest first - LIFO)
+      // Get all batches for this barcode, ordered by creation date (oldest first - FIFO)
       const batchesResult = await pool.query(`
         SELECT id, name, batch_number, stock_quantity, created_at
         FROM showcase_products 
         WHERE barcode = $1 AND stock_quantity > 0
-        ORDER BY created_at DESC
+        ORDER BY created_at ASC
       `, [barcode]);
       
-      console.log(`🔄 [LIFO] Reducing ${quantityToReduce} units from barcode ${barcode} across ${batchesResult.rows.length} batches`);
+      console.log(`🔄 [FIFO] Reducing ${quantityToReduce} units from barcode ${barcode} across ${batchesResult.rows.length} batches`);
       
-      // Process batches in LIFO order (newest first)
+      // Process batches in FIFO order (oldest first)
       for (const batch of batchesResult.rows) {
         if (remainingQuantity <= 0) break;
         
@@ -960,20 +960,20 @@ export class ShopStorage implements IShopStorage {
       }
       
       if (remainingQuantity > 0) {
-        console.log(`⚠️  [LIFO] Warning: Could not reduce ${remainingQuantity} units - insufficient stock`);
+        console.log(`⚠️  [FIFO] Warning: Could not reduce ${remainingQuantity} units - insufficient stock`);
         return { success: false, affectedBatches };
       }
       
-      console.log(`✅ [LIFO] Successfully reduced ${quantityToReduce} units from ${affectedBatches.length} batches`);
+      console.log(`✅ [FIFO] Successfully reduced ${quantityToReduce} units from ${affectedBatches.length} batches`);
       return { success: true, affectedBatches };
       
     } catch (error) {
-      console.error('Error in LIFO inventory reduction:', error);
+      console.error('Error in FIFO inventory reduction:', error);
       return { success: false, affectedBatches: [] };
     }
   }
 
-  // Get current selling batch (newest batch with stock > 0)
+  // Get current selling batch (oldest batch with stock > 0 - FIFO)
   async getCurrentSellingBatch(barcode: string): Promise<any> {
     try {
       const { pool } = await import('./db');
@@ -982,7 +982,7 @@ export class ShopStorage implements IShopStorage {
         SELECT id, name, batch_number, stock_quantity, created_at
         FROM showcase_products 
         WHERE barcode = $1 AND stock_quantity > 0
-        ORDER BY created_at DESC
+        ORDER BY created_at ASC
         LIMIT 1
       `, [barcode]);
       
