@@ -34,6 +34,7 @@ import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
 import EmailAddressManagerFixed from "@/pages/admin/email-address-manager-fixed";
 import EmailProgressPage from "@/pages/admin/email-progress";
 import EmailTemplates from '@/pages/admin/email-templates';
+import EmailTemplatesFixed from '@/pages/admin/email-templates-fixed';
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import ServerConfig from "@/components/admin/server-config";
 import ForgotPassword from "@/pages/forgot-password";
@@ -196,6 +197,7 @@ function Router() {
 
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/admin/email-templates" component={EmailTemplates} />
+          <Route path="/admin/email-templates-fixed" component={EmailTemplatesFixed} />
           <Route path="/admin/security-management" component={SecurityManagement} />
           <Route path="/admin/ticketing-system" component={TicketingSystemFixed} />
           <Route path="/admin/ai-seo-assistant" component={AiSeoAssistant} />

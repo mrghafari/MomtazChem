@@ -123,8 +123,14 @@ const EmailTemplates: React.FC = () => {
         
         console.log("✅ Fixed templates with proper field mapping:", fixedTemplates.length);
         setTemplatesData(fixedTemplates);
+      } else if (data && data.success === false && data.error) {
+        // API endpoint issue - return error
+        console.error("🔴 API Error Response:", data);
+        setError(new Error(data.message || data.error || "API endpoint error"));
+        setTemplatesData([]);
       } else {
         console.warn("Response is not an array:", data);
+        setError(new Error("Unexpected API response format"));
         setTemplatesData([]);
       }
     } catch (err) {
