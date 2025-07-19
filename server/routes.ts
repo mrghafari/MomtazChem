@@ -6498,6 +6498,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // EMAIL LOGS MANAGEMENT API ENDPOINTS 
+  // =============================================================================
+
+  // Get all automatic email logs
+  app.get("/api/admin/email/logs", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT * FROM automatic_email_logs 
+        ORDER BY created_at DESC 
+        LIMIT 100
+      `);
+      
+      res.json({
+        success: true,
+        logs: result.rows
+      });
+    } catch (error: any) {
+      console.error("Error fetching email logs:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت لاگ ایمیل‌ها"
+      });
+    }
+  });
+
+  // Get email log by ID
+  app.get("/api/admin/email/logs/:id", requireAuth, async (req, res) => {
+    try {
+      const logId = parseInt(req.params.id);
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT * FROM automatic_email_logs 
+        WHERE id = $1
+      `, [logId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "لاگ ایمیل یافت نشد"
+        });
+      }
+      
+      res.json({
+        success: true,
+        log: result.rows[0]
+      });
+    } catch (error: any) {
+      console.error("Error fetching email log:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت لاگ ایمیل"
+      });
+    }
+  });
+
+  // Search email logs
+  app.get("/api/admin/email/logs/search", requireAuth, async (req, res) => {
+    try {
+      const { emailType, recipientEmail, dateFrom, dateTo, deliveryStatus } = req.query;
+      const { pool } = await import('./db');
+      
+      let query = `
+        SELECT * FROM automatic_email_logs 
+        WHERE 1=1
+      `;
+      const params: any[] = [];
+      let paramCount = 0;
+      
+      if (emailType) {
+        paramCount++;
+        query += ` AND email_type = $${paramCount}`;
+        params.push(emailType);
+      }
+      
+      if (recipientEmail) {
+        paramCount++;
+        query += ` AND recipient_email ILIKE $${paramCount}`;
+        params.push(`%${recipientEmail}%`);
+      }
+      
+      if (deliveryStatus) {
+        paramCount++;
+        query += ` AND delivery_status = $${paramCount}`;
+        params.push(deliveryStatus);
+      }
+      
+      if (dateFrom) {
+        paramCount++;
+        query += ` AND created_at >= $${paramCount}`;
+        params.push(dateFrom);
+      }
+      
+      if (dateTo) {
+        paramCount++;
+        query += ` AND created_at <= $${paramCount}`;
+        params.push(dateTo);
+      }
+      
+      query += ` ORDER BY created_at DESC LIMIT 100`;
+      
+      const result = await pool.query(query, params);
+      
+      res.json({
+        success: true,
+        logs: result.rows
+      });
+    } catch (error: any) {
+      console.error("Error searching email logs:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در جستجوی لاگ ایمیل‌ها"
+      });
+    }
+  });
+
+  // =============================================================================
   // SMS MANAGEMENT API ENDPOINTS
   // =============================================================================
 
@@ -11920,6 +12037,98 @@ Momtaz Chemical Technical Team`,
       res.status(500).json({ 
         success: false, 
         message: "خطا در دریافت دسته‌بندی‌های ایمیل" 
+      });
+    }
+  });
+
+  // Create new email category
+  app.post("/api/admin/email/categories", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const { categoryKey, categoryName, description } = req.body;
+
+      if (!categoryKey || !categoryName) {
+        return res.status(400).json({
+          success: false,
+          message: "نام و کلید دسته‌بندی الزامی است"
+        });
+      }
+
+      // Check if category key already exists
+      const existing = await emailStorage.getCategoryByKey(categoryKey);
+      if (existing) {
+        return res.status(400).json({
+          success: false,
+          message: "این کلید دسته‌بندی قبلاً وجود دارد"
+        });
+      }
+
+      const newCategory = await emailStorage.createCategory({
+        categoryKey,
+        categoryName,
+        description: description || ""
+      });
+
+      res.json({
+        success: true,
+        message: "دسته‌بندی با موفقیت ایجاد شد",
+        category: newCategory
+      });
+    } catch (error) {
+      console.error("Error creating email category:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ایجاد دسته‌بندی ایمیل"
+      });
+    }
+  });
+
+  // Delete email category
+  app.delete("/api/admin/email/categories/:id", requireAuth, async (req, res) => {
+    try {
+      const { emailStorage } = await import("./email-storage");
+      const categoryId = parseInt(req.params.id);
+
+      if (isNaN(categoryId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه دسته‌بندی نامعتبر است"
+        });
+      }
+
+      // Check if category exists
+      const category = await emailStorage.getCategoryById(categoryId);
+      if (!category) {
+        return res.status(404).json({
+          success: false,
+          message: "دسته‌بندی یافت نشد"
+        });
+      }
+
+      // Delete related SMTP settings first
+      const smtp = await emailStorage.getSmtpSettingByCategory(categoryId);
+      if (smtp) {
+        await emailStorage.deleteSmtpSetting(smtp.id);
+      }
+
+      // Delete related recipients
+      const recipients = await emailStorage.getRecipientsByCategory(categoryId);
+      for (const recipient of recipients) {
+        await emailStorage.deleteRecipient(recipient.id);
+      }
+
+      // Delete the category
+      await emailStorage.deleteCategory(categoryId);
+
+      res.json({
+        success: true,
+        message: "دسته‌بندی با موفقیت حذف شد"
+      });
+    } catch (error) {
+      console.error("Error deleting email category:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف دسته‌بندی ایمیل"
       });
     }
   });

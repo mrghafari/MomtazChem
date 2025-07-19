@@ -178,6 +178,7 @@ function Router() {
           <Route path="/category-management" component={CategoryManagement} />
           <Route path="/seo-management" component={SeoManagement} />
           <Route path="/admin/sms-management" component={AdminSmsManagement} />
+          <Route path="/admin/email-logs" component={lazy(() => import("@/pages/admin-email-logs"))} />
           <Route path="/admin/sms" component={AdminSmsManagement} />
           <Route path="/admin/widgets" component={WidgetRecommendations} />
           <Route path="/admin/order-management" component={OrderTrackingManagement} />

@@ -22,7 +22,8 @@ import {
   Eye,
   EyeOff,
   Zap,
-  BookOpen
+  BookOpen,
+  FileText
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -467,13 +468,21 @@ export default function EmailSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-center items-center py-8">
+              <div className="flex gap-4 justify-center items-center py-8">
                 <Button
                   onClick={() => setLocation("/admin/email-templates")}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg"
                 >
                   <Mail className="w-5 h-5 mr-2" />
                   باز کردن مدیریت قالب‌ها
+                </Button>
+                
+                <Button
+                  onClick={() => setLocation("/admin/email-logs")}
+                  className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-8 py-3 text-lg"
+                >
+                  <FileText className="w-5 h-5 mr-2" />
+                  لاگ ایمیل‌های اتوماتیک
                 </Button>
               </div>
               <div className="text-center text-gray-600 mt-4">

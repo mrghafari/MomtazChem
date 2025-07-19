@@ -27,6 +27,7 @@ export interface IEmailStorage {
   getCategoryById(id: number): Promise<EmailCategory | undefined>;
   getCategoryByKey(key: string): Promise<EmailCategory | undefined>;
   updateCategory(id: number, category: Partial<InsertEmailCategory>): Promise<EmailCategory>;
+  deleteCategory(id: number): Promise<void>;
   
   // SMTP Settings
   createSmtpSetting(setting: InsertSmtpSetting): Promise<SmtpSetting>;
@@ -107,6 +108,12 @@ export class EmailStorage implements IEmailStorage {
       .where(eq(emailCategories.id, id))
       .returning();
     return category;
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    await emailDb
+      .delete(emailCategories)
+      .where(eq(emailCategories.id, id));
   }
   
   // SMTP Settings

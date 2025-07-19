@@ -56,6 +56,28 @@ export const categoryEmailAssignments = pgTable("category_email_assignments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Automatic Email Logs Table - logs all automated emails sent by the system
+export const automaticEmailLogs = pgTable("automatic_email_logs", {
+  id: serial("id").primaryKey(),
+  emailType: text("email_type").notNull(), // "inquiry_response", "inventory_alert", "password_reset", etc.
+  recipientEmail: text("recipient_email").notNull(),
+  recipientName: text("recipient_name"),
+  senderEmail: text("sender_email").notNull(),
+  senderName: text("sender_name"),
+  subject: text("subject").notNull(),
+  htmlContent: text("html_content").notNull(),
+  textContent: text("text_content"),
+  templateUsed: text("template_used"), // template ID or name used
+  categoryKey: text("category_key"), // category for categorized emails
+  triggerEvent: text("trigger_event"), // "new_inquiry", "low_stock", "user_registration", etc.
+  relatedEntityId: text("related_entity_id"), // inquiry ID, customer ID, product ID, etc.
+  deliveryStatus: text("delivery_status").default("pending"), // "pending", "sent", "failed"
+  errorMessage: text("error_message"), // if delivery failed
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Email Templates Table
 export const emailTemplates = pgTable("email_templates", {
   id: serial("id").primaryKey(),
@@ -164,6 +186,16 @@ export const insertCategoryEmailAssignmentSchema = createInsertSchema(categoryEm
   createdAt: true,
   updatedAt: true,
 });
+
+export const insertAutomaticEmailLogSchema = createInsertSchema(automaticEmailLogs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Add types for automatic email logs
+export type AutomaticEmailLog = typeof automaticEmailLogs.$inferSelect;
+export type InsertAutomaticEmailLog = z.infer<typeof insertAutomaticEmailLogSchema>;
 
 // Validation schemas with additional rules
 export const smtpConfigSchema = z.object({

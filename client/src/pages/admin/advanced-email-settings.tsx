@@ -73,6 +73,14 @@ interface SMTPForm {
 export default function AdvancedEmailSettingsPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  
+  // Category management state
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState({
+    categoryKey: "",
+    categoryName: "",
+    description: ""
+  });
   const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<EmailCategory | null>(null);
   const [smtpForm, setSmtpForm] = useState<SMTPForm>({
@@ -320,7 +328,66 @@ export default function AdvancedEmailSettingsPage() {
     }
   });
 
+  // Create new category mutation
+  const createCategoryMutation = useMutation({
+    mutationFn: async (categoryData: { categoryKey: string; categoryName: string; description: string }) => {
+      const response = await fetch("/api/admin/email/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categoryData)
+      });
 
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create category");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
+      toast({ title: "دسته‌بندی با موفقیت ایجاد شد" });
+      setShowAddCategory(false);
+      setNewCategory({ categoryKey: "", categoryName: "", description: "" });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در ایجاد دسته‌بندی",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Delete category mutation
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (categoryId: number) => {
+      const response = await fetch(`/api/admin/email/categories/${categoryId}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete category");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/categories"] });
+      toast({ title: "دسته‌بندی با موفقیت حذف شد" });
+      if (selectedCategory) {
+        setSelectedCategory(null);
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در حذف دسته‌بندی",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
 
   const categories: EmailCategory[] = categoriesData?.categories || [];
 
@@ -574,6 +641,25 @@ export default function AdvancedEmailSettingsPage() {
         <div>
           <h2 className="text-2xl font-semibold">Email Categories</h2>
           <p className="text-gray-600">Configure SMTP settings and recipients for each category</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowAddCategory(true)}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            افزودن دسته‌بندی
+          </Button>
+          {selectedCategory && (
+            <Button
+              onClick={() => deleteCategoryMutation.mutate(selectedCategory.id)}
+              variant="destructive"
+              disabled={deleteCategoryMutation.isPending}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {deleteCategoryMutation.isPending ? "در حال حذف..." : "حذف دسته‌بندی"}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1486,6 +1572,67 @@ export default function AdvancedEmailSettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Add Category Modal */}
+      {showAddCategory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">افزودن دسته‌بندی جدید</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="category-key">کلید دسته‌بندی</Label>
+                <Input
+                  id="category-key"
+                  value={newCategory.categoryKey}
+                  onChange={(e) => setNewCategory({ ...newCategory, categoryKey: e.target.value })}
+                  placeholder="مثال: marketing"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="category-name">نام دسته‌بندی</Label>
+                <Input
+                  id="category-name"
+                  value={newCategory.categoryName}
+                  onChange={(e) => setNewCategory({ ...newCategory, categoryName: e.target.value })}
+                  placeholder="مثال: Marketing Department"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="category-description">توضیحات</Label>
+                <Textarea
+                  id="category-description"
+                  value={newCategory.description}
+                  onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                  placeholder="توضیح مختصری از دسته‌بندی..."
+                  rows={3}
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddCategory(false);
+                  setNewCategory({ categoryKey: "", categoryName: "", description: "" });
+                }}
+              >
+                انصراف
+              </Button>
+              <Button
+                onClick={() => createCategoryMutation.mutate(newCategory)}
+                disabled={!newCategory.categoryKey || !newCategory.categoryName || createCategoryMutation.isPending}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {createCategoryMutation.isPending ? "در حال ایجاد..." : "ایجاد دسته‌بندی"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

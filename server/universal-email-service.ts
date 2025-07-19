@@ -140,7 +140,7 @@ export class UniversalEmailService {
 
       await transporter.sendMail(mailOptions);
       
-      // Log successful email
+      // Log successful email to both old and new logging systems
       await emailStorage.logEmail({
         categoryId: categorySettings.category.id,
         toEmail: `TO: ${finalTo.join(', ')} | CC: ${finalCc?.join(', ') || ''} | BCC: ${finalBcc?.join(', ') || ''}`,
@@ -150,24 +150,60 @@ export class UniversalEmailService {
         sentAt: new Date()
       });
 
+      // Log to new automatic email logs system
+      await this.logAutomaticEmail({
+        emailType: options.categoryKey,
+        recipientEmail: finalTo[0] || 'unknown',
+        recipientName: '', // Can be enhanced with recipient names
+        senderEmail: smtp.fromEmail,
+        senderName: smtp.fromName,
+        subject: finalSubject,
+        htmlContent: finalHtml,
+        textContent: finalText,
+        templateUsed: options.templateNumber,
+        categoryKey: options.categoryKey,
+        triggerEvent: '', // Can be passed as parameter
+        relatedEntityId: '', // Can be passed as parameter
+        deliveryStatus: 'sent',
+        sentAt: new Date(),
+      });
+
       console.log(`✅ [Universal Email] Email sent successfully for category: ${options.categoryKey}`);
       return true;
 
     } catch (error) {
       console.error(`❌ [Universal Email] Error sending email for category ${options.categoryKey}:`, error);
       
-      // Log failed email
+      // Log failed email to both systems
       try {
         const categorySettings = await emailStorage.getCategoryWithSettings(options.categoryKey);
         if (categorySettings) {
           await emailStorage.logEmail({
             categoryId: categorySettings.category.id,
-            toEmail: `TO: ${finalTo?.join(', ') || options.to.join(', ')} | CC: ${finalCc?.join(', ') || options.cc?.join(', ') || ''} | BCC: ${finalBcc?.join(', ') || options.bcc?.join(', ') || ''}`,
+            toEmail: `TO: ${finalTo?.join(', ') || options.to?.join(', ') || ''} | CC: ${finalCc?.join(', ') || options.cc?.join(', ') || ''} | BCC: ${finalBcc?.join(', ') || options.bcc?.join(', ') || ''}`,
             fromEmail: categorySettings.smtp?.fromEmail || 'unknown',
             subject: options.subject,
             status: 'failed',
             errorMessage: error instanceof Error ? error.message : 'Unknown error',
             sentAt: new Date()
+          });
+
+          // Log to new automatic email logs system
+          await this.logAutomaticEmail({
+            emailType: options.categoryKey,
+            recipientEmail: (options.to && options.to[0]) || 'unknown',
+            recipientName: '',
+            senderEmail: categorySettings.smtp?.fromEmail || 'system@momtazchem.com',
+            senderName: categorySettings.smtp?.fromName || 'System',
+            subject: options.subject,
+            htmlContent: options.html,
+            textContent: options.text,
+            templateUsed: options.templateNumber,
+            categoryKey: options.categoryKey,
+            triggerEvent: '',
+            relatedEntityId: '',
+            deliveryStatus: 'failed',
+            errorMessage: error instanceof Error ? error.message : 'Unknown error',
           });
         }
       } catch (logError) {
@@ -197,6 +233,59 @@ export class UniversalEmailService {
                categorySettings.smtp.password);
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * Log email to automatic_email_logs table
+   */
+  private static async logAutomaticEmail(logData: {
+    emailType: string;
+    recipientEmail: string;
+    recipientName?: string;
+    senderEmail: string;
+    senderName?: string;
+    subject: string;
+    htmlContent: string;
+    textContent?: string;
+    templateUsed?: string;
+    categoryKey?: string;
+    triggerEvent?: string;
+    relatedEntityId?: string;
+    deliveryStatus: string;
+    errorMessage?: string;
+    sentAt?: Date;
+  }): Promise<void> {
+    try {
+      const { pool } = await import('./db');
+      
+      await pool.query(`
+        INSERT INTO automatic_email_logs (
+          email_type, recipient_email, recipient_name, sender_email, sender_name,
+          subject, html_content, text_content, template_used, category_key,
+          trigger_event, related_entity_id, delivery_status, error_message, sent_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      `, [
+        logData.emailType,
+        logData.recipientEmail,
+        logData.recipientName || null,
+        logData.senderEmail,
+        logData.senderName || null,
+        logData.subject,
+        logData.htmlContent,
+        logData.textContent || null,
+        logData.templateUsed || null,
+        logData.categoryKey || null,
+        logData.triggerEvent || null,
+        logData.relatedEntityId || null,
+        logData.deliveryStatus,
+        logData.errorMessage || null,
+        logData.sentAt || null
+      ]);
+      
+      console.log(`📝 [EMAIL LOG] ${logData.emailType} to ${logData.recipientEmail} - ${logData.deliveryStatus}`);
+    } catch (error: any) {
+      console.error('❌ Failed to log automatic email:', error.message);
     }
   }
 
