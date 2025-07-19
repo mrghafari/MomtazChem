@@ -1233,40 +1233,99 @@ export class OrderManagementStorage implements IOrderManagementStorage {
 
   async calculateOrderWeight(customerOrderId: number): Promise<number> {
     try {
-      // Get order items and join with shop_products to get weight
+      console.log(`🔍 [WEIGHT] Calculating weight for order ${customerOrderId}`);
+      
+      // Get order items and join with both shop_products and showcase_products to get weight
       const items = await db
         .select({
           productId: orderItems.productId,
+          productName: orderItems.productName,
           quantity: orderItems.quantity,
-          grossWeight: shopProducts.grossWeight,
-          netWeight: shopProducts.netWeight,
-          weight: shopProducts.weight,
-          weightUnit: shopProducts.weightUnit
+          shopGrossWeight: shopProducts.grossWeight,
+          shopNetWeight: shopProducts.netWeight,
+          shopWeight: shopProducts.weight,
+          shopBarcode: shopProducts.barcode
         })
         .from(orderItems)
         .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
         .where(eq(orderItems.orderId, customerOrderId));
 
+      console.log(`📊 [WEIGHT] Found ${items.length} items for order ${customerOrderId}`);
+
       // Calculate total weight using gross weight (وزن ناخالص) for logistics calculations
       let totalWeight = 0;
+      
       for (const item of items) {
         let productWeight = 0;
+        const quantity = parseFloat(item.quantity?.toString() || '1');
         
-        // Priority: Use gross weight if available, otherwise fallback to legacy weight
-        if (item.grossWeight) {
-          productWeight = parseFloat(item.grossWeight.toString());
-        } else if (item.weight) {
-          productWeight = parseFloat(item.weight.toString());
+        console.log(`🏷️ [WEIGHT] Processing item: ${item.productName} (ID: ${item.productId}) x${quantity}`);
+        
+        // First try to get weight from shop_products
+        if (item.shopGrossWeight) {
+          productWeight = parseFloat(item.shopGrossWeight.toString());
+          console.log(`⚖️ [WEIGHT] Using shop gross weight: ${productWeight} kg`);
+        } else if (item.shopWeight) {
+          productWeight = parseFloat(item.shopWeight.toString());
+          console.log(`⚖️ [WEIGHT] Using shop legacy weight: ${productWeight} kg`);
+        } else if (item.shopBarcode) {
+          // If no weight in shop, try to get from showcase_products by barcode
+          console.log(`🔍 [WEIGHT] No weight in shop, searching Kardex by barcode: ${item.shopBarcode}`);
+          
+          const { showcaseProducts } = await import('../shared/showcase-schema');
+          const showcaseWeight = await db
+            .select({
+              grossWeight: showcaseProducts.grossWeight,
+              netWeight: showcaseProducts.netWeight,
+              weight: showcaseProducts.weight
+            })
+            .from(showcaseProducts)
+            .where(eq(showcaseProducts.barcode, item.shopBarcode))
+            .limit(1);
+
+          if (showcaseWeight.length > 0 && showcaseWeight[0].grossWeight) {
+            productWeight = parseFloat(showcaseWeight[0].grossWeight.toString());
+            console.log(`⚖️ [WEIGHT] Using Kardex gross weight: ${productWeight} kg`);
+          } else if (showcaseWeight.length > 0 && showcaseWeight[0].weight) {
+            productWeight = parseFloat(showcaseWeight[0].weight.toString());
+            console.log(`⚖️ [WEIGHT] Using Kardex legacy weight: ${productWeight} kg`);
+          }
         }
         
-        const quantity = item.quantity || 1;
-        totalWeight += productWeight * quantity;
+        const itemTotalWeight = productWeight * quantity;
+        totalWeight += itemTotalWeight;
+        
+        console.log(`📦 [WEIGHT] Item total: ${productWeight} kg x ${quantity} = ${itemTotalWeight} kg`);
       }
 
-      return Math.round(totalWeight * 100) / 100; // Round to 2 decimal places
+      const finalWeight = Math.round(totalWeight * 100) / 100; // Round to 2 decimal places
+      console.log(`🎯 [WEIGHT] Final calculated weight for order ${customerOrderId}: ${finalWeight} kg`);
+      
+      return finalWeight;
     } catch (error) {
-      console.error(`Error calculating weight for order ${customerOrderId}:`, error);
+      console.error(`❌ [WEIGHT] Error calculating weight for order ${customerOrderId}:`, error);
       return 0;
+    }
+  }
+
+  async updateOrderWeight(customerOrderId: number, weight: number): Promise<void> {
+    try {
+      console.log(`📝 [WEIGHT] Updating order ${customerOrderId} weight to ${weight} kg`);
+      
+      // Update the weight in order_management table
+      await db
+        .update(orderManagement)
+        .set({
+          totalWeight: weight.toString(),
+          weightUnit: 'kg',
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
+
+      console.log(`✅ [WEIGHT] Successfully updated weight for order ${customerOrderId}`);
+    } catch (error) {
+      console.error(`❌ [WEIGHT] Error updating weight for order ${customerOrderId}:`, error);
+      throw error;
     }
   }
 

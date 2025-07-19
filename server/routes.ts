@@ -16301,6 +16301,49 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Calculate order weight endpoint - accessible by all authenticated users
+  app.post('/api/orders/:customerOrderId/calculate-weight', requireAuth, async (req, res) => {
+    try {
+      const customerOrderId = parseInt(req.params.customerOrderId);
+      
+      if (!customerOrderId) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره سفارش نامعتبر است"
+        });
+      }
+
+      console.log(`🔄 [WEIGHT] Calculating weight for order ${customerOrderId}...`);
+      
+      // Calculate the weight using enhanced method
+      const weight = await orderManagementStorage.calculateOrderWeight(customerOrderId);
+      
+      // Update the order_management table with the calculated weight
+      try {
+        await orderManagementStorage.updateOrderWeight(customerOrderId, weight);
+        console.log(`✅ [WEIGHT] Updated order ${customerOrderId} weight: ${weight} kg`);
+      } catch (updateError) {
+        console.error(`❌ [WEIGHT] Failed to update weight in database:`, updateError);
+      }
+      
+      res.json({
+        success: true,
+        message: `وزن سفارش ${customerOrderId} محاسبه شد`,
+        data: {
+          customerOrderId,
+          totalWeight: weight,
+          weightUnit: 'kg'
+        }
+      });
+    } catch (error) {
+      console.error(`❌ [WEIGHT] Error calculating weight for order ${req.params.customerOrderId}:`, error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در محاسبه وزن سفارش" 
+      });
+    }
+  });
+
   // Process logistics order
   app.post('/api/logistics/orders/:id/process', requireDepartmentAuth('logistics'), async (req: any, res) => {
     try {

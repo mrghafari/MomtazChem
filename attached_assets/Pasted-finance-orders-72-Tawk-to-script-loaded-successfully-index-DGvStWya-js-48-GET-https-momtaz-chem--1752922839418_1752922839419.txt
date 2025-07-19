@@ -1,0 +1,374 @@
+finance-orders:72 Tawk.to script loaded successfully
+index-DGvStWya.js:48  GET https://momtaz-chem-website-admin3119.replit.app/api/customers/me 401 (Unauthorized)
+(anonymous) @ index-DGvStWya.js:48
+i @ index-DGvStWya.js:48
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+Hg @ index-DGvStWya.js:48
+onSubscribe @ index-DGvStWya.js:48
+subscribe @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+lW @ index-DGvStWya.js:38
+MN @ index-DGvStWya.js:40
+zf @ index-DGvStWya.js:40
+lD @ index-DGvStWya.js:40
+$u @ index-DGvStWya.js:38
+xue @ index-DGvStWya.js:40
+lh @ index-DGvStWya.js:40
+$W @ index-DGvStWya.js:40
+E @ index-DGvStWya.js:25
+$ @ index-DGvStWya.js:25
+index-DGvStWya.js:936 Auth check result: {success: true, user: {…}}
+index-DGvStWya.js:1420 The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio
+l @ index-DGvStWya.js:1420
+(anonymous) @ index-DGvStWya.js:1420
+MN @ index-DGvStWya.js:40
+zf @ index-DGvStWya.js:40
+xue @ index-DGvStWya.js:40
+lh @ index-DGvStWya.js:40
+lD @ index-DGvStWya.js:40
+$u @ index-DGvStWya.js:38
+(anonymous) @ index-DGvStWya.js:40
+setTimeout
+a @ index-DGvStWya.js:48
+o @ index-DGvStWya.js:48
+batch @ index-DGvStWya.js:48
+Lc @ index-DGvStWya.js:48
+setData @ index-DGvStWya.js:48
+onSuccess @ index-DGvStWya.js:48
+m @ index-DGvStWya.js:48
+Promise.then
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+Hg @ index-DGvStWya.js:48
+onSubscribe @ index-DGvStWya.js:48
+subscribe @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+lW @ index-DGvStWya.js:38
+MN @ index-DGvStWya.js:40
+zf @ index-DGvStWya.js:40
+lD @ index-DGvStWya.js:40
+$u @ index-DGvStWya.js:38
+xue @ index-DGvStWya.js:40
+lh @ index-DGvStWya.js:40
+$W @ index-DGvStWya.js:40
+E @ index-DGvStWya.js:25
+$ @ index-DGvStWya.js:25
+index-DGvStWya.js:1420 🔔 [FINANCIAL] نوتیفیکیشن: 5 سفارش جدید دریافت شد
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+finance-orders:44 Tawk.to Live Chat loaded successfully
+index-DGvStWya.js:48  GET https://momtaz-chem-website-admin3119.replit.app/api/customers/me 401 (Unauthorized)
+(anonymous) @ index-DGvStWya.js:48
+i @ index-DGvStWya.js:48
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+Hg @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+refetch @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+batch @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+await in (anonymous)
+(anonymous) @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+n @ index-DGvStWya.js:48
+index-DGvStWya.js:1420 The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio
+l @ index-DGvStWya.js:1420
+(anonymous) @ index-DGvStWya.js:1420
+MN @ index-DGvStWya.js:40
+zf @ index-DGvStWya.js:40
+xue @ index-DGvStWya.js:40
+lh @ index-DGvStWya.js:40
+lD @ index-DGvStWya.js:40
+$u @ index-DGvStWya.js:38
+(anonymous) @ index-DGvStWya.js:40
+setTimeout
+a @ index-DGvStWya.js:48
+o @ index-DGvStWya.js:48
+batch @ index-DGvStWya.js:48
+Lc @ index-DGvStWya.js:48
+setData @ index-DGvStWya.js:48
+onSuccess @ index-DGvStWya.js:48
+m @ index-DGvStWya.js:48
+Promise.then
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+Hg @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+refetch @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+batch @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+await in (anonymous)
+(anonymous) @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+n @ index-DGvStWya.js:48
+index-DGvStWya.js:1420 🔔 [FINANCIAL] نوتیفیکیشن: 1 سفارش جدید دریافت شد
+index-DGvStWya.js:936 Auth check result: {success: true, user: {…}}
+index-DGvStWya.js:940 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-DGvStWya.js:940
+MN @ index-DGvStWya.js:40
+zf @ index-DGvStWya.js:40
+xue @ index-DGvStWya.js:40
+lh @ index-DGvStWya.js:40
+lD @ index-DGvStWya.js:40
+$u @ index-DGvStWya.js:38
+(anonymous) @ index-DGvStWya.js:40
+index-DGvStWya.js:1420 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239837)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+onClick @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
+index-DGvStWya.js:1420 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239715)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+onClick @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
+index-DGvStWya.js:48  GET https://momtaz-chem-website-admin3119.replit.app/api/customers/me 401 (Unauthorized)
+(anonymous) @ index-DGvStWya.js:48
+i @ index-DGvStWya.js:48
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+Hg @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+refetch @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+batch @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+await in (anonymous)
+(anonymous) @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+n @ index-DGvStWya.js:48
+index-DGvStWya.js:936 Auth check result: {success: true, user: {…}}
+index-DGvStWya.js:1420 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239715)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+onClick @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
+index-DGvStWya.js:1420 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239837)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+onClick @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
+index-DGvStWya.js:48  GET https://momtaz-chem-website-admin3119.replit.app/api/customers/me 401 (Unauthorized)
+(anonymous) @ index-DGvStWya.js:48
+i @ index-DGvStWya.js:48
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+Hg @ index-DGvStWya.js:48
+fetch @ index-DGvStWya.js:48
+refetch @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+batch @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+await in (anonymous)
+(anonymous) @ index-DGvStWya.js:48
+onFocus @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+n @ index-DGvStWya.js:48
+index-DGvStWya.js:936 Auth check result: {success: true, user: {…}}
+index-DGvStWya.js:1420 🔄 [FINANCE] Sending approve request for order 235
+index-DGvStWya.js:48  POST https://momtaz-chem-website-admin3119.replit.app/api/finance/orders/235/approve 404 (Not Found)
+Je @ index-DGvStWya.js:48
+mutationFn @ index-DGvStWya.js:1420
+fn @ index-DGvStWya.js:48
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+execute @ index-DGvStWya.js:48
+await in execute
+mutate @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+Ye @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
+index-DGvStWya.js:1420 ❌ [FINANCE] Approve error: Error: 404: {"success":false,"message":"سفارش یافت نشد"}
+    at wG (index-DGvStWya.js:48:43801)
+    at async Je (index-DGvStWya.js:48:44059)
+onError @ index-DGvStWya.js:1420
+execute @ index-DGvStWya.js:48
+await in execute
+mutate @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+Ye @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
+index-DGvStWya.js:1420 🔄 [FINANCE] Sending approve request for order 235
+index-DGvStWya.js:48  POST https://momtaz-chem-website-admin3119.replit.app/api/finance/orders/235/approve 404 (Not Found)
+Je @ index-DGvStWya.js:48
+mutationFn @ index-DGvStWya.js:1420
+fn @ index-DGvStWya.js:48
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+execute @ index-DGvStWya.js:48
+await in execute
+mutate @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+Ye @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
+index-DGvStWya.js:1420 ❌ [FINANCE] Approve error: Error: 404: {"success":false,"message":"سفارش یافت نشد"}
+    at wG (index-DGvStWya.js:48:43801)
+    at async Je (index-DGvStWya.js:48:44059)
+onError @ index-DGvStWya.js:1420
+execute @ index-DGvStWya.js:48
+await in execute
+mutate @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+Ye @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
