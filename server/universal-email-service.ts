@@ -81,9 +81,17 @@ export class UniversalEmailService {
         }
       }
 
+      // Get reply-to address from category recipients
+      let replyTo = smtp.fromEmail; // Default fallback
+      const categoryRecipients = categorySettings.recipients.filter(r => r.recipientType === 'to' && r.isActive);
+      if (categoryRecipients.length > 0) {
+        replyTo = categoryRecipients[0].email; // Use first active recipient as reply-to
+      }
+
       // Send email
       const mailOptions = {
         from: `${smtp.fromName} <${smtp.fromEmail}>`,
+        replyTo: replyTo, // Responses will go to category email
         to: finalTo.join(', '),
         cc: finalCc.length > 0 ? finalCc.join(', ') : undefined,
         bcc: finalBcc.length > 0 ? finalBcc.join(', ') : undefined,

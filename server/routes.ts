@@ -9413,11 +9413,11 @@ ${procedure.content}
         
         const emailCategory = categoryMap[inquiryData.category] || 'admin';
         
-        // Send admin notification email
+        // Send admin notification email  
         await UniversalEmailService.sendEmail({
           categoryKey: emailCategory,
           to: [],
-          cc: [],
+          cc: ['info@momtazchem.com'],
           subject: `New Product Inquiry: ${inquiryData.subject || 'General Inquiry'}`,
           html: `
             <h2>New Product Inquiry</h2>
@@ -9433,6 +9433,8 @@ ${procedure.content}
             <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
               ${(inquiryData.message || '').replace(/\n/g, '<br>')}
             </div>
+            <hr>
+            <p style="color: #d32f2f; font-weight: bold;">⏰ Response Required: Within 24 hours</p>
           `,
           variables: {
             inquiryNumber: inquiry.inquiryNumber,
@@ -9457,67 +9459,59 @@ ${procedure.content}
             cc: [],
             subject: `Inquiry Confirmation - ${inquiry.inquiryNumber}`,
             html: `
-              <div style="font-family: 'Arial', 'Helvetica', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px;">
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-                  <h1 style="margin: 0; font-size: 28px; font-weight: bold;">Momtaz Chemical Solutions</h1>
-                  <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">شرکت ممتاز شیمی</p>
+              <div style="font-family: 'Arial', 'Helvetica', sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                  <h1 style="color: #2c3e50; font-size: 24px; font-weight: bold; margin: 0;">Momtaz Chemical Solutions</h1>
+                  <p style="color: #7f8c8d; font-size: 14px; margin: 5px 0 0 0;">شرکت ممتاز شیمی</p>
                 </div>
                 
-                <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                  <h2 style="color: #333; margin-top: 0; font-size: 24px; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
-                    Thank You for Your Inquiry
-                  </h2>
-                  
-                  <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
-                    Dear Valued Customer,
-                  </p>
-                  
-                  <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
-                    Thank you for your inquiry about our <strong>${productName || 'chemical products'}</strong>. We are pleased to provide you with detailed information about this product. Our technical team has reviewed your requirements and will send you a comprehensive quote including pricing, specifications, and availability within <strong>24 hours</strong>.
-                  </p>
-                  
-                  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #667eea;">
-                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">Your Inquiry Details:</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>Inquiry Number:</strong> ${inquiry.inquiryNumber}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>Product:</strong> ${productName || 'General'}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>Subject:</strong> ${inquiryData.subject || 'General Inquiry'}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>Category:</strong> ${inquiryData.category || 'General'}</p>
-                  </div>
-                  
-                  <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
-                    <h3 style="color: #1976d2; margin: 0 0 15px 0; font-size: 18px;">⏰ Response Time</h3>
-                    <p style="margin: 0; font-size: 16px; color: #333; font-weight: bold;">
-                      Within 24 Hours
-                    </p>
-                    <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">
-                      (During business days)
-                    </p>
-                  </div>
-                  
-                  <div style="margin: 30px 0; padding: 20px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeaa7;">
-                    <h4 style="color: #856404; margin: 0 0 10px 0;">📞 Contact Information</h4>
-                    <p style="margin: 5px 0; color: #856404;"><strong>Phone:</strong> +964 770 999 6771</p>
-                    <p style="margin: 5px 0; color: #856404;"><strong>Email:</strong> info@momtazchem.com</p>
-                    <p style="margin: 5px 0; color: #856404;"><strong>Website:</strong> www.momtazchem.com</p>
-                  </div>
-                  
-                  <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
-                    Please feel free to contact us if you have any additional questions.
-                  </p>
-                  
-                  <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
-                    Thank you for choosing Momtaz Chemical Solutions.
-                  </p>
-                  
-                  <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                    <p style="color: #888; font-size: 14px; margin: 0;">
-                      This email was sent automatically.
-                    </p>
-                  </div>
+                <p style="color: #2c3e50; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                  Dear Valued Customer,
+                </p>
+                
+                <p style="color: #2c3e50; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+                  Thank you for your inquiry. We have prepared a follow-up response regarding your request:
+                </p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 25px 0; border-left: 4px solid #3498db;">
+                  <h3 style="color: #2c3e50; font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">Your Original Inquiry:</h3>
+                  <p style="margin: 8px 0; color: #34495e; font-size: 14px;"><strong>Inquiry Number:</strong> ${inquiry.inquiryNumber}</p>
+                  <p style="margin: 8px 0; color: #34495e; font-size: 14px;"><strong>Subject:</strong> ${inquiryData.subject || 'General Inquiry'}</p>
+                  <p style="margin: 8px 0; color: #34495e; font-size: 14px;"><strong>Category:</strong> ${inquiryData.category || 'General'}</p>
                 </div>
                 
-                <div style="text-align: center; margin-top: 20px;">
-                  <p style="color: #888; font-size: 12px; margin: 0;">
+                <div style="background: #e8f4fd; padding: 20px; border-radius: 6px; margin: 25px 0; border-left: 4px solid #27ae60;">
+                  <h3 style="color: #2c3e50; font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">Our Response:</h3>
+                  <p style="color: #2c3e50; font-size: 15px; line-height: 1.6; margin: 0;">
+                    Thank you for your inquiry about our ${productName || 'chemical products'}. We are pleased to provide you with detailed information about this product. Our technical team has reviewed your requirements and will send you a comprehensive quote including pricing, specifications, and availability within <strong>24 hours</strong>. Please feel free to contact us if you have any additional questions.
+                  </p>
+                </div>
+                
+                <div style="background: #fff3cd; padding: 20px; border-radius: 6px; margin: 25px 0; border-left: 4px solid #f39c12;">
+                  <h3 style="color: #2c3e50; font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">Need Further Assistance?</h3>
+                  <p style="color: #2c3e50; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">
+                    If you have any additional questions or need clarification, please don't hesitate to contact us:
+                  </p>
+                  <p style="margin: 5px 0; color: #2c3e50; font-size: 14px;"><strong>Email:</strong> info@momtazchem.com</p>
+                  <p style="margin: 5px 0; color: #2c3e50; font-size: 14px;"><strong>Phone:</strong> +964 770 999 6771</p>
+                  <p style="margin: 5px 0; color: #2c3e50; font-size: 14px;"><strong>Website:</strong> www.momtazchem.com</p>
+                </div>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
+                  <p style="color: #2c3e50; font-size: 16px; line-height: 1.6; margin: 0 0 10px 0;">
+                    Best regards,
+                  </p>
+                  <p style="color: #3498db; font-size: 16px; font-weight: bold; margin: 0 0 5px 0;">
+                    Momtaz Chemical Team
+                  </p>
+                  <p style="color: #7f8c8d; font-size: 14px; margin: 0;">
+                    Leading Chemical Solutions Provider
+                  </p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
+                  <p style="color: #95a5a6; font-size: 12px; margin: 0;">
                     © 2025 Momtaz Chemical Solutions. All rights reserved.
                   </p>
                 </div>
@@ -9554,7 +9548,7 @@ ${procedure.content}
               inquiryType: inquiryData.type,
               category: inquiryData.category,
               priority: inquiryData.priority,
-              productName: (productName || 'General'),
+              productName: 'General',
               inquiryNumber: inquiry.inquiryNumber,
               message: inquiryData.message
             }
@@ -9585,7 +9579,7 @@ ${procedure.content}
               inquiryType: inquiryData.type,
               category: inquiryData.category,
               priority: inquiryData.priority,
-              productName: (productName || 'General'),
+              productName: 'General',
               inquiryNumber: inquiry.inquiryNumber,
               message: inquiryData.message
             }
