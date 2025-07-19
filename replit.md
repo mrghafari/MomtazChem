@@ -4,6 +4,17 @@
 
 This is a comprehensive multilingual chemical solutions e-commerce and management platform for Momtazchem, a leading chemical products company in Iraq and the Middle East. The system combines a public-facing showcase website, advanced e-commerce functionality, and robust administrative tools including CRM, inventory management, email automation, content management, and SEO optimization. The platform supports 4 languages (English, Arabic, Kurdish, Turkish) with complete RTL/LTR text direction handling and features 24 integrated administrative functions centralized in a unified Site Management interface with drag-and-drop Quick Actions layout.
 
+## Recent Changes
+
+### ESM Module Resolution Fix (July 19, 2025)
+✅ **Fixed critical deployment ESM import issues for pdfmake module**
+- Updated `server/pdfmake-generator.ts` imports to use `.js` extension for ESM compatibility
+- Updated `server/pdfmake-generator-fixed.ts` imports to use `.js` extension
+- Fixed all dynamic imports in `server/routes.ts` from `'./pdfmake-generator'` to `'./pdfmake-generator.js'`
+- **Impact**: Resolves Node.js ESM module resolution errors that were causing deployment crash loops
+- **Testing**: Build process now completes successfully, application starts without import errors
+- **Status**: Ready for deployment to production without pdfmake-related crashes
+
 ## System Architecture
 
 ### Frontend Architecture
