@@ -14808,25 +14808,40 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
       const { pool } = await import('./db');
       
-      // Get the order management record to check if it's a temporary order
-      const orderManagementResult = await pool.query(`
+      // First try to find by order management ID
+      let orderManagementResult = await pool.query(`
         SELECT om.*, co.payment_method, co.status
         FROM order_management om
         JOIN customer_orders co ON om.customer_order_id = co.id
         WHERE om.id = $1
       `, [orderId]);
 
+      // If not found, try to find by customer_order_id (for frontend compatibility)
       if (orderManagementResult.rows.length === 0) {
+        console.log(`🔍 [FINANCE] Order management ID ${orderId} not found, searching by customer_order_id`);
+        orderManagementResult = await pool.query(`
+          SELECT om.*, co.payment_method, co.status
+          FROM order_management om
+          JOIN customer_orders co ON om.customer_order_id = co.id
+          WHERE om.customer_order_id = $1
+        `, [orderId]);
+      }
+
+      if (orderManagementResult.rows.length === 0) {
+        console.log(`❌ [FINANCE] Order ${orderId} not found in either order_management.id or customer_order_id`);
         return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
       }
 
       const orderData = orderManagementResult.rows[0];
       const isTemporaryOrder = orderData.payment_grace_period_start !== null;
+      const orderManagementId = orderData.id; // Use correct order management ID
+
+      console.log(`📊 [FINANCE] Order details - Management ID: ${orderManagementId}, Customer Order ID: ${orderData.customer_order_id}, Is Temporary: ${isTemporaryOrder}`);
 
       // When financial approves, move to warehouse_pending for warehouse approval
       const { orderStatuses } = await import('../shared/order-management-schema');
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
-        orderId, 
+        orderManagementId, // Use correct order management ID
         orderStatuses.WAREHOUSE_PENDING, // Use constant from schema
         adminId, 
         'financial', 
@@ -14844,7 +14859,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               payment_grace_period_end = NULL,
               is_order_locked = false
           WHERE id = $1
-        `, [orderId]);
+        `, [orderManagementId]);
 
         // Update customer order status to 'confirmed' (regular order status)
         await pool.query(`
@@ -14854,10 +14869,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           WHERE id = $1
         `, [orderData.customer_order_id]);
 
-        console.log(`✅ [FINANCE] Order ${orderId} converted from temporary to regular order and moved to warehouse`);
+        console.log(`✅ [FINANCE] Order ${orderManagementId} (Customer Order ${orderData.customer_order_id}) converted from temporary to regular order and moved to warehouse`);
         res.json({ success: true, order: updatedOrder, message: 'سفارش موقت تایید شد و به سفارش معمولی تبدیل شد' });
       } else {
-        console.log(`✅ [FINANCE] Regular order ${orderId} approved and moved to warehouse department`);
+        console.log(`✅ [FINANCE] Regular order ${orderManagementId} (Customer Order ${orderData.customer_order_id}) approved and moved to warehouse department`);
         res.json({ success: true, order: updatedOrder, message: 'پرداخت تایید شد و به انبار ارسال گردید' });
       }
     } catch (error) {

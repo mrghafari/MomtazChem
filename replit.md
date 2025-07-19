@@ -6,6 +6,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### Financial Order Approval Fix (July 19, 2025)
+✅ **Fixed critical 404 error in temporary order payment approval system**
+- Resolved `/api/finance/orders/236/approve` endpoint returning "سفارش یافت نشد" (Order not found)
+- Enhanced endpoint to support both order_management.id and customer_order_id lookups for frontend compatibility
+- Fixed ID mapping issue where frontend sends customer_order_id but backend expects order_management.id
+- Successfully tested temporary order conversion: Order 236 (customer_order_id) → Management ID 71
+- Temporary order conversion workflow now fully operational: payment_uploaded → warehouse_pending
+- Grace period fields properly cleared and order unlocked after financial approval
+- **Impact**: Financial department can now approve temporary orders submitted with bank receipt uploads
+- **Testing**: Order 236 successfully converted from temporary to regular order and moved to warehouse department
+
 ### ESM Module Resolution Fix (July 19, 2025)
 ✅ **Fixed critical deployment ESM import issues for pdfmake module**
 - Updated `server/pdfmake-generator.ts` imports to use `.js` extension for ESM compatibility

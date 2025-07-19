@@ -1,0 +1,176 @@
+VM239 site-management:51 Tawk.to script loaded successfully
+index-DGvStWya.js:1485 🔍 [DEBUG] Site Management component initialized
+index-DGvStWya.js:1485 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-DGvStWya.js:936 Auth check result: Object
+index-DGvStWya.js:1485 🔍 [DEBUG] Site Management component initialized
+index-DGvStWya.js:1485 🔍 [DEBUG] Site Management component initialized
+index-DGvStWya.js:1485 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+index-DGvStWya.js:1485 🔍 [DEBUG] userPermissions modules: Array(27)
+index-DGvStWya.js:1485 🔍 [DEBUG] allowedModules: Array(27)
+index-DGvStWya.js:1485 🔍 [DEBUG] finance in allowedModules? true
+index-DGvStWya.js:1485 🔍 [DEBUG] geography_analytics in allowedModules? true
+index-DGvStWya.js:1485 🔍 [DEBUG] finance button found in allButtons? Object
+index-DGvStWya.js:1485 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+index-DGvStWya.js:1485 🔍 [DEBUG] finance button in filtered? Object
+index-DGvStWya.js:1485 🔍 [DEBUG] geography_analytics button in filtered? Object
+index-DGvStWya.js:1485 🔍 [DEBUG] filtered buttons count: 28
+index-DGvStWya.js:1485 🔍 [DEBUG] Site Management component initialized
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+VM239 site-management:23 Tawk.to Live Chat loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-DGvStWya.js:936 Auth check result: Object
+index-DGvStWya.js:1420 🔔 [FINANCIAL] نوتیفیکیشن: 6 سفارش جدید دریافت شد
+index-DGvStWya.js:936 Auth check result: Object
+index-DGvStWya.js:940 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-DGvStWya.js:940
+index-DGvStWya.js:37 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239837)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+index-DGvStWya.js:37 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239837)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+index-DGvStWya.js:37 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239837)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+index-DGvStWya.js:37 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239715)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+index-DGvStWya.js:936 Auth check result: Object
+index-DGvStWya.js:37 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239715)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+index-DGvStWya.js:37 Uncaught ReferenceError: openImageModal is not defined
+    at onClick (index-DGvStWya.js:1420:239837)
+    at Object.Dce (index-DGvStWya.js:37:9873)
+    at Lce (index-DGvStWya.js:37:10030)
+    at Fce (index-DGvStWya.js:37:10090)
+    at IM (index-DGvStWya.js:37:31563)
+    at Gq (index-DGvStWya.js:37:31981)
+    at index-DGvStWya.js:37:36914
+    at rk (index-DGvStWya.js:40:36984)
+    at xq (index-DGvStWya.js:37:9007)
+    at jC (index-DGvStWya.js:37:33271)
+index-DGvStWya.js:1420 🔄 [FINANCE] Sending approve request for order 236
+/api/finance/orders/236/approve:1  Failed to load resource: the server responded with a status of 404 ()
+index-DGvStWya.js:1420 ❌ [FINANCE] Approve error: Error: 404: {"success":false,"message":"سفارش یافت نشد"}
+    at wG (index-DGvStWya.js:48:43801)
+    at async Je (index-DGvStWya.js:48:44059)
+onError @ index-DGvStWya.js:1420
+index-DGvStWya.js:1420 🔄 [FINANCE] Sending approve request for order 236
+/api/finance/orders/236/approve:1  Failed to load resource: the server responded with a status of 404 ()
+index-DGvStWya.js:1420 ❌ [FINANCE] Approve error: Error: 404: {"success":false,"message":"سفارش یافت نشد"}
+    at wG (index-DGvStWya.js:48:43801)
+    at async Je (index-DGvStWya.js:48:44059)
+onError @ index-DGvStWya.js:1420
+index-DGvStWya.js:1420 🔄 [FINANCE] Sending approve request for order 236
+/api/finance/orders/236/approve:1  Failed to load resource: the server responded with a status of 404 ()
+index-DGvStWya.js:1420 ❌ [FINANCE] Approve error: Error: 404: {"success":false,"message":"سفارش یافت نشد"}
+    at wG (index-DGvStWya.js:48:43801)
+    at async Je (index-DGvStWya.js:48:44059)
+onError @ index-DGvStWya.js:1420
+index-DGvStWya.js:936 Auth check result: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-DGvStWya.js:936 Auth check result: Object
+index-DGvStWya.js:940 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-DGvStWya.js:940
+index-DGvStWya.js:1420 🔄 [FINANCE] Sending approve request for order 236
+/api/finance/orders/236/approve:1  Failed to load resource: the server responded with a status of 404 ()
+index-DGvStWya.js:1420 ❌ [FINANCE] Approve error: Error: 404: {"success":false,"message":"سفارش یافت نشد"}
+    at wG (index-DGvStWya.js:48:43801)
+    at async Je (index-DGvStWya.js:48:44059)
+onError @ index-DGvStWya.js:1420
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-DGvStWya.js:936 Auth check result: Object
+index-DGvStWya.js:1420 🔄 [FINANCE] Sending approve request for order 236
+index-DGvStWya.js:48  POST https://momtaz-chem-website-admin3119.replit.app/api/finance/orders/236/approve 404 (Not Found)
+Je @ index-DGvStWya.js:48
+mutationFn @ index-DGvStWya.js:1420
+fn @ index-DGvStWya.js:48
+w @ index-DGvStWya.js:48
+start @ index-DGvStWya.js:48
+execute @ index-DGvStWya.js:48
+await in execute
+mutate @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+Ye @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
+index-DGvStWya.js:1420 ❌ [FINANCE] Approve error: Error: 404: {"success":false,"message":"سفارش یافت نشد"}
+    at wG (index-DGvStWya.js:48:43801)
+    at async Je (index-DGvStWya.js:48:44059)
+onError @ index-DGvStWya.js:1420
+execute @ index-DGvStWya.js:48
+await in execute
+mutate @ index-DGvStWya.js:48
+(anonymous) @ index-DGvStWya.js:48
+Ye @ index-DGvStWya.js:1420
+Dce @ index-DGvStWya.js:37
+Lce @ index-DGvStWya.js:37
+Fce @ index-DGvStWya.js:37
+IM @ index-DGvStWya.js:37
+Gq @ index-DGvStWya.js:37
+(anonymous) @ index-DGvStWya.js:37
+rk @ index-DGvStWya.js:40
+xq @ index-DGvStWya.js:37
+jC @ index-DGvStWya.js:37
+PP @ index-DGvStWya.js:37
+ede @ index-DGvStWya.js:37
