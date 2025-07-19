@@ -48,10 +48,13 @@ const EmailTemplates: React.FC = () => {
     created_by: 15
   });
 
-  const { data: templates, isLoading } = useQuery({
+  const { data: templatesData, isLoading } = useQuery({
     queryKey: ['/api/email-templates'],
     staleTime: 30000,
   });
+
+  // Handle both array response and object with data property
+  const templates = Array.isArray(templatesData) ? templatesData : templatesData?.data || [];
 
   const createTemplateMutation = useMutation({
     mutationFn: async (templateData: any) => {
@@ -225,6 +228,11 @@ const EmailTemplates: React.FC = () => {
       </div>
     );
   }
+
+  // Debug logging
+  console.log("Templates data:", templatesData);
+  console.log("Processed templates:", templates);
+  console.log("Templates length:", templates?.length);
 
   return (
     <div className="space-y-6 p-6">
