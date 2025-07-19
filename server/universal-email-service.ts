@@ -32,6 +32,30 @@ export class UniversalEmailService {
 
       const smtp = categorySettings.smtp;
       
+      // If no recipients provided, use category default recipients
+      let finalTo = options.to || [];
+      let finalCc = options.cc || [];
+      let finalBcc = options.bcc || [];
+      
+      if (finalTo.length === 0) {
+        // Get recipients from category configuration
+        const primaryRecipients = categorySettings.recipients.filter(r => r.recipientType === 'to' && r.isActive);
+        finalTo = primaryRecipients.map(r => r.email);
+        console.log(`📧 [Universal Email] Using category recipients for ${options.categoryKey}: ${finalTo.join(', ')}`);
+      }
+      
+      if (finalCc.length === 0) {
+        // Get CC recipients from category configuration
+        const ccRecipients = categorySettings.recipients.filter(r => r.recipientType === 'cc' && r.isActive);
+        finalCc = ccRecipients.map(r => r.email);
+      }
+      
+      if (finalBcc.length === 0) {
+        // Get BCC recipients from category configuration
+        const bccRecipients = categorySettings.recipients.filter(r => r.recipientType === 'bcc' && r.isActive);
+        finalBcc = bccRecipients.map(r => r.email);
+      }
+      
       // Create transporter
       const transporter = nodemailer.createTransport({
         host: smtp.host,
@@ -60,9 +84,9 @@ export class UniversalEmailService {
       // Send email
       const mailOptions = {
         from: `${smtp.fromName} <${smtp.fromEmail}>`,
-        to: options.to.join(', '),
-        cc: options.cc?.join(', '),
-        bcc: options.bcc?.join(', '),
+        to: finalTo.join(', '),
+        cc: finalCc.length > 0 ? finalCc.join(', ') : undefined,
+        bcc: finalBcc.length > 0 ? finalBcc.join(', ') : undefined,
         subject: finalSubject,
         html: finalHtml,
         text: finalText,
@@ -74,7 +98,7 @@ export class UniversalEmailService {
       // Log successful email
       await emailStorage.logEmail({
         categoryId: categorySettings.category.id,
-        toEmail: `TO: ${options.to.join(', ')} | CC: ${options.cc?.join(', ') || ''} | BCC: ${options.bcc?.join(', ') || ''}`,
+        toEmail: `TO: ${finalTo.join(', ')} | CC: ${finalCc?.join(', ') || ''} | BCC: ${finalBcc?.join(', ') || ''}`,
         fromEmail: smtp.fromEmail,
         subject: finalSubject,
         status: 'sent',
@@ -93,7 +117,7 @@ export class UniversalEmailService {
         if (categorySettings) {
           await emailStorage.logEmail({
             categoryId: categorySettings.category.id,
-            toEmail: `TO: ${options.to.join(', ')} | CC: ${options.cc?.join(', ') || ''} | BCC: ${options.bcc?.join(', ') || ''}`,
+            toEmail: `TO: ${finalTo?.join(', ') || options.to.join(', ')} | CC: ${finalCc?.join(', ') || options.cc?.join(', ') || ''} | BCC: ${finalBcc?.join(', ') || options.bcc?.join(', ') || ''}`,
             fromEmail: categorySettings.smtp?.fromEmail || 'unknown',
             subject: options.subject,
             status: 'failed',

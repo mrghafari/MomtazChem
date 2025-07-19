@@ -9554,7 +9554,7 @@ ${procedure.content}
               inquiryType: inquiryData.type,
               category: inquiryData.category,
               priority: inquiryData.priority,
-              productName: productName,
+              productName: (productName || 'General'),
               inquiryNumber: inquiry.inquiryNumber,
               message: inquiryData.message
             }
@@ -9585,7 +9585,7 @@ ${procedure.content}
               inquiryType: inquiryData.type,
               category: inquiryData.category,
               priority: inquiryData.priority,
-              productName: productName,
+              productName: (productName || 'General'),
               inquiryNumber: inquiry.inquiryNumber,
               message: inquiryData.message
             }
