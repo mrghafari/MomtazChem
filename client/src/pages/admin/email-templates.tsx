@@ -48,13 +48,18 @@ const EmailTemplates: React.FC = () => {
     created_by: 15
   });
 
-  const { data: templatesData, isLoading } = useQuery({
+  const { data: templatesData, isLoading, error } = useQuery({
     queryKey: ['/api/email-templates'],
     staleTime: 30000,
   });
 
+  // Debug and handle templates data
+  console.log("Debug Templates:", { templatesData, isLoading, error });
+  
   // Handle both array response and object with data property
   const templates = Array.isArray(templatesData) ? templatesData : templatesData?.data || [];
+  
+  console.log("Processed templates:", templates, "Count:", templates.length);
 
   const createTemplateMutation = useMutation({
     mutationFn: async (templateData: any) => {
@@ -258,17 +263,20 @@ const EmailTemplates: React.FC = () => {
         </TabsList>
 
         <TabsContent value="templates" className="space-y-4">
-          {templates.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="text-blue-500">در حال بارگذاری قالب‌ها...</div>
+            </div>
+          ) : templates.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-red-500 text-lg mb-4">
-                ۱۷ قالب ایمیل در دیتابیس موجود است ولی نمایش داده نمی‌شود
+                مشکل در دریافت قالب‌ها
               </div>
               <div className="text-sm text-gray-600 mb-4">
-                لطفاً از <strong>بخش مدیریت</strong> وارد شوید:<br/>
-                admin@momtazchem.com / Ghafari@110
+                Raw Data: {JSON.stringify(templatesData, null, 2).substring(0, 200)}...
               </div>
               <div className="text-xs text-blue-600">
-                API Status: {templatesData ? 'Connected' : 'Authentication Required'}
+                Error: {error ? JSON.stringify(error) : 'No error'}
               </div>
             </div>
           ) : (
