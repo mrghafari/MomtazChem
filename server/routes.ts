@@ -28620,6 +28620,81 @@ momtazchem.com
     }
   });
 
+  // Email Templates API endpoints
+  app.get('/api/email-templates', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const templates = await db.select().from(emailTemplates).orderBy(desc(emailTemplates.createdAt));
+      res.json({ success: true, data: templates });
+    } catch (error) {
+      console.error('Error fetching email templates:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت قالب‌های ایمیل' });
+    }
+  });
+
+  app.post('/api/email-templates', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertEmailTemplateSchema.parse(req.body);
+      
+      // Generate unique template number
+      const templateCount = await db.select({ count: sql<number>`count(*)` }).from(emailTemplates);
+      const templateNumber = `TPL-${String(templateCount[0].count + 1).padStart(4, '0')}`;
+      
+      const [newTemplate] = await db.insert(emailTemplates).values({
+        ...validatedData,
+        templateNumber,
+        updatedAt: new Date()
+      }).returning();
+
+      res.status(201).json({ success: true, data: newTemplate });
+    } catch (error) {
+      console.error('Error creating email template:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد قالب ایمیل' });
+    }
+  });
+
+  app.put('/api/email-templates/:id', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const validatedData = insertEmailTemplateSchema.parse(req.body);
+      
+      const [updatedTemplate] = await db.update(emailTemplates)
+        .set({
+          ...validatedData,
+          updatedAt: new Date()
+        })
+        .where(eq(emailTemplates.id, templateId))
+        .returning();
+
+      if (!updatedTemplate) {
+        return res.status(404).json({ success: false, message: 'قالب یافت نشد' });
+      }
+
+      res.json({ success: true, data: updatedTemplate });
+    } catch (error) {
+      console.error('Error updating email template:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی قالب ایمیل' });
+    }
+  });
+
+  app.delete('/api/email-templates/:id', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      
+      const deletedTemplate = await db.delete(emailTemplates)
+        .where(eq(emailTemplates.id, templateId))
+        .returning();
+
+      if (!deletedTemplate.length) {
+        return res.status(404).json({ success: false, message: 'قالب یافت نشد' });
+      }
+
+      res.json({ success: true, message: 'قالب با موفقیت حذف شد' });
+    } catch (error) {
+      console.error('Error deleting email template:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف قالب ایمیل' });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);

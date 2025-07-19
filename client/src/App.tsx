@@ -33,6 +33,7 @@ import EmailSettingsPage from "@/pages/admin/email-settings";
 import AdvancedEmailSettingsPage from "@/pages/admin/advanced-email-settings";
 import EmailAddressManagerFixed from "@/pages/admin/email-address-manager-fixed";
 import EmailProgressPage from "@/pages/admin/email-progress";
+import EmailTemplates from '@/pages/admin/email-templates';
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import ServerConfig from "@/components/admin/server-config";
 import ForgotPassword from "@/pages/forgot-password";
@@ -98,7 +99,7 @@ import InventoryNotificationSettings from "@/pages/admin/inventory-notification-
 import WarehouseManagement from "@/pages/admin/warehouse-management";
 import WarehouseManagementFixed from "@/pages/admin/warehouse-management-fixed";
 import ContentManagement from "@/pages/content-management";
-import EmailTemplates from "@/pages/email-templates";
+
 import SecurityManagement from "@/pages/security-management-new";
 import OrderTrackingManagement from "@/pages/admin/order-tracking-management";
 import AiSeoAssistant from "@/pages/admin/ai-seo-assistant";
@@ -144,6 +145,7 @@ function Router() {
           <Route path="/admin/advanced-email-settings" component={AdvancedEmailSettingsPage} />
           <Route path="/admin/email-address-manager" component={EmailAddressManagerFixed} />
           <Route path="/admin/email-progress" component={EmailProgressPage} />
+          <Route path="/admin/email-templates" component={EmailTemplates} />
           <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
           <Route path="/admin/email-service-guide" component={EmailServiceGuide} />
           <Route path="/admin/invoice-management" component={InvoiceManagement} />
