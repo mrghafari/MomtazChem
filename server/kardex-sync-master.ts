@@ -25,9 +25,23 @@ export class KardexSyncMaster {
     try {
       console.log("🔄 [KARDEX-SYNC] شروع بازسازی کامل فروشگاه از کاردکس...");
       
-      // مرحله 1: دریافت محصولات کاردکس
-      const kardexProducts = await storage.getProducts();
-      console.log(`📋 [KARDEX-SYNC] ${kardexProducts.length} محصول در کاردکس یافت شد`);
+      // مرحله 1: دریافت محصولات کاردکس و تجمیع بر اساس barcode
+      const allKardexProducts = await storage.getProducts();
+      
+      // تجمیع محصولات بر اساس بارکد (برای batch های مختلف) - انتخاب اولین محصول از هر barcode
+      const kardexWithBarcode = allKardexProducts.filter(p => 
+        p.barcode && p.barcode.trim() !== ''
+      );
+      
+      const uniqueKardexBarcodes = new Map<string, any>();
+      for (const product of kardexWithBarcode) {
+        const barcode = product.barcode.trim();
+        if (!uniqueKardexBarcodes.has(barcode)) {
+          uniqueKardexBarcodes.set(barcode, product);
+        }
+      }
+      const kardexProducts = Array.from(uniqueKardexBarcodes.values());
+      console.log(`📋 [KARDEX-SYNC] ${kardexProducts.length} محصول تجمیع شده (یونیک) در کاردکس`);
       
       // مرحله 2: پاک کردن کامل فروشگاه با تأیید
       const existingShopProducts = await shopStorage.getAllShopProducts();
@@ -47,7 +61,7 @@ export class KardexSyncMaster {
       const remainingProducts = await shopStorage.getShopProducts();
       console.log(`🗑️ [KARDEX-SYNC] ${deletedCount} محصول حذف شد، ${remainingProducts.length} محصول باقی مانده`);
       
-      // مرحله 3: کپی کردن همه محصولات از کاردکس
+      // مرحله 3: کپی کردن محصولات تجمیع شده از کاردکس
       let addedCount = 0;
       for (const kardexProduct of kardexProducts) {
         try {
@@ -60,14 +74,14 @@ export class KardexSyncMaster {
         }
       }
       
-      console.log(`✅ [KARDEX-SYNC] بازسازی کامل انجام شد - ${addedCount} محصول اضافه شد`);
+      console.log(`✅ [KARDEX-SYNC] بازسازی کامل انجام شد - ${kardexProducts.length} محصول یونیک اضافه شد (از ${allKardexProducts.length} محصول خام)`);
       
       return {
         success: true,
-        message: `بازسازی کامل انجام شد - ${addedCount} محصول از کاردکس به فروشگاه کپی شد`,
+        message: `بازسازی کامل انجام شد - ${kardexProducts.length} محصول یونیک از کاردکس به فروشگاه کپی شد`,
         details: {
           deletedFromShop: deletedCount,
-          addedToShop: addedCount,
+          addedToShop: kardexProducts.length,
           kardexProducts: kardexProducts.length
         }
       };
@@ -235,10 +249,20 @@ export class KardexSyncMaster {
       
       let added = 0, updated = 0, removed = 0, unchanged = 0;
       
-      // فیلتر کردن محصولات کاردکس که بارکد دارند (همه محصولات کاردکس باید sync شوند)
-      const syncEnabledKardex = kardexProducts.filter(p => 
+      // فیلتر کردن محصولات کاردکس که بارکد دارند و تجمیع بر اساس barcode (برای batch ها)
+      const kardexWithBarcode = kardexProducts.filter(p => 
         p.barcode && p.barcode.trim() !== ''
       );
+      
+      // تجمیع محصولات بر اساس بارکد (برای batch های مختلف) - انتخاب اولین محصول از هر barcode
+      const uniqueKardexBarcodes = new Map<string, any>();
+      for (const product of kardexWithBarcode) {
+        const barcode = product.barcode.trim();
+        if (!uniqueKardexBarcodes.has(barcode)) {
+          uniqueKardexBarcodes.set(barcode, product);
+        }
+      }
+      const syncEnabledKardex = Array.from(uniqueKardexBarcodes.values());
       
       // محصولاتی که در کاردکس هستند و باید در فروشگاه باشند (بر اساس بارکد EAN-13)
       const kardexBarcodes = new Set(syncEnabledKardex.map(p => p.barcode.trim()));
@@ -288,11 +312,11 @@ export class KardexSyncMaster {
         }
       }
       
-      console.log(`✅ [KARDEX-SYNC] همگام‌سازی هوشمند کامل شد`);
+      console.log(`✅ [KARDEX-SYNC] همگام‌سازی هوشمند کامل شد - ${syncEnabledKardex.length} محصول یونیک پردازش شد (از ${kardexWithBarcode.length} محصول خام)`);
       
       return {
         success: true,
-        message: `همگام‌سازی انجام شد - ${added} اضافه، ${updated} بروزرسانی، ${removed} حذف`,
+        message: `همگام‌سازی انجام شد - ${added} اضافه، ${updated} بروزرسانی، ${removed} حذف (${syncEnabledKardex.length} محصول یونیک)`,
         details: { added, updated, removed, unchanged }
       };
       
