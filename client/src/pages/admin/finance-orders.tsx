@@ -397,6 +397,11 @@ function FinanceOrders() {
     });
   };
 
+  const openImageModal = (imageUrl: string) => {
+    setSelectedImageUrl(imageUrl);
+    setImageModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">

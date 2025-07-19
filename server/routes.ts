@@ -14768,6 +14768,19 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // Financial department authentication check
   app.get('/api/financial/auth/me', async (req: Request, res: Response) => {
     try {
+      // Check if user has admin session first
+      if (req.session?.isAuthenticated && req.session?.adminId) {
+        // Return admin user as financial user
+        const adminUser = {
+          id: req.session.adminId,
+          username: 'admin_financial',
+          email: 'admin@momtazchem.com',
+          department: 'financial',
+          isAdmin: true
+        };
+        return res.json({ success: true, user: adminUser });
+      }
+
       // For now, return a default financial user for testing
       // In production, this would check actual financial department authentication
       const defaultFinancialUser = {
@@ -17225,37 +17238,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Financial approve order (for admin panel)
-  app.post('/api/finance/orders/:id/approve', requireAuth, async (req, res) => {
-    try {
-      const orderId = parseInt(req.params.id);
-      const { notes } = req.body;
-      const adminId = req.session.adminId!;
-      
-      // Use warehouse_pending status from schema to properly transfer to warehouse
-      const { orderStatuses } = await import('../shared/order-management-schema');
-      await orderManagementStorage.updateOrderStatus(
-        orderId,
-        orderStatuses.WAREHOUSE_PENDING, // Transfer directly to warehouse pending
-        adminId,
-        'financial',
-        notes || 'تایید شده توسط بخش مالی - انتقال به انبار'
-      );
-
-      // Send website notification and email to customer (NO SMS)
-      const orderMgmt = await orderManagementStorage.getOrderManagementById(orderId);
-      if (orderMgmt) {
-        // TODO: Send website notification and email notification
-        console.log(`✓ واریزی تایید شد - سفارش ${orderMgmt.customerOrderId}`);
-        console.log('✓ تأیید از طریق وب‌سایت و ایمیل ارسال شد (بدون SMS)');
-      }
-
-      res.json({ success: true, message: "واریزی تایید شد و به انبار اعلام شد" });
-    } catch (error) {
-      console.error('Error approving financial order:', error);
-      res.status(500).json({ success: false, message: "خطا در تایید واریزی" });
-    }
-  });
+  // REMOVED: Duplicate route definition that was blocking requests with requireAuth middleware
 
   // Financial approve order (for financial department users)
   app.get('/api/finance/orders/:id/approve', requireDepartmentAuth('financial'), async (req, res) => {
