@@ -228,14 +228,16 @@ const EmailTemplatesCentral: React.FC = () => {
 
   // Filter templates by category
   const filteredTemplates = selectedCategory === 'all' 
-    ? templates 
-    : templates.filter(template => {
+    ? (Array.isArray(templates) ? templates : [])
+    : (Array.isArray(templates) ? templates.filter(template => {
         const info = getTemplateInfo(template.name);
         return info.category === selectedCategory;
-      });
+      }) : []);
 
   // Get category stats
   const getCategoryStats = (categoryKey: string) => {
+    if (!Array.isArray(templates)) return { total: 0, active: 0, autoUse: 0 };
+    
     const categoryTemplates = templates.filter(template => {
       const info = getTemplateInfo(template.name);
       return info.category === categoryKey;
@@ -255,7 +257,7 @@ const EmailTemplatesCentral: React.FC = () => {
       await refetch();
       toast({
         title: "✅ بروزرسانی موفق",
-        description: `${templates.length} قالب از دیتابیس بارگذاری شد`,
+        description: `${Array.isArray(templates) ? templates.length : 0} قالب از دیتابیس بارگذاری شد`,
       });
     } catch (error) {
       toast({
@@ -310,14 +312,14 @@ const EmailTemplatesCentral: React.FC = () => {
             <div className="flex gap-3">
               <Button onClick={handleRefresh} variant="outline" size="sm">
                 <RefreshCw className="w-4 h-4 mr-2" />
-                بروزرسانی ({templates.length})
+                بروزرسانی ({Array.isArray(templates) ? templates.length : 0})
               </Button>
             </div>
           </div>
         </div>
 
         {/* Template #05 Special Highlight */}
-        {templates.find(t => t.name === '#05 - Momtaz Chemical Follow-up Response') && (
+        {Array.isArray(templates) && templates.find(t => t.name === '#05 - Momtaz Chemical Follow-up Response') && (
           <div className="mb-6">
             <Card className="border-green-300 bg-green-50 shadow-lg">
               <CardHeader>
@@ -371,7 +373,7 @@ const EmailTemplatesCentral: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPreviewTemplate(templates.find(t => t.name === '#05 - Momtaz Chemical Follow-up Response') || null)}
+                    onClick={() => setPreviewTemplate(Array.isArray(templates) ? templates.find(t => t.name === '#05 - Momtaz Chemical Follow-up Response') || null : null)}
                     className="text-green-700 border-green-300 hover:bg-green-100"
                   >
                     <Eye className="w-4 h-4 mr-2" />
@@ -387,7 +389,7 @@ const EmailTemplatesCentral: React.FC = () => {
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-6">
           <TabsList className="grid grid-cols-4 md:grid-cols-8 gap-1 h-auto p-1">
             <TabsTrigger value="all" className="text-xs">
-              همه ({templates.length})
+              همه ({Array.isArray(templates) ? templates.length : 0})
             </TabsTrigger>
             {Object.entries(TEMPLATE_CATEGORIES).map(([key, category]) => {
               const stats = getCategoryStats(key);
