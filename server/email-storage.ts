@@ -356,15 +356,15 @@ export class EmailStorage implements IEmailStorage {
     }
   }
   
-  async getTemplatesByCategory(categoryId: number): Promise<EmailTemplate[]> {
+  async getTemplatesByCategory(categoryName: string): Promise<EmailTemplate[]> {
     return await emailDb
       .select()
       .from(emailTemplates)
       .where(and(
-        eq(emailTemplates.categoryId, categoryId),
+        eq(emailTemplates.category, categoryName),
         eq(emailTemplates.isActive, true)
       ))
-      .orderBy(emailTemplates.isDefault, emailTemplates.templateName);
+      .orderBy(emailTemplates.templateName);
   }
   
   async getTemplateById(id: number): Promise<EmailTemplate | undefined> {
@@ -478,25 +478,53 @@ export class EmailStorage implements IEmailStorage {
   }
 
   async toggleTemplateStatus(id: number): Promise<EmailTemplate> {
-    // Get current status
-    const template = await this.getTemplateById(id);
-    if (!template) {
-      throw new Error(`Template with ID ${id} not found`);
-    }
-    
-    // Toggle the status
-    const newStatus = !template.isActive;
-    
-    const [updatedTemplate] = await emailDb
-      .update(emailTemplates)
-      .set({ 
-        isActive: newStatus,
-        updatedAt: new Date()
-      })
-      .where(eq(emailTemplates.id, id))
-      .returning();
+    try {
+      const { sql } = await import("drizzle-orm");
       
-    return updatedTemplate;
+      // First get current template to check if exists and get current status
+      const currentTemplate = await emailDb.execute(sql`
+        SELECT id, name, is_active
+        FROM email_templates 
+        WHERE id = ${id}
+      `);
+      
+      if (currentTemplate.rows.length === 0) {
+        throw new Error(`Template with ID ${id} not found`);
+      }
+      
+      const currentStatus = currentTemplate.rows[0].is_active;
+      const newStatus = !currentStatus;
+      
+      // Update template status
+      const result = await emailDb.execute(sql`
+        UPDATE email_templates 
+        SET 
+          is_active = ${newStatus},
+          updated_at = NOW()
+        WHERE id = ${id}
+        RETURNING 
+          id, 
+          template_number as templateNumber,
+          template_name as templateName, 
+          category,
+          subject, 
+          html_content as htmlContent, 
+          text_content as textContent, 
+          variables, 
+          is_active as isActive, 
+          created_at as createdAt, 
+          updated_at as updatedAt
+      `);
+      
+      if (result.rows.length === 0) {
+        throw new Error('Template not found after update');
+      }
+      
+      return result.rows[0] as EmailTemplate;
+    } catch (error) {
+      console.error('Error toggling template status:', error);
+      throw error;
+    }
   }
 
   // Get template by numbered reference (e.g., "#05", "#13")
