@@ -566,18 +566,18 @@ export default function AdvancedEmailSettingsPage() {
             </div>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/admin/email-templates")}>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/admin/email-templates-central")}>
             <div className="p-4">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
                   <Mail className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">قالب‌های ایمیل</h3>
-                  <p className="text-sm text-gray-600">Email Templates</p>
+                  <h3 className="font-semibold text-gray-900">📧 مرکز قالب‌های ایمیل</h3>
+                  <p className="text-sm text-gray-600">Central Email Templates</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-500">مدیریت قالب‌های ایمیل با شماره‌گذاری منظم برای ارجاع در سراسر سیستم</p>
+              <p className="text-sm text-gray-500">مدیریت یکپارچه همه ۱۷ قالب ایمیل سیستم با دسته‌بندی کامل</p>
             </div>
           </Card>
         </div>

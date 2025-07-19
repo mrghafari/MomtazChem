@@ -39,10 +39,43 @@ interface EmailTemplate {
   updatedAt?: string;
 }
 
+// Template categories and info for centralized system
+const TEMPLATE_CATEGORIES = {
+  support: { name: 'پشتیبانی فنی', color: 'bg-blue-50 border-blue-200 text-blue-800' },
+  inquiry: { name: 'استعلامات', color: 'bg-green-50 border-green-200 text-green-800' },
+  admin: { name: 'مدیریتی', color: 'bg-purple-50 border-purple-200 text-purple-800' },
+  notification: { name: 'اطلاع‌رسانی', color: 'bg-orange-50 border-orange-200 text-orange-800' },
+  inventory: { name: 'موجودی', color: 'bg-yellow-50 border-yellow-200 text-yellow-800' },
+  payment: { name: 'پرداخت', color: 'bg-indigo-50 border-indigo-200 text-indigo-800' },
+  security: { name: 'امنیتی', color: 'bg-red-50 border-red-200 text-red-800' }
+};
+
+// All 17 templates information from EMAIL_TEMPLATES_GUIDE.md
+const TEMPLATE_REGISTRY = {
+  '#01': { category: 'support', ref: 'TPL-001', usage: 'Technical Support Response' },
+  '#02': { category: 'support', ref: 'TPL-002', usage: 'Product Information Response' },
+  '#03': { category: 'inquiry', ref: 'TPL-003', usage: 'General Inquiry Response' },
+  '#04': { category: 'inquiry', ref: 'TPL-004', usage: 'قالب پاسخ استعلام - طراحی زیبا و حرفه‌ای' },
+  '#05': { category: 'inquiry', ref: 'TPL-005', usage: 'Momtaz Chemical Follow-up Response ⭐' },
+  '#06': { category: 'admin', ref: 'TPL-006', usage: 'Password Management Template' },
+  '#07': { category: 'notification', ref: 'TPL-007', usage: 'Product Inquiry Admin Notification' },
+  '#08': { category: 'notification', ref: 'TPL-008', usage: 'Customer Inquiry Confirmation' },
+  '#09': { category: 'notification', ref: 'TPL-009', usage: 'Sales Inquiry Notification' },
+  '#10': { category: 'notification', ref: 'TPL-010', usage: 'Quote Request Notification' },
+  '#11': { category: 'admin', ref: 'TPL-011', usage: 'Generated Password Notification (Persian)' },
+  '#12': { category: 'admin', ref: 'TPL-012', usage: 'Admin Password Reset (Persian)' },
+  '#13': { category: 'inventory', ref: 'TPL-013', usage: 'Low Stock Alert (Universal Service)' },
+  '#14': { category: 'payment', ref: 'TPL-014', usage: 'Payment Confirmation' },
+  '#15': { category: 'notification', ref: 'TPL-015', usage: 'System Notification' },
+  '#16': { category: 'security', ref: 'TPL-016', usage: 'Security Alert' },
+  '#17': { category: 'inventory', ref: 'TPL-017', usage: 'Comprehensive Inventory Alert System ⭐' }
+};
+
 const EmailTemplatesFixed: React.FC = () => {
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -252,28 +285,49 @@ const EmailTemplatesFixed: React.FC = () => {
 
         {/* Templates Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templates.map((template) => (
-            <Card key={template.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg mb-1">
-                      {template.name || template.templateName}
-                    </CardTitle>
-                    <Badge variant={template.is_active ? "default" : "secondary"}>
-                      {template.is_active ? "فعال" : "غیرفعال"}
-                    </Badge>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPreviewTemplate(template)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
+          {templates.map((template) => {
+            const isTemplate05 = template.name === '#05 - Momtaz Chemical Follow-up Response';
+            
+            return (
+              <Card 
+                key={template.id} 
+                className={`hover:shadow-md transition-shadow ${
+                  isTemplate05 ? 'border-green-300 bg-green-50 shadow-lg' : ''
+                }`}
+              >
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className={`text-lg mb-1 ${isTemplate05 ? 'text-green-800' : ''}`}>
+                        {template.name || template.templateName}
+                        {isTemplate05 && (
+                          <span className="block text-sm text-green-600 font-normal mt-1">
+                            ⭐ شامل بخش‌های "پاسخ ما" و "درخواست شما"
+                          </span>
+                        )}
+                      </CardTitle>
+                      <div className="flex gap-2">
+                        <Badge variant={template.is_active ? "default" : "secondary"}>
+                          {template.is_active ? "فعال" : "غیرفعال"}
+                        </Badge>
+                        {isTemplate05 && (
+                          <Badge variant="default" className="bg-green-600 text-white">
+                            ✨ Template #05 زیبا
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setPreviewTemplate(template)}
+                        className={isTemplate05 ? 'hover:bg-green-100' : ''}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
                       size="sm"
                       onClick={() => setEditingTemplate(template)}
                     >
@@ -283,6 +337,30 @@ const EmailTemplatesFixed: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {isTemplate05 && (
+                  <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-3">
+                    <h4 className="text-sm font-bold text-green-800 mb-2">✨ ویژگی‌های Template #05:</h4>
+                    <div className="grid grid-cols-1 gap-1 text-xs text-green-700">
+                      <div className="flex items-center gap-1">
+                        <span className="text-green-600">✅</span>
+                        <span>بخش "پاسخ ما" با پس‌زمینه سبز</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-blue-600">✅</span>
+                        <span>بخش "درخواست شما" با پس‌زمینه آبی</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-yellow-600">✅</span>
+                        <span>شماره تلفن: +964 770 999 6771</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-purple-600">✅</span>
+                        <span>وب‌سایت: www.momtazchem.com</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <p className="text-sm text-gray-600 mb-2">
                   <strong>موضوع:</strong> {template.subject}
                 </p>
@@ -292,9 +370,21 @@ const EmailTemplatesFixed: React.FC = () => {
                 <p className="text-sm text-gray-600">
                   <strong>استفاده:</strong> {template.usage_count || template.usageCount || 0} بار
                 </p>
+                
+                {isTemplate05 && (
+                  <div className="mt-3">
+                    <a 
+                      href="/admin/template05-static" 
+                      className="inline-flex items-center px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                    >
+                      🎨 مشاهده کامل Template #05
+                    </a>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
 
         {/* Preview Modal */}
