@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,22 +41,8 @@ interface CrmCustomer {
   averageOrderValue: string;
   lastOrderDate?: string;
   createdAt: string;
-  phone?: string;
-  country?: string;
-  city?: string;
-  address?: string;
-  secondaryAddress?: string;
-  postalCode?: string;
-  customerType: string;
-  customerStatus: string;
-  customerSource: string;
-  preferredLanguage: string;
-  communicationPreference: string;
-  totalOrdersCount: number;
-  totalSpent: string;
-  averageOrderValue: string;
-  lastOrderDate?: string;
-  createdAt: string;
+  smsEnabled?: boolean;
+  emailEnabled?: boolean;
 }
 
 interface CustomerActivity {
@@ -1237,6 +1224,40 @@ export default function CRM() {
                       <SelectItem value="blacklisted">Blacklisted</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              {/* Authentication Settings */}
+              <div className="border-t pt-4">
+                <Label className="text-lg font-semibold">Authentication Settings</Label>
+                <div className="grid grid-cols-2 gap-6 mt-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <Label htmlFor="sms-auth" className="font-medium">SMS Authentication</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Enable SMS verification for this customer
+                      </p>
+                    </div>
+                    <Switch
+                      id="sms-auth"
+                      checked={editingCustomer.smsEnabled ?? true}
+                      onCheckedChange={(checked) => setEditingCustomer({ ...editingCustomer, smsEnabled: checked })}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <Label htmlFor="email-auth" className="font-medium">Email Authentication</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Enable email verification for this customer
+                      </p>
+                    </div>
+                    <Switch
+                      id="email-auth"
+                      checked={editingCustomer.emailEnabled ?? true}
+                      onCheckedChange={(checked) => setEditingCustomer({ ...editingCustomer, emailEnabled: checked })}
+                    />
+                  </div>
                 </div>
               </div>
 
