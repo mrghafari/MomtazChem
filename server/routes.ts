@@ -11835,11 +11835,11 @@ ${procedure.content}
         }
 
         if (smtp) {
-          // Get the "Momtaz Chemical Follow-up Response" template from database
+          // Get the "#05 - Momtaz Chemical Follow-up Response" template from database
           let emailTemplate;
           try {
             const templates = await emailStorage.getAllTemplates();
-            emailTemplate = templates.find(t => t.templateName === 'Momtaz Chemical Follow-up Response');
+            emailTemplate = templates.find(t => t.templateName === '#05 - Momtaz Chemical Follow-up Response');
             console.log(`📧 Using template: ${emailTemplate ? emailTemplate.templateName : 'Default hardcoded template'}`);
           } catch (templateError) {
             console.log(`❌ Error loading template: ${templateError.message}, using default`);
