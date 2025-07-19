@@ -260,11 +260,15 @@ const EmailTemplates: React.FC = () => {
         <TabsContent value="templates" className="space-y-4">
           {templates.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-gray-500 text-lg mb-4">
-                هیچ قالب ایمیل موجود یافت نشد
+              <div className="text-red-500 text-lg mb-4">
+                ۱۷ قالب ایمیل در دیتابیس موجود است ولی نمایش داده نمی‌شود
               </div>
-              <div className="text-sm text-gray-400">
-                لطفاً وارد حساب مدیریتی شوید یا قالب جدید اضافه کنید
+              <div className="text-sm text-gray-600 mb-4">
+                لطفاً از <strong>بخش مدیریت</strong> وارد شوید:<br/>
+                admin@momtazchem.com / Ghafari@110
+              </div>
+              <div className="text-xs text-blue-600">
+                API Status: {templatesData ? 'Connected' : 'Authentication Required'}
               </div>
             </div>
           ) : (
