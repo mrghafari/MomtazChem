@@ -17884,15 +17884,22 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     try {
       const { email } = req.body;
       
+      console.log(`📧 [Password Reset Request] Email: ${email}`);
+      
       const customer = await crmStorage.getCrmCustomerByEmail(email);
       if (!customer) {
         // Don't reveal if email exists or not
+        console.log(`⚠️ [Password Reset] Customer not found for email: ${email}`);
         return res.json({ success: true, message: "در صورت وجود حساب کاربری، لینک تغییر رمز عبور ارسال شد" });
       }
       
+      console.log(`✓ [Password Reset] Customer found: ${customer.firstName} ${customer.lastName} (ID: ${customer.id})`);
+      
       // Generate reset token
       const resetToken = crypto.randomBytes(32).toString('hex');
-      const resetExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour (was 24 hours)
+      
+      console.log(`🔑 [Password Reset] Generated token: ${resetToken.substring(0, 8)}... (expires in 1 hour)`);
       
       // Update customer with reset token
       await crmStorage.updateCrmCustomer(customer.id, {
@@ -17900,16 +17907,32 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         resetPasswordExpires: resetExpires.toISOString()
       });
       
-      // Send reset email
-      await emailService.sendPasswordResetEmail(
+      console.log(`💾 [Password Reset] Token saved to database for customer ID: ${customer.id}`);
+      
+      // Import Universal Email Service
+      const { UniversalEmailService } = await import('./universal-email-service');
+      
+      // Send reset email using Universal Email Service with noreply@momtazchem.com
+      const emailResult = await UniversalEmailService.sendPasswordResetEmail(
         customer.email,
         resetToken,
-        `${customer.firstName} ${customer.lastName}`
+        `${customer.firstName} ${customer.lastName}`,
+        req
       );
+      
+      console.log(`📧 [Password Reset] Email send result: ${emailResult ? 'Success' : 'Failed'}`);
+      
+      // Log activity in CRM
+      await crmStorage.logActivity({
+        customerId: customer.id,
+        activityType: 'password_reset_requested',
+        description: 'درخواست تغییر رمز عبور از طریق ایمیل',
+        performedBy: 'customer'
+      });
       
       res.json({ success: true, message: "لینک تغییر رمز عبور به ایمیل شما ارسال شد" });
     } catch (error) {
-      console.error('Error requesting password reset:', error);
+      console.error('❌ [Password Reset] Error:', error);
       res.status(500).json({ success: false, message: "خطا در ارسال لینک تغییر رمز عبور" });
     }
   });

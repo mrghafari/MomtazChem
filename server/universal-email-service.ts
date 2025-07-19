@@ -470,4 +470,133 @@ export class UniversalEmailService {
       }
     });
   }
+
+  /**
+   * Send customer password reset email using template from database
+   */
+  static async sendPasswordResetEmail(customerEmail: string, resetToken: string, customerName: string, req?: any) {
+    try {
+      const { CONFIG } = await import('./config');
+      const resetUrl = CONFIG.getCustomerPasswordResetUrl(resetToken, req);
+      
+      console.log(`📧 [Password Reset] Sending reset email to: ${customerEmail}`);
+      console.log(`🔗 Reset URL: ${resetUrl}`);
+      
+      // Try to get template from database first
+      try {
+        const template = await emailStorage.getTemplates();
+        const passwordResetTemplate = template.find(t => t.category === 'password-reset' && t.isActive);
+        
+        if (passwordResetTemplate) {
+          console.log(`✓ Using database template: ${passwordResetTemplate.name}`);
+          
+          // Process template variables
+          let htmlContent = passwordResetTemplate.htmlContent;
+          let textContent = passwordResetTemplate.textContent || '';
+          let subject = passwordResetTemplate.subject;
+          
+          const variables = {
+            customer_name: customerName,
+            reset_url: resetUrl,
+            expiry_time: '1 ساعت'
+          };
+          
+          // Replace variables in content
+          Object.entries(variables).forEach(([key, value]) => {
+            const placeholder = new RegExp(`{{${key}}}`, 'g');
+            htmlContent = htmlContent.replace(placeholder, value || '');
+            textContent = textContent.replace(placeholder, value || '');
+            subject = subject.replace(placeholder, value || '');
+          });
+          
+          return await this.sendEmail({
+            categoryKey: 'password-reset',
+            to: [customerEmail],
+            subject: subject,
+            html: htmlContent,
+            text: textContent
+          });
+        }
+      } catch (templateError) {
+        console.warn('⚠️ Could not load template from database, using fallback:', templateError);
+      }
+      
+      // Fallback to hardcoded template if database template not available
+      return await this.sendEmail({
+        categoryKey: 'password-reset',
+        to: [customerEmail],
+        subject: 'درخواست تغییر رمز عبور - ممتاز شیمی',
+        html: `
+          <div style="font-family: 'Vazir', Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1>🔐 درخواست تغییر رمز عبور</h1>
+              <p>ممتاز شیمی - Chemical Solutions</p>
+            </div>
+            
+            <div style="padding: 30px 20px; background-color: #ffffff; border: 1px solid #e5e7eb;">
+              <p>سلام ${customerName} عزیز،</p>
+              
+              <p>درخواست تغییر رمز عبور برای حساب کاربری شما در سیستم ممتاز شیمی دریافت شد.</p>
+              
+              <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                <strong>⚠️ توجه:</strong> اگر این درخواست را شما انجام نداده‌اید، لطفاً این ایمیل را نادیده بگیرید.
+              </div>
+              
+              <p>برای تغییر رمز عبور خود، روی دکمه زیر کلیک کنید:</p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" style="display: inline-block; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">تغییر رمز عبور</a>
+              </div>
+              
+              <p><strong>مدت اعتبار:</strong> این لینک تنها برای <strong>1 ساعت</strong> معتبر است.</p>
+              
+              <p>اگر دکمه کار نمی‌کند، لینک زیر را کپی کرده و در مرورگر خود وارد کنید:</p>
+              <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace;">${resetUrl}</p>
+              
+              <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+              
+              <p>با تشکر،<br>
+              تیم پشتیبانی ممتاز شیمی</p>
+            </div>
+            
+            <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 10px 10px;">
+              <p><strong>ممتاز شیمی</strong> - ارائه‌دهنده راه‌کارهای شیمیایی</p>
+              <p>📞 +964 770 999 6771 | 📧 noreply@momtazchem.com</p>
+              <p>🌐 www.momtazchem.com</p>
+              <p style="margin-top: 15px; font-size: 11px;">
+                این ایمیل به صورت خودکار ارسال شده است. لطفاً پاسخ ندهید.
+              </p>
+            </div>
+          </div>
+        `,
+        text: `سلام ${customerName} عزیز،
+
+درخواست تغییر رمز عبور برای حساب کاربری شما در سیستم ممتاز شیمی دریافت شد.
+
+⚠️ توجه: اگر این درخواست را شما انجام نداده‌اید، لطفاً این ایمیل را نادیده بگیرید.
+
+برای تغییر رمز عبور خود، روی لینک زیر کلیک کنید:
+${resetUrl}
+
+مدت اعتبار: این لینک تنها برای 1 ساعت معتبر است.
+
+با تشکر،
+تیم پشتیبانی ممتاز شیمی
+
+📞 +964 770 999 6771
+📧 noreply@momtazchem.com  
+🌐 www.momtazchem.com
+
+این ایمیل به صورت خودکار ارسال شده است. لطفاً پاسخ ندهید.`,
+        variables: {
+          customer_name: customerName,
+          reset_url: resetUrl,
+          expiry_time: '1 ساعت'
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error in sendPasswordResetEmail:', error);
+      return false;
+    }
+  }
 }

@@ -33,7 +33,7 @@ export default function CustomerForgotPassword() {
   const onSubmit = async (data: ForgotPasswordForm) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/customers/forgot-password', {
+      const response = await fetch('/api/customers/request-password-reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
