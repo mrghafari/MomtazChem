@@ -468,12 +468,22 @@ export class KardexSyncMaster {
       const kardexProducts = await storage.getProducts();
       const shopProducts = await shopStorage.getAllShopProducts();
       
-      // فیلتر کردن محصولات که بارکد دارند (همه محصولات کاردکس باید sync شوند)
-      const syncEnabledKardex = kardexProducts.filter(p => 
+      // فیلتر کردن محصولات که بارکد دارند و تجمیع بر اساس بارکد
+      const kardexWithBarcode = kardexProducts.filter(p => 
         p.barcode && p.barcode.trim() !== ''
       );
       
-      // محاسبه محصولات مخفی (syncWithShop = false)
+      // تجمیع محصولات بر اساس بارکد (برای بچ‌های مختلف)
+      const uniqueKardexBarcodes = new Map<string, any>();
+      for (const product of kardexWithBarcode) {
+        const barcode = product.barcode.trim();
+        if (!uniqueKardexBarcodes.has(barcode)) {
+          uniqueKardexBarcodes.set(barcode, product);
+        }
+      }
+      const syncEnabledKardex = Array.from(uniqueKardexBarcodes.values());
+      
+      // محاسبه محصولات مخفی (syncWithShop = false) - بر اساس تجمیع شده
       const hiddenKardexProducts = syncEnabledKardex.filter(p => 
         p.syncWithShop === false
       );
@@ -497,7 +507,7 @@ export class KardexSyncMaster {
       const totalAccountedProducts = (syncEnabledKardex.length - missingInShop.length) + hiddenKardexProducts.length;
       const inSync = totalAccountedProducts === syncEnabledKardex.length && extraInShop.length === 0;
       
-      console.log(`📊 [SYNC STATUS] کاردکس: ${syncEnabledKardex.length}, فروشگاه: ${shopProducts.length}, مخفی: ${hiddenKardexProducts.length}, همگام: ${inSync}`);
+      console.log(`📊 [SYNC STATUS] کاردکس تجمیع شده: ${syncEnabledKardex.length} (از ${kardexWithBarcode.length} محصول خام), فروشگاه: ${shopProducts.length}, مخفی: ${hiddenKardexProducts.length}, همگام: ${inSync}`);
       console.log(`📊 [SYNC STATUS] کمبود در فروشگاه: ${missingInShop.length}, اضافی در فروشگاه: ${extraInShop.length}`);
       console.log(`📊 [SYNC STATUS] منطق جدید: (${syncEnabledKardex.length} - ${missingInShop.length}) + ${hiddenKardexProducts.length} = ${totalAccountedProducts} از ${syncEnabledKardex.length}`);
       
