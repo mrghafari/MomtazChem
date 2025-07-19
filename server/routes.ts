@@ -6536,33 +6536,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isTestMode: settings.is_test_mode
       });
 
-      // If in test mode, simulate sending without actual API call
-      if (settings.is_test_mode) {
-        const messageId = `TEST_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      // Use actual SMS service regardless of test mode
+      try {
+        let smsResult;
         
+        if (settings.provider === 'infobip') {
+          // Send via Infobip API
+          const infobipResponse = await fetch(`https://${settings.api_endpoint}/sms/2/text/advanced`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `App ${settings.api_key}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              messages: [{
+                from: settings.sender_number || 'InfoSMS',
+                destinations: [{
+                  to: phoneNumber
+                }],
+                text: message
+              }]
+            })
+          });
+
+          const infobipData = await infobipResponse.json();
+          
+          if (infobipResponse.ok && infobipData.messages && infobipData.messages[0]) {
+            const messageData = infobipData.messages[0];
+            smsResult = {
+              success: true,
+              messageId: messageData.messageId,
+              status: messageData.status?.name || 'PENDING'
+            };
+          } else {
+            throw new Error(`Infobip API Error: ${infobipData.requestError?.serviceException?.text || 'Unknown error'}`);
+          }
+        } else if (settings.provider === 'kavenegar') {
+          // Send via Kavenegar API
+          const kavenegarUrl = `https://api.kavenegar.com/v1/${settings.api_key}/sms/send.json`;
+          const kavenegarResponse = await fetch(kavenegarUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+              receptor: phoneNumber,
+              message: message,
+              sender: settings.sender_number || '1000596446'
+            })
+          });
+
+          const kavenegarData = await kavenegarResponse.json();
+          
+          if (kavenegarResponse.ok && kavenegarData.return && kavenegarData.return.status === 200) {
+            smsResult = {
+              success: true,
+              messageId: kavenegarData.entries[0].messageid.toString(),
+              status: 'PENDING'
+            };
+          } else {
+            throw new Error(`Kavenegar API Error: ${kavenegarData.return?.message || 'Unknown error'}`);
+          }
+        } else {
+          // For other providers, simulate for now
+          smsResult = {
+            success: true,
+            messageId: `PROVIDER_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            status: 'SIMULATED'
+          };
+        }
+
         res.json({
           success: true,
-          message: "پیام تست با موفقیت ارسال شد (حالت تست)",
-          messageId,
-          testMode: true
+          message: settings.is_test_mode ? 
+            `پیام تست واقعی ارسال شد (${settings.provider})` : 
+            "پیام با موفقیت ارسال شد",
+          messageId: smsResult.messageId,
+          status: smsResult.status,
+          provider: settings.provider,
+          testMode: settings.is_test_mode
         });
         
-        console.log(`✅ Test SMS simulated - ID: ${messageId}`);
-        return;
+        console.log(`✅ Real SMS sent via ${settings.provider} - ID: ${smsResult.messageId}, Phone: ${phoneNumber}, Status: ${smsResult.status}`);
+        
+      } catch (smsError) {
+        console.error('SMS sending error:', smsError);
+        res.json({
+          success: false,
+          message: `خطا در ارسال SMS: ${smsError.message}`,
+          provider: settings.provider,
+          testMode: settings.is_test_mode
+        });
       }
-
-      // For actual SMS sending, you would integrate with real SMS service here
-      // For now, we'll simulate a successful response
-      const messageId = `SMS_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-      
-      res.json({
-        success: true,
-        message: "پیام تست با موفقیت ارسال شد",
-        messageId,
-        testMode: false
-      });
-      
-      console.log(`✅ Test SMS sent - ID: ${messageId}, Phone: ${phoneNumber}`);
       
     } catch (error) {
       console.error("Error sending test SMS:", error);
