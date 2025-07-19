@@ -9413,6 +9413,7 @@ ${procedure.content}
         
         const emailCategory = categoryMap[inquiryData.category] || 'admin';
         
+        // Send admin notification email
         await UniversalEmailService.sendEmail({
           categoryKey: emailCategory,
           to: [],
@@ -9446,7 +9447,84 @@ ${procedure.content}
           }
         });
         
-        console.log(`Product inquiry email sent via Universal Email Service for category: ${inquiryData.category} → ${emailCategory}`);
+        console.log(`Admin inquiry notification sent via Universal Email Service for category: ${inquiryData.category} → ${emailCategory}`);
+
+        // Send confirmation email to customer
+        try {
+          await UniversalEmailService.sendEmail({
+            categoryKey: 'notifications',
+            to: [inquiryData.contactEmail],
+            cc: [],
+            subject: `تایید دریافت درخواست شما - ${inquiry.inquiryNumber}`,
+            html: `
+              <div style="font-family: 'Tahoma', Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+                  <h1 style="margin: 0; font-size: 28px; font-weight: bold;">شرکت ممتاز شیمی</h1>
+                  <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Momtaz Chemical Solutions</p>
+                </div>
+                
+                <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                  <h2 style="color: #333; margin-top: 0; font-size: 24px; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
+                    تایید دریافت درخواست
+                  </h2>
+                  
+                  <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
+                    با سلام و احترام،
+                  </p>
+                  
+                  <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
+                    درخواست شما با موفقیت دریافت شد. تیم متخصص ما در اسرع وقت و حداکثر تا <strong>24 ساعت آینده</strong> با شما تماس خواهند گرفت.
+                  </p>
+                  
+                  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-right: 4px solid #667eea;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">اطلاعات درخواست شما:</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>شماره درخواست:</strong> ${inquiry.inquiryNumber}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>محصول:</strong> ${productName || 'عمومی'}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>موضوع:</strong> ${inquiryData.subject || 'درخواست عمومی'}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>دسته‌بندی:</strong> ${inquiryData.category || 'عمومی'}</p>
+                  </div>
+                  
+                  <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
+                    <h3 style="color: #1976d2; margin: 0 0 15px 0; font-size: 18px;">🕐 زمان پاسخ</h3>
+                    <p style="margin: 0; font-size: 16px; color: #333; font-weight: bold;">
+                      حداکثر 24 ساعت
+                    </p>
+                    <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">
+                      (در روزهای کاری)
+                    </p>
+                  </div>
+                  
+                  <div style="margin: 30px 0; padding: 20px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeaa7;">
+                    <h4 style="color: #856404; margin: 0 0 10px 0;">📞 اطلاعات تماس</h4>
+                    <p style="margin: 5px 0; color: #856404;"><strong>تلفن:</strong> +964 770 999 6771</p>
+                    <p style="margin: 5px 0; color: #856404;"><strong>ایمیل:</strong> info@momtazchem.com</p>
+                    <p style="margin: 5px 0; color: #856404;"><strong>وب‌سایت:</strong> www.momtazchem.com</p>
+                  </div>
+                  
+                  <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
+                    از اعتماد شما به شرکت ممتاز شیمی سپاسگزاریم.
+                  </p>
+                  
+                  <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="color: #888; font-size: 14px; margin: 0;">
+                      این ایمیل به صورت خودکار ارسال شده است.
+                    </p>
+                  </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                  <p style="color: #888; font-size: 12px; margin: 0;">
+                    © 2025 Momtaz Chemical Solutions. All rights reserved.
+                  </p>
+                </div>
+              </div>
+            `
+          });
+          
+          console.log(`✅ Customer confirmation email sent to: ${inquiryData.contactEmail}`);
+        } catch (customerEmailError) {
+          console.error("❌ Failed to send customer confirmation email:", customerEmailError);
+        }
       } catch (emailError) {
         console.error("Failed to send inquiry email:", emailError);
         // Don't fail the inquiry creation if email fails
