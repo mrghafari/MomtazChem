@@ -26,7 +26,7 @@ function setupVazirFont() {
   };
 }
 
-export async function generateCustomerPDFWithPDFMake(
+async function generateCustomerPDFWithPDFMake(
   customerData: any,
   orders: any[],
   activities: any[],
@@ -309,7 +309,7 @@ export async function generateCustomerPDFWithPDFMake(
   });
 }
 
-export async function generateAnalyticsPDFWithPDFMake(
+async function generateAnalyticsPDFWithPDFMake(
   analyticsData: any,
   title: string
 ): Promise<Buffer> {
@@ -480,7 +480,7 @@ export async function generateAnalyticsPDFWithPDFMake(
   });
 }
 
-export async function generateInvoicePDFWithPDFMake(
+async function generateInvoicePDFWithPDFMake(
   customerData: any,
   orderData: any,
   batchData: any[],
@@ -719,7 +719,7 @@ export async function generateInvoicePDFWithPDFMake(
 }
 
 // Documentation PDF Generation
-export async function generateDocumentationPDFWithPDFMake(
+async function generateDocumentationPDFWithPDFMake(
   docType: string,
   language: string
 ): Promise<Buffer> {
