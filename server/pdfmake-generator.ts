@@ -3,44 +3,19 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import vazirBase64 from "./vazir-base64";
 
-// Setup fonts for pdfMake with Helvetica fallback
+// Setup fonts for pdfMake with default Roboto fonts
 function setupVazirFont() {
   try {
     console.log('Setting up fonts for pdfMake...');
     
-    // Initialize pdfMake with fonts if not already done
-    if (!pdfMake.vfs) {
-      pdfMake.vfs = pdfFonts.pdfMake?.vfs || {};
-    }
+    // Use the default pdfMake VFS and fonts
+    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+    pdfMake.fonts = pdfFonts.pdfMake.fonts;
     
-    // Use standard fonts that work reliably
-    pdfMake.fonts = {
-      Helvetica: {
-        normal: 'Helvetica',
-        bold: 'Helvetica-Bold',
-        italics: 'Helvetica-Oblique',
-        bolditalics: 'Helvetica-BoldOblique'
-      },
-      Roboto: {
-        normal: 'Roboto-Regular.ttf',
-        bold: 'Roboto-Medium.ttf',
-        italics: 'Roboto-Italic.ttf',
-        bolditalics: 'Roboto-MediumItalic.ttf'
-      }
-    };
-    
-    console.log('✅ Font setup completed successfully with Helvetica');
+    console.log('✅ Font setup completed successfully with default Roboto');
   } catch (error) {
     console.error('❌ Error setting up fonts:', error);
-    // Ultimate fallback to basic font setup
-    pdfMake.fonts = {
-      Helvetica: {
-        normal: 'Helvetica',
-        bold: 'Helvetica-Bold',
-        italics: 'Helvetica-Oblique',
-        bolditalics: 'Helvetica-BoldOblique'
-      }
-    };
+    // Ultimate fallback - let pdfMake use its defaults
   }
 }
 
@@ -258,7 +233,7 @@ async function generateCustomerPDFWithPDFMake(
             fontSize: 20,
             bold: true,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           subheader: {
             fontSize: 14,
@@ -269,46 +244,46 @@ async function generateCustomerPDFWithPDFMake(
             fontSize: 16,
             bold: true,
             color: '#333333',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           dateInfo: {
             fontSize: 10,
             color: '#666666',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           customerInfo: {
             fontSize: 11,
             color: '#333333',
-            font: 'Helvetica',
+            font: 'Roboto',
             margin: [0, 2, 0, 2]
           },
           tableHeader: {
             fontSize: 10,
             bold: true,
             color: '#374151',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           noData: {
             fontSize: 10,
             color: '#666666',
-            font: 'Helvetica',
+            font: 'Roboto',
             italics: true
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Helvetica'
+            font: 'Roboto'
           }
         },
 
         defaultStyle: {
-          font: 'Helvetica',
+          font: 'Roboto',
           fontSize: 10,
           alignment: 'right'
         }
@@ -434,7 +409,7 @@ async function generateAnalyticsPDFWithPDFMake(
             fontSize: 22,
             bold: true,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           subheader: {
             fontSize: 16,
@@ -444,7 +419,7 @@ async function generateAnalyticsPDFWithPDFMake(
           companyName: {
             fontSize: 14,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           companyNameEn: {
             fontSize: 12,
@@ -454,12 +429,12 @@ async function generateAnalyticsPDFWithPDFMake(
           dateInfo: {
             fontSize: 10,
             color: '#666666',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           statLabel: {
             fontSize: 14,
             color: '#374151',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           statLabelEn: {
             fontSize: 11,
@@ -470,17 +445,17 @@ async function generateAnalyticsPDFWithPDFMake(
             fontSize: 18,
             bold: true,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Helvetica'
+            font: 'Roboto'
           }
         },
 
         defaultStyle: {
-          font: 'Helvetica',
+          font: 'Roboto',
           fontSize: 12,
           alignment: 'right'
         }
@@ -663,7 +638,7 @@ async function generateInvoicePDFWithPDFMake(
             fontSize: 22,
             bold: true,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           subheader: {
             fontSize: 16,
@@ -673,52 +648,52 @@ async function generateInvoicePDFWithPDFMake(
           companyName: {
             fontSize: 14,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           invoiceInfo: {
             fontSize: 12,
             color: '#333333',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           customerInfo: {
             fontSize: 11,
             color: '#333333',
-            font: 'Helvetica',
+            font: 'Roboto',
             margin: [0, 2, 0, 2]
           },
           tableHeader: {
             fontSize: 10,
             bold: true,
             color: '#374151',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           noData: {
             fontSize: 10,
             color: '#666666',
-            font: 'Helvetica',
+            font: 'Roboto',
             italics: true
           },
           totalAmount: {
             fontSize: 16,
             bold: true,
             color: '#2563eb',
-            font: 'Helvetica'
+            font: 'Roboto'
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Helvetica'
+            font: 'Roboto'
           }
         },
 
         defaultStyle: {
-          font: 'Helvetica',
+          font: 'Roboto',
           fontSize: 10,
           alignment: 'right'
         }
