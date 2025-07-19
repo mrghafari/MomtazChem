@@ -48,17 +48,48 @@ const EmailTemplates: React.FC = () => {
     created_by: 15
   });
 
-  const { data: templatesData, isLoading, error } = useQuery({
-    queryKey: ['/api/email-templates'],
-    staleTime: 0, // Force fresh data
-    cacheTime: 0, // Don't cache
-    retry: (failureCount, error) => {
-      // Don't retry if it's an authentication error
-      if (error.message?.includes('authentication') || error.message?.includes('API endpoint not found')) {
-        return false;
+  const { data: templatesData, isLoading, error, refetch } = useQuery({
+    queryKey: ['/api/email-templates', Date.now()], // Force unique key
+    queryFn: async () => {
+      console.log("🚀 Starting direct API call to /api/email-templates");
+      const timestamp = Date.now();
+      const url = `/api/email-templates?_t=${timestamp}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        cache: 'no-store'
+      });
+      
+      console.log("🔍 Response status:", response.status, response.statusText);
+      console.log("🔍 Response headers:", [...response.headers.entries()]);
+      
+      const responseText = await response.text();
+      console.log("🔍 Raw response text:", responseText.substring(0, 200));
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${responseText}`);
       }
-      return failureCount < 3;
-    }
+      
+      try {
+        const data = JSON.parse(responseText);
+        console.log("🔥 Parsed JSON result:", data?.length || 'Not array', typeof data);
+        return data;
+      } catch (parseError) {
+        console.error("❌ JSON Parse error:", parseError);
+        throw new Error(`Invalid JSON response: ${responseText}`);
+      }
+    },
+    staleTime: 0,
+    cacheTime: 0,
+    retry: false
   });
 
   // Debug and handle templates data
@@ -304,9 +335,15 @@ const EmailTemplates: React.FC = () => {
                   {JSON.stringify(templatesData, null, 2)}
                 </pre>
               </div>
-              <div className="text-xs text-blue-600">
+              <div className="text-xs text-blue-600 mb-4">
                 Error: {error ? error.message : 'No error detected'}
               </div>
+              <Button 
+                onClick={() => refetch()} 
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                🔄 تلاش مجدد
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

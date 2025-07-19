@@ -76,6 +76,7 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
+    // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);
 
     // Multer error handling middleware
