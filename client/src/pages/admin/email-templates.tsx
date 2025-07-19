@@ -87,52 +87,34 @@ const EmailTemplates: React.FC = () => {
         isArray: Array.isArray(data), 
         type: typeof data, 
         keys: typeof data === 'object' ? Object.keys(data || {}) : 'not object',
-        firstItem: Array.isArray(data) && data[0] ? Object.keys(data[0]) : 'no first item'
+        firstItem: Array.isArray(data) && data[0] ? Object.keys(data[0]) : 'no first item',
+        actualData: data
       });
       
-      if (Array.isArray(data)) {
-        setTemplatesData(data);
+      if (Array.isArray(data) && data.length > 0) {
+        // Map backend data to frontend interface
+        const mappedTemplates = data.map((template: any) => ({
+          id: template.id,
+          name: template.templateName || template.name,
+          category: template.category || 'general',
+          html_content: template.htmlContent || template.html_content || '<p>No content</p>',
+          usage_count: template.usageCount || template.usage_count || 0,
+          language: template.language || 'en',
+          created_by: template.createdBy || template.created_by || 15,
+          created_at: template.createdAt || template.created_at || new Date().toISOString(),
+          updated_at: template.updatedAt || template.updated_at || new Date().toISOString()
+        }));
+        
+        console.log("🎯 Mapped templates:", mappedTemplates.length, "templates");
+        console.log("🎯 First template:", mappedTemplates[0]);
+        setTemplatesData(mappedTemplates);
       } else if (data && typeof data === 'object' && data.success === false) {
-        // This is the cached error response - use mock data temporarily
-        console.warn("🔴 Detected cached error response, using mock templates");
-        const mockTemplates = [
-          {
-            id: 18,
-            name: "#17 - Comprehensive Inventory Alert",
-            category: "inventory",
-            html_content: "<div>Mock template content</div>",
-            usage_count: 5,
-            language: "fa",
-            created_by: 15,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 5,
-            name: "#05 - Momtaz Chemical Follow-up Response",
-            category: "follow-up",
-            html_content: "<div>Mock follow-up template</div>",
-            usage_count: 12,
-            language: "en",
-            created_by: 15,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 13,
-            name: "#13 - Low Stock Alert",
-            category: "inventory",
-            html_content: "<div>Mock inventory alert</div>",
-            usage_count: 8,
-            language: "fa",
-            created_by: 15,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ] as EmailTemplate[];
-        setTemplatesData(mockTemplates);
+        console.warn("🔴 API returned error response:", data.message);
+        // Show actual error but provide working interface  
+        setTemplatesData([]);
+        setError(new Error("Session expired - please refresh the page"));
       } else {
-        console.warn("Response is not an array:", data);
+        console.warn("🔴 Unexpected response format:", data);
         setTemplatesData([]);
       }
     } catch (err) {
@@ -387,20 +369,28 @@ const EmailTemplates: React.FC = () => {
           ) : templates.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-orange-500 text-lg mb-4">
-                ⚠️ مشکل در اتصال به API - استفاده از قالب‌های نمونه
+                ⚠️ مشکل در دسترسی به قالب‌ها
               </div>
               <div className="text-sm text-gray-600 mb-4">
-                سیستم از قالب‌های نمونه استفاده می‌کند تا شما بتوانید عملکرد را بررسی کنید.
+                {error?.message || 'نتوانست قالب‌ها بارگذاری شود'}
               </div>
-              <div className="text-xs text-blue-600 mb-4">
-                API Status: Cache conflict detected - showing sample templates
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => refetch()} 
+                  className="bg-blue-500 hover:bg-blue-600 text-white mr-3"
+                >
+                  🔄 تلاش مجدد
+                </Button>
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  className="bg-green-500 hover:bg-green-600 text-white"
+                >
+                  🔄 بازخوانی صفحه
+                </Button>
               </div>
-              <Button 
-                onClick={() => refetch()} 
-                className="bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                🔄 تلاش مجدد
-              </Button>
+              <div className="text-xs text-gray-500 mt-4">
+                اگر مشکل ادامه دارد، صفحه را بازخوانی کنید
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
