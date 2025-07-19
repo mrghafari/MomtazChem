@@ -15,6 +15,16 @@ async function throwIfResNotOk(res: Response, requestUrl?: string, method?: stri
       throw new Error(`${res.status}: API returned HTML instead of JSON`);
     }
     
+    // Check for specific API endpoint error messages that indicate JSON response
+    if (text.includes('API endpoint not found') && text.includes('success')) {
+      try {
+        const errorData = JSON.parse(text);
+        throw new Error(errorData.message || `${res.status}: ${text}`);
+      } catch (parseError) {
+        throw new Error(`${res.status}: ${text}`);
+      }
+    }
+    
     // Don't suppress 401 errors for DELETE operations - admin authentication is required
     if (res.status === 401) {
       if (requestUrl?.includes('/api/products/') && method === 'DELETE') {

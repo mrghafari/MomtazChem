@@ -50,16 +50,42 @@ const EmailTemplates: React.FC = () => {
 
   const { data: templatesData, isLoading, error } = useQuery({
     queryKey: ['/api/email-templates'],
-    staleTime: 30000,
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Don't cache
+    retry: (failureCount, error) => {
+      // Don't retry if it's an authentication error
+      if (error.message?.includes('authentication') || error.message?.includes('API endpoint not found')) {
+        return false;
+      }
+      return failureCount < 3;
+    }
   });
 
   // Debug and handle templates data
-  console.log("Debug Templates:", { templatesData, isLoading, error });
+  console.log("🔧 Email Templates Debug:", { 
+    hasData: !!templatesData, 
+    isArray: Array.isArray(templatesData),
+    dataType: typeof templatesData,
+    rawData: templatesData,
+    isLoading, 
+    error: error?.message
+  });
   
-  // Handle both array response and object with data property
-  const templates = Array.isArray(templatesData) ? templatesData : templatesData?.data || [];
+  // Process templates based on response format
+  let templates: EmailTemplate[] = [];
   
-  console.log("Processed templates:", templates, "Count:", templates.length);
+  if (Array.isArray(templatesData)) {
+    templates = templatesData;
+  } else if (templatesData && typeof templatesData === 'object') {
+    // Check various response structures
+    if (templatesData.data && Array.isArray(templatesData.data)) {
+      templates = templatesData.data;
+    } else if (templatesData.templates && Array.isArray(templatesData.templates)) {
+      templates = templatesData.templates;
+    }
+  }
+  
+  console.log("📧 Final Templates:", { count: templates.length, firstTemplate: templates[0] });
 
   const createTemplateMutation = useMutation({
     mutationFn: async (templateData: any) => {
@@ -270,13 +296,16 @@ const EmailTemplates: React.FC = () => {
           ) : templates.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-red-500 text-lg mb-4">
-                مشکل در دریافت قالب‌ها
+                قالب‌هایی پیدا نشد
               </div>
-              <div className="text-sm text-gray-600 mb-4">
-                Raw Data: {JSON.stringify(templatesData, null, 2).substring(0, 200)}...
+              <div className="text-sm text-gray-600 mb-4 max-h-40 overflow-auto">
+                <strong>Raw API Response:</strong><br/>
+                <pre className="text-xs text-left" dir="ltr">
+                  {JSON.stringify(templatesData, null, 2)}
+                </pre>
               </div>
               <div className="text-xs text-blue-600">
-                Error: {error ? JSON.stringify(error) : 'No error'}
+                Error: {error ? error.message : 'No error detected'}
               </div>
             </div>
           ) : (

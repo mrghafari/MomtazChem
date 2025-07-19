@@ -11055,10 +11055,12 @@ ${procedure.content}
   // Email template management routes - remove auth requirement temporarily
   app.get("/api/email-templates", async (req, res) => {
     try {
+      console.log("📧 GET /api/email-templates - Fetching templates...");
       const templates = await customerStorage.getEmailTemplates();
+      console.log("📧 Found templates:", templates?.length || 0);
       res.json(templates);
     } catch (error) {
-      console.error("Error fetching email templates:", error);
+      console.error("❌ Error fetching email templates:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -28579,6 +28581,7 @@ momtazchem.com
 
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
+    console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
     res.status(404).json({
       success: false,
       message: 'API endpoint not found',
