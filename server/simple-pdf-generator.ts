@@ -1,313 +1,32 @@
-// PDF Generator with Arabic/Persian Support using Puppeteer
-// Enhanced version for proper multilingual text rendering
+// Simple PDF Generator - HTML Response for Browser Print to PDF
+// This approach generates HTML that browsers can print to PDF natively
 
-import * as fs from 'fs';
-import * as path from 'path';
-import puppeteer from 'puppeteer';
-
-// Generate HTML content with Arabic/Persian font support for invoices
-function generateHTMLContent(customerData: any, orderData: any, batchData: any[], title: string): string {
-  const batchRows = batchData?.map(batch => `
-    <tr>
-      <td>${batch.batchNumber || 'نامشخص'}</td>
-      <td>${batch.barcode || 'نامشخص'}</td>
-      <td>${batch.quantitySold || 0}</td>
-      <td>${batch.wasteAmount || 0} (${batch.quantitySold ? ((parseFloat(batch.wasteAmount || 0) / batch.quantitySold) * 100).toFixed(2) : 0}%)</td>
-      <td>${batch.effectiveQuantity || 0}</td>
-      <td>${batch.unitPrice || 0} دینار</td>
-      <td>${batch.totalPrice || 0} دینار</td>
-    </tr>
-  `).join('') || '<tr><td colspan="7">اطلاعات بچی موجود نیست</td></tr>';
-
-  return `
-<!DOCTYPE html>
-<html dir="rtl" lang="fa">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>فاکتور - ${title}</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Noto Sans Arabic', 'Tahoma', 'Arial Unicode MS', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background: #fff;
-      direction: rtl;
-      padding: 20px;
-    }
-    
-    .header {
-      text-align: center;
-      border-bottom: 3px solid #2563eb;
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .company-name {
-      font-size: 24px;
-      font-weight: bold;
-      color: #2563eb;
-      margin-bottom: 10px;
-    }
-    
-    .invoice-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    
-    .section {
-      margin-bottom: 25px;
-      padding: 15px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-    }
-    
-    .section-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #1f2937;
-      margin-bottom: 15px;
-      border-bottom: 1px solid #d1d5db;
-      padding-bottom: 8px;
-    }
-    
-    .info-row {
-      display: flex;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-    
-    .info-label {
-      font-weight: bold;
-      width: 120px;
-      color: #374151;
-    }
-    
-    .info-value {
-      flex: 1;
-      color: #1f2937;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 15px 0;
-      font-size: 14px;
-    }
-    
-    th, td {
-      border: 1px solid #d1d5db;
-      padding: 8px;
-      text-align: center;
-    }
-    
-    th {
-      background-color: #f3f4f6;
-      font-weight: bold;
-      color: #1f2937;
-    }
-    
-    .total-section {
-      background-color: #f8fafc;
-      border: 2px solid #2563eb;
-    }
-    
-    .footer {
-      text-align: center;
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #d1d5db;
-      color: #6b7280;
-      font-size: 12px;
-    }
-    
-    @media print {
-      body { padding: 10px; }
-      .section { break-inside: avoid; }
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="company-name">شرکت ممتاز برای مواد شیمیایی</div>
-    <div class="invoice-title">فاکتور - ${title}</div>
-    <div>تاریخ صدور: ${new Date().toLocaleDateString('fa-IR')}</div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">اطلاعات شرکت</div>
-    <div class="info-row">
-      <span class="info-label">نام شرکت:</span>
-      <span class="info-value">شرکت ممتاز برای مواد شیمیایی</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">موقعیت:</span>
-      <span class="info-value">عراق - بغداد</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">تلفن:</span>
-      <span class="info-value">+964 770 999 6771</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">ایمیل:</span>
-      <span class="info-value">info@momtazchem.com</span>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">اطلاعات مشتری</div>
-    <div class="info-row">
-      <span class="info-label">نام:</span>
-      <span class="info-value">${customerData.name || 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">ایمیل:</span>
-      <span class="info-value">${customerData.email || 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">تلفن:</span>
-      <span class="info-value">${customerData.phone || 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">آدرس:</span>
-      <span class="info-value">${customerData.address || 'نامشخص'}</span>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">جزئیات فاکتور</div>
-    <div class="info-row">
-      <span class="info-label">شماره فاکتور:</span>
-      <span class="info-value">${orderData.invoiceNumber || orderData.id}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">شماره سفارش:</span>
-      <span class="info-value">${orderData.orderNumber || orderData.id}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">تاریخ سفارش:</span>
-      <span class="info-value">${orderData.createdAt ? new Date(orderData.createdAt).toLocaleDateString('fa-IR') : 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">وضعیت:</span>
-      <span class="info-value">${orderData.status || 'نامشخص'}</span>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">اطلاعات بچ‌ها</div>
-    <table>
-      <thead>
-        <tr>
-          <th>شماره بچ</th>
-          <th>بارکد</th>
-          <th>مقدار فروخته شده</th>
-          <th>ضایعات</th>
-          <th>مقدار موثر</th>
-          <th>قیمت واحد</th>
-          <th>قیمت کل</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${batchRows}
-      </tbody>
-    </table>
-  </div>
-
-  <div class="section total-section">
-    <div class="section-title">اطلاعات پرداخت</div>
-    <div class="info-row">
-      <span class="info-label">روش پرداخت:</span>
-      <span class="info-value">${orderData.paymentMethod || 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">وضعیت پرداخت:</span>
-      <span class="info-value">${orderData.paymentStatus || 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">مبلغ کل:</span>
-      <span class="info-value">${orderData.totalAmount || 'نامشخص'} دینار عراقی</span>
-    </div>
-  </div>
-
-  <div class="footer">
-    <p>این فاکتور به صورت الکترونیکی تولید شده است</p>
-    <p>تاریخ تولید: ${new Date().toLocaleString('fa-IR')}</p>
-  </div>
-</body>
-</html>`;
-}
-
-// Generate invoice PDF with batch information using Puppeteer
-export async function generateInvoicePDFWithBatch(
+// Generate customer report as printable HTML
+export async function generateCustomerPDFHTML(
   customerData: any,
-  orderData: any,
-  batchData: any[],
+  orders: any[],
+  activities: any[],
   title: string
 ): Promise<Buffer> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  
   try {
-    const page = await browser.newPage();
-    const htmlContent = generateHTMLContent(customerData, orderData, batchData, title);
-    
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
-      }
-    });
-    
-    return Buffer.from(pdfBuffer);
-  } finally {
-    await browser.close();
-  }
-}
-
-// Generate Customer PDF Report with Arabic/Persian support
-export async function generateCustomerPDFHTML(customerData: any, orders: any[], activities: any[], title: string): Promise<Buffer> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  
-  try {
-    const page = await browser.newPage();
-    
-    const orderRows = orders?.map(order => `
+    const orderRows = orders?.slice(0, 10).map((order, index) => `
       <tr>
+        <td>${index + 1}</td>
         <td>${order.id || 'نامشخص'}</td>
         <td>${order.totalAmount || 0} دینار</td>
         <td>${order.status || 'نامشخص'}</td>
         <td>${order.createdAt ? new Date(order.createdAt).toLocaleDateString('fa-IR') : 'نامشخص'}</td>
       </tr>
-    `).join('') || '<tr><td colspan="4">سفارشی ثبت نشده است</td></tr>';
+    `).join('') || '<tr><td colspan="5">سفارشی ثبت نشده است</td></tr>';
 
-    const activityRows = activities?.slice(0, 10).map(activity => `
+    const activityRows = activities?.slice(0, 10).map((activity, index) => `
       <tr>
+        <td>${index + 1}</td>
         <td>${activity.activityType || 'نامشخص'}</td>
         <td>${activity.description || 'توضیحی ثبت نشده'}</td>
         <td>${activity.createdAt ? new Date(activity.createdAt).toLocaleDateString('fa-IR') : 'نامشخص'}</td>
       </tr>
-    `).join('') || '<tr><td colspan="3">فعالیتی ثبت نشده است</td></tr>';
+    `).join('') || '<tr><td colspan="4">فعالیتی ثبت نشده است</td></tr>';
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -332,6 +51,17 @@ export async function generateCustomerPDFHTML(customerData: any, orders: any[], 
       background: #fff;
       direction: rtl;
       padding: 20px;
+      font-size: 14px;
+    }
+    
+    @media print {
+      body {
+        padding: 0;
+        font-size: 12px;
+      }
+      .no-print {
+        display: none;
+      }
     }
     
     .header {
@@ -345,6 +75,13 @@ export async function generateCustomerPDFHTML(customerData: any, orders: any[], 
       font-size: 24px;
       font-weight: bold;
       color: #2563eb;
+      margin-bottom: 5px;
+    }
+    
+    .company-name-en {
+      font-size: 18px;
+      color: #666;
+      direction: ltr;
       margin-bottom: 10px;
     }
     
@@ -354,117 +91,169 @@ export async function generateCustomerPDFHTML(customerData: any, orders: any[], 
       margin-bottom: 10px;
     }
     
+    .report-date {
+      font-size: 12px;
+      color: #666;
+    }
+    
     .section {
       margin-bottom: 25px;
       padding: 15px;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
+      page-break-inside: avoid;
     }
     
     .section-title {
       font-size: 16px;
       font-weight: bold;
-      color: #1f2937;
+      color: #2563eb;
       margin-bottom: 15px;
-      border-bottom: 1px solid #d1d5db;
       padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
     }
     
-    .info-row {
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .info-item {
       display: flex;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
+      flex-direction: column;
     }
     
     .info-label {
       font-weight: bold;
-      width: 120px;
       color: #374151;
+      margin-bottom: 5px;
     }
     
     .info-value {
-      flex: 1;
-      color: #1f2937;
+      color: #6b7280;
+      padding: 8px;
+      background: #f9fafb;
+      border-radius: 4px;
     }
     
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 15px 0;
-      font-size: 14px;
+      margin-top: 15px;
+      font-size: 12px;
     }
     
     th, td {
-      border: 1px solid #d1d5db;
+      border: 1px solid #e5e7eb;
       padding: 8px;
       text-align: center;
     }
     
     th {
-      background-color: #f3f4f6;
+      background: #f3f4f6;
       font-weight: bold;
-      color: #1f2937;
+      color: #374151;
+    }
+    
+    tr:nth-child(even) {
+      background: #f9fafb;
     }
     
     .footer {
-      text-align: center;
-      margin-top: 30px;
+      margin-top: 40px;
       padding-top: 20px;
-      border-top: 1px solid #d1d5db;
-      color: #6b7280;
+      border-top: 2px solid #e5e7eb;
+      text-align: center;
       font-size: 12px;
+      color: #666;
     }
     
-    @media print {
-      body { padding: 10px; }
-      .section { break-inside: avoid; }
+    .contact-info {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .print-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #2563eb;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 1000;
+    }
+    
+    .print-button:hover {
+      background: #1d4ed8;
     }
   </style>
+  <script>
+    function printPage() {
+      window.print();
+    }
+    
+    window.onload = function() {
+      // Auto-trigger print dialog for PDF generation
+      setTimeout(function() {
+        window.print();
+      }, 1000);
+    }
+  </script>
 </head>
 <body>
+  <button class="print-button no-print" onclick="printPage()">چاپ / Print to PDF</button>
+  
   <div class="header">
     <div class="company-name">شرکت ممتاز برای مواد شیمیایی</div>
+    <div class="company-name-en">Momtaz Chemical Solutions Company</div>
     <div class="report-title">گزارش مشتری - ${title}</div>
-    <div>تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')}</div>
+    <div class="report-date">تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')} | Generated: ${new Date().toLocaleDateString('en-US')}</div>
   </div>
 
   <div class="section">
-    <div class="section-title">اطلاعات مشتری</div>
-    <div class="info-row">
-      <span class="info-label">نام:</span>
-      <span class="info-value">${customerData.name || 'نامشخص'}</span>
+    <div class="section-title">اطلاعات مشتری - Customer Information</div>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">نام / Name</div>
+        <div class="info-value">${customerData.name || 'نامشخص / Unknown'}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">ایمیل / Email</div>
+        <div class="info-value">${customerData.email || 'نامشخص / Unknown'}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">تلفن / Phone</div>
+        <div class="info-value">${customerData.phone || 'نامشخص / Unknown'}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">وضعیت / Status</div>
+        <div class="info-value">${customerData.customerStatus || 'فعال / Active'}</div>
+      </div>
     </div>
-    <div class="info-row">
-      <span class="info-label">ایمیل:</span>
-      <span class="info-value">${customerData.email || 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">تلفن:</span>
-      <span class="info-value">${customerData.phone || 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">آدرس:</span>
-      <span class="info-value">${customerData.address || 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">تاریخ عضویت:</span>
-      <span class="info-value">${customerData.createdAt ? new Date(customerData.createdAt).toLocaleDateString('fa-IR') : 'نامشخص'}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">وضعیت:</span>
-      <span class="info-value">${customerData.customerStatus || 'فعال'}</span>
+    <div class="info-item">
+      <div class="info-label">آدرس / Address</div>
+      <div class="info-value">${customerData.address || 'نامشخص / Unknown'}</div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">سفارشات مشتری</div>
+    <div class="section-title">سفارشات اخیر - Recent Orders</div>
     <table>
       <thead>
         <tr>
-          <th>شماره سفارش</th>
-          <th>مبلغ کل</th>
-          <th>وضعیت</th>
-          <th>تاریخ</th>
+          <th>#</th>
+          <th>شماره سفارش / Order ID</th>
+          <th>مبلغ / Amount (IQD)</th>
+          <th>وضعیت / Status</th>
+          <th>تاریخ / Date</th>
         </tr>
       </thead>
       <tbody>
@@ -474,13 +263,14 @@ export async function generateCustomerPDFHTML(customerData: any, orders: any[], 
   </div>
 
   <div class="section">
-    <div class="section-title">فعالیت‌های اخیر</div>
+    <div class="section-title">فعالیت‌های اخیر - Recent Activities</div>
     <table>
       <thead>
         <tr>
-          <th>نوع فعالیت</th>
-          <th>توضیحات</th>
-          <th>تاریخ</th>
+          <th>#</th>
+          <th>نوع فعالیت / Activity Type</th>
+          <th>توضیحات / Description</th>
+          <th>تاریخ / Date</th>
         </tr>
       </thead>
       <tbody>
@@ -490,64 +280,61 @@ export async function generateCustomerPDFHTML(customerData: any, orders: any[], 
   </div>
 
   <div class="footer">
-    <p>این گزارش به صورت الکترونیکی تولید شده است</p>
-    <p>تاریخ تولید: ${new Date().toLocaleString('fa-IR')}</p>
+    <div class="contact-info">
+      <div>تلفن: +964 770 999 6771 | Phone: +964 770 999 6771</div>
+      <div>ایمیل: info@momtazchem.com | Email: info@momtazchem.com</div>
+      <div>وب‌سایت: www.momtazchem.com | Website: www.momtazchem.com</div>
+      <div>آدرس: عراق - بغداد | Address: Iraq - Baghdad</div>
+    </div>
+    <div style="margin-top: 20px;">
+      <div>این گزارش به صورت الکترونیکی تولید شده است</div>
+      <div>This report was generated electronically</div>
+      <div style="margin-top: 10px;">© ${new Date().getFullYear()} شرکت ممتاز برای مواد شیمیایی</div>
+    </div>
   </div>
 </body>
-</html>`;
+</html>
+`;
+
+    return Buffer.from(htmlContent, 'utf-8');
     
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
-      }
-    });
-    
-    return Buffer.from(pdfBuffer);
-  } finally {
-    await browser.close();
+  } catch (error) {
+    console.error('Error generating customer HTML:', error);
+    throw new Error('Failed to generate customer report');
   }
 }
 
-// Generate Analytics PDF Report with Arabic/Persian support
-export async function generateAnalyticsPDFHTML(analyticsData: any, title: string): Promise<Buffer> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  
+// Generate analytics report as printable HTML
+export async function generateAnalyticsPDFHTML(
+  analyticsData: any,
+  title: string
+): Promise<Buffer> {
   try {
-    const page = await browser.newPage();
-    
     const htmlContent = `
 <!DOCTYPE html>
 <html dir="rtl" lang="fa">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>گزارش آمارها - ${title}</title>
+  <title>گزارش آمارها - Analytics Report</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
     
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
     body {
       font-family: 'Noto Sans Arabic', 'Tahoma', 'Arial Unicode MS', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background: #fff;
       direction: rtl;
       padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    @media print {
+      body {
+        padding: 0;
+      }
+      .no-print {
+        display: none;
+      }
     }
     
     .header {
@@ -561,159 +348,256 @@ export async function generateAnalyticsPDFHTML(analyticsData: any, title: string
       font-size: 24px;
       font-weight: bold;
       color: #2563eb;
-      margin-bottom: 10px;
-    }
-    
-    .report-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    
-    .section {
-      margin-bottom: 25px;
-      padding: 15px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-    }
-    
-    .section-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #1f2937;
-      margin-bottom: 15px;
-      border-bottom: 1px solid #d1d5db;
-      padding-bottom: 8px;
     }
     
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin: 15px 0;
+      gap: 20px;
+      margin: 20px 0;
     }
     
     .stat-card {
-      padding: 15px;
-      background: #f8fafc;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
+      padding: 20px;
       text-align: center;
     }
     
-    .stat-number {
-      font-size: 24px;
+    .stat-value {
+      font-size: 28px;
       font-weight: bold;
       color: #2563eb;
     }
     
     .stat-label {
       font-size: 14px;
-      color: #6b7280;
+      color: #666;
       margin-top: 5px;
     }
     
-    .footer {
-      text-align: center;
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #d1d5db;
-      color: #6b7280;
-      font-size: 12px;
-    }
-    
-    @media print {
-      body { padding: 10px; }
-      .section { break-inside: avoid; }
+    .print-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #2563eb;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 1000;
     }
   </style>
+  <script>
+    function printPage() {
+      window.print();
+    }
+    
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 1000);
+    }
+  </script>
 </head>
 <body>
+  <button class="print-button no-print" onclick="printPage()">چاپ / Print to PDF</button>
+  
   <div class="header">
-    <div class="company-name">شرکت ممتاز برای مواد شیمیایی</div>
-    <div class="report-title">گزارش آمارها - ${title}</div>
-    <div>تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')}</div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">آمار کلی سیستم</div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number">${analyticsData.totalCustomers || 0}</div>
-        <div class="stat-label">تعداد کل مشتریان</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">${analyticsData.activeCustomers || 0}</div>
-        <div class="stat-label">مشتریان فعال</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">${analyticsData.newThisMonth || 0}</div>
-        <div class="stat-label">مشتریان جدید این ماه</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">${analyticsData.totalOrders || 0}</div>
-        <div class="stat-label">تعداد کل سفارشات</div>
-      </div>
+    <div class="company-name">گزارش آمارها - Analytics Report</div>
+    <div style="font-size: 16px; color: #666; margin-top: 10px;">
+      شرکت ممتاز برای مواد شیمیایی - Momtaz Chemical Solutions
+    </div>
+    <div style="font-size: 14px; color: #666; margin-top: 10px;">
+      تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')} | Generated: ${new Date().toLocaleDateString('en-US')}
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">عملکرد ماهانه</div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number">${analyticsData.monthlyRevenue || 0}</div>
-        <div class="stat-label">درآمد ماهانه (دینار)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">${analyticsData.monthlyOrders || 0}</div>
-        <div class="stat-label">سفارشات ماهانه</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">${analyticsData.averageOrderValue || 0}</div>
-        <div class="stat-label">میانگین ارزش سفارش (دینار)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">${analyticsData.conversionRate || 0}%</div>
-        <div class="stat-label">نرخ تبدیل</div>
-      </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">${analyticsData.totalCustomers || 0}</div>
+      <div class="stat-label">تعداد کل مشتریان<br>Total Customers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${analyticsData.activeCustomers || 0}</div>
+      <div class="stat-label">مشتریان فعال<br>Active Customers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${analyticsData.totalOrders || 0}</div>
+      <div class="stat-label">تعداد کل سفارشات<br>Total Orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${analyticsData.monthlyRevenue || 0}</div>
+      <div class="stat-label">درآمد ماهانه (دینار)<br>Monthly Revenue (IQD)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${analyticsData.newThisMonth || 0}</div>
+      <div class="stat-label">مشتریان جدید این ماه<br>New Customers This Month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${analyticsData.averageOrderValue || 0}</div>
+      <div class="stat-label">میانگین ارزش سفارش<br>Average Order Value (IQD)</div>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">خلاصه تحلیل</div>
-    <p>این گزارش شامل آمار جامع سیستم مدیریت مشتریان و فروش شرکت ممتاز برای مواد شیمیایی می‌باشد.</p>
-    <p>داده‌های ارائه شده بر اساس آخرین اطلاعات موجود در سیستم محاسبه شده است.</p>
-    <p>برای اطلاعات بیشتر با واحد فنی تماس بگیرید.</p>
-  </div>
-
-  <div class="footer">
-    <p>این گزارش به صورت الکترونیکی تولید شده است</p>
-    <p>تاریخ تولید: ${new Date().toLocaleString('fa-IR')}</p>
+  <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666;">
+    <div>© ${new Date().getFullYear()} شرکت ممتاز برای مواد شیمیایی</div>
+    <div>Momtaz Chemical Solutions Company</div>
+    <div style="margin-top: 10px;">
+      تلفن: +964 770 999 6771 | ایمیل: info@momtazchem.com | وب‌سایت: www.momtazchem.com
+    </div>
   </div>
 </body>
-</html>`;
+</html>
+`;
+
+    return Buffer.from(htmlContent, 'utf-8');
     
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
-      }
-    });
-    
-    return Buffer.from(pdfBuffer);
-  } finally {
-    await browser.close();
+  } catch (error) {
+    console.error('Error generating analytics HTML:', error);
+    throw new Error('Failed to generate analytics report');
   }
 }
 
-// Simple text cleaning function for legacy compatibility  
-function cleanTextForPdf(text: string): string {
-  return text
-    .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters for basic PDF compatibility
-    .substring(0, 80); // Limit line length
+// Generate invoice as printable HTML
+export async function generateInvoicePDFWithBatch(
+  customerData: any,
+  orderData: any,
+  batchData: any[],
+  title: string
+): Promise<Buffer> {
+  try {
+    const batchRows = batchData?.map((batch, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${batch.batchNumber || 'نامشخص'}</td>
+        <td>${batch.barcode || 'نامشخص'}</td>
+        <td>${batch.quantitySold || 0}</td>
+        <td>${batch.wasteAmount || 0}</td>
+        <td>${batch.effectiveQuantity || 0}</td>
+        <td>${batch.unitPrice || 0}</td>
+        <td>${batch.totalPrice || 0}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="8">اطلاعات بچی موجود نیست</td></tr>';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>فاکتور - ${title}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
+    
+    body {
+      font-family: 'Noto Sans Arabic', 'Tahoma', 'Arial Unicode MS', sans-serif;
+      direction: rtl;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    @media print {
+      .no-print { display: none; }
+    }
+    
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 12px;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    
+    th {
+      background: #f3f4f6;
+      font-weight: bold;
+    }
+    
+    .print-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #2563eb;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+  </style>
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 1000);
+    }
+  </script>
+</head>
+<body>
+  <button class="print-button no-print" onclick="window.print()">چاپ / Print</button>
+  
+  <div class="header">
+    <h1>فاکتور - Invoice</h1>
+    <div>${title}</div>
+    <div style="font-size: 14px; margin-top: 10px;">
+      تاریخ صدور: ${new Date().toLocaleDateString('fa-IR')}
+    </div>
+  </div>
+
+  <div style="margin: 20px 0;">
+    <h3>اطلاعات مشتری - Customer Information</h3>
+    <p><strong>نام:</strong> ${customerData.name || 'نامشخص'}</p>
+    <p><strong>ایمیل:</strong> ${customerData.email || 'نامشخص'}</p>
+    <p><strong>تلفن:</strong> ${customerData.phone || 'نامشخص'}</p>
+  </div>
+
+  <div style="margin: 20px 0;">
+    <h3>اطلاعات بچ محصولات - Product Batch Information</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>شماره بچ</th>
+          <th>بارکد</th>
+          <th>مقدار فروخته شده</th>
+          <th>ضایعات</th>
+          <th>مقدار موثر</th>
+          <th>قیمت واحد</th>
+          <th>قیمت کل</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${batchRows}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 40px; text-align: center; font-size: 12px;">
+    <div>© ${new Date().getFullYear()} شرکت ممتاز برای مواد شیمیایی</div>
+  </div>
+</body>
+</html>
+`;
+
+    return Buffer.from(htmlContent, 'utf-8');
+    
+  } catch (error) {
+    console.error('Error generating invoice HTML:', error);
+    throw new Error('Failed to generate invoice report');
+  }
 }

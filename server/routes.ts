@@ -13836,26 +13836,23 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get customer activities
       const activities = await crmStorage.getCustomerActivities(customerId, 20);
 
-      // Generate PDF using jsPDF for reliable Persian support
-      const { generateCustomerPDFHTML } = await import('./jspdf-generator');
-      const pdfBuffer = await generateCustomerPDFHTML(customer, analytics.orders || [], activities, `مشتری ${customer.name}`);
+      // Generate printable HTML for reliable Persian support
+      const { generateCustomerPDFHTML } = await import('./simple-pdf-generator');
+      const htmlBuffer = await generateCustomerPDFHTML(customer, analytics.orders || [], activities, `مشتری ${customer.name}`);
 
-      // Set response headers for PDF download
-      // Validate PDF buffer before sending
-      if (!pdfBuffer || pdfBuffer.length === 0) {
-        throw new Error('Generated PDF is empty');
+      // Validate HTML buffer before sending
+      if (!htmlBuffer || htmlBuffer.length === 0) {
+        throw new Error('Generated HTML is empty');
       }
       
-      console.log('Customer PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+      console.log('Customer report HTML generated successfully, size:', htmlBuffer.length, 'bytes');
       
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.pdf"`);
-      res.setHeader('Content-Length', pdfBuffer.length);
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `inline; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.html"`);
       res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Accept-Ranges', 'bytes');
       
-      // Send PDF buffer
-      res.end(pdfBuffer);
+      // Send HTML buffer
+      res.end(htmlBuffer);
       
     } catch (error) {
       console.error("Error generating customer PDF:", error);
@@ -13872,26 +13869,23 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get dashboard statistics
       const dashboardStats = await crmStorage.getCrmDashboardStats();
       
-      // Generate PDF using jsPDF for reliable Persian support
-      const { generateAnalyticsPDFHTML } = await import('./jspdf-generator');
-      const pdfBuffer = await generateAnalyticsPDFHTML(dashboardStats, 'گزارش آمارها');
+      // Generate printable HTML for reliable Persian support
+      const { generateAnalyticsPDFHTML } = await import('./simple-pdf-generator');
+      const htmlBuffer = await generateAnalyticsPDFHTML(dashboardStats, 'گزارش آمارها');
 
-      // Set response headers for PDF download
-      // Validate PDF buffer before sending
-      if (!pdfBuffer || pdfBuffer.length === 0) {
-        throw new Error('Generated PDF is empty');
+      // Validate HTML buffer before sending
+      if (!htmlBuffer || htmlBuffer.length === 0) {
+        throw new Error('Generated HTML is empty');
       }
       
-      console.log('Analytics PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+      console.log('Analytics report HTML generated successfully, size:', htmlBuffer.length, 'bytes');
       
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.pdf"`);
-      res.setHeader('Content-Length', pdfBuffer.length);
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `inline; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.html"`);
       res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Accept-Ranges', 'bytes');
       
-      // Send PDF buffer
-      res.end(pdfBuffer);
+      // Send HTML buffer
+      res.end(htmlBuffer);
       
     } catch (error) {
       console.error("Error generating analytics PDF:", error);
