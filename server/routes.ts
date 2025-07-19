@@ -11278,7 +11278,39 @@ Momtaz Chemical Technical Team`,
     try {
       const { emailStorage } = await import("./email-storage");
       const templates = await emailStorage.getAllTemplates();
-      res.json(templates);
+      
+      // Convert database fields to frontend expected fields
+      const formattedTemplates = templates.map(template => ({
+        id: template.id,
+        name: template.templateName || template.name,
+        templateName: template.templateName || template.name,
+        subject: template.subject,
+        html_content: template.htmlContent || template.html_content,
+        htmlContent: template.htmlContent || template.html_content,
+        text_content: template.textContent || template.text_content,
+        textContent: template.textContent || template.text_content,
+        category: template.categoryName || template.category,
+        categoryName: template.categoryName || template.category,
+        variables: template.variables || [],
+        is_active: template.isActive !== false,
+        isActive: template.isActive !== false,
+        is_default: template.isDefault || false,
+        isDefault: template.isDefault || false,
+        language: template.language || 'fa',
+        created_by: template.createdBy || template.created_by,
+        createdBy: template.createdBy || template.created_by,
+        usage_count: template.usageCount || template.usage_count || 0,
+        usageCount: template.usageCount || template.usage_count || 0,
+        last_used: template.lastUsed || template.last_used,
+        lastUsed: template.lastUsed || template.last_used,
+        created_at: template.createdAt || template.created_at,
+        createdAt: template.createdAt || template.created_at,
+        updated_at: template.updatedAt || template.updated_at,
+        updatedAt: template.updatedAt || template.updated_at
+      }));
+      
+      console.log(`📧 Formatted ${formattedTemplates.length} templates for frontend`);
+      res.json(formattedTemplates);
     } catch (error) {
       console.error("Error fetching admin email templates:", error);
       res.status(500).json({ 

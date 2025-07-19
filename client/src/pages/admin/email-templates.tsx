@@ -58,12 +58,11 @@ const EmailTemplates: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
-      // Try different approaches to bypass cache
+      // Force complete cache bypass with unique URL
       const timestamp = Date.now() + Math.random();
-      let response;
       
-      // Use correct admin endpoint
-      response = await fetch(`/api/admin/email/templates?_bust=${timestamp}`, {
+      // Use correct admin endpoint with cache busting
+      const response = await fetch(`/api/admin/email/templates?t=${timestamp}&r=${Math.random()}`, {
         method: 'GET',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -71,7 +70,8 @@ const EmailTemplates: React.FC = () => {
           'Expires': '0',
           'X-Requested-With': 'XMLHttpRequest'
         },
-        credentials: 'include'
+        credentials: 'include',
+        cache: 'no-store'
       });
       
       console.log("✅ Fresh API response status:", response.status);
@@ -91,46 +91,38 @@ const EmailTemplates: React.FC = () => {
       });
       
       if (Array.isArray(data)) {
-        setTemplatesData(data);
-      } else if (data && typeof data === 'object' && data.success === false) {
-        // This is the cached error response - use mock data temporarily
-        console.warn("🔴 Detected cached error response, using mock templates");
-        const mockTemplates = [
-          {
-            id: 18,
-            name: "#17 - Comprehensive Inventory Alert",
-            category: "inventory",
-            html_content: "<div>Mock template content</div>",
-            usage_count: 5,
-            language: "fa",
-            created_by: 15,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 5,
-            name: "#05 - Momtaz Chemical Follow-up Response",
-            category: "follow-up",
-            html_content: "<div>Mock follow-up template</div>",
-            usage_count: 12,
-            language: "en",
-            created_by: 15,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 13,
-            name: "#13 - Low Stock Alert",
-            category: "inventory",
-            html_content: "<div>Mock inventory alert</div>",
-            usage_count: 8,
-            language: "fa",
-            created_by: 15,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ] as EmailTemplate[];
-        setTemplatesData(mockTemplates);
+        // Make sure templates have correct field mapping
+        const fixedTemplates = data.map((template: any) => ({
+          id: template.id,
+          name: template.name || template.templateName,
+          templateName: template.templateName || template.name,
+          subject: template.subject,
+          html_content: template.html_content || template.htmlContent,
+          htmlContent: template.htmlContent || template.html_content,
+          text_content: template.text_content || template.textContent,
+          textContent: template.textContent || template.text_content,
+          category: template.category || template.categoryName,
+          categoryName: template.categoryName || template.category,
+          variables: template.variables || [],
+          is_active: template.is_active !== false && template.isActive !== false,
+          isActive: template.isActive !== false && template.is_active !== false,
+          is_default: template.is_default || template.isDefault || false,
+          isDefault: template.isDefault || template.is_default || false,
+          language: template.language || 'fa',
+          created_by: template.created_by || template.createdBy,
+          createdBy: template.createdBy || template.created_by,
+          usage_count: template.usage_count || template.usageCount || 0,
+          usageCount: template.usageCount || template.usage_count || 0,
+          last_used: template.last_used || template.lastUsed,
+          lastUsed: template.lastUsed || template.last_used,
+          created_at: template.created_at || template.createdAt,
+          createdAt: template.createdAt || template.created_at,
+          updated_at: template.updated_at || template.updatedAt,
+          updatedAt: template.updatedAt || template.updated_at
+        }));
+        
+        console.log("✅ Fixed templates with proper field mapping:", fixedTemplates.length);
+        setTemplatesData(fixedTemplates);
       } else {
         console.warn("Response is not an array:", data);
         setTemplatesData([]);
