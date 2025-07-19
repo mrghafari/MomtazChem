@@ -3,28 +3,18 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import vazirBase64 from "./vazir-base64";
 
-// Setup Vazir font for pdfMake with error handling
+// Setup fonts for pdfMake with Helvetica fallback
 function setupVazirFont() {
   try {
+    console.log('Setting up fonts for pdfMake...');
+    
     // Initialize pdfMake with fonts if not already done
     if (!pdfMake.vfs) {
       pdfMake.vfs = pdfFonts.pdfMake?.vfs || {};
     }
     
-    // Add Vazir font to virtual file system
-    pdfMake.vfs = {
-      ...pdfMake.vfs,
-      "Vazir.ttf": vazirBase64,
-    };
-
-    // Define font families
+    // Use standard fonts that work reliably
     pdfMake.fonts = {
-      Vazir: {
-        normal: "Vazir.ttf",
-        bold: "Vazir.ttf", 
-        italics: "Vazir.ttf",
-        bolditalics: "Vazir.ttf",
-      },
       Helvetica: {
         normal: 'Helvetica',
         bold: 'Helvetica-Bold',
@@ -38,9 +28,11 @@ function setupVazirFont() {
         bolditalics: 'Roboto-MediumItalic.ttf'
       }
     };
+    
+    console.log('✅ Font setup completed successfully with Helvetica');
   } catch (error) {
-    console.error('Error setting up Vazir font:', error);
-    // Fallback to basic font setup
+    console.error('❌ Error setting up fonts:', error);
+    // Ultimate fallback to basic font setup
     pdfMake.fonts = {
       Helvetica: {
         normal: 'Helvetica',
@@ -266,7 +258,7 @@ async function generateCustomerPDFWithPDFMake(
             fontSize: 20,
             bold: true,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           subheader: {
             fontSize: 14,
@@ -277,46 +269,46 @@ async function generateCustomerPDFWithPDFMake(
             fontSize: 16,
             bold: true,
             color: '#333333',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           dateInfo: {
             fontSize: 10,
             color: '#666666',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           customerInfo: {
             fontSize: 11,
             color: '#333333',
-            font: 'Vazir',
+            font: 'Helvetica',
             margin: [0, 2, 0, 2]
           },
           tableHeader: {
             fontSize: 10,
             bold: true,
             color: '#374151',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           noData: {
             fontSize: 10,
             color: '#666666',
-            font: 'Vazir',
+            font: 'Helvetica',
             italics: true
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Vazir'
+            font: 'Helvetica'
           }
         },
 
         defaultStyle: {
-          font: 'Vazir',
+          font: 'Helvetica',
           fontSize: 10,
           alignment: 'right'
         }
@@ -442,7 +434,7 @@ async function generateAnalyticsPDFWithPDFMake(
             fontSize: 22,
             bold: true,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           subheader: {
             fontSize: 16,
@@ -452,7 +444,7 @@ async function generateAnalyticsPDFWithPDFMake(
           companyName: {
             fontSize: 14,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           companyNameEn: {
             fontSize: 12,
@@ -462,12 +454,12 @@ async function generateAnalyticsPDFWithPDFMake(
           dateInfo: {
             fontSize: 10,
             color: '#666666',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           statLabel: {
             fontSize: 14,
             color: '#374151',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           statLabelEn: {
             fontSize: 11,
@@ -478,17 +470,17 @@ async function generateAnalyticsPDFWithPDFMake(
             fontSize: 18,
             bold: true,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Vazir'
+            font: 'Helvetica'
           }
         },
 
         defaultStyle: {
-          font: 'Vazir',
+          font: 'Helvetica',
           fontSize: 12,
           alignment: 'right'
         }
@@ -671,7 +663,7 @@ async function generateInvoicePDFWithPDFMake(
             fontSize: 22,
             bold: true,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           subheader: {
             fontSize: 16,
@@ -681,52 +673,52 @@ async function generateInvoicePDFWithPDFMake(
           companyName: {
             fontSize: 14,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           invoiceInfo: {
             fontSize: 12,
             color: '#333333',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           customerInfo: {
             fontSize: 11,
             color: '#333333',
-            font: 'Vazir',
+            font: 'Helvetica',
             margin: [0, 2, 0, 2]
           },
           tableHeader: {
             fontSize: 10,
             bold: true,
             color: '#374151',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           noData: {
             fontSize: 10,
             color: '#666666',
-            font: 'Vazir',
+            font: 'Helvetica',
             italics: true
           },
           totalAmount: {
             fontSize: 16,
             bold: true,
             color: '#2563eb',
-            font: 'Vazir'
+            font: 'Helvetica'
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Vazir'
+            font: 'Helvetica'
           }
         },
 
         defaultStyle: {
-          font: 'Vazir',
+          font: 'Helvetica',
           fontSize: 10,
           alignment: 'right'
         }
