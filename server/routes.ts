@@ -6534,7 +6534,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update SMS settings
+  // Update SMS settings - POST
+  app.post("/api/admin/sms/settings", requireAuth, async (req, res) => {
+    try {
+      const settings = req.body;
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        INSERT INTO sms_settings (id, is_enabled, provider, custom_provider_name, api_key, api_secret, username, password, sender_number, api_endpoint, service_type, pattern_id, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
+        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW())
+        ON CONFLICT (id) DO UPDATE SET
+          is_enabled = $1,
+          provider = $2,
+          custom_provider_name = $3,
+          api_key = $4,
+          api_secret = $5,
+          username = $6,
+          password = $7,
+          sender_number = $8,
+          api_endpoint = $9,
+          service_type = $10,
+          pattern_id = $11,
+          code_length = $12,
+          code_expiry = $13,
+          max_attempts = $14,
+          rate_limit_minutes = $15,
+          updated_at = NOW()
+        RETURNING *
+      `, [
+        settings.isEnabled,
+        settings.provider,
+        settings.customProviderName,
+        settings.apiKey,
+        settings.apiSecret,
+        settings.username,
+        settings.password,
+        settings.senderNumber,
+        settings.apiEndpoint,
+        settings.serviceType,
+        settings.patternId,
+        settings.codeLength,
+        settings.codeExpiry,
+        settings.maxAttempts,
+        settings.rateLimitMinutes
+      ]);
+
+      res.json({ success: true, settings: result.rows[0] });
+    } catch (error) {
+      console.error("Error updating SMS settings:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی تنظیمات" });
+    }
+  });
+
+  // Update SMS settings - PUT (for compatibility)
   app.put("/api/admin/sms/settings", requireAuth, async (req, res) => {
     try {
       const settings = req.body;
@@ -14102,54 +14154,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // =============================================================================
-  // SMS AUTHENTICATION MANAGEMENT ROUTES
-  // =============================================================================
 
-  // Get SMS settings (admin only)
-  app.get("/api/admin/sms/settings", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const settings = await smsStorage.getSmsSettings();
-      res.json({ 
-        success: true, 
-        data: settings || {
-          isEnabled: false,
-          provider: 'kavenegar',
-          codeLength: 6,
-          codeExpiry: 300,
-          maxAttempts: 3,
-          rateLimitMinutes: 60
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching SMS settings:", error);
-      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات SMS" });
-    }
-  });
-
-  // Update SMS settings (admin only)
-  app.put("/api/admin/sms/settings", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const { isEnabled, provider, apiKey, apiSecret, senderNumber, codeLength, codeExpiry, maxAttempts, rateLimitMinutes } = req.body;
-      
-      const settings = await smsStorage.updateSmsSettings({
-        isEnabled,
-        provider,
-        apiKey,
-        apiSecret,
-        senderNumber,
-        codeLength,
-        codeExpiry,
-        maxAttempts,
-        rateLimitMinutes
-      });
-
-      res.json({ success: true, data: settings, message: "تنظیمات SMS با موفقیت به‌روزرسانی شد" });
-    } catch (error) {
-      console.error("Error updating SMS settings:", error);
-      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی تنظیمات SMS" });
-    }
-  });
 
   // Toggle SMS system (admin only)
   app.post("/api/admin/sms/toggle", requireAuth, async (req: Request, res: Response) => {
