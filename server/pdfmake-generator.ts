@@ -8,17 +8,20 @@ function setupVazirFont() {
   try {
     console.log('Setting up fonts for pdfMake...');
     
-    // اول فونت‌های پیش‌فرض را اضافه می‌کنیم
+    // Initialize VFS with default fonts
     if (pdfFonts && pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
       pdfMake.vfs = { ...pdfFonts.pdfMake.vfs };
     } else {
       pdfMake.vfs = {};
     }
     
-    // سپس فونت Vazir را اضافه می‌کنیم
-    pdfMake.vfs["Vazirmatn-Regular.ttf"] = vazirBase64;
+    // Add our custom font with the exact filename
+    pdfMake.vfs["vazirmatn.ttf"] = vazirBase64;
+    
+    console.log('Font data length:', vazirBase64.length);
+    console.log('VFS keys:', Object.keys(pdfMake.vfs));
 
-    // تنظیم فونت‌ها
+    // Setup font families
     pdfMake.fonts = {
       Roboto: {
         normal: 'Roboto-Regular.ttf',
@@ -27,17 +30,18 @@ function setupVazirFont() {
         bolditalics: 'Roboto-MediumItalic.ttf'
       },
       Vazirmatn: {
-        normal: "Vazirmatn-Regular.ttf",
-        bold: "Vazirmatn-Regular.ttf",
-        italics: "Vazirmatn-Regular.ttf",
-        bolditalics: "Vazirmatn-Regular.ttf",
+        normal: "vazirmatn.ttf",
+        bold: "vazirmatn.ttf",
+        italics: "vazirmatn.ttf",
+        bolditalics: "vazirmatn.ttf",
       },
     };
     
-    console.log('✅ Font setup completed successfully with Vazirmatn and Roboto');
+    console.log('✅ Font setup completed successfully');
+    console.log('Available fonts:', Object.keys(pdfMake.fonts));
   } catch (error) {
     console.error('❌ Error setting up fonts:', error);
-    // Ultimate fallback - use basic setup
+    // Ultimate fallback - use only default fonts
     pdfMake.vfs = pdfFonts?.pdfMake?.vfs || {};
     pdfMake.fonts = {
       Roboto: {
@@ -47,6 +51,7 @@ function setupVazirFont() {
         bolditalics: 'Roboto-MediumItalic.ttf'
       }
     };
+    console.log('Using fallback font setup');
   }
 }
 
