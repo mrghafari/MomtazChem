@@ -39,6 +39,7 @@ interface SmsSettings {
   apiEndpoint?: string;
   serviceType?: string;
   patternId?: string;
+  serviceCode?: string;
   codeLength: number;
   codeExpiry: number;
   maxAttempts: number;
@@ -82,6 +83,14 @@ interface DeliveryLog {
 export default function AdminSmsManagement() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [testLoading, setTestLoading] = useState(false);
+  const [testPhone, setTestPhone] = useState("");
+  const [testMessage, setTestMessage] = useState("پیام تست از سیستم Momtaz Chemical");
+  const [testResult, setTestResult] = useState<{
+    success: boolean;
+    message: string;
+    messageId?: string;
+  } | null>(null);
   const [settings, setSettings] = useState<SmsSettings>({
     isEnabled: false,
     provider: 'kavenegar',
@@ -255,6 +264,116 @@ export default function AdminSmsManagement() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTestConnection = async () => {
+    setTestLoading(true);
+    setTestResult(null);
+    try {
+      const response = await fetch('/api/admin/sms/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setTestResult({
+          success: true,
+          message: data.message,
+          messageId: data.messageId
+        });
+        toast({
+          title: "موفقیت",
+          description: "اتصال SMS با موفقیت تست شد"
+        });
+      } else {
+        setTestResult({
+          success: false,
+          message: data.message
+        });
+        toast({
+          title: "خطا در تست اتصال",
+          description: data.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error testing SMS connection:', error);
+      setTestResult({
+        success: false,
+        message: "خطا در تست اتصال SMS"
+      });
+      toast({
+        title: "خطا",
+        description: "خطا در تست اتصال SMS",
+        variant: "destructive"
+      });
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+  const handleTestSms = async () => {
+    if (!testPhone || !testMessage) {
+      toast({
+        title: "خطا",
+        description: "شماره تلفن و پیام الزامی است",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setTestLoading(true);
+    setTestResult(null);
+    try {
+      const response = await fetch('/api/admin/sms/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phoneNumber: testPhone,
+          message: testMessage
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setTestResult({
+          success: true,
+          message: data.message,
+          messageId: data.messageId
+        });
+        toast({
+          title: "موفقیت",
+          description: "پیامک با موفقیت ارسال شد"
+        });
+      } else {
+        setTestResult({
+          success: false,
+          message: data.message
+        });
+        toast({
+          title: "خطا در ارسال",
+          description: data.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error sending test SMS:', error);
+      setTestResult({
+        success: false,
+        message: "خطا در ارسال پیامک تست"
+      });
+      toast({
+        title: "خطا",
+        description: "خطا در ارسال پیامک تست",
+        variant: "destructive"
+      });
+    } finally {
+      setTestLoading(false);
     }
   };
 
@@ -587,6 +706,16 @@ export default function AdminSmsManagement() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="serviceCode">کد سرویس</Label>
+                  <Input
+                    id="serviceCode"
+                    placeholder="کد سرویس خاص SMS Provider"
+                    value={settings.serviceCode || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, serviceCode: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="codeLength">Code Length</Label>
                   <Input
                     id="codeLength"
@@ -640,6 +769,77 @@ export default function AdminSmsManagement() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* SMS Test Card */}
+          {settings.isEnabled && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  تست ارسال SMS
+                </CardTitle>
+                <CardDescription>
+                  تست اتصال و ارسال پیامک با تنظیمات فعلی
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="testPhone">شماره تلفن تست</Label>
+                  <Input
+                    id="testPhone"
+                    placeholder="9647503533769"
+                    value={testPhone}
+                    onChange={(e) => setTestPhone(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="testMessage">پیام تست</Label>
+                  <Input
+                    id="testMessage"
+                    placeholder="پیام تست از سیستم Momtaz Chemical"
+                    value={testMessage}
+                    onChange={(e) => setTestMessage(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button 
+                    onClick={handleTestConnection} 
+                    disabled={testLoading}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {testLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
+                    تست اتصال
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleTestSms} 
+                    disabled={testLoading || !testPhone || !testMessage}
+                    className="w-full"
+                  >
+                    {testLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
+                    ارسال پیام تست
+                  </Button>
+                </div>
+
+                {testResult && (
+                  <Alert className={testResult.success ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"}>
+                    {testResult.success ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-red-600" />}
+                    <AlertDescription className={testResult.success ? "text-green-800" : "text-red-800"}>
+                      {testResult.message}
+                      {testResult.messageId && (
+                        <div className="text-xs mt-1 opacity-75">
+                          Message ID: {testResult.messageId}
+                        </div>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Provider Information Card */}
           <Card>

@@ -1,224 +1,391 @@
-import { deliveryVerificationStorage } from "./delivery-verification-storage";
-import { generateSMSMessage } from './multilingual-messages';
+import https from 'https';
+import http from 'http';
 
-export interface SmsConfig {
-  provider: 'kavenegar' | 'sms_ir' | 'melipayamak';
-  apiKey: string;
-  sender: string;
-  baseUrl: string;
-  isActive: boolean;
+interface SmsSettings {
+  isEnabled: boolean;
+  provider: string;
+  customProviderName?: string;
+  apiKey?: string;
+  apiSecret?: string;
+  username?: string;
+  password?: string;
+  senderNumber?: string;
+  apiEndpoint?: string;
+  serviceType?: string;
+  patternId?: string;
+  serviceCode?: string;
+  codeLength: number;
+  codeExpiry: number;
+  maxAttempts: number;
+  rateLimitMinutes: number;
 }
 
-export interface SmsResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-  cost?: number;
+interface SmsMessage {
+  to: string;
+  message: string;
+  code?: string;
 }
 
 export class SmsService {
-  private config: SmsConfig;
-  
-  constructor(config: SmsConfig) {
-    this.config = config;
+  private settings: SmsSettings;
+
+  constructor(settings: SmsSettings) {
+    this.settings = settings;
   }
-  
-  // Enhanced multilingual SMS sending method
-  async sendLocalizedSms(
-    phone: string,
-    messageType: string,
-    customerLanguage: string,
-    variables: Record<string, string>
-  ): Promise<SmsResult> {
+
+  async sendSms(message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    if (!this.settings.isEnabled) {
+      return { success: false, error: 'SMS service is disabled' };
+    }
+
     try {
-      const message = generateSMSMessage(messageType as any, customerLanguage, variables);
-      return await this.sendSms(phone, message);
-    } catch (error) {
-      console.error('Error sending localized SMS:', error);
-      return { success: false, error: error.message };
+      switch (this.settings.provider) {
+        case 'infobip':
+          return await this.sendInfobipSms(message);
+        case 'twilio':
+          return await this.sendTwilioSms(message);
+        case 'asiacell':
+        case 'zain_iraq':
+        case 'korek_telecom':
+          return await this.sendIraqiOperatorSms(message);
+        case 'custom':
+          return await this.sendCustomProviderSms(message);
+        default:
+          return { success: false, error: 'Unsupported SMS provider' };
+      }
+    } catch (error: any) {
+      console.error('SMS sending error:', error);
+      return { success: false, error: error.message || 'Unknown error' };
     }
   }
 
-  async sendDeliveryVerificationSms(
-    phone: string, 
-    verificationCode: string, 
-    customerName: string = 'مشتری',
-    deliveryVerificationId?: number,
-    customerLanguage: string = 'fa'
-  ): Promise<SmsResult> {
-    // Use multilingual messaging if language preference is available
-    if (customerLanguage && customerLanguage !== 'fa') {
-      return await this.sendLocalizedSms(phone, 'smsOrderUpdate', customerLanguage, {
-        orderNumber: verificationCode,
-        status: 'در راه / On the way',
-        customerName
+  private async sendInfobipSms(message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    return new Promise((resolve) => {
+      const postData = JSON.stringify({
+        messages: [
+          {
+            destinations: [{ to: message.to }],
+            from: this.settings.senderNumber || '447491163443',
+            text: message.message
+          }
+        ]
       });
-    }
-    
-    // Default Persian message for backward compatibility
-    const message = `${customerName} عزیز، سفارش شما در راه است.
-کد تحویل: ${verificationCode}
-این کد را هنگام تحویل به پیک اعلام کنید.
-ممتازکم - Momtazchem`;
-    
+
+      const options = {
+        method: 'POST',
+        hostname: 'api.infobip.com',
+        path: this.settings.serviceCode ? `/sms/2/text/advanced?serviceCode=${this.settings.serviceCode}` : '/sms/2/text/advanced',
+        headers: {
+          'Authorization': `App ${this.settings.apiKey}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Content-Length': Buffer.byteLength(postData)
+        },
+        maxRedirects: 20
+      };
+
+      const req = https.request(options, (res) => {
+        const chunks: Buffer[] = [];
+
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on('end', () => {
+          const body = Buffer.concat(chunks);
+          const response = JSON.parse(body.toString());
+          
+          if (res.statusCode === 200 && response.messages && response.messages[0]) {
+            const messageStatus = response.messages[0];
+            if (messageStatus.status && messageStatus.status.groupId === 1) {
+              resolve({ 
+                success: true, 
+                messageId: messageStatus.messageId 
+              });
+            } else {
+              resolve({ 
+                success: false, 
+                error: `Infobip error: ${messageStatus.status?.description || 'Unknown error'}` 
+              });
+            }
+          } else {
+            resolve({ 
+              success: false, 
+              error: `HTTP ${res.statusCode}: ${response.requestError?.serviceException?.text || 'Unknown error'}` 
+            });
+          }
+        });
+
+        res.on('error', (error) => {
+          resolve({ success: false, error: `Network error: ${error.message}` });
+        });
+      });
+
+      req.on('error', (error) => {
+        resolve({ success: false, error: `Request error: ${error.message}` });
+      });
+
+      req.write(postData);
+      req.end();
+    });
+  }
+
+  private async sendTwilioSms(message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    return new Promise((resolve) => {
+      const auth = Buffer.from(`${this.settings.username}:${this.settings.password}`).toString('base64');
+      
+      const postData = new URLSearchParams({
+        To: message.to,
+        From: this.settings.senderNumber || '',
+        Body: message.message
+      }).toString();
+
+      const options = {
+        method: 'POST',
+        hostname: 'api.twilio.com',
+        path: `/2010-04-01/Accounts/${this.settings.username}/Messages.json`,
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+
+      const req = https.request(options, (res) => {
+        const chunks: Buffer[] = [];
+
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on('end', () => {
+          const body = Buffer.concat(chunks);
+          const response = JSON.parse(body.toString());
+          
+          if (res.statusCode === 201 && response.sid) {
+            resolve({ 
+              success: true, 
+              messageId: response.sid 
+            });
+          } else {
+            resolve({ 
+              success: false, 
+              error: `Twilio error: ${response.message || 'Unknown error'}` 
+            });
+          }
+        });
+
+        res.on('error', (error) => {
+          resolve({ success: false, error: `Network error: ${error.message}` });
+        });
+      });
+
+      req.on('error', (error) => {
+        resolve({ success: false, error: `Request error: ${error.message}` });
+      });
+
+      req.write(postData);
+      req.end();
+    });
+  }
+
+  private async sendIraqiOperatorSms(message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    // Iraqi operators typically use custom APIs
+    // This is a generic implementation that can be customized
+    return new Promise((resolve) => {
+      if (!this.settings.apiEndpoint) {
+        resolve({ success: false, error: 'API endpoint not configured for Iraqi operator' });
+        return;
+      }
+
+      const postData = JSON.stringify({
+        username: this.settings.username,
+        password: this.settings.password,
+        to: message.to,
+        from: this.settings.senderNumber,
+        text: message.message,
+        serviceCode: this.settings.serviceCode
+      });
+
+      const url = new URL(this.settings.apiEndpoint);
+      const isHttps = url.protocol === 'https:';
+      const httpModule = isHttps ? https : http;
+
+      const options = {
+        method: 'POST',
+        hostname: url.hostname,
+        port: url.port || (isHttps ? 443 : 80),
+        path: url.pathname + url.search,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+
+      const req = httpModule.request(options, (res) => {
+        const chunks: Buffer[] = [];
+
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on('end', () => {
+          const body = Buffer.concat(chunks);
+          try {
+            const response = JSON.parse(body.toString());
+            
+            if (res.statusCode === 200) {
+              resolve({ 
+                success: true, 
+                messageId: response.messageId || response.id || 'success' 
+              });
+            } else {
+              resolve({ 
+                success: false, 
+                error: `${this.settings.provider} error: ${response.message || response.error || 'Unknown error'}` 
+              });
+            }
+          } catch (parseError) {
+            resolve({ 
+              success: false, 
+              error: `Response parsing error: ${parseError}` 
+            });
+          }
+        });
+
+        res.on('error', (error) => {
+          resolve({ success: false, error: `Network error: ${error.message}` });
+        });
+      });
+
+      req.on('error', (error) => {
+        resolve({ success: false, error: `Request error: ${error.message}` });
+      });
+
+      req.write(postData);
+      req.end();
+    });
+  }
+
+  private async sendCustomProviderSms(message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    // Generic implementation for custom providers
+    return new Promise((resolve) => {
+      if (!this.settings.apiEndpoint) {
+        resolve({ success: false, error: 'API endpoint not configured for custom provider' });
+        return;
+      }
+
+      const postData = JSON.stringify({
+        apiKey: this.settings.apiKey,
+        apiSecret: this.settings.apiSecret,
+        username: this.settings.username,
+        password: this.settings.password,
+        to: message.to,
+        from: this.settings.senderNumber,
+        message: message.message,
+        serviceCode: this.settings.serviceCode,
+        patternId: this.settings.patternId
+      });
+
+      const url = new URL(this.settings.apiEndpoint);
+      const isHttps = url.protocol === 'https:';
+      const httpModule = isHttps ? https : http;
+
+      const options = {
+        method: 'POST',
+        hostname: url.hostname,
+        port: url.port || (isHttps ? 443 : 80),
+        path: url.pathname + url.search,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': this.settings.apiKey ? `Bearer ${this.settings.apiKey}` : undefined,
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+
+      const req = httpModule.request(options, (res) => {
+        const chunks: Buffer[] = [];
+
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on('end', () => {
+          const body = Buffer.concat(chunks);
+          try {
+            const response = JSON.parse(body.toString());
+            
+            if (res.statusCode === 200 || res.statusCode === 201) {
+              resolve({ 
+                success: true, 
+                messageId: response.messageId || response.id || response.reference || 'success' 
+              });
+            } else {
+              resolve({ 
+                success: false, 
+                error: `${this.settings.customProviderName || 'Custom provider'} error: ${response.message || response.error || 'Unknown error'}` 
+              });
+            }
+          } catch (parseError) {
+            resolve({ 
+              success: false, 
+              error: `Response parsing error: ${parseError}` 
+            });
+          }
+        });
+
+        res.on('error', (error) => {
+          resolve({ success: false, error: `Network error: ${error.message}` });
+        });
+      });
+
+      req.on('error', (error) => {
+        resolve({ success: false, error: `Request error: ${error.message}` });
+      });
+
+      req.write(postData);
+      req.end();
+    });
+  }
+
+  async sendVerificationCode(phone: string, code: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const message = {
+      to: phone,
+      message: `کد تایید شما: ${code}`,
+      code: code
+    };
+
+    return await this.sendSms(message);
+  }
+
+  async testConnection(): Promise<{ success: boolean; error?: string }> {
     try {
-      const result = await this.sendSms(phone, message);
-      
-      if (deliveryVerificationId && result.success) {
-        await deliveryVerificationStorage.updateSmsStatus(
-          deliveryVerificationId, 
-          'sent', 
-          { messageId: result.messageId, provider: this.config.provider }
-        );
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('SMS sending failed:', error);
-      
-      if (deliveryVerificationId) {
-        await deliveryVerificationStorage.updateSmsStatus(
-          deliveryVerificationId, 
-          'failed', 
-          { reason: error.message }
-        );
-      }
-      
+      const testResult = await this.sendSms({
+        to: '9647503533769', // Test number
+        message: 'Test message from Momtaz Chemical SMS System'
+      });
+
+      return testResult;
+    } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
-  
-  private async sendSms(phone: string, message: string): Promise<SmsResult> {
-    // Clean phone number
-    const cleanPhone = phone.replace(/[^\d+]/g, '');
-    
-    switch (this.config.provider) {
-      case 'kavenegar':
-        return await this.sendKavenegarSms(cleanPhone, message);
-      case 'sms_ir':
-        return await this.sendSmsIrSms(cleanPhone, message);
-      case 'melipayamak':
-        return await this.sendMelipayamakSms(cleanPhone, message);
-      default:
-        throw new Error('Invalid SMS provider');
-    }
-  }
-  
-  private async sendKavenegarSms(phone: string, message: string): Promise<SmsResult> {
-    const url = `${this.config.baseUrl}/send.json`;
-    
-    const params = new URLSearchParams({
-      apikey: this.config.apiKey,
-      sender: this.config.sender,
-      receptor: phone,
-      message: message,
-    });
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    });
-    
-    const data = await response.json();
-    
-    if (data.return?.status === 200) {
-      return {
-        success: true,
-        messageId: data.return.entries[0].messageid?.toString(),
-        cost: data.return.entries[0].cost,
-      };
-    } else {
-      throw new Error(data.return?.message || 'SMS sending failed');
-    }
-  }
-  
-  private async sendSmsIrSms(phone: string, message: string): Promise<SmsResult> {
-    const url = `${this.config.baseUrl}/send`;
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': this.config.apiKey,
-      },
-      body: JSON.stringify({
-        mobile: phone,
-        message: message,
-        lineNumber: this.config.sender,
-      }),
-    });
-    
-    const data = await response.json();
-    
-    if (data.status === 1) {
-      return {
-        success: true,
-        messageId: data.messageId?.toString(),
-        cost: data.cost,
-      };
-    } else {
-      throw new Error(data.message || 'SMS sending failed');
-    }
-  }
-  
-  private async sendMelipayamakSms(phone: string, message: string): Promise<SmsResult> {
-    const url = `${this.config.baseUrl}/send`;
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: this.config.apiKey.split(':')[0],
-        password: this.config.apiKey.split(':')[1],
-        to: phone,
-        from: this.config.sender,
-        text: message,
-      }),
-    });
-    
-    const data = await response.json();
-    
-    if (data.Value && data.Value !== '0') {
-      return {
-        success: true,
-        messageId: data.Value.toString(),
-      };
-    } else {
-      throw new Error(data.RetStatus || 'SMS sending failed');
-    }
-  }
-  
-  async checkDeliveryStatus(messageId: string): Promise<'sent' | 'delivered' | 'failed'> {
-    // Implementation depends on provider
-    // This is a placeholder for delivery status checking
-    return 'sent';
-  }
 }
 
-// Default SMS service configuration
-const defaultSmsConfig: SmsConfig = {
-  provider: 'kavenegar',
-  apiKey: process.env.SMS_API_KEY || 'demo-key',
-  sender: process.env.SMS_SENDER || '10008663',
-  baseUrl: 'https://api.kavenegar.com/v1/{api-key}',
-  isActive: !!process.env.SMS_API_KEY,
-};
+export async function createSmsService(): Promise<SmsService> {
+  const { pool } = await import('./db');
+  
+  const result = await pool.query('SELECT * FROM sms_settings WHERE id = 1');
+  const settings = result.rows[0] || {
+    isEnabled: false,
+    provider: 'infobip',
+    codeLength: 6,
+    codeExpiry: 300,
+    maxAttempts: 3,
+    rateLimitMinutes: 5
+  };
 
-export const smsService = new SmsService(defaultSmsConfig);
-
-// Function to get SMS configuration from database (future enhancement)
-export async function getSmsConfiguration(): Promise<SmsConfig> {
-  // This would fetch from database in a real implementation
-  return defaultSmsConfig;
-}
-
-// Function to update SMS configuration in database (future enhancement)
-export async function updateSmsConfiguration(config: Partial<SmsConfig>): Promise<void> {
-  // This would update database in a real implementation
-  console.log('SMS configuration updated:', config);
+  return new SmsService(settings);
 }

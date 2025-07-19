@@ -16,6 +16,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Chemical products follow proper first-in-first-out inventory management standards
 - **Status**: All batch operations now use FIFO methodology for optimal inventory turnover
 
+### SMS Service Code Enhancement (July 19, 2025)
+✅ **IMPLEMENTED: Added service code field to SMS settings configuration**
+- Added `serviceCode` field to sms_settings database table and TypeScript interfaces
+- Enhanced SMS management form with dedicated "کد سرویس" (Service Code) input field
+- Updated both POST and PUT API endpoints to handle service code parameter
+- **Purpose**: Allows SMS providers to specify custom service codes for different messaging services
+- **UI Location**: Service code field positioned between Pattern ID and Code Length settings
+- **Database**: service_code column added to sms_settings table with VARCHAR(100) type
+- **Impact**: SMS providers can now configure specific service codes for enhanced message routing
+- **Status**: Ready for use with all SMS providers requiring service code configuration
+
 ### Product Name Split Enhancement (July 19, 2025)
 ✅ **IMPLEMENTED: Split product name display for technical name/grade information**
 - Added `technicalName` field to showcase_products schema for technical name or grade display

@@ -43,7 +43,7 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
-import { smsService } from "./sms-service";
+// SMS service will be imported dynamically when needed
 import { ticketingStorage } from "./ticketing-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
 import { supportTickets } from "../shared/ticketing-schema";
@@ -6521,6 +6521,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         apiEndpoint: '',
         serviceType: 'pattern',
         patternId: '',
+        serviceCode: '',
         codeLength: 6,
         codeExpiry: 300,
         maxAttempts: 3,
@@ -6541,8 +6542,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { pool } = await import('./db');
       
       const result = await pool.query(`
-        INSERT INTO sms_settings (id, is_enabled, provider, custom_provider_name, api_key, api_secret, username, password, sender_number, api_endpoint, service_type, pattern_id, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
-        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW())
+        INSERT INTO sms_settings (id, is_enabled, provider, custom_provider_name, api_key, api_secret, username, password, sender_number, api_endpoint, service_type, pattern_id, service_code, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
+        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
         ON CONFLICT (id) DO UPDATE SET
           is_enabled = $1,
           provider = $2,
@@ -6555,10 +6556,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           api_endpoint = $9,
           service_type = $10,
           pattern_id = $11,
-          code_length = $12,
-          code_expiry = $13,
-          max_attempts = $14,
-          rate_limit_minutes = $15,
+          service_code = $12,
+          code_length = $13,
+          code_expiry = $14,
+          max_attempts = $15,
+          rate_limit_minutes = $16,
           updated_at = NOW()
         RETURNING *
       `, [
@@ -6573,6 +6575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         settings.apiEndpoint,
         settings.serviceType,
         settings.patternId,
+        settings.serviceCode,
         settings.codeLength,
         settings.codeExpiry,
         settings.maxAttempts,
@@ -6593,8 +6596,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { pool } = await import('./db');
       
       const result = await pool.query(`
-        INSERT INTO sms_settings (id, is_enabled, provider, custom_provider_name, api_key, api_secret, username, password, sender_number, api_endpoint, service_type, pattern_id, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
-        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW())
+        INSERT INTO sms_settings (id, is_enabled, provider, custom_provider_name, api_key, api_secret, username, password, sender_number, api_endpoint, service_type, pattern_id, service_code, code_length, code_expiry, max_attempts, rate_limit_minutes, updated_at)
+        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
         ON CONFLICT (id) DO UPDATE SET
           is_enabled = $1,
           provider = $2,
@@ -6607,10 +6610,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           api_endpoint = $9,
           service_type = $10,
           pattern_id = $11,
-          code_length = $12,
-          code_expiry = $13,
-          max_attempts = $14,
-          rate_limit_minutes = $15,
+          service_code = $12,
+          code_length = $13,
+          code_expiry = $14,
+          max_attempts = $15,
+          rate_limit_minutes = $16,
           updated_at = NOW()
         RETURNING *
       `, [
@@ -6625,6 +6629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         settings.apiEndpoint,
         settings.serviceType,
         settings.patternId,
+        settings.serviceCode,
         settings.codeLength,
         settings.codeExpiry,
         settings.maxAttempts,
@@ -6635,6 +6640,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating SMS settings:", error);
       res.status(500).json({ success: false, message: "خطا در بروزرسانی تنظیمات" });
+    }
+  });
+
+  // Test SMS sending
+  app.post("/api/admin/sms/test", requireAuth, async (req, res) => {
+    try {
+      const { phoneNumber, message } = req.body;
+      
+      if (!phoneNumber || !message) {
+        return res.status(400).json({ success: false, message: "شماره تلفن و پیام الزامی است" });
+      }
+
+      const { createSmsService } = await import('./sms-service.js');
+      const smsService = await createSmsService();
+      
+      const result = await smsService.sendSms({
+        to: phoneNumber,
+        message: message
+      });
+
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          message: "پیامک با موفقیت ارسال شد",
+          messageId: result.messageId 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: `خطا در ارسال پیامک: ${result.error}` 
+        });
+      }
+    } catch (error) {
+      console.error("Error testing SMS:", error);
+      res.status(500).json({ success: false, message: "خطا در تست SMS" });
+    }
+  });
+
+  // Test SMS connection
+  app.post("/api/admin/sms/test-connection", requireAuth, async (req, res) => {
+    try {
+      const { createSmsService } = await import('./sms-service.js');
+      const smsService = await createSmsService();
+      
+      const result = await smsService.testConnection();
+
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          message: "اتصال SMS با موفقیت تست شد",
+          messageId: result.messageId 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: `خطا در تست اتصال: ${result.error}` 
+        });
+      }
+    } catch (error) {
+      console.error("Error testing SMS connection:", error);
+      res.status(500).json({ success: false, message: "خطا در تست اتصال SMS" });
     }
   });
 
