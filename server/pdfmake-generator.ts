@@ -3,19 +3,44 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import vazirBase64 from "./vazir-base64";
 
-// Setup fonts for pdfMake with default Roboto fonts
+// Setup fonts for pdfMake with Vazir support for Persian/Arabic text
 function setupVazirFont() {
   try {
     console.log('Setting up fonts for pdfMake...');
     
-    // Use the default pdfMake VFS and fonts
-    pdfMake.vfs = pdfFonts.pdfMake.vfs;
-    pdfMake.fonts = pdfFonts.pdfMake.fonts;
+    // Set up VFS with default fonts and Vazir
+    pdfMake.vfs = pdfFonts.pdfMake.vfs || {};
+    pdfMake.vfs["Vazir.ttf"] = vazirBase64;
+
+    // Set up fonts
+    pdfMake.fonts = {
+      Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+      },
+      Vazir: {
+        normal: "Vazir.ttf",
+        bold: "Vazir.ttf",
+        italics: "Vazir.ttf",
+        bolditalics: "Vazir.ttf",
+      },
+    };
     
-    console.log('✅ Font setup completed successfully with default Roboto');
+    console.log('✅ Font setup completed successfully with Vazir and Roboto');
   } catch (error) {
     console.error('❌ Error setting up fonts:', error);
-    // Ultimate fallback - let pdfMake use its defaults
+    // Ultimate fallback - use basic setup
+    pdfMake.vfs = pdfFonts.pdfMake?.vfs || {};
+    pdfMake.fonts = {
+      Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+      }
+    };
   }
 }
 
