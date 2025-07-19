@@ -155,6 +155,9 @@ export class CrmStorage implements ICrmStorage {
       // Handle date fields properly - convert strings to Date objects if needed
       const processedUpdate = { ...customerUpdate };
       
+      console.log("[CRM UPDATE] Original update data:", customerUpdate);
+      console.log("[CRM UPDATE] resetPasswordExpires type:", typeof customerUpdate.resetPasswordExpires, customerUpdate.resetPasswordExpires);
+      
       // Handle updatedAt - always set to current date
       processedUpdate.updatedAt = new Date();
       
@@ -170,6 +173,9 @@ export class CrmStorage implements ICrmStorage {
       }
       if (processedUpdate.lastContactDate && typeof processedUpdate.lastContactDate === 'string') {
         processedUpdate.lastContactDate = new Date(processedUpdate.lastContactDate);
+      }
+      if (processedUpdate.resetPasswordExpires && typeof processedUpdate.resetPasswordExpires === 'string') {
+        processedUpdate.resetPasswordExpires = new Date(processedUpdate.resetPasswordExpires);
       }
       
       console.log("Processed update data:", processedUpdate);

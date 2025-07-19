@@ -17901,11 +17901,13 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       console.log(`🔑 [Password Reset] Generated token: ${resetToken.substring(0, 8)}... (expires in 1 hour)`);
       
-      // Update customer with reset token
-      await crmStorage.updateCrmCustomer(customer.id, {
-        resetPasswordToken: resetToken,
-        resetPasswordExpires: resetExpires.toISOString()
-      });
+      // Update customer with reset token directly with SQL
+      await crmDb.execute(sql`
+        UPDATE crm_customers 
+        SET reset_password_token = ${resetToken}, 
+            reset_password_expires = ${resetExpires.toISOString()}
+        WHERE id = ${customer.id}
+      `);
       
       console.log(`💾 [Password Reset] Token saved to database for customer ID: ${customer.id}`);
       
