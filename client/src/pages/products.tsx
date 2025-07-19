@@ -30,6 +30,8 @@ const formSchema = insertShowcaseProductSchema.extend({
   stockQuantity: z.coerce.number().min(0),
   minStockLevel: z.coerce.number().min(0),
   maxStockLevel: z.coerce.number().min(0),
+  // Technical name/grade field for display
+  technicalName: z.string().optional(),
   // Weight fields - Enhanced with net and gross weights
   netWeight: z.coerce.number().min(0).optional(),
   grossWeight: z.coerce.number().min(0).optional(),
@@ -1223,6 +1225,11 @@ export default function ProductsPage() {
                         <CardTitle className="text-lg font-semibold mb-1 text-gray-900 dark:text-white truncate">
                           {product.name}
                         </CardTitle>
+                        {product.technicalName && (
+                          <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">
+                            {product.technicalName}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 mb-2">
                           {categories.find((c: CategoryOption) => c.value === product.category)?.icon}
                           <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -1563,19 +1570,20 @@ export default function ProductsPage() {
 {t.basicInfo}
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
+                    {/* نام محصول اصلی */}
                     <FormField
                       control={form.control}
                       name="name"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium flex items-center gap-2">
-{t.productName} *
+نام محصول *
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>نام کامل محصول را وارد کنید. این نام در کاردکس و فروشگاه نمایش داده می‌شود</p>
+                                <p>نام اصلی محصول را وارد کنید</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -1624,6 +1632,37 @@ export default function ProductsPage() {
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* بخش نام فنی / گرید - دو قسمت در یک خط */}
+                  <div className="mt-3">
+                    <FormField
+                      control={form.control}
+                      name="technicalName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium flex items-center gap-2">
+نام فنی / گرید
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-3 w-3 text-gray-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>نام فنی یا گرید محصول برای نمایش در کارت فروش</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="نام فنی یا گرید محصول" 
+                              className="h-9"
+                              {...field} 
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}

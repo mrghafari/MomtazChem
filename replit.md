@@ -6,6 +6,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### Product Name Split Enhancement (July 19, 2025)
+✅ **IMPLEMENTED: Split product name display for technical name/grade information**
+- Added `technicalName` field to showcase_products schema for technical name or grade display
+- Enhanced product form with two-part name system: main product name + technical name/grade field
+- Updated product card display to show technical name/grade information below main product name
+- Technical name/grade appears in blue text on product cards when entered
+- **Display Logic**: Main name remains primary, technical name/grade shown as secondary information
+- **Impact**: Sales cards now display both general product name and specific technical/grade details
+- **Status**: Ready for use in kardex with automatic display on sales interface
+
 ### Financial Order Approval System Completely Fixed (July 19, 2025)
 ✅ **RESOLVED: Complete financial approval system now fully operational**
 - Fixed critical duplicate route definition causing 404 errors - removed conflicting POST route with requireAuth middleware

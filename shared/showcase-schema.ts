@@ -30,6 +30,7 @@ export type Contact = typeof contacts.$inferSelect;
 export const showcaseProducts = pgTable("showcase_products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  technicalName: text("technical_name"), // نام فنی / گرید - Technical name or grade for display
   category: text("category").notNull(), // fuel-additives, water-treatment, paint-thinner, agricultural-fertilizers
   description: text("description").notNull(),
   shortDescription: text("short_description"),
