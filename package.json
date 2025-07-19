@@ -67,6 +67,7 @@
     "express-session-store": "^2.0.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^11.13.1",
+    "html-pdf-node": "^1.0.8",
     "html2canvas": "^1.4.1",
     "html5-qrcode": "^2.3.8",
     "input-otp": "^1.4.2",

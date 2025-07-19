@@ -13836,8 +13836,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get customer activities
       const activities = await crmStorage.getCustomerActivities(customerId, 20);
 
-      // Generate PDF using text-based generator for reliable Persian support
-      const { generateCustomerPDFHTML } = await import('./text-pdf-generator');
+      // Generate PDF using html-pdf-node for reliable Persian support
+      const { generateCustomerPDFHTML } = await import('./html-pdf-generator');
       const pdfBuffer = await generateCustomerPDFHTML(customer, analytics.orders || [], activities, `مشتری ${customer.name}`);
 
       // Set response headers for PDF download
@@ -13848,8 +13848,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       console.log('Customer PDF generated successfully, size:', pdfBuffer.length, 'bytes');
       
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.txt"`);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerId}-${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Content-Length', pdfBuffer.length);
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Accept-Ranges', 'bytes');
@@ -13872,8 +13872,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get dashboard statistics
       const dashboardStats = await crmStorage.getCrmDashboardStats();
       
-      // Generate PDF using text-based generator for reliable Persian support
-      const { generateAnalyticsPDFHTML } = await import('./text-pdf-generator');
+      // Generate PDF using html-pdf-node for reliable Persian support
+      const { generateAnalyticsPDFHTML } = await import('./html-pdf-generator');
       const pdfBuffer = await generateAnalyticsPDFHTML(dashboardStats, 'گزارش آمارها');
 
       // Set response headers for PDF download
@@ -13884,8 +13884,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       console.log('Analytics PDF generated successfully, size:', pdfBuffer.length, 'bytes');
       
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.txt"`);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="customer-analytics-${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Content-Length', pdfBuffer.length);
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Accept-Ranges', 'bytes');
