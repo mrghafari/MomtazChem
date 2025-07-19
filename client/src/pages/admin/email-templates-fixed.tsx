@@ -52,11 +52,13 @@ const EmailTemplatesFixed: React.FC = () => {
     queryFn: async () => {
       try {
         const timestamp = Date.now();
-        const response = await fetch(`/api/admin/email/templates?cache_bust=${timestamp}`, {
+        const response = await fetch(`/api/admin/email/templates?cache_bust=${timestamp}&t=${Math.random()}`, {
           method: 'GET',
           credentials: 'include',
           headers: {
-            'Cache-Control': 'no-cache',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
             'Content-Type': 'application/json'
           }
         });
@@ -69,9 +71,18 @@ const EmailTemplatesFixed: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('📧 Templates received:', data?.length || 0);
+        console.log('📧 Raw API Response:', { 
+          dataType: typeof data, 
+          isArray: Array.isArray(data), 
+          length: data?.length, 
+          keys: data && typeof data === 'object' ? Object.keys(data) : null 
+        });
         
         if (!Array.isArray(data)) {
+          if (data && data.success === false) {
+            console.error('❌ API Error:', data);
+            throw new Error(data.message || 'خطای API');
+          }
           console.error('❌ Invalid data format:', data);
           throw new Error('فرمت داده نامعتبر دریافت شد');
         }
@@ -111,11 +122,20 @@ const EmailTemplatesFixed: React.FC = () => {
     },
     staleTime: 0,
     refetchOnWindowFocus: true,
-    retry: 2
+    retry: (failureCount, error) => {
+      if (error?.message?.includes('احراز هویت')) {
+        // Redirect to login on auth error
+        window.location.href = '/admin/login';
+        return false;
+      }
+      return failureCount < 2;
+    }
   });
 
   // Manual refresh function
   const handleRefresh = () => {
+    // Clear query cache first
+    queryClient.removeQueries({ queryKey: ['admin-email-templates'] });
     refetch();
     toast({
       title: "🔄 در حال بروزرسانی...",
