@@ -204,7 +204,11 @@ const EmailTemplatesCentral: React.FC = () => {
         headers: { 'Content-Type': 'application/json' }
       });
       if (!response.ok) throw new Error('Failed to fetch templates');
-      return response.json() as EmailTemplate[];
+      const data = await response.json();
+      console.log('🔍 Raw API response:', data);
+      console.log('🔍 Is array?', Array.isArray(data));
+      console.log('🔍 Data length:', data?.length);
+      return Array.isArray(data) ? data : [] as EmailTemplate[];
     },
     staleTime: 30000,
     refetchInterval: 60000
@@ -235,6 +239,16 @@ const EmailTemplatesCentral: React.FC = () => {
         const info = getTemplateInfo(template.name);
         return info.category === selectedCategory;
       }) : []);
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🔍 Templates data:', templates);
+    console.log('🔍 Selected category:', selectedCategory);
+    console.log('🔍 Filtered templates:', filteredTemplates);
+    console.log('🔍 Filtered length:', filteredTemplates.length);
+    console.log('🔍 Is loading:', isLoading);
+    console.log('🔍 Error:', error);
+  }, [templates, selectedCategory, filteredTemplates, isLoading, error]);
 
   // Get category stats
   const getCategoryStats = (categoryKey: string) => {
