@@ -190,28 +190,45 @@ const TEMPLATE_REGISTRY = {
 };
 
 const EmailTemplatesCentral: React.FC = () => {
-  const [, setLocation] = useLocation();
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
-  // Fetch templates from API
+  // Fetch templates from API with error handling
   const { data: templates = [], isLoading, error, refetch } = useQuery({
     queryKey: ['email-templates-central'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/email/templates', {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (!response.ok) throw new Error('Failed to fetch templates');
-      const data = await response.json();
-      console.log('🔍 Raw API response:', data);
-      console.log('🔍 Is array?', Array.isArray(data));
-      console.log('🔍 Data length:', data?.length);
-      return Array.isArray(data) ? data : [] as EmailTemplate[];
+      try {
+        const response = await fetch('/api/admin/email/templates', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Authentication required - please login');
+          }
+          throw new Error(`HTTP ${response.status}: Failed to fetch templates`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Templates loaded successfully:', data?.length || 0, 'templates');
+        return Array.isArray(data) ? data : [] as EmailTemplate[];
+      } catch (error) {
+        console.error('❌ Template loading error:', error);
+        throw error;
+      }
     },
     staleTime: 30000,
-    refetchInterval: 60000
+    refetchInterval: 60000,
+    retry: (failureCount, error) => {
+      // Don't retry auth errors, but retry other errors up to 3 times
+      if (error.message?.includes('Authentication required')) {
+        return false;
+      }
+      return failureCount < 3;
+    }
   });
 
   // Get template number from name
@@ -298,16 +315,41 @@ const EmailTemplatesCentral: React.FC = () => {
   }
 
   if (error) {
+    const isAuthError = error.message?.includes('Authentication required');
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <Card className="border-red-200 bg-red-50">
+          <Card className={isAuthError ? "border-orange-200 bg-orange-50" : "border-red-200 bg-red-50"}>
             <CardContent className="p-6 text-center">
-              <p className="text-red-700 mb-4">خطا در بارگذاری قالب‌های ایمیل</p>
-              <Button onClick={handleRefresh} variant="outline" className="text-red-600 border-red-300">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                تلاش مجدد
-              </Button>
+              {isAuthError ? (
+                <>
+                  <Shield className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-orange-800 mb-2">نیاز به احراز هویت</h3>
+                  <p className="text-orange-700 mb-4">
+                    برای مشاهده قالب‌های ایمیل، لطفاً ابتدا وارد حساب مدیریت شوید
+                  </p>
+                  <div className="flex gap-3 justify-center">
+                    <Button 
+                      onClick={() => setLocation('/admin/login')} 
+                      className="bg-orange-600 hover:bg-orange-700"
+                    >
+                      ورود به حساب مدیریت
+                    </Button>
+                    <Button onClick={handleRefresh} variant="outline" className="text-orange-600 border-orange-300">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      تلاش مجدد
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-red-700 mb-4">خطا در بارگذاری قالب‌های ایمیل: {error.message}</p>
+                  <Button onClick={handleRefresh} variant="outline" className="text-red-600 border-red-300">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    تلاش مجدد
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
