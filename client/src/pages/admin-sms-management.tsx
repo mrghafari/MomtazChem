@@ -21,7 +21,8 @@ import {
   XCircle,
   RefreshCw,
   Info,
-  AlertTriangle
+  AlertTriangle,
+  Send
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SmsTemplatesSimple from '@/components/sms-templates-simple';
@@ -371,7 +372,7 @@ export default function AdminSmsManagement() {
     setTestLoading(true);
     setTestResult(null);
     try {
-      const response = await fetch('/api/admin/sms/test', {
+      const response = await fetch('/api/admin/sms/test-sms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -857,6 +858,66 @@ export default function AdminSmsManagement() {
                       {settings.isTestMode ? 'حالت تست فعال' : 'حالت تست غیرفعال'}
                     </span>
                   </div>
+                </div>
+
+                {/* SMS Test Section */}
+                <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
+                  <h4 className="text-sm font-medium">تست ارسال SMS</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="testPhone">شماره تلفن تست</Label>
+                      <Input
+                        id="testPhone"
+                        placeholder="+964770xxxxxxx"
+                        value={testPhone}
+                        onChange={(e) => setTestPhone(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="testMessage">متن پیام تست</Label>
+                      <Input
+                        id="testMessage"
+                        placeholder="این یک پیام تست است"
+                        value={testMessage}
+                        onChange={(e) => setTestMessage(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-start">
+                    <Button 
+                      onClick={handleTestSms}
+                      disabled={testLoading || !testPhone || !testMessage}
+                      className="w-full md:w-auto"
+                    >
+                      {testLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          در حال ارسال...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          ارسال پیام تست
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {testResult && (
+                    <div className={`p-3 rounded-lg ${testResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                      <p className={`text-sm ${testResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                        {testResult.message}
+                        {testResult.messageId && (
+                          <span className="block mt-1 text-xs text-gray-600">
+                            شناسه پیام: {testResult.messageId}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">

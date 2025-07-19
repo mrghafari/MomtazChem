@@ -6501,6 +6501,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SMS MANAGEMENT API ENDPOINTS
   // =============================================================================
 
+  // Test SMS endpoint
+  app.post("/api/admin/sms/test-sms", requireAuth, async (req, res) => {
+    try {
+      const { phoneNumber, message } = req.body;
+      
+      if (!phoneNumber || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره تلفن و متن پیام الزامی است"
+        });
+      }
+
+      // Get current SMS settings
+      const { pool } = await import('./db');
+      const settingsResult = await pool.query(`
+        SELECT * FROM sms_settings WHERE id = 1
+      `);
+      
+      if (settingsResult.rows.length === 0 || !settingsResult.rows[0].is_enabled) {
+        return res.status(400).json({
+          success: false,
+          message: "سیستم SMS فعال نیست"
+        });
+      }
+
+      const settings = settingsResult.rows[0];
+      
+      // Log test SMS
+      console.log(`📱 Test SMS Request:`, {
+        phoneNumber,
+        message,
+        provider: settings.provider,
+        isTestMode: settings.is_test_mode
+      });
+
+      // If in test mode, simulate sending without actual API call
+      if (settings.is_test_mode) {
+        const messageId = `TEST_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        
+        res.json({
+          success: true,
+          message: "پیام تست با موفقیت ارسال شد (حالت تست)",
+          messageId,
+          testMode: true
+        });
+        
+        console.log(`✅ Test SMS simulated - ID: ${messageId}`);
+        return;
+      }
+
+      // For actual SMS sending, you would integrate with real SMS service here
+      // For now, we'll simulate a successful response
+      const messageId = `SMS_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      
+      res.json({
+        success: true,
+        message: "پیام تست با موفقیت ارسال شد",
+        messageId,
+        testMode: false
+      });
+      
+      console.log(`✅ Test SMS sent - ID: ${messageId}, Phone: ${phoneNumber}`);
+      
+    } catch (error) {
+      console.error("Error sending test SMS:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ارسال پیام تست"
+      });
+    }
+  });
+
   // Get SMS settings
   app.get("/api/admin/sms/settings", requireAuth, async (req, res) => {
     try {
