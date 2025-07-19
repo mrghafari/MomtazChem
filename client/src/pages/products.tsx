@@ -209,6 +209,77 @@ export default function ProductsPage() {
     refetch();
   }, [refetch]);
 
+  // Consolidate products by barcode for batch management
+  const consolidateProductsByBarcode = (products: ShowcaseProduct[]) => {
+    const barcodeMap = new Map<string, {
+      mainProduct: ShowcaseProduct;
+      batches: Array<{
+        id: number;
+        batchNumber: string;
+        stockQuantity: number;
+        createdAt: Date;
+        isActive: boolean;
+      }>;
+      totalStock: number;
+      currentSellingBatch: string;
+    }>();
+
+    // Group products by barcode
+    for (const product of products) {
+      if (!product.barcode) {
+        // Products without barcodes are shown individually
+        barcodeMap.set(`no-barcode-${product.id}`, {
+          mainProduct: product,
+          batches: [{
+            id: product.id,
+            batchNumber: product.batchNumber || 'N/A',
+            stockQuantity: product.stockQuantity || 0,
+            createdAt: product.createdAt ? new Date(product.createdAt) : new Date(),
+            isActive: true
+          }],
+          totalStock: product.stockQuantity || 0,
+          currentSellingBatch: product.batchNumber || 'N/A'
+        });
+        continue;
+      }
+
+      if (!barcodeMap.has(product.barcode)) {
+        barcodeMap.set(product.barcode, {
+          mainProduct: product,
+          batches: [],
+          totalStock: 0,
+          currentSellingBatch: ''
+        });
+      }
+
+      const group = barcodeMap.get(product.barcode)!;
+      group.batches.push({
+        id: product.id,
+        batchNumber: product.batchNumber || 'N/A',
+        stockQuantity: product.stockQuantity || 0,
+        createdAt: product.createdAt ? new Date(product.createdAt) : new Date(),
+        isActive: false
+      });
+      group.totalStock += (product.stockQuantity || 0);
+    }
+
+    // Determine active batch for each group (LIFO - newest with stock > 0)
+    for (const [barcode, group] of barcodeMap) {
+      // Sort batches by creation date (newest first)
+      group.batches.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      // Find the first batch with stock > 0 (newest = LIFO)
+      const activeBatch = group.batches.find(batch => batch.stockQuantity > 0);
+      
+      if (activeBatch) {
+        activeBatch.isActive = true;
+        group.currentSellingBatch = activeBatch.batchNumber;
+      }
+    }
+
+    return Array.from(barcodeMap.values());
+  };
+
   const { mutate: createProduct } = useMutation({
     mutationFn: (data: InsertShowcaseProduct) => {
       setIsSubmitting(true);
@@ -741,16 +812,20 @@ export default function ProductsPage() {
     setDialogOpen(true);
   };
 
-  // Filter products based on category, inventory status, visibility, and search
-  const filteredProducts = (products || []).filter((product: ShowcaseProduct) => {
+  // Get consolidated products by barcode
+  const consolidatedProducts = products ? consolidateProductsByBarcode(products) : [];
+
+  // Filter consolidated products based on category, inventory status, visibility, and search
+  const filteredProducts = consolidatedProducts.filter((productGroup) => {
+    const product = productGroup.mainProduct;
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = !searchQuery || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.barcode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.sku?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Check inventory status
-    const inventoryStatus = getActualInventoryStatus(product.stockQuantity, product.minStockLevel);
+    // Check inventory status based on total stock
+    const inventoryStatus = getActualInventoryStatus(productGroup.totalStock, product.minStockLevel);
     const matchesInventoryStatus = selectedInventoryStatus === "all" || inventoryStatus === selectedInventoryStatus;
     
     // Check visibility status
@@ -1117,8 +1192,10 @@ export default function ProductsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product: ShowcaseProduct) => (
-                <Card key={`${product.id}-${refreshKey}`} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
+              {filteredProducts.map((productGroup) => {
+                const product = productGroup.mainProduct;
+                return (
+                  <Card key={`${product.barcode || product.id}-${refreshKey}`} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
                       {/* Product Thumbnail */}
@@ -1203,8 +1280,8 @@ export default function ProductsPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
+                    <CardContent className="pt-0">
+                      <div className="space-y-3">
                       {/* Inventory Status */}
                       <div className="flex items-center justify-between">
                         <Badge 
@@ -1229,11 +1306,58 @@ export default function ProductsPage() {
                         </div>
                       </div>
 
+                      {/* Current Selling Batch (LIFO) - Only show if product has multiple batches */}
+                      {productGroup.batches.length > 1 && productGroup.currentSellingBatch && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-green-700">بچ فعال (در حال فروش):</span>
+                            <Badge variant="default" className="bg-green-600 text-white">
+                              {productGroup.currentSellingBatch}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-green-600 mt-1">
+                            سیستم LIFO - جدیدترین بچ با موجودی
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Batch Summary */}
+                      {productGroup.batches.length > 1 && (
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">همه بچ‌ها ({productGroup.batches.length}):</span>
+                            <span className="text-sm text-gray-600">کل موجودی: {productGroup.totalStock}</span>
+                          </div>
+                          <div className="space-y-1">
+                            {productGroup.batches.slice(0, 2).map((batch, index) => (
+                              <div key={index} className={`flex justify-between items-center p-2 rounded text-xs ${
+                                batch.isActive ? 'bg-green-100 border border-green-300' : 'bg-gray-50'
+                              }`}>
+                                <span className="font-medium">بچ {batch.batchNumber}</span>
+                                <div className="flex items-center gap-2">
+                                  <span>{batch.stockQuantity} واحد</span>
+                                  {batch.isActive && (
+                                    <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+                                      فعال
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {productGroup.batches.length > 2 && (
+                              <div className="text-center text-xs text-gray-500">
+                                و {productGroup.batches.length - 2} بچ دیگر...
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Stock Level Indicator */}
-                      {product.stockQuantity !== undefined && product.stockQuantity !== null && (
+                      {productGroup.totalStock !== undefined && productGroup.totalStock !== null && (
                         <div className="space-y-1 w-full">
                           <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 min-w-0">
-                            <span className="break-words truncate">Stock: {product.stockQuantity.toLocaleString()}</span>
+                            <span className="break-words truncate">کل موجودی: {productGroup.totalStock.toLocaleString()}</span>
                             {product.maxStockLevel && <span className="break-words truncate ml-2">Max: {product.maxStockLevel.toLocaleString()}</span>}
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -1382,8 +1506,9 @@ export default function ProductsPage() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
         </TabsContent>
