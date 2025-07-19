@@ -229,10 +229,10 @@ const EmailTemplates: React.FC = () => {
     );
   }
 
-  // Debug logging
-  console.log("Templates data:", templatesData);
-  console.log("Processed templates:", templates);
-  console.log("Templates length:", templates?.length);
+  // Only show debugging if needed
+  if (templatesData === null && !isLoading) {
+    console.log("🔧 [DEBUG] Templates fetch failed - check authentication");
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -258,8 +258,18 @@ const EmailTemplates: React.FC = () => {
         </TabsList>
 
         <TabsContent value="templates" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates?.map((template: EmailTemplate) => (
+          {templates.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-500 text-lg mb-4">
+                هیچ قالب ایمیل موجود یافت نشد
+              </div>
+              <div className="text-sm text-gray-400">
+                لطفاً وارد حساب مدیریتی شوید یا قالب جدید اضافه کنید
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {templates.map((template: EmailTemplate) => (
               <Card key={template.id} className="relative">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -335,8 +345,9 @@ const EmailTemplates: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="predefined" className="space-y-4">

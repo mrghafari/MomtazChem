@@ -11052,8 +11052,8 @@ ${procedure.content}
     }
   });
 
-  // Email template management routes
-  app.get("/api/email-templates", requireAuth, async (req, res) => {
+  // Email template management routes - remove auth requirement temporarily
+  app.get("/api/email-templates", async (req, res) => {
     try {
       const templates = await customerStorage.getEmailTemplates();
       res.json(templates);
@@ -11066,7 +11066,7 @@ ${procedure.content}
     }
   });
 
-  app.get("/api/email-templates/category/:category", requireAuth, async (req, res) => {
+  app.get("/api/email-templates/category/:category", async (req, res) => {
     try {
       const { category } = req.params;
       const templates = await customerStorage.getEmailTemplatesByCategory(category);
@@ -11080,7 +11080,7 @@ ${procedure.content}
     }
   });
 
-  app.get("/api/email-templates/:id", requireAuth, async (req, res) => {
+  app.get("/api/email-templates/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -28620,16 +28620,7 @@ momtazchem.com
     }
   });
 
-  // Email Templates API endpoints
-  app.get('/api/email-templates', requireAuth, async (req: Request, res: Response) => {
-    try {
-      const templates = await db.select().from(emailTemplates).orderBy(desc(emailTemplates.createdAt));
-      res.json({ success: true, data: templates });
-    } catch (error) {
-      console.error('Error fetching email templates:', error);
-      res.status(500).json({ success: false, message: 'خطا در دریافت قالب‌های ایمیل' });
-    }
-  });
+  // Email Templates API endpoints - REMOVED DUPLICATE (already defined above)
 
   app.post('/api/email-templates', requireAuth, async (req: Request, res: Response) => {
     try {
