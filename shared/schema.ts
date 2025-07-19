@@ -340,18 +340,52 @@ export const smsSettings = pgTable("sms_settings", {
   isEnabled: boolean("is_enabled").default(false), // Global SMS system toggle
   provider: text("provider").default("asiacell"), // 'asiacell', 'zain_iraq', 'korek_telecom', 'twilio', 'plivo', 'infobip', 'msg91', 'custom'
   customProviderName: text("custom_provider_name"), // Name for custom SMS provider
+  
+  // Authentication credentials
   apiKey: text("api_key"),
   apiSecret: text("api_secret"),
   username: text("username"), // Username for SMS provider
   password: text("password"), // Password for SMS provider  
+  accessToken: text("access_token"), // OAuth token or JWT token
+  clientId: text("client_id"), // OAuth client ID
+  clientSecret: text("client_secret"), // OAuth client secret
+  
+  // Provider configuration
   senderNumber: text("sender_number"),
+  senderId: text("sender_id"), // Sender ID for some providers
   apiEndpoint: text("api_endpoint"), // Custom API endpoint URL
+  baseUrl: text("base_url"), // Base URL for API requests
   serviceType: text("service_type").default("pattern"), // 'pattern', 'simple', 'otp'
   patternId: text("pattern_id"), // Pattern ID for template-based SMS
+  templateId: text("template_id"), // Template ID for some providers
+  serviceCode: text("service_code"), // Service code for SMS providers
+  applicationId: text("application_id"), // Application ID for some providers
+  
+  // Additional provider-specific fields
+  countryCode: text("country_code"), // Country code prefix
+  encoding: text("encoding").default("UTF-8"), // Message encoding
+  messageType: text("message_type").default("TEXT"), // TEXT, UNICODE, BINARY
+  priority: text("priority").default("NORMAL"), // LOW, NORMAL, HIGH, URGENT
+  validityPeriod: integer("validity_period").default(1440), // Message validity in minutes
+  
+  // Security and validation
+  webhookUrl: text("webhook_url"), // Webhook for delivery reports
+  webhookSecret: text("webhook_secret"), // Secret for webhook validation
+  ipWhitelist: json("ip_whitelist"), // Array of allowed IP addresses
+  
+  // Rate limiting and quotas
+  dailyLimit: integer("daily_limit").default(1000), // Daily SMS limit
+  monthlyLimit: integer("monthly_limit").default(30000), // Monthly SMS limit
+  rateLimitPerMinute: integer("rate_limit_per_minute").default(10), // Messages per minute
+  
+  // Message configuration
   codeLength: integer("code_length").default(6),
   codeExpiry: integer("code_expiry").default(300), // seconds (5 minutes)
   maxAttempts: integer("max_attempts").default(3),
   rateLimitMinutes: integer("rate_limit_minutes").default(60),
+  
+  // System fields
+  isTestMode: boolean("is_test_mode").default(true), // Test mode toggle
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -490,6 +524,8 @@ export const smsNotifications = pgTable('sms_notifications', {
   failureReason: text('failure_reason'),
   createdAt: timestamp('created_at').defaultNow().notNull()
 });
+
+
 
 // Create insert schemas for custom user management
 export const insertCustomRoleSchema = createInsertSchema(customRoles).omit({

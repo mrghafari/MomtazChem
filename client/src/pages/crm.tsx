@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown, Shield } from "lucide-react";
+import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown, Shield, Settings, MessageCircle, Mail } from "lucide-react";
 import UnifiedCustomerProfile from "@/components/unified-customer-profile";
 import { PasswordManagement } from "@/components/PasswordManagement";
 import { apiRequest } from "@/lib/queryClient";
@@ -84,6 +84,7 @@ export default function CRM() {
   const [editingCustomer, setEditingCustomer] = useState<CrmCustomer | null>(null);
   const [sortField, setSortField] = useState<string>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [bulkActionsLoading, setBulkActionsLoading] = useState(false);
   const [newCustomer, setNewCustomer] = useState({
     email: "",
     firstName: "",
@@ -383,6 +384,49 @@ export default function CRM() {
     }
   };
 
+  const handleBulkToggleVerification = async (type: 'sms' | 'email', enabled: boolean) => {
+    setBulkActionsLoading(true);
+    try {
+      const response = await fetch('/api/crm/customers/bulk-toggle-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          type,
+          enabled
+        })
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to update verification settings');
+      }
+
+      // Refresh customers data
+      await queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
+
+      const actionText = enabled ? 'فعال' : 'غیرفعال';
+      const typeText = type === 'sms' ? 'SMS' : 'ایمیل';
+      
+      toast({
+        title: "موفقیت",
+        description: `ارسال کد تایید ${typeText} برای ${result.updatedCount} مشتری ${actionText} شد`,
+      });
+    } catch (error) {
+      console.error('Error bulk toggling verification:', error);
+      toast({
+        title: "خطا",
+        description: error instanceof Error ? error.message : "خطا در تغییر تنظیمات",
+        variant: "destructive"
+      });
+    } finally {
+      setBulkActionsLoading(false);
+    }
+  };
+
   const handleExportAnalytics = async () => {
     try {
       const response = await fetch('/api/crm/analytics/export-pdf', {
@@ -621,6 +665,67 @@ export default function CRM() {
               />
             </div>
           </div>
+
+          {/* Bulk SMS & Email Settings */}
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                تنظیمات کلی ارسال کد تایید
+              </CardTitle>
+              <CardDescription>
+                فعال/غیرفعال کردن ارسال کد تایید ثبت‌نام اولیه برای همه مشتریان
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={() => handleBulkToggleVerification('sms', true)}
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                  disabled={bulkActionsLoading}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  فعال کردن SMS برای همه
+                </Button>
+                
+                <Button
+                  onClick={() => handleBulkToggleVerification('sms', false)}
+                  variant="outline"
+                  className="flex items-center gap-2 border-red-500 text-red-600 hover:bg-red-50"
+                  disabled={bulkActionsLoading}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  غیرفعال کردن SMS برای همه
+                </Button>
+                
+                <Button
+                  onClick={() => handleBulkToggleVerification('email', true)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  disabled={bulkActionsLoading}
+                >
+                  <Mail className="h-4 w-4" />
+                  فعال کردن ایمیل برای همه
+                </Button>
+                
+                <Button
+                  onClick={() => handleBulkToggleVerification('email', false)}
+                  variant="outline"
+                  className="flex items-center gap-2 border-red-500 text-red-600 hover:bg-red-50"
+                  disabled={bulkActionsLoading}
+                >
+                  <Mail className="h-4 w-4" />
+                  غیرفعال کردن ایمیل برای همه
+                </Button>
+                
+                {bulkActionsLoading && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    در حال پردازش...
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Customers Table */}
           <Card>

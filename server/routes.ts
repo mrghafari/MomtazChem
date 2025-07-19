@@ -13132,6 +13132,56 @@ Leading Chemical Solutions Provider
     }
   });
 
+  // Bulk toggle verification settings for all customers
+  app.post("/api/crm/customers/bulk-toggle-verification", async (req, res) => {
+    try {
+      const { type, enabled } = req.body;
+      
+      if (!type || (type !== 'sms' && type !== 'email')) {
+        return res.status(400).json({
+          success: false,
+          message: "نوع باید 'sms' یا 'email' باشد"
+        });
+      }
+
+      if (typeof enabled !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: "وضعیت فعال/غیرفعال باید boolean باشد"
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Determine which field to update
+      const fieldToUpdate = type === 'sms' ? 'sms_enabled' : 'email_enabled';
+      
+      // Update all customers
+      const result = await pool.query(`
+        UPDATE crm_customers 
+        SET ${fieldToUpdate} = $1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE is_active = true
+      `, [enabled]);
+
+      const updatedCount = result.rowCount || 0;
+      
+      console.log(`📢 Bulk ${type} verification ${enabled ? 'enabled' : 'disabled'} for ${updatedCount} customers`);
+
+      res.json({
+        success: true,
+        message: `تنظیمات ${type === 'sms' ? 'SMS' : 'ایمیل'} برای همه مشتریان ${enabled ? 'فعال' : 'غیرفعال'} شد`,
+        updatedCount
+      });
+    } catch (error) {
+      console.error("Error bulk toggling verification:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تغییر تنظیمات یکجا"
+      });
+    }
+  });
+
   // Log customer activity
   app.post("/api/crm/customers/:id/activities", requireAuth, async (req, res) => {
     try {

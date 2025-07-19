@@ -31,18 +31,52 @@ interface SmsSettings {
   isEnabled: boolean;
   provider: string;
   customProviderName?: string;
+  
+  // Authentication credentials
   apiKey?: string;
   apiSecret?: string;
   username?: string;
   password?: string;
+  accessToken?: string;
+  clientId?: string;
+  clientSecret?: string;
+  
+  // Provider configuration
   senderNumber?: string;
+  senderId?: string;
   apiEndpoint?: string;
+  baseUrl?: string;
   serviceType?: string;
   patternId?: string;
+  templateId?: string;
   serviceCode?: string;
+  applicationId?: string;
+  
+  // Additional provider-specific fields
+  countryCode?: string;
+  encoding?: string;
+  messageType?: string;
+  priority?: string;
+  validityPeriod?: number;
+  
+  // Security and validation
+  webhookUrl?: string;
+  webhookSecret?: string;
+  ipWhitelist?: string[];
+  
+  // Rate limiting and quotas
+  dailyLimit?: number;
+  monthlyLimit?: number;
+  rateLimitPerMinute?: number;
+  
+  // Message configuration
   codeLength: number;
   codeExpiry: number;
   maxAttempts: number;
+  rateLimitMinutes?: number;
+  
+  // System fields
+  isTestMode?: boolean;
   rateLimitMinutes: number;
 }
 
@@ -93,11 +127,19 @@ export default function AdminSmsManagement() {
   } | null>(null);
   const [settings, setSettings] = useState<SmsSettings>({
     isEnabled: false,
-    provider: 'kavenegar',
-    codeLength: 6,
-    codeExpiry: 300,
+    provider: 'infobip',
+    encoding: 'UTF-8',
+    messageType: 'TEXT',
+    priority: 'NORMAL',
+    validityPeriod: 1440,
+    dailyLimit: 1000,
+    monthlyLimit: 30000,
+    rateLimitPerMinute: 10,
+    codeLength: 4,
+    codeExpiry: 10,
     maxAttempts: 3,
-    rateLimitMinutes: 60
+    rateLimitMinutes: 60,
+    isTestMode: true
   });
   const [customersWithSms, setCustomersWithSms] = useState<CustomerSmsSettings[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerSmsSettings[]>([]);
@@ -713,6 +755,108 @@ export default function AdminSmsManagement() {
                     value={settings.serviceCode || ''}
                     onChange={(e) => setSettings(prev => ({ ...prev, serviceCode: e.target.value }))}
                   />
+                </div>
+
+                {/* Additional Authentication Fields */}
+                <div className="space-y-2">
+                  <Label htmlFor="accessToken">Access Token</Label>
+                  <Input
+                    id="accessToken"
+                    type="password"
+                    placeholder="JWT یا Access Token"
+                    value={settings.accessToken || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, accessToken: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="clientId">Client ID</Label>
+                  <Input
+                    id="clientId"
+                    placeholder="OAuth Client ID"
+                    value={settings.clientId || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, clientId: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="senderId">Sender ID</Label>
+                  <Input
+                    id="senderId"
+                    placeholder="نام فرستنده (برای برخی ارائه‌دهندگان)"
+                    value={settings.senderId || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, senderId: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="templateId">Template ID</Label>
+                  <Input
+                    id="templateId"
+                    placeholder="شناسه قالب پیام"
+                    value={settings.templateId || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, templateId: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="applicationId">Application ID</Label>
+                  <Input
+                    id="applicationId"
+                    placeholder="شناسه اپلیکیشن"
+                    value={settings.applicationId || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, applicationId: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="webhookUrl">Webhook URL</Label>
+                  <Input
+                    id="webhookUrl"
+                    placeholder="https://yoursite.com/webhook/sms"
+                    value={settings.webhookUrl || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, webhookUrl: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="dailyLimit">حد روزانه پیام</Label>
+                  <Input
+                    id="dailyLimit"
+                    type="number"
+                    placeholder="1000"
+                    value={settings.dailyLimit || 1000}
+                    onChange={(e) => setSettings(prev => ({ ...prev, dailyLimit: parseInt(e.target.value) }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="priority">اولویت ارسال</Label>
+                  <Select value={settings.priority || 'NORMAL'} onValueChange={(value) => setSettings(prev => ({ ...prev, priority: value }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="LOW">پایین</SelectItem>
+                      <SelectItem value="NORMAL">عادی</SelectItem>
+                      <SelectItem value="HIGH">بالا</SelectItem>
+                      <SelectItem value="URGENT">فوری</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="isTestMode">حالت تست</Label>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="isTestMode"
+                      checked={settings.isTestMode || false}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, isTestMode: checked }))}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {settings.isTestMode ? 'حالت تست فعال' : 'حالت تست غیرفعال'}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
