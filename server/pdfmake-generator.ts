@@ -8,11 +8,17 @@ function setupVazirFont() {
   try {
     console.log('Setting up fonts for pdfMake...');
     
-    // Set up VFS with default fonts and Vazir
-    pdfMake.vfs = pdfFonts.pdfMake.vfs || {};
-    pdfMake.vfs["Vazir.ttf"] = vazirBase64;
+    // اول فونت‌های پیش‌فرض را اضافه می‌کنیم
+    if (pdfFonts && pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
+      pdfMake.vfs = { ...pdfFonts.pdfMake.vfs };
+    } else {
+      pdfMake.vfs = {};
+    }
+    
+    // سپس فونت Vazir را اضافه می‌کنیم
+    pdfMake.vfs["Vazirmatn-Regular.ttf"] = vazirBase64;
 
-    // Set up fonts
+    // تنظیم فونت‌ها
     pdfMake.fonts = {
       Roboto: {
         normal: 'Roboto-Regular.ttf',
@@ -20,19 +26,19 @@ function setupVazirFont() {
         italics: 'Roboto-Italic.ttf',
         bolditalics: 'Roboto-MediumItalic.ttf'
       },
-      Vazir: {
-        normal: "Vazir.ttf",
-        bold: "Vazir.ttf",
-        italics: "Vazir.ttf",
-        bolditalics: "Vazir.ttf",
+      Vazirmatn: {
+        normal: "Vazirmatn-Regular.ttf",
+        bold: "Vazirmatn-Regular.ttf",
+        italics: "Vazirmatn-Regular.ttf",
+        bolditalics: "Vazirmatn-Regular.ttf",
       },
     };
     
-    console.log('✅ Font setup completed successfully with Vazir and Roboto');
+    console.log('✅ Font setup completed successfully with Vazirmatn and Roboto');
   } catch (error) {
     console.error('❌ Error setting up fonts:', error);
     // Ultimate fallback - use basic setup
-    pdfMake.vfs = pdfFonts.pdfMake?.vfs || {};
+    pdfMake.vfs = pdfFonts?.pdfMake?.vfs || {};
     pdfMake.fonts = {
       Roboto: {
         normal: 'Roboto-Regular.ttf',
@@ -258,7 +264,7 @@ async function generateCustomerPDFWithPDFMake(
             fontSize: 20,
             bold: true,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           subheader: {
             fontSize: 14,
@@ -269,41 +275,41 @@ async function generateCustomerPDFWithPDFMake(
             fontSize: 16,
             bold: true,
             color: '#333333',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           dateInfo: {
             fontSize: 10,
             color: '#666666',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           customerInfo: {
             fontSize: 11,
             color: '#333333',
-            font: 'Roboto',
+            font: 'Vazirmatn',
             margin: [0, 2, 0, 2]
           },
           tableHeader: {
             fontSize: 10,
             bold: true,
             color: '#374151',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           noData: {
             fontSize: 10,
             color: '#666666',
-            font: 'Roboto',
+            font: 'Vazirmatn',
             italics: true
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           }
         },
 
@@ -434,7 +440,7 @@ async function generateAnalyticsPDFWithPDFMake(
             fontSize: 22,
             bold: true,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           subheader: {
             fontSize: 16,
@@ -444,7 +450,7 @@ async function generateAnalyticsPDFWithPDFMake(
           companyName: {
             fontSize: 14,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           companyNameEn: {
             fontSize: 12,
@@ -454,12 +460,12 @@ async function generateAnalyticsPDFWithPDFMake(
           dateInfo: {
             fontSize: 10,
             color: '#666666',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           statLabel: {
             fontSize: 14,
             color: '#374151',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           statLabelEn: {
             fontSize: 11,
@@ -470,12 +476,12 @@ async function generateAnalyticsPDFWithPDFMake(
             fontSize: 18,
             bold: true,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           }
         },
 
@@ -663,7 +669,7 @@ async function generateInvoicePDFWithPDFMake(
             fontSize: 22,
             bold: true,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           subheader: {
             fontSize: 16,
@@ -673,47 +679,47 @@ async function generateInvoicePDFWithPDFMake(
           companyName: {
             fontSize: 14,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           invoiceInfo: {
             fontSize: 12,
             color: '#333333',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           customerInfo: {
             fontSize: 11,
             color: '#333333',
-            font: 'Roboto',
+            font: 'Vazirmatn',
             margin: [0, 2, 0, 2]
           },
           tableHeader: {
             fontSize: 10,
             bold: true,
             color: '#374151',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           noData: {
             fontSize: 10,
             color: '#666666',
-            font: 'Roboto',
+            font: 'Vazirmatn',
             italics: true
           },
           totalAmount: {
             fontSize: 16,
             bold: true,
             color: '#2563eb',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Roboto'
+            font: 'Vazirmatn'
           }
         },
 
@@ -792,33 +798,33 @@ async function generateDocumentationPDFWithPDFMake(
           header: {
             fontSize: 20,
             bold: true,
-            font: language === 'fa' ? 'Vazir' : 'Helvetica'
+            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             margin: [0, 15, 0, 5],
-            font: language === 'fa' ? 'Vazir' : 'Helvetica'
+            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
           },
           paragraph: {
             fontSize: 11,
             margin: [0, 0, 0, 10],
-            font: language === 'fa' ? 'Vazir' : 'Helvetica'
+            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
           },
           listItem: {
             fontSize: 11,
             margin: [20, 0, 0, 10],
-            font: language === 'fa' ? 'Vazir' : 'Helvetica'
+            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
           },
           footer: {
             fontSize: 10,
             italics: true,
-            font: language === 'fa' ? 'Vazir' : 'Helvetica'
+            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
           }
         },
         
         defaultStyle: {
-          font: language === 'fa' ? 'Vazir' : 'Helvetica',
+          font: language === 'fa' ? 'Vazirmatn' : 'Roboto',
           fontSize: 10
         }
       };
