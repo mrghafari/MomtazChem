@@ -9460,11 +9460,21 @@ ${procedure.content}
             console.log(`📧 Using Template #05 - ${followUpTemplate.templateName}`);
             
             const templateVariables = {
-              customer_name: inquiryData.contactEmail,
+              customer_name: inquiryData.contactEmail.split('@')[0] || 'Valued Customer',
               inquiry_number: inquiry.inquiryNumber,
               inquiry_subject: inquiryData.subject || 'General Inquiry',
               inquiry_category: inquiryData.category || 'general',
-              response_text: 'استعلام شما با موفقیت دریافت شد و در کمتر از 24 ساعت پاسخ داده خواهد شد.',
+              customer_message: inquiryData.message || 'No specific message provided',
+              response_text: `Dear ${inquiryData.contactEmail.split('@')[0] || 'Customer'},
+
+Thank you for your inquiry about our ${inquiryData.category || 'chemical products'}. We are pleased to provide you with detailed information about this product. 
+
+Our technical team has reviewed your requirements and will send you a comprehensive quote including pricing, specifications, and availability within 24 hours. 
+
+If you need immediate assistance or have specific technical questions, please feel free to contact us directly.
+
+Best regards,
+Momtaz Chemical Technical Team`,
               contact_phone: '+964 770 999 6771',
               contact_email: 'info@momtazchem.com'
             };
