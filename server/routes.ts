@@ -9479,13 +9479,27 @@ ${procedure.content}
                   <p style="margin: 8px 0; color: #34495e; font-size: 14px;"><strong>Inquiry Number:</strong> ${inquiry.inquiryNumber}</p>
                   <p style="margin: 8px 0; color: #34495e; font-size: 14px;"><strong>Subject:</strong> ${inquiryData.subject || 'General Inquiry'}</p>
                   <p style="margin: 8px 0; color: #34495e; font-size: 14px;"><strong>Category:</strong> ${inquiryData.category || 'General'}</p>
+                  
+                  <hr style="border: none; height: 1px; background: linear-gradient(to right, #3498db, #e74c3c, #3498db); margin: 15px 0;">
+                  
+                  <div style="background: #ffffff; padding: 15px; border-radius: 4px; border: 1px solid #ddd;">
+                    <h4 style="color: #2c3e50; font-size: 14px; font-weight: bold; margin: 0 0 10px 0;">Your Message:</h4>
+                    <p style="color: #555; font-size: 14px; line-height: 1.6; margin: 0; font-style: italic;">
+                      "${inquiryData.message || 'No specific message provided'}"
+                    </p>
+                  </div>
                 </div>
                 
                 <div style="background: #e8f4fd; padding: 20px; border-radius: 6px; margin: 25px 0; border-left: 4px solid #27ae60;">
                   <h3 style="color: #2c3e50; font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">Our Response:</h3>
-                  <p style="color: #2c3e50; font-size: 15px; line-height: 1.6; margin: 0;">
-                    Thank you for your inquiry about our ${productName || 'chemical products'}. We are pleased to provide you with detailed information about this product. Our technical team has reviewed your requirements and will send you a comprehensive quote including pricing, specifications, and availability within <strong>24 hours</strong>. Please feel free to contact us if you have any additional questions.
-                  </p>
+                  
+                  <hr style="border: none; height: 2px; background: linear-gradient(to right, #27ae60, #3498db, #27ae60); margin: 15px 0;">
+                  
+                  <div style="background: #ffffff; padding: 18px; border-radius: 4px; border: 1px solid #27ae60; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #2c3e50; font-size: 15px; line-height: 1.6; margin: 0;">
+                      Thank you for your inquiry about our <strong>${productName || 'chemical products'}</strong>. We are pleased to provide you with detailed information about this product. Our technical team has reviewed your requirements and will send you a comprehensive quote including pricing, specifications, and availability within <strong>24 hours</strong>. Please feel free to contact us if you have any additional questions.
+                    </p>
+                  </div>
                 </div>
                 
                 <div style="background: #fff3cd; padding: 20px; border-radius: 6px; margin: 25px 0; border-left: 4px solid #f39c12;">
