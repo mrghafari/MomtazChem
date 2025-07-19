@@ -12,17 +12,20 @@ import { useToast } from '@/hooks/use-toast';
 
 interface EmailTemplate {
   id: number;
-  templateNumber: string;
-  templateName: string;
+  name: string;
   subject: string;
-  htmlContent: string;
-  textContent: string;
+  html_content: string;
+  text_content: string;
   category: string;
-  description: string;
   variables: string[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  is_active: boolean;
+  is_default: boolean;
+  language: string;
+  created_by: number;
+  usage_count: number;
+  last_used: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const EmailTemplates: React.FC = () => {
@@ -34,14 +37,15 @@ const EmailTemplates: React.FC = () => {
 
   // Form state for editing/creating
   const [formData, setFormData] = useState({
-    templateName: '',
+    name: '',
     subject: '',
-    htmlContent: '',
-    textContent: '',
+    html_content: '',
+    text_content: '',
     category: '',
-    description: '',
     variables: '',
-    isActive: true
+    is_active: true,
+    language: 'fa',
+    created_by: 15
   });
 
   const { data: templates, isLoading } = useQuery({
@@ -123,28 +127,30 @@ const EmailTemplates: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
-      templateName: '',
+      name: '',
       subject: '',
-      htmlContent: '',
-      textContent: '',
+      html_content: '',
+      text_content: '',
       category: '',
-      description: '',
       variables: '',
-      isActive: true
+      is_active: true,
+      language: 'fa',
+      created_by: 15
     });
   };
 
   const handleEdit = (template: EmailTemplate) => {
     setEditingTemplate(template);
     setFormData({
-      templateName: template.templateName,
+      name: template.name,
       subject: template.subject,
-      htmlContent: template.htmlContent,
-      textContent: template.textContent,
+      html_content: template.html_content,
+      text_content: template.text_content || '',
       category: template.category,
-      description: template.description,
       variables: template.variables?.join(', ') || '',
-      isActive: template.isActive
+      is_active: template.is_active,
+      language: template.language || 'fa',
+      created_by: template.created_by || 15
     });
   };
 
@@ -165,15 +171,15 @@ const EmailTemplates: React.FC = () => {
 
   const handleCopy = async (template: EmailTemplate) => {
     try {
-      await navigator.clipboard.writeText(`Template #${template.templateNumber}: ${template.templateName}`);
+      await navigator.clipboard.writeText(`Template: ${template.name}`);
       toast({
         title: "کپی شد",
-        description: "شماره قالب کپی شد",
+        description: "نام قالب کپی شد",
       });
     } catch (error) {
       toast({
         title: "خطا در کپی",
-        description: "نتوانستم شماره قالب را کپی کنم",
+        description: "نتوانستم نام قالب را کپی کنم",
         variant: "destructive",
       });
     }
@@ -245,12 +251,12 @@ const EmailTemplates: React.FC = () => {
 
         <TabsContent value="templates" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates?.data?.map((template: EmailTemplate) => (
+            {templates?.map((template: EmailTemplate) => (
               <Card key={template.id} className="relative">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                      #{template.templateNumber}
+                      {template.name.includes('#') ? template.name.split(' ')[0] : `#${template.id}`}
                     </Badge>
                     <div className="flex space-x-2">
                       <Button
@@ -271,8 +277,8 @@ const EmailTemplates: React.FC = () => {
                       </Button>
                     </div>
                   </div>
-                  <CardTitle className="text-lg">{template.templateName}</CardTitle>
-                  <p className="text-sm text-gray-600">{template.description}</p>
+                  <CardTitle className="text-lg">{template.name}</CardTitle>
+                  <p className="text-sm text-gray-600">استفاده شده: {template.usage_count} بار</p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -297,8 +303,8 @@ const EmailTemplates: React.FC = () => {
                       </div>
                     )}
                     <div className="flex justify-between items-center pt-2">
-                      <Badge variant={template.isActive ? "default" : "secondary"}>
-                        {template.isActive ? "فعال" : "غیرفعال"}
+                      <Badge variant={template.is_active ? "default" : "secondary"}>
+                        {template.is_active ? "فعال" : "غیرفعال"}
                       </Badge>
                       <div className="flex space-x-2">
                         <Button
@@ -354,14 +360,15 @@ const EmailTemplates: React.FC = () => {
                       className="w-full"
                       onClick={() => {
                         setFormData({
-                          templateName: template.templateName,
+                          name: template.templateName,
                           subject: `موضوع - ${template.templateName}`,
-                          htmlContent: '',
-                          textContent: '',
+                          html_content: '',
+                          text_content: '',
                           category: template.category,
-                          description: template.description,
                           variables: template.variables.join(', '),
-                          isActive: true
+                          is_active: true,
+                          language: 'fa',
+                          created_by: 15
                         });
                         setIsCreating(true);
                       }}
@@ -438,8 +445,8 @@ const EmailTemplates: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium mb-2">نام قالب</label>
                     <Input
-                      value={formData.templateName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, templateName: e.target.value }))}
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       required
                     />
                   </div>
@@ -462,13 +469,7 @@ const EmailTemplates: React.FC = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">توضیحات</label>
-                  <Input
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  />
-                </div>
+
 
                 <div>
                   <label className="block text-sm font-medium mb-2">متغیرها (با کاما جدا کنید)</label>
@@ -482,8 +483,8 @@ const EmailTemplates: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium mb-2">محتوای HTML</label>
                   <Textarea
-                    value={formData.htmlContent}
-                    onChange={(e) => setFormData(prev => ({ ...prev, htmlContent: e.target.value }))}
+                    value={formData.html_content}
+                    onChange={(e) => setFormData(prev => ({ ...prev, html_content: e.target.value }))}
                     rows={10}
                     className="font-mono text-sm"
                     required
@@ -493,8 +494,8 @@ const EmailTemplates: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium mb-2">محتوای متنی (اختیاری)</label>
                   <Textarea
-                    value={formData.textContent}
-                    onChange={(e) => setFormData(prev => ({ ...prev, textContent: e.target.value }))}
+                    value={formData.text_content}
+                    onChange={(e) => setFormData(prev => ({ ...prev, text_content: e.target.value }))}
                     rows={5}
                   />
                 </div>
@@ -503,8 +504,8 @@ const EmailTemplates: React.FC = () => {
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                      checked={formData.is_active}
+                      onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
                       className="rounded"
                     />
                     <span className="text-sm font-medium">قالب فعال باشد</span>
@@ -543,7 +544,7 @@ const EmailTemplates: React.FC = () => {
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">پیش‌نمایش قالب #{previewTemplate.templateNumber}</h2>
+                <h2 className="text-2xl font-bold">پیش‌نمایش قالب: {previewTemplate.name}</h2>
                 <Button
                   variant="outline"
                   size="sm"
@@ -563,15 +564,15 @@ const EmailTemplates: React.FC = () => {
                   <h3 className="font-medium text-gray-700">محتوای HTML:</h3>
                   <div 
                     className="border p-4 rounded bg-white"
-                    dangerouslySetInnerHTML={{ __html: previewTemplate.htmlContent }}
+                    dangerouslySetInnerHTML={{ __html: previewTemplate.html_content }}
                   />
                 </div>
 
-                {previewTemplate.textContent && (
+                {previewTemplate.text_content && (
                   <div>
                     <h3 className="font-medium text-gray-700">محتوای متنی:</h3>
                     <pre className="bg-gray-50 p-3 rounded text-sm whitespace-pre-wrap">
-                      {previewTemplate.textContent}
+                      {previewTemplate.text_content}
                     </pre>
                   </div>
                 )}

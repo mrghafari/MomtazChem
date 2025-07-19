@@ -44,11 +44,14 @@ export default function AdminLogin() {
       queryClient.invalidateQueries({ queryKey: ["/api/user/permissions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/site-management/modules"] });
       
-      // Wait a bit for cache invalidation to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Clear all cache and force complete refetch
+      queryClient.clear();
       
-      // Navigate directly using window.location for reliable redirect
-      window.location.href = "/admin";
+      // Wait for cache clear to complete 
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Navigate to Site Management directly
+      window.location.href = "/admin/site-management";
     },
     onError: (error: any) => {
       toast({ 
