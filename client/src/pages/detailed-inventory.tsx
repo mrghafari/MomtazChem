@@ -21,6 +21,7 @@ interface BatchDetails {
   batchNumber: string;
   stock: number;
   createdAt: Date;
+  isActive: boolean;
   notes?: string;
 }
 
@@ -28,6 +29,7 @@ interface ProductInventory {
   productName: string;
   barcode: string;
   totalStock: number;
+  currentSellingBatch: string;
   batches: BatchDetails[];
 }
 
@@ -171,8 +173,21 @@ export default function DetailedInventory() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
+                {/* Current Selling Batch (LIFO) */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-green-700">بچ فعال (در حال فروش):</span>
+                    <Badge variant="default" className="bg-green-600 text-white">
+                      {item.currentSellingBatch}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-green-600 mt-1">
+                    سیستم LIFO - جدیدترین بچ با موجودی
+                  </div>
+                </div>
+                
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">جزئیات بچ:</span>
+                  <span className="text-sm font-medium">همه بچ‌ها ({item.batches.length}):</span>
                   <Button
                     size="sm"
                     variant="outline"
@@ -185,12 +200,20 @@ export default function DetailedInventory() {
                 
                 <div className="space-y-2">
                   {item.batches.slice(0, 3).map((batch, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div key={index} className={`flex justify-between items-center p-2 rounded ${
+                      batch.isActive ? 'bg-green-100 border border-green-300' : 'bg-gray-50'
+                    }`}>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">بچ {batch.batchNumber}</span>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant={batch.isActive ? "default" : "outline"} 
+                               className={`text-xs ${batch.isActive ? 'bg-green-600 text-white' : ''}`}>
                           {batch.stock} واحد
                         </Badge>
+                        {batch.isActive && (
+                          <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+                            فعال
+                          </Badge>
+                        )}
                       </div>
                       <span className="text-xs text-gray-500">
                         {formatDate(batch.createdAt)}

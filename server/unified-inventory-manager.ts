@@ -282,69 +282,110 @@ export class UnifiedInventoryManager {
     productName: string;
     barcode: string;
     totalStock: number;
+    currentSellingBatch: string;
     batches: {
       batchNumber: string;
       stock: number;
       createdAt: Date;
+      isActive: boolean;
       notes?: string;
     }[];
   }[]> {
     try {
-      console.log(`📦 [INVENTORY] Getting detailed inventory with batch information...`);
+      console.log(`📦 [INVENTORY] Getting detailed inventory with batch information from کاردکس...`);
       
-      // Get all products with batch information from shop_products using existing database connection
-      const allShopProducts = await shopStorage.getShopProducts();
-      const productsWithBarcodes = allShopProducts.filter(p => p.barcode);
+      // Get all products with batch information from showcase_products (کاردکس) - consolidated view
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          name as product_name,
+          barcode,
+          batch_number,
+          stock_quantity,
+          created_at
+        FROM showcase_products 
+        WHERE barcode IS NOT NULL AND barcode != ''
+        ORDER BY barcode, created_at DESC
+      `);
       
-      console.log(`📦 [INVENTORY] Found ${productsWithBarcodes.length} products with barcodes`);
+      console.log(`📦 [INVENTORY] Found ${result.rows.length} batch entries from کاردکس`);
       
-      // Group by barcode and get product names
+      // Group by barcode to consolidate batches under one product card
       const inventoryMap = new Map<string, {
         productName: string;
         barcode: string;
         totalStock: number;
+        currentSellingBatch: string;
         batches: {
           batchNumber: string;
           stock: number;
           createdAt: Date;
+          isActive: boolean;
           notes?: string;
         }[];
       }>();
       
-      // Process batch data
-      for (const product of productsWithBarcodes) {
-        const barcode = product.barcode!;
-        const batchNumber = product.batchNumber || 'بدون شماره بچ';
-        const stock = product.stockQuantity || 0;
-        const createdAt = new Date(product.createdAt || new Date());
-        const notes = undefined;
+      // Process each batch entry
+      for (const row of result.rows) {
+        const barcode = row.barcode;
+        const batchNumber = row.batch_number || 'بدون شماره';
+        const stock = parseInt(row.stock_quantity) || 0;
+        const createdAt = new Date(row.created_at);
         
-        console.log(`📦 [INVENTORY] Processing product: ${product.name}, barcode: ${barcode}, stock: ${stock}`);
+        console.log(`📦 [INVENTORY] Processing batch: ${batchNumber}, stock: ${stock}, barcode: ${barcode}`);
         
         if (!inventoryMap.has(barcode)) {
-          const productName = product.name || `محصول ${barcode}`;
-          
           inventoryMap.set(barcode, {
-            productName,
+            productName: row.product_name,
             barcode,
             totalStock: 0,
+            currentSellingBatch: 'بدون شماره',
             batches: []
           });
         }
         
         const inventoryItem = inventoryMap.get(barcode)!;
         inventoryItem.totalStock += stock;
+        
         inventoryItem.batches.push({
           batchNumber,
           stock,
           createdAt,
-          notes
+          isActive: false, // Will be set correctly after processing all batches
+          notes: undefined
         });
       }
       
-      const resultArray = Array.from(inventoryMap.values());
-      console.log(`✅ [INVENTORY] Found ${resultArray.length} products with batch details`);
-      console.log(`✅ [INVENTORY] Sample result:`, JSON.stringify(resultArray[0], null, 2));
+      // Now determine the active batch for each product (LIFO - newest with stock > 0)
+      for (const [barcode, inventoryItem] of inventoryMap) {
+        // Sort batches by creation date (newest first)
+        inventoryItem.batches.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        
+        // Find the first batch with stock > 0 (newest = LIFO)
+        const activeBatch = inventoryItem.batches.find(batch => batch.stock > 0);
+        
+        if (activeBatch) {
+          activeBatch.isActive = true;
+          activeBatch.notes = 'دسته فعال (LIFO)';
+          inventoryItem.currentSellingBatch = activeBatch.batchNumber;
+        }
+      }
+      
+      // Filter out products with no stock
+      const resultArray = Array.from(inventoryMap.values()).filter(item => item.totalStock > 0);
+      
+      console.log(`✅ [INVENTORY] Consolidated ${resultArray.length} products with batch details`);
+      
+      // Log sample for debugging
+      if (resultArray.length > 0) {
+        console.log(`✅ [INVENTORY] Sample consolidated product:`, {
+          name: resultArray[0].productName,
+          barcode: resultArray[0].barcode,
+          totalStock: resultArray[0].totalStock,
+          currentBatch: resultArray[0].currentSellingBatch,
+          batchCount: resultArray[0].batches.length
+        });
+      }
       
       return resultArray;
       
