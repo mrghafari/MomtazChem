@@ -394,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log('Generating User Documentation with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
       const pdfBuffer = await generateDocumentationPDFWithPDFMake('User Guide', language);
       
       const filename = language === 'fa' ? 
@@ -419,7 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log('Generating Admin Documentation with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
       const pdfBuffer = await generateDocumentationPDFWithPDFMake('Admin Guide', language);
       
       const filename = language === 'fa' ? 
@@ -444,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log('Generating Technical Documentation with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
       const pdfBuffer = await generateDocumentationPDFWithPDFMake('Technical Documentation', language);
       
       const filename = language === 'fa' ? 
@@ -469,7 +469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log('Generating Complete Documentation with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
       const pdfBuffer = await generateDocumentationPDFWithPDFMake('Complete Documentation', language);
       
       const filename = language === 'fa' ? 
@@ -494,7 +494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log('Generating Project Proposal with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator');
+      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
       const pdfBuffer = await generateDocumentationPDFWithPDFMake('Project Proposal', language);
       
       const filename = language === 'fa' ? 
@@ -7230,7 +7230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const batchInfo = await unifiedInventoryManager.getBatchInfoForOrder(orderId);
 
       // Generate PDF with batch information using PDFMake
-      const { generateInvoicePDFWithPDFMake } = await import('./pdfmake-generator');
+      const { generateInvoicePDFWithPDFMake } = await import('./pdfmake-generator.js');
       const pdfBuffer = await generateInvoicePDFWithPDFMake(
         customer,
         order,
@@ -14043,7 +14043,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const activities = await crmStorage.getCustomerActivities(customerId, 20);
 
       // Generate PDF using PDFMake with Vazir font support
-      const { generateCustomerPDFWithPDFMake } = await import('./pdfmake-generator');
+      const { generateCustomerPDFWithPDFMake } = await import('./pdfmake-generator.js');
       const pdfBuffer = await generateCustomerPDFWithPDFMake(customer, analytics.orders || [], activities, `مشتری ${customer.name}`);
 
       // Validate PDF buffer before sending
@@ -14076,7 +14076,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const dashboardStats = await crmStorage.getCrmDashboardStats();
       
       // Generate PDF using PDFMake with Vazir font support
-      const { generateAnalyticsPDFWithPDFMake } = await import('./pdfmake-generator');
+      const { generateAnalyticsPDFWithPDFMake } = await import('./pdfmake-generator.js');
       const pdfBuffer = await generateAnalyticsPDFWithPDFMake(dashboardStats, 'گزارش آمارها');
 
       // Validate PDF buffer before sending

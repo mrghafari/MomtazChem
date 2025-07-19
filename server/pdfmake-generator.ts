@@ -1,6 +1,6 @@
 // PDFMake Generator با فونت فارسی Vazir برای Persian/Arabic support
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
+import pdfMake from "pdfmake/build/pdfmake.js";
+import pdfFonts from "pdfmake/build/vfs_fonts.js";
 import vazirBase64 from "./vazir-base64";
 
 // Setup fonts for pdfMake with Vazir support for Persian/Arabic text
