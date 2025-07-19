@@ -1,29 +1,55 @@
 // PDFMake Generator با فونت فارسی Vazir برای Persian/Arabic support
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
-import vazirBase64 from "./vazir-base64.js";
+import vazirBase64 from "./vazir-base64";
 
-// Setup Vazir font for pdfMake
+// Setup Vazir font for pdfMake with error handling
 function setupVazirFont() {
-  pdfMake.vfs = {
-    ...pdfFonts.pdfMake.vfs,
-    "Vazir.ttf": vazirBase64,
-  };
-
-  pdfMake.fonts = {
-    Vazir: {
-      normal: "Vazir.ttf",
-      bold: "Vazir.ttf",
-      italics: "Vazir.ttf",
-      bolditalics: "Vazir.ttf",
-    },
-    Roboto: {
-      normal: "Roboto-Regular.ttf",
-      bold: "Roboto-Medium.ttf",
-      italics: "Roboto-Italic.ttf",
-      bolditalics: "Roboto-MediumItalic.ttf"
+  try {
+    // Initialize pdfMake with fonts if not already done
+    if (!pdfMake.vfs) {
+      pdfMake.vfs = pdfFonts.pdfMake?.vfs || {};
     }
-  };
+    
+    // Add Vazir font to virtual file system
+    pdfMake.vfs = {
+      ...pdfMake.vfs,
+      "Vazir.ttf": vazirBase64,
+    };
+
+    // Define font families
+    pdfMake.fonts = {
+      Vazir: {
+        normal: "Vazir.ttf",
+        bold: "Vazir.ttf", 
+        italics: "Vazir.ttf",
+        bolditalics: "Vazir.ttf",
+      },
+      Helvetica: {
+        normal: 'Helvetica',
+        bold: 'Helvetica-Bold',
+        italics: 'Helvetica-Oblique',
+        bolditalics: 'Helvetica-BoldOblique'
+      },
+      Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+      }
+    };
+  } catch (error) {
+    console.error('Error setting up Vazir font:', error);
+    // Fallback to basic font setup
+    pdfMake.fonts = {
+      Helvetica: {
+        normal: 'Helvetica',
+        bold: 'Helvetica-Bold',
+        italics: 'Helvetica-Oblique',
+        bolditalics: 'Helvetica-BoldOblique'
+      }
+    };
+  }
 }
 
 async function generateCustomerPDFWithPDFMake(
