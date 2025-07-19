@@ -9449,65 +9449,69 @@ ${procedure.content}
         
         console.log(`Admin inquiry notification sent via Universal Email Service for category: ${inquiryData.category} → ${emailCategory}`);
 
-        // Send confirmation email to customer
+        // Send confirmation email to customer with English template
         try {
           await UniversalEmailService.sendEmail({
             categoryKey: 'notifications',
             to: [inquiryData.contactEmail],
             cc: [],
-            subject: `تایید دریافت درخواست شما - ${inquiry.inquiryNumber}`,
+            subject: `Inquiry Confirmation - ${inquiry.inquiryNumber}`,
             html: `
-              <div style="font-family: 'Tahoma', Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px;">
+              <div style="font-family: 'Arial', 'Helvetica', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px;">
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-                  <h1 style="margin: 0; font-size: 28px; font-weight: bold;">شرکت ممتاز شیمی</h1>
-                  <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Momtaz Chemical Solutions</p>
+                  <h1 style="margin: 0; font-size: 28px; font-weight: bold;">Momtaz Chemical Solutions</h1>
+                  <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">شرکت ممتاز شیمی</p>
                 </div>
                 
                 <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                   <h2 style="color: #333; margin-top: 0; font-size: 24px; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
-                    تایید دریافت درخواست
+                    Thank You for Your Inquiry
                   </h2>
                   
                   <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
-                    با سلام و احترام،
+                    Dear Valued Customer,
                   </p>
                   
                   <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
-                    درخواست شما با موفقیت دریافت شد. تیم متخصص ما در اسرع وقت و حداکثر تا <strong>24 ساعت آینده</strong> با شما تماس خواهند گرفت.
+                    Thank you for your inquiry about our <strong>${productName || 'chemical products'}</strong>. We are pleased to provide you with detailed information about this product. Our technical team has reviewed your requirements and will send you a comprehensive quote including pricing, specifications, and availability within <strong>24 hours</strong>.
                   </p>
                   
-                  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-right: 4px solid #667eea;">
-                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">اطلاعات درخواست شما:</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>شماره درخواست:</strong> ${inquiry.inquiryNumber}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>محصول:</strong> ${productName || 'عمومی'}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>موضوع:</strong> ${inquiryData.subject || 'درخواست عمومی'}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>دسته‌بندی:</strong> ${inquiryData.category || 'عمومی'}</p>
+                  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #667eea;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">Your Inquiry Details:</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>Inquiry Number:</strong> ${inquiry.inquiryNumber}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>Product:</strong> ${productName || 'General'}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>Subject:</strong> ${inquiryData.subject || 'General Inquiry'}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>Category:</strong> ${inquiryData.category || 'General'}</p>
                   </div>
                   
                   <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
-                    <h3 style="color: #1976d2; margin: 0 0 15px 0; font-size: 18px;">🕐 زمان پاسخ</h3>
+                    <h3 style="color: #1976d2; margin: 0 0 15px 0; font-size: 18px;">⏰ Response Time</h3>
                     <p style="margin: 0; font-size: 16px; color: #333; font-weight: bold;">
-                      حداکثر 24 ساعت
+                      Within 24 Hours
                     </p>
                     <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">
-                      (در روزهای کاری)
+                      (During business days)
                     </p>
                   </div>
                   
                   <div style="margin: 30px 0; padding: 20px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeaa7;">
-                    <h4 style="color: #856404; margin: 0 0 10px 0;">📞 اطلاعات تماس</h4>
-                    <p style="margin: 5px 0; color: #856404;"><strong>تلفن:</strong> +964 770 999 6771</p>
-                    <p style="margin: 5px 0; color: #856404;"><strong>ایمیل:</strong> info@momtazchem.com</p>
-                    <p style="margin: 5px 0; color: #856404;"><strong>وب‌سایت:</strong> www.momtazchem.com</p>
+                    <h4 style="color: #856404; margin: 0 0 10px 0;">📞 Contact Information</h4>
+                    <p style="margin: 5px 0; color: #856404;"><strong>Phone:</strong> +964 770 999 6771</p>
+                    <p style="margin: 5px 0; color: #856404;"><strong>Email:</strong> info@momtazchem.com</p>
+                    <p style="margin: 5px 0; color: #856404;"><strong>Website:</strong> www.momtazchem.com</p>
                   </div>
                   
                   <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
-                    از اعتماد شما به شرکت ممتاز شیمی سپاسگزاریم.
+                    Please feel free to contact us if you have any additional questions.
+                  </p>
+                  
+                  <p style="color: #555; font-size: 16px; line-height: 1.8; margin: 20px 0;">
+                    Thank you for choosing Momtaz Chemical Solutions.
                   </p>
                   
                   <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
                     <p style="color: #888; font-size: 14px; margin: 0;">
-                      این ایمیل به صورت خودکار ارسال شده است.
+                      This email was sent automatically.
                     </p>
                   </div>
                 </div>
