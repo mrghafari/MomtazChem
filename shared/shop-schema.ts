@@ -247,6 +247,39 @@ export const insertSalesReportSchema = createInsertSchema(salesReports).omit({
 export type InsertSalesReport = z.infer<typeof insertSalesReportSchema>;
 export type SalesReport = typeof salesReports.$inferSelect;
 
+// Product Returns - کالای برگشتی
+export const productReturns = pgTable("product_returns", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  productName: text("product_name").notNull(),
+  productSku: text("product_sku").notNull(),
+  returnQuantity: integer("return_quantity").notNull(),
+  customerName: text("customer_name").notNull(),
+  customerPhone: text("customer_phone").notNull(),
+  returnReason: text("return_reason").notNull(),
+  returnDate: timestamp("return_date").notNull(),
+  originalOrderId: integer("original_order_id"),
+  originalOrderNumber: text("original_order_number"),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  totalReturnAmount: decimal("total_return_amount", { precision: 10, scale: 2 }).notNull(),
+  refundStatus: text("refund_status").notNull().default("pending"), // pending, approved, refunded, rejected
+  refundMethod: text("refund_method"), // cash, bank_transfer, store_credit, wallet
+  refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }),
+  processedBy: integer("processed_by"), // Admin user ID
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertProductReturnSchema = createInsertSchema(productReturns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProductReturn = z.infer<typeof insertProductReturnSchema>;
+export type ProductReturn = typeof productReturns.$inferSelect;
+
 export const insertShopProductSchema = createInsertSchema(shopProducts).omit({
   id: true,
   createdAt: true,

@@ -10772,6 +10772,121 @@ Momtaz Chemical Technical Team`,
     }
   });
 
+  // Product Returns endpoints
+  app.get("/api/shop/returns", requireAuth, async (req, res) => {
+    try {
+      const returns = await shopStorage.getProductReturns();
+      res.json({ success: true, data: returns });
+    } catch (error) {
+      console.error("Error fetching product returns:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch product returns" });
+    }
+  });
+
+  app.post("/api/shop/returns", requireAuth, async (req, res) => {
+    try {
+      const returnData = req.body;
+      
+      // Find customer by phone number
+      const customer = await shopStorage.findCustomerByPhone(returnData.customerPhone);
+      if (customer) {
+        returnData.customerName = `${customer.firstName} ${customer.lastName}`;
+      }
+      
+      // Get product information
+      const product = await shopStorage.getShopProductById(returnData.productId);
+      if (!product) {
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+      
+      returnData.productName = product.name;
+      returnData.productSku = product.sku;
+      returnData.unitPrice = product.price;
+      
+      const newReturn = await shopStorage.createProductReturn(returnData);
+      res.json({ success: true, data: newReturn });
+    } catch (error) {
+      console.error("Error creating product return:", error);
+      res.status(500).json({ success: false, message: "Failed to create product return" });
+    }
+  });
+
+  app.get("/api/shop/returns/:id", requireAuth, async (req, res) => {
+    try {
+      const returnId = parseInt(req.params.id);
+      if (isNaN(returnId)) {
+        return res.status(400).json({ success: false, message: "Invalid return ID" });
+      }
+      
+      const returnRecord = await shopStorage.getProductReturnById(returnId);
+      if (!returnRecord) {
+        return res.status(404).json({ success: false, message: "Return not found" });
+      }
+      
+      res.json({ success: true, data: returnRecord });
+    } catch (error) {
+      console.error("Error fetching product return:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch product return" });
+    }
+  });
+
+  app.patch("/api/shop/returns/:id", requireAuth, async (req, res) => {
+    try {
+      const returnId = parseInt(req.params.id);
+      if (isNaN(returnId)) {
+        return res.status(400).json({ success: false, message: "Invalid return ID" });
+      }
+      
+      const updateData = req.body;
+      const updatedReturn = await shopStorage.updateProductReturn(returnId, updateData);
+      res.json({ success: true, data: updatedReturn });
+    } catch (error) {
+      console.error("Error updating product return:", error);
+      res.status(500).json({ success: false, message: "Failed to update product return" });
+    }
+  });
+
+  app.delete("/api/shop/returns/:id", requireAuth, async (req, res) => {
+    try {
+      const returnId = parseInt(req.params.id);
+      if (isNaN(returnId)) {
+        return res.status(400).json({ success: false, message: "Invalid return ID" });
+      }
+      
+      await shopStorage.deleteProductReturn(returnId);
+      res.json({ success: true, message: "Product return deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting product return:", error);
+      res.status(500).json({ success: false, message: "Failed to delete product return" });
+    }
+  });
+
+  app.get("/api/shop/returns/stats", requireAuth, async (req, res) => {
+    try {
+      const stats = await shopStorage.getReturnStatistics();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("Error fetching return statistics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch return statistics" });
+    }
+  });
+
+  // Find customer by phone for returns
+  app.get("/api/shop/customers/phone/:phone", requireAuth, async (req, res) => {
+    try {
+      const phone = req.params.phone;
+      const customer = await shopStorage.findCustomerByPhone(phone);
+      if (customer) {
+        res.json({ success: true, data: customer });
+      } else {
+        res.json({ success: false, message: "Customer not found" });
+      }
+    } catch (error) {
+      console.error("Error finding customer by phone:", error);
+      res.status(500).json({ success: false, message: "Failed to find customer" });
+    }
+  });
+
   // Order statistics for dashboard
   app.get("/api/shop/statistics", requireAuth, async (req, res) => {
     try {

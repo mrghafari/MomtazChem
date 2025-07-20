@@ -53,6 +53,9 @@ export default function ShopAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingDiscount, setEditingDiscount] = useState<any>(null);
   const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false);
+  const [showReturnForm, setShowReturnForm] = useState(false);
+  const [showReturnDialog, setShowReturnDialog] = useState(false);
+  const [selectedReturn, setSelectedReturn] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -94,6 +97,18 @@ export default function ShopAdmin() {
   // Fetch accounting stats
   const { data: accountingStats = {} } = useQuery({
     queryKey: ["/api/shop/accounting-stats"],
+    enabled: isAuthenticated,
+  });
+
+  // Fetch returns
+  const { data: returns = [], isLoading: returnsLoading } = useQuery({
+    queryKey: ["/api/shop/returns"],
+    enabled: isAuthenticated,
+  });
+
+  // Fetch return statistics
+  const { data: returnStats = {} } = useQuery({
+    queryKey: ["/api/shop/returns/stats"],
     enabled: isAuthenticated,
   });
 
@@ -145,6 +160,25 @@ export default function ShopAdmin() {
       });
     },
   });
+
+  // Returns handlers
+  const handleDeleteReturn = async (returnId: number) => {
+    try {
+      await apiRequest("DELETE", `/api/shop/returns/${returnId}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/returns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/returns/stats"] });
+      toast({
+        title: "Success",
+        description: "Return deleted successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error", 
+        description: error.message || "Failed to delete return",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (authLoading) {
     return (
@@ -235,7 +269,7 @@ export default function ShopAdmin() {
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
             <TabsTrigger value="invoices">Invoice Management</TabsTrigger>
-            <TabsTrigger value="accounting">Accounting</TabsTrigger>
+            <TabsTrigger value="returns">Returned Items</TabsTrigger>
             <TabsTrigger value="reports">Sales Reports</TabsTrigger>
           </TabsList>
 
@@ -280,28 +314,28 @@ export default function ShopAdmin() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          شماره سفارش
+                          Order Number
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          نام مشتری
+                          Customer Name
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          موبایل
+                          Mobile
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          ایمیل
+                          Email
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          مبلغ کل
+                          Total Amount
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          وضعیت
+                          Status
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          تاریخ
+                          Date
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          عملیات
+                          Actions
                         </th>
                       </tr>
                     </thead>
@@ -438,38 +472,166 @@ export default function ShopAdmin() {
             <InvoiceManagement />
           </TabsContent>
 
-          {/* Accounting Tab */}
-          <TabsContent value="accounting" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="w-5 h-5" />
-                  Financial Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium text-gray-900">Today's Sales</h3>
-                    <p className="text-2xl font-bold text-green-600">
-                      ${accountingStats.todaySales || 0}
-                    </p>
+          {/* Returns Tab */}
+          <TabsContent value="returns" className="space-y-6">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Returned Items Management</h3>
+                <Button onClick={() => setShowReturnForm(true)}>
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add New Return
+                </Button>
+              </div>
+
+              {/* Return Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-center">Total Returns</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-center text-blue-600">
+                      {returnStats?.totalReturns || 0}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-center">Total Return Amount</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-center text-red-600">
+                      ${returnStats?.totalReturnAmount || '0'}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-center">Pending Returns</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-center text-orange-600">
+                      {returnStats?.pendingReturns || 0}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-center">Approved Returns</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-center text-green-600">
+                      {returnStats?.approvedReturns || 0}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Returns Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Returns List</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Product Name
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Quantity
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Customer Name
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Phone
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Return Date
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Amount
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Status
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {returns && returns.length > 0 ? returns.map((returnItem: any) => (
+                          <tr key={returnItem.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                              {returnItem.productName}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-900">
+                              {returnItem.returnQuantity}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-900">
+                              {returnItem.customerName}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-900">
+                              {returnItem.customerPhone}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-900">
+                              {new Date(returnItem.returnDate).toLocaleDateString()}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-900">
+                              ${returnItem.totalReturnAmount}
+                            </td>
+                            <td className="px-4 py-4 text-sm">
+                              <Badge variant={
+                                returnItem.refundStatus === 'approved' ? 'default' :
+                                returnItem.refundStatus === 'pending' ? 'secondary' :
+                                returnItem.refundStatus === 'rejected' ? 'destructive' : 'secondary'
+                              }>
+                                {returnItem.refundStatus === 'pending' ? 'Pending' :
+                                 returnItem.refundStatus === 'approved' ? 'Approved' :
+                                 returnItem.refundStatus === 'rejected' ? 'Rejected' :
+                                 returnItem.refundStatus === 'refunded' ? 'Refunded' :
+                                 returnItem.refundStatus}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-4 text-sm">
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedReturn(returnItem);
+                                    setShowReturnDialog(true);
+                                  }}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleDeleteReturn(returnItem.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        )) : (
+                          <tr>
+                            <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                              No returns found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium text-gray-900">Monthly Revenue</h3>
-                    <p className="text-2xl font-bold text-blue-600">
-                      ${accountingStats.monthlyRevenue || 0}
-                    </p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium text-gray-900">Net Profit</h3>
-                    <p className="text-2xl font-bold text-purple-600">
-                      ${accountingStats.netProfit || 0}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Sales Reports Tab */}

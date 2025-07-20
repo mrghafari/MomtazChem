@@ -10,6 +10,7 @@ import {
   discountSettings,
   financialTransactions,
   salesReports,
+  productReturns,
   type ShopProduct, 
   type InsertShopProduct,
   type ShopCategory,
@@ -31,7 +32,9 @@ import {
   type FinancialTransaction,
   type InsertFinancialTransaction,
   type SalesReport,
-  type InsertSalesReport
+  type InsertSalesReport,
+  type ProductReturn,
+  type InsertProductReturn
 } from "@shared/shop-schema";
 import { shopDb } from "./shop-db";
 import { eq, desc, and, gte, lte, gt, sql, count, or, like, ilike, asc } from "drizzle-orm";
@@ -1428,6 +1431,122 @@ export class ShopStorage implements IShopStorage {
         }
       }
     }
+  }
+
+  // Product Returns Management
+  async createProductReturn(returnData: InsertProductReturn): Promise<ProductReturn> {
+    // Calculate total return amount
+    const totalAmount = (parseFloat(returnData.unitPrice.toString()) * returnData.returnQuantity).toFixed(2);
+    
+    const result = await shopDb
+      .insert(productReturns)
+      .values({
+        ...returnData,
+        totalReturnAmount: totalAmount,
+      })
+      .returning();
+
+    // Deduct from product sales (reduce stock quantity)
+    await this.reduceProductStockForReturn(returnData.productId, returnData.returnQuantity);
+
+    return result[0];
+  }
+
+  async getProductReturns(): Promise<ProductReturn[]> {
+    return await shopDb
+      .select()
+      .from(productReturns)
+      .orderBy(desc(productReturns.createdAt));
+  }
+
+  async getProductReturnById(id: number): Promise<ProductReturn | undefined> {
+    const result = await shopDb
+      .select()
+      .from(productReturns)
+      .where(eq(productReturns.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateProductReturn(id: number, returnData: Partial<InsertProductReturn>): Promise<ProductReturn> {
+    const result = await shopDb
+      .update(productReturns)
+      .set({ ...returnData, updatedAt: new Date() })
+      .where(eq(productReturns.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteProductReturn(id: number): Promise<void> {
+    // Get return details before deletion to restore stock
+    const returnRecord = await this.getProductReturnById(id);
+    if (returnRecord) {
+      // Restore stock quantity (add back the returned quantity)
+      const product = await this.getShopProductById(returnRecord.productId);
+      if (product) {
+        await this.updateProductStock(
+          returnRecord.productId, 
+          product.stockQuantity + returnRecord.returnQuantity, 
+          `Restored stock from deleted return record #${id}`
+        );
+      }
+    }
+
+    await shopDb
+      .delete(productReturns)
+      .where(eq(productReturns.id, id));
+  }
+
+  // Find customer by phone number for returns
+  async findCustomerByPhone(phone: string): Promise<Customer | undefined> {
+    const result = await shopDb
+      .select()
+      .from(customers)
+      .where(eq(customers.phone, phone))
+      .limit(1);
+    return result[0];
+  }
+
+  // Reduce product stock for returns (deduct from total sales)
+  private async reduceProductStockForReturn(productId: number, returnQuantity: number): Promise<void> {
+    const product = await this.getShopProductById(productId);
+    if (product) {
+      const newStockQuantity = Math.max(0, product.stockQuantity - returnQuantity);
+      await this.updateProductStock(
+        productId, 
+        newStockQuantity, 
+        `Stock reduced due to product return: ${returnQuantity} units`
+      );
+
+      // Create inventory movement record
+      await this.createInventoryTransaction({
+        productId,
+        type: 'return_deduction',
+        quantity: -returnQuantity,
+        notes: `Product return - stock deducted from sales`
+      });
+    }
+  }
+
+  // Get return statistics
+  async getReturnStatistics(): Promise<{
+    totalReturns: number;
+    totalReturnAmount: string;
+    pendingReturns: number;
+    approvedReturns: number;
+    rejectedReturns: number;
+  }> {
+    const result = await shopDb
+      .select({
+        totalReturns: count(productReturns.id),
+        totalReturnAmount: sql<string>`COALESCE(SUM(${productReturns.totalReturnAmount}), 0)`,
+        pendingReturns: sql<number>`COALESCE(SUM(CASE WHEN ${productReturns.refundStatus} = 'pending' THEN 1 ELSE 0 END), 0)`,
+        approvedReturns: sql<number>`COALESCE(SUM(CASE WHEN ${productReturns.refundStatus} = 'approved' THEN 1 ELSE 0 END), 0)`,
+        rejectedReturns: sql<number>`COALESCE(SUM(CASE WHEN ${productReturns.refundStatus} = 'rejected' THEN 1 ELSE 0 END), 0)`,
+      })
+      .from(productReturns);
+
+    return result[0];
   }
 }
 
