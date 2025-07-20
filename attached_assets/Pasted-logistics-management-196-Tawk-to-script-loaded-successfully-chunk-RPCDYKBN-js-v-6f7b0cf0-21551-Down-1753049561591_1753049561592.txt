@@ -1,0 +1,77 @@
+logistics-management:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=6f7b0cf0:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=6f7b0cf0:840
+run @ @tanstack_react-query.js?v=6f7b0cf0:494
+start @ @tanstack_react-query.js?v=6f7b0cf0:536
+fetch @ @tanstack_react-query.js?v=6f7b0cf0:926
+executeFetch_fn @ @tanstack_react-query.js?v=6f7b0cf0:2211
+onSubscribe @ @tanstack_react-query.js?v=6f7b0cf0:1898
+subscribe @ @tanstack_react-query.js?v=6f7b0cf0:24
+(anonymous) @ @tanstack_react-query.js?v=6f7b0cf0:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6f7b0cf0:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6f7b0cf0:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6f7b0cf0:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6f7b0cf0:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6f7b0cf0:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6f7b0cf0:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6f7b0cf0:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6f7b0cf0:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6f7b0cf0:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6f7b0cf0:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=6f7b0cf0:19432
+commitRoot @ chunk-RPCDYKBN.js?v=6f7b0cf0:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=6f7b0cf0:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=6f7b0cf0:18718
+workLoop @ chunk-RPCDYKBN.js?v=6f7b0cf0:197
+flushWork @ chunk-RPCDYKBN.js?v=6f7b0cf0:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=6f7b0cf0:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+useOrderNotifications.ts:99 🔔 [LOGISTICS] نوتیفیکیشن: 68 سفارش جدید دریافت شد
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+logistics-management:168 Tawk.to Live Chat loaded successfully
+logistics-management.tsx:212  PATCH https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/order-management/logistics/78/complete 500 (Internal Server Error)
+handleCompleteDelivery @ logistics-management.tsx:212
+onClick @ logistics-management.tsx:787
+callCallback2 @ chunk-RPCDYKBN.js?v=6f7b0cf0:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=6f7b0cf0:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=6f7b0cf0:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=6f7b0cf0:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=6f7b0cf0:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=6f7b0cf0:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=6f7b0cf0:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=6f7b0cf0:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=6f7b0cf0:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=6f7b0cf0:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=6f7b0cf0:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=6f7b0cf0:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=6f7b0cf0:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=6f7b0cf0:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=6f7b0cf0:5449

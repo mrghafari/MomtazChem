@@ -17676,9 +17676,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Complete delivery for an order (Admin only)
+  // Complete delivery for an order (All users allowed per request)
   app.patch('/api/order-management/logistics/:id/complete', requireAuth, async (req, res) => {
     try {
+      console.log(`🚀 [DELIVERY-START] Initiating delivery completion for order ${req.params.id}`);
       const orderId = parseInt(req.params.id);
       const adminId = req.session?.adminId;
       
@@ -17721,16 +17722,18 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const { status, actualDeliveryDate } = req.body;
       const now = new Date();
       
-      console.log(`📦 [DELIVERY-COMPLETE] Admin ${adminId} completing delivery for order ${orderId}`);
+      console.log(`📦 [DELIVERY-COMPLETE] User ${adminId} completing delivery for order ${orderId}`);
       
       // Update order status to delivered
+      console.log(`🗂️ [DELIVERY-DB] Updating order status to 'logistics_delivered'`);
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderId,
         status || 'logistics_delivered',
         adminId,
         'logistics',
-        'سفارش توسط ادمین تحویل شده تایید شد'
+        'سفارش تحویل شده تایید شد'
       );
+      console.log(`✅ [DELIVERY-DB] Order status updated successfully:`, updatedOrder?.id);
       
       // Set actual delivery date to now if not provided
       const deliveryDate = actualDeliveryDate || now.toISOString();

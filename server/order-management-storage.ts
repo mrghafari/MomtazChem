@@ -1220,6 +1220,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   async updateDeliveryInfo(orderId: number, deliveryData: {
     trackingNumber?: string;
     estimatedDeliveryDate?: string;
+    actualDeliveryDate?: string;
+    deliveryStatus?: string;
     deliveryPersonName?: string;
     deliveryPersonPhone?: string;
     deliveryMethod?: string;
@@ -1243,6 +1245,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     const updateData: Partial<OrderManagement> = {
       ...deliveryData,
       estimatedDeliveryDate: deliveryData.estimatedDeliveryDate ? new Date(deliveryData.estimatedDeliveryDate) : undefined,
+      actualDeliveryDate: deliveryData.actualDeliveryDate ? new Date(deliveryData.actualDeliveryDate) : undefined,
       postalWeight: deliveryData.postalWeight ? deliveryData.postalWeight : undefined,
       postalPrice: deliveryData.postalPrice ? deliveryData.postalPrice : undefined,
       updatedAt: new Date(),
