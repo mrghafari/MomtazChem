@@ -26647,8 +26647,37 @@ momtazchem.com
       const { notes, trackingNumber, deliveryPersonName, deliveryPersonPhone, estimatedDeliveryDate } = req.body;
       const adminId = req.session.adminId;
 
-      // Generate unique 4-digit delivery code
-      const deliveryCode = Math.floor(1000 + Math.random() * 9000).toString();
+      // Generate sequential 4-digit delivery code using logistics storage
+      const { logisticsStorage } = await import('./logistics-storage');
+      let deliveryCode: string;
+      
+      try {
+        // Get customer phone for delivery code generation
+        const { crmCustomers } = await import("../shared/schema");
+        const { customerOrders } = await import("../shared/customer-schema");
+        
+        const orderDetails = await db
+          .select({
+            customerPhone: crmCustomers.phone
+          })
+          .from(orderManagement)
+          .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+          .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+          .where(eq(orderManagement.customerOrderId, orderId))
+          .limit(1);
+
+        if (orderDetails[0]?.customerPhone) {
+          deliveryCode = await logisticsStorage.generateSequentialDeliveryCode(orderId, orderDetails[0].customerPhone);
+          console.log('✅ [SEQUENTIAL CODE] Generated delivery code with SMS:', deliveryCode);
+        } else {
+          // Sequential code without SMS notification
+          deliveryCode = await logisticsStorage.getNextSequentialCode();
+          console.log('✅ [SEQUENTIAL CODE] Generated delivery code (no SMS):', deliveryCode);
+        }
+      } catch (error) {
+        console.error('❌ [SEQUENTIAL CODE] Error generating sequential code:', error);
+        throw error; // Don't use random fallback, throw error instead
+      }
 
       // Update order status to logistics_dispatched
       await db

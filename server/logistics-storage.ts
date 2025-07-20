@@ -600,7 +600,7 @@ export class LogisticsStorage implements ILogisticsStorage {
     return sequentialCode;
   }
 
-  private async getNextSequentialCode(): Promise<string> {
+  async getNextSequentialCode(): Promise<string> {
     // Get current code from counter table
     const counterResult = await db
       .select()
