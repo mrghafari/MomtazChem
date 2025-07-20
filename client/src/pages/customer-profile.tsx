@@ -243,6 +243,13 @@ const CustomerProfile = () => {
       case 'cancelled': return 'bg-red-100 text-red-800';
       case 'payment_grace_period': return 'bg-amber-100 text-amber-800';
       case 'financial_pending': return 'bg-blue-100 text-blue-800';
+      case 'financial_approved': return 'bg-blue-100 text-blue-800';
+      case 'warehouse_pending': return 'bg-orange-100 text-orange-800';
+      case 'warehouse_processing': return 'bg-orange-100 text-orange-800';
+      case 'warehouse_approved': return 'bg-green-100 text-green-800';
+      case 'logistics_pending': return 'bg-purple-100 text-purple-800';
+      case 'logistics_processing': return 'bg-purple-100 text-purple-800';
+      case 'completed': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -256,7 +263,14 @@ const CustomerProfile = () => {
       case 'delivered': return t.delivered;
       case 'cancelled': return t.cancelled;
       case 'payment_grace_period': return 'مهلت پرداخت';
-      case 'financial_pending': return 'در انتظار بررسی مالی';
+      case 'financial_pending': return 'در حال پردازش مالی';
+      case 'financial_approved': return 'تایید شده توسط واحد مالی';
+      case 'warehouse_pending': return 'در حال بسته‌بندی';
+      case 'warehouse_processing': return 'در حال بسته‌بندی';
+      case 'warehouse_approved': return 'بسته‌بندی شده';
+      case 'logistics_pending': return 'آماده ارسال';
+      case 'logistics_processing': return 'در حال ارسال';
+      case 'completed': return 'تکمیل شده';
       default: return status;
     }
   };
@@ -482,6 +496,15 @@ const CustomerProfile = () => {
                             <Badge className={getStatusColor(order.status)}>
                               {getStatusLabel(order.status)}
                             </Badge>
+                            {/* Show tracking code for completed orders */}
+                            {(order.status === 'completed' || order.currentStatus === 'completed') && order.deliveryCode && (
+                              <div className="mt-2 text-sm">
+                                <div className="bg-green-50 border border-green-200 rounded px-2 py-1">
+                                  <span className="text-green-700 font-medium">کد رهگیری: </span>
+                                  <span className="text-green-900 font-mono">{order.deliveryCode}</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                         

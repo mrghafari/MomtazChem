@@ -9765,6 +9765,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           om.is_order_locked,
           om.current_status,
           om.financial_reviewed_at,
+          om.delivery_code,
           EXTRACT(EPOCH FROM (om.payment_grace_period_end - NOW()))/3600 as hours_remaining,
           CASE 
             WHEN om.payment_grace_period_end > NOW() THEN 'active'
@@ -9810,7 +9811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerOrders = allOrdersWithItems.map((row: any) => ({
         id: row.id,
         orderNumber: row.order_number,
-        status: row.status,
+        status: row.current_status || row.status, // Use current_status from order_management if available
         totalAmount: row.total_amount,
         currency: row.currency,
         paymentStatus: row.payment_status,
@@ -9832,7 +9833,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerEmail: row.guest_email,
         customerPhone: row.recipient_phone,
         recipientName: row.recipient_name,
-        recipientAddress: row.recipient_address
+        recipientAddress: row.recipient_address,
+        deliveryCode: row.delivery_code // Add delivery code for tracking
       }));
 
       // Remove duplicate orders and combine all orders

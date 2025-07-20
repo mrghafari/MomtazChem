@@ -6,6 +6,29 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Profile Order Status Display with Persian Workflow Labels (July 20, 2025)
+✅ **IMPLEMENTED: Comprehensive order status progression display in customer profile**
+- **Issue**: User requested customer profile to show order workflow progression: "در حال پردازش مالی", "در حال بسته‌بندی", "بسته‌بندی شده", "تکمیل شده"
+- **Solution**: Enhanced customer profile with complete order workflow status system
+- **Status Mapping Implementation**:
+  - **Financial Stage**: "در حال پردازش مالی" (financial_pending)
+  - **Warehouse Stage**: "در حال بسته‌بندی" (warehouse_pending/processing)
+  - **Logistics Stage**: "بسته‌بندی شده" (warehouse_approved/logistics_pending)
+  - **Completed**: "تکمیل شده" (completed) with tracking code display
+- **Backend Enhancement**:
+  - Modified `/api/customers/orders` endpoint to use `current_status` from order_management table
+  - Added delivery_code field to customer order data for tracking functionality
+  - Order status now reflects actual workflow progression through 3-department system
+- **Frontend Features**:
+  - Updated getStatusColor() function with appropriate color coding for all workflow stages
+  - Enhanced getStatusLabel() function with Persian labels for complete workflow
+  - Added tracking code display in green box for completed orders
+  - Visual status badges with proper color coding throughout order progression
+- **Tracking Code Integration**: Completed orders display delivery code in highlighted box with "کد رهگیری" label
+- **User Experience**: Customers now see exact workflow stage with clear Persian descriptions
+- **Result**: Complete order lifecycle visibility from financial processing to delivery tracking
+- **Impact**: Enhanced customer experience with transparent order status tracking and professional delivery code display
+
 ### COMPLETED: Department Pages Integrated with Global Refresh Control (July 20, 2025)
 ✅ **INTEGRATED: All department pages now use centralized refresh settings from Module Refresh Control**
 - **Issue**: User requested that financial, warehouse, and logistics pages receive refresh commands from centralized Refresh Control module
