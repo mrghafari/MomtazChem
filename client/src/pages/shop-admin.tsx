@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -964,6 +964,10 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Add refs for timeout management
+  const phoneTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const productTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Function to fetch customer by phone number
   const fetchCustomerByPhone = async (phone: string) => {
@@ -1009,13 +1013,16 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     setCustomerPhone(phone);
     
     // Clear existing timeout
-    const timeoutId = setTimeout(() => {
+    if (phoneTimeoutRef.current) {
+      clearTimeout(phoneTimeoutRef.current);
+    }
+    
+    // Set new timeout
+    phoneTimeoutRef.current = setTimeout(() => {
       if (phone && phone.length >= 3) {
         fetchCustomerByPhone(phone);
       }
     }, 500); // 500ms delay
-
-    return () => clearTimeout(timeoutId);
   };
 
   // Function to fetch product suggestions
@@ -1027,8 +1034,11 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     }
 
     try {
+      console.log('Fetching product suggestions for:', query);
       const response = await apiRequest('GET', `/api/shop/products`);
       const data = await response.json();
+      
+      console.log('Products data received:', data?.length);
       
       if (Array.isArray(data)) {
         const filtered = data
@@ -1038,6 +1048,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
           .map(product => product.name)
           .slice(0, 5); // Show max 5 suggestions
         
+        console.log('Filtered suggestions:', filtered);
         setProductSuggestions(filtered);
         setShowProductSuggestions(filtered.length > 0);
       }
@@ -1052,13 +1063,16 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     setShowProductSuggestions(false);
     
     // Clear existing timeout
-    const timeoutId = setTimeout(() => {
+    if (productTimeoutRef.current) {
+      clearTimeout(productTimeoutRef.current);
+    }
+    
+    // Set new timeout
+    productTimeoutRef.current = setTimeout(() => {
       if (name && name.length >= 3) {
         fetchProductSuggestions(name);
       }
     }, 300); // 300ms delay
-
-    return () => clearTimeout(timeoutId);
   };
 
   // Handle suggestion selection
