@@ -770,9 +770,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
-  // AI PRODUCT RECOMMENDATIONS API
+  // AI PRODUCT RECOMMENDATIONS API - DISABLED
   // =============================================================================
   
+  /*
   // Generate AI-powered product recommendations
   app.post('/api/recommendations/analyze', async (req, res) => {
     try {
@@ -835,6 +836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  */
 
   // API endpoint to get active users count
   app.get("/api/active-users", requireAuth, async (req: Request, res: Response) => {
