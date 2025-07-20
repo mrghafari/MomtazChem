@@ -280,22 +280,28 @@ export default function ShopAdmin() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Order ID
+                          شماره سفارش
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Customer
+                          نام مشتری
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Total
+                          موبایل
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
+                          ایمیل
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date
+                          مبلغ کل
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
+                          وضعیت
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          تاریخ
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          عملیات
                         </th>
                       </tr>
                     </thead>
@@ -306,33 +312,49 @@ export default function ShopAdmin() {
                             #{order.orderNumber || order.id}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {order.customerName || 'Unknown'}
+                            {order.customer ? 
+                              `${order.customer.firstName} ${order.customer.lastName}` : 
+                              order.customerName || 'نامشخص'
+                            }
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {order.customer?.phone || order.mobileNumber || 'نامشخص'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {order.customer?.email || order.email || 'نامشخص'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             ${order.totalAmount || 0}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Badge variant={order.status === 'confirmed' ? 'default' : 'secondary'}>
-                              {order.status}
+                              {order.status === 'pending' ? 'در انتظار' :
+                               order.status === 'confirmed' ? 'تایید شده' :
+                               order.status === 'shipped' ? 'ارسال شده' :
+                               order.status === 'delivered' ? 'تحویل داده شده' :
+                               order.status === 'cancelled' ? 'لغو شده' :
+                               order.status}
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(order.createdAt).toLocaleDateString()}
+                            {new Date(order.createdAt).toLocaleDateString('fa-IR')}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => setSelectedOrder(order)}
+                              className="flex items-center gap-1"
                             >
                               <Eye className="w-4 h-4" />
+                              جزئیات
                             </Button>
                           </td>
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                            No orders found
+                          <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
+                            هیچ سفارشی یافت نشد
                           </td>
                         </tr>
                       )}
@@ -460,20 +482,228 @@ export default function ShopAdmin() {
       {/* Order Details Modal */}
       {selectedOrder && (
         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Order Details - #{selectedOrder.orderNumber || selectedOrder.id}</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-right">
+                جزئیات سفارش #{selectedOrder.orderNumber || selectedOrder.id}
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Customer</p>
-                  <p className="font-medium">{selectedOrder.customerName || 'Unknown'}</p>
+            <div className="space-y-6" dir="rtl">
+              {/* Customer Information */}
+              <div className="border rounded-lg p-4 bg-blue-50">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  اطلاعات مشتری
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">نام مشتری</p>
+                    <p className="font-medium">
+                      {selectedOrder.customer ? 
+                        `${selectedOrder.customer.firstName} ${selectedOrder.customer.lastName}` : 
+                        selectedOrder.customerName || 'نامشخص'
+                      }
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">شماره موبایل</p>
+                    <p className="font-medium flex items-center gap-1">
+                      <Phone className="w-4 h-4" />
+                      {selectedOrder.customer?.phone || selectedOrder.mobileNumber || 'نامشخص'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">ایمیل</p>
+                    <p className="font-medium flex items-center gap-1">
+                      <Mail className="w-4 h-4" />
+                      {selectedOrder.customer?.email || selectedOrder.email || 'نامشخص'}
+                    </p>
+                  </div>
+                  {selectedOrder.customer?.company && (
+                    <div>
+                      <p className="text-sm text-gray-600">شرکت</p>
+                      <p className="font-medium flex items-center gap-1">
+                        <Building className="w-4 h-4" />
+                        {selectedOrder.customer.company}
+                      </p>
+                    </div>
+                  )}
+                  {selectedOrder.customer?.city && (
+                    <div>
+                      <p className="text-sm text-gray-600">شهر</p>
+                      <p className="font-medium">{selectedOrder.customer.city}</p>
+                    </div>
+                  )}
+                  {selectedOrder.customer?.address && (
+                    <div className="md:col-span-2">
+                      <p className="text-sm text-gray-600">آدرس</p>
+                      <p className="font-medium">{selectedOrder.customer.address}</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total Amount</p>
-                  <p className="font-bold text-lg text-green-600">${selectedOrder.totalAmount}</p>
+              </div>
+
+              {/* Order Summary */}
+              <div className="border rounded-lg p-4 bg-green-50">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Receipt className="w-4 h-4" />
+                  خلاصه سفارش
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">شماره سفارش</p>
+                    <p className="font-medium">#{selectedOrder.orderNumber || selectedOrder.id}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">تاریخ سفارش</p>
+                    <p className="font-medium flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(selectedOrder.createdAt).toLocaleDateString('fa-IR')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">وضعیت سفارش</p>
+                    <Badge className="mt-1" variant={selectedOrder.status === 'confirmed' ? 'default' : 'secondary'}>
+                      {selectedOrder.status === 'pending' ? 'در انتظار' :
+                       selectedOrder.status === 'confirmed' ? 'تایید شده' :
+                       selectedOrder.status === 'shipped' ? 'ارسال شده' :
+                       selectedOrder.status === 'delivered' ? 'تحویل داده شده' :
+                       selectedOrder.status === 'cancelled' ? 'لغو شده' :
+                       selectedOrder.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">مبلغ کل</p>
+                    <p className="font-bold text-lg text-green-600">${selectedOrder.totalAmount}</p>
+                  </div>
                 </div>
+              </div>
+
+              {/* Order Items */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  اقلام سفارش ({selectedOrder.items?.length || 0} قلم)
+                </h3>
+                <div className="space-y-3">
+                  {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                    selectedOrder.items.map((item: any, index: number) => (
+                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{item.productName || item.name || 'نام محصول'}</p>
+                          <p className="text-sm text-gray-600">کد محصول: {item.productSku || item.sku || 'نامشخص'}</p>
+                          <p className="text-sm text-blue-600">قیمت واحد: ${item.price || item.unitPrice || 0}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">تعداد: {item.quantity || 1}</p>
+                          <p className="text-lg font-bold text-green-600">
+                            ${((item.price || item.unitPrice || 0) * (item.quantity || 1)).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6 text-gray-500">
+                      <Package className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p>هیچ قلمی برای این سفارش یافت نشد</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Payment Information */}
+              <div className="border rounded-lg p-4 bg-purple-50">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  اطلاعات پرداخت
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">روش پرداخت</p>
+                    <p className="font-medium">
+                      {selectedOrder.paymentMethod === 'bank_transfer' ? 'واریز بانکی' : 
+                       selectedOrder.paymentMethod === 'cash_on_delivery' ? 'پرداخت در محل' :
+                       selectedOrder.paymentMethod === 'company_credit' ? 'اعتبار شرکت' :
+                       selectedOrder.paymentMethod === 'wallet' ? 'کیف پول' :
+                       selectedOrder.paymentMethod || 'نامشخص'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">وضعیت پرداخت</p>
+                    <Badge variant={selectedOrder.paymentStatus === 'paid' ? 'default' : 'secondary'}>
+                      {selectedOrder.paymentStatus === 'paid' ? 'پرداخت شده' :
+                       selectedOrder.paymentStatus === 'pending' ? 'در انتظار پرداخت' :
+                       selectedOrder.paymentStatus === 'failed' ? 'ناموفق' :
+                       selectedOrder.paymentStatus || 'نامشخص'}
+                    </Badge>
+                  </div>
+                  {selectedOrder.discount && selectedOrder.discount > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-600">تخفیف</p>
+                      <p className="font-medium text-orange-600">${selectedOrder.discount}</p>
+                    </div>
+                  )}
+                  {selectedOrder.tax && selectedOrder.tax > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-600">مالیات</p>
+                      <p className="font-medium">${selectedOrder.tax}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Shipping Information */}
+              {(selectedOrder.shippingAddress || selectedOrder.carrier) && (
+                <div className="border rounded-lg p-4 bg-orange-50">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Truck className="w-4 h-4" />
+                    اطلاعات ارسال
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedOrder.carrier && (
+                      <div>
+                        <p className="text-sm text-gray-600">شرکت حمل</p>
+                        <p className="font-medium">{selectedOrder.carrier}</p>
+                      </div>
+                    )}
+                    {selectedOrder.trackingNumber && (
+                      <div>
+                        <p className="text-sm text-gray-600">کد رهگیری</p>
+                        <p className="font-medium">{selectedOrder.trackingNumber}</p>
+                      </div>
+                    )}
+                    {selectedOrder.shippingAddress && (
+                      <div className="md:col-span-2">
+                        <p className="text-sm text-gray-600">آدرس ارسال</p>
+                        <p className="font-medium">
+                          {typeof selectedOrder.shippingAddress === 'object' 
+                            ? `${selectedOrder.shippingAddress.address || ''} ${selectedOrder.shippingAddress.city || ''} ${selectedOrder.shippingAddress.postalCode || ''}`.trim()
+                            : selectedOrder.shippingAddress}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Order Actions */}
+              <div className="flex gap-4 justify-end pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedOrder(null)}
+                >
+                  بستن
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    // Update order status functionality can be added here
+                    console.log('Update order status for:', selectedOrder.id);
+                  }}
+                >
+                  <Edit className="w-4 h-4 mr-1" />
+                  ویرایش سفارش
+                </Button>
               </div>
             </div>
           </DialogContent>
