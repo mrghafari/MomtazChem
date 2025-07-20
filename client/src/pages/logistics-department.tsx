@@ -174,12 +174,24 @@ export default function LogisticsDepartment() {
         const adminResponse = await fetch('/api/admin/me');
         if (adminResponse.ok) {
           const adminData = await adminResponse.json();
-          setIsAdmin(adminData.success && adminData.user?.roleId === 1);
+          console.log('🔐 [ADMIN-CHECK] Admin data:', adminData);
+          const adminStatus = adminData.success && adminData.user?.roleId === 1;
+          setIsAdmin(adminStatus);
+          console.log('🔐 [ADMIN-CHECK] Is admin:', adminStatus);
+        } else {
+          console.log('🔐 [ADMIN-CHECK] Admin response not OK:', adminResponse.status);
+          setIsAdmin(false);
         }
         
-        // Check logistics auth
+        // Check logistics auth (allow if admin is authenticated)
+        if (adminResponse.ok) {
+          console.log('✅ [AUTH] Admin authenticated, allowing logistics access');
+          return;
+        }
+        
         const response = await fetch('/api/logistics/auth/me');
         if (!response.ok) {
+          console.log('❌ [AUTH] Neither admin nor logistics auth succeeded');
           setLocation('/admin/login');
         }
       } catch (error) {
@@ -252,6 +264,7 @@ export default function LogisticsDepartment() {
   // Complete delivery mutation (Admin only)
   const completeDeliveryMutation = useMutation({
     mutationFn: async (orderId: number) => {
+      console.log('🚚 [DELIVERY-API] Calling delivery complete API for order:', orderId);
       const response = await fetch(`/api/order-management/logistics/${orderId}/complete`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -260,6 +273,13 @@ export default function LogisticsDepartment() {
           actualDeliveryDate: new Date().toISOString()
         })
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'خطا در تکمیل تحویل');
+      }
+      
+      return await response.json();
       
       if (!response.ok) {
         const error = await response.json();
@@ -419,7 +439,7 @@ export default function LogisticsDepartment() {
         </div>
 
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               سفارشات فعال
@@ -435,10 +455,6 @@ export default function LogisticsDepartment() {
             <TabsTrigger value="shipping-rates" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               تعرفه‌های ارسال
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              گزارشات
             </TabsTrigger>
           </TabsList>
 
@@ -539,10 +555,15 @@ export default function LogisticsDepartment() {
                             مدیریت ارسال
                           </Button>
                           
+
+                          
                           {/* Only Admin can complete delivery */}
                           {isAdmin && order.currentStatus !== 'logistics_delivered' && (
                             <Button
-                              onClick={() => completeDeliveryMutation.mutate(order.id)}
+                              onClick={() => {
+                                console.log('🚚 [DELIVERY] Completing delivery for order:', order.id);
+                                completeDeliveryMutation.mutate(order.id);
+                              }}
                               className="bg-green-600 hover:bg-green-700"
                               disabled={completeDeliveryMutation.isPending}
                               title="فقط ادمین می‌تواند سفارش را تحویل شده علامت‌گذاری کند"
@@ -568,6 +589,8 @@ export default function LogisticsDepartment() {
           {/* Delivered Orders Tab */}
           <TabsContent value="delivered">
             <div className="space-y-4">
+
+              
               {deliveredOrders.length === 0 ? (
                 <Card>
                   <CardContent className="p-6 text-center">
@@ -663,17 +686,7 @@ export default function LogisticsDepartment() {
             <ShippingRatesManagement />
           </TabsContent>
 
-          {/* Reports Tab */}
-          <TabsContent value="reports">
-            <Card>
-              <CardHeader>
-                <CardTitle>گزارشات لجستیک</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">گزارشات عملکرد لجستیک در حال توسعه است...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
+
         </Tabs>
 
         {/* Delivery Info Dialog */}
