@@ -397,9 +397,11 @@ const LogisticsManagement = () => {
                 آدرس تحویل
               </h5>
               <p className="text-sm text-orange-700">
-                {order.customerAddress || 'آدرس ثبت نشده'}
+                {order.shippingAddress || order.customerAddress || 'آدرس ثبت نشده'}
               </p>
-              <p className="text-xs text-orange-600 mt-1">آدرس دریافت کالا</p>
+              <p className="text-xs text-orange-600 mt-1">
+                {order.shippingAddress ? 'آدرس جایگزین سفارش' : 'آدرس مشتری از CRM'}
+              </p>
             </div>
 
             {/* Order Date Block */}
