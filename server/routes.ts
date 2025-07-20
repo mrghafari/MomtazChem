@@ -5925,6 +5925,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get warehouse approved orders ready for invoice generation
+  app.get("/api/orders/warehouse-approved", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get orders that have been approved by warehouse (shipped)
+      const result = await pool.query(`
+        SELECT 
+          id,
+          order_number as "orderNumber",
+          customer_name as "customerName", 
+          billing_address as "billingAddress",
+          total_amount as "totalAmount",
+          status,
+          payment_status as "paymentStatus",
+          shipping_address as "shippingAddress",
+          created_at as "createdAt",
+          warehouse_approved_at as "warehouseApprovedAt",
+          notes
+        FROM order_management 
+        WHERE status IN ('warehouse_approved', 'logistics_pending', 'logistics_approved', 'delivered')
+        AND payment_status = 'paid'
+        ORDER BY warehouse_approved_at DESC, created_at DESC
+        LIMIT 50
+      `);
+      
+      const orders = result.rows.map((row: any) => ({
+        ...row,
+        totalAmount: parseFloat(row.totalAmount) || 0,
+        billingAddress: typeof row.billingAddress === 'string' ? row.billingAddress : 
+                       row.billingAddress ? JSON.stringify(row.billingAddress) : '',
+        shippingAddress: typeof row.shippingAddress === 'string' ? row.shippingAddress : 
+                        row.shippingAddress ? JSON.stringify(row.shippingAddress) : ''
+      }));
+      
+      console.log(`📋 [WAREHOUSE ORDERS] Found ${orders.length} warehouse-approved orders ready for invoicing`);
+      
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching warehouse approved orders:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات تایید شده انبار" 
+      });
+    }
+  });
+
   // =============================================================================
   // PROCEDURES MANAGEMENT ENDPOINTS
   // =============================================================================

@@ -57,7 +57,12 @@ const InvoiceManagementTab = () => {
     taxInfo: ''
   });
 
-  // Fetch all invoices
+  // Fetch warehouse approved orders for invoice generation
+  const { data: warehouseOrders, isLoading: ordersLoading } = useQuery({
+    queryKey: ['/api/orders/warehouse-approved'],
+  });
+
+  // Fetch existing invoices
   const { data: invoicesData, isLoading: invoicesLoading } = useQuery({
     queryKey: ['/api/invoices'],
   });
@@ -65,6 +70,57 @@ const InvoiceManagementTab = () => {
   // Fetch invoice statistics
   const { data: statsData } = useQuery({
     queryKey: ['/api/invoices/stats'],
+  });
+
+  // Generate invoice from order mutation
+  const generateInvoiceMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      return apiRequest(`/api/invoices/generate`, {
+        method: 'POST',
+        body: JSON.stringify({ orderId }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invoice generated",
+        description: "Invoice has been generated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/invoices/stats'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error generating invoice",
+        description: error.message || "Failed to generate invoice",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mark invoice as paid mutation
+  const markPaidMutation = useMutation({
+    mutationFn: async (invoiceId: number) => {
+      return apiRequest(`/api/invoices/${invoiceId}/mark-paid`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invoice marked as paid",
+        description: "Invoice payment status updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/invoices/stats'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error updating payment status",
+        description: error.message || "Failed to mark invoice as paid",
+        variant: "destructive",
+      });
+    },
   });
 
   // Process official invoice mutation
@@ -94,30 +150,7 @@ const InvoiceManagementTab = () => {
     },
   });
 
-  // Mark invoice as paid mutation
-  const markPaidMutation = useMutation({
-    mutationFn: async (invoiceId: number) => {
-      return apiRequest(`/api/invoices/${invoiceId}/mark-paid`, {
-        method: 'POST',
-        body: JSON.stringify({ paymentDate: new Date().toISOString() }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Invoice marked as paid",
-        description: "Invoice status updated successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/invoices'] });
-    },
-    onError: () => {
-      toast({
-        title: "Error updating invoice",
-        description: "Failed to mark invoice as paid",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   // Download invoice PDF function
   const handleDownloadInvoice = async (invoice: any) => {
@@ -271,10 +304,73 @@ const InvoiceManagementTab = () => {
         </Card>
       </div>
 
-      {/* Invoices Table */}
+      {/* Warehouse Orders Ready for Invoice */}
       <Card>
         <CardHeader>
-          <CardTitle>All Invoices</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="w-5 h-5" />
+            Orders Ready for Invoice Generation
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Orders that have been processed by warehouse and are ready for invoicing
+          </p>
+        </CardHeader>
+        <CardContent>
+          {ordersLoading ? (
+            <div className="text-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p>Loading warehouse orders...</p>
+            </div>
+          ) : warehouseOrders?.length > 0 ? (
+            <div className="space-y-3">
+              {warehouseOrders.map((order: any) => (
+                <div key={order.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <h3 className="font-semibold">Order #{order.id}</h3>
+                          <p className="text-sm text-gray-600">
+                            Customer: {order.customerName || order.billingAddress?.split(',')[0] || 'Unknown'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Amount: <span className="font-semibold text-green-600">{order.totalAmount} IQD</span>
+                          </p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          <p>Status: <Badge variant="default">Warehouse Approved</Badge></p>
+                          <p>Created: {new Date(order.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => generateInvoiceMutation.mutate(order.id)}
+                      disabled={generateInvoiceMutation.isPending}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Generate Invoice
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <p>No warehouse-approved orders available for invoicing</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Existing Invoices Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Receipt className="w-5 h-5" />
+            Generated Invoices
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -283,7 +379,7 @@ const InvoiceManagementTab = () => {
                 <tr className="border-b">
                   <th className="text-left p-3 font-semibold">Invoice #</th>
                   <th className="text-left p-3 font-semibold">Order ID</th>
-                  <th className="text-left p-3 font-semibold">Customer ID</th>
+                  <th className="text-left p-3 font-semibold">Customer</th>
                   <th className="text-left p-3 font-semibold">Amount</th>
                   <th className="text-left p-3 font-semibold">Status</th>
                   <th className="text-left p-3 font-semibold">Type</th>
@@ -292,13 +388,13 @@ const InvoiceManagementTab = () => {
                 </tr>
               </thead>
               <tbody>
-                {invoices.map((invoice: any) => (
+                {invoices.length > 0 ? invoices.map((invoice: any) => (
                   <tr key={invoice.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">{invoice.invoiceNumber}</td>
+                    <td className="p-3 font-medium">#{invoice.invoiceNumber || invoice.id}</td>
                     <td className="p-3">{invoice.orderId}</td>
-                    <td className="p-3">{invoice.customerId}</td>
+                    <td className="p-3">{invoice.customerName || 'Unknown'}</td>
                     <td className="p-3 font-semibold text-green-600">
-                      {formatCurrency(invoice.totalAmount)}
+                      {invoice.totalAmount} IQD
                     </td>
                     <td className="p-3">
                       <Badge variant={getStatusColor(invoice.status)}>
@@ -355,70 +451,19 @@ const InvoiceManagementTab = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan={8} className="text-center py-8 text-gray-500">
+                      <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No invoices generated yet</p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
-
-      {/* Official Invoice Processing Modal */}
-      {showOfficialForm && selectedInvoice && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-lg mx-4">
-            <CardHeader>
-              <CardTitle>Process Official Invoice</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="companyInfo">Company Information (JSON)</Label>
-                <textarea
-                  id="companyInfo"
-                  className="w-full h-32 p-3 border rounded-md"
-                  placeholder='{"name": "Company Name", "address": "Address", "taxId": "123456"}'
-                  value={officialData.companyInfo}
-                  onChange={(e) => setOfficialData(prev => ({ ...prev, companyInfo: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="taxInfo">Tax Information (JSON)</Label>
-                <textarea
-                  id="taxInfo"
-                  className="w-full h-32 p-3 border rounded-md"
-                  placeholder='{"rate": 0.1, "type": "VAT"}'
-                  value={officialData.taxInfo}
-                  onChange={(e) => setOfficialData(prev => ({ ...prev, taxInfo: e.target.value }))}
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <Button 
-                  onClick={handleProcessOfficial}
-                  disabled={processOfficialMutation.isPending}
-                  className="flex-1"
-                >
-                  {processOfficialMutation.isPending ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  ) : (
-                    <Building className="w-4 h-4 mr-2" />
-                  )}
-                  Process Official Invoice
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    setShowOfficialForm(false);
-                    setSelectedInvoice(null);
-                    setOfficialData({ companyInfo: '', taxInfo: '' });
-                  }}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };
@@ -1344,6 +1389,11 @@ ${data.data.map((item: any) =>
                 />
               </DialogContent>
             </Dialog>
+          </TabsContent>
+
+          {/* Invoice Management */}
+          <TabsContent value="invoices">
+            <InvoiceManagement />
           </TabsContent>
 
           {/* Accounting Dashboard */}
