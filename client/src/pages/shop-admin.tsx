@@ -1134,16 +1134,17 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     }
 
     createReturnMutation.mutate({
-      productId: productId ? parseInt(productId) : null,
+      productId: productId ? parseInt(productId) : 1, // Default to 1 if no ID provided
       productName,
+      productSku: productId ? `SKU-${productId}` : 'SKU-DEFAULT', // Generate SKU
       returnQuantity: parseInt(returnQuantity),
       customerName,
       customerPhone,
-      customerEmail: customerEmail || null,
       returnReason,
+      unitPrice: 0, // Default unit price
       totalReturnAmount: parseFloat(totalReturnAmount) || 0,
       refundStatus,
-      returnDate: new Date().toISOString()
+      returnDate: new Date().toISOString() // Convert back to string format
     });
   };
 
