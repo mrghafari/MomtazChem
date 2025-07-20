@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, startTransition } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -70,34 +70,36 @@ export default function SiteManagement() {
   useEffect(() => {
     console.log('🔍 [DEBUG] useEffect triggered, userPermissions:', userPermissions);
     if (userPermissions?.success) {
-      console.log('🔍 [DEBUG] userPermissions modules:', userPermissions.modules);
-      const filteredButtons = getFilteredButtons();
-      console.log('🔍 [DEBUG] filtered buttons count:', filteredButtons.length);
-      const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
-      const savedOrder = localStorage.getItem('site-management-button-order');
-      
-      if (savedOrder) {
-        try {
-          const savedButtonIds = JSON.parse(savedOrder);
-          const orderedButtons = savedButtonIds
-            .map((id: string) => filteredButtons.find(btn => btn.id === id))
-            .filter((btn: QuickActionButton | undefined): btn is QuickActionButton => btn !== undefined);
-          
-          const savedIds = new Set(savedButtonIds);
-          const newButtons = filteredButtons.filter(btn => !savedIds.has(btn.id));
-          
-          setButtons([...orderedButtons, ...newButtons]);
-          return;
-        } catch {
-          // If parsing fails, fall back to default behavior
+      startTransition(() => {
+        console.log('🔍 [DEBUG] userPermissions modules:', userPermissions.modules);
+        const filteredButtons = getFilteredButtons();
+        console.log('🔍 [DEBUG] filtered buttons count:', filteredButtons.length);
+        const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
+        const savedOrder = localStorage.getItem('site-management-button-order');
+        
+        if (savedOrder) {
+          try {
+            const savedButtonIds = JSON.parse(savedOrder);
+            const orderedButtons = savedButtonIds
+              .map((id: string) => filteredButtons.find(btn => btn.id === id))
+              .filter((btn: QuickActionButton | undefined): btn is QuickActionButton => btn !== undefined);
+            
+            const savedIds = new Set(savedButtonIds);
+            const newButtons = filteredButtons.filter(btn => !savedIds.has(btn.id));
+            
+            setButtons([...orderedButtons, ...newButtons]);
+            return;
+          } catch {
+            // If parsing fails, fall back to default behavior
+          }
         }
-      }
-      
-      if (Object.keys(clickCounts).length > 0) {
-        setButtons(sortButtonsByUsage(filteredButtons));
-      } else {
-        setButtons(filteredButtons);
-      }
+        
+        if (Object.keys(clickCounts).length > 0) {
+          setButtons(sortButtonsByUsage(filteredButtons));
+        } else {
+          setButtons(filteredButtons);
+        }
+      });
     }
   }, [userPermissions]);
 
