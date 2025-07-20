@@ -17702,6 +17702,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         console.log(`🔐 [DELIVERY-AUTH] Custom user role: ${userRole}`);
       }
       
+      // Allow all authenticated users to complete deliveries (admin restriction removed per user request)
+      console.log(`✅ [DELIVERY-AUTH] Delivery completion allowed - user role: ${userRole}`);
+      
+      /* Admin restriction removed per user request
       // Check if user is admin (only admin can complete deliveries)
       if (userRole !== 1) {
         console.log(`❌ [DELIVERY-AUTH] Access denied - user role: ${userRole}, required: 1`);
@@ -17710,6 +17714,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           message: 'فقط ادمین می‌تواند تحویل سفارش را تکمیل کند' 
         });
       }
+      */
       
       console.log(`✅ [DELIVERY-AUTH] Admin access granted - role: ${userRole}`);
       

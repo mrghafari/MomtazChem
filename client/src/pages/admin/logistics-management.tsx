@@ -210,11 +210,15 @@ const LogisticsManagement = () => {
     
     try {
       const response = await fetch(`/api/order-management/logistics/${orderId}/complete`, {
-        method: 'POST',
+        method: 'PATCH',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          status: 'logistics_delivered',
+          actualDeliveryDate: new Date().toISOString()
+        })
       });
       
       const result = await response.json();
@@ -225,8 +229,9 @@ const LogisticsManagement = () => {
           description: "سفارش به بایگانی لجستیک منتقل شد",
         });
         
-        // Invalidate queries to refresh the data
+        // Invalidate both active and delivered orders queries to refresh the data
         queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics', { statuses: 'logistics_delivered,completed' }] });
       } else {
         toast({
           title: "خطا",
