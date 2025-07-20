@@ -50,33 +50,34 @@ export default function ProductRating({
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🌟 [REVIEW SUBMIT] Starting review submission');
+    console.log('🌟 [REVIEW SUBMIT] Rating:', newRating);
+    console.log('🌟 [REVIEW SUBMIT] Comment:', newComment);
+    console.log('🌟 [REVIEW SUBMIT] Product ID:', productId);
+    console.log('🌟 [REVIEW SUBMIT] onAddReview function:', typeof onAddReview);
+    
     if (newRating === 0) {
+      console.log('❌ [REVIEW SUBMIT] No rating provided');
       toast({
-        title: t.error,
-        description: t.rating,
+        title: "خطا",
+        description: "لطفاً امتیاز خود را انتخاب کنید",
         variant: "destructive"
       });
       return;
     }
     
-    // Comment is now optional - removed validation
-    // if (!newComment.trim()) {
-    //   toast({
-    //     title: t.error, 
-    //     description: t.comment,
-    //     variant: "destructive"
-    //   });
-    //   return;
-    // }
-    
     setIsSubmitting(true);
     
     try {
+      console.log('🌟 [REVIEW SUBMIT] Calling onAddReview...');
       if (onAddReview) {
         await onAddReview({
           rating: newRating,
           comment: newComment.trim()
         });
+        console.log('✅ [REVIEW SUBMIT] onAddReview completed successfully');
+      } else {
+        console.log('❌ [REVIEW SUBMIT] onAddReview is not defined');
       }
       
       // Reset form
@@ -84,13 +85,14 @@ export default function ProductRating({
       setNewComment('');
       
       toast({
-        title: t.reviewSubmitted,
-        description: t.reviewSubmittedDesc
+        title: "نظر ثبت شد",
+        description: "نظر شما با موفقیت ثبت شد"
       });
     } catch (error) {
+      console.error('❌ [REVIEW SUBMIT] Error occurred:', error);
       toast({
-        title: t.reviewError,
-        description: t.reviewErrorDesc,
+        title: "خطا در ثبت نظر",
+        description: "لطفاً دوباره تلاش کنید",
         variant: "destructive"
       });
     } finally {

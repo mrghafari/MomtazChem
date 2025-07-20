@@ -1,0 +1,144 @@
+shop:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=6f7b0cf0:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+shop:168 Tawk.to Live Chat loaded successfully
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: []
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: []
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:110 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:110 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:110 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:110 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:110 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:110 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: 0}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:110 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: 0}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:110 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: 0}

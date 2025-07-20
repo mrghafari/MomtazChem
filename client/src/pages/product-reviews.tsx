@@ -85,7 +85,17 @@ export default function ProductReviews() {
   });
 
   const handleAddReview = async (reviewData: { rating: number; comment: string }) => {
-    await addReviewMutation.mutateAsync(reviewData);
+    console.log('🔥 [HANDLE ADD REVIEW] Starting...');
+    console.log('🔥 [HANDLE ADD REVIEW] Review data:', reviewData);
+    console.log('🔥 [HANDLE ADD REVIEW] Product ID:', id);
+    try {
+      const result = await addReviewMutation.mutateAsync(reviewData);
+      console.log('✅ [HANDLE ADD REVIEW] Success:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ [HANDLE ADD REVIEW] Error:', error);
+      throw error;
+    }
   };
 
   if (isLoadingProduct || isLoadingReviews) {
