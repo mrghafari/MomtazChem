@@ -1104,13 +1104,23 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Return created successfully"
+        title: "موفق",
+        description: "برگشت محصول با موفقیت ثبت شد"
       });
       queryClient.invalidateQueries({ queryKey: ["/api/shop/returns"] });
       queryClient.invalidateQueries({ queryKey: ["/api/shop/returns/stats"] });
-      clearFormFields();
-      onClose();
+      
+      // Clear all form fields
+      setProductId('');
+      setProductName('');
+      setReturnQuantity('');
+      setCustomerName('');
+      setCustomerPhone('');
+      setCustomerEmail('');
+      setReturnReason('');
+      setTotalReturnAmount('');
+      setRefundStatus('pending');
+      setShowReturnForm(false);
     },
     onError: (error: any) => {
       toast({
