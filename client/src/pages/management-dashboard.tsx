@@ -201,94 +201,151 @@ export default function ManagementDashboard() {
         {/* Overview Tab */}
         <TabsContent value="overview">
           <div className="space-y-6">
-            {/* Key Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <SummaryCard
-                title="فروش امروز"
-                value="2,543,000"
-                subtitle="تومان"
-                change={12.5}
-                changeType="increase"
-                icon={<DollarSign className="w-4 h-4 text-white" />}
-                color="bg-green-500"
-              />
-              <SummaryCard
-                title="سفارشات فعال"
-                value="47"
-                change={-5.2}
-                changeType="decrease"
-                icon={<ShoppingCart className="w-4 h-4 text-white" />}
-                color="bg-blue-500"
-              />
-              <SummaryCard
-                title="مشتریان آنلاین"
-                value="124"
-                change={8.1}
-                changeType="increase"
-                icon={<Users className="w-4 h-4 text-white" />}
-                color="bg-purple-500"
-              />
-              <SummaryCard
-                title="هشدارهای سیستم"
-                value="3"
-                changeType="neutral"
-                icon={<AlertTriangle className="w-4 h-4 text-white" />}
-                color="bg-orange-500"
-              />
-            </div>
-
-            {/* Quick Actions */}
-            <div>
-              <h2 className="text-xl font-bold mb-4">اقدامات سریع</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <QuickActionWidget
-                  title="مدیریت سفارشات"
-                  description="بررسی و پردازش سفارشات جدید"
-                  icon={<ShoppingCart className="w-5 h-5 text-white" />}
-                  color="bg-blue-500"
-                  count={23}
-                  onClick={() => setLocation("/admin/order-management")}
-                />
-                <QuickActionWidget
-                  title="مدیریت موجودی"
-                  description="کنترل و بروزرسانی موجودی محصولات"
-                  icon={<Package className="w-5 h-5 text-white" />}
-                  color="bg-green-500"
-                  count={15}
-                  onClick={() => setLocation("/admin/warehouse-management")}
-                />
-                <QuickActionWidget
-                  title="مدیریت مشتریان"
-                  description="پیگیری و خدمات به مشتریان"
-                  icon={<Users className="w-5 h-5 text-white" />}
-                  color="bg-purple-500"
-                  count={8}
-                  onClick={() => setLocation("/crm")}
-                />
-                <QuickActionWidget
-                  title="گزارش‌های مالی"
-                  description="تحلیل عملکرد مالی و فروش"
-                  icon={<BarChart3 className="w-5 h-5 text-white" />}
-                  color="bg-orange-500"
-                  onClick={() => setLocation("/admin/finance-orders")}
-                />
-                <QuickActionWidget
-                  title="تنظیمات ایمیل"
-                  description="مدیریت سیستم ایمیل و اطلاع‌رسانی"
-                  icon={<Settings className="w-5 h-5 text-white" />}
-                  color="bg-red-500"
-                  onClick={() => setLocation("/admin/email-settings")}
-                />
-                <QuickActionWidget
-                  title="پشتیبانی فنی"
-                  description="رسیدگی به تیکت‌های پشتیبانی"
-                  icon={<AlertTriangle className="w-5 h-5 text-white" />}
-                  color="bg-yellow-500"
-                  count={12}
-                  onClick={() => setLocation("/admin/ticketing-system")}
-                />
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                <span className="mr-3">در حال بارگذاری...</span>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Key Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <SummaryCard
+                    title="فروش امروز"
+                    value={dashboardData?.data?.summary?.dailySales?.toLocaleString('fa-IR') || '0'}
+                    subtitle="تومان"
+                    change={12.5}
+                    changeType="increase"
+                    icon={<DollarSign className="w-4 h-4 text-white" />}
+                    color="bg-green-500"
+                  />
+                  <SummaryCard
+                    title="سفارشات فعال"
+                    value={dashboardData?.data?.summary?.activeOrders || '0'}
+                    change={-5.2}
+                    changeType="decrease"
+                    icon={<ShoppingCart className="w-4 h-4 text-white" />}
+                    color="bg-blue-500"
+                  />
+                  <SummaryCard
+                    title="مشتریان آنلاین"
+                    value={dashboardData?.data?.summary?.onlineCustomers || '0'}
+                    change={8.1}
+                    changeType="increase"
+                    icon={<Users className="w-4 h-4 text-white" />}
+                    color="bg-purple-500"
+                  />
+                  <SummaryCard
+                    title="هشدارهای سیستم"
+                    value={dashboardData?.data?.summary?.systemAlerts || '0'}
+                    changeType="neutral"
+                    icon={<AlertTriangle className="w-4 h-4 text-white" />}
+                    color="bg-orange-500"
+                  />
+                </div>
+                {/* Quick Actions */}
+                <div>
+                  <h2 className="text-xl font-bold mb-4">اقدامات سریع</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <QuickActionWidget
+                      title="مدیریت سفارشات"
+                      description="بررسی و پردازش سفارشات جدید"
+                      icon={<ShoppingCart className="w-5 h-5 text-white" />}
+                      color="bg-blue-500"
+                      count={(dashboardData?.data?.quickStats?.orderStatuses?.pending || 0) + (dashboardData?.data?.quickStats?.orderStatuses?.processing || 0) || 23}
+                      onClick={() => setLocation("/admin/order-management")}
+                    />
+                    <QuickActionWidget
+                      title="مدیریت موجودی"
+                      description="کنترل و بروزرسانی موجودی محصولات"
+                      icon={<Package className="w-5 h-5 text-white" />}
+                      color="bg-green-500"
+                      count={dashboardData?.data?.quickStats?.criticalInventory?.length || 15}
+                      onClick={() => setLocation("/admin/warehouse-management")}
+                    />
+                    <QuickActionWidget
+                      title="مدیریت مشتریان"
+                      description="پیگیری و خدمات به مشتریان"
+                      icon={<Users className="w-5 h-5 text-white" />}
+                      color="bg-purple-500"
+                      count={8}
+                      onClick={() => setLocation("/crm")}
+                    />
+                    <QuickActionWidget
+                      title="گزارش‌های مالی"
+                      description="تحلیل عملکرد مالی و فروش"
+                      icon={<BarChart3 className="w-5 h-5 text-white" />}
+                      color="bg-orange-500"
+                      onClick={() => setLocation("/admin/finance-orders")}
+                    />
+                    <QuickActionWidget
+                      title="تنظیمات ایمیل"
+                      description="مدیریت سیستم ایمیل و اطلاع‌رسانی"
+                      icon={<Settings className="w-5 h-5 text-white" />}
+                      color="bg-red-500"
+                      onClick={() => setLocation("/admin/email-settings")}
+                    />
+                    <QuickActionWidget
+                      title="پشتیبانی فنی"
+                      description="رسیدگی به تیکت‌های پشتیبانی"
+                      icon={<AlertTriangle className="w-5 h-5 text-white" />}
+                      color="bg-yellow-500"
+                      count={12}
+                      onClick={() => setLocation("/admin/ticketing-system")}
+                    />
+                  </div>
+                </div>
+
+                {/* Recent Activities */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Activity className="w-5 h-5 ml-2 text-blue-500" />
+                      فعالیت‌های اخیر
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {dashboardData?.data?.recentActivities?.map((activity, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center">
+                            <CheckCircle className="w-4 h-4 text-green-500 ml-2" />
+                            <span className="text-sm">{activity.message}</span>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(activity.timestamp).toLocaleTimeString('fa-IR')}
+                          </span>
+                        </div>
+                      )) || (
+                        <>
+                          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex items-center">
+                              <CheckCircle className="w-4 h-4 text-green-500 ml-2" />
+                              <span className="text-sm">سفارش #ORD-1234 با موفقیت تحویل داده شد</span>
+                            </div>
+                            <span className="text-xs text-gray-500">5 دقیقه پیش</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex items-center">
+                              <Users className="w-4 h-4 text-blue-500 ml-2" />
+                              <span className="text-sm">مشتری جدید "شرکت کیمیا پتروشیمی" ثبت‌نام کرد</span>
+                            </div>
+                            <span className="text-xs text-gray-500">15 دقیقه پیش</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <div className="flex items-center">
+                              <AlertTriangle className="w-4 h-4 text-yellow-500 ml-2" />
+                              <span className="text-sm">محصول "سولونت 402" به حد مجاز موجودی رسید</span>
+                            </div>
+                            <span className="text-xs text-gray-500">30 دقیقه پیش</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
 
             {/* Recent Activities */}
             <Card>

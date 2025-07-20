@@ -239,69 +239,78 @@ export default function KPIDashboard() {
         {/* Overview Tab */}
         <TabsContent value="overview">
           <div className="space-y-6">
-            {/* Key Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <KPICard
-                title="فروش امروز"
-                value="2,543,000"
-                subtitle="تومان"
-                change={12.5}
-                changeType="increase"
-                icon={<DollarSign className="w-4 h-4 text-white" />}
-                color="bg-green-500"
-              />
-              <KPICard
-                title="سفارشات جدید"
-                value="47"
-                change={-5.2}
-                changeType="decrease"
-                icon={<ShoppingCart className="w-4 h-4 text-white" />}
-                color="bg-blue-500"
-              />
-              <KPICard
-                title="مشتریان فعال"
-                value="1,234"
-                change={8.1}
-                changeType="increase"
-                icon={<Users className="w-4 h-4 text-white" />}
-                color="bg-purple-500"
-              />
-              <KPICard
-                title="کالاهای کم موجود"
-                value="15"
-                changeType="neutral"
-                icon={<AlertTriangle className="w-4 h-4 text-white" />}
-                color="bg-orange-500"
-              />
-            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                <span className="mr-3">در حال بارگذاری...</span>
+              </div>
+            ) : (
+              <>
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <KPICard
+                    title="فروش امروز"
+                    value={salesKPIs?.data?.dailySales?.toLocaleString('fa-IR') || '0'}
+                    subtitle="تومان"
+                    change={salesKPIs?.data?.salesGrowth || 0}
+                    changeType={salesKPIs?.data?.salesGrowth > 0 ? "increase" : salesKPIs?.data?.salesGrowth < 0 ? "decrease" : "neutral"}
+                    icon={<DollarSign className="w-4 h-4 text-white" />}
+                    color="bg-green-500"
+                  />
+                  <KPICard
+                    title="سفارشات کل"
+                    value={salesKPIs?.data?.totalOrders || '0'}
+                    change={salesKPIs?.data?.ordersGrowth || 0}
+                    changeType={salesKPIs?.data?.ordersGrowth > 0 ? "increase" : salesKPIs?.data?.ordersGrowth < 0 ? "decrease" : "neutral"}
+                    icon={<ShoppingCart className="w-4 h-4 text-white" />}
+                    color="bg-blue-500"
+                  />
+                  <KPICard
+                    title="مشتریان فعال"
+                    value={customerKPIs?.data?.activeCustomers || '0'}
+                    change={customerKPIs?.data?.customersGrowth || 0}
+                    changeType={customerKPIs?.data?.customersGrowth > 0 ? "increase" : customerKPIs?.data?.customersGrowth < 0 ? "decrease" : "neutral"}
+                    icon={<Users className="w-4 h-4 text-white" />}
+                    color="bg-purple-500"
+                  />
+                  <KPICard
+                    title="کالاهای کم موجود"
+                    value={inventoryKPIs?.data?.lowStockProducts || '0'}
+                    changeType="neutral"
+                    icon={<AlertTriangle className="w-4 h-4 text-white" />}
+                    color="bg-orange-500"
+                  />
+                </div>
 
-            {/* Performance Gauges */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <PerformanceGauge
-                title="هدف فروش ماهانه"
-                value={75000000}
-                target={100000000}
-                unit="تومان"
-              />
-              <PerformanceGauge
-                title="رضایت مشتری"
-                value={87}
-                target={90}
-                unit="%"
-              />
-              <PerformanceGauge
-                title="تحویل به موقع"
-                value={92}
-                target={95}
-                unit="%"
-              />
-              <PerformanceGauge
-                title="نرخ تبدیل"
-                value={15.8}
-                target={20}
-                unit="%"
-              />
-            </div>
+                {/* Performance Gauges */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <PerformanceGauge
+                    title="هدف فروش ماهانه"
+                    value={salesKPIs?.data?.monthlySales || 0}
+                    target={100000000}
+                    unit="تومان"
+                  />
+                  <PerformanceGauge
+                    title="رضایت مشتری"
+                    value={customerKPIs?.data?.customerSatisfaction * 20 || 80}
+                    target={90}
+                    unit="%"
+                  />
+                  <PerformanceGauge
+                    title="نرخ حفظ مشتری"
+                    value={customerKPIs?.data?.customerRetention || 85}
+                    target={90}
+                    unit="%"
+                  />
+                  <PerformanceGauge
+                    title="نرخ تبدیل"
+                    value={salesKPIs?.data?.conversionRate || 10}
+                    target={20}
+                    unit="%"
+                  />
+                </div>
+              </>
+            )}
 
             {/* Critical Alerts */}
             <Card>
@@ -342,40 +351,46 @@ export default function KPIDashboard() {
 
         {/* Sales Tab */}
         <TabsContent value="sales">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <KPICard
-              title="فروش روزانه"
-              value="2,543,000"
-              subtitle="تومان"
-              change={12.5}
-              changeType="increase"
-              icon={<BarChart3 className="w-4 h-4 text-white" />}
-              color="bg-green-500"
-            />
-            <KPICard
-              title="فروش هفتگی"
-              value="15,890,000"
-              subtitle="تومان"
-              change={8.3}
-              changeType="increase"
-              icon={<TrendingUp className="w-4 h-4 text-white" />}
-              color="bg-blue-500"
-            />
-            <KPICard
-              title="فروش ماهانه"
-              value="75,230,000"
-              subtitle="تومان"
-              change={-2.1}
-              changeType="decrease"
-              icon={<Calendar className="w-4 h-4 text-white" />}
-              color="bg-purple-500"
-            />
-            <KPICard
-              title="متوسط ارزش سفارش"
-              value="1,245,000"
-              subtitle="تومان"
-              change={15.7}
-              changeType="increase"
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+              <span className="mr-3">در حال بارگذاری...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <KPICard
+                title="فروش روزانه"
+                value={salesKPIs?.data?.dailySales?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={salesKPIs?.data?.salesGrowth || 0}
+                changeType={salesKPIs?.data?.salesGrowth > 0 ? "increase" : salesKPIs?.data?.salesGrowth < 0 ? "decrease" : "neutral"}
+                icon={<BarChart3 className="w-4 h-4 text-white" />}
+                color="bg-green-500"
+              />
+              <KPICard
+                title="فروش هفتگی"
+                value={salesKPIs?.data?.weeklySales?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={salesKPIs?.data?.salesGrowth || 0}
+                changeType={salesKPIs?.data?.salesGrowth > 0 ? "increase" : salesKPIs?.data?.salesGrowth < 0 ? "decrease" : "neutral"}
+                icon={<TrendingUp className="w-4 h-4 text-white" />}
+                color="bg-blue-500"
+              />
+              <KPICard
+                title="فروش ماهانه"
+                value={salesKPIs?.data?.monthlySales?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={salesKPIs?.data?.salesGrowth || 0}
+                changeType={salesKPIs?.data?.salesGrowth > 0 ? "increase" : salesKPIs?.data?.salesGrowth < 0 ? "decrease" : "neutral"}
+                icon={<Calendar className="w-4 h-4 text-white" />}
+                color="bg-purple-500"
+              />
+              <KPICard
+                title="متوسط ارزش سفارش"
+                value={salesKPIs?.data?.averageOrderValue?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={15.7}
+                changeType="increase"
               icon={<DollarSign className="w-4 h-4 text-white" />}
               color="bg-green-600"
             />
