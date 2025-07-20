@@ -27899,9 +27899,10 @@ momtazchem.com
       if (!rating || rating < 1 || rating > 5) {
         return res.status(400).json({ success: false, message: "امتیاز باید بین 1 تا 5 باشد" });
       }
-      if (!reviewText || reviewText.trim().length === 0) {
-        return res.status(400).json({ success: false, message: "متن نظر الزامی است" });
-      }
+      // Comment is now optional - user can submit rating only
+      // if (!reviewText || reviewText.trim().length === 0) {
+      //   return res.status(400).json({ success: false, message: "متن نظر الزامی است" });
+      // }
 
       const { pool } = await import('./db');
       

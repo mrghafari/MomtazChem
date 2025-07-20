@@ -59,14 +59,15 @@ export default function ProductRating({
       return;
     }
     
-    if (!newComment.trim()) {
-      toast({
-        title: t.error, 
-        description: t.comment,
-        variant: "destructive"
-      });
-      return;
-    }
+    // Comment is now optional - removed validation
+    // if (!newComment.trim()) {
+    //   toast({
+    //     title: t.error, 
+    //     description: t.comment,
+    //     variant: "destructive"
+    //   });
+    //   return;
+    // }
     
     setIsSubmitting(true);
     
@@ -174,12 +175,12 @@ export default function ProductRating({
                 </div>
 
                 <div>
-                  <Label htmlFor="comment">{t.comment}</Label>
+                  <Label htmlFor="comment">نظر و کامنت (اختیاری)</Label>
                   <Textarea
                     id="comment"
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    placeholder={t.writeReview}
+                    placeholder="نظر خود را بنویسید (اختیاری - می‌توانید فقط امتیاز دهید)"
                     className="mt-1"
                     rows={4}
                   />
