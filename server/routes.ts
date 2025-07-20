@@ -18607,6 +18607,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
           // Map Persian display names to technical module IDs
           const persianToTechnicalMap = {
+            'شاخص‌های عملکرد (KPI)': 'kpi_dashboard',
+            'داشبورد مدیریتی': 'management_dashboard',
             'تنظیمات ایمیل': 'email_settings',
             'پشتیبان‌گیری پایگاه داده': 'database_backup',
             'مدیریت SEO': 'seo',
@@ -18700,6 +18702,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
           // Map Persian display names to technical module IDs
           const persianToTechnicalMap = {
+            'شاخص‌های عملکرد (KPI)': 'kpi_dashboard',
+            'داشبورد مدیریتی': 'management_dashboard',
             'تنظیمات ایمیل': 'email_settings',
             'پشتیبان‌گیری پایگاه داده': 'database_backup',
             'مدیریت SEO': 'seo',
@@ -18763,6 +18767,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       if (legacyUser[0].id === 15 || legacyUser[0].email === 'admin@momtazchem.com') {
         console.log(`🔍 [DEBUG] SUPER ADMIN PATH ACTIVATED for ${legacyUser[0].email}`);
         const allModules = [
+          "kpi_dashboard", "management_dashboard",
           "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
           "crm", "seo", "categories", "sms", "factory", "user_management",
           "shop_management", "procedures", "order_management", "product_management",
